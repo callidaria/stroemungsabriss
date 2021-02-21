@@ -55,10 +55,13 @@ void Shader::compile_vCols(const char* vspath,const char* fspath)
 	// !!reduce recurring code chunks
 	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
 	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,5*sizeof(float),0);
+	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,7*sizeof(float),0);
+	int dposAttrib = glGetAttribLocation(m_shaderProgram,"dposition");
+	glEnableVertexAttribArray(dposAttrib);
+	glVertexAttribPointer(dposAttrib,2,GL_FLOAT,GL_FALSE,7*sizeof(float),(void*)(2*sizeof(float)));
 	int colAttrib = glGetAttribLocation(m_shaderProgram,"colour");
 	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer(colAttrib,3,GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)(2*sizeof(float)));
+	glVertexAttribPointer(colAttrib,3,GL_FLOAT,GL_FALSE,7*sizeof(float),(void*)(4*sizeof(float)));
 }
 void Shader::load_index(unsigned int ibo) // !!index upload checking && double upload nessessary
 {

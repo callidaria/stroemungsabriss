@@ -18,6 +18,15 @@ private:
 	Shader sshd;
 	FrameBuffer fb,splash_fb;
 	Text tft,vtft;
+
+	// start animation values
+	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
+	const glm::vec3 ENTITLE_START = glm::vec3(340,720,0);
+	const glm::vec3 TITLE_MENU = glm::vec3(50,50,0);
+	const glm::vec3 ENTITLE_MENU = glm::vec3(340,600,0);
 	bool title = false;
-	glm::mat4 pos_title = glm::mat4(1.0f);
+	glm::mat4 pos_title,pos_entitle;
+	float ptrans = 0;
+	glm::vec3 title_dir = TITLE_MENU-TITLE_START;
+	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
 };
