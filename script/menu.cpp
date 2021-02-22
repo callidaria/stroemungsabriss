@@ -21,10 +21,10 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	float sverts[] = {
 		-25,0,25,0,.5f,0,0, 420,720,-25,720,.5f,0,0, 600,720,25,720,.5f,0,0, // title splash
 		600,720,25,720,.5f,0,0, 50,0,160,0,.5f,0,0, -25,0,25,0,.5f,0,0,
-		0,500,0,500,0,0,1, 0,500,0,550,0,0,1, 0,500,1280,600,0,0,1, // head splash
-		0,500,1280,600,0,0,1, 0,500,1280,470,0,0,1, 0,500,0,500,0,0,1,
-		630,0,630,0,0,1,0, 630,0,600,720,0,1,0, 650,0,665,720,0,1,0, // select splash
-		650,0,665,720,0,1,0, 650,0,650,0,0,1,0, 630,0,630,0,0,1,0
+		0,500,0,500,0,0,.5f, 0,500,0,550,0,0,.5f, 0,500,1280,600,0,0,.5f, // head splash
+		0,500,1280,600,0,0,.5f, 0,500,1280,470,0,0,.5f, 0,500,0,500,0,0,.5f,
+		630,0,630,0,0,.5f,0, 630,0,600,720,0,.5f,0, 650,0,665,720,0,.5f,0, // select splash
+		650,0,665,720,0,.5f,0, 650,0,650,0,0,.5f,0, 630,0,630,0,0,.5f,0
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -32,8 +32,10 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	sshd.compile_vCols("shader/fbv_select.shader","shader/fbf_select.shader");
 	sshd.upload_matrix("view",cam2d->view2D);sshd.upload_matrix("proj",cam2d->proj2D);
 
-	fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_menu.shader","shader/fbf_sepia.shader",false);
+	fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
 	splash_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	title_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	select_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 }
 void Menu::render(Frame f)
 {
@@ -44,13 +46,12 @@ void Menu::render(Frame f)
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans);
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*ptrans);
 
-	splash_fb.bind();
-	f.clear(0,0,0);
 	sshd.enable();
 	sshd.upload_float("ptrans",ptrans);
 	glBindVertexArray(svao);glBindBuffer(GL_ARRAY_BUFFER,svbo); // §§??
-	glDrawArrays(GL_TRIANGLES,0,18);
-	splash_fb.close();
+	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
+	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
+	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
 
 	fb.bind();
 	f.clear(1,0.8f,0);
@@ -61,5 +62,6 @@ void Menu::render(Frame f)
 	if (!title) {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,0,1));
-	} fb.close();f.clear(0,0,0);fb.render_wOverlay(splash_fb.get_tex());
+	} fb.close();f.clear(0,0,0);
+	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex());
 }

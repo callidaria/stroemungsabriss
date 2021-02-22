@@ -16,7 +16,7 @@ private:
 	uint32_t svao,svbo;
 	Renderer2D* m_r2d;
 	Shader sshd;
-	FrameBuffer fb,splash_fb;
+	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
 
 	// start animation values

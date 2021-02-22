@@ -46,17 +46,17 @@ void FrameBuffer::render()
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
-void FrameBuffer::render_wOverlay(uint32_t atex)
+void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex)
 {
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
-	glBindVertexArray(vao);
-	glBindTexture(GL_TEXTURE_2D,tex);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,atex);
+	glBindVertexArray(vao);glBindTexture(GL_TEXTURE_2D,tex);
+	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,atex);
+	glActiveTexture(GL_TEXTURE2);glBindTexture(GL_TEXTURE_2D,btex);
+	glActiveTexture(GL_TEXTURE3);glBindTexture(GL_TEXTURE_2D,ctex);
 	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
 	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
-	s.upload_int("splash",1); // make texture loading independent from sprite class stuff && fb class stuff
+	s.upload_int("splash",1);s.upload_int("title",2);s.upload_int("select",3);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 unsigned int FrameBuffer::get_fbo() { return fbo; }
