@@ -87,6 +87,7 @@ int main(int argc,char** argv)
 		glm::vec2 mnt = glm::vec2(0);
 		bool coll = false;
 
+		// !!use deadzone epsilons ffs
 		if (f.kb.ka[SDL_SCANCODE_W]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY]<-1000) mnt.y=MVMT_SPEED;
 		else if (f.kb.ka[SDL_SCANCODE_S]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY]>1000) mnt.y=-MVMT_SPEED;
 		if (f.kb.ka[SDL_SCANCODE_A]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX]<-1000) mnt.x=-MVMT_SPEED;
