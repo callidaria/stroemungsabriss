@@ -19,12 +19,15 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
 	float sverts[] = {
-		-25,0,25,0,.5f,0,0, 420,720,-25,720,.5f,0,0, 600,720,25,720,.5f,0,0, // title splash
+		// title splash
+		-25,0,25,0,.5f,0,0, 420,720,-25,720,.5f,0,0, 600,720,25,720,.5f,0,0,
 		600,720,25,720,.5f,0,0, 50,0,160,0,.5f,0,0, -25,0,25,0,.5f,0,0,
-		0,500,0,500,0,0,.5f, 0,500,0,550,0,0,.5f, 0,500,1280,600,0,0,.5f, // head splash
-		0,500,1280,600,0,0,.5f, 0,500,1280,470,0,0,.5f, 0,500,0,500,0,0,.5f,
-		630,0,630,0,0,.5f,0, 630,0,600,720,0,.5f,0, 650,0,665,720,0,.5f,0, // select splash
-		650,0,665,720,0,.5f,0, 650,0,650,0,0,.5f,0, 630,0,630,0,0,.5f,0
+		// head splash
+		0,500,0,500,.245f,.606f,.564f, 0,500,0,550,.245f,.606f,.564f, 0,500,1280,600,.245f,.606f,.564f,
+		0,500,1280,600,.245f,.606f,.564f, 0,500,1280,470,.245f,.606f,.564f, 0,500,0,500,.245f,.606f,.564f,
+		// select splash
+		630,0,630,0,.341f,.341f,.129f, 630,0,600,720,.341f,.341f,.129f, 650,0,665,720,.341f,.341f,.129f,
+		650,0,665,720,.341f,.341f,.129f, 650,0,650,0,.341f,.341f,.129f, 630,0,630,0,.341f,.341f,.129f
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -56,6 +59,7 @@ void Menu::render(Frame f)
 	fb.bind();
 	f.clear(1,0.8f,0);
 	m_r2d->prepare();
+	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->upload_model(pos_title);m_r2d->render_sprite(0,1);
 	m_r2d->upload_model(pos_entitle);m_r2d->render_sprite(1,2);
 
