@@ -1,7 +1,9 @@
 				Introduction
 <sudden showing of yon, hanging from a cliff by his legs tied to a rope, swinging around>
-cletus (voice):	Yeehaw, Maria! Maria my dear, it seems we have just caught the cowboy ain't never been caught.
+cletus (voice):	Toldya, Maria! Yep, my dear, it seems we have just caught the cowboy ain't never been caught.
 		Thank you Lord Jesus, Sinclair will be *very* pleased, thats for *god-damn* sure. <spits>
+		Turned out you were all hat no cattle after all.
+		Should have known, you *were* still just a boy they told me, all right
 		Well, i hope you hang in there boy, he will soon be with you, dontcha worry. <sighs>
 		So thats goodbye i guess, probably my favourite goodbye i've ever had to say. So long, yeehaw.
 <fat sound of ford f150 suggesting he is driving away, maybe little sand animation above cliff?>
@@ -9,11 +11,25 @@ cletus (voice):	Yeehaw, Maria! Maria my dear, it seems we have just caught the c
 <also kick in stage 1 music, gimme that fat sax quartet>
 <back cut to previous scene or just remove title from screen>
 <give player choice to either cut the rope and let himself fall down or to climb up the rope>
-	-> if rope is cut initiate sleigh down stage and give points to chaotic. jump to #aa0000#
-	-> else initiate motorcycle stage. jump to #aa0001#
+	-> if rope is cut initiate sleigh down STAGE0 and give points to chaotic. jump to #aa0000#
+	-> else initiate motorcycle STAGE0. jump to #aa0001#
+RUN STAGE
 #aa0000# yon crashes into truck from above and breaks through the security cloth
 #aa0001# yon crashes into truck from the side and breaks through the security cloth
+<before: show truck driver humming along frontal view before yon crashes into van>
 <female voice can be heard complaining about being hurt and male voice coming from the drivers seat>
+Driver:		I'm sorry, I don't want to come off as rude, but couldn't you have found a less destructive way of
+		seeking refuge midst the myriad of valuables loaded in the storage area of my brand new vehicle?
+04:		1) Yeah good to see you too, that was horribly close.
+			-> Must have been close if you couldn't help but shamelessly destroy my property. I'm not used
+			to you being this careless. *??
+		2) Thanks for saving me. What a ride!
+			-> <with sadness filled voice> Oh no problem, no problem at all my friend, it was a pleasure,
+			oh i just wish that there would have been another way <sigh> dante(+)
+		3) I could have sworn i heard some girl during the crash. Got company i don't know about yet?
+			-> jump to #aa0002#
+		4) Who are you?
+Driver:		
 
 - Orphansnatcher stage
 - Rescued by Nelly
