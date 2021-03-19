@@ -5,7 +5,14 @@
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#ifdef __WIN32__
+#define STB_IMAGE_IMPLEMENTATION
+#ifndef STBI_INCLUDE_STB_IMAGE_H
+#include "../ext/stb_image.h"
+#endif
+#else
 #include <SOIL/SOIL.h>
+#endif
 
 class Sprite
 {
@@ -23,11 +30,17 @@ public:
 	{
 		glBindTexture(GL_TEXTURE_2D, tex);
 		int width, height;
-		unsigned char* image=SOIL_load_image(texpath,&width,&height,
-				0,SOIL_LOAD_RGBA);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,
-				GL_UNSIGNED_BYTE,image);
+#ifdef __WIN32__
+		unsigned char* image = stbi_load(texpath, &width, &height, 0, 0); // !!research RGBA support
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, image);
+		stbi_image_free(image);
+#else
+		unsigned char* image = SOIL_load_image(texpath, &width, &height, 0, SOIL_LOAD_RGBA);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);
+#endif
 
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,
 				GL_CLAMP_TO_EDGE);

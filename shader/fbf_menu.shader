@@ -35,5 +35,5 @@ void main()
 	vec4 cproc = vec4(sproc.rgb+tproc.rgb+selproc.rgb,1.0);
 	int opaque = 1-int(cproc.r+cproc.g+cproc.b+0.9);
 	//outColour = vec4(mix(sepia_proc.rgb,sepia,0.75)*opaque,1.0)+cproc-proc.b+vec4(0,0,proc.b,1.0);
-	outColour = sepia;//+cproc-proc.b+vec4(0,0,proc.b,1.0);
+	outColour = sepia+cproc-proc.b+vec4(0,0,proc.b,1.0);
 }

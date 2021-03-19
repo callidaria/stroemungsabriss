@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstring>
 #include <SDL2/SDL_net.h>
 
 class ConnectionUDP
