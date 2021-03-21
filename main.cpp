@@ -1,15 +1,15 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
 #include <iostream>
 #include <glm/gtx/rotate_vector.hpp>
-#include "cld_lin/frm/frame.h"
-#include "cld_lin/gfx/renderer2d.h"
-#include "cld_lin/gfx/rendereri.h"
-#include "cld_lin/mat/camera2d.h"
-#include "cld_lin/ppe/msaa.h"
-#include "cld_lin/ppe/bloom.h"
-#include "cld_lin/fcn/text.h"
-#include "cld_lin/aud/audio.h"
-#include "cld_lin/aud/listener.h"
+#include "ccb/frm/frame.h"
+#include "ccb/gfx/renderer2d.h"
+#include "ccb/gfx/rendereri.h"
+#include "ccb/mat/camera2d.h"
+#include "ccb/ppe/msaa.h"
+#include "ccb/ppe/bloom.h"
+#include "ccb/fcn/text.h"
+#include "ccb/aud/audio.h"
+#include "ccb/aud/listener.h"
 #include "script/menu.h"
 
 #define MVMT_SPEED 4
@@ -82,7 +82,7 @@ int main(int argc,char** argv)
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
 
 #ifdef MENU_RENDER
-		menu.render(f);
+		menu.render(f,run);
 #elif
 		glm::vec2 mnt = glm::vec2(0);
 		bool coll = false;

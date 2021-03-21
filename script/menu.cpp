@@ -5,8 +5,11 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 {
 	const char* GVERSION = "0.0.1";
 
-	m_r2d->add(glm::vec2(0,0),100,400,"res/title.png");
+	/*m_r2d->add(glm::vec2(0,0),100,400,"res/title.png");
 	m_r2d->add(glm::vec2(0,0),500,83,"res/en_title.png");
+	msindex = m_r2d->add(glm::vec2(200,400),250,250,"res/menu/exit.png");*/
+	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr);
+	ccbl.load_level("lvload/menu.ccb");
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -40,10 +43,16 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	title_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 }
-void Menu::render(Frame f)
+void Menu::render(Frame f,bool &running)
 {
-	if (f.kb.ka[SDL_SCANCODE_BACKSPACE]&&title) title = false;
-	else if (f.kb.ka[SDL_SCANCODE_RETURN]&&!title) title = true;
+	if (f.m_gc.size()>0) { // !!DYNAMIC BOOLEAN INSERTION TO AVOID BRANCHING AND CODE DUPLICATION
+		if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B]) title = false;
+		else if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START]&&!title) title = true;
+	} else {
+		if (f.kb.ka[SDL_SCANCODE_BACKSPACE]&&title) title = false;
+		else if (f.kb.ka[SDL_SCANCODE_RETURN]&&!title) title = true;
+	}
+
 	if (title&&ptrans<1) ptrans+=0.1f;
 	else if (!title&&ptrans>0) ptrans-=0.1f;
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans);
@@ -57,15 +66,19 @@ void Menu::render(Frame f)
 	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
 
 	fb.bind();
-	f.clear(1,0.8f,0);
+//	f.clear(1,0.8f,0);
+	f.clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->upload_model(pos_title);m_r2d->render_sprite(0,1);
 	m_r2d->upload_model(pos_entitle);m_r2d->render_sprite(1,2);
 
-	if (!title) {
+	if (title) {
+		m_r2d->upload_model(glm::scale(glm::mat4(1.0f),glm::vec3(ptrans,ptrans,0)));
+		m_r2d->render_sprite(2,3);
+	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,0,1));
 	} fb.close();f.clear(0,0,0);
-	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex());
+	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 }

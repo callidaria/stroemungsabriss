@@ -1,8 +1,8 @@
-#include "../fcn/cldl_interpreter.h"
+#include "../fcn/ccb_linpr.h"
 
-CLDLInterpreter::CLDLInterpreter(Renderer2D* r2d,Text* txt)
+CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,Text* txt)
 	: m_r2d(r2d),m_txt(txt) { }
-void CLDLInterpreter::load_level(const char* path)
+void CCBLInterpreter::load_level(const char* path)
 {
 	std::fstream lvlfile;
 	lvlfile.open(path,std::ios::in);
@@ -16,6 +16,7 @@ void CLDLInterpreter::load_level(const char* path)
 			rd>>x;rd>>y;rd>>w;rd>>h;rd>>tp;
 			char* tpcp = new char[tp.size()+1];
 			std::strcpy(tpcp,tp.c_str());
+			printf("vec2(%f,%f),%f %f %s\n",x,y,w,h,tpcp);
 			m_r2d->add(glm::vec2(x,y),w,h,tpcp);
 			spritesCount++;
 		} else if (type=="text:") {

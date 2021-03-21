@@ -33,7 +33,7 @@ Frame::Frame(const char* title,int screen,int width,int height,SDL_WindowFlags f
 }
 void Frame::clear(float cx,float cy,float cz)
 {
-	glClearColor(cx,cy,cz,1.0f);
+	glClearColor(cx,cy,cz,1);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
 }
 void Frame::update() { SDL_GL_SwapWindow(m_frame); }
@@ -67,9 +67,7 @@ void Frame::input(bool &running)
 
 		// read text input
 		// ??better performance than check if pressed
-		for (int i=0;i<285;i++) {
-			
-		}
+		//for (int i=0;i<285;i++) {}
 
 		// read mouse input
 		SDL_GetMouseState(&mouse.mx,&mouse.my);

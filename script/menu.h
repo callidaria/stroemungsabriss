@@ -1,17 +1,18 @@
 #pragma once
 
 #include <iostream>
-#include "../cld_lin/frm/frame.h"
-#include "../cld_lin/gfx/renderer2d.h"
-#include "../cld_lin/mat/camera2d.h"
-#include "../cld_lin/frm/framebuffer.h"
-#include "../cld_lin/fcn/text.h"
+#include "../ccb/frm/frame.h"
+#include "../ccb/fcn/ccb_linpr.h"
+#include "../ccb/gfx/renderer2d.h"
+#include "../ccb/mat/camera2d.h"
+#include "../ccb/frm/framebuffer.h"
+#include "../ccb/fcn/text.h"
 
 class Menu
 {
 public:
 	Menu(Frame f,Renderer2D* r2d,Camera2D* cam2d);
-	void render(Frame f);
+	void render(Frame f,bool &running);
 private:
 	uint32_t svao,svbo;
 	Renderer2D* m_r2d;
@@ -29,4 +30,5 @@ private:
 	float ptrans = 0;
 	glm::vec3 title_dir = TITLE_MENU-TITLE_START;
 	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
+	uint32_t msindex;
 };

@@ -19,7 +19,7 @@ public:
 			SDL_WindowFlags fs=(SDL_WindowFlags)0);
 	Frame(const char* title,int screen,int width,int height,SDL_WindowFlags fs);
 
-	void clear(float cx,float cy,float cz); 	// clear the window
+	void clear(float cx,float cy,float cz);// clear the window
 	void update(); 					// update the window
 	void update_framerelative();			// calculate current location of the mouse in ref to sdim
 	void vsync(unsigned int frames); 		// cap frame count to specified value

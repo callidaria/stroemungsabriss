@@ -1,0 +1,3 @@
+sprite: 0 0 100 400 "res/title.png"
+sprite: 0 0 500 83 "res/en_title.png"
+sprite: 200 400 250 250 "res/menu/exit.png"

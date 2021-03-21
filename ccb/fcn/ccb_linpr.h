@@ -14,10 +14,10 @@
  *	PLEASE DONT JUDGE OR RELY ON THIS CODE. THANK YOU!
  * */
 
-class CLDLInterpreter
+class CCBLInterpreter
 {
 public:
-	CLDLInterpreter(Renderer2D* r2d,Text* txt);
+	CCBLInterpreter(Renderer2D* r2d,Text* txt);
 	void load_level(const char* path);
 private:
 	Renderer2D* m_r2d;
