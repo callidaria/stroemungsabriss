@@ -5,9 +5,6 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 {
 	const char* GVERSION = "0.0.1";
 
-	/*m_r2d->add(glm::vec2(0,0),100,400,"res/title.png");
-	m_r2d->add(glm::vec2(0,0),500,83,"res/en_title.png");
-	msindex = m_r2d->add(glm::vec2(200,400),250,250,"res/menu/exit.png");*/
 	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr);
 	ccbl.load_level("lvload/menu.ccb");
 
@@ -75,7 +72,7 @@ void Menu::render(Frame f,bool &running)
 
 	if (title) {
 		m_r2d->upload_model(glm::scale(glm::mat4(1.0f),glm::vec3(ptrans,ptrans,0)));
-		m_r2d->render_sprite(2,3);
+		m_r2d->render_sprite(2,8);
 	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,0,1));
