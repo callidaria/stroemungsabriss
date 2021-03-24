@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <filesystem>
 
 #include "../gfx/renderer2d.h"
 #include "text.h"
@@ -19,7 +18,7 @@ class CCBLInterpreter
 {
 public:
 	CCBLInterpreter(Renderer2D* r2d,Text* txt);
-	void load_level(const char* path);
+	int load_level(const char* path);
 private:
 	Renderer2D* m_r2d;
 	Text* m_txt;

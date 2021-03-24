@@ -14,6 +14,7 @@
 
 #define MVMT_SPEED 4
 #define MENU_RENDER
+#define BUILD_DEV_MODE 1
 
 int main(int argc,char** argv)
 {
@@ -27,6 +28,7 @@ int main(int argc,char** argv)
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 
 #ifdef MENU_RENDER
+	r2d.add(glm::vec2(10,10),20,20,"res/weight.png");
 	Menu menu = Menu(f,&r2d,&cam2d);
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
@@ -83,6 +85,9 @@ int main(int argc,char** argv)
 
 #ifdef MENU_RENDER
 		menu.render(f,run);
+#if BUILD_DEV_MODE
+		r2d.prepare();r2d.upload_model(glm::mat4(1.0f));r2d.render_sprite(0,1);
+#endif
 #elif
 		glm::vec2 mnt = glm::vec2(0);
 		bool coll = false;

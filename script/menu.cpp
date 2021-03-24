@@ -6,7 +6,7 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	const char* GVERSION = "0.0.1";
 
 	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr);
-	ccbl.load_level("lvload/menu.ccb");
+	msindex = ccbl.load_level("lvload/menu.ccb");
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -39,16 +39,21 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	splash_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	title_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+
+	if (f.m_gc.size()>0) {
+		cnt_b = &f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
+		cnt_start = &f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
+	} else {
+		cnt_b = &f.kb.ka[SDL_SCANCODE_BACKSPACE];
+		cnt_start = &f.kb.ka[SDL_SCANCODE_RETURN];
+	}
 }
 void Menu::render(Frame f,bool &running)
 {
-	if (f.m_gc.size()>0) { // !!DYNAMIC BOOLEAN INSERTION TO AVOID BRANCHING AND CODE DUPLICATION
-		if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B]) title = false;
-		else if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START]&&!title) title = true;
-	} else {
-		if (f.kb.ka[SDL_SCANCODE_BACKSPACE]&&title) title = false;
-		else if (f.kb.ka[SDL_SCANCODE_RETURN]&&!title) title = true;
-	}
+	if (*cnt_b&&title) title = false;
+	else if (*cnt_start&&!title) title = true;
+	/*if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B]&&title) title = false;
+	else if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START]&&!title) title = true;*/
 
 	if (title&&ptrans<1) ptrans+=0.1f;
 	else if (!title&&ptrans>0) ptrans-=0.1f;
@@ -67,12 +72,12 @@ void Menu::render(Frame f,bool &running)
 	f.clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	m_r2d->upload_model(pos_title);m_r2d->render_sprite(0,1);
-	m_r2d->upload_model(pos_entitle);m_r2d->render_sprite(1,2);
+	m_r2d->upload_model(pos_title);m_r2d->render_sprite(msindex,msindex+1);
+	m_r2d->upload_model(pos_entitle);m_r2d->render_sprite(msindex+1,msindex+2);
 
 	if (title) {
 		m_r2d->upload_model(glm::scale(glm::mat4(1.0f),glm::vec3(ptrans,ptrans,0)));
-		m_r2d->render_sprite(2,8);
+		m_r2d->render_sprite(msindex+2,msindex+8);
 	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,0,1));

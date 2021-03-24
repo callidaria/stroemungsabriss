@@ -20,6 +20,9 @@ private:
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
 
+	// input definition
+	bool *cnt_b,*cnt_start;
+
 	// start animation values
 	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
 	const glm::vec3 ENTITLE_START = glm::vec3(340,720,0);
