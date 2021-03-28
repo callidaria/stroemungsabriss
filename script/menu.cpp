@@ -1,12 +1,12 @@
 #include "menu.h"
 
-Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
+Menu::Menu(Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	: m_r2d(r2d)
 {
 	const char* GVERSION = "0.0.1";
 
-	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr);
-	msindex = ccbl.load_level("lvload/menu.ccb");
+	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr,"lvload/menu.ccb");
+	msindex = ccbl.load_level();
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -35,25 +35,25 @@ Menu::Menu(Frame f,Renderer2D* r2d, Camera2D* cam2d)
 	sshd.compile_vCols("shader/fbv_select.shader","shader/fbf_select.shader");
 	sshd.upload_matrix("view",cam2d->view2D);sshd.upload_matrix("proj",cam2d->proj2D);
 
-	fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
-	splash_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
-	title_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
-	select_fb = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
+	splash_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
-	if (f.m_gc.size()>0) {
-		cnt_b = &f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
-		cnt_start = &f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
+	if (f->m_gc.size()>0) {
+		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
+		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
 	} else {
-		cnt_b = &f.kb.ka[SDL_SCANCODE_BACKSPACE];
-		cnt_start = &f.kb.ka[SDL_SCANCODE_RETURN];
+		cnt_b = &f->kb.ka[SDL_SCANCODE_BACKSPACE];
+		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
 	}
+
+	ccbl.edit_level("lvload/menu.ccb",0,glm::vec2(0,0),0,0,"newlines");
 }
 void Menu::render(Frame f,bool &running)
 {
 	if (*cnt_b&&title) title = false;
 	else if (*cnt_start&&!title) title = true;
-	/*if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B]&&title) title = false;
-	else if (f.xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START]&&!title) title = true;*/
 
 	if (title&&ptrans<1) ptrans+=0.1f;
 	else if (!title&&ptrans>0) ptrans-=0.1f;
@@ -68,19 +68,18 @@ void Menu::render(Frame f,bool &running)
 	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
 
 	fb.bind();
-//	f.clear(1,0.8f,0);
 	f.clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	m_r2d->upload_model(pos_title);m_r2d->render_sprite(msindex,msindex+1);
-	m_r2d->upload_model(pos_entitle);m_r2d->render_sprite(msindex+1,msindex+2);
+	m_r2d->sl.at(msindex).model = pos_title;m_r2d->sl.at(msindex+1).model = pos_entitle;
+	m_r2d->render_sprite(msindex,msindex+2);
 
 	if (title) {
-		m_r2d->upload_model(glm::scale(glm::mat4(1.0f),glm::vec3(ptrans,ptrans,0)));
+		for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
 		m_r2d->render_sprite(msindex+2,msindex+8);
 	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
-		vtft.prepare();vtft.render(75,glm::vec4(0,0,0,1));
+		vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	} fb.close();f.clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 }

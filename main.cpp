@@ -28,8 +28,8 @@ int main(int argc,char** argv)
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 
 #ifdef MENU_RENDER
-	r2d.add(glm::vec2(10,10),20,20,"res/weight.png");
-	Menu menu = Menu(f,&r2d,&cam2d);
+	r2d.add(glm::vec2(1230,10),40,20,"res/dev.png");
+	Menu menu = Menu(&f,&r2d,&cam2d);
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");

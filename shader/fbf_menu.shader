@@ -39,7 +39,7 @@ void main()
 //	outColour = proc+cproc;
 	//outColour = sepia+cproc-proc.b+vec4(0,0,proc.b,1.0);
 
-	// RUNCODE STARTS HERE
+	// REAL CODE STARTS HERE
 	vec2 pos = (gl_FragCoord.xy/fres)-vec2(.5);
 	float vignette = smoothstep(0.75,0.75-vgnt,length(pos));
 	float falpha = min((proc.r+proc.g+proc.b)/1.5,1.0);
@@ -50,6 +50,5 @@ void main()
 	vec4 spproc = vec4(mix(sepia_proc.rgb,sepia,.75),1.0);
 
 	vec4 cproc = vec4(sproc.rgb+tproc.rgb+selproc.rgb,1.0);
-
 	outColour = spproc*(1-ptrans)+proc*ptrans+cproc;
 }

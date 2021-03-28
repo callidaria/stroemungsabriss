@@ -11,7 +11,7 @@
 class Menu
 {
 public:
-	Menu(Frame f,Renderer2D* r2d,Camera2D* cam2d);
+	Menu(Frame* f,Renderer2D* r2d,Camera2D* cam2d);
 	void render(Frame f,bool &running);
 private:
 	uint32_t svao,svbo;

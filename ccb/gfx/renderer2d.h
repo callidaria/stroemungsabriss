@@ -76,6 +76,7 @@ public:
 	void render_sprite(int b, int e)
 	{
 		for (int i = b; i < e; i++) {
+			upload_model(sl.at(i).model); // ??how expensive exactely
 			glBindTexture(GL_TEXTURE_2D, sl.at(i).tex);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 		}
