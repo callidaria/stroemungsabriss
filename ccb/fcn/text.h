@@ -21,6 +21,7 @@ public:
 	void load_wcam(Camera2D* c);
 	void prepare();
 	void render(int amnt,glm::vec4 col);
+	void set_scroll(glm::mat4 model);
 private:
 	Shader sT;Font* font;
 	unsigned int vao,vbo,ibo,ind;

@@ -63,3 +63,4 @@ void Text::render(int amnt,glm::vec4 col)
 	glBufferData(GL_ARRAY_BUFFER,sizeof(ibv),ibv,GL_DYNAMIC_DRAW); // !!buffer data call in main loop ´°___°`
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
+void Text::set_scroll(glm::mat4 model) { sT.upload_matrix("model",model); }

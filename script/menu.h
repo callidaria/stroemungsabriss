@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../ccb/frm/frame.h"
 #include "../ccb/fcn/ccb_linpr.h"
+#include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
@@ -11,7 +12,7 @@
 class Menu
 {
 public:
-	Menu(Frame* f,Renderer2D* r2d,Camera2D* cam2d);
+	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Camera2D* cam2d);
 	void render(Frame f,bool &running);
 private:
 	uint32_t svao,svbo;

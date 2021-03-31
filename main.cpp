@@ -10,6 +10,7 @@
 #include "ccb/fcn/text.h"
 #include "ccb/aud/audio.h"
 #include "ccb/aud/listener.h"
+#include "ccb/fcn/ccb_manager.h"
 #include "script/menu.h"
 
 #define MVMT_SPEED 4
@@ -28,8 +29,9 @@ int main(int argc,char** argv)
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 
 #ifdef MENU_RENDER
-	r2d.add(glm::vec2(1230,10),40,20,"res/dev.png");
-	Menu menu = Menu(&f,&r2d,&cam2d);
+	//r2d.add(glm::vec2(1230,10),40,20,"res/dev.png");
+	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
+	Menu menu = Menu(&ccbm,&f,&r2d,&cam2d);
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
@@ -86,7 +88,7 @@ int main(int argc,char** argv)
 #ifdef MENU_RENDER
 		menu.render(f,run);
 #if BUILD_DEV_MODE
-		r2d.prepare();r2d.upload_model(glm::mat4(1.0f));r2d.render_sprite(0,1);
+		ccbm.dev_console();
 #endif
 #elif
 		glm::vec2 mnt = glm::vec2(0);

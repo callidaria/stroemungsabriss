@@ -1,5 +1,6 @@
 #include "../fcn/font.h"
 
+Font::Font() {  }
 Font::Font(const char* ff,const char* tf,float w,float h)
 	: tp(tf),mw(w)
 {

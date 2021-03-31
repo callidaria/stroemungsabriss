@@ -1,12 +1,11 @@
 #include "menu.h"
 
-Menu::Menu(Frame* f,Renderer2D* r2d, Camera2D* cam2d)
+Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	: m_r2d(r2d)
 {
 	const char* GVERSION = "0.0.1";
 
-	CCBLInterpreter ccbl = CCBLInterpreter(r2d,nullptr,"lvload/menu.ccb");
-	msindex = ccbl.load_level();
+	msindex = ccbm->add_lv("lvload/menu.ccb",nullptr);
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -48,7 +47,7 @@ Menu::Menu(Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
 	}
 
-	ccbl.edit_level("lvload/menu.ccb",0,glm::vec2(0,0),0,0,"newlines");
+	//ccbl.edit_level("lvload/menu.ccb",0,glm::vec2(0,0),0,0,"newlines");
 }
 void Menu::render(Frame f,bool &running)
 {

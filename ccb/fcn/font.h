@@ -19,6 +19,7 @@
 class Font
 {
 public:
+	Font();
 	Font(const char* ff,const char* tf,float w,float h);
 	void texture();
 	void setup();
