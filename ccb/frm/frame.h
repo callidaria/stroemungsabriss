@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -23,8 +24,10 @@ public:
 	void update(); 					// update the window
 	void update_framerelative();			// calculate current location of the mouse in ref to sdim
 	void vsync(unsigned int frames); 		// cap frame count to specified value
-	void input(bool &running); 			// check for user input
+	void input(bool &running,bool tinput=false); 	// check for user input
 	void vanish(); 					// close program
+	void input_start();
+	void input_stop();
 private:
 	void init();
 	void setup(const char* title,int x,int y,int width,int height,SDL_WindowFlags fs);
@@ -38,4 +41,5 @@ public: //change back to private
 	ALCdevice* m_alcdev; ALCcontext* m_alccon;			// audio members
 	std::vector<SDL_GameController*> m_gc; SDL_Event m_fe;		// additional members
 	unsigned int m_pT, m_cT, m_fps, m_tempFPS, m_lO;		// frame related members
+	std::string tline = "";
 };

@@ -53,7 +53,7 @@ void Frame::vsync(unsigned int mf)
 		m_tempFPS = 0;
 	} if (m_cT-m_pT<1000/mf) SDL_Delay(1000/mf-SDL_GetTicks()+m_pT);
 }
-void Frame::input(bool &running)
+void Frame::input(bool &running,bool tinput)
 {
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
@@ -64,6 +64,8 @@ void Frame::input(bool &running)
 		// ??are scancodes slower that sdlks
 		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
 		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
+		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0) tline.pop_back();
+		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
 
 		// read text input
 		// ??better performance than check if pressed
@@ -97,7 +99,7 @@ void Frame::input(bool &running)
 				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),(SDL_GameControllerButton)j);
 		}
 		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
-		// results in SDL_CONTROLLER_BUTTON_* macro for nintendo controllers having exchanged a&b recognition
+		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers having exchanged a&b recognition
 	}
 }
 void Frame::vanish()
@@ -122,6 +124,7 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
+	SDL_StopTextInput();
 }
 void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowFlags fs)
 {
@@ -162,3 +165,5 @@ void Frame::get_screen(int screen,SDL_Rect* dim_screen)
 		dim_screen->x = 0; dim_screen->y = 0; dim_screen->w = 1280; dim_screen->h = 720;
 	}
 }
+void Frame::input_start() { SDL_StartTextInput(); }
+void Frame::input_stop() { SDL_StopTextInput(); }

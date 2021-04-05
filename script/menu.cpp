@@ -43,7 +43,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
 		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
 	} else {
-		cnt_b = &f->kb.ka[SDL_SCANCODE_BACKSPACE];
+		cnt_b = &f->kb.ka[SDL_SCANCODE_Q];
 		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
 	}
 

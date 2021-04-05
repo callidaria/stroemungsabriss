@@ -18,10 +18,8 @@ int Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad
 	}
 	
 	// character information write
-	ibv[ind] = p.x;ind++;ibv[ind] = p.y;ind++;
-	ibv[ind] = font->x[i];ind++;ibv[ind] = font->y[i];ind++;
-	ibv[ind] = font->wdt[i];ind++;ibv[ind] = font->hgt[i];ind++;
-	ibv[ind] = font->xo[i];ind++;ibv[ind] = font->yo[i];ind++;
+	ibv.push_back(p.x);ibv.push_back(p.y);ibv.push_back(font->x[i]);ibv.push_back(font->y[i]);
+	ibv.push_back(font->wdt[i]);ibv.push_back(font->hgt[i]);ibv.push_back(font->xo[i]);ibv.push_back(font->yo[i]);
 
 	return font->xa[i]*(font->mw/83.0f); // ??do this with a vec2 pointer maybe & also with dynamic texdiv
 }
@@ -32,6 +30,7 @@ void Text::add(const char* s,glm::vec2 p) // this function is actually good ...i
 		else p.x += 57.0f*(font->mw/83.0f);
 	}
 }
+void Text::clear() { ibv.clear(); }
 void Text::load_vertex() // !!no need to have this extra public vertex load function
 {
 	glBindVertexArray(vao);
@@ -60,7 +59,8 @@ void Text::render(int amnt,glm::vec4 col)
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
 	glBindTexture(GL_TEXTURE_2D,font->tex);
 	glBindBuffer(GL_ARRAY_BUFFER,ibo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(ibv),ibv,GL_DYNAMIC_DRAW); // !!buffer data call in main loop ´°___°`
+	glBufferData(GL_ARRAY_BUFFER,ibv.size()*sizeof(float),&ibv[0],GL_DYNAMIC_DRAW);
+	// !!buffer data call in main loop ´°___°`
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 void Text::set_scroll(glm::mat4 model) { sT.upload_matrix("model",model); }

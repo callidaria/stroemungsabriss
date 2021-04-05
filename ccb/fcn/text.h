@@ -17,6 +17,7 @@ public:
 	Text(Font* f);
 	int add(char c,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
+	void clear();
 	void load_vertex();
 	void load_wcam(Camera2D* c);
 	void prepare();
@@ -24,6 +25,6 @@ public:
 	void set_scroll(glm::mat4 model);
 private:
 	Shader sT;Font* font;
-	unsigned int vao,vbo,ibo,ind;
-	float ibv[8*MAX_CHAR_COUNT];
+	unsigned int vao,vbo,ibo;//,ind;
+	std::vector<float> ibv;
 };

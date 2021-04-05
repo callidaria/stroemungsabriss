@@ -29,7 +29,7 @@ int main(int argc,char** argv)
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 
 #ifdef MENU_RENDER
-	//r2d.add(glm::vec2(1230,10),40,20,"res/dev.png");
+	bool dactive = false;
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&ccbm,&f,&r2d,&cam2d);
 #elif
@@ -80,7 +80,7 @@ int main(int argc,char** argv)
 			false);*/
 
 	bool run=true,pause=false;while (run) {
-		f.vsync(60);f.input(run);
+		f.vsync(60);f.input(run,dactive);
 
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
@@ -88,7 +88,7 @@ int main(int argc,char** argv)
 #ifdef MENU_RENDER
 		menu.render(f,run);
 #if BUILD_DEV_MODE
-		ccbm.dev_console();
+		ccbm.dev_console(dactive);
 #endif
 #elif
 		glm::vec2 mnt = glm::vec2(0);
