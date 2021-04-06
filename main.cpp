@@ -88,7 +88,7 @@ int main(int argc,char** argv)
 #ifdef MENU_RENDER
 		menu.render(f,run);
 #if BUILD_DEV_MODE
-		ccbm.dev_console(dactive);
+		ccbm.dev_console(run,dactive);
 #endif
 #elif
 		glm::vec2 mnt = glm::vec2(0);

@@ -14,10 +14,11 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 int CCBManager::add_lv(const char* path,Text* txt)
 {
 	CCBLInterpreter proc = CCBLInterpreter(m_r2d,txt,path);
+	int out = proc.load_level();
 	linpr.push_back(proc);
-	return proc.load_level();
+	return out;
 }
-void CCBManager::dev_console(bool &dactive)
+void CCBManager::dev_console(bool &running,bool &dactive)
 {
 	m_r2d->prepare();m_r2d->render_sprite(0,1);
 	if (m_frame->kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) { // ??find a way without branch. CPU dont like much.
@@ -26,18 +27,48 @@ void CCBManager::dev_console(bool &dactive)
 		else m_frame->input_start();
 		dactive = !dactive;
 	} activeonsc = m_frame->kb.ka[SDL_SCANCODE_COMMA];
-	if (dactive) {
+	if (mv) {
+		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) mv = false;
+		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		glm::vec2 deltamv = glm::vec2(m_frame->mouse.mxfr-mlf.x,m_frame->mouse.myfr-mlf.y);
+		m_r2d->sl.at(i_rf).model = glm::translate(m_r2d->sl.at(i_rf).model,glm::vec3(deltamv.x,deltamv.y,0));
+		linpr.at(i_lv).m_pos.at(i_rf) += deltamv;
+		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+	} else if (dactive) {
 		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) {
 			activeonentr = true;
-			ct.add(m_frame->tline.c_str(),glm::vec2(770,console_y));
+			ct.add(m_frame->tline.c_str(),glm::vec2(770,console_y));console_y-=20;
+			std::vector<std::string> args;
+			std::string tmp = "";
+			for (int i=0;i<m_frame->tline.length();i++) {
+				if (m_frame->tline[i]==' ') { args.push_back(tmp);tmp=""; }
+				else tmp.push_back(m_frame->tline[i]);
+			} args.push_back(tmp);
+			if (args.at(0)=="exit") running = false;
+			else if (args.at(0)=="mv_sprite") {
+				if (args.size()!=3)
+					ct.add("invalid number of arguments; should be 2",glm::vec2(750,console_y));
+				else {
+					mv=true;
+					mlf=glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+					i_lv = std::stoi(args.at(1));i_rf = std::stoi(args.at(2));
+				}
+			} else if (args.at(0)=="write_changes") {
+				for (int i=0;i<linpr.size();i++) linpr.at(i).write_level();
+				ct.add("changes written",glm::vec2(750,console_y));
+			} else {
+				std::string errline = "invalid command: \""+args.at(0)+"\"";
+				ct.add(errline.c_str(),glm::vec2(750,console_y));
+			}
 			m_frame->tline = "";console_y-=20;
 			ct.add('>',glm::vec2(750,console_y));
-			cscroll = glm::translate(cscroll,glm::vec3(0,20,0));
+			cscroll = glm::translate(cscroll,glm::vec3(0,40,0));
 		} activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
 		cl.clear(); // ??maybe directly add and remove chars from text instead of rewrite
 		cl.add(m_frame->tline.c_str(),glm::vec2(770,30));
 		//cl.load_wcam(m_cam2d);
-		ct.prepare();ct.set_scroll(cscroll);ct.render(1024,glm::vec4(0,.7f,0,1));
+		ct.prepare();//ct.set_scroll(glm::translate(cscroll,glm::vec3(0,-console_y,0)));
+		ct.set_scroll(cscroll);ct.render(1024,glm::vec4(0,.7f,0,1));
 		cl.prepare();cl.render(m_frame->tline.size(),glm::vec4(.7f,.7f,.2f,1));
 	}
 }

@@ -22,7 +22,14 @@ int CCBLInterpreter::load_level()
 		}
 	} return out;
 }
-int CCBLInterpreter::edit_level(const char* path,int id,glm::vec2 pos,float width,float height,const char* tp)
+void CCBLInterpreter::write_level()
 {
-	return 0;
+	std::ofstream lvfile(lvpath,std::ios::out);
+	std::string def_sprite = "sprite ";
+	for (int i=0;i<m_pos.size();i++) {
+		std::stringstream lvbuff;
+		lvbuff <<def_sprite<<m_pos.at(i).x<<' '<<m_pos.at(i).y
+			<<m_width.at(i)<<' '<<m_height.at(i)<<' '<<m_tex.at(i)<<'\n';
+		lvfile << lvbuff.str();
+	} lvfile.close();
 }

@@ -15,7 +15,7 @@ class CCBManager
 public:
 	CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d);
 	int add_lv(const char* path,Text* txt=nullptr);
-	void dev_console(bool &dactive);
+	void dev_console(bool &running,bool &dactive);
 private:
 	// background
 	Frame* m_frame;
@@ -25,9 +25,13 @@ private:
 
 	// console control
 	bool activeonsc = false,activeonentr=false;
-	//std::string iline;
+	bool mv = false;
 	glm::mat4 cscroll = glm::mat4(1.0f);
 	int console_y = 30;
+
+	// edit control
+	glm::vec2 mlf;
+	int i_lv=0,i_rf=0;
 
 	// console graphics
 	Font cf;
