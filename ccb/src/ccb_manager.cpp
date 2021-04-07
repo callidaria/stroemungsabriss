@@ -16,6 +16,7 @@ int CCBManager::add_lv(const char* path,Text* txt)
 	CCBLInterpreter proc = CCBLInterpreter(m_r2d,txt,path);
 	int out = proc.load_level();
 	linpr.push_back(proc);
+	index.push_back(out);
 	return out;
 }
 void CCBManager::dev_console(bool &running,bool &dactive)
@@ -31,7 +32,8 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) mv = false;
 		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
 		glm::vec2 deltamv = glm::vec2(m_frame->mouse.mxfr-mlf.x,m_frame->mouse.myfr-mlf.y);
-		m_r2d->sl.at(i_rf).model = glm::translate(m_r2d->sl.at(i_rf).model,glm::vec3(deltamv.x,deltamv.y,0));
+		int ti = index.at(i_lv)+i_rf;
+		m_r2d->sl.at(ti).model = glm::translate(m_r2d->sl.at(ti).model,glm::vec3(deltamv.x,deltamv.y,0));
 		linpr.at(i_lv).m_pos.at(i_rf) += deltamv;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	} else if (dactive) {
@@ -53,7 +55,9 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 					mlf=glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 					i_lv = std::stoi(args.at(1));i_rf = std::stoi(args.at(2));
 				}
-			} else if (args.at(0)=="write_changes") {
+			} /*else if (args.at(0)=="show_coords") {
+
+			} */else if (args.at(0)=="write_changes") {
 				for (int i=0;i<linpr.size();i++) linpr.at(i).write_level();
 				ct.add("changes written",glm::vec2(750,console_y));
 			} else {

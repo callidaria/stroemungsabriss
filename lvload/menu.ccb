@@ -1,8 +1,8 @@
-sprite 0 0100 400 res/title.png
-sprite 0 0500 83 res/en_title.png
-sprite 150 370200 200 res/menu/exit.png
-sprite 296 358200 200 res/menu/options.png
-sprite 515 391200 200 res/menu/practice.png
-sprite 655 371200 200 res/menu/load.png
-sprite 800 350200 200 res/menu/ngame.png
-sprite 950 350200 200 res/menu/continue.png
+sprite: 0 0 100 400 res/title.png
+sprite: 0 0 500 83 res/en_title.png
+sprite: 147 380 200 200 res/menu/exit.png
+sprite: 307 394 200 200 res/menu/options.png
+sprite: 502 370 200 200 res/menu/practice.png
+sprite: 656 375 200 200 res/menu/load.png
+sprite: 833 380 200 200 res/menu/continue.png
+sprite: 1050 394 200 200 res/menu/ngame.png

@@ -22,7 +22,8 @@ private:
 	Text tft,vtft;
 
 	// input definition
-	bool *cnt_b,*cnt_start;
+	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt;
+	bool trglft=false,trgrgt=false;
 
 	// start animation values
 	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
@@ -35,4 +36,5 @@ private:
 	glm::vec3 title_dir = TITLE_MENU-TITLE_START;
 	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
 	uint32_t msindex;
+	uint8_t mselect = 4;
 };

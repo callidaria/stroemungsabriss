@@ -19,14 +19,14 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	sshd = Shader();
 	float sverts[] = {
 		// title splash
-		-25,0,25,0,.5f,0,0, 420,720,-25,720,.5f,0,0, 600,720,25,720,.5f,0,0,
-		600,720,25,720,.5f,0,0, 50,0,160,0,.5f,0,0, -25,0,25,0,.5f,0,0,
+		-25,0,25,0,.5f,0,0,0, 420,720,-25,720,.5f,0,0,1, 600,720,25,720,.5f,0,0,2,
+		600,720,25,720,.5f,0,0,2, 50,0,160,0,.5f,0,0,3, -25,0,25,0,.5f,0,0,0,
 		// head splash
-		0,500,0,500,.245f,.606f,.564f, 0,500,0,550,.245f,.606f,.564f, 0,500,1280,600,.245f,.606f,.564f,
-		0,500,1280,600,.245f,.606f,.564f, 0,500,1280,470,.245f,.606f,.564f, 0,500,0,500,.245f,.606f,.564f,
+		0,500,0,500,.245f,.606f,.564f,0, 0,500,0,550,.245f,.606f,.564f,1, 0,500,1280,600,.245f,.606f,.564f,2,
+		0,500,1280,600,.245f,.606f,.564f,2, 0,500,1280,470,.245f,.606f,.564f,3, 0,500,0,500,.245f,.606f,.564f,0,
 		// select splash
-		630,0,630,0,.341f,.341f,.129f, 630,0,600,720,.341f,.341f,.129f, 650,0,665,720,.341f,.341f,.129f,
-		650,0,665,720,.341f,.341f,.129f, 650,0,650,0,.341f,.341f,.129f, 630,0,630,0,.341f,.341f,.129f
+		630,0,630,0,.341f,.341f,.129f,0, 630,0,600,720,.341f,.341f,.129f,1, 650,0,665,720,.341f,.341f,.129f,2,
+		650,0,665,720,.341f,.341f,.129f,2, 650,0,650,0,.341f,.341f,.129f,3, 630,0,630,0,.341f,.341f,.129f,0,
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -42,17 +42,22 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	if (f->m_gc.size()>0) {
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
 		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
+		cnt_lft = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_LEFT];
+		cnt_rgt = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_RIGHT];
 	} else {
 		cnt_b = &f->kb.ka[SDL_SCANCODE_Q];
 		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
+		cnt_lft = &f->kb.ka[SDL_SCANCODE_LEFT];
+		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
 	}
-
-	//ccbl.edit_level("lvload/menu.ccb",0,glm::vec2(0,0),0,0,"newlines");
 }
 void Menu::render(Frame f,bool &running)
 {
 	if (*cnt_b&&title) title = false;
 	else if (*cnt_start&&!title) title = true;
+	if (*cnt_lft&&!trglft) { trglft=true;mselect--;m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f); }
+	else if (*cnt_rgt&&!trgrgt) { trgrgt=true;mselect++;m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f); }
+	trglft=*cnt_lft;trgrgt=*cnt_rgt;
 
 	if (title&&ptrans<1) ptrans+=0.1f;
 	else if (!title&&ptrans>0) ptrans-=0.1f;
@@ -61,10 +66,14 @@ void Menu::render(Frame f,bool &running)
 
 	sshd.enable();
 	sshd.upload_float("ptrans",ptrans);
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
 	glBindVertexArray(svao);glBindBuffer(GL_ARRAY_BUFFER,svbo); // §§??
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
-	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
+	select_fb.bind();f.clear(0,0,0);
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(-400,0));
+	glDrawArrays(GL_TRIANGLES,12,6);
+	select_fb.close();
 
 	fb.bind();
 	f.clear(0,0,0);
@@ -75,6 +84,7 @@ void Menu::render(Frame f,bool &running)
 
 	if (title) {
 		for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
+		//m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
 		m_r2d->render_sprite(msindex+2,msindex+8);
 	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));

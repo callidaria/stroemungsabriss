@@ -22,6 +22,7 @@ private:
 	Renderer2D* m_r2d;
 	Camera2D* m_cam2d;
 	std::vector<CCBLInterpreter> linpr;
+	std::vector<int> index;
 
 	// console control
 	bool activeonsc = false,activeonentr=false;
