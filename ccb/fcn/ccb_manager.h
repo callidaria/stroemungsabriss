@@ -25,7 +25,7 @@ private:
 	std::vector<int> index;
 
 	// console control
-	bool activeonsc = false,activeonentr=false;
+	bool activeonsc=false,activeonentr=false,activeonmcl=false;
 	bool mv = false;
 	glm::mat4 cscroll = glm::mat4(1.0f);
 	int console_y = 30;

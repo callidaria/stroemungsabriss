@@ -51,13 +51,11 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 				if (args.size()!=3)
 					ct.add("invalid number of arguments; should be 2",glm::vec2(750,console_y));
 				else {
-					mv=true;
-					mlf=glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+					mv = true;
+					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 					i_lv = std::stoi(args.at(1));i_rf = std::stoi(args.at(2));
 				}
-			} /*else if (args.at(0)=="show_coords") {
-
-			} */else if (args.at(0)=="write_changes") {
+			} else if (args.at(0)=="write_changes") {
 				for (int i=0;i<linpr.size();i++) linpr.at(i).write_level();
 				ct.add("changes written",glm::vec2(750,console_y));
 			} else {
@@ -68,6 +66,12 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 			ct.add('>',glm::vec2(750,console_y));
 			cscroll = glm::translate(cscroll,glm::vec3(0,40,0));
 		} activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		if (m_frame->mouse.mcl&&!activeonmcl) {
+			std::string mouse_out
+				= std::to_string(m_frame->mouse.mxfr)+'x'+std::to_string(m_frame->mouse.myfr);
+			ct.add(mouse_out.c_str(),glm::vec2(770,console_y));console_y-=20;
+			cscroll = glm::translate(cscroll,glm::vec3(0,20,0));
+		} activeonmcl = m_frame->mouse.mcl;
 		cl.clear(); // ??maybe directly add and remove chars from text instead of rewrite
 		cl.add(m_frame->tline.c_str(),glm::vec2(770,30));
 		//cl.load_wcam(m_cam2d);

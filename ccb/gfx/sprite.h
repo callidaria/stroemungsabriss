@@ -70,9 +70,10 @@ public:
 		glm::mat4 tscale = glm::scale(glm::mat4(1.0f),glm::vec3(wscale,hscale,0));
 		glm::mat4 rtrans = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
 		model = rtrans*tscale*btrans*model;*/
-		model = glm::translate(model,glm::vec3(-pos.x,-pos.y,0));
-		//scale(wscale,hscale);
-		model = glm::translate(model,glm::vec3(pos.x,pos.y,0));
+		glm::mat4 btrans = glm::translate(glm::mat4(1.0f),glm::vec3(-pos.x,-pos.y,0));
+		glm::mat4 cscale = glm::scale(glm::mat4(1.0f),glm::vec3(wscale,hscale,0));
+		glm::mat4 rtrans = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
+		model = rtrans*cscale*btrans*model;
 	}
 	void rotate(float rot) { model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }
 private:

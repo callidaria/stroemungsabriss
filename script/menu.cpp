@@ -25,8 +25,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		0,500,0,500,.245f,.606f,.564f,0, 0,500,0,550,.245f,.606f,.564f,1, 0,500,1280,600,.245f,.606f,.564f,2,
 		0,500,1280,600,.245f,.606f,.564f,2, 0,500,1280,470,.245f,.606f,.564f,3, 0,500,0,500,.245f,.606f,.564f,0,
 		// select splash
-		630,0,630,0,.341f,.341f,.129f,0, 630,0,600,720,.341f,.341f,.129f,1, 650,0,665,720,.341f,.341f,.129f,2,
-		650,0,665,720,.341f,.341f,.129f,2, 650,0,650,0,.341f,.341f,.129f,3, 630,0,630,0,.341f,.341f,.129f,0,
+		630,0,630,0,.341f,.341f,.129f,0, 630,0,0,720,.341f,.341f,.129f,1, 650,0,0,720,.341f,.341f,.129f,2,
+		650,0,0,720,.341f,.341f,.129f,2, 650,0,650,0,.341f,.341f,.129f,3, 630,0,630,0,.341f,.341f,.129f,0,
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -55,9 +55,18 @@ void Menu::render(Frame f,bool &running)
 {
 	if (*cnt_b&&title) title = false;
 	else if (*cnt_start&&!title) title = true;
-	if (*cnt_lft&&!trglft) { trglft=true;mselect--;m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f); }
-	else if (*cnt_rgt&&!trgrgt) { trgrgt=true;mselect++;m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f); }
-	trglft=*cnt_lft;trgrgt=*cnt_rgt;
+	else if (*cnt_start&&mselect==2) running = false;
+	if (*cnt_lft&&!trglft&&mselect>2) {
+		trglft=true;
+		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
+		mselect--;
+		m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
+	} else if (*cnt_rgt&&!trgrgt&&mselect<7) {
+		trgrgt=true;
+		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
+		mselect++;
+		m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
+	} trglft=*cnt_lft;trgrgt=*cnt_rgt;
 
 	if (title&&ptrans<1) ptrans+=0.1f;
 	else if (!title&&ptrans>0) ptrans-=0.1f;
@@ -66,12 +75,13 @@ void Menu::render(Frame f,bool &running)
 
 	sshd.enable();
 	sshd.upload_float("ptrans",ptrans);
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
 	glBindVertexArray(svao);glBindBuffer(GL_ARRAY_BUFFER,svbo); // §§??
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	select_fb.bind();f.clear(0,0,0);
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(-400,0));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-2)*2],0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-2)*2+1],0));
 	glDrawArrays(GL_TRIANGLES,12,6);
 	select_fb.close();
 
@@ -83,7 +93,7 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->render_sprite(msindex,msindex+2);
 
 	if (title) {
-		for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
+		//for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
 		//m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
 		m_r2d->render_sprite(msindex+2,msindex+8);
 	} else {

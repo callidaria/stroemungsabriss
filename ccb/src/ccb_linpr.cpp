@@ -25,10 +25,10 @@ int CCBLInterpreter::load_level()
 void CCBLInterpreter::write_level()
 {
 	std::ofstream lvfile(lvpath,std::ios::out);
-	std::string def_sprite = "sprite: ";
+	//std::string def_sprite = "sprite: ";
 	for (int i=0;i<m_pos.size();i++) {
 		std::stringstream lvbuff;
-		lvbuff <<def_sprite<<m_pos.at(i).x<<' '<<m_pos.at(i).y<<' '
+		lvbuff <<"sprite: "<<m_pos.at(i).x<<' '<<m_pos.at(i).y<<' '
 			<<m_width.at(i)<<' '<<m_height.at(i)<<' '<<m_tex.at(i)<<'\n';
 		lvfile << lvbuff.str();
 	} lvfile.close();
