@@ -73,12 +73,14 @@ public:
 		trans=glm::translate(trans,glm::vec3(-(pos.x+sclx/2+ax),-(pos.y+scly/2+ay),0));
 		return trans;
 	}
+	void scale(float wscale,float hscale) { model[0][0]=wscale;model[1][1]=hscale; }
 private:
 	glm::vec2 pos;
 	float sclx,scly;
 	const char* tp;
 public:
 	float v[16];
+	glm::mat4 model = glm::mat4(1.0f);
 	unsigned int tex,r,c;
 	float tn, fl; float ft = 0;
 };

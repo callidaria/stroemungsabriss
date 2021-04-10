@@ -25,8 +25,8 @@ private:
 	Text* m_txt;
 	const char* lvpath;
 public:
-	std::vector<glm::vec2> m_pos;
-	std::vector<float> m_width,m_height;
-	std::vector<const char*> m_tex;
+	std::vector<glm::vec2> m_pos,a_pos;
+	std::vector<float> m_width,a_width,m_height,a_height,a_row,a_column,a_frames,a_ts;
+	std::vector<const char*> m_tex,a_tex;
 	int spritesCount,charsCount;
 };

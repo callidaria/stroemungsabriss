@@ -6,3 +6,9 @@ sprite: 502 370 200 200 res/menu/practice.png
 sprite: 656 375 200 200 res/menu/load.png
 sprite: 833 380 200 200 res/menu/continue.png
 sprite: 1050 394 200 200 res/menu/ngame.png
+anim: 500 430 300 100 res/diffs/normal.png 6 1 1 1
+anim: 500 310 300 100 res/diffs/master.png 5 1 1 1
+anim: 500 190 300 100 res/diffs/gmaster.png 2 1 1 1
+anim: 500 430 300 100 res/diffs/diff_normal.png 6 1 1 1
+anim: 500 310 300 100 res/diffs/diff_master.png 5 1 1 1
+anim: 500 190 300 100 res/diffs/diff_gmaster.png 2 1 1 1

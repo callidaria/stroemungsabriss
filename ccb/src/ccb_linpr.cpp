@@ -11,14 +11,27 @@ int CCBLInterpreter::load_level()
 		lvfile >> lh;
 		const char* rclh = reinterpret_cast<char*>(&lh[0]);
 		if (!strcmp(rclh,"sprite:")) {
+		// pattern for spritedef: lh position_x position_y width height texpath
 			float x,y,w,h;
 			char* tpath = new char[128];
-			const char* rctpath = reinterpret_cast<char*>(&tpath[0]);
+			const char* rctpath = reinterpret_cast<char*>(&tpath[0]); // ??wat
 			lvfile >> x >> y >> w >> h >> tpath;
 			m_pos.push_back(glm::vec2(x,y));
 			m_width.push_back(w);m_height.push_back(h);
 			m_tex.push_back(rctpath);
 			m_r2d->add(glm::vec2(x,y),w,h,rctpath);
+		} else if (!strcmp(rclh,"anim:")) {
+		// pattern for animdef: lh position_x position_y width height texpath rows columns frames timesplit
+			float x,y,w,h,r,c,f,t;
+			char* tpath = new char[128];
+			const char* rctpath = reinterpret_cast<char*>(&tpath[0]);
+			lvfile >> x >> y >> w >> h >> tpath >> r >> c >> f >> t;
+			a_pos.push_back(glm::vec2(x,y));
+			a_width.push_back(w);a_height.push_back(h);
+			a_tex.push_back(rctpath);
+			a_row.push_back(r);a_column.push_back(c);
+			a_frames.push_back(f);a_ts.push_back(t);
+			m_r2d->add(glm::vec2(x,y),w,h,rctpath,r,c,f,t);
 		}
 	} return out;
 }

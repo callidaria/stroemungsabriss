@@ -6,6 +6,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	const char* GVERSION = "0.0.1";
 
 	msindex = ccbm->add_lv("lvload/menu.ccb",nullptr);
+	/*m_r2d->add(glm::vec2(500,310),300,100,"res/diffs/master.png",5,1,60,1);
+	m_r2d->load_wcam(cam2d);*/
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -17,13 +19,14 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
-	float sverts[] = {
+	float sverts[] = { // TODO: remove hardcoded secondary segment coords
 		// title splash
 		-25,0,25,0,.5f,0,0,0, 420,720,-25,720,.5f,0,0,1, 600,720,25,720,.5f,0,0,2,
 		600,720,25,720,.5f,0,0,2, 50,0,160,0,.5f,0,0,3, -25,0,25,0,.5f,0,0,0,
 		// head splash
 		0,500,0,500,.245f,.606f,.564f,0, 0,500,0,550,.245f,.606f,.564f,1, 0,500,1280,600,.245f,.606f,.564f,2,
-		0,500,1280,600,.245f,.606f,.564f,2, 0,500,1280,470,.245f,.606f,.564f,3, 0,500,0,500,.245f,.606f,.564f,0,
+		0,500,1280,600,.245f,.606f,.564f,2, 0,500,1280,470,.245f,.606f,.564f,3, 0,500,0,500,.245f,.606f,.564f,
+														0,
 		// select splash
 		630,0,630,0,.341f,.341f,.129f,0, 630,0,0,720,.341f,.341f,.129f,1, 650,0,0,720,.341f,.341f,.129f,2,
 		650,0,0,720,.341f,.341f,.129f,2, 650,0,650,0,.341f,.341f,.129f,3, 630,0,630,0,.341f,.341f,.129f,0,
@@ -38,6 +41,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	splash_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+
+	for (int i=0;i<3;i++) m_r2d->al.at(i).scale(0,0);
 
 	if (f->m_gc.size()>0) {
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
@@ -54,9 +59,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 void Menu::render(Frame f,bool &running)
 {
 	if (*cnt_b&&title) title = false;
-	else if (*cnt_start&&!title) title = true;
-	else if (*cnt_start&&mselect==2) running = false;
+	else if (*cnt_start&&!title) { trgentr=true;title=true; }
+	else if (*cnt_start&&mselect==2) running=false;
+	else if (*cnt_start&&mselect==7&&!trgentr) { trgentr=true;diffs=true;}
 	if (*cnt_lft&&!trglft&&mselect>2) {
+		// !!horrible math. please redo
 		trglft=true;
 		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
 		mselect--;
@@ -66,12 +73,15 @@ void Menu::render(Frame f,bool &running)
 		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
 		mselect++;
 		m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
-	} trglft=*cnt_lft;trgrgt=*cnt_rgt;
+	} trglft=*cnt_lft;trgrgt=*cnt_rgt;trgentr=*cnt_start;
 
-	if (title&&ptrans<1) ptrans+=0.1f;
-	else if (!title&&ptrans>0) ptrans-=0.1f;
+	if (title&&ptrans<1) ptrans+=.1f;
+	else if (!title&&ptrans>0) ptrans-=.1f;
+	if (diffs&&dtrans<1) dtrans+=.1f;
+	else if (!diffs&&dtrans>0) dtrans-=.1f;
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans);
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*ptrans);
+	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans,1);
 
 	sshd.enable();
 	sshd.upload_float("ptrans",ptrans);
@@ -89,8 +99,10 @@ void Menu::render(Frame f,bool &running)
 	f.clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	m_r2d->sl.at(msindex).model = pos_title;m_r2d->sl.at(msindex+1).model = pos_entitle;
+	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
 	m_r2d->render_sprite(msindex,msindex+2);
+	for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
+	m_r2d->reset_shader();
 
 	if (title) {
 		//for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);

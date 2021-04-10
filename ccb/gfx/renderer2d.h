@@ -81,10 +81,11 @@ public:
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 		}
 	}
-	void render_state(int s, glm::vec2 i)
+	void render_state(int s, glm::vec2 i) // !!float is taken but integer is needed. SPACE
 	{
 		glBindTexture(GL_TEXTURE_2D,al.at(s).tex);
 		upload_row(al.at(s).r);upload_col(al.at(s).c);upload_tindex(i);
+		upload_model(al.at(s).model);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,(void*)((s+sl.size())*6*sizeof(int)));
 	}
 	void render_anim(int i)
@@ -94,6 +95,7 @@ public:
 		upload_row(r);
 		upload_col(c);
 		upload_tindex(ind);
+		upload_model(al.at(i).model);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sl.size())*6*sizeof(int)));
 	}
 	void reset_shader()
