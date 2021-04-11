@@ -36,6 +36,15 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		m_r2d->sl.at(ti).model = glm::translate(m_r2d->sl.at(ti).model,glm::vec3(deltamv.x,deltamv.y,0));
 		linpr.at(i_lv).m_pos.at(i_rf) += deltamv;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+	} else if (scl) {
+		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) scl = false;
+		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		deltascl += (m_frame->mouse.myfr-mlf.y)*0.001f;
+		int ti = index.at(i_lv)+i_rf;
+		m_r2d->sl.at(ti).scale_arbit(deltascl,deltascl);
+		linpr.at(i_lv).m_width.at(i_rf)=tmp_wscale*deltascl;
+		linpr.at(i_lv).m_height.at(i_rf)=tmp_hscale*deltascl;
+		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	} else if (dactive) {
 		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) {
 			activeonentr = true;
@@ -53,7 +62,17 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 				else {
 					mv = true;
 					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
-					i_lv = std::stoi(args.at(1));i_rf = std::stoi(args.at(2));
+					i_lv=std::stoi(args.at(1));i_rf=std::stoi(args.at(2));
+				}
+			} else if (args.at(0)=="scl_sprite") {
+				if (args.size()!=3)
+					ct.add("invalid number of arguments; should be 2",glm::vec2(750,console_y));
+				else {
+					scl = true;
+					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+					i_lv=std::stoi(args.at(1));i_rf=std::stoi(args.at(2));
+					tmp_wscale=linpr.at(i_lv).m_width.at(i_rf);
+					tmp_hscale=linpr.at(i_lv).m_height.at(i_rf);
 				}
 			} else if (args.at(0)=="write_changes") {
 				for (int i=0;i<linpr.size();i++) linpr.at(i).write_level();

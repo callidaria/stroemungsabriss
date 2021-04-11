@@ -44,5 +44,11 @@ void CCBLInterpreter::write_level()
 		lvbuff <<"sprite: "<<m_pos.at(i).x<<' '<<m_pos.at(i).y<<' '
 			<<m_width.at(i)<<' '<<m_height.at(i)<<' '<<m_tex.at(i)<<'\n';
 		lvfile << lvbuff.str();
+	} for (int i=0;i<a_pos.size();i++) {
+		std::stringstream lvbuff;
+		lvbuff <<"anim: "<<a_pos.at(i).x<<' '<<a_pos.at(i).y<<' '
+			<<a_width.at(i)<<' '<<a_height.at(i)<<' '<<a_tex.at(i)<<' '
+			<<a_row.at(i)<<' '<<a_column.at(i)<<' '<<a_frames.at(i)<<' '<<a_ts.at(i)<<'\n';
+		lvfile << lvbuff.str();
 	} lvfile.close();
 }

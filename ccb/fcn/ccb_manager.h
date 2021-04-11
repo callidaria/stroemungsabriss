@@ -26,13 +26,17 @@ private:
 
 	// console control
 	bool activeonsc=false,activeonentr=false,activeonmcl=false;
-	bool mv = false;
+	bool mv=false,scl=false;
 	glm::mat4 cscroll = glm::mat4(1.0f);
 	int console_y = 30;
 
 	// edit control
 	glm::vec2 mlf;
 	int i_lv=0,i_rf=0;
+	float deltascl = 1;
+	float tmp_wscale=0,tmp_hscale=0;
+
+	glm::mat4 tmp_model = glm::mat4(1.0f);
 
 	// console graphics
 	Font cf;

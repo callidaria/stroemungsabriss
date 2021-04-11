@@ -4,7 +4,7 @@ On Linux: run ./yomisensei in console<br>
 On Windows: Run yomisensei.exe
 
 BUILD:
-linux> make unx<br>
+linux> make<br>
 windows> make win
 
 v0.0.2

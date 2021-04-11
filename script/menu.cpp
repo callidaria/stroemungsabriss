@@ -61,19 +61,10 @@ void Menu::render(Frame f,bool &running)
 	if (*cnt_b&&title) title = false;
 	else if (*cnt_start&&!title) { trgentr=true;title=true; }
 	else if (*cnt_start&&mselect==2) running=false;
-	else if (*cnt_start&&mselect==7&&!trgentr) { trgentr=true;diffs=true;}
-	if (*cnt_lft&&!trglft&&mselect>2) {
-		// !!horrible math. please redo
-		trglft=true;
-		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
-		mselect--;
-		m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
-	} else if (*cnt_rgt&&!trgrgt&&mselect<7) {
-		trgrgt=true;
-		m_r2d->sl.at(msindex+mselect).scale_absolute((float)2/3,(float)2/3);
-		mselect++;
-		m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
-	} trglft=*cnt_lft;trgrgt=*cnt_rgt;trgentr=*cnt_start;
+	else if (*cnt_start&&mselect==8&&!trgentr) { trgentr=true;diffs=true; }
+	if (*cnt_lft&&!trglft&&mselect>2) { trglft=true;mselect--; }
+	else if (*cnt_rgt&&!trgrgt&&mselect<8) { trgrgt=true;mselect++; }
+	trglft=*cnt_lft;trgrgt=*cnt_rgt;trgentr=*cnt_start;
 
 	if (title&&ptrans<1) ptrans+=.1f;
 	else if (!title&&ptrans>0) ptrans-=.1f;
@@ -107,7 +98,7 @@ void Menu::render(Frame f,bool &running)
 	if (title) {
 		//for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
 		//m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
-		m_r2d->render_sprite(msindex+2,msindex+8);
+		m_r2d->render_sprite(msindex+2,msindex+16);
 	} else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));

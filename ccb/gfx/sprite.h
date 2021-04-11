@@ -64,16 +64,11 @@ public:
 	}
 	void translate(glm::vec2 tp) { model = glm::translate(model,glm::vec3(tp.x,tp.y,0)); }
 	void scale(float wscale,float hscale) { model[0][0]=wscale;model[1][1]=hscale; }
-	void scale_absolute(float wscale,float hscale)
+	void scale_arbit(float wscale,float hscale)
 	{
-		/*glm::mat4 btrans = glm::translate(glm::mat4(1.0f),glm::vec3(-pos.x,-pos.y,0));
-		glm::mat4 tscale = glm::scale(glm::mat4(1.0f),glm::vec3(wscale,hscale,0));
-		glm::mat4 rtrans = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
-		model = rtrans*tscale*btrans*model;*/
-		glm::mat4 btrans = glm::translate(glm::mat4(1.0f),glm::vec3(-pos.x,-pos.y,0));
-		glm::mat4 cscale = glm::scale(glm::mat4(1.0f),glm::vec3(wscale,hscale,0));
-		glm::mat4 rtrans = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
-		model = rtrans*cscale*btrans*model;
+		model = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
+		model = glm::scale(model,glm::vec3(wscale,hscale,1));
+		model = glm::translate(model,glm::vec3(-pos.x,-pos.y,0));
 	}
 	void rotate(float rot) { model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }
 private:
