@@ -30,7 +30,7 @@ private:
 	const glm::vec3 ENTITLE_START = glm::vec3(340,720,0);
 	const glm::vec3 TITLE_MENU = glm::vec3(50,50,0);
 	const glm::vec3 ENTITLE_MENU = glm::vec3(340,600,0);
-	int SELTRANS[14] = { 34,170,221,380,419,609,644,810,871,997,1027,1258,1212,1498 };
+	int SELTRANS[16] = { 900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498 };
 	bool title=false,diffs=false;
 	glm::mat4 pos_title,pos_entitle;
 	float ptrans=0,dtrans=0;
@@ -38,4 +38,5 @@ private:
 	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
 	uint32_t msindex;
 	uint8_t mselect = 7;
+	glm::vec2 mve,mvj;
 };

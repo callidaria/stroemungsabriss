@@ -72,10 +72,10 @@ public:
 	}
 	void rotate(float rot) { model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }
 private:
-	glm::vec2 pos;
-	float sclx,scly;
 	const char* texpath;
 public:
+	glm::vec2 pos;
+	float sclx,scly;
 	float v[16];
 	unsigned int tex;
 	glm::mat4 model = glm::mat4(1.0f);
