@@ -6,8 +6,6 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	const char* GVERSION = "0.0.1";
 
 	msindex = ccbm->add_lv("lvload/menu.ccb",nullptr);
-	/*m_r2d->add(glm::vec2(500,310),300,100,"res/diffs/master.png",5,1,60,1);
-	m_r2d->load_wcam(cam2d);*/
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -42,7 +40,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
-	for (int i=0;i<3;i++) m_r2d->al.at(i).scale(0,0);
+	for (int i=0;i<3;i++) m_r2d->al.at(i).scale(0,1);
 
 	if (f->m_gc.size()>0) {
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
@@ -56,22 +54,61 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
 	}
 }
+Menu::~Menu() {  }
 void Menu::render(Frame f,bool &running)
 {
-	if (*cnt_b&&ptrans>0&&dtrans<=0.01f) title = false;
-	else if (*cnt_b&&diffs) {
-		diffs = false;
+	int tmm;
+
+switch (mm) { // define geometry and behaviour by menu mode
+	case MenuMode::MENU_TITLE:
+		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
+
+		printf("waiting...\n");
+		break;
+	case MenuMode::MENU_SELECTION:
+		tmm = 1;
+		tmm += 2*(*cnt_start&&!trg_start&&(mselect>3&&mselect<6||mselect==8)); 	// j diff
+		tmm += 3*(*cnt_start&&!trg_start&&(mselect==3||mselect==6)); 		// j list
+		tmm += 1*(*cnt_start&&!trg_start&&mselect==7); 				// j start
+		tmm = tmm*!(*cnt_b&&!trg_b); 						// j title
+		running = !(*cnt_start&&!trg_start&&mselect==2);			// exit
+		mm = (MenuMode)tmm;
+
+		printf("selecting...\n");
+		break;
+	case MenuMode::MENU_DIFFS:
+		tmm = 3;
+		tmm -= 2*(*cnt_b&&!trg_b); // !!reduce this expression
+		mm = (MenuMode)tmm;
+
+		printf("diffing...\n");
+		break;
+	case MenuMode::MENU_LISTING:
+		tmm = 4;
+		tmm -= 3*(*cnt_b&&!trg_b); // !!reduce this expression
+		mm = (MenuMode)tmm;
+
+		printf("listing...\n");
+		break;
+	default:
+		printf("starting...\n");
+}	trg_start=*cnt_start;trg_b=*cnt_b; // triggers
+
+	// !!!THIS IS AN OR CASE BETWEEN THE SWITCH AND THE FORMER IMPLEMENTATION!!!
+	// !!!DO NOT RUN RN!!!
+
+	bool to_diff = mselect==8||(mselect>3&&mselect<6); // !!just a precaution
+	if (*cnt_b&&mm>2) {
+		//diffs = false;
 		m_r2d->sl.at(mselect*2-1).model = glm::mat4(1.0f);
 		m_r2d->sl.at(mselect*2).model = glm::mat4(1.0f);
 	}
-	else if (*cnt_start&&!title) { trgentr=true;title=true; }
-	else if (*cnt_start&&mselect==2) running=false;
-	else if (*cnt_start&&(mselect==8||(mselect>2&&mselect<7))&&!trgentr) {
-		trgentr=true;diffs=true;
+	else if (*cnt_start&&((to_diff||mselect==3||mselect==6)&&!trgentr)) { // !!please reduce this. it is evil
+		trgentr=true;//diffs=true;
 		mve = glm::vec2(360-(m_r2d->sl.at(mselect*2-1).sclx/2),650)-m_r2d->sl.at(mselect*2-1).pos;
 		mvj = glm::vec2(50,50)-m_r2d->sl.at(mselect*2).pos;
-	}
-	if (!diffs&&title) {
+	} // ??maybe reduce by accepting all mselect input and deload when continuing is preferred
+	if (mm==MenuMode::MENU_SELECTION) {
 		if (*cnt_lft&&!trglft&&mselect>2) { trglft=true;mselect--; }
 		else if (*cnt_rgt&&!trgrgt&&mselect<8) { trgrgt=true;mselect++; }
 		trglft=*cnt_lft;trgrgt=*cnt_rgt;trgentr=*cnt_start;
@@ -86,14 +123,15 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->sl.at(mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
 	m_r2d->sl.at(mselect*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 
-	if (title&&ptrans<1) ptrans+=.1f;
-	else if (!title&&ptrans>0.01) ptrans-=.1f;
-	if (diffs&&dtrans<1) dtrans+=.1f;
-	else if (!diffs&&dtrans>0.01) dtrans-=.1f;
+	if (mm==1&&ptrans<1) ptrans+=.1f;
+	else if (mm==0&&ptrans>0.01) ptrans-=.1f;
+	if (mm>2&&dtrans<1) dtrans+=.1f;
+	else if (mm<2&&dtrans>0.01) dtrans-=.1f;
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
-	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(/*dtrans*/0,1);
+	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans*to_diff,1); // !!still breaks with option reference
 
+	// NON-RELATIVE CASE UPDATE
 	sshd.enable();
 	sshd.upload_float("ptrans",ptrans);
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
@@ -118,11 +156,8 @@ void Menu::render(Frame f,bool &running)
 	for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
 	m_r2d->reset_shader();
 
-	if (title) {
-		//for (int i=2;i<8;i++) m_r2d->sl.at(msindex+i).scale(ptrans,ptrans);
-		//m_r2d->sl.at(msindex+mselect).scale_absolute(1.5f,1.5f);
-		m_r2d->render_sprite(msindex+2,msindex+16);
-	} else {
+	if (/*title*/mm>0) m_r2d->render_sprite(msindex+2,msindex+16);
+	else {
 		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
 		vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	} fb.close();f.clear(0,0,0);

@@ -100,6 +100,7 @@ void Frame::input(bool &running,bool tinput)
 		}
 		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
 		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers having exchanged a&b recognition
+		// switch input refuses to be read. conn ok but no prints
 	}
 }
 void Frame::vanish()
