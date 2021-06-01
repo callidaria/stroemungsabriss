@@ -50,7 +50,7 @@ void Text::load_wcam(Camera2D* c)
 void Text::prepare()
 {
 	sT.enable();
-	glBindVertexArray(vao);
+	glBindVertexArray(vao);glBindBuffer(GL_ARRAY_BUFFER,vbo); // §§
 	glDisable(GL_CULL_FACE); // !!define standard flagging by majority usage
 	glActiveTexture(GL_TEXTURE0);
 }

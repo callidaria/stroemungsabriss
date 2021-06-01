@@ -19,7 +19,7 @@
 
 int main(int argc,char** argv)
 {
-	Frame f = Frame("黄泉先生",0,SDL_WINDOW_FULLSCREEN_DESKTOP);
+	Frame f = Frame("黄泉先生",0,1280,720,(SDL_WindowFlags)0/*SDL_WINDOW_FULLSCREEN_DESKTOP*/);
 
 	// AUDIO
 	Listener listener=Listener();

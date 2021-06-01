@@ -34,8 +34,7 @@ private:
 
 	// input definition
 	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt;
-	bool trglft=false,trgrgt=false,trgentr=false;
-	bool trg_start=false,trg_b=false; // §§retest values
+	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false; // §§retest values
 
 	// start animation values
 	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
@@ -43,7 +42,6 @@ private:
 	const glm::vec3 TITLE_MENU = glm::vec3(50,50,0);
 	const glm::vec3 ENTITLE_MENU = glm::vec3(340,600,0);
 	int SELTRANS[16] = { 900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498 };
-	//bool title=false,diffs=false;
 	glm::mat4 pos_title,pos_entitle;
 	float ptrans=0,dtrans=0;
 	glm::vec3 title_dir = TITLE_MENU-TITLE_START;

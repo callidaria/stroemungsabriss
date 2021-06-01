@@ -25,6 +25,6 @@ public:
 	void set_scroll(glm::mat4 model);
 private:
 	Shader sT;Font* font;
-	unsigned int vao,vbo,ibo;//,ind;
+	unsigned int vao,vbo,ibo;
 	std::vector<float> ibv;
 };

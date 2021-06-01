@@ -57,13 +57,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 Menu::~Menu() {  }
 void Menu::render(Frame f,bool &running)
 {
-	int tmm;
+	bool is_shift;int tmm;
 
-switch (mm) { // define geometry and behaviour by menu mode
+	switch (mm) {
 	case MenuMode::MENU_TITLE:
 		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
-
-		printf("waiting...\n");
 		break;
 	case MenuMode::MENU_SELECTION:
 		tmm = 1;
@@ -74,45 +72,24 @@ switch (mm) { // define geometry and behaviour by menu mode
 		running = !(*cnt_start&&!trg_start&&mselect==2);			// exit
 		mm = (MenuMode)tmm;
 
-		printf("selecting...\n");
+		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title
+		mve=(glm::vec2(360-(m_r2d->sl.at(mselect*2-1).sclx/2),650)-m_r2d->sl.at(mselect*2-1).pos)
+			*glm::vec2(is_shift); // setting title animation destination
+		mvj=(glm::vec2(50,50)-m_r2d->sl.at(mselect*2).pos)*glm::vec2(is_shift);
+		mselect+=*cnt_rgt*(mselect<8&&!trg_rgt)-*cnt_lft*(mselect>2&&!trg_lft); // update selection marker
 		break;
 	case MenuMode::MENU_DIFFS:
 		tmm = 3;
-		tmm -= 2*(*cnt_b&&!trg_b); // !!reduce this expression
+		tmm -= 2*(*cnt_b&&!trg_b); // !!reduce this expression j selection
 		mm = (MenuMode)tmm;
-
-		printf("diffing...\n");
 		break;
 	case MenuMode::MENU_LISTING:
 		tmm = 4;
-		tmm -= 3*(*cnt_b&&!trg_b); // !!reduce this expression
+		tmm -= 3*(*cnt_b&&!trg_b); // !!reduce this expression j selection
 		mm = (MenuMode)tmm;
-
-		printf("listing...\n");
 		break;
-	default:
-		printf("starting...\n");
-}	trg_start=*cnt_start;trg_b=*cnt_b; // triggers
-
-	// !!!THIS IS AN OR CASE BETWEEN THE SWITCH AND THE FORMER IMPLEMENTATION!!!
-	// !!!DO NOT RUN RN!!!
-
-	bool to_diff = mselect==8||(mselect>3&&mselect<6); // !!just a precaution
-	if (*cnt_b&&mm>2) {
-		//diffs = false;
-		m_r2d->sl.at(mselect*2-1).model = glm::mat4(1.0f);
-		m_r2d->sl.at(mselect*2).model = glm::mat4(1.0f);
-	}
-	else if (*cnt_start&&((to_diff||mselect==3||mselect==6)&&!trgentr)) { // !!please reduce this. it is evil
-		trgentr=true;//diffs=true;
-		mve = glm::vec2(360-(m_r2d->sl.at(mselect*2-1).sclx/2),650)-m_r2d->sl.at(mselect*2-1).pos;
-		mvj = glm::vec2(50,50)-m_r2d->sl.at(mselect*2).pos;
-	} // ??maybe reduce by accepting all mselect input and deload when continuing is preferred
-	if (mm==MenuMode::MENU_SELECTION) {
-		if (*cnt_lft&&!trglft&&mselect>2) { trglft=true;mselect--; }
-		else if (*cnt_rgt&&!trgrgt&&mselect<8) { trgrgt=true;mselect++; }
-		trglft=*cnt_lft;trgrgt=*cnt_rgt;trgentr=*cnt_start;
-	}
+	default: printf("starting...\n");
+	}trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt; // triggers
 
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(i*2-1).pos.x+250;
@@ -120,23 +97,21 @@ switch (mm) { // define geometry and behaviour by menu mode
 		tval = m_r2d->sl.at(i*2).pos.x+250;
 		m_r2d->sl.at(i*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
 	}
+
+	// animate movement within title positions
+	ptrans+=.1f*(mm==1&&ptrans<1);ptrans-=.1f*(mm==0&&ptrans>0.01); // !!use an epsilon, pretty please
+	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>0.01); // ??maybe reduce this
 	m_r2d->sl.at(mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
 	m_r2d->sl.at(mselect*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
-
-	if (mm==1&&ptrans<1) ptrans+=.1f;
-	else if (mm==0&&ptrans>0.01) ptrans-=.1f;
-	if (mm>2&&dtrans<1) dtrans+=.1f;
-	else if (mm<2&&dtrans>0.01) dtrans-=.1f;
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
-	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans*to_diff,1); // !!still breaks with option reference
+	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans,1);
 
-	// NON-RELATIVE CASE UPDATE
-	sshd.enable();
+	// render the selection splash
+	sshd.enable();glBindVertexArray(svao);
 	sshd.upload_float("ptrans",ptrans);
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
-	glBindVertexArray(svao);glBindBuffer(GL_ARRAY_BUFFER,svbo); // §§??
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	select_fb.bind();f.clear(0,0,0);
@@ -147,19 +122,17 @@ switch (mm) { // define geometry and behaviour by menu mode
 	glDrawArrays(GL_TRIANGLES,12,6);
 	select_fb.close();
 
-	fb.bind();
-	f.clear(0,0,0);
+	// render menu
+	fb.bind();f.clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
 	m_r2d->render_sprite(msindex,msindex+2);
 	for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
 	m_r2d->reset_shader();
-
-	if (/*title*/mm>0) m_r2d->render_sprite(msindex+2,msindex+16);
-	else {
-		tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
-		vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	} fb.close();f.clear(0,0,0);
+	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
+	tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
+	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
+	fb.close();f.clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 }
