@@ -37,6 +37,16 @@ void Frame::clear(float cx,float cy,float cz)
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
 }
 void Frame::update() { SDL_GL_SwapWindow(m_frame); }
+void Frame::print_fps()
+{
+        m_fps++;
+	// !!reduce branch for pipeline
+        if (1000<=SDL_GetTicks()-m_pT) { // !!incredibly high numbers will be saved. lets not do this
+                m_pT = SDL_GetTicks();
+                printf("\rFPS: %i",m_fps);fflush(stdout);
+                m_fps = 0;
+        }
+}
 /*
  *	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
  *	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
@@ -105,6 +115,7 @@ void Frame::input(bool &running,bool tinput)
 }
 void Frame::vanish()
 {
+	printf("\n");
 	// ??doing this with an array reference even cleaner when converted & test when valgrind isn't mad anymore
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i)); // closing controller reference
 

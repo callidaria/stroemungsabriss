@@ -57,7 +57,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 Menu::~Menu() {  }
 void Menu::render(Frame f,bool &running)
 {
-	bool is_shift;int tmm;
+	bool is_shift;uint8_t tmm;
 
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
@@ -105,22 +105,25 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->sl.at(mselect*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
-	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans,1);
+	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans*(mm==3),1);
 
 	// render the selection splash
 	sshd.enable();glBindVertexArray(svao);
 	sshd.upload_float("ptrans",ptrans);
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
+	// first part break: 500,430,300,100 || second: 500,550,600,470
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-70*(mm>2)));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-100*(mm>2)));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-50*(mm>2)));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,-40*(mm>2)));
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
-	select_fb.bind();f.clear(0,0,0);
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
-	glDrawArrays(GL_TRIANGLES,12,6);
-	select_fb.close();
+	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
 
 	// render menu
 	fb.bind();f.clear(0,0,0);

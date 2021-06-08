@@ -80,7 +80,7 @@ int main(int argc,char** argv)
 			false);*/
 
 	bool run=true,pause=false;while (run) {
-		f.vsync(60);f.input(run,dactive);
+		f.print_fps();f.input(run,dactive);
 
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
