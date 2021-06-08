@@ -1,15 +1,34 @@
-<h2>callidaria's yomisensei</h2>
+# callidaria's yomisensei
+## BUILD
+### linux
+```
+# only the first time to build the ccb library
+./ccb_console
+build
+exit
 
-On Linux: run ./yomisensei in console<br>
-On Windows: Run yomisensei.exe
-
-BUILD:
-linux> make<br>
-windows> make win
-
-v0.0.2
+# then
+make
+```
+### windows
+```
+make win
+```
+### DISCLAIMER
+*certain libraries are required to satisfy the makefile*
+***
+## RUN
+### linux
+```
+./yomisensei
+```
+### windows
+double click yomisensei.exe
+### DISCLAIMER
+*building is not required to run the game*
+***
+## v0.0.2
 - Build in Dev Mode & Engine Terminal
+- Windows Port [WIP]
+- Test Builds [WIP]
 - Main Menu Prototype [WIP]
-- Dancing Pilot Prototype [WIP]
-- Windows Port
-- Test Builds
