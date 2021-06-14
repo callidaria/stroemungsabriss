@@ -35,7 +35,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, tex);
 		int width, height;
 #ifdef __WIN32__
-		unsigned char* image = stbi_load(tp, &width, &height, 0, 0); // !!research RGBA support
+		unsigned char* image = stbi_load(tp, &width, &height, 0, STBI_rgb_alpha);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);

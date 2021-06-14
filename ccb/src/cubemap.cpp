@@ -30,8 +30,8 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 	int width,height;
 	for (int i = 0; i < tp.size(); i++) {
 #ifdef __WIN32__
-		unsigned char* image = stbi_load(tp.at(i), &width, &height, 0, 0); // !!research RGBA support
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+		unsigned char* image = stbi_load(tp.at(i), &width, &height, 0, STBI_rgb); // ??alpha needed
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
 #else

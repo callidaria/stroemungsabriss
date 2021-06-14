@@ -15,7 +15,7 @@ make
 make win
 ```
 ### DISCLAIMER
-*certain libraries are required to satisfy the makefile*
+*certain libraries are required to satisfy the compiler*
 ***
 ## RUN
 ### linux

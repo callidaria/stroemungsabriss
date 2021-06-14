@@ -5,7 +5,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 {
 	const char* GVERSION = "0.0.1";
 
-	msindex = ccbm->add_lv("lvload/menu.ccb",nullptr);
+	msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
