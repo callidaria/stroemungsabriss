@@ -9,7 +9,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	tft = Text(&fnt);vtft = Text(&vfnt);
+	tft = Text(fnt);vtft = Text(vfnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	vtft.add("yomisensei by callidaria. danmaku version 0.0.1 - running on cascabel 1.3.1v (OpenGL)",
 			glm::vec2(630,20)); // §§FIX: hardcoded version number
@@ -89,7 +89,7 @@ void Menu::render(Frame f,bool &running)
 		mm = (MenuMode)tmm;
 		break;
 	default: printf("starting...\n");
-	}trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt; // triggers
+	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt; // triggers
 
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(i*2-1).pos.x+250;

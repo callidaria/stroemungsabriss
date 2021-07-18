@@ -4,7 +4,7 @@ TextField::TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* bp,glm:
 	: m_r2d(r2d),m_pos(pos),m_bpos(bpos),m_width(width),m_height(height)
 {
 	rinst = m_r2d->add(bpos,width,height,bp,3,1,30,0);
-	txt = Text(fnt);
+	txt = Text(*fnt);
 }
 void TextField::render(Frame* frame,Camera2D* cam2d,glm::vec4 col)
 {

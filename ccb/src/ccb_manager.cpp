@@ -5,7 +5,7 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 {
 	m_r2d->add(glm::vec2(1230,10),40,20,"res/dev.png");
 	cf = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-	ct = Text(&cf);cl = Text(&cf);
+	ct = Text(cf);cl = Text(cf);
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));
 	int prog = ct.add('>',glm::vec2(750,console_y));
 	cl.add("lineerr",glm::vec2(700+prog,30));
@@ -93,9 +93,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		} activeonmcl = m_frame->mouse.mcl;
 		cl.clear(); // ??maybe directly add and remove chars from text instead of rewrite
 		cl.add(m_frame->tline.c_str(),glm::vec2(770,30));
-		//cl.load_wcam(m_cam2d);
-		ct.prepare();//ct.set_scroll(glm::translate(cscroll,glm::vec3(0,-console_y,0)));
-		ct.set_scroll(cscroll);ct.render(1024,glm::vec4(0,.7f,0,1));
+		ct.prepare();ct.set_scroll(cscroll);ct.render(1024,glm::vec4(0,.7f,0,1));
 		cl.prepare();cl.render(m_frame->tline.size(),glm::vec4(.7f,.7f,.2f,1));
 	}
 }
