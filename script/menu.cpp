@@ -134,7 +134,7 @@ void Menu::render(Frame f,bool &running)
 	for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
-	tft.prepare();tft.render(50,glm::vec4(1,0,0,1));
+	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	fb.close();f.clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
