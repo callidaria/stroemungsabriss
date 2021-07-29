@@ -14,6 +14,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	vtft.add("yomisensei by callidaria. danmaku version 0.0.1 - running on cascabel 1.3.1v (OpenGL)",
 			glm::vec2(630,20)); // §§FIX: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
+	ml_stages = MenuList(cam2d,"lvload/ml_stages");
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
@@ -47,11 +48,15 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_A];
 		cnt_lft = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_LEFT];
 		cnt_rgt = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_RIGHT];
+		cnt_dwn = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_DOWN];
+		cnt_up = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_UP];
 	} else {
 		cnt_b = &f->kb.ka[SDL_SCANCODE_Q];
 		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
 		cnt_lft = &f->kb.ka[SDL_SCANCODE_LEFT];
 		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
+		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
+		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
 	}
 }
 Menu::~Menu() {  }
@@ -71,7 +76,6 @@ void Menu::render(Frame f,bool &running)
 		tmm = tmm*!(*cnt_b&&!trg_b); 						// j title
 		running = !(*cnt_start&&!trg_start&&mselect==2);			// exit
 		mm = (MenuMode)tmm;
-
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title
 		mve=(glm::vec2(360-(m_r2d->sl.at(mselect*2-1).sclx/2),650)-m_r2d->sl.at(mselect*2-1).pos)
 			*glm::vec2(is_shift); // setting title animation destination
@@ -82,6 +86,7 @@ void Menu::render(Frame f,bool &running)
 		tmm = 3;
 		tmm -= 2*(*cnt_b&&!trg_b); // !!reduce this expression j selection
 		mm = (MenuMode)tmm;
+		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up);
 		break;
 	case MenuMode::MENU_LISTING:
 		tmm = 4;
@@ -89,7 +94,8 @@ void Menu::render(Frame f,bool &running)
 		mm = (MenuMode)tmm;
 		break;
 	default: printf("starting...\n");
-	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt; // triggers
+	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
+	// triggers
 
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(i*2-1).pos.x+250;
@@ -105,7 +111,7 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->sl.at(mselect*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
-	for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans*(mm==3),1);
+	//for (int i=0;i<6;i++) m_r2d->al.at(i).scale(dtrans*(mm==3),1);
 
 	// render the selection splash
 	sshd.enable();glBindVertexArray(svao);
@@ -114,10 +120,11 @@ void Menu::render(Frame f,bool &running)
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	// first part break: 500,430,300,100 || second: 500,550,600,470
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-70*(mm>2)));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-100*(mm>2)));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-50*(mm>2)));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,-40*(mm>2)));
+	int lscroll = 45*lselect;
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lscroll));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-30*(mm>2)-lscroll));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-80*(mm>2)-lscroll));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lscroll));
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
@@ -131,11 +138,12 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
 	m_r2d->render_sprite(msindex,msindex+2);
-	for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
+	//for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
+	ml_stages.render(dtrans);
 	fb.close();f.clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 }

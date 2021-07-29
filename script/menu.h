@@ -8,6 +8,7 @@
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
+#include "menu_list.h"
 
 enum MenuMode
 {
@@ -31,10 +32,13 @@ private:
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
+	MenuList ml_stages;
+	int lselect = 0;
 
 	// input definition
-	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt;
-	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false; // §§retest values
+	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
+	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
+	// §§retest values
 
 	// start animation values
 	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
