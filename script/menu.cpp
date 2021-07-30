@@ -15,6 +15,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 			glm::vec2(630,20)); // §§FIX: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 	ml_stages = MenuList(cam2d,"lvload/ml_stages");
+	ml_mopt = MenuList(cam2d,"lvload/ml_mopt");
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
@@ -86,7 +87,6 @@ void Menu::render(Frame f,bool &running)
 		tmm = 3;
 		tmm -= 2*(*cnt_b&&!trg_b); // !!reduce this expression j selection
 		mm = (MenuMode)tmm;
-		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up);
 		break;
 	case MenuMode::MENU_LISTING:
 		tmm = 4;
@@ -94,8 +94,9 @@ void Menu::render(Frame f,bool &running)
 		mm = (MenuMode)tmm;
 		break;
 	default: printf("starting...\n");
-	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
-	// triggers
+	} lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up&&lselect>0);
+	trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
+
 
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(i*2-1).pos.x+250;
@@ -120,11 +121,16 @@ void Menu::render(Frame f,bool &running)
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
 	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	// first part break: 500,430,300,100 || second: 500,550,600,470
-	int lscroll = 45*lselect;
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lscroll));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-30*(mm>2)-lscroll));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-80*(mm>2)-lscroll));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lscroll));
+	lscroll += (lselect>lbounds)-(lselect<(lbounds-7));
+	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
+	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
+	int lcscroll = 45*(lselect+7-lbounds);
+	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%50-25)+(diffsel==lselect)*sbar[i];
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-30*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-80*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lcscroll+sbar[3]+(rand()%10-5)));
+	diffsel = lselect;
 	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
@@ -143,7 +149,8 @@ void Menu::render(Frame f,bool &running)
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	ml_stages.render(dtrans);
+	ml_stages.render(dtrans*(mselect==4),lscroll);
+	ml_mopt.render(dtrans*(mselect==3),lscroll);
 	fb.close();f.clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 }

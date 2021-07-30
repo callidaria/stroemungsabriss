@@ -13,8 +13,9 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 	} ltxt.load_wcam(cam2d);
 }
 MenuList::~MenuList() {  }
-void MenuList::render(float dtrans)
+void MenuList::render(float dtrans,float lscroll)
 {
 	ltxt.prepare();
+	ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(0,lscroll*45,0)));
 	ltxt.render(dtrans*2048,glm::vec4(1,1,1,1));
 }

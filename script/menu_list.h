@@ -11,7 +11,7 @@ public:
 	MenuList() {  }
 	MenuList(Camera2D* cam2d,const char* path);
 	~MenuList();
-	void render(float dtrans);
+	void render(float dtrans,float lscroll);
 private:
 	Text ltxt;
 	int lscroll = 515;

@@ -32,8 +32,9 @@ private:
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
-	MenuList ml_stages;
-	int lselect = 0;
+	MenuList ml_stages,ml_mopt;
+	uint32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0;
+	int32_t sbar[4] = { 0,0,0,0 };
 
 	// input definition
 	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
