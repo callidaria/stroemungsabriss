@@ -19,7 +19,8 @@
 
 int main(int argc,char** argv)
 {
-	Frame f = Frame("黄泉先生",0,1280,720,(SDL_WindowFlags)0/*SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+	Frame f = Frame("黄泉先生",0,1280,720,(SDL_WindowFlags)0);
+	//Frame f = Frame("黄泉先生",0,1920,1080,SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 	// AUDIO
 	Listener listener=Listener();
@@ -56,12 +57,6 @@ int main(int argc,char** argv)
 	int projectiles = 0; int proj_clear = 2; glm::vec2 bllt_dir[1000] = { glm::vec2(0) };
 	int fbs[] = { 0,0 }; int fbs_clear = 1; glm::vec2 fbs_dir[2000] = { glm::vec2(0) }; bool swap_idx = false;
 	glm::vec2 md = glm::vec2(0,-1); glm::mat4 mmd = glm::mat4(1.0f); int chmult = 1; int cutback = 4;
-
-	// POST PROCESSING
-	//Bloom blm=Bloom(&f);
-	//MSAA msaa=MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",16);
-	//FrameBuffer ifb=FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
-	//Blur blr = Blur(&f);
 
 	// TEXT
 	Font fnt=Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
@@ -103,8 +98,8 @@ int main(int argc,char** argv)
 		if (mlen!=0) ppos += glm::normalize(mnt)*(mlen/(1+3*f.kb.ka[SDL_SCANCODE_LSHIFT])); // kill branch
 		if ((f.kb.ka[SDL_SCANCODE_SPACE]||f.xb[0].xbb[SDL_CONTROLLER_BUTTON_A])&&shot_clear<1) {
 			for (int i=-2;i<3;i++) {
-				glm::vec4 pnv = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),glm::radians(i*5.0f),
-						glm::vec3(0,0,1));
+				glm::vec4 pnv = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),
+							glm::radians(i*5.0f),glm::vec3(0,0,1));
 				shot_dir[shot_idx] = glm::vec2(pnv.x,pnv.y);
 				ri.set_offset(4,shot_idx,ppos+shot_dir[shot_idx]*glm::vec2(20)+glm::vec2(20,0));
 				shot_idx++;

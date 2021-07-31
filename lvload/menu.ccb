@@ -14,9 +14,7 @@ sprite: 888 511 225 30 res/menu/econtinue.png
 sprite: 975 400 50 100 res/menu/jcontinue.png
 sprite: 1043 509 225 30 res/menu/engame.png
 sprite: 1125 250 50 250 res/menu/jngame.png
-anim: 500 430 300 100 res/diffs/normal.png 6 1 1 1
-anim: 500 310 300 100 res/diffs/master.png 5 1 1 1
-anim: 500 190 300 100 res/diffs/gmaster.png 2 1 1 1
-anim: 500 430 300 100 res/diffs/diff_normal.png 6 1 1 1
-anim: 500 310 300 100 res/diffs/diff_master.png 5 1 1 1
-anim: 500 190 300 100 res/diffs/diff_gmaster.png 2 1 1 1
+sprite: 205 60 200 600 res/diffs/normal_diff.png
+sprite: 425 60 200 600 res/diffs/master_diff.png
+sprite: 645 60 200 600 res/diffs/gmaster_diff.png
+sprite: 865 60 200 600 res/diffs/rhack_diff.png
