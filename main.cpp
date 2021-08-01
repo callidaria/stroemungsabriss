@@ -68,13 +68,8 @@ int main(int argc,char** argv)
 
 	// CAMERAS
 	r2d.load_wcam(&cam2d);//ri.load_wcam(&cam2d);
-	/*FrameBuffer ppef = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",
-			false);
-	MSAA msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",f.w_res,f.h_res,16);
-	FrameBuffer fmsaa = FrameBuffer(f.w_res,f.h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",
-			false);*/
-
-	bool run=true,pause=false;while (run) {
+	bool run=true,pause=false;
+	while (run) {
 		f.print_fps();f.input(run,dactive);
 
 		// INPUT

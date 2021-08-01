@@ -9,6 +9,7 @@
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
 #include "menu_list.h"
+#include "level_manager.h"
 
 enum MenuMode
 {
@@ -54,4 +55,6 @@ private:
 	uint32_t msindex;
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
+
+	LevelManager lmanage;
 };
