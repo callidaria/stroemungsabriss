@@ -28,6 +28,7 @@ public:
 	void render(Frame f,bool &running);
 private:
 	uint32_t svao,svbo;
+	Frame* m_frame;
 	Renderer2D* m_r2d;
 	Shader sshd;
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
@@ -56,5 +57,5 @@ private:
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 
-	LevelManager lmanage;
+	LevelManager lmanager = LevelManager(m_frame,m_r2d);
 };

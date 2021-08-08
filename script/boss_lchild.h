@@ -4,10 +4,10 @@
 #include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
 
-class BossDPilot
+class BossLChild
 {
 public:
-	BossDPilot() {  }
-	~BossDPilot() {  }
+	BossLChild() {  }
+	~BossLChild() {  }
 	void run(Frame* f,Renderer2D* r2d);
 };

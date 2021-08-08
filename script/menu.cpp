@@ -1,7 +1,7 @@
 #include "menu.h"
 
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
-	: m_r2d(r2d)
+	: m_frame(f),m_r2d(r2d)
 {
 	const char* GVERSION = "0.0.2d";
 
@@ -60,11 +60,9 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
 		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
 	} // !!make input mapping stuff in input class pls
-
-	lmanage = LevelManager(f,r2d);
 }
 Menu::~Menu() {  }
-void Menu::render(Frame f,bool &running)
+void Menu::render(Frame f,bool &running) // !!kill frame parameter
 {
 	bool is_shift;uint8_t tmm;
 	switch (mm) {
@@ -73,7 +71,7 @@ void Menu::render(Frame f,bool &running)
 		break;
 	case MenuMode::MENU_SELECTION:
 		tmm = 1;
-		tmm += 2*(*cnt_start&&!trg_start);				// j listing
+		tmm += 3*(*cnt_start&&!trg_start);				// j listing
 		tmm -= 2*(*cnt_start&&!trg_start&&mselect==7); 			// j start
 		tmm = tmm*!(*cnt_b&&!trg_b);					// j title
 		running = !(*cnt_start&&!trg_start&&mselect==2);		// exit
@@ -97,7 +95,7 @@ void Menu::render(Frame f,bool &running)
 		mm = (MenuMode)tmm;
 		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up&&lselect>0);
 		break;
-	default:lmanage.run((uint8_t&)mm);
+	default:lmanager.run(lselect);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
@@ -122,7 +120,7 @@ void Menu::render(Frame f,bool &running)
 	bool scddiff = lselect>lbounds; bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
-	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%50-25)+(diffsel==lselect)*sbar[i];
+	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i];
 
 	// render the selection splash
 	sshd.enable();glBindVertexArray(svao);

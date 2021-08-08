@@ -1,15 +1,15 @@
-#include "boss_dpilot.h"
+#include "boss_lchild.h"
 
-void BossDPilot::run(Frame* f,Renderer2D* r2d)
+void BossLChild::run(Frame* f,Renderer2D* r2d)
 {
-	// TODO: setup dancing pilot
+	// TODO: setup lost child
 
 	bool run = true;
 	while (run) {
 		f->print_fps();f->input(run,false);f->clear(.1f,.1f,.1f);
 		if (f->kb.ka[SDL_SCANCODE_ESCAPE]) break;
 
-		// TODO: run dancing pilot
+		// TODO: run lost child
 
 		f->update();
 	}
