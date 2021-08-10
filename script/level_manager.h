@@ -3,8 +3,15 @@
 #include <iostream>
 #include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
+#include "player.h"
 #include "boss_lchild.h"
 #include "boss_dpilot.h"
+
+enum LNR_ID
+{
+	LCHILD,
+	DPILOT
+};
 
 class LevelManager
 {
@@ -16,10 +23,8 @@ public:
 private:
 	Frame* m_frame;
 	Renderer2D* m_r2d;
+	Player m_pchar = Player(m_frame,m_r2d);
 
 	BossLChild lchild = BossLChild();
 	BossDPilot dpilot = BossDPilot();
-
-	const uint32_t LID_LCHILD = 0;
-	const uint32_t LID_DPILOT = 1;
 };

@@ -77,9 +77,9 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 		running = !(*cnt_start&&!trg_start&&mselect==2);		// exit
 		mm = (MenuMode)tmm;
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title
-		mve=(glm::vec2(360-(m_r2d->sl.at(mselect*2-1).sclx/2),650)-m_r2d->sl.at(mselect*2-1).pos)
-			*glm::vec2(is_shift); // setting title animation destination
-		mvj=(glm::vec2(50,50)-m_r2d->sl.at(mselect*2).pos)*glm::vec2(is_shift);
+		mve=(glm::vec2(360-(m_r2d->sl.at(msindex+mselect*2-2).sclx/2),650)
+			-m_r2d->sl.at(msindex+mselect*2-2).pos)*glm::vec2(is_shift); // setting title destination
+		mvj=(glm::vec2(50,50)-m_r2d->sl.at(msindex+mselect*2-1).pos)*glm::vec2(is_shift);
 		mselect+=*cnt_rgt*(mselect<8&&!trg_rgt)-*cnt_lft*(mselect>2&&!trg_lft); // update selection marker
 		break;
 	case MenuMode::MENU_DIFFS:
@@ -98,19 +98,20 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 	default:lmanager.run(lselect);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 
+	// move non-used out of view
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
-		float tval = m_r2d->sl.at(i*2-1).pos.x+250;
-		m_r2d->sl.at(i*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
-		tval = m_r2d->sl.at(i*2).pos.x+250;
-		m_r2d->sl.at(i*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
+		float tval = m_r2d->sl.at(msindex+i*2-1).pos.x+250;
+		m_r2d->sl.at(msindex+i*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
+		tval = m_r2d->sl.at(msindex+i*2-2).pos.x+250;
+		m_r2d->sl.at(msindex+i*2-2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
 	}
 
 	// animate movement within title positions
 	ptrans+=.1f*(mm==1&&ptrans<1);ptrans-=.1f*(mm==0&&ptrans>.01f); // !!use an epsilon, pretty please
 	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>.01f); // ??maybe reduce this
 	strans+=.1f*(mm==3&&strans<1);strans-=.1f*(mm!=3&&strans>.01f);
-	m_r2d->sl.at(mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
-	m_r2d->sl.at(mselect*2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
+	m_r2d->sl.at(msindex+mselect*2-2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
+	m_r2d->sl.at(msindex+mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,strans);
@@ -120,7 +121,7 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 	bool scddiff = lselect>lbounds; bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
-	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i];
+	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%37-20)+(diffsel==lselect)*sbar[i];
 
 	// render the selection splash
 	sshd.enable();glBindVertexArray(svao);

@@ -1,6 +1,6 @@
 #include "boss_lchild.h"
 
-void BossLChild::run(Frame* f,Renderer2D* r2d)
+void BossLChild::run(Player* pchar,Frame* f,Renderer2D* r2d)
 {
 	// TODO: setup lost child
 

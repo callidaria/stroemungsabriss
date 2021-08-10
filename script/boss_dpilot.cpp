@@ -1,6 +1,6 @@
 #include "boss_dpilot.h"
 
-void BossDPilot::run(Frame* f,Renderer2D* r2d)
+void BossDPilot::run(Player* pchar,Frame* f,Renderer2D* r2d)
 {
 	// TODO: setup dancing pilot
 
@@ -9,6 +9,7 @@ void BossDPilot::run(Frame* f,Renderer2D* r2d)
 		f->print_fps();f->input(run,false);f->clear(.1f,.1f,.1f);
 		if (f->kb.ka[SDL_SCANCODE_ESCAPE]) break;
 
+		pchar->update();
 		// TODO: run dancing pilot
 
 		f->update();
