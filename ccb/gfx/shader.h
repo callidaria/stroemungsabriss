@@ -17,6 +17,7 @@ public:
 	void compile2d(const char* vspath, const char* fspath);
 	void compile3d(const char* vspath,const char* fspath);
 	void compile_vCols(const char* vspath,const char* fspath);
+	void compile_hp(const char* vspath,const char* fspath);
 	void load_index(unsigned int ibo);
 	void load_text(unsigned int ibo);
 	void enable();

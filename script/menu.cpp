@@ -118,7 +118,7 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 
 	// menu list selection and scrolling
 	lscroll += (lselect>lbounds)-(lselect<(lbounds-7));
-	bool scddiff = lselect>lbounds; bool scudiff = lselect<(lbounds-7);
+	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
 	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%37-20)+(diffsel==lselect)*sbar[i];

@@ -23,9 +23,15 @@ public:
 	~Player();
 	void update();
 private:
+	// rendering
 	Renderer2D* m_r2d;
 	int ri;
+	Shader shp;				// health bar shader
+	uint32_t hpvao,hpvbo;			// health bar buffers
 
+	// controlling
 	glm::vec3 pos = glm::vec3(200,200,0);
+	glm::vec2 dhold;
+	int ddur=0,drec=0;
 	struct PlayerControls cnt;
 };

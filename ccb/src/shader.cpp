@@ -67,6 +67,13 @@ void Shader::compile_vCols(const char* vspath,const char* fspath)
 	glVertexAttribPointer(idxAttrib,1,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(7*sizeof(float)));
 	// !!reduce to int
 }
+void Shader::compile_hp(const char* vspath,const char* fspath)
+{
+	compile(vspath,fspath);
+	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
+}
 void Shader::load_index(unsigned int ibo) // !!index upload checking && double upload nessessary
 {
 	int offsetAttrib = glGetAttribLocation(m_shaderProgram,"offset");
