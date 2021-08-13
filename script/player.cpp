@@ -9,13 +9,20 @@ Player::Player(Frame* f,Renderer2D* r2d)
 	// health bar
 	glGenVertexArrays(1,&hpvao);glGenBuffers(1,&hpvbo);
 	shp = Shader();
-	float hpverts[] = { 10,10,10,60,210,60,210,60,210,10,10,10 };
+	float hpverts[] = {
+		10,10,0,0,10,35,0,0,310,35,0,1,310,35,0,1,310,10,0,2,10,10,0,0,
+		10,40,1,0,10,50,1,0,10,50,1,3,10,50,1,3,10,40,1,4,10,40,1,0,
+	};
 	glBindVertexArray(hpvao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,hpvbo);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(hpverts),hpverts,GL_STATIC_DRAW);
 	shp.compile_hp("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	shp.upload_matrix("view",tc2d.view2D);shp.upload_matrix("proj",tc2d.proj2D);
+
+	rng_flib.push_back(&jet_wait);
+	rng_flib.push_back(&jet_projectile);
+	rng_flib.push_back(&jet_scientific);
 
 	// setup controlling
 	if (f->m_gc.size()>0) {
@@ -63,6 +70,8 @@ void Player::update()
 	ddur-=ddur>0;drec-=drec>0; // dash reset
 	// ??does the ternary flush the pipeline and if so how badly
 
+	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))();
+
 	// TODO: bombs
 	// TODO: shot modes and spawn
 	// TODO: close quarters
@@ -73,5 +82,21 @@ void Player::update()
 
 	// rendering health bar
 	shp.enable();glBindVertexArray(hpvao);
-	glDrawArrays(GL_TRIANGLES,0,6);
+	float engbar_dist = 200.0f*((42.0f-drec)/42.0f);
+	shp.upload_float("edgediv[3]",engbar_dist);shp.upload_float("edgediv[4]",engbar_dist);
+	glDrawArrays(GL_TRIANGLES,0,12);
+}
+void Player::jet_wait()
+{
+	// TODO: cool waiting animation and muzzle smoke particles
+}
+void Player::jet_projectile()
+{
+	// TODO: projectile shot
+	std::cout << "projectile" << '\n';
+}
+void Player::jet_scientific()
+{
+	// TODO: scientific shot
+	std::cout << "science" << '\n';
 }

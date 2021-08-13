@@ -15,6 +15,8 @@ struct PlayerControls
 	bool* pause,*rdetails;int* qrestart;			// non-diegesis related
 };
 
+typedef void (*fnc_vpoint)();
+
 class Player
 {
 public:
@@ -22,6 +24,11 @@ public:
 	Player(Frame* f,Renderer2D* r2d);
 	~Player();
 	void update();
+private:
+	// ranged functions
+	static void jet_wait();
+	static void jet_projectile();
+	static void jet_scientific();
 private:
 	// rendering
 	Renderer2D* m_r2d;
@@ -34,4 +41,7 @@ private:
 	glm::vec2 dhold;
 	int ddur=0,drec=0;
 	struct PlayerControls cnt;
+
+	// ranged
+	std::vector<fnc_vpoint> rng_flib;	// indexed ranged functions
 };

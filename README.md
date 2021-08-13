@@ -32,3 +32,4 @@ double click yomisensei.exe
 - Windows Port [WIP]
 - Test Builds [WIP]
 - Main Menu Prototype [WIP]
+- Player Movement Prototype [WIP]

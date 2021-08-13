@@ -25,7 +25,7 @@ public:
 	void update_framerelative();			// calculate current location of the mouse in ref to sdim
 	void print_fps();				// outputs fps count
 	void vsync(unsigned int frames); 		// cap frame count to specified value
-	void input(bool &running,bool tinput=false); 	// check for user input
+	void input(uint32_t &running,bool tinput=false); 	// check for user input
 	void vanish(); 					// close program
 	void input_start();
 	void input_stop();

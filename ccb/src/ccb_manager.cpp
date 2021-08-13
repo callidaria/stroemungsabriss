@@ -19,7 +19,7 @@ int CCBManager::add_lv(const char* path,Text* txt)
 	index.push_back(out);
 	return out;
 }
-void CCBManager::dev_console(bool &running,bool &dactive)
+void CCBManager::dev_console(uint32_t &running,bool &dactive)
 {
 	m_r2d->prepare();m_r2d->render_sprite(0,1);
 	if (m_frame->kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) { // ??find a way without branch. CPU dont like much.

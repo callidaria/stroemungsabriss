@@ -25,7 +25,7 @@ class Menu
 public:
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Camera2D* cam2d);
 	~Menu();
-	void render(Frame f,bool &running);
+	void render(uint32_t &running);
 private:
 	uint32_t svao,svbo;
 	Frame* m_frame;

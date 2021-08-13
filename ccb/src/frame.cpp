@@ -63,7 +63,7 @@ void Frame::vsync(unsigned int mf)
 		m_tempFPS = 0;
 	} if (m_cT-m_pT<1000/mf) SDL_Delay(1000/mf-SDL_GetTicks()+m_pT);
 }
-void Frame::input(bool &running,bool tinput)
+void Frame::input(uint32_t &running,bool tinput)
 {
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {

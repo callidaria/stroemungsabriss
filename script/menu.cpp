@@ -62,7 +62,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	} // !!make input mapping stuff in input class pls
 }
 Menu::~Menu() {  }
-void Menu::render(Frame f,bool &running) // !!kill frame parameter
+void Menu::render(uint32_t &running) // !!kill frame parameter
 {
 	bool is_shift;uint8_t tmm;
 	switch (mm) {
@@ -95,7 +95,7 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 		mm = (MenuMode)tmm;
 		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up&&lselect>0);
 		break;
-	default:lmanager.run(lselect);
+	default:running=lselect;
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 
 	// move non-used out of view
@@ -128,21 +128,21 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 	sshd.upload_float("ptrans",ptrans);
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
-	splash_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
+	splash_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-30*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-80*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lcscroll+sbar[3]+(rand()%10-5)));
-	title_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
+	title_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
-	select_fb.bind();f.clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
+	select_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
 	diffsel = lselect;
 
 	// render menu
-	fb.bind();f.clear(0,0,0);
+	fb.bind();m_frame->clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
@@ -154,7 +154,7 @@ void Menu::render(Frame f,bool &running) // !!kill frame parameter
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	ml_stages.render(dtrans*(mselect==4),lscroll);
 	ml_mopt.render(dtrans*(mselect==3),lscroll);
-	fb.close();f.clear(0,0,0);
+	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
 }
