@@ -12,7 +12,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	tft = Text(fnt);vtft = Text(vfnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	vtft.add("yomisensei by callidaria. danmaku version 0.0.2d - running on cascabel 1.3.1v (OpenGL)",
-			glm::vec2(630,20)); // §§FIX: hardcoded version number
+			glm::vec2(630,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 	ml_stages = MenuList(cam2d,"lvload/ml_stages");
 	ml_mopt = MenuList(cam2d,"lvload/ml_mopt");
@@ -42,7 +42,6 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 	title_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
-	//for (int i=0;i<3;i++) m_r2d->al.at(i).scale(0,1);
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,0);
 
 	if (f->m_gc.size()>0) {
@@ -59,7 +58,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
 		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
 		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
-	} // !!make input mapping stuff in input class pls
+	}
 }
 Menu::~Menu() {  }
 void Menu::render(uint32_t &running) // !!kill frame parameter
@@ -95,8 +94,9 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		mm = (MenuMode)tmm;
 		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up&&lselect>0);
 		break;
-	default:running=lselect;
+	default:running=lselect+2;game.run(running);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
+	// !!break branch with static function pointer list
 
 	// move non-used out of view
 	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
@@ -147,7 +147,6 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
 	m_r2d->render_sprite(msindex,msindex+2);
-	//for (int i=0;i<6;i++) m_r2d->render_state(i,glm::vec2(0,0));
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));

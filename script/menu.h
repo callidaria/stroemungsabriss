@@ -9,7 +9,7 @@
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
 #include "menu_list.h"
-#include "level_manager.h"
+#include "game.h"
 
 enum MenuMode
 {
@@ -41,9 +41,8 @@ private:
 	// input definition
 	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
-	// §§retest values
 
-	// start animation values
+	// animation values
 	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
 	const glm::vec3 ENTITLE_START = glm::vec3(340,720,0);
 	const glm::vec3 TITLE_MENU = glm::vec3(50,50,0);
@@ -57,5 +56,5 @@ private:
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 
-	LevelManager lmanager = LevelManager(m_frame,m_r2d);
+	Game game = Game(m_frame,m_r2d);
 };

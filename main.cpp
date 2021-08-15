@@ -17,8 +17,6 @@
 #define MENU_RENDER
 #define BUILD_DEV_MODE 1
 
-typedef void (*fnc_vipoint)(uint32_t&);
-
 int main(int argc,char** argv)
 {
 	Frame f = Frame("黄泉先生",0,1280,720,(SDL_WindowFlags)0);
@@ -35,9 +33,6 @@ int main(int argc,char** argv)
 	bool dactive = false;
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&ccbm,&f,&r2d,&cam2d);
-
-	// environment function library
-	std::vector<fnc_vipoint> lv_flib;
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
@@ -82,7 +77,6 @@ int main(int argc,char** argv)
 
 #ifdef MENU_RENDER
 		menu.render(run);
-		//lv_flib.at(run-1)(run);
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
