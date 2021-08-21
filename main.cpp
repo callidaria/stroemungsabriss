@@ -8,6 +8,7 @@
 #include "ccb/ppe/msaa.h"
 #include "ccb/ppe/bloom.h"
 #include "ccb/fcn/text.h"
+#include "ccb/fcn/init.h"
 #include "ccb/aud/audio.h"
 #include "ccb/aud/listener.h"
 #include "ccb/fcn/ccb_manager.h"
@@ -19,8 +20,9 @@
 
 int main(int argc,char** argv)
 {
-	Frame f = Frame("黄泉先生",0,1280,720,(SDL_WindowFlags)0);
-	//Frame f = Frame("黄泉先生",0,1920,1080,SDL_WINDOW_FULLSCREEN_DESKTOP);
+	Init init = Init("config.ini");
+	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),init.rINT(init.FRAME_RESOLUTION_WIDTH),
+		init.rINT(init.FRAME_RESOLUTION_HEIGHT),(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
 
 	// AUDIO
 	Listener listener=Listener();
@@ -32,7 +34,7 @@ int main(int argc,char** argv)
 #ifdef MENU_RENDER
 	bool dactive = false;
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&cam2d);
+	Menu menu = Menu(&ccbm,&f,&r2d,&ri,&cam2d);
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
@@ -67,7 +69,7 @@ int main(int argc,char** argv)
 #endif
 
 	// CAMERAS
-	r2d.load_wcam(&cam2d);//ri.load_wcam(&cam2d);
+	r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
 	uint32_t run=1,pause=false;
 	while (run) {
 		f.print_fps();f.input(run,dactive);

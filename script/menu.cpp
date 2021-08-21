@@ -1,7 +1,7 @@
 #include "menu.h"
 
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
-	: m_frame(f),m_r2d(r2d)
+Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d)
+	: m_frame(f),m_r2d(r2d),m_rI(rI)
 {
 	const char* GVERSION = "0.0.2d";
 
@@ -44,7 +44,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d, Camera2D* cam2d)
 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,0);
 
-	if (f->m_gc.size()>0) {
+	if (f->m_gc.size()>0) { // TODO: include all axis and common intuitive input systems
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
 		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_A];
 		cnt_lft = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_LEFT];

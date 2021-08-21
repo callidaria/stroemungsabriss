@@ -65,6 +65,7 @@ void Frame::vsync(unsigned int mf)
 }
 void Frame::input(uint32_t &running,bool tinput)
 {
+	// FIXME: this is loopcode. make it work as such !!branches!!
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
 		event_active = true;
@@ -74,12 +75,9 @@ void Frame::input(uint32_t &running,bool tinput)
 		// ??are scancodes slower that sdlks
 		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
 		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
-		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0) tline.pop_back();
+		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
+			tline.pop_back();
 		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
-
-		// read text input
-		// ??better performance than check if pressed
-		//for (int i=0;i<285;i++) {}
 
 		// read mouse input
 		SDL_GetMouseState(&mouse.mx,&mouse.my);

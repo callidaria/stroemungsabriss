@@ -1,7 +1,7 @@
 #include "player.h"
 
-Player::Player(Frame* f,Renderer2D* r2d)
-	: m_r2d(r2d)
+Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI)
+	: m_frame(f),m_r2d(r2d),m_rI(rI)
 {
 	// setup graphics
 	ri = m_r2d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
@@ -21,13 +21,15 @@ Player::Player(Frame* f,Renderer2D* r2d)
 	shp.upload_matrix("view",tc2d.view2D);shp.upload_matrix("proj",tc2d.proj2D);
 
 	rng_flib.push_back(&jet_wait);
-	rng_flib.push_back(&jet_projectile);
+	rng_flib.push_back(&jet_wide);
+	rng_flib.push_back(&jet_focus);
 	rng_flib.push_back(&jet_scientific);
 
 	// setup controlling
 	if (f->m_gc.size()>0) {
 		// TODO: dynamic controller choosing
 		// TODO: dynamic controller and keyboard config
+		dz_epsilon = 5000; // FIXME: set static epsilon value to dynamic from ini
 		cnt.flt_lr = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_LEFTX];
 		cnt.flt_ud = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_LEFTY];
 		cnt.prc_lr = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_RIGHTX];
@@ -38,7 +40,7 @@ Player::Player(Frame* f,Renderer2D* r2d)
 		cnt.abs_right = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_RIGHT];
 		cnt.cq_def = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_LEFTSHOULDER];
 		cnt.cq_atk = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_RIGHTSHOULDER];
-		cnt.rng_wide = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERRIGHT];
+		cnt.rng_wide = (bool*)&f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERRIGHT];
 		cnt.rng_focus = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_A];
 		cnt.bomb = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
 		cnt.change = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_Y];
@@ -46,19 +48,38 @@ Player::Player(Frame* f,Renderer2D* r2d)
 		cnt.target = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_RIGHTSTICK];
 		cnt.pause = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
 		cnt.rdetails = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_BACK];
-		cnt.qrestart = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERLEFT];
+		cnt.qrestart = (bool*)&f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERLEFT];
 	} else {
 		// TODO: define in case of keyboard
+		emulate_vectorized();
+		cnt.flt_ud = &emuflt_ud;
+		cnt.flt_lr = &emuflt_lr;
+		cnt.abs_up = &f->kb.ka[SDL_SCANCODE_UP];
+		cnt.abs_down = &f->kb.ka[SDL_SCANCODE_DOWN];
+		cnt.abs_left = &f->kb.ka[SDL_SCANCODE_LEFT];
+		cnt.abs_right = &f->kb.ka[SDL_SCANCODE_RIGHT];
+		cnt.cq_def = &f->kb.ka[SDL_SCANCODE_Q];
+		cnt.cq_atk = &f->kb.ka[SDL_SCANCODE_E];
+		cnt.rng_wide = &f->kb.ka[SDL_SCANCODE_SPACE];
+		cnt.rng_focus = &f->kb.ka[SDL_SCANCODE_LALT];
+		cnt.bomb = &f->kb.ka[SDL_SCANCODE_F];
+		cnt.change = &f->kb.ka[SDL_SCANCODE_C];
+		cnt.dash = &f->kb.ka[SDL_SCANCODE_LSHIFT];
+		cnt.target = &f->kb.ka[SDL_SCANCODE_RSHIFT];
+		cnt.pause = &f->kb.ka[SDL_SCANCODE_ESCAPE];
+		cnt.rdetails = &f->kb.ka[SDL_SCANCODE_TAB];
+		cnt.qrestart = &f->kb.ka[SDL_SCANCODE_5];
 	}
 }
 Player::~Player() {  }
 void Player::update()
 {
 	// movement processing
+	emulate_vectorized();
 	ddur = ddur*!(!drec&&*cnt.dash)+3*(!drec&&*cnt.dash);drec = drec*(ddur!=3)+42*(ddur==3); // dash
 	float mvspeed = !ddur*(4+(3*!(*cnt.rng_focus||*cnt.change))); // movement speed based on mode
-	glm::vec2 fltmv=glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>5000), // vectorized
-			*cnt.flt_ud*(abs(*cnt.flt_ud)>5000)*-1)); // TODO: epsilon and ini dead zones
+	glm::vec2 fltmv=glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>dz_epsilon), // vectorized
+			*cnt.flt_ud*(abs(*cnt.flt_ud)>dz_epsilon)*-1));
 	bool t_real = fltmv.x==fltmv.x;
 	glm::vec2 absmv=glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left), // absolute
 			(*cnt.abs_up)-(*cnt.abs_down)));
@@ -70,7 +91,7 @@ void Player::update()
 	ddur-=ddur>0;drec-=drec>0; // dash reset
 	// ??does the ternary flush the pipeline and if so how badly
 
-	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))();
+	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))(m_rI); // TODO: reassert
 
 	// TODO: bombs
 	// TODO: shot modes and spawn
@@ -86,17 +107,25 @@ void Player::update()
 	shp.upload_float("edgediv[3]",engbar_dist);shp.upload_float("edgediv[4]",engbar_dist);
 	glDrawArrays(GL_TRIANGLES,0,12);
 }
-void Player::jet_wait()
+void Player::emulate_vectorized()
+{
+	// FIXME: exclude 2 subs if keyboard is not primary input
+	emuflt_ud = m_frame->kb.ka[SDL_SCANCODE_S]-m_frame->kb.ka[SDL_SCANCODE_W];
+	emuflt_lr = m_frame->kb.ka[SDL_SCANCODE_D]-m_frame->kb.ka[SDL_SCANCODE_A];
+}
+void Player::jet_wait(RendererI* rI)
 {
 	// TODO: cool waiting animation and muzzle smoke particles
 }
-void Player::jet_projectile()
+void Player::jet_wide(RendererI* rI)
 {
-	// TODO: projectile shot
-	std::cout << "projectile" << '\n';
+	// TODO: wideshot calculations
 }
-void Player::jet_scientific()
+void Player::jet_focus(RendererI* rI)
+{
+	// TODO: focused projectile shot
+}
+void Player::jet_scientific(RendererI* rI)
 {
 	// TODO: scientific shot
-	std::cout << "science" << '\n';
 }

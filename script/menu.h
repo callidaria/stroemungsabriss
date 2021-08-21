@@ -5,6 +5,7 @@
 #include "../ccb/fcn/ccb_linpr.h"
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/gfx/renderer2d.h"
+#include "../ccb/gfx/rendereri.h"
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
@@ -23,13 +24,14 @@ enum MenuMode
 class Menu
 {
 public:
-	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Camera2D* cam2d);
+	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d);
 	~Menu();
 	void render(uint32_t &running);
 private:
 	uint32_t svao,svbo;
 	Frame* m_frame;
 	Renderer2D* m_r2d;
+	RendererI* m_rI;
 	Shader sshd;
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
@@ -56,5 +58,5 @@ private:
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 
-	Game game = Game(m_frame,m_r2d);
+	Game game = Game(m_frame,m_r2d,m_rI);
 };
