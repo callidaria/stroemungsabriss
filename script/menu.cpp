@@ -14,8 +14,9 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	vtft.add("yomisensei by callidaria. danmaku version 0.0.2d - running on cascabel 1.3.1v (OpenGL)",
 			glm::vec2(630,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
-	ml_stages = MenuList(cam2d,"lvload/ml_stages");
-	ml_mopt = MenuList(cam2d,"lvload/ml_mopt");
+
+	mls[0]=MenuList();mls[1]=MenuList(cam2d,"lvload/ml_mopt");mls[2]=MenuList(cam2d,"lvload/ml_stages");
+	mls[3]=MenuList(cam2d,"lvload/ml_arcades");mls[4]=MenuList();mls[5]=MenuList();mls[6]=MenuList();
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
@@ -92,7 +93,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		tmm -= *cnt_start&&!trg_start;
 		tmm -= 3*(*cnt_b&&!trg_b);
 		mm = (MenuMode)tmm;
-		lselect += (*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up&&lselect>0);
+		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-2))-(*cnt_up&&!trg_up&&lselect>0);
 		break;
 	default:running=lselect+2;game.run(running);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
@@ -151,8 +152,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	ml_stages.render(dtrans*(mselect==4),lscroll);
-	ml_mopt.render(dtrans*(mselect==3),lscroll);
+	mls[mselect-2].render(dtrans,lscroll);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);

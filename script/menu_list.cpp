@@ -9,10 +9,17 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 		std::string line;
 		getline(mlfile,line);
 		ltxt.add(line.c_str(),glm::vec2(250,lscroll));
-		lscroll -= 45;
+		lscroll-=45;esize++;
 	} ltxt.load_wcam(cam2d);
 }
 MenuList::~MenuList() {  }
+void MenuList::add_lines(Camera2D* cam2d,std::vector<const char*> lines)
+{
+	for (int i=0;i<lines.size();i++) {
+		ltxt.add(lines.at(i),glm::vec2(250,lscroll));
+		lscroll-=45;esize++;
+	} ltxt.load_wcam(cam2d);
+}
 void MenuList::render(float dtrans,float lscroll)
 {
 	ltxt.prepare();
