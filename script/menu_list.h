@@ -10,13 +10,14 @@ class MenuList
 {
 public:
 	MenuList() {  }
-	MenuList(Camera2D* cam2d,const char* path);
-	~MenuList();
+	MenuList(Camera2D* cam2d,const char* path,const char* dpath);
+	~MenuList() {  }
 	void add_lines(Camera2D* cam2d,std::vector<const char*> lines);
-	void render(float dtrans,float lscroll);
+	void render(float dtrans,float lscroll,uint16_t index);
 public:
 	uint16_t esize = 0;
 private:
 	Text ltxt;
-	int32_t lscroll = 515;
+	std::vector<Text> dtxt; // ??maybe do this with less SPACE
+	int32_t lscroll = 515,dscroll = 675;
 };
