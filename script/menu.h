@@ -18,7 +18,8 @@ enum MenuMode
 	MENU_SELECTION,		// rv = 1
 	MENU_START,		// rv = 2
 	MENU_DIFFS,		// rv = 3
-	MENU_LISTING		// rv = 4
+	MENU_LISTING,		// rv = 4
+	MENU_SUBLIST		// rv = 5
 };
 
 class Menu
@@ -36,9 +37,9 @@ private:
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
-	uint32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0;
+	int32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0,opt_index = 0;
 	int32_t sbar[4] = { 0,0,0,0 };
-	MenuList mls[7];
+	MenuList mls[12];
 
 	// input definition
 	bool *cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;

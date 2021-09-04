@@ -9,7 +9,7 @@
 class MenuList
 {
 public:
-	MenuList() {  }
+	MenuList();
 	MenuList(Camera2D* cam2d,const char* path,const char* dpath);
 	~MenuList() {  }
 	void add_lines(Camera2D* cam2d,std::vector<const char*> lines);
@@ -19,5 +19,5 @@ public:
 private:
 	Text ltxt;
 	std::vector<Text> dtxt; // ??maybe do this with less SPACE
-	int32_t lscroll = 515,dscroll = 675;
+	int32_t lscroll = 515,dscroll = 600;
 };

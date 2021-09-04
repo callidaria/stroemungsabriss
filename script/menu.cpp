@@ -18,7 +18,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	mls[0]=MenuList();mls[1]=MenuList(cam2d,"lvload/ml_mopt","lvload/md_mopt");
 	mls[2]=MenuList(cam2d,"lvload/ml_stages","lvload/md_stages");
 	mls[3]=MenuList(cam2d,"lvload/ml_arcades","lvload/md_arcades");mls[4]=MenuList();
-	mls[5]=MenuList();mls[6]=MenuList();
+	mls[5]=MenuList();mls[6]=MenuList();mls[7]=MenuList(cam2d,"lvload/ml_optfrm","lvload/md_optfrm");
+	mls[8]=MenuList(cam2d,"lvload/ml_optaud","lvload/md_optaud");
+	mls[9]=MenuList(cam2d,"lvload/ml_optgfx","lvload/md_optgfx");
+	mls[10]=MenuList(cam2d,"lvload/ml_optgm","lvload/md_optgm");
+	mls[11]=MenuList(cam2d,"lvload/ml_optext","lvload/md_optext");
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();
@@ -78,6 +82,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		tmm = tmm*!(*cnt_b&&!trg_b);					// j title
 		running = !(*cnt_start&&!trg_start&&mselect==2);		// exit
 		mm = (MenuMode)tmm;
+		lselect=0;lscroll=0; // FIXME: reduce one set call. idc which one
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title
 		mve=(glm::vec2(360-(m_r2d->sl.at(msindex+mselect*2-2).sclx/2),650)
 			-m_r2d->sl.at(msindex+mselect*2-2).pos)*glm::vec2(is_shift); // setting title destination
@@ -92,17 +97,29 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		break;
 	case MenuMode::MENU_LISTING:
 		tmm = 4;
-		tmm -= *cnt_start&&!trg_start;
+		tmm += *cnt_start&&!trg_start&&mselect==3;
+		tmm -= *cnt_start&&!trg_start&&mselect!=3;
 		tmm -= 3*(*cnt_b&&!trg_b);
 		mm = (MenuMode)tmm;
+		opt_index = (6+lselect)*(tmm==5);
 		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-2))-(*cnt_up&&!trg_up&&lselect>0);
+		lselect *= tmm!=5;
+		break;
+	case MenuMode::MENU_SUBLIST:
+		tmm = 5;
+		tmm -= *cnt_b&&!trg_b;
+		mm = (MenuMode)tmm;
+		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-2))
+			-(*cnt_up&&!trg_up&&lselect>0); // FIXME: reduce to one increment calculation
+		opt_index *= tmm==5; // FIXME: doubled logical can be broken down in MENU_LISTING
+		lselect *= tmm!=4;
 		break;
 	default:running=lselect+2;game.run(running);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
-	// !!break branch with static function pointer list
+	// FIXME: break branch with static function pointer list
 
 	// move non-used out of view
-	for (int i=2;i<9;i++) { // !!i will regret this tomorrow ...just a test
+	for (int i=2;i<9;i++) { // FIXME: i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(msindex+i*2-1).pos.x+250;
 		m_r2d->sl.at(msindex+i*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
 		tval = m_r2d->sl.at(msindex+i*2-2).pos.x+250;
@@ -120,7 +137,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,strans);
 
 	// menu list selection and scrolling
-	lscroll += (lselect>lbounds)-(lselect<(lbounds-7));
+	lscroll += (lselect>lbounds)-(lselect<(lbounds-7)); // FIXME: kill the extra scrolling calculation
 	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
@@ -154,7 +171,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	mls[mselect-2].render(dtrans,lscroll,lselect);
+	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
