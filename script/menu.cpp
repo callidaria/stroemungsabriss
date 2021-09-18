@@ -141,7 +141,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
-	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%37-20)+(diffsel==lselect)*sbar[i];
+	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
 
 	// render the selection splash
 	sshd.enable();glBindVertexArray(svao);
@@ -149,10 +149,12 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
 	splash_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
+	// barriers: -15/15=>485&&-30/-80=>520 ; ORIGINS: 500,550,600,470
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-30*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-80*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-90*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lcscroll+sbar[3]+(rand()%10-5)));
+	// FIXME: rangetweaking
 	title_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
@@ -175,4 +177,5 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
+	// TODO: throw fake text shadow
 }
