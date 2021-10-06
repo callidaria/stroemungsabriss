@@ -19,10 +19,10 @@ struct PlayerControls
 class Player
 {
 public:
-	Player() {  }
+	Player() { sal[0]=0;sal[1]=1; }
 	Player(Frame* f,Renderer2D* r2d,RendererI* rI);
 	~Player();
-	void update();
+	void update(uint32_t &rstate);
 private:
 	// additional
 	void emulate_vectorized();
@@ -40,6 +40,7 @@ private:
 	int ri;
 	Shader shp;				// health bar shader
 	uint32_t hpvao,hpvbo;			// health bar buffers
+	uint8_t sal[2];				// sprite adress library
 
 	// controlling
 	glm::vec3 pos = glm::vec3(200,200,0);

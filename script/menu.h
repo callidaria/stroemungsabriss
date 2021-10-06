@@ -30,9 +30,11 @@ public:
 	void render(uint32_t &running);
 private:
 	uint32_t svao,svbo;
+	CCBManager* m_ccbm;
 	Frame* m_frame;
 	Renderer2D* m_r2d;
 	RendererI* m_rI;
+	Camera2D* m_cam2d;
 	Shader sshd;
 	FrameBuffer fb,splash_fb,title_fb,select_fb;
 	Text tft,vtft;
@@ -59,5 +61,5 @@ private:
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 
-	Game game = Game(m_frame,m_r2d,m_rI);
+	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

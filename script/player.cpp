@@ -72,7 +72,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI)
 	}
 }
 Player::~Player() {  }
-void Player::update()
+void Player::update(uint32_t &rstate)
 {
 	// movement processing
 	emulate_vectorized();
@@ -89,7 +89,7 @@ void Player::update()
 	dhold = dhold*glm::vec2(ddur!=3)+mvdir*glm::vec2(ddur==3);
 	pos += glm::vec3(ddur>0)*glm::vec3(mvdir.x*37,mvdir.y*37,0); // adding dash
 	ddur-=ddur>0;drec-=drec>0; // dash reset
-	// ??does the ternary flush the pipeline and if so how badly
+	// ??does the ternary flush the pipeline and if so how badly !!yes, very badly
 
 	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))(m_rI); // TODO: reassert
 

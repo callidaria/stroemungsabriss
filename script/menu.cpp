@@ -1,7 +1,7 @@
 #include "menu.h"
 
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d)
-	: m_frame(f),m_r2d(r2d),m_rI(rI)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
 {
 	const char* GVERSION = "0.0.2d";
 
@@ -114,7 +114,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		opt_index *= tmm==5; // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;
 		break;
-	default:running=lselect+2;game.run(running);
+	default:running=lselect;game.run(running,m_ccbm);
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 	// FIXME: break branch with static function pointer list
 
