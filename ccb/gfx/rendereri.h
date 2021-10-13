@@ -51,7 +51,7 @@ public:
 	{
 		glBindTexture(GL_TEXTURE_2D, il.at(i).tex);
 		glBindBuffer(GL_ARRAY_BUFFER,ibo);
-		glBufferData(GL_ARRAY_BUFFER,sizeof(glm::vec2)*1000,
+		glBufferData(GL_ARRAY_BUFFER,sizeof(glm::vec2)*4096,
 				il.at(i).o,GL_DYNAMIC_DRAW);
 		glDrawArraysInstanced(GL_TRIANGLES, i*6, i*6+6, amt);
 	}

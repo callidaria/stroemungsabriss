@@ -61,5 +61,5 @@ public:
 	const char* tp;
 	unsigned int tex;
 	float v[24];
-	glm::vec2 o[1000] = { glm::vec2(0) };
+	glm::vec2 o[4096] = { glm::vec2(0) };
 };

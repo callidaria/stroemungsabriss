@@ -1,14 +1,12 @@
 #pragma once
 
 #include <iostream>
-#include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
-#include "player.h"
+#include "bullet_system.h"
 
 class BossDPilot
 {
 public:
-	BossDPilot() {  }
-	~BossDPilot() {  }
-	void run(Player* pchar,Frame* f,Renderer2D* r2d);
+	static void load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys);
+	static void update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys);
 };

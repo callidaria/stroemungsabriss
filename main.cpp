@@ -83,26 +83,6 @@ int main(int argc,char** argv)
 		ccbm.dev_console(run,dactive);
 #endif
 #elif
-		glm::vec2 mnt = glm::vec2(0);
-		bool coll = false;
-
-		// !!use deadzone epsilons ffs
-		if (f.kb.ka[SDL_SCANCODE_W]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY]<-1000) mnt.y=MVMT_SPEED;
-		else if (f.kb.ka[SDL_SCANCODE_S]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY]>1000) mnt.y=-MVMT_SPEED;
-		if (f.kb.ka[SDL_SCANCODE_A]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX]<-1000) mnt.x=-MVMT_SPEED;
-		else if (f.kb.ka[SDL_SCANCODE_D]||f.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX]>1000) mnt.x=MVMT_SPEED;
-		float mlen = glm::length(mnt);
-		if (mlen!=0) ppos += glm::normalize(mnt)*(mlen/(1+3*f.kb.ka[SDL_SCANCODE_LSHIFT])); // kill branch
-		if ((f.kb.ka[SDL_SCANCODE_SPACE]||f.xb[0].xbb[SDL_CONTROLLER_BUTTON_A])&&shot_clear<1) {
-			for (int i=-2;i<3;i++) {
-				glm::vec4 pnv = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),
-							glm::radians(i*5.0f),glm::vec3(0,0,1));
-				shot_dir[shot_idx] = glm::vec2(pnv.x,pnv.y);
-				ri.set_offset(4,shot_idx,ppos+shot_dir[shot_idx]*glm::vec2(20)+glm::vec2(20,0));
-				shot_idx++;
-			} shot_clear=7;
-		} else shot_clear--;
-
 		// ENEMY
 		if (state==0) { // use vector function later
 			if (ex>=600||ex<=-600) state++;
