@@ -7,6 +7,7 @@ void BulletSystem::add_cluster(uint16_t width,uint16_t height,uint32_t caps,cons
 	m_rI->add(glm::vec2(0,0),width,height,tPath);
 	bCount.push_back(0);countCaps.push_back(caps);
 }
+// FIXME: add hitbox parameters when adding cluster
 void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos)
 {
 	bCount.at(cluster)%=countCaps.at(cluster); // ??how performant is modulo spamming in this context
@@ -35,3 +36,4 @@ void BulletSystem::render()
 	for (int i=0;i<bCount.size();i++) m_rI->render(i,countCaps.at(i));
 	// FIXME: find a solution to the bullets rendering at origin because of capping before setting
 }
+// TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)

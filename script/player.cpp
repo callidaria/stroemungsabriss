@@ -89,7 +89,7 @@ void Player::update(uint32_t &rstate)
 	dhold = dhold*glm::vec2(ddur!=3)+mvdir*glm::vec2(ddur==3);
 	pos += glm::vec3(ddur>0)*glm::vec3(mvdir.x*37,mvdir.y*37,0); // adding dash
 	ddur-=ddur>0;drec-=drec>0; // dash reset
-	// ??does the ternary flush the pipeline and if so how badly !!yes, very badly
+	// FIXME: ??does the ternary flush the pipeline and if so how badly !!yes, very badly
 
 	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))(m_rI); // TODO: reassert
 
@@ -107,6 +107,7 @@ void Player::update(uint32_t &rstate)
 	shp.upload_float("edgediv[3]",engbar_dist);shp.upload_float("edgediv[4]",engbar_dist);
 	glDrawArrays(GL_TRIANGLES,0,12);
 }
+glm::vec2 Player::get_pPos() { return glm::vec2(pos.x,pos.y); }
 void Player::emulate_vectorized()
 {
 	// FIXME: exclude 2 subs if keyboard is not primary input

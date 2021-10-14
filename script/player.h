@@ -23,6 +23,7 @@ public:
 	Player(Frame* f,Renderer2D* r2d,RendererI* rI);
 	~Player();
 	void update(uint32_t &rstate);
+	glm::vec2 get_pPos();
 private:
 	// additional
 	void emulate_vectorized();

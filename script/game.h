@@ -29,10 +29,10 @@ private:
 	BGEnv m_bgenv = BGEnv(m_r2d);
 	Player m_player = Player(m_frame,m_r2d,m_rI);
 	BulletSystem m_bSys = BulletSystem(m_rI);
-	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*)> stg_ld = {
+	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,int32_t*)> stg_ld = {
 		BossLChild::load,BossDPilot::load
 	};
-	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*)> stg_upd = {
+	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*)> stg_upd = {
 		BossLChild::update,BossDPilot::update
 	};
 };
