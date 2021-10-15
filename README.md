@@ -29,7 +29,10 @@ double click yomisensei.exe
 ***
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
-- Windows Port [WIP]
+- Windows Port
 - Test Builds [WIP]
 - Main Menu Prototype [WIP]
+- Options Configuration Save
 - Player Movement Prototype [WIP]
+- Dancing Pilot Test (Itr 0) [WIP]
+- Lost Child Test (Itr 0) [WIP]

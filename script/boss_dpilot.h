@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <glm/glm.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include "../ccb/gfx/renderer2d.h"
 #include "bullet_system.h"
 
