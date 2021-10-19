@@ -7,6 +7,19 @@ Another Forgotten War Orphan:
 		___insert___
 	reward: green dragon tile
 
+The Rainbow Goblins:
+	initiated by: getting one of the rainbow keys
+	cleared when: cottonmind rainbow label is cleared
+	questline:
+		___insert___
+	reward: able to play cottonmind white label -> necessary for blue dragon tile
+
+The White Goblin:
+	initiated by: getting all rainbow keys and meet the white goblin in skandinavia
+	cleared when: cottonmind white label is cleared
+	questline:
+		___insert___
+	reward: able to trigger cottonminds "illusion" phase -> clearing will reward blue dragon tile
 
 				LOYALTY QUESTS
 
