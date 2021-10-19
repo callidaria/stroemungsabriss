@@ -5,7 +5,7 @@ BulletSystem::BulletSystem(RendererI* rI)
 void BulletSystem::add_cluster(uint16_t width,uint16_t height,const uint32_t caps,const char* tPath)
 {
 	m_rI->add(glm::vec2(0,0),width,height,tPath);
-	glm::vec2 t_dirs[4096] = { glm::vec2(0) }; // FIXME: const caps var as array size wo segmentation fault
+	std::vector<glm::vec2> t_dirs(caps);
 	bCount.push_back(0);countCaps.push_back(caps);dirs.push_back(t_dirs);
 }
 // FIXME: add hitbox parameters when adding cluster
@@ -53,3 +53,4 @@ void BulletSystem::render()
 }
 // TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)
 // TODO: add a reset method
+// TODO: add projectile rendering rotation

@@ -88,6 +88,8 @@ void Player::update(uint32_t &rstate)
 	pos += glm::vec3(mvdir.x*mvspeed,mvdir.y*mvspeed,0); // adding directional input
 	dhold = dhold*glm::vec2(ddur!=3)+mvdir*glm::vec2(ddur==3);
 	pos += glm::vec3(ddur>0)*glm::vec3(mvdir.x*37,mvdir.y*37,0); // adding dash
+	pos += glm::vec3((pos.x<0)*-pos.x-(pos.x>1230)*(pos.x-1230),
+		(pos.y<0)*-pos.y-(pos.y>670)*(pos.y-670),pos.z); // mvmt bounds
 	ddur-=ddur>0;drec-=drec>0; // dash reset
 	// FIXME: ??does the ternary flush the pipeline and if so how badly !!yes, very badly
 

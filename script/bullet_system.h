@@ -28,5 +28,5 @@ private:
 	std::vector<bool> fCount;
 	std::vector<uint16_t> bCount;
 	std::vector<uint32_t> countCaps;
-	std::vector<glm::vec2*> dirs;
+	std::vector<std::vector<glm::vec2>> dirs;
 };
