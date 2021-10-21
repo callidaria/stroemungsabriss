@@ -1,36 +1,3 @@
-				Introduction
-<sudden showing of yon, hanging from a cliff by his legs tied to a rope, swinging around>
-cletus (voice):	Toldya, Maria! Yep, my dear, it seems we have just caught the cowboy ain't never been caught.
-		Thank you Lord Jesus, Sinclair will be *very* pleased, thats for *god-damn* sure. <spits>
-		Turned out you were all hat no cattle after all.
-		Should have known, you *were* still just a boy they told me, all right
-		Well, i hope you hang in there boy, he will soon be with you, dontcha worry. <sighs>
-		So thats goodbye i guess, probably my favourite goodbye i've ever had to say. So long, yeehaw.
-<fat sound of ford f150 suggesting he is driving away, maybe little sand animation above cliff?>
-<hard cut to title display, maybe just suddently display title or even with black background?>
-<also kick in stage 1 music, gimme that fat sax quartet>
-<back cut to previous scene or just remove title from screen>
-<give player choice to either cut the rope and let himself fall down or to climb up the rope>
-	-> if rope is cut initiate sleigh down STAGE0 and give points to chaotic. jump to #aa0000#
-	-> else initiate motorcycle STAGE0. jump to #aa0001#
-RUN STAGE
-#aa0000# yon crashes into truck from above and breaks through the security cloth
-#aa0001# yon crashes into truck from the side and breaks through the security cloth
-<before: show truck driver humming along frontal view before yon crashes into van>
-<female voice can be heard complaining about being hurt and male voice coming from the drivers seat>
-Driver:		I'm sorry, I don't want to come off as rude, but couldn't you have found a less destructive way of
-		seeking refuge midst the myriad of valuables loaded in the storage area of my brand new vehicle?
-04:		1) Yeah good to see you too, that was horribly close.
-			-> Must have been close if you couldn't help but shamelessly destroy my property. I'm not used
-			to you being this careless. *??
-		2) Thanks for saving me. What a ride!
-			-> <with sadness filled voice> Oh no problem, no problem at all my friend, it was a pleasure,
-			oh i just wish that there would have been another way <sigh> dante(+)
-		3) I could have sworn i heard some girl during the crash. Got company i don't know about yet?
-			-> jump to #aa0002#
-		4) Who are you?
-Driver:		
-
 - Orphansnatcher stage
 - Rescued by Nelly
 				Chapter 1 - Beginning the Hunt
@@ -42,32 +9,57 @@ Driver:
 				Chapter 2 - Don't look down
 - Martha Fight
 - Meeting April
+
 - Pavel X Fight
 <Before you can finish off Pavel X a dialogue is initialized>
-pavel x (always breathing heavily, talking like the rat that he is):
-            Hold it right there, *dickhead*! I believe you don't understand the severity of your situation!
-            Your degenerate brain inside your degenerate skull is not able to grasp the limitlessness of my powers.
-            Give up or face a fate much worse than death!
-04:         1) What are you talking about? You suck at fighting. This was easier than I could have wished for.
-            2) Listen up *shithead*! Being dramatic is *my* job. Shut and give up. You are nothing but a miniboss!
-			3) Forfeit all your rambling and pathetic attempts, fritening me. This shall be the end of your free reign!
-			4) <surrender> Yes, I suppose you speak the truth. I surrender myself to your predetermined will.
-            5) Hey, thats cheating. Initiating a talk sequence right before beating a boss is so unsatisfying!
+RUN LC0002
 
+- Gustavo Fight
+- Climbing the Skyscraper
+- Sinclair Fight
+				Chapter 3 - Working where others go on Vacation
+- Black Belt Laura Fight
+- Taking the Gondola over the Lagoon
+- DJ JackIt Fight
+				Chapter 4 - A City in the middle of nowhere
+- Lost Child Chiaki Fight
+- Expedition into the Desert
+- Basilisk Fight
+				Chapter 5 - Wunderzirkus Chaosland
+- Moodmakers Cadence
+- Surviving the Jahrmarkt
+- Clocktower Fight
+- Feuersforst Fight
+- Entering the Luftschiff Spielzeugparadies
 
-April's Options before confronting her "father", what will she do while appearing in the fading smoke:
-			1) <break through the door> Father!
-			2) <break through the door> Guess whos back!
-			3) <break through the door> You have abandoned me but I'm still alive and well! Don't worry.
-			4) <break through the door> Great job asshole, your experiment worked after all!
+NOTES:
 			5) <break through the door, looking through a crack> Here's April
 !!amounts to him believing his daughter would have broken down the door with an explosion
 		-> then she responds with "wait for it" and you hear a distant explosion while spielzeugparadies is breaking
 		-> weirdly cute family reunion
-			6) <break through the door> What an Insult! *I'm* the greatest thing you've ever created. Not this airship!
-			7) <break through the door> Ah yes, finally we meet. Let this be our greatest battle! <begin boss fight>
-			8) <do not break through the door>
-				-> April<smiling to herself, making the selected option impossible to select again> yeah right...
-(ref.1)		1) No wait!
-				-> Dr. Kindsgesicht: "No wait"? what a compelling argument indeed... then again, i changed my mind.
-					<laughter> Keep shooting her! <begin main boss fight>
+- Dr. Kindsgesicht Fight
+
+                Chapter 6 - The Vast Cold Desert
+				Chapter 7 - The Summit
+- Dancing Pilot Fight
+- Sane Sorcerer Fight
+- Climbing Mount Everest
+- Red Belt Laura Fight
+				Chapter 8 - Spaced Out
+- Astral Adventurer Fight
+- Flying to the fucking MOON
+- Battle Angel Chiaki Fight
+				Chapter 9 - The Cold Lonely Woods
+- Noonday Witch Fight
+- Honourable Student Fight
+- Blind SAI Fight
+- Aurora Minerva Fight
+- Akkordeons Cadence
+- Travelling to Greenland
+- Sad Sailor Fight
+				Finale Furioso - 37, YOMI
+- Cottonmind fight
+- Styx' Echoed Cadence
+- Twin Blades Fight
+- YOMIs fireplace
+- YOMI fight
