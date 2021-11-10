@@ -1,10 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include "../ccb/gfx/renderer2d.h"
 #include "bullet_system.h"
+
+#define E 2.7182818284
 
 class BossDPilot
 {

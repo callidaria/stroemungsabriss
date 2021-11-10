@@ -36,7 +36,10 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 		0,500,1280,470,.245f,.606f,.564f,3,0,500,0,500,.245f,.606f,.564f,0,
 		// select splash
 		630,0,630,0,.341f,.341f,.129f,0,630,0,0,720,.341f,.341f,.129f,1,650,0,0,720,.341f,.341f,.129f,2,
-		650,0,0,720,.341f,.341f,.129f,2,650,0,650,0,.341f,.341f,.129f,3,630,0,630,0,.341f,.341f,.129f,0
+		650,0,0,720,.341f,.341f,.129f,2,650,0,650,0,.341f,.341f,.129f,3,630,0,630,0,.341f,.341f,.129f,0,
+		// crossselect splash
+		1280,720,333,593,1,1,1,0,1280,720,333,690,1,0,0,1,1280,720,847,690,0,1,0,2,
+		1280,720,847,690,0,1,0,2,1280,720,847,593,0,0,1,3,1280,720,333,593,1,1,1,0
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -48,6 +51,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	splash_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	title_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	cross_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,0);
 
@@ -114,7 +118,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 		opt_index *= tmm==5; // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;
 		break;
-	default:running=lselect;game.run(running,m_ccbm);
+	default:running=lselect;game.run(running,m_ccbm); // running game at position
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 	// FIXME: break branch with static function pointer list
 
@@ -161,6 +165,9 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
 	select_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
+	cross_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,18,6);cross_fb.close();
 	diffsel = lselect;
 
 	// render menu
@@ -175,7 +182,7 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect);
 	fb.close();m_frame->clear(0,0,0);
-	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),ptrans);
+	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
 	// TODO: throw fake text shadow
 }

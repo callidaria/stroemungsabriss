@@ -21,7 +21,10 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	// DANMAKU
 	bSys->add_cluster(21,21,2048,"./res/bllt_proj.png");
 	bSys->add_cluster(30,30,2048,"./res/bllt_norm.png");
-	bSys->add_cluster(17,17,1024,"./res/fast_bullet.png");
+	/*bSys->add_cluster(17,17,1024,"./res/fast_bullet.png");
+	bSys->add_cluster(12,12,2048,"./res/bllt_ffdir.png");*/
+	bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png");
+	bSys->add_cluster(12,12,2048,"./res/fast_bullet.png");
 	treg[2]=1;treg[5]=rand()%3+4;treg[7]=rand()%2+3;
 }
 void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,glm::vec2 ePos,
@@ -65,7 +68,15 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	} treg[8]+=!treg[8]*30;treg[7]--;
 
 	// whirlpool mesh pattern
-	/*bSys->delta_fDir(2);
+	for (int i=0;i<2048;i++) {
+		float t = 0.1f*bSys->get_ts(3,i);
+		bSys->set_bltPos(3,i,bSys->get_bltDir(3,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
+									pow(E,.35f*t)*glm::sin(t)));
+	} bSys->inc_tick(3);
+	for (int i=0;i<1;i++) {
+		bSys->spwn_blt(3,ePos,ePos);
+	}
+	/*bSys->delta_fDir(3);
 	for (int i=0;i<2048;i++) {
 		glm::vec2 toDir = bSys->get_bltDir(2,i);float mult = glm::length(toDir);
 		glm::vec2 oDir = glm::normalize(toDir);

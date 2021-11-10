@@ -46,7 +46,7 @@ void FrameBuffer::render()
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
-void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,float ptrans)
+void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint32_t dtex,float ptrans)
 {
 	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
@@ -54,9 +54,11 @@ void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,floa
 	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,atex);
 	glActiveTexture(GL_TEXTURE2);glBindTexture(GL_TEXTURE_2D,btex);
 	glActiveTexture(GL_TEXTURE3);glBindTexture(GL_TEXTURE_2D,ctex);
+	glActiveTexture(GL_TEXTURE4);glBindTexture(GL_TEXTURE_2D,dtex);
 	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
 	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
-	s.upload_int("splash",1);s.upload_int("title",2);s.upload_int("select",3);s.upload_float("ptrans",ptrans);
+	s.upload_int("splash",1);s.upload_int("title",2);s.upload_int("select",3);s.upload_int("cross",4);
+	s.upload_float("ptrans",ptrans);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 unsigned int FrameBuffer::get_fbo() { return fbo; }

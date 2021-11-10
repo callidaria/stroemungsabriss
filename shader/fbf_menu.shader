@@ -11,6 +11,7 @@ uniform sampler2D tex;
 uniform sampler2D splash;
 uniform sampler2D title;
 uniform sampler2D select;
+uniform sampler2D cross;
 
 void main()
 {
@@ -18,7 +19,8 @@ void main()
 	vec4 proc = texture(tex,TexCoords);
 	vec4 sproc = texture(splash,TexCoords);
 	vec4 tproc = texture(title,TexCoords);
-	vec4 selproc = texture(select,TexCoords); // !!NAMING
+	vec4 selproc = texture(select,TexCoords); // FIXME: NAMING
+	vec4 crssproc = texture(cross,TexCoords);
 
 	// cinema screen sepia
 	vec2 pos = (gl_FragCoord.xy/fres)-vec2(.5);
@@ -33,8 +35,8 @@ void main()
 	// colour balancing
 	vec4 cproc = vec4(sproc.rgb+tproc.rgb+selproc.rgb,1.0);
 	outColour = spproc*(1-ptrans)+proc*ptrans+cproc;
-	int ltr_balance = int(cproc.r-proc.b>.5); // !!optimize valuation
+	int ltr_balance = int(cproc.r-proc.b>.5); // FIXME: optimize valuation
 	int org_balance = int(proc.b>.2);
-	outColour = outColour*(1-ltr_balance)+cproc*ltr_balance;
-	// !!fix logical horribleness w_o branch
+	outColour = outColour*(1-ltr_balance)+cproc*ltr_balance+crssproc*.7f;
+	// FIXME: logical horribleness w_o branch
 }
