@@ -1,3 +1,19 @@
-Adjust Master Audio
-Adjust Voices
-Adjust Music
+<node>
+	<head>Master Audio</>
+	<dsc>
+		Too loud? Too low?
+		Adjust master audio here.
+	</>
+</>
+<node>
+	<head>Voices Volume</>
+	<dsc>
+		Spoken language volume.
+	</>
+</>
+<node>
+	<head>Music Volume</>
+	<dsc>
+		Background jam volume.
+	</>
+</>

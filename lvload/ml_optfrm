@@ -1,4 +1,24 @@
-Screen Resolution Width
-Screen Resolution Height
-Fullscreen ?
-Which Monitor ?
+<node>
+	<head>Screen Resolution</>
+	<dsc>
+		Full HD would be 1920x1080
+		Red. HD would be 1280x720
+	</>
+</>
+<node>
+	<head>Fullscreen ?</head>
+	<dsc>
+		Have you tried turning
+		it off and on again?
+	</>
+</>
+<node>
+	<head>Target Monitor</>
+	<dsc>
+		Choose Monitor ID.
+		If you don't know which
+		ID is correct just try it
+		out until it works the way
+		you want.
+	</>
+</>

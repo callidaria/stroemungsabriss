@@ -35,4 +35,3 @@ double click yomisensei.exe
 - Options Configuration Save
 - Player Movement Prototype [WIP]
 - Dancing Pilot Test (Itr 0) [WIP]
-- Lost Child Test (Itr 0) [WIP]

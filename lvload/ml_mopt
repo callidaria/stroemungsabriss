@@ -1,5 +1,43 @@
-Frame
-Audio
-Graphics
-Game
-Extra
+<node>
+	<head>Frame</>
+	<dsc>
+		Adjust resolution,
+		monitor configurations
+		and screen settings.
+	</>
+</>
+<node>
+	<head>Audio</>
+	<dsc>
+		Music, SFX and Voices
+		can be configured here.
+	</>
+</>
+<node>
+	<head>Graphics</>
+	<dsc>
+		If this game is not
+		beautiful enough for your
+		taste, or your computer
+		is from the 80s, here you
+		can adjust performace and
+		gfx in-depth.
+	</>
+</>
+<node>
+	<head>Game</>
+	<dsc>
+		GP specifics, input,
+		languages and many more
+		little tweaks for you to
+		make the best out of the
+		game.
+	</>
+</>
+<node>
+	<head>Extra</>
+	<dsc>
+		W8, how the hell did you
+		unlock this?
+	</>
+</>

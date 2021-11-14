@@ -38,8 +38,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 		630,0,630,0,.341f,.341f,.129f,0,630,0,0,720,.341f,.341f,.129f,1,650,0,0,720,.341f,.341f,.129f,2,
 		650,0,0,720,.341f,.341f,.129f,2,650,0,650,0,.341f,.341f,.129f,3,630,0,630,0,.341f,.341f,.129f,0,
 		// crossselect splash
-		1280,720,333,593,1,1,1,0,1280,720,333,690,1,0,0,1,1280,720,847,690,0,1,0,2,
-		1280,720,847,690,0,1,0,2,1280,720,847,593,0,0,1,3,1280,720,333,593,1,1,1,0
+		1280,720,770,515,1,1,1,0,1280,720,770,490,1,0,0,1,1280,720,870,490,0,1,0,2,
+		1280,720,870,490,0,1,0,2,1280,720,870,515,0,0,1,3,1280,720,770,515,1,1,1,0
 	}; // ??clockwise rotation triangle hardcoded replace
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
@@ -70,9 +70,14 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
 		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
 	}
-}
-Menu::~Menu() {  }
-void Menu::render(uint32_t &running) // !!kill frame parameter
+} Menu::~Menu() {  }
+
+/*
+	render(uint32_t&)
+	running: is application still running?
+	purpose: render the main menu, calculate geometry and process interactions
+*/
+void Menu::render(uint32_t &running)
 {
 	bool is_shift;uint8_t tmm;
 	switch (mm) {
@@ -153,7 +158,6 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
 	splash_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
-	// barriers: -15/15=>485&&-30/-80=>520 ; ORIGINS: 500,550,600,470
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-90*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
@@ -165,8 +169,10 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
 	select_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-lcscroll));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-lcscroll));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-lcscroll));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,-lcscroll));
 	cross_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,18,6);cross_fb.close();
 	diffsel = lselect;
 
@@ -184,5 +190,4 @@ void Menu::render(uint32_t &running) // !!kill frame parameter
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
-	// TODO: throw fake text shadow
 }

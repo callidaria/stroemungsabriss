@@ -1,2 +1,16 @@
-Which Graphics Library ?
-How great should it look ?
+<node>
+	<head>Graphics Library</>
+	<dsc>
+		Choose between Volkan, OpenGL
+		and DirectX depending on your
+		preferences.
+	</>
+</>
+<node>
+	<head>How great should it look ?</>
+	<dsc>
+		Choose a template if you dont
+		want to bother with tech
+		details.
+	</>
+</>

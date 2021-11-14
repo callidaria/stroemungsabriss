@@ -1,3 +1,26 @@
-Which Text Languages ?
-Which Voiced Languages ?
-Which Input Style ?
+<node>
+	<head>Text Language</>
+	<dsc>
+		Choose subtitle and textbox
+		language.
+	</>
+</>
+<node>
+	<head>Voiced Language</>
+	<dsc>
+		Native option means, that
+		every character speaks their
+		own native language depending
+		on where they grew up / live.
+		All the other options are
+		pretty easy to understand.
+	</>
+</>
+<node>
+	<head>Input Style</>
+	<dsc>
+		Choose between Controller &
+		Keyboard, as well as Controller
+		& Keyboard mapping.
+	</>
+</>
