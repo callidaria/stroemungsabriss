@@ -1,11 +1,24 @@
 #include "menu_list.h"
 
+/*
+	Constructor()
+	purpose: constructor, that sets up an empty menu list, to fill with lines later. no interpretations.
+*/
 MenuList::MenuList()
 {
 	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
 	dtxt.push_back(Text(fproc));
 	esize = 0;
 }
+
+/*
+	Constructor(Camera2D*,const char*)
+	cam2d: text will be rendered according to the camera parameter's perspective and view
+	path: path to menu list configuration file in cmli language format
+	dpath: path to menu description configuration
+	purpose: contructor, that interprets the given cmli file and sets up the menu list accordingly.
+	!! ATTENTION !! will be outdated soon
+*/
 MenuList::MenuList(Camera2D* cam2d,const char* path,const char* dpath)
 {
 	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
@@ -32,11 +45,41 @@ MenuList::MenuList(Camera2D* cam2d,const char* path,const char* dpath)
 	}
 }
 
+MenuList::MenuList(Camera2D* cam2d,const char* path)
+{
+	// setting up the different fonts & texts for menu parts
+	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
+	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
+	ltxt = Text(lfnt);
+	// FIXME: do not make the fonts with static parameters
+
+	// gathering raw node data
+	std::ifstream mlfile(path,std::ios::in);	// reading file
+	std::vector<std::string> ndata; 		// variable for raw node data
+	std::string t_content;				// temporary node content
+	bool ractive = false;				// active reading process (in node)
+	while (!mlfile.eof()) {
+		std::string line;getline(mlfile,line);
+		bool enode = !strcmp(line.c_str(),"</>");
+		if (ractive&&!enode) {
+			line.erase(std::remove(line.begin(),line.end(),'\t'),line.end());
+			t_content+=line;
+		} else if (enode) {
+			ractive = false;
+			ndata.push_back(t_content);
+			t_content = "";
+		} else if (!strcmp(line.c_str(),"<node>")) ractive = true;
+		//ractive = bnode+ractive*enode; // FIXME: reform
+	} for (int i=0;i<ndata.size();i++) {
+		// TODO: interpret raw lines
+	}
+}
+
 /*
 	add_lines(Camera2D*,std::vector<const char*>)
-	cam2d: text will be rendered according to the camera parameter's perspective
+	cam2d: text will be rendered according to the camera parameter's perspective and view
 	lines: list of lines that will be added to the menu list
-	purpose: good question
+	purpose: good question.
 */
 void MenuList::add_lines(Camera2D* cam2d,std::vector<const char*> lines)
 {
@@ -52,7 +95,7 @@ void MenuList::add_lines(Camera2D* cam2d,std::vector<const char*> lines)
 	dtrans: represents the stage of transition in the menu's colouring & geometry
 	lscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
-	purpose: renders the menu list on top of the menu visuals
+	purpose: renders the menu list on top of the menu visuals.
 */
 void MenuList::render(float dtrans,float lscroll,uint16_t index)
 {

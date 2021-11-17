@@ -1,7 +1,7 @@
 <node>
 	<head>Graphics Library</>
 	<dsc>
-		Choose between Volkan, OpenGL
+		Choose between Vulkan, OpenGL
 		and DirectX depending on your
 		preferences.
 	</>

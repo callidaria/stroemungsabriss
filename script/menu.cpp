@@ -15,14 +15,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 			glm::vec2(630,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
-	mls[0]=MenuList();mls[1]=MenuList(cam2d,"lvload/ml_mopt","lvload/md_mopt");
-	mls[2]=MenuList(cam2d,"lvload/ml_stages","lvload/md_stages");
-	mls[3]=MenuList(cam2d,"lvload/ml_arcades","lvload/md_arcades");mls[4]=MenuList();
-	mls[5]=MenuList();mls[6]=MenuList();mls[7]=MenuList(cam2d,"lvload/ml_optfrm","lvload/md_optfrm");
-	mls[8]=MenuList(cam2d,"lvload/ml_optaud","lvload/md_optaud");
-	mls[9]=MenuList(cam2d,"lvload/ml_optgfx","lvload/md_optgfx");
-	mls[10]=MenuList(cam2d,"lvload/ml_optgm","lvload/md_optgm");
-	mls[11]=MenuList(cam2d,"lvload/ml_optext","lvload/md_optext");
+	mls[0]=MenuList();mls[1]=MenuList(cam2d,"lvload/ml_mopt");mls[2]=MenuList(cam2d,"lvload/ml_stages");
+	mls[3]=MenuList(cam2d,"lvload/ml_arcades");mls[4]=MenuList();mls[5]=MenuList();mls[6]=MenuList();
+	mls[7]=MenuList(cam2d,"lvload/ml_optfrm");mls[8]=MenuList(cam2d,"lvload/ml_optaud");
+	mls[9]=MenuList(cam2d,"lvload/ml_optgfx");mls[10]=MenuList(cam2d,"lvload/ml_optgm");
+	mls[11]=MenuList(cam2d,"lvload/ml_optext");
 
 	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
 	sshd = Shader();

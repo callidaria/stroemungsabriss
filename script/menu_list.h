@@ -1,7 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <vector>
+#include <algorithm>
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/fcn/font.h"
 #include "../ccb/fcn/text.h"
@@ -10,7 +12,8 @@ class MenuList
 {
 public:
 	MenuList();
-	MenuList(Camera2D* cam2d,const char* path,const char* dpath);
+	MenuList(Camera2D* cam2d,const char* path,const char* dpath); // readying to remove
+	MenuList(Camera2D* cam2d,const char* path);
 	~MenuList() {  }
 	void add_lines(Camera2D* cam2d,std::vector<const char*> lines);
 	void render(float dtrans,float lscroll,uint16_t index);
