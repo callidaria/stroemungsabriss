@@ -12,7 +12,7 @@ MenuList::MenuList()
 }
 
 /*
-	Constructor(Camera2D*,const char*)
+	Constructor(Camera2D*,const char*,const char*)
 	cam2d: text will be rendered according to the camera parameter's perspective and view
 	path: path to menu list configuration file in cmli language format
 	dpath: path to menu description configuration
@@ -45,6 +45,12 @@ MenuList::MenuList(Camera2D* cam2d,const char* path,const char* dpath)
 	}
 }
 
+/*
+	Constructor(Camera2D*,const char*)
+	cam2d: text will be rendered according to the camera parameter's perspective and view
+	path: path to menu list configuration file in updated cmli2 language format
+	purpose: constructor, that interprets single cmli2 file and sets up the menu list accordingly
+*/
 MenuList::MenuList(Camera2D* cam2d,const char* path)
 {
 	// setting up the different fonts & texts for menu parts
@@ -69,9 +75,13 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 			ndata.push_back(t_content);
 			t_content = "";
 		} else if (!strcmp(line.c_str(),"<node>")) ractive = true;
-		//ractive = bnode+ractive*enode; // FIXME: reform
 	} for (int i=0;i<ndata.size();i++) {
-		// TODO: interpret raw lines
+		uint32_t ix = 0;
+		while (i<ndata.size()) {
+			uint8_t emode = get_readmode(ndata[i],ix);
+			std::string excnt = breakgrind(ndata[i],ix);
+			std::cout << (unsigned int)emode << "   " << excnt << '\n';
+		} std::cout << "\n\n\n";
 	}
 }
 
@@ -102,7 +112,7 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index)
 	// rendering the selectable list text
 	ltxt.prepare();
 	int32_t fscroll = lscroll*45; // calculating the amount of scrolling
-	ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(rand()%10,fscroll+rand()%10,0))); // shadow scroll
+	ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(rand()%10,fscroll+rand()%10,0))); // shadow scrll
 	ltxt.render(dtrans*2048,glm::vec4(.35f,.35f,.35f,.5f)); // rendering fake shadow
 	ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(0,fscroll,0))); // list scroll in shader
 	ltxt.render(dtrans*2048,glm::vec4(1,1,1,1));
@@ -113,4 +123,44 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index)
 	// rendering the description text in white
 	dtxt.at(index).prepare();
 	dtxt.at(index).render(dtrans*1024,glm::vec4(1,1,1,1));
+}
+
+/*
+	breakgrind(std::string,uint32_t&)
+	nl: represents the remaining nodeline to scan until break
+	i: reading index for nodeline
+	purpose: get contents to write into given interpreter mode
+*/
+std::string MenuList::breakgrind(std::string nl,uint32_t &i)
+{
+	std::string out;
+	while (i<nl.length()) {
+		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') {
+			i += 3;
+			return out;
+		} out += nl[i];
+		i++;
+	} return out;
+}
+
+/*
+	get_readmode(std::string,uint8_t&)
+	nl: represents the remaining nodeline to scan until break
+	i: reading index for nodeline
+	purpose: get the modeID, representing the mode in which the following text is supposed to be added
+	modeID:
+		0 := faulty element identifier read "<*>"
+		1 := conservative menu list element marked as "<head>"
+		2 := menu splash description text element marked as "<dsc>"
+*/
+uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
+{
+	std::string pcnt = "";
+	while (nl[i]!='<') i++;
+	i++;
+	while (nl[i]!='>') {
+		pcnt += nl[i];
+		i++;
+	} i++;
+	return !strcmp(pcnt.c_str(),"head")+2*!strcmp(pcnt.c_str(),"dsc");
 }

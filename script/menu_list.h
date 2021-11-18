@@ -17,6 +17,9 @@ public:
 	~MenuList() {  }
 	void add_lines(Camera2D* cam2d,std::vector<const char*> lines);
 	void render(float dtrans,float lscroll,uint16_t index);
+private:
+	std::string breakgrind(std::string nl,uint32_t &i);
+	uint8_t get_readmode(std::string nl,uint32_t &i);
 public:
 	uint16_t esize = 0;
 private:
