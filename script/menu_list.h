@@ -19,6 +19,7 @@ public:
 	void render(float dtrans,float lscroll,uint16_t index);
 private:
 	std::string breakgrind(std::string nl,uint32_t &i);
+	uint8_t textgrind(std::string nl,uint32_t &i);
 	uint8_t get_readmode(std::string nl,uint32_t &i);
 public:
 	uint16_t esize = 0;

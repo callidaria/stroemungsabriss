@@ -1,26 +1,26 @@
 <node>
 	<head>Text Language</>
 	<dsc>
-		Choose subtitle and textbox
+		Choose subtitle and textbox<br>
 		language.
 	</>
 </>
 <node>
 	<head>Voiced Language</>
 	<dsc>
-		Native option means, that
-		every character speaks their
-		own native language depending
-		on where they grew up / live.
-		All the other options are
+		Native option means, that<br>
+		every character speaks their<br>
+		own native language depending<br>
+		on where they grew up / live.<br>
+		All the other options are<br>
 		pretty easy to understand.
 	</>
 </>
 <node>
 	<head>Input Style</>
 	<dsc>
-		Choose between Controller &
-		Keyboard, as well as Controller
+		Choose between Controller &<br>
+		Keyboard, as well as Controller<br>
 		& Keyboard mapping.
 	</>
 </>

@@ -1,16 +1,16 @@
 <node>
 	<head>Graphics Library</>
 	<dsc>
-		Choose between Vulkan, OpenGL
-		and DirectX depending on your
+		Choose between Vulkan, OpenGL<br>
+		and DirectX depending on your<br>
 		preferences.
 	</>
 </>
 <node>
 	<head>How great should it look ?</>
 	<dsc>
-		Choose a template if you dont
-		want to bother with tech
+		Choose a template if you dont<br>
+		want to bother with tech<br>
 		details.
 	</>
 </>

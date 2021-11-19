@@ -29,6 +29,7 @@ double click yomisensei.exe
 ***
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
+- dynamic entity loader & interpreter
 - Windows Port
 - Test Builds [WIP]
 - Main Menu Prototype [WIP]

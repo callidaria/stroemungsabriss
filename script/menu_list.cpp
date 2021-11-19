@@ -57,12 +57,14 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
 	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 	ltxt = Text(lfnt);
+	Text t_desc;
 	// FIXME: do not make the fonts with static parameters
 
 	// gathering raw node data
 	std::ifstream mlfile(path,std::ios::in);	// reading file
 	std::vector<std::string> ndata; 		// variable for raw node data
 	std::string t_content;				// temporary node content
+	std::string t_line = "";
 	bool ractive = false;				// active reading process (in node)
 	while (!mlfile.eof()) {
 		std::string line;getline(mlfile,line);
@@ -77,12 +79,33 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 		} else if (!strcmp(line.c_str(),"<node>")) ractive = true;
 	} for (int i=0;i<ndata.size();i++) {
 		uint32_t ix = 0;
-		while (i<ndata.size()) {
+		while (ix<ndata[i].size()) {
 			uint8_t emode = get_readmode(ndata[i],ix);
 			std::string excnt = breakgrind(ndata[i],ix);
-			std::cout << (unsigned int)emode << "   " << excnt << '\n';
-		} std::cout << "\n\n\n";
-	}
+			switch (emode) {
+			case 1:
+				ltxt.add(excnt.c_str(),glm::vec2(250,lscroll));
+				lscroll -= 45;
+				esize++;
+				break;
+			case 2:
+				t_desc = Text(dfnt);
+				for (uint32_t iy=0;iy<excnt.size();iy++) {
+					if (textgrind(excnt,iy)==1) {
+						t_desc.add(t_line.c_str(),glm::vec2(920,dscroll));
+						dscroll -= 20;
+						t_line = "";
+					} else t_line += excnt[iy];
+				} t_desc.add(t_line.c_str(),glm::vec2(920,dscroll));
+				t_desc.load_wcam(cam2d);
+				dtxt.push_back(t_desc);
+				dscroll = 600;
+				t_line = "";
+				break;
+			default:printf("%s is a broken cmli file\n",path);
+			}
+		} ltxt.load_wcam(cam2d);
+	} // FIXME: text with annotated \n in written file format -> is it \n or \\n?
 }
 
 /*
@@ -141,6 +164,27 @@ std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 		} out += nl[i];
 		i++;
 	} return out;
+}
+
+/*
+	textgrind(std::string,uint32_t&)
+	fline: the current line in question
+	i: index of current character in line
+	purpose: check if current character contains beginning of a special value
+		0 := faulty bracket contents
+		1 := linebreak annotation with "<br>"
+*/
+uint8_t MenuList::textgrind(std::string fline,uint32_t &i)
+{
+	if (fline[i]=='<') {
+		std::string cast = "";
+		i++;
+		while (fline[i]!='>') {
+			cast += fline[i];
+			i++;
+		} if(!strcmp(cast.c_str(),"br")) return 1;
+		else return 0;
+	} return 0;
 }
 
 /*
