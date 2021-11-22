@@ -108,14 +108,14 @@ void Menu::render(uint32_t &running)
 		tmm -= 3*(*cnt_b&&!trg_b);
 		mm = (MenuMode)tmm;
 		opt_index = (6+lselect)*(tmm==5);
-		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-2))-(*cnt_up&&!trg_up&&lselect>0);
+		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-1))-(*cnt_up&&!trg_up&&lselect>0);
 		lselect *= tmm!=5;
 		break;
 	case MenuMode::MENU_SUBLIST:
 		tmm = 5;
 		tmm -= *cnt_b&&!trg_b;
 		mm = (MenuMode)tmm;
-		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-2))
+		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-1))
 			-(*cnt_up&&!trg_up&&lselect>0); // FIXME: reduce to one increment calculation
 		opt_index *= tmm==5; // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;

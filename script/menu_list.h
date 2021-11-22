@@ -12,7 +12,6 @@ class MenuList
 {
 public:
 	MenuList();
-	MenuList(Camera2D* cam2d,const char* path,const char* dpath); // readying to remove
 	MenuList(Camera2D* cam2d,const char* path);
 	~MenuList() {  }
 	void add_lines(Camera2D* cam2d,std::vector<const char*> lines);
