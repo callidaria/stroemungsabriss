@@ -4,16 +4,22 @@
 		Too loud? Too low?<br>
 		Adjust master audio here.
 	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioMasterVolume</>
 </>
 <node>
 	<head>Voices Volume</>
 	<dsc>
 		Spoken language volume.
 	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioVoicesVolume</>
 </>
 <node>
 	<head>Music Volume</>
 	<dsc>
 		Background jam volume.
 	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioMusicVolume</>
 </>

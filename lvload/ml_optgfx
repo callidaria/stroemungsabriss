@@ -5,6 +5,10 @@
 		and DirectX depending on your<br>
 		preferences.
 	</>
+	<le>OpenGL,0</>
+	<le>Vulkan,1</>
+	<le>DirectX,2</>
+	<dest>iGFXTargetLibrary</>
 </>
 <node>
 	<head>How great should it look ?</>
@@ -13,4 +17,10 @@
 		want to bother with tech<br>
 		details.
 	</>
+	<le>phenomenal,0</>
+	<le>good,1</>
+	<le>broken,2</>
+	<le>abominal,3</>
+	<le>userspecific,4</>
+	<dest>iGFXDetailsPreset</>
 </>

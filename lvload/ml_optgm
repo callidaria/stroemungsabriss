@@ -4,6 +4,15 @@
 		Choose subtitle and textbox<br>
 		language.
 	</>
+	<le>English,0</>
+	<le>German,1</>
+	<le>Japanese,2</>
+	<le>Japanese (Annotated Hiragana),3</>
+	<le>Korean,4</>
+	<le>Korean (Annotated Hanja),5</>
+	<le>Russian,6</>
+	<le>Natives (Definitely Not Recommended),7</>
+	<dest>iGeneralTextLanguageFlag</>
 </>
 <node>
 	<head>Voiced Language</>
@@ -15,6 +24,12 @@
 		All the other options are<br>
 		pretty easy to understand.
 	</>
+	<le>Natives,0</>
+	<le>English,1</>
+	<le>Japanese,2</>
+	<le>German,3</>
+	<le>Russian,4</>
+	<dest>iGeneralVoiceLanguageFlag</>
 </>
 <node>
 	<head>Input Style</>
@@ -23,4 +38,9 @@
 		Keyboard, as well as Controller<br>
 		& Keyboard mapping.
 	</>
+	<le>Controller,0</>
+	<le>Arcade Stick,1</>
+	<le>Keyboard,2</>
+	<le>Mouse & Keyboard,3</>
+	<dest>iGeneralPeripheralStyleFlag</>
 </>
