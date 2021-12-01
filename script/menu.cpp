@@ -178,7 +178,7 @@ void Menu::render(uint32_t &running)
 	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
-	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
+	for (int i=0;i<8;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
 
 	// render the title splash
 	sshd.enable();glBindVertexArray(svao);
@@ -195,15 +195,15 @@ void Menu::render(uint32_t &running)
 	// render the horizontal selection splash
 	int rnd_edge[4];
 	for (int i=0;i<4;i++) rnd_edge[i] = (rand()%10-5);
-	for (int i=0;i<4;i++) sbar[i] = 0;
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]));//+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]));//+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550*(mm==5),-90*(mm>2)-lcscroll+sbar[2]));//+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550*(mm==5),15*(mm>2)-lcscroll+sbar[3]));//+rnd_edge[1]));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250*(mm==5),-15*(mm>2)-lcscroll+sbar[0]));//+rnd_edge[2]));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250*(mm==5),-40*(mm>2)-lcscroll+sbar[1]));//+rnd_edge[3]));
-	sshd.upload_vec2("idx_mod[6]",glm::vec2(1280,-90*(mm>2)-lcscroll+sbar[2]));//+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,15*(mm>2)-lcscroll+sbar[3]));//+(rand()%10-5)));
+	//for (int i=0;i<4;i++) sbar[i] = 0;
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550*(mm==5),-90*(mm>2)-lcscroll+sbar[2]+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550*(mm==5),15*(mm>2)-lcscroll+sbar[3]+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250*(mm==5),-15*(mm>2)-lcscroll+sbar[4]+rnd_edge[2]));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250*(mm==5),-40*(mm>2)-lcscroll+sbar[5]+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[6]",glm::vec2(1280,-40*(mm>2)-lcscroll+sbar[6]+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,-15*(mm>2)-lcscroll+sbar[7]+(rand()%10-5)));
 	title_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,6,12);
@@ -220,14 +220,14 @@ void Menu::render(uint32_t &running)
 	select_fb.close();
 
 	// render the list splash for prism list selection
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(-550,-lcscroll));//+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(-550,-lcscroll));//+rnd_edge[1]));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550,-lcscroll));//+rnd_edge[1]));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550,-lcscroll));//+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250,-lcscroll));//+rnd_edge[3]));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250,-lcscroll));//+rnd_edge[2]));
-	sshd.upload_vec2("idx_mod[6]",glm::vec2(-250,-lcscroll));//+rnd_edge[2]));
-	sshd.upload_vec2("idx_mod[7]",glm::vec2(-250,-lcscroll));//+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(-550,-15-lcscroll+sbar[3]+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(-550,-40-lcscroll+sbar[2]+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550,-40-lcscroll+sbar[2]+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550,-15-lcscroll+sbar[3]+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250,-40-lcscroll+sbar[5]+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250,-15-lcscroll+sbar[4]+rnd_edge[2]));
+	sshd.upload_vec2("idx_mod[6]",glm::vec2(-250,-40-lcscroll+sbar[5]+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[7]",glm::vec2(-250,-15-lcscroll+sbar[4]+rnd_edge[2]));
 	// TODO: automation of int array upload to shader
 	// FIXME: do this with loop
 	cross_fb.bind();

@@ -40,7 +40,7 @@ private:
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	int32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0,opt_index = 0;
-	int32_t sbar[4] = { 0,0,0,0 };
+	int32_t sbar[8];
 	MenuList mls[12];
 
 	// input definition
