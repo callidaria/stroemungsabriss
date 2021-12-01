@@ -10,7 +10,7 @@
 	<dest>vFrameResolution</>
 </>
 <node>
-	<head>Fullscreen ?</head>
+	<head>Fullscreen ?</>
 	<dsc>
 		Have you tried turning<br>
 		it off and on again?

@@ -12,7 +12,7 @@ uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 
 uniform float ptrans = 0.0;
-uniform vec2 idx_mod[4];
+uniform vec2 idx_mod[8];
 
 void main()
 {

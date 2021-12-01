@@ -105,14 +105,14 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 				break;
 			case 5: // destination annotation
 				t_le.saveID = excnt;
+				// TODO: read selection status from config file
 				break;
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
 		} t_le.ltxt.load_wcam(cam2d); // load conservative list element data
 		les.push_back(t_le);
 	} // FIXME: text with annotated \n in written file format -> is it \n or \\n?
-} 	// TODO: write interpreter fault instead of letting the mem take the fall
-	// TODO: read selection status from config file
+} // TODO: write interpreter fault instead of letting the mem take the fall
 
 /*
 	save(void)
@@ -138,21 +138,18 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index)
 		les.at(i).ltxt.prepare();
 		int32_t fscroll = lscroll*45; // calculating the amount of scrolling
 		les.at(i).ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(rand()%10,fscroll+rand()%10,0)));			 // shadow scroll
-		les.at(i).ltxt.render(dtrans*2048,glm::vec4(.35f,.35f,.35f,.5f)); 	 // rendering fake shadow
+			glm::vec3(rand()%10,fscroll+rand()%10,0)));			    // shadow scroll
+		les.at(i).ltxt.render(dtrans*32*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
 		les.at(i).ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(0,fscroll,0)));					 // list scroll in shader
-		les.at(i).ltxt.render(dtrans*2048,glm::vec4(1,1,1,1));			 // render main text
+			glm::vec3(0,fscroll,0)));			// list scroll in shader
+		les.at(i).ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: reduce call to just translation from mat4(1) and translation from model
-		// FIXME: reduce max render cap after broken down save system
 		// FIXME: performance
-
-		// rendering the description text in white
-		les.at(i).dtxt.prepare();
-		les.at(i).dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
-		// FIXME: broken render flow
 	}
+	// rendering the description text in white
+	les.at(index).dtxt.prepare();
+	les.at(index).dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
 }
 
 /*

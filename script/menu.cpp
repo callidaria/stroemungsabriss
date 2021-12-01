@@ -15,29 +15,60 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 			glm::vec2(630,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
-	mls[0]=MenuList();mls[1]=MenuList(cam2d,"lvload/ml_mopt");mls[2]=MenuList(cam2d,"lvload/ml_stages");
-	mls[3]=MenuList(cam2d,"lvload/ml_arcades");mls[4]=MenuList();mls[5]=MenuList();mls[6]=MenuList();
-	mls[7]=MenuList(cam2d,"lvload/ml_optfrm");mls[8]=MenuList(cam2d,"lvload/ml_optaud");
-	mls[9]=MenuList(cam2d,"lvload/ml_optgfx");mls[10]=MenuList(cam2d,"lvload/ml_optgm");
+	mls[0]=MenuList();
+	mls[1]=MenuList(cam2d,"lvload/ml_mopt");
+	mls[2]=MenuList(cam2d,"lvload/ml_stages");
+	mls[3]=MenuList(cam2d,"lvload/ml_arcades");
+	mls[4]=MenuList();
+	mls[5]=MenuList();
+	mls[6]=MenuList();
+	mls[7]=MenuList(cam2d,"lvload/ml_optfrm");
+	mls[8]=MenuList(cam2d,"lvload/ml_optaud");
+	mls[9]=MenuList(cam2d,"lvload/ml_optgfx");
+	mls[10]=MenuList(cam2d,"lvload/ml_optgm");
 	mls[11]=MenuList(cam2d,"lvload/ml_optext");
+	// FIXME: mess
 
-	glGenVertexArrays(1,&svao);glGenBuffers(1,&svbo);
+	glGenVertexArrays(1,&svao);
+	glGenBuffers(1,&svbo);
 	sshd = Shader();
+
+	glm::vec3 s_rgb = glm::vec3(.245f,.606f,.564f);
+	glm::vec3 h_rgb = glm::vec3(.341f,.341f,.129f);
 	float sverts[] = { // TODO: remove hardcoded secondary segment coords
 		// title splash
 		-25,0,25,0,.5f,0,0,0,420,720,-25,720,.5f,0,0,1,600,720,25,720,.5f,0,0,2,
 		600,720,25,720,.5f,0,0,2,50,0,160,0,.5f,0,0,3,-25,0,25,0,.5f,0,0,0,
+
 		// head splash
-		0,500,0,500,.245f,.606f,.564f,0,0,500,0,550,.245f,.606f,.564f,1,
-		0,500,1280,600,.245f,.606f,.564f,2,0,500,1280,600,.245f,.606f,.564f,2,
-		0,500,1280,470,.245f,.606f,.564f,3,0,500,0,500,.245f,.606f,.564f,0,
+		0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 0,500,0,550,h_rgb.x,h_rgb.y,h_rgb.z,1,
+		0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2, 0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		0,500,1280,470,h_rgb.x,h_rgb.y,h_rgb.z,3, 0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0,
+
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,5,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,7, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4,
+
 		// select splash
-		630,0,630,0,.341f,.341f,.129f,0,630,0,0,720,.341f,.341f,.129f,1,650,0,0,720,.341f,.341f,.129f,2,
-		650,0,0,720,.341f,.341f,.129f,2,650,0,650,0,.341f,.341f,.129f,3,630,0,630,0,.341f,.341f,.129f,0,
+		630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0, 630,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,1,
+		650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2, 650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2,
+		650,0,650,0,s_rgb.x,s_rgb.y,s_rgb.z,3, 630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0,
+
 		// crossselect splash
-		1280,720,770,515,1,1,1,0,1280,720,770,490,1,0,0,1,1280,720,870,490,0,1,0,2,
-		1280,720,870,490,0,1,0,2,1280,720,870,515,0,0,1,3,1280,720,770,515,1,1,1,0
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,1,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,0,
+
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3,
+
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,7, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5
 	}; // ??clockwise rotation triangle hardcoded replace
+	// FIXME: mess
+
 	glBindVertexArray(svao); // §§??
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(sverts),sverts,GL_STATIC_DRAW);
@@ -149,32 +180,65 @@ void Menu::render(uint32_t &running)
 	int lcscroll = 45*(lselect+7-lbounds);
 	for (int i=0;i<4;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
 
-	// render the selection splash
+	// render the title splash
 	sshd.enable();glBindVertexArray(svao);
 	sshd.upload_float("ptrans",ptrans);
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
-	splash_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,0,6);splash_fb.close();
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-90*(mm>2)-lcscroll+sbar[2]+(rand()%10-5)));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,15*(mm>2)-lcscroll+sbar[3]+(rand()%10-5)));
-	// FIXME: rangetweaking
-	title_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,6,6);title_fb.close();
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
+	splash_fb.bind();
+	m_frame->clear(0,0,0);
+	glDrawArrays(GL_TRIANGLES,0,6);
+	splash_fb.close();
+
+	// render the horizontal selection splash
+	int rnd_edge[4];
+	for (int i=0;i<4;i++) rnd_edge[i] = (rand()%10-5);
+	for (int i=0;i<4;i++) sbar[i] = 0;
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]));//+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]));//+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550*(mm==5),-90*(mm>2)-lcscroll+sbar[2]));//+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550*(mm==5),15*(mm>2)-lcscroll+sbar[3]));//+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250*(mm==5),-15*(mm>2)-lcscroll+sbar[0]));//+rnd_edge[2]));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250*(mm==5),-40*(mm>2)-lcscroll+sbar[1]));//+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[6]",glm::vec2(1280,-90*(mm>2)-lcscroll+sbar[2]));//+(rand()%10-5)));
+	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,15*(mm>2)-lcscroll+sbar[3]));//+(rand()%10-5)));
+	title_fb.bind();
+	m_frame->clear(0,0,0);
+	glDrawArrays(GL_TRIANGLES,6,12);
+	title_fb.close();
+
+	// render the vertical selection splash
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
-	select_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,12,6);select_fb.close();
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-lcscroll));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-lcscroll));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,-lcscroll));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,-lcscroll));
-	cross_fb.bind();m_frame->clear(0,0,0);glDrawArrays(GL_TRIANGLES,18,6);cross_fb.close();
+	select_fb.bind();
+	m_frame->clear(0,0,0);
+	glDrawArrays(GL_TRIANGLES,18,6);
+	select_fb.close();
+
+	// render the list splash for prism list selection
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(-550,-lcscroll));//+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(-550,-lcscroll));//+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(-550,-lcscroll));//+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(-550,-lcscroll));//+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(-250,-lcscroll));//+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(-250,-lcscroll));//+rnd_edge[2]));
+	sshd.upload_vec2("idx_mod[6]",glm::vec2(-250,-lcscroll));//+rnd_edge[2]));
+	sshd.upload_vec2("idx_mod[7]",glm::vec2(-250,-lcscroll));//+rnd_edge[3]));
+	// TODO: automation of int array upload to shader
+	// FIXME: do this with loop
+	cross_fb.bind();
+	m_frame->clear(0,0,0);
+	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
+	cross_fb.close();
 	diffsel = lselect;
 
 	// render menu
-	fb.bind();m_frame->clear(0,0,0);
+	fb.bind();
+	m_frame->clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
