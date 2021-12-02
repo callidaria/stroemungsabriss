@@ -60,6 +60,7 @@ private:
 	uint32_t msindex;
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
+	float edge_mod;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

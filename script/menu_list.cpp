@@ -9,7 +9,7 @@ MenuList::MenuList()
 	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
 	//dtxt.push_back(Text(fproc)); // FIXME: breakdown if necessary in new update
 	LEntity proc = {
-		Text(fproc),Text(fproc),std::vector<std::string>(),std::vector<std::string>(),
+		Text(fproc),Text(fproc),std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,""
 	};
 	les.push_back(proc);
@@ -33,7 +33,7 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 	// setting up the different fonts & texts for menu parts
 	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
 	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	Text t_desc;	   // temporary storage variable for node descriptions
+	Text t_desc,t_sle; // temporary storage variable for node descriptions & sublist elements
 	// FIXME: do not make the fonts with static parameters
 
 	// gathering raw node data
@@ -88,14 +88,15 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 				t_line = "";	    // reset temporary line
 				break;
 			case 3: // selectable menu sublist element in dropdown
-				// TODO: split integer interpretation according to set pattern
 				// TODO: read from system for some list elements (eg. monitor ID)
 				args = split_arguments(excnt); // getting argument list
-				t_le.lee.push_back(args[0]); // save entity parameter as sublist element
+				t_sle = Text(lfnt);
+				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
+				t_sle.load_wcam(cam2d);
+				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
 				t_le.lev.push_back(args[1]); // save value parameter as value list element
 				break;
 			case 4: // slider element inserted
-				// TODO: interpret slider parameters as integer construct
 				t_le.slide = true; // setting slider to be active and visible
 				args = split_arguments(excnt); // define the capacities according to pattern
 				t_le.sl_min = stoi(args[0]);
@@ -125,31 +126,49 @@ void MenuList::save()
 }
 
 /*
-	render(float,float,uint16_t)
+	render(float,float,uint16_t,float&)
 	dtrans: represents the stage of transition in the menu's colouring & geometry
 	lscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
+	edge_mod: midedge modding for the sublist splash
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index)
+void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod)
 {
+	// rendering all head list entities
+	edge_mod = -1;
 	for (int i=0;i<les.size();i++) {
+		// precalculations
+		float x_ofs = -150*(les[i].slide||les[i].lee.size()>0);
+
 		// rendering the selectable list text
-		les.at(i).ltxt.prepare();
+		les[i].ltxt.prepare();
 		int32_t fscroll = lscroll*45; // calculating the amount of scrolling
-		les.at(i).ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(rand()%10,fscroll+rand()%10,0)));			    // shadow scroll
-		les.at(i).ltxt.render(dtrans*32*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
-		les.at(i).ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(0,fscroll,0)));			// list scroll in shader
-		les.at(i).ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
+		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
+			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));		 // shadow scroll
+		les[i].ltxt.render(dtrans*32*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
+
+		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
+			glm::vec3(x_ofs,fscroll,0)));			// list scroll in shader
+		les[i].ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: reduce call to just translation from mat4(1) and translation from model
 		// FIXME: performance
+
+		// rendering the sublist and selection entity
+		if (les[i].lee.size()>0) {
+			les[i].lee[les[i].sID].prepare();
+			les[i].lee[les[i].sID].render(dtrans*128,glm::vec4(1,1,1,1));
+		} // FIXME: remove branching from main loop!!!!!!!!!!!!!!
+
+		// setting edge mod variable if head with slider attachment selected
+		if (i==index&&les[i].slide) edge_mod = (les[i].sID+les[i].sl_min)/(les[i].sl_max+les[i].sl_min);
+		// FIXME: CHEAPSCAPE!!!!! WHAT ARE YOU WRITING?
 	}
+
 	// rendering the description text in white
-	les.at(index).dtxt.prepare();
-	les.at(index).dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
+	les[index].dtxt.prepare();
+	les[index].dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
 }
 
 /*
