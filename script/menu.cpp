@@ -197,8 +197,7 @@ void Menu::render(uint32_t &running)
 	// render the horizontal selection splash
 	int rnd_edge[4];
 	for (int i=0;i<4;i++) rnd_edge[i] = (rand()%10-5);
-	int32_t xscr0 = -700;
-	int32_t xscr1 = -400;
+	int32_t xscr0 = -700,xscr1 = -400;
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0*(mm==5),-90*(mm>2)-lcscroll+sbar[2]+rnd_edge[0]));
@@ -224,12 +223,13 @@ void Menu::render(uint32_t &running)
 
 	// render the list splash for prism list selection
 	bool af = edge_mod==-1;
+	int32_t xsll = 5+290*edge_mod,xslr = -5-290*(1-edge_mod);
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+100*!af,-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+100*!af,-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1-190*!af,-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1-190*!af,-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af,-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af,-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af,-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af,-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af));
 	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
 	// TODO: automation of int array upload to shader
@@ -251,7 +251,7 @@ void Menu::render(uint32_t &running)
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod);
+	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,*cnt_rgt-*cnt_lft);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);

@@ -16,7 +16,7 @@ struct LEntity
 	std::vector<Text> lee;		// list of list entity elements in sublist
 	std::vector<std::string> lev;	// list of list entity flag values to write to config
 	bool slide = false;		// identifier of slideable values in list entity
-	uint32_t sl_min,sl_max=1;	// definition of visibile slider caps
+	int32_t sl_min=0,sl_max=1;	// definition of visibile slider caps
 	float sl_vmin,sl_vmax;		// definition of slider save caps in file
 	uint32_t sID = 0;		// selection ID for active chosen option / slider input
 	std::string saveID;		// value, storing the config variable destination
@@ -30,7 +30,7 @@ public:
 	MenuList(Camera2D* cam2d,const char* path);
 	~MenuList() {  }
 	void save();
-	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod);
+	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta);
 private:
 	std::string breakgrind(std::string nl,uint32_t &i);
 	uint8_t textgrind(std::string nl,uint32_t &i);

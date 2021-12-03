@@ -131,9 +131,10 @@ void MenuList::save()
 	lscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
 	edge_mod: midedge modding for the sublist splash
+	delta: reads the slider sID increment from menu controlling
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod)
+void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta)
 {
 	// rendering all head list entities
 	edge_mod = -1;
@@ -152,18 +153,22 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod)
 			glm::vec3(x_ofs,fscroll,0)));			// list scroll in shader
 		les[i].ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
 		// ??maybe do shadow calculation in shader
-		// FIXME: reduce call to just translation from mat4(1) and translation from model
 		// FIXME: performance
 
 		// rendering the sublist and selection entity
 		if (les[i].lee.size()>0) {
 			les[i].lee[les[i].sID].prepare();
 			les[i].lee[les[i].sID].render(dtrans*128,glm::vec4(1,1,1,1));
-		} // FIXME: remove branching from main loop!!!!!!!!!!!!!!
+		} // FIXME: remove branching from main loop!!!!
 
-		// setting edge mod variable if head with slider attachment selected
-		if (i==index&&les[i].slide) edge_mod = (les[i].sID+les[i].sl_min)/(les[i].sl_max+les[i].sl_min);
-		// FIXME: CHEAPSCAPE!!!!! WHAT ARE YOU WRITING?
+		// setting edge mod variable if head with slider attachment selected & delta slider state
+		bool has_slider = (i==index)&&les[i].slide;
+		les[i].sID += delta*(has_slider&&
+			((delta>0&&les[i].sID<les[i].sl_max)||(delta<0&&les[i].sID>les[i].sl_min)));
+		edge_mod += (1+(les[i].sID+les[i].sl_min)/(float)(les[i].sl_max+les[i].sl_min))*has_slider;
+
+		// rendering the numeric representation of the slider state
+		
 	}
 
 	// rendering the description text in white
