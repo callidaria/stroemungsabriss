@@ -12,7 +12,7 @@
 	<le>Korean (Annotated Hanja),5</>
 	<le>Russian,6</>
 	<le>Natives (Definitely Not Recommended),7</>
-	<dest>iGeneralTextLanguageFlag</>
+	<dest>iGeneralTextLanguageFlag,0</>
 </>
 <node>
 	<head>Voiced Language</>
@@ -29,7 +29,7 @@
 	<le>Japanese,2</>
 	<le>German,3</>
 	<le>Russian,4</>
-	<dest>iGeneralVoiceLanguageFlag</>
+	<dest>iGeneralVoiceLanguageFlag,0</>
 </>
 <node>
 	<head>Input Style</>
@@ -42,5 +42,5 @@
 	<le>Arcade Stick,1</>
 	<le>Keyboard,2</>
 	<le>Mouse & Keyboard,3</>
-	<dest>iGeneralPeripheralStyleFlag</>
+	<dest>iGeneralPeripheralStyleFlag,0</>
 </>

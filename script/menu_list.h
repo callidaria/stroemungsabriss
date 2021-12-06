@@ -35,7 +35,8 @@ private:
 	std::string breakgrind(std::string nl,uint32_t &i);
 	uint8_t textgrind(std::string nl,uint32_t &i);
 	uint8_t get_readmode(std::string nl,uint32_t &i);
-	std::vector<std::string> split_arguments(std::string ext);
+	std::vector<std::string> split_arguments(std::string ext,char sep);
+	uint32_t translate_index(std::vector<std::string> lev,std::string arg);
 public:
 	uint16_t esize = 0;
 private:

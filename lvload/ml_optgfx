@@ -8,7 +8,7 @@
 	<le>OpenGL,0</>
 	<le>Vulkan,1</>
 	<le>DirectX,2</>
-	<dest>iGFXTargetLibrary</>
+	<dest>iGFXTargetLibrary,0</>
 </>
 <node>
 	<head>How great should it look ?</>
@@ -22,5 +22,5 @@
 	<le>broken,2</>
 	<le>abominal,3</>
 	<le>userspecific,4</>
-	<dest>iGFXDetailsPreset</>
+	<dest>iGFXDetailsPreset,0</>
 </>

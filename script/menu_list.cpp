@@ -26,7 +26,7 @@ MenuList::MenuList()
 		<desc>*description*</desc>
 		(optional)<le>*element*,*value*</le>
 		(optional)<slider>*slider min (int)*,*slider max (int)*</slider>
-		(optional)<dest>*destination save name in config*</dest>
+		(optional)<dest>*destination save name in config*,*default value*</dest>
 */
 MenuList::MenuList(Camera2D* cam2d,const char* path)
 {
@@ -57,9 +57,23 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 		} else if (!strcmp(line.c_str(),"<node>")) ractive = true; // open node if marked accordingly
 	}
 
+	// load current configuration
+	std::ifstream i_conf("config.ini",std::ios::in);
+	std::vector<std::string> curr;
+	while (!i_conf.eof()) {
+		std::string line;getline(i_conf,line);
+		std::vector<std::string> args = split_arguments(line,' ');
+		if (args.size()>1) { // FIXME: overly obsolete branching, if only...
+			curr.push_back(args[0]);
+			curr.push_back(args[1]);
+		} // FIXME: remove check when target monitor
+	}
+
 	// interpreting raw node data as cmli pattern
 	std::vector<std::string> args;
 	std::string t_extract;
+	std::ofstream o_conf("config.ini",std::ios::app);
+	bool written;
 	for (int i=0;i<ndata.size();i++) {
 		uint32_t ix = 0;     // index of raw node data
 		struct LEntity t_le; // temporary list element, getting pushed back later
@@ -89,7 +103,7 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 				break;
 			case 3: // selectable menu sublist element in dropdown
 				// TODO: read from system for some list elements (eg. monitor ID)
-				args = split_arguments(excnt); // getting argument list
+				args = split_arguments(excnt,','); // getting argument list
 				t_sle = Text(lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
 				t_sle.load_wcam(cam2d);
@@ -98,16 +112,29 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 				break;
 			case 4: // slider element inserted
 				t_le.slide = true; // setting slider to be active and visible
-				args = split_arguments(excnt); // define the capacities according to pattern
+				args = split_arguments(excnt,','); // define the capacities according to pattern
 				t_le.sl_min = stoi(args[0]);
 				t_le.sl_max = stoi(args[1]);
-				t_le.sl_vmin = stoi(args[2]);
+				t_le.sl_vmin = stoi(args[2]); // FIXME: remove slider value caps
 				t_le.sl_vmax = stoi(args[3]);
 				break;
 			case 5: // destination annotation
-				t_le.saveID = excnt;
-				// TODO: read selection status from config file
-				break;
+				args = split_arguments(excnt,',');
+				t_le.saveID = args[0];
+				written = false;
+				for (int i=0;i<curr.size();i+=2) {
+					if (curr[i]==args[0]) {
+						if (t_le.slide) t_le.sID = stoi(curr[i+1]);
+						else t_le.sID = translate_index(t_le.lev,curr[i+1]);
+						written = true;
+						break;
+					}
+				} if (!written) {
+					if (t_le.slide) o_conf << args[0] << ' ' << stoi(args[1]) << '\n';
+					else if (t_le.lev.size()) // FIXME: remove check when target monitor
+						o_conf << args[0] << ' ' << t_le.lev[stoi(args[1])] << '\n';
+				}
+				break; // FIXME: double branching where better solutions
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
 		} t_le.ltxt.load_wcam(cam2d); // load conservative list element data
@@ -246,15 +273,31 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 /*
 	split_arguments(std::string)
 	ext: represents the extraction string
+	sep: the character to split the line at
 	purpose: getting an argument list from extraction string
 */
-std::vector<std::string> MenuList::split_arguments(std::string ext)
+std::vector<std::string> MenuList::split_arguments(std::string ext,char sep)
 {
 	std::vector<std::string> args;
 	std::string t_arg;
 	for (int i=0;i<ext.size();i++) {
-		if (ext[i]==',') args.push_back(t_arg);
-		else t_arg += ext[i];
+		if (ext[i]==sep) {
+			args.push_back(t_arg);
+			t_arg = "";
+		} else t_arg += ext[i];
 	} args.push_back(t_arg);
 	return args;
 } // TODO: optimize
+
+/*
+	translate_index(std::vector<std::string>,std::string)
+	lev: holds the value flag list to compare with
+	arg: the extracted value to translate to index value
+	purpose: translates the read value from config into index integer
+*/
+uint32_t MenuList::translate_index(std::vector<std::string> lev,std::string arg)
+{
+	for (int i=0;i<lev.size();i++) {
+		if (lev[i]==arg) return i;
+	} return 0;
+}

@@ -5,7 +5,7 @@
 		Adjust master audio here.
 	</>
 	<slider>0,100,0,1</>
-	<dest>fAudioMasterVolume</>
+	<dest>fAudioMasterVolume,80</>
 </>
 <node>
 	<head>Voices Volume</>
@@ -13,7 +13,7 @@
 		Spoken language volume.
 	</>
 	<slider>0,100,0,1</>
-	<dest>fAudioVoicesVolume</>
+	<dest>fAudioVoicesVolume,75</>
 </>
 <node>
 	<head>Music Volume</>
@@ -21,5 +21,5 @@
 		Background jam volume.
 	</>
 	<slider>0,100,0,1</>
-	<dest>fAudioMusicVolume</>
+	<dest>fAudioMusicVolume,50</>
 </>

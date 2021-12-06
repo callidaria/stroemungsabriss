@@ -7,7 +7,7 @@
 	<le>1280x720,1280x720</>
 	<le>1600x800,1600x800</>
 	<le>1920x1080,1920x1080</>
-	<dest>vFrameResolution</>
+	<dest>vFrameResolution,1</>
 </>
 <node>
 	<head>Fullscreen ?</>
@@ -17,7 +17,7 @@
 	</>
 	<le>no,0</>
 	<le>yes,1</>
-	<dest>bFrameFullscreen</>
+	<dest>bFrameFullscreen,0</>
 </>
 <node>
 	<head>Target Monitor</>
@@ -28,5 +28,5 @@
 		out until it works the way<br>
 		you want.
 	</>
-	<dest>iFrameTargetMonitor</>
+	<dest>iFrameTargetMonitor,0</>
 </>

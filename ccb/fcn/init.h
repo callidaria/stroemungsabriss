@@ -23,8 +23,8 @@ public:
 	const uint32_t FRAME_DISPLAY_ID = 3;
 private:
 	// key identification dictionaries
-	std::vector<const char*> iKeys = { "frameResWidth:","frameResHeight:","frameFullScreen:",
-		"frameDisplayID:" };
+	std::vector<const char*> iKeys = { "frameResWidth","frameResHeight","frameFullScreen",
+		"frameDisplayID" };
 
 	// constant collections
 	uint32_t iConfig[INTEGER_KEY_LENGTH];
