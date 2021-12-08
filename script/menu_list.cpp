@@ -27,6 +27,7 @@ MenuList::MenuList()
 		(optional)<le>*element*,*value*</le>
 		(optional)<slider>*slider min (int)*,*slider max (int)*</slider>
 		(optional)<dest>*destination save name in config*,*default value*</dest>
+		(optional)<le_TargetMonitor></>
 */
 MenuList::MenuList(Camera2D* cam2d,const char* path)
 {
@@ -67,7 +68,7 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 			curr.push_back(args[0]);
 			curr.push_back(args[1]);
 		} // FIXME: remove check when target monitor
-	}
+		} // FIXME: default value after writing sits at 0 regardless of determined default in cmli
 
 	// interpreting raw node data as cmli pattern
 	std::vector<std::string> args;
@@ -131,10 +132,18 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 					}
 				} if (!written) {
 					if (t_le.slide) o_conf << args[0] << ' ' << stoi(args[1]) << '\n';
-					else if (t_le.lev.size()) // FIXME: remove check when target monitor
+					else if (t_le.lev.size()>0) // FIXME: remove check when target monitor
 						o_conf << args[0] << ' ' << t_le.lev[stoi(args[1])] << '\n';
 				}
 				break; // FIXME: double branching where better solutions
+			case 6: // reading target monitor for menu list insert
+				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
+					t_sle = Text(lfnt);
+					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
+					t_sle.load_wcam(cam2d);
+					t_le.lee.push_back(t_sle);
+					t_le.lev.push_back(std::to_string(disp));
+				} break; // FIXME: display value not as integer but as comm name
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
 		} t_le.ltxt.load_wcam(cam2d); // load conservative list element data
@@ -266,7 +275,8 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 		i++;		// increment line index
 	} i++;			// ready for further work with the nodeline
 	return !strcmp(pcnt.c_str(),"head")+2*!strcmp(pcnt.c_str(),"dsc")+3*!strcmp(pcnt.c_str(),"le")
-		+4*!strcmp(pcnt.c_str(),"slider")+5*!strcmp(pcnt.c_str(),"dest");
+		+4*!strcmp(pcnt.c_str(),"slider")+5*!strcmp(pcnt.c_str(),"dest")
+		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor");
 	// output ID according to annotation
 }
 
