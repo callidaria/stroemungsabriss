@@ -23,3 +23,12 @@
 	<slider>0,100,0,1</>
 	<dest>fAudioMusicVolume,50</>
 </>
+<node>
+	<head>Effects Volume</>
+	<dsc>
+		Volume of interaction sound<br>
+		and SFX.
+	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioEffectsVolume,65</>
+</>
