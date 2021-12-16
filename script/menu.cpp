@@ -110,6 +110,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 void Menu::render(uint32_t &running)
 {
 	bool is_shift;uint8_t tmm;
+	bool hit_a = *cnt_start&&!trg_start,hit_b = *cnt_b&&!trg_b;
+	int ml_delta = 0;
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
 		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
@@ -146,16 +148,20 @@ void Menu::render(uint32_t &running)
 		break;
 	case MenuMode::MENU_SUBLIST:
 		tmm = 5;
-		tmm -= *cnt_b&&!trg_b;
+		tmm -= *cnt_b&&!trg_b&&!edge_sel;
 		mm = (MenuMode)tmm;
-		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-1))
-			-(*cnt_up&&!trg_up&&lselect>0); // FIXME: reduce to one increment calculation
+		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-1)&&!edge_sel)
+			-(*cnt_up&&!trg_up&&lselect>0&&!edge_sel); // FIXME: reduce to one increment calculation
 		opt_index *= tmm==5; // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;
+		edge_sel = !edge_sel*(hit_a||(edge_sel&&hit_b))+edge_sel*(!hit_a&&!(edge_sel&&hit_b));
+		ml_delta = edge_sel*((*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up));
+		ml_delta = edge_sel*ml_delta+!edge_sel*(*cnt_rgt-*cnt_lft);
 		break;
 	default:running=lselect;game.run(running,m_ccbm); // running game at position
 	} trg_start=*cnt_start;trg_b=*cnt_b;trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;
 	// FIXME: break branch with static function pointer list
+	// FIXME: a button naming as cnt_start reference is off and should be changed
 
 	// move non-used out of view
 	for (int i=2;i<9;i++) { // FIXME: i will regret this tomorrow ...just a test
@@ -223,17 +229,21 @@ void Menu::render(uint32_t &running)
 
 	// render the list splash for prism list selection
 	bool af = edge_mod==-1;
-	int32_t xsll = 5+290*edge_mod,xslr = -5-290*(1-edge_mod);
+	int32_t xsll = 5+290*edge_mod+50,xslr = -5-290*(1-edge_mod)+50; // ??reset and immediate usage, the hell?
+	int32_t yslu = 75*edge_sel,ysld = -75*edge_sel;
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af,-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af,-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af,-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af,-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af,
+			-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af,
+			-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af,
+			-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af,
+			-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
 	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
 	// TODO: automation of int array upload to shader
-	// FIXME: do this with loop
 	cross_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
@@ -251,7 +261,7 @@ void Menu::render(uint32_t &running)
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,*cnt_rgt-*cnt_lft);
+	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);

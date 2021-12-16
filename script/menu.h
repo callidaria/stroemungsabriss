@@ -61,6 +61,7 @@ private:
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 	float edge_mod;
+	bool edge_sel = false;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

@@ -30,7 +30,7 @@ public:
 	MenuList(Camera2D* cam2d,const char* path);
 	~MenuList() {  }
 	void save();
-	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta);
+	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl);
 private:
 	std::string breakgrind(std::string nl,uint32_t &i);
 	uint8_t textgrind(std::string nl,uint32_t &i);

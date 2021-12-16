@@ -162,15 +162,16 @@ void MenuList::save()
 }
 
 /*
-	render(float,float,uint16_t,float&)
+	render(float,float,uint16_t,float&,int8_t,bool)
 	dtrans: represents the stage of transition in the menu's colouring & geometry
 	lscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
 	edge_mod: midedge modding for the sublist splash
 	delta: reads the slider sID increment from menu controlling
+	rsl: shows if sublist mode is rendered
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta)
+void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl)
 {
 	// rendering all head list entities
 	edge_mod = -1;
@@ -185,16 +186,25 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));		 // shadow scroll
 		les[i].ltxt.render(dtrans*32*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
 
-		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(x_ofs,fscroll,0)));			// list scroll in shader
+		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(x_ofs,fscroll,0)));
 		les[i].ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: performance
 
 		// rendering the sublist and selection entity
-		if (les[i].lee.size()>0) {
+		if (les[i].lee.size()>0&&!rsl) {
 			les[i].lee[les[i].sID].prepare();
 			les[i].lee[les[i].sID].render(dtrans*128,glm::vec4(1,1,1,1));
+		} else if (rsl&&index==i) {
+			int32_t ofs = (les[i].lee.size()*25)/2;
+			les[i].sID += delta;
+			for (int j=0;j<les[i].lee.size();j++) {
+				int csel = 1-(j==les[i].sID);
+				les[i].lee[j].prepare();
+				les[i].lee[j].set_scroll(glm::translate(glm::mat4(1.0f),
+						glm::vec3(-60,ofs+j*-25,0)));
+				les[i].lee[j].render(128,glm::vec4(1,1-csel,1-csel,1));
+			}
 		} // FIXME: remove branching from main loop!!!!
 
 		// setting edge mod variable if head with slider attachment selected & delta slider state
@@ -202,9 +212,6 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 		les[i].sID += delta*(has_slider&&
 			((delta>0&&les[i].sID<les[i].sl_max)||(delta<0&&les[i].sID>les[i].sl_min)));
 		edge_mod += (1+(les[i].sID+les[i].sl_min)/(float)(les[i].sl_max+les[i].sl_min))*has_slider;
-
-		// rendering the numeric representation of the slider state
-		
 	}
 
 	// rendering the description text in white
