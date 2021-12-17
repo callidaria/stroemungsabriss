@@ -173,7 +173,7 @@ void Menu::render(uint32_t &running)
 
 	// animate movement within title positions
 	ptrans+=.1f*(mm==1&&ptrans<1);ptrans-=.1f*(mm==0&&ptrans>.01f); // !!use an epsilon, pretty please
-	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>.01f); // ??maybe reduce this
+	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>.01f); // FIXME: reduce this
 	strans+=.1f*(mm==3&&strans<1);strans-=.1f*(mm!=3&&strans>.01f);
 	m_r2d->sl.at(msindex+mselect*2-2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
 	m_r2d->sl.at(msindex+mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
@@ -229,21 +229,21 @@ void Menu::render(uint32_t &running)
 
 	// render the list splash for prism list selection
 	bool af = edge_mod==-1;
-	int32_t xsll = 5+290*edge_mod+50,xslr = -5-290*(1-edge_mod)+50; // ??reset and immediate usage, the hell?
-	int32_t yslu = 75*edge_sel,ysld = -75*edge_sel;
+	int32_t xsll = 5+290*edge_mod,xslr = -5-290*(1-edge_mod); // ??reset and immediate usage, the hell?
+	int32_t yslu = (md_disp)*edge_sel+12*(!!edge_sel),ysld = -(md_disp)*edge_sel-12*(!!edge_sel);
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af,
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
 			-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af,
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
 			-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af,
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
 			-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af,
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
 			-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
 	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
-	// TODO: automation of int array upload to shader
+	// TODO: automation of array upload to shader
 	cross_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
@@ -261,7 +261,7 @@ void Menu::render(uint32_t &running)
 	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel);
+	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);

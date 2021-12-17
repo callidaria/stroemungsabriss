@@ -169,12 +169,16 @@ void MenuList::save()
 	edge_mod: midedge modding for the sublist splash
 	delta: reads the slider sID increment from menu controlling
 	rsl: shows if sublist mode is rendered
+	md: returns the option entity render mode:
+		sublist: 1,
+		slider: 2
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl)
+void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md)
 {
 	// rendering all head list entities
 	edge_mod = -1;
+	md = 0;
 	for (int i=0;i<les.size();i++) {
 		// precalculations
 		float x_ofs = -150*(les[i].slide||les[i].lee.size()>0);
@@ -194,10 +198,12 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 		// rendering the sublist and selection entity
 		if (les[i].lee.size()>0&&!rsl) {
 			les[i].lee[les[i].sID].prepare();
+			les[i].lee[les[i].sID].set_scroll(glm::mat4(1.0f));
 			les[i].lee[les[i].sID].render(dtrans*128,glm::vec4(1,1,1,1));
-		} else if (rsl&&index==i) {
-			int32_t ofs = (les[i].lee.size()*25)/2;
-			les[i].sID += delta;
+		} else if (rsl&&index==i&&!les[i].slide) {
+			int32_t ofs = (les[i].lee.size()*25)/2-12;
+			md = ofs;
+			les[i].sID += delta*((delta>0&&les[i].sID<les[i].lee.size()-1)||(delta<0&&les[i].sID>0));
 			for (int j=0;j<les[i].lee.size();j++) {
 				int csel = 1-(j==les[i].sID);
 				les[i].lee[j].prepare();
