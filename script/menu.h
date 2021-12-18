@@ -63,6 +63,7 @@ private:
 	float edge_mod;
 	bool edge_sel = false;
 	uint8_t md_disp = 0;
+	uint8_t hrz_title = 0,vrt_title = 3;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

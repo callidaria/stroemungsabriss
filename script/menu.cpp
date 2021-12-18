@@ -83,7 +83,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	select_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	cross_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
-	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,0);
+	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 
 	if (f->m_gc.size()>0) { // TODO: include all axis and common intuitive input systems
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
@@ -112,6 +112,8 @@ void Menu::render(uint32_t &running)
 	bool is_shift;uint8_t tmm;
 	bool hit_a = *cnt_start&&!trg_start,hit_b = *cnt_b&&!trg_b;
 	int ml_delta = 0;
+	uint8_t thrzt,tvrtt;
+	int8_t mv_dlta = 0;
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
 		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
@@ -125,10 +127,17 @@ void Menu::render(uint32_t &running)
 		mm = (MenuMode)tmm;
 		lselect=0;lscroll=0; // FIXME: reduce one set call. idc which one
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title
-		mve=(glm::vec2(360-(m_r2d->sl.at(msindex+mselect*2-2).sclx/2),650)
-			-m_r2d->sl.at(msindex+mselect*2-2).pos)*glm::vec2(is_shift); // setting title destination
-		mvj=(glm::vec2(50,50)-m_r2d->sl.at(msindex+mselect*2-1).pos)*glm::vec2(is_shift);
-		mselect+=*cnt_rgt*(mselect<8&&!trg_rgt)-*cnt_lft*(mselect>2&&!trg_lft); // update selection marker
+		mve=(glm::vec2(360-(m_r2d->sl.at(msindex+mselect*2-4).sclx/2),650)
+			-m_r2d->sl.at(msindex+mselect*2-4).pos)*glm::vec2(is_shift); // setting title destination
+		mvj=(glm::vec2(50,50)-m_r2d->sl.at(msindex+mselect*2-3).pos)*glm::vec2(is_shift);
+		mv_dlta = *cnt_rgt*(mselect<8&&!trg_rgt)-*cnt_lft*(mselect>2&&!trg_lft);
+		mselect += mv_dlta; // update selection marker
+		thrzt = hrz_title;
+		tvrtt = vrt_title;
+		hrz_title = rand()%4*(!!mv_dlta)+hrz_title*(!mv_dlta);
+		vrt_title = rand()%4*(!!mv_dlta)+vrt_title*(!mv_dlta);
+		hrz_title = (hrz_title+(hrz_title==thrzt&&!!mv_dlta))%4;
+		vrt_title = (vrt_title+(vrt_title==tvrtt&&!!mv_dlta))%4;
 		break;
 	case MenuMode::MENU_DIFFS:
 		tmm = 3;
@@ -164,7 +173,7 @@ void Menu::render(uint32_t &running)
 	// FIXME: a button naming as cnt_start reference is off and should be changed
 
 	// move non-used out of view
-	for (int i=2;i<9;i++) { // FIXME: i will regret this tomorrow ...just a test
+	for (int i=1;i<8;i++) { // FIXME: i will regret this tomorrow ...just a test
 		float tval = m_r2d->sl.at(msindex+i*2-1).pos.x+250;
 		m_r2d->sl.at(msindex+i*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
 		tval = m_r2d->sl.at(msindex+i*2-2).pos.x+250;
@@ -175,11 +184,11 @@ void Menu::render(uint32_t &running)
 	ptrans+=.1f*(mm==1&&ptrans<1);ptrans-=.1f*(mm==0&&ptrans>.01f); // !!use an epsilon, pretty please
 	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>.01f); // FIXME: reduce this
 	strans+=.1f*(mm==3&&strans<1);strans-=.1f*(mm!=3&&strans>.01f);
-	m_r2d->sl.at(msindex+mselect*2-2).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
-	m_r2d->sl.at(msindex+mselect*2-1).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
+	m_r2d->sl.at(msindex+mselect*2-4).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
+	m_r2d->sl.at(msindex+mselect*2-3).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
 	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
-	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+16+i).scale_arbit(1,strans);
+	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,strans);
 
 	// menu list selection and scrolling
 	lscroll += (lselect>lbounds)-(lselect<(lbounds-7)); // FIXME: kill the extra scrolling calculation
@@ -255,14 +264,18 @@ void Menu::render(uint32_t &running)
 	m_frame->clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
-	m_r2d->render_sprite(msindex,msindex+2);
+	//m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
+	m_r2d->al.at(0).model = pos_title;
+	m_r2d->al.at(1).model = pos_entitle;
+	//m_r2d->render_sprite(msindex+0,msindex+1);
+	m_r2d->render_state(0,glm::vec2(vrt_title,0));
+	m_r2d->render_state(1,glm::vec2(0,hrz_title));
 	m_r2d->reset_shader();
-	m_r2d->render_sprite(msindex+2,msindex+16*(mm>0));
+	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
 	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
-	m_r2d->prepare();m_r2d->render_sprite(msindex+16,msindex+20);
+	m_r2d->prepare();m_r2d->render_sprite(msindex+14,msindex+18);
 }

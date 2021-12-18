@@ -169,9 +169,7 @@ void MenuList::save()
 	edge_mod: midedge modding for the sublist splash
 	delta: reads the slider sID increment from menu controlling
 	rsl: shows if sublist mode is rendered
-	md: returns the option entity render mode:
-		sublist: 1,
-		slider: 2
+	md: returns the option entity render offset for menu
 	purpose: renders the menu list on top of the menu visuals.
 */
 void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md)
