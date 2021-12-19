@@ -29,6 +29,7 @@
 	<le>Japanese,2</>
 	<le>German,3</>
 	<le>Russian,4</>
+	<le>Korean,5</>
 	<dest>iGeneralVoiceLanguageFlag,0</>
 </>
 <node>

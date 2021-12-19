@@ -114,6 +114,11 @@ void Menu::render(uint32_t &running)
 	int ml_delta = 0;
 	uint8_t thrzt,tvrtt;
 	int8_t mv_dlta = 0;
+
+	uint8_t i_ml = mselect-2+opt_index;
+	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
+	// FIXME: remove branch from loop
+
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
 		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
@@ -264,17 +269,15 @@ void Menu::render(uint32_t &running)
 	m_frame->clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	//m_r2d->sl.at(msindex).model=pos_title;m_r2d->sl.at(msindex+1).model=pos_entitle;
 	m_r2d->al.at(0).model = pos_title;
 	m_r2d->al.at(1).model = pos_entitle;
-	//m_r2d->render_sprite(msindex+0,msindex+1);
 	m_r2d->render_state(0,glm::vec2(vrt_title,0));
 	m_r2d->render_state(1,glm::vec2(0,hrz_title));
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
 	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	mls[mselect-2+opt_index].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
+	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 	fb.close();m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
 	m_r2d->prepare();m_r2d->render_sprite(msindex+14,msindex+18);

@@ -199,11 +199,12 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 			les[i].lee[les[i].sID].set_scroll(glm::mat4(1.0f));
 			les[i].lee[les[i].sID].render(dtrans*128,glm::vec4(1,1,1,1));
 		} else if (rsl&&index==i&&!les[i].slide) {
+			t_slID = t_slID*lf_open+les[i].sID*!lf_open;
 			int32_t ofs = (les[i].lee.size()*25)/2-12;
 			md = ofs;
-			les[i].sID += delta*((delta>0&&les[i].sID<les[i].lee.size()-1)||(delta<0&&les[i].sID>0));
+			t_slID += delta*((delta>0&&t_slID<les[i].lee.size()-1)||(delta<0&&t_slID>0));
 			for (int j=0;j<les[i].lee.size();j++) {
-				int csel = 1-(j==les[i].sID);
+				int csel = 1-(j==t_slID);
 				les[i].lee[j].prepare();
 				les[i].lee[j].set_scroll(glm::translate(glm::mat4(1.0f),
 						glm::vec3(-60,ofs+j*-25,0)));
@@ -216,12 +217,19 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 		les[i].sID += delta*(has_slider&&
 			((delta>0&&les[i].sID<les[i].sl_max)||(delta<0&&les[i].sID>les[i].sl_min)));
 		edge_mod += (1+(les[i].sID+les[i].sl_min)/(float)(les[i].sl_max+les[i].sl_min))*has_slider;
-	}
+	} lf_open = rsl;
 
 	// rendering the description text in white
 	les[index].dtxt.prepare();
 	les[index].dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
 }
+
+/*
+	write_tempID(uint8_t)
+	index: gets the selected menu list element
+	purpose: writes the temporary selection id to the selected menu list entity id when called
+*/
+void MenuList::write_tempID(uint8_t index) { les[index].sID = t_slID; }
 
 /*
 	breakgrind(std::string,uint32_t&)
