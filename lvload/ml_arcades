@@ -13,6 +13,7 @@
 		of Hitmen trying to kill you and a roadtrip<br>
 		through the US.
 	</>
+	<diff>2</>
 </>
 <node>
 	<head>Latin American Arcade</>
@@ -20,6 +21,7 @@
 		This arcade contains a few cool characters,<br>
 		multiple revenge stories and real evil dudes.
 	</>
+	<diff>3</>
 </>
 <node>
 	<head>Arcade Antarctica</>
@@ -28,6 +30,7 @@
 		has been discovered. This option lets you play<br>
 		the full Antarctica experience.
 	</>
+	<diff>4</>
 </>
 <node>
 	<head>The African Arcade</>
@@ -36,6 +39,7 @@
 		jungle and semi-urban environment with the<br>
 		African Arcade.
 	</>
+	<diff>6</>
 </>
 <node>
 	<head>The European Arcade</>
@@ -44,6 +48,7 @@
 		Also there is public transportation over here.<br>
 		Call it infrastructure!
 	</>
+	<diff>8</>
 </>
 <node>
 	<head>The Great East Arcade</>
@@ -53,12 +58,14 @@
 		The Great East Arcade offers a lot of challenge<br>
 		and a lot of difference.
 	</>
+	<diff>10</>
 </>
 <node>
 	<head>The Asian Challenge Collection</>
 	<dsc>
 		...
 	</>
+	<diff>12</>
 </>
 <node>
 	<head>The Japanese Arcade</>
@@ -68,13 +75,29 @@
 		bosses, including the final battle against<br>
 		yomisensei. Proceed with care!
 	</>
+	<diff>14</>
 </>
 <node>
 	<head>Cottonmind Arcade</>
+	<dsc>
+		Cottonmind Arcade
+	</>
+	<diff>7</>
 </>
 <node>
 	<head>Cottonmind: Rainbow Label</>
+	<dsc>
+		Unlocks if player met Cottonmind and<br>
+		collected all rainbow PCBs.
+	</>
+	<diff>9</>
 </>
 <node>
 	<head>Cottonmind: White Label</>
+	<dsc>
+		Unlocks if player met Cottonmind,<br>
+		beat his rainbow label arcade and<br>
+		inserted the white coin.
+	</>
+	<diff>11</>
 </>

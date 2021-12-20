@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "../ccb/gfx/renderer2d.h"
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/fcn/font.h"
 #include "../ccb/fcn/text.h"
@@ -18,6 +19,7 @@ struct LEntity
 	bool slide = false;		// identifier of slideable values in list entity
 	int32_t sl_min=0,sl_max=1;	// definition of visibile slider caps
 	float sl_vmin,sl_vmax;		// definition of slider save caps in file
+	uint8_t diff = 0;		// definition of estimated difficulty
 	uint32_t sID = 0;		// selection ID for active chosen option / slider input
 	std::string saveID;		// value, storing the config variable destination
 	// TODO: elements for save destination, values & additional parsing
@@ -27,7 +29,7 @@ class MenuList
 {
 public:
 	MenuList();
-	MenuList(Camera2D* cam2d,const char* path);
+	MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path);
 	~MenuList() {  }
 	void save();
 	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md);
@@ -41,10 +43,12 @@ private:
 public:
 	uint16_t esize = 0;
 private:
+	Renderer2D* m_r2d;			// pointer to renderer
 	std::vector<struct LEntity> les;	// list of all extracted list entity elements
 	int32_t lscroll = 515,dscroll = 600;	// defines the scrolling values of description and list entity
 	bool lf_open = false;			// saves if sublist was open last frame
 	uint8_t t_slID;				// temporarily saves the sublist selection, def by user input
+	uint32_t diffRID = 0;			// ID of the difficulty spritesheet in renderer
 };
 
 // FIXME: parameter lscroll & private variable lscroll naming bad practice

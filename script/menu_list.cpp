@@ -7,11 +7,10 @@
 MenuList::MenuList()
 {
 	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
-	//dtxt.push_back(Text(fproc)); // FIXME: breakdown if necessary in new update
 	LEntity proc = {
 		Text(fproc),Text(fproc),std::vector<Text>(),std::vector<std::string>(),
-		false,0,0,0,0,0,""
-	};
+		false,0,0,0,0,0,0,""
+	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
 	esize = 0;
 }
@@ -28,9 +27,15 @@ MenuList::MenuList()
 		(optional)<slider>*slider min (int)*,*slider max (int)*</slider>
 		(optional)<dest>*destination save name in config*,*default value*</dest>
 		(optional)<le_TargetMonitor></>
+		(optional)<diff>*estimated difficulty rating (no:0,kakusei:1-6,master:7-11,gm:12-14,ugm:15-17)*</>
 */
-MenuList::MenuList(Camera2D* cam2d,const char* path)
+MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
+	: m_r2d(r2d)
 {
+	// setting up textures for 2D renderer
+	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	m_r2d->load_wcam(cam2d);
+
 	// setting up the different fonts & texts for menu parts
 	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
 	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -68,7 +73,7 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 			curr.push_back(args[0]);
 			curr.push_back(args[1]);
 		} // FIXME: remove check when target monitor
-		} // FIXME: default value after writing sits at 0 regardless of determined default in cmli
+	} // FIXME: default value after writing sits at 0 regardless of determined default in cmli
 
 	// interpreting raw node data as cmli pattern
 	std::vector<std::string> args;
@@ -144,6 +149,9 @@ MenuList::MenuList(Camera2D* cam2d,const char* path)
 					t_le.lee.push_back(t_sle);
 					t_le.lev.push_back(std::to_string(disp));
 				} break; // FIXME: display value not as integer but as comm name
+			case 7: // estimated difficulty rating
+				t_le.diff = stoi(excnt);
+				break;
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
 		} t_le.ltxt.load_wcam(cam2d); // load conservative list element data
@@ -186,10 +194,10 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 		int32_t fscroll = lscroll*45; // calculating the amount of scrolling
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
 			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));		 // shadow scroll
-		les[i].ltxt.render(dtrans*32*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
+		les[i].ltxt.render(dtrans*64*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
 
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(x_ofs,fscroll,0)));
-		les[i].ltxt.render(dtrans*32,glm::vec4(1,1,1,1));	// render main text
+		les[i].ltxt.render(dtrans*64,glm::vec4(1,1,1,1));	// render main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: performance
 
@@ -219,8 +227,14 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 		edge_mod += (1+(les[i].sID+les[i].sl_min)/(float)(les[i].sl_max+les[i].sl_min))*has_slider;
 	} lf_open = rsl;
 
+	// rendering the estimated difficulty impression banner
+	bool is_diff = !!les[index].diff;
+	/*m_r2d->prepare();
+	m_r2d->render_state(diffRID,glm::vec2(0,les[index].diff));*/
+
 	// rendering the description text in white
 	les[index].dtxt.prepare();
+	les[index].dtxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(0,-75*(is_diff),0)));
 	les[index].dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
 }
 
@@ -283,6 +297,8 @@ uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable
 		3 := dropdown list element marked as "<le>"
 		4 := slider element marked as "<slider>"
 		5 := save destination annotation marked as "<dest>"
+		6 := sublist has a list of possible target monitors with "<le_TargetMonitor>"
+		7 := estimated difficulty of level/arcade/boss marked as "<diff>"
 */
 uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 {
@@ -293,10 +309,14 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 		pcnt += nl[i];	// add current character to the cast variable
 		i++;		// increment line index
 	} i++;			// ready for further work with the nodeline
-	return !strcmp(pcnt.c_str(),"head")+2*!strcmp(pcnt.c_str(),"dsc")+3*!strcmp(pcnt.c_str(),"le")
-		+4*!strcmp(pcnt.c_str(),"slider")+5*!strcmp(pcnt.c_str(),"dest")
-		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor");
-	// output ID according to annotation
+	return !strcmp(pcnt.c_str(),"head")
+		+2*!strcmp(pcnt.c_str(),"dsc")
+		+3*!strcmp(pcnt.c_str(),"le")
+		+4*!strcmp(pcnt.c_str(),"slider")
+		+5*!strcmp(pcnt.c_str(),"dest")
+		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor")
+		+7*!strcmp(pcnt.c_str(),"diff");
+	// ??maybe do this with case
 }
 
 /*
