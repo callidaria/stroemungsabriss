@@ -49,6 +49,10 @@ private:
 	bool lf_open = false;			// saves if sublist was open last frame
 	uint8_t t_slID;				// temporarily saves the sublist selection, def by user input
 	uint32_t diffRID = 0;			// ID of the difficulty spritesheet in renderer
+
+	// animation of estimated difficulty
+	bool neg_scl=false,neg_rot=false;	// true if transformation of estimated difficulty is negative
+	float val_scl=1,val_rot=0;		// values of description transformation
 };
 
 // FIXME: parameter lscroll & private variable lscroll naming bad practice

@@ -34,7 +34,8 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 {
 	// setting up textures for 2D renderer
 	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->load_wcam(cam2d);
+	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	m_r2d->load_wcam(cam2d); // FIXME: sprite always in split, use different spritesheets
 
 	// setting up the different fonts & texts for menu parts
 	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
@@ -229,8 +230,26 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 
 	// rendering the estimated difficulty impression banner
 	bool is_diff = !!les[index].diff;
-	/*m_r2d->prepare();
-	m_r2d->render_state(diffRID,glm::vec2(0,les[index].diff));*/
+	if (les[index].diff&&dtrans>.75f) {
+		m_r2d->prepare();
+
+		// rendering belt colour
+		m_r2d->upload_model(glm::mat4(1.0f));
+		m_r2d->render_state(diffRID,glm::vec2(0,les[index].diff));
+
+		// render belt description
+		glm::mat4 trans_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
+		trans_model = glm::scale(trans_model,glm::vec3(val_scl,val_scl,0));
+		trans_model = glm::rotate(trans_model,glm::radians(val_rot),glm::vec3(0,0,1));
+		m_r2d->al[diffRID+1].model = trans_model;
+		m_r2d->render_state(diffRID+1,glm::vec2(1,les[index].diff));
+
+		// animate belt description movement
+		neg_scl += (val_scl>1&&!neg_scl)-(val_scl<.5f&&neg_scl);
+		val_scl += .02f*(1-2*neg_scl);
+		neg_rot += (val_rot>27&&!neg_rot)-(val_rot<-27&&neg_rot);
+		val_rot += (rand()%20)*.01f*(1-2*neg_rot);
+	}
 
 	// rendering the description text in white
 	les[index].dtxt.prepare();
