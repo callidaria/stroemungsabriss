@@ -269,16 +269,45 @@ void Menu::render(uint32_t &running)
 	m_frame->clear(0,0,0);
 	m_r2d->prepare();
 	m_r2d->s2d.upload_float("ptrans",ptrans);
-	m_r2d->al.at(0).model = pos_title;
-	m_r2d->al.at(1).model = pos_entitle;
+
+	// transform titles
+	glm::mat4 tr_model = glm::scale(pos_title,glm::vec3(val_vscl,val_vscl,0));
+	tr_model = glm::rotate(tr_model,glm::radians(val_vrot),glm::vec3(0,0,1));
+	m_r2d->al.at(0).model = tr_model;	// model matrix for vertical title
+	tr_model = glm::scale(pos_entitle,glm::vec3(val_hscl,val_hscl,0));
+	tr_model = glm::rotate(tr_model,glm::radians(val_hrot),glm::vec3(0,0,1));
+	m_r2d->al.at(1).model = tr_model;	// model matrix for horizontal title
+
+	// render titles
 	m_r2d->render_state(0,glm::vec2(vrt_title,0));
 	m_r2d->render_state(1,glm::vec2(0,hrz_title));
+
+	// animate title speedup effect
+	neg_vscl += (val_vscl>1.1f&&!neg_vscl)-(val_vscl<.9f&&neg_vscl);
+	val_vscl += ((rand()%6+6)*.0001f)*(1-2*neg_vscl);	// vertical scale anim
+	neg_hscl += (val_hscl>1.1f&&!neg_hscl)-(val_hscl<.9f&&neg_hscl);
+	val_hscl += ((rand()%6+6)*.0001f)*(1-2*neg_hscl);	// horizontal scale anim
+	neg_vrot += (val_vrot>2&&!neg_vrot)-(val_vrot<-2&&neg_vrot);
+	val_vrot += ((rand()%5+10)*.001f)*(1-2*neg_vrot);	// vertical rotation
+	neg_hrot += (val_hrot>2&&!neg_hrot)-(val_hrot<-2&&neg_hrot);
+	val_hrot += ((rand()%5+10)*.001f)*(1-2*neg_hrot);	// horizontal rotation
+	// FIXME: breakdown the rhythm
+
+	// write dare message & version notification
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
-	tft.prepare();tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
-	vtft.prepare();vtft.render(75,glm::vec4(0,0,.5f,1));
-	fb.close();m_frame->clear(0,0,0);
+	tft.prepare();
+	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
+	vtft.prepare();
+	vtft.render(75,glm::vec4(0,0,.5f,1));
+	fb.close();
+
+	// render splash overlay
+	m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
-	m_r2d->prepare();m_r2d->render_sprite(msindex+14,msindex+18);
+
+	// render menu lists and sublists
+	m_r2d->prepare();
+	m_r2d->render_sprite(msindex+14,msindex+18);
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 }

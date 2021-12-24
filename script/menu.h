@@ -48,10 +48,10 @@ private:
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
 
 	// animation values
-	const glm::vec3 TITLE_START = glm::vec3(250,100,0);
-	const glm::vec3 ENTITLE_START = glm::vec3(340,720,0);
-	const glm::vec3 TITLE_MENU = glm::vec3(50,50,0);
-	const glm::vec3 ENTITLE_MENU = glm::vec3(340,600,0);
+	const glm::vec3 TITLE_START = glm::vec3(300,300,0);
+	const glm::vec3 ENTITLE_START = glm::vec3(590,762,0);
+	const glm::vec3 TITLE_MENU = glm::vec3(100,250,0);
+	const glm::vec3 ENTITLE_MENU = glm::vec3(590,642,0);
 	uint32_t SELTRANS[16] = { 900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498 };
 	glm::mat4 pos_title,pos_entitle;
 	float ptrans=0,dtrans=0,strans=0;
@@ -64,6 +64,10 @@ private:
 	bool edge_sel = false;
 	uint8_t md_disp = 0;
 	uint8_t hrz_title = 0,vrt_title = 3;
+
+	// menu title speedup animation
+	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;
+	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };
