@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+
 #include "../ccb/frm/frame.h"
 #include "../ccb/fcn/ccb_linpr.h"
 #include "../ccb/fcn/ccb_manager.h"
@@ -9,7 +10,9 @@
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
+
 #include "menu_list.h"
+#include "menu_dialogue.h"
 #include "game.h"
 
 enum MenuMode
@@ -28,6 +31,8 @@ public:
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d);
 	~Menu();
 	void render(uint32_t &running);
+private:
+	void fill_dialogue();
 private:
 	uint32_t svao,svbo;
 	CCBManager* m_ccbm;
@@ -68,6 +73,10 @@ private:
 	// menu title speedup animation
 	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;
 	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
+
+	// dialogue relevant variables
+	MenuDialogue md_diff;
+	MenuDialogue md_conf;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

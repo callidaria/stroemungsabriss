@@ -80,6 +80,13 @@ void Shader::compile_hp(const char* vspath,const char* fspath)
 	glEnableVertexAttribArray(edgeAttrib);
 	glVertexAttribPointer(edgeAttrib,1,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(3*sizeof(float)));
 }
+void Shader::compile_mDlg(const char* vspath,const char* fspath)
+{
+	compile(vspath,fspath);
+	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
+}
 void Shader::load_index(unsigned int ibo) // !!index upload checking && double upload nessessary
 {
 	int offsetAttrib = glGetAttribLocation(m_shaderProgram,"offset");

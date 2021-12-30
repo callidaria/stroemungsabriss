@@ -168,6 +168,7 @@ void MenuList::save()
 {
 	// TODO: destination check
 	// TODO: writing routine
+	std::cout << "save triggered\n";
 }
 
 /*

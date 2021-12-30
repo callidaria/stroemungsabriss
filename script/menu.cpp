@@ -75,7 +75,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	glBindBuffer(GL_ARRAY_BUFFER,svbo);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(sverts),sverts,GL_STATIC_DRAW);
 	sshd.compile_vCols("shader/fbv_select.shader","shader/fbf_select.shader");
-	sshd.upload_matrix("view",cam2d->view2D);sshd.upload_matrix("proj",cam2d->proj2D);
+	sshd.upload_matrix("view",cam2d->view2D);
+	sshd.upload_matrix("proj",cam2d->proj2D);
 
 	fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
 	splash_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
@@ -84,6 +85,15 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	cross_fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
+
+	// setting up menu dialogues
+	std::vector<const char*> pth_diff = {
+		"res/diffs/normal_diff.png","res/diffs/master_diff.png",
+		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
+	};
+	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,"select difficulty",pth_diff,150,450);
+	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
+	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",pth_conf,75,75);
 
 	if (f->m_gc.size()>0) { // TODO: include all axis and common intuitive input systems
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
@@ -310,4 +320,8 @@ void Menu::render(uint32_t &running)
 	m_r2d->prepare();
 	m_r2d->render_sprite(msindex+14,msindex+18);
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
+
+	// render menu dialogue overlays
+	md_diff.render();
+	md_conf.render();
 }
