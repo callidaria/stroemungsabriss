@@ -15,6 +15,7 @@ public:
 	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,const char* head,
 		std::vector<const char*> paths,float ewidth,float eheight);
 	~MenuDialogue();
+	bool stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back);
 	void render();
 	void open_dialogue();
 	uint8_t hit_dialogue(bool confirm);

@@ -42,15 +42,12 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 /*
 
 */
-void MenuDialogue::open_dialogue() { open = true; }
-
-/*
-
-*/
-uint8_t MenuDialogue::hit_dialogue(bool confirm)
+bool MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
 {
-	open = false;
-	return 0;
+	bool out = *conf&&open;
+	open -= open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));
+	for (int i=0;i<trg_stall.size()*open;i++) *trg_stall[i] = true;
+	return out;
 }
 
 /*
@@ -73,4 +70,18 @@ void MenuDialogue::render()
 	// render selection entities
 	m_r2d->prepare();
 	m_r2d->render_sprite(irnd,irnd+srnd*open);
+}
+
+/*
+
+*/
+void MenuDialogue::open_dialogue() { open = true; }
+
+/*
+
+*/
+uint8_t MenuDialogue::hit_dialogue(bool confirm)
+{
+	open = false;
+	return 0;
 }

@@ -30,7 +30,7 @@ class Menu
 public:
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d);
 	~Menu();
-	void render(uint32_t &running);
+	void render(uint32_t &running,bool &reboot);
 private:
 	void fill_dialogue();
 private:

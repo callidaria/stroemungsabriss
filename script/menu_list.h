@@ -1,9 +1,11 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
+
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/fcn/font.h"

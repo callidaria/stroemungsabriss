@@ -166,9 +166,11 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 */
 void MenuList::save()
 {
-	// TODO: destination check
-	// TODO: writing routine
-	std::cout << "save triggered\n";
+	std::ofstream chwrite{ "config.ini",std::ios::app };
+	for (int i=0;i<les.size();i++) {
+		std::string val = les[i].slide?std::to_string(les[i].sID):les[i].lev[les[i].sID];
+		chwrite << les[i].saveID << ' ' << val << "\n";
+	} chwrite.close();
 }
 
 /*

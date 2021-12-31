@@ -117,7 +117,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 	running: is application still running?
 	purpose: render the main menu, calculate geometry and process interactions
 */
-void Menu::render(uint32_t &running)
+void Menu::render(uint32_t &running,bool &reboot)
 {
 	bool is_shift;uint8_t tmm;
 	bool hit_a = *cnt_start&&!trg_start,hit_b = *cnt_b&&!trg_b;
@@ -128,6 +128,18 @@ void Menu::render(uint32_t &running)
 	uint8_t i_ml = mselect-2+opt_index;
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
 	// FIXME: remove branch from loop
+
+	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
+	bool diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
+	bool conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
+	if (conf_can) {
+		std::ofstream kill("config.ini");
+		kill.close();
+		for (int i=7;i<11;i++) mls[i].save();
+		reboot = true;
+		running = 0;
+		return;
+	}
 
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
@@ -164,7 +176,8 @@ void Menu::render(uint32_t &running)
 		tmm = 4;
 		tmm += *cnt_start&&!trg_start&&mselect==3;
 		tmm -= *cnt_start&&!trg_start&&mselect!=3;
-		tmm -= 3*(*cnt_b&&!trg_b);
+		if (*cnt_b&&!trg_b&&mselect==3) md_conf.open_dialogue();
+		else tmm -= 3*(*cnt_b&&!trg_b);
 		mm = (MenuMode)tmm;
 		opt_index = (6+lselect)*(tmm==5);
 		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-1))-(*cnt_up&&!trg_up&&lselect>0);

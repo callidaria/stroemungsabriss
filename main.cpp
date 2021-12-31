@@ -71,6 +71,7 @@ int main(int argc,char** argv)
 	// CAMERAS
 	r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
 	uint32_t run=1,pause=false;
+	bool reboot = false;
 	while (run) {
 		f.print_fps();f.input(run,dactive);
 
@@ -78,7 +79,7 @@ int main(int argc,char** argv)
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
 
 #ifdef MENU_RENDER
-		menu.render(run);
+		menu.render(run,reboot);
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
@@ -167,6 +168,8 @@ int main(int argc,char** argv)
 
 		f.update();
 	}
+
+	if (reboot) system("./yomisensei &");
 
 	f.vanish();
 	return 0;
