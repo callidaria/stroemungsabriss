@@ -5,11 +5,11 @@ MenuDialogue::MenuDialogue() {  }
 /*
 
 */
-MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
+MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Renderer3D* r3d,Camera2D* cam2d,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight)
-	: m_r2d(r2d)
+	: m_r2d(r2d),m_r3d(r3d)
 {
-	// dialogue backround
+	// dialogue background
 	glGenVertexArrays(1,&bvao);
 	glGenBuffers(1,&bvbo);
 	m_sh = Shader();
@@ -24,6 +24,12 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	m_sh.upload_matrix("view",cam2d->view2D);
 	m_sh.upload_matrix("proj",cam2d->proj2D);
 
+	// selection identifier
+	cam3d = Camera3D(glm::vec3(0,0,10),16,9,90);
+	m_r3d->add("res/menu/selector.obj","res/menu/dlg_main.png","res/menu/dlg_nan.png","res/menu/dlg_nan.png",
+			"res/menu/dlg_all.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
+	m_r3d->load(&cam3d);
+
 	// TODO: dialogue border
 
 	// dialogue text heading
@@ -37,16 +43,25 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	srnd = paths.size();
 	int32_t blank = (width-srnd*ewidth)/srnd+ewidth;
 	for (int i=0;i<srnd;i++) m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
+
+	// 3D lighting of selection identifier
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,750,100),glm::vec3(1,.6f,0),1);
+	Light3D contr = Light3D(m_r3d,1,glm::vec3(-1000,-750,-100),glm::vec3(0,.4f,1),.4f);
+	l3d.upload();
+	contr.upload();
+	l3d.set_amnt(2);
+	mat0 = Material3D(r3d,3,8,0.25f);
 } MenuDialogue::~MenuDialogue() {  }
 
 /*
 
 */
-bool MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
+uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
 {
-	bool out = *conf&&open;
-	open -= open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));
+	uint8_t out = ((*back&&!*trg_stall[1])&&open)+2*((*conf&&!*trg_stall[0])&&open);
+	bool topen = open-open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));
 	for (int i=0;i<trg_stall.size()*open;i++) *trg_stall[i] = true;
+	open = topen;
 	return out;
 }
 
@@ -70,6 +85,11 @@ void MenuDialogue::render()
 	// render selection entities
 	m_r2d->prepare();
 	m_r2d->render_sprite(irnd,irnd+srnd*open);
+
+	// render selection icosphere
+	m_r3d->prepare_wcam(&cam3d);
+	mat0.upload();
+	m_r3d->render_mesh(0,1);
 }
 
 /*

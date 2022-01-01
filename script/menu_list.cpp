@@ -157,8 +157,14 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 			}
 		} t_le.ltxt.load_wcam(cam2d); // load conservative list element data
 		les.push_back(t_le);
-	} // FIXME: text with annotated \n in written file format -> is it \n or \\n?
+	} rles = les;
+	// FIXME: text with annotated \n in written file format -> is it \n or \\n?
 } // TODO: write interpreter fault instead of letting the mem take the fall
+
+/*
+
+*/
+void MenuList::reset() { les = rles; }
 
 /*
 	save(void)
@@ -171,6 +177,16 @@ void MenuList::save()
 		std::string val = les[i].slide?std::to_string(les[i].sID):les[i].lev[les[i].sID];
 		chwrite << les[i].saveID << ' ' << val << "\n";
 	} chwrite.close();
+}
+
+/*
+
+*/
+bool MenuList::was_changed()
+{
+	bool out = false;
+	for (int i=0;i<les.size();i++) out = les[i].sID!=rles[i].sID||out;
+	return out;
 }
 
 /*

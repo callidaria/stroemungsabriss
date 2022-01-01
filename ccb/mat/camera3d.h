@@ -7,6 +7,7 @@
 class Camera3D
 {
 public:
+	Camera3D() {  }
 	Camera3D(glm::vec3 cp, float w_res, float h_res, float fov)
 		: pos(cp)
 	{

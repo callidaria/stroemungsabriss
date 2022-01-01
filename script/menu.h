@@ -6,6 +6,7 @@
 #include "../ccb/fcn/ccb_linpr.h"
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/gfx/renderer2d.h"
+#include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
@@ -28,7 +29,7 @@ enum MenuMode
 class Menu
 {
 public:
-	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d);
+	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d);
 	~Menu();
 	void render(uint32_t &running,bool &reboot);
 private:

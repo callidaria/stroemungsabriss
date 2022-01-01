@@ -25,7 +25,6 @@ public:
 	{
 		r3d->s3d.enable();
 		r3d->s3d.upload_int("amnt_light_sun",n);
-		r3d->s3d.enable();
 	}
 	void create_shadow(glm::vec3 to,float width,float height,float f,int res)
 	{

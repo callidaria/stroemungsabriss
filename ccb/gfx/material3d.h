@@ -6,6 +6,7 @@
 class Material3D
 {
 public:
+	Material3D() {  }
 	Material3D(Renderer3D* in_r3d,int in_rep,int in_spec,float in_intense)
 		: r3d(in_r3d),rep(in_rep),spec(in_spec),intense(in_intense)
 	{  }

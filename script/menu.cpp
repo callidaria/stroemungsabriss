@@ -1,6 +1,6 @@
 #include "menu.h"
 
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d)
+Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
 	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
 {
 	const char* GVERSION = "0.0.2d";
@@ -91,9 +91,9 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 		"res/diffs/normal_diff.png","res/diffs/master_diff.png",
 		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
 	};
-	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,"select difficulty",pth_diff,150,450);
+	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,r3d,m_cam2d,"select difficulty",pth_diff,150,450);
 	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
-	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",pth_conf,75,75);
+	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,r3d,m_cam2d,"confirm changes?",pth_conf,75,75);
 
 	if (f->m_gc.size()>0) { // TODO: include all axis and common intuitive input systems
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
@@ -119,7 +119,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam
 */
 void Menu::render(uint32_t &running,bool &reboot)
 {
-	bool is_shift;uint8_t tmm;
+	bool is_shift;
+	uint8_t tmm;
 	bool hit_a = *cnt_start&&!trg_start,hit_b = *cnt_b&&!trg_b;
 	int ml_delta = 0;
 	uint8_t thrzt,tvrtt;
@@ -130,9 +131,12 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// FIXME: remove branch from loop
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
-	bool diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
-	bool conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
-	if (conf_can) {
+	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
+	uint8_t conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
+	if (conf_can==1) {
+		for (int i=7;i<11;i++) mls[i].reset();
+		mm = MenuMode::MENU_SELECTION;
+	} else if (conf_can==2) {
 		std::ofstream kill("config.ini");
 		kill.close();
 		for (int i=7;i<11;i++) mls[i].save();
@@ -141,6 +145,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 		return;
 	}
 
+	bool changed;
 	switch (mm) {
 	case MenuMode::MENU_TITLE:
 		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
@@ -176,7 +181,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 		tmm = 4;
 		tmm += *cnt_start&&!trg_start&&mselect==3;
 		tmm -= *cnt_start&&!trg_start&&mselect!=3;
-		if (*cnt_b&&!trg_b&&mselect==3) md_conf.open_dialogue();
+		changed = false;
+		for (int i=7;i<11;i++) changed = mls[i].was_changed()||changed;	 // FIXME: maybe a little heavy
+		if (*cnt_b&&!trg_b&&mselect==3&&changed) md_conf.open_dialogue();
 		else tmm -= 3*(*cnt_b&&!trg_b);
 		mm = (MenuMode)tmm;
 		opt_index = (6+lselect)*(tmm==5);
