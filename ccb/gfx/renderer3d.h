@@ -29,7 +29,7 @@ public:
 	}
 	void load_texture()
 	{
-		for(int i=0;i<ml.size();i++)ml.at(i).texture();
+		for(int i=0;i<ml.size();i++) ml.at(i).texture();
 		s3d.upload_int("tex",0);s3d.upload_int("sm",1);
 		s3d.upload_int("emit",2);s3d.upload_int("shadow_map",3);
 		s3d.upload_int("nmap",4);

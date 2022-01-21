@@ -25,10 +25,11 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	m_sh.upload_matrix("proj",cam2d->proj2D);
 
 	// selection identifier
-	cam3d = Camera3D(glm::vec3(0,0,10),16,9,90);
-	m_r3d->add("res/menu/selector.obj","res/menu/dlg_main.png","res/menu/dlg_nan.png","res/menu/dlg_nan.png",
-			"res/menu/dlg_all.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
-	m_r3d->load(&cam3d);
+	/*cam3d = Camera3D(glm::vec3(0,1,10),16,9,90);
+	cam3d.view3D = glm::lookAt(cam3d.pos,glm::vec3(0,0,0),cam3d.up);
+	m_r3d->add("res/menu/selector.obj","res/dnormal.png","res/menu/dlg_all.png","res/dnormal.png",
+			"res/menu/dlg_nan.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
+	m_r3d->load(&cam3d);*/
 
 	// TODO: dialogue border
 
@@ -45,12 +46,10 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	for (int i=0;i<srnd;i++) m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
 
 	// 3D lighting of selection identifier
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,750,100),glm::vec3(1,.6f,0),1);
-	Light3D contr = Light3D(m_r3d,1,glm::vec3(-1000,-750,-100),glm::vec3(0,.4f,1),.4f);
+	/*Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
 	l3d.upload();
-	contr.upload();
-	l3d.set_amnt(2);
-	mat0 = Material3D(r3d,3,8,0.25f);
+	l3d.set_amnt(1);
+	mat0 = Material3D(r3d,4,32,.2);*/
 } MenuDialogue::~MenuDialogue() {  }
 
 /*
@@ -68,7 +67,7 @@ uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* 
 /*
 
 */
-void MenuDialogue::render()
+void MenuDialogue::render(uint8_t &index)
 {
 	// render dialogue background
 	m_sh.enable();
@@ -86,10 +85,20 @@ void MenuDialogue::render()
 	m_r2d->prepare();
 	m_r2d->render_sprite(irnd,irnd+srnd*open);
 
+	// §§ POLICE POLICE -- NOTHING TO SEE HERE -- POLICE POLICE §§
+
 	// render selection icosphere
+	/*glEnable(GL_DEPTH_TEST);
 	m_r3d->prepare_wcam(&cam3d);
 	mat0.upload();
-	m_r3d->render_mesh(0,1);
+	m_r3d->upload_model(glm::rotate(glm::mat4(1.0f),glm::radians(mrot),glm::vec3(.5f,1,.2f)));
+	mrot += 2;
+	mrot = (int)mrot%360;
+	m_r3d->render_mesh(0,1);*/
+
+	// §§ POLICE POLICE -- OUT OF COMMISSION -- POLICE POLICE §§
+
+	index = open;
 }
 
 /*

@@ -18,7 +18,7 @@ uniform sampler2D nmap;
 
 uniform samplerCube cm;
 
-uniform float ambient = 0.0;
+uniform float ambient = 0.1;
 uniform vec3 view_pos;
 
 uniform int specular = 2;
@@ -59,24 +59,26 @@ float calc_shadow(vec4 ltp);
 
 void main()
 {
-	vec4 mix=texture(tex,TexCoords);
-	vec4 amb=vec4(mix.rgb*ambient,mix.a);
+	vec4 mix = texture(tex,TexCoords);
+	mix = vec4(1,1,1,1);
+	vec4 amb = vec4(mix.rgb*ambient,mix.a);
 
-	vec4 alo=vec4(0.0,0.0,0.0,0.0);
-	for (int i=0;i<amnt_light_sun;i++) alo+=lumen_sun(mix,al[i]);
-	vec4 plo=vec4(0.0,0.0,0.0,0.0);
-	for (int j=0;j<amnt_light_point;j++) plo+=lumen_point(mix,pl[j]);
-	vec4 slo=vec4(0.0,0.0,0.0,0.0);
-	for (int k=0;k<amnt_light_spot;k++) slo+=lumen_spot(mix,sl[k]);
+	vec4 alo = vec4(0.0,0.0,0.0,0.0);
+	for (int i=0;i<amnt_light_sun;i++) alo += lumen_sun(mix,al[i]);
+	vec4 plo = vec4(0.0,0.0,0.0,0.0);
+	for (int j=0;j<amnt_light_point;j++) plo += lumen_point(mix,pl[j]);
+	vec4 slo = vec4(0.0,0.0,0.0,0.0);
+	for (int k=0;k<amnt_light_spot;k++) slo += lumen_spot(mix,sl[k]);
 
-	vec3 emitmap=vec3(texture(emit,TexCoords));
-	float shadow=calc_shadow(light_transpos);
-	vec4 all=amb+(alo+plo+slo)*(1.0-shadow);
-	outColour=vec4(max(all.rgb,emitmap),all.a);
+	vec3 emitmap = vec3(texture(emit,TexCoords));
+	float shadow = calc_shadow(light_transpos);
+	vec4 all = amb+(alo+plo+slo)*(1.0-shadow);
+	//outColour = mix;
+	outColour = vec4(max(all.rgb,emitmap),all.a);
 
-	//vec3 I=normalize(Position.xyz-view_pos);
-	//vec3 R=reflect(I,Normals);
-	//outColour=vec4(texture(cm,R).rgb,1.0);
+	//vec3 I = normalize(Position.xyz-view_pos);
+	//vec3 R = reflect(I,Normals);
+	//outColour = vec4(texture(cm,R).rgb,1.0);
 }
 vec4 lumen_sun(vec4 o,light_sun l)
 {

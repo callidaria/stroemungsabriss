@@ -76,8 +76,8 @@ private:
 	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
 
 	// dialogue relevant variables
-	MenuDialogue md_diff;
-	MenuDialogue md_conf;
+	MenuDialogue md_diff,md_conf;
+	uint8_t dsi_diff,dsi_conf;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
 };

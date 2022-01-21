@@ -227,7 +227,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// menu list selection and scrolling
 	lscroll += (lselect>lbounds)-(lselect<(lbounds-7)); // FIXME: kill the extra scrolling calculation
-	bool scddiff = lselect>lbounds;bool scudiff = lselect<(lbounds-7);
+	bool scddiff = lselect>lbounds;
+	bool scudiff = lselect<(lbounds-7);
 	lbounds = (!scddiff&&!scudiff)*lbounds+scddiff*lselect+scudiff*(lselect+7);
 	int lcscroll = 45*(lselect+7-lbounds);
 	for (int i=0;i<8;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
@@ -275,19 +276,29 @@ void Menu::render(uint32_t &running,bool &reboot)
 	bool af = edge_mod==-1;
 	int32_t xsll = 5+290*edge_mod,xslr = -5-290*(1-edge_mod); // ??reset and immediate usage, the hell?
 	int32_t yslu = (md_disp)*edge_sel+12*(!!edge_sel),ysld = -(md_disp)*edge_sel-12*(!!edge_sel);
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
-			-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
-			-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
-	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
-			-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
-	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
-			-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
-	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
-	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
-	// TODO: automation of array upload to shader
+	if (dsi_diff||dsi_conf) { // FIXME: remove branching from mloop right now!
+		sshd.upload_vec2("idx_mod[0]",glm::vec2(0));
+		sshd.upload_vec2("idx_mod[1]",glm::vec2(0,100));
+		sshd.upload_vec2("idx_mod[2]",glm::vec2(100,100));
+		sshd.upload_vec2("idx_mod[3]",glm::vec2(100,0));
+		sshd.upload_vec2("idx_mod[4]",glm::vec2(200,100));
+		sshd.upload_vec2("idx_mod[5]",glm::vec2(200,0));
+		sshd.upload_vec2("idx_mod[6]",glm::vec2(300,100));
+		sshd.upload_vec2("idx_mod[7]",glm::vec2(300,0));
+	} else {
+		sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
+		sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
+		sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
+				-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
+		sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
+				-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
+		sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
+				-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
+		sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
+				-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
+		sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
+		sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
+	} // TODO: automation of array upload to shader
 	cross_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
@@ -342,6 +353,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
 	// render menu dialogue overlays
-	md_diff.render();
-	md_conf.render();
+	md_diff.render(dsi_diff);
+	md_conf.render(dsi_conf);
 }
