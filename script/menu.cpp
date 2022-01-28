@@ -114,7 +114,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 /*
 	render(uint32_t&)
-	running: is application still running?
+	running: is application still running, and if so which lvindex?
+	reboot: will be rebooting with new settings after game closed?
 	purpose: render the main menu, calculate geometry and process interactions
 */
 void Menu::render(uint32_t &running,bool &reboot)
@@ -233,13 +234,34 @@ void Menu::render(uint32_t &running,bool &reboot)
 	int lcscroll = 45*(lselect+7-lbounds);
 	for (int i=0;i<8;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i]; // !!range
 
+	// modulation coordinates title splash
+	/*
+		INITIAL		DESTINATION	VERTEX COLOUR		INDEX
+		-25,0,		25,0,		.5f,0,0,		0,
+		420,720,	-25,720,	.5f,0,0,		1,
+		600,720,	25,720,		.5f,0,0,		2,
+		50,0,		160,0,		.5f,0,0,		3,
+	*/
+
+	// container square parameters
+	/*
+	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,r3d,m_cam2d,"select difficulty",pth_diff,150,450);
+	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,r3d,m_cam2d,"confirm changes?",pth_conf,75,75);
+	*/
+
 	// render the title splash
-	sshd.enable();glBindVertexArray(svao);
+	sshd.enable();
+	glBindVertexArray(svao);
+
+	glm::vec2 dopen = glm::vec2(dsi_diff||dsi_conf);
+	glm::vec2 disp = glm::vec2(295,135)*glm::vec2(dsi_diff)+glm::vec2(257,285)*glm::vec2(dsi_conf);
+
 	sshd.upload_float("ptrans",ptrans);
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(0,0));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(0,0));
+	sshd.upload_vec2("idx_mod[0]",(glm::vec2(-50,-25)+disp)*dopen);
+	sshd.upload_vec2("idx_mod[1]",(glm::vec2(0,-695)+disp)*dopen);
+	sshd.upload_vec2("idx_mod[2]",(glm::vec2(0,-695)+disp)*dopen);
+	sshd.upload_vec2("idx_mod[3]",(glm::vec2(-135,-25)+disp)*dopen);
+
 	splash_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,0,6);
@@ -249,6 +271,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	int rnd_edge[4];
 	for (int i=0;i<4;i++) rnd_edge[i] = (rand()%10-5);
 	int32_t xscr0 = -700,xscr1 = -400;
+
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(0,-15*(mm>2)-lcscroll+sbar[0]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[1]",glm::vec2(0,-40*(mm>2)-lcscroll+sbar[1]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0*(mm==5),-90*(mm>2)-lcscroll+sbar[2]+rnd_edge[0]));
@@ -257,10 +280,21 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1*(mm==5),-40*(mm>2)-lcscroll+sbar[5]+rnd_edge[3]));
 	sshd.upload_vec2("idx_mod[6]",glm::vec2(1280,-40*(mm>2)-lcscroll+sbar[6]+(rand()%10-5)));
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,-15*(mm>2)-lcscroll+sbar[7]+(rand()%10-5)));
+
 	title_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,6,12);
 	title_fb.close();
+
+	// modulation coordinates for selection splash
+	/*
+		INITIAL		DESTINATION	VERTEX COLOUR	INDEX
+		630,0,		630,0,		s_rgb,		0,
+		630,0,		0,720,		s_rgb,		1,
+		650,0,		0,720,		s_rgb,		2,
+		650,0,		650,0,		s_rgb,		3,
+
+	*/
 
 	// render the vertical selection splash
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
@@ -276,29 +310,18 @@ void Menu::render(uint32_t &running,bool &reboot)
 	bool af = edge_mod==-1;
 	int32_t xsll = 5+290*edge_mod,xslr = -5-290*(1-edge_mod); // ??reset and immediate usage, the hell?
 	int32_t yslu = (md_disp)*edge_sel+12*(!!edge_sel),ysld = -(md_disp)*edge_sel-12*(!!edge_sel);
-	if (dsi_diff||dsi_conf) { // FIXME: remove branching from mloop right now!
-		sshd.upload_vec2("idx_mod[0]",glm::vec2(0));
-		sshd.upload_vec2("idx_mod[1]",glm::vec2(0,100));
-		sshd.upload_vec2("idx_mod[2]",glm::vec2(100,100));
-		sshd.upload_vec2("idx_mod[3]",glm::vec2(100,0));
-		sshd.upload_vec2("idx_mod[4]",glm::vec2(200,100));
-		sshd.upload_vec2("idx_mod[5]",glm::vec2(200,0));
-		sshd.upload_vec2("idx_mod[6]",glm::vec2(300,100));
-		sshd.upload_vec2("idx_mod[7]",glm::vec2(300,0));
-	} else {
-		sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
-		sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
-		sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
-				-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
-		sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
-				-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
-		sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
-				-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
-		sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
-				-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
-		sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
-		sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
-	} // TODO: automation of array upload to shader
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(xscr0,-15-lcscroll+sbar[3]+rnd_edge[1]));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(xscr0,-40-lcscroll+sbar[2]+rnd_edge[0]));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
+			-40-lcscroll+(sbar[2]+rnd_edge[0])*af-10*!af+yslu));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(xscr0+xsll*!af+yslu*.1f,
+			-15-lcscroll+(sbar[3]+rnd_edge[1])*af+10*!af+ysld));
+	sshd.upload_vec2("idx_mod[4]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
+			-40-lcscroll+(sbar[5]+rnd_edge[3])*af-10*!af+yslu));
+	sshd.upload_vec2("idx_mod[5]",glm::vec2(xscr1+xslr*!af-yslu*.1f,
+			-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
+	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
+	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
 	cross_fb.bind();
 	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
@@ -315,6 +338,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	glm::mat4 tr_model = glm::scale(pos_title,glm::vec3(val_vscl,val_vscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_vrot),glm::vec3(0,0,1));
 	m_r2d->al.at(0).model = tr_model;	// model matrix for vertical title
+
 	tr_model = glm::scale(pos_entitle,glm::vec3(val_hscl,val_hscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_hrot),glm::vec3(0,0,1));
 	m_r2d->al.at(1).model = tr_model;	// model matrix for horizontal title
@@ -337,8 +361,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// write dare message & version notification
 	m_r2d->reset_shader();
 	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
+
 	tft.prepare();
 	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
+
 	vtft.prepare();
 	vtft.render(75,glm::vec4(0,0,.5f,1));
 	fb.close();
