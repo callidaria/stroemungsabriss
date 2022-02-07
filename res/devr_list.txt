@@ -1,0 +1,17 @@
+NEEDED WITHOUT REPLACEMENT
+./boss/dpilot.dae +tex
+
+EXISTING REPLACEMENTS
+./boss/lchild.png +anim
+./title.png
+./en_title.png
+./flyfighter.png -> ./player/ssonicfighter.dae +tex
+./diffs/*
+./bgr/exmp_dpilot -> ./bgr/sb_dpilot.png
+./bgr/exmp_lchild -> ./bgr/sb_lchild.png
+./fonts/*
+./menu/*
+./bllt_norm.png -> ./bllt/dpilot_norm.png +anim
+./bllt_proj.png -> ./bllt/dpilot_proj.png +anim
+./bllt_ffdir.png -> ./bllt/dpilot_ffdir.png +anim
+./norm_shot.png -> ./player/bllt/norm_shot.png

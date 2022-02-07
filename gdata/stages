@@ -1,43 +1,3 @@
-america:
-    texas -> Cletus                                     *
-    colorado -> Hotshot                                 *
-    new York -> Sebastian Necronte                      **
-brasil:
-    rainforrest -> Martha                               **
-    brasilia -> Pavel X                                 **
-    the passing roads -> Gustavo                        ***
-    favela watchtower -> Sinclair                       ***
-greenland:
-    icebreaker -> Sad Sailor                            ***
-spain:
-    tolero -> Black Belt Laura                          ****
-    manege -> DJ JackIt                                 **
-egypt:
-    cairo -> Lost Child Chiaki                          ***
-    cairo -> pharao kordanhio                           ***
-germany:
-    Wunderzirkus Chaosland -> Fritz von Feuersforst     ***
-    Berlin -> Clocktower                                ***
-nepal:
-    himalaya mountains -> Chett, the Dancing Pilot      ***
-    base camp -> Sane Sorcerer                          ****
-    everest summit -> Red Belt Laura                    *****
-siberia:
-    ochotsk rocket station -> Artyom                    ****
-    space -> Battle Angel Chiaki                        *****
-    siberian woods -> Yaga, the Noonday Witch           ****
-finland:
-    north woods -> Blind SAI                            ****
-    north village -> Aurora Minerva                     *****
-japan:
-    okinawa -> The Twin Blades                          *** // ***
-    tokyo -> Cottonmind                                 *** // *** // *** // ***
-    STYX Residence -> YOMI                              *****
-
-BOSS COUNT: 26
-
-							ARCADE MODE
-
 					AMERICA
 Stage 1: Orphansnatchers
 Boss 1: Cletus // Toothless and his beloved Maria // Mecharia
@@ -60,7 +20,6 @@ Boss ??: Black Belt Laura
 Stage ??: Traffic JAM
 Boss ??: Lost Child Chiaki
 Stage ??: Rafting Vacation on the Nile
-Boss ??: Pharao Kordanhio, The Snake Charmer // Vengeful Basilisk of the Nile // Kordanhio, Professional Swimmer
                     GERMANY
 Boss ??: Clocktower
 (Boss ?? <loyalty,johanna>: Chessmaster Octagon)
@@ -86,7 +45,6 @@ Stage ??: Free Fall to Reality
 Stage ??: Crossdrive through the Woods
 Boss ??: A Hutt with Feet // Grandmother Yaga, the Noonday Witch // Childfeaster Yaga
                     FINLAND
-Boss ??: Blinded By Disgrace // Reborn By Failure // Redeemed Student of the Twin Blades || The Enlightened One
 Boss ??: Aurora Minerva // Minerva, Seeker of Wisdom // Minerva, She Who Knows Everything
 					GREENLAND
 Stage ??: Titanical Dodge
@@ -99,7 +57,7 @@ Boss ??: Dustdragon // Endzeit Phoenix // True Endzeit, The Sun // Final Endzeit
 Stage ??: Tokyo Emergency
 Boss ??: Black Label Arcade // White Label Arcade // (Red Label Arcade) // Cottonmind // Dnimnottoc
 Stage ??: Styx Residence
-Boss ??: Roshisenpai & Onikochan, the Twin Blades // Lonely Blade, Awakened Deamon || Lonely Blade, Ruthless Killer
+Boss ??: Roshisenpai & Onikochan, the Twin Blades
 Boss ??: YOMI, The East Wall // YOMI, The South Wall // YOMI, The West Wall // YOMI, The North Wall // Yomisensei
 			// (Yomisama, The Beautiful Death - True Final Form) || (Yomisama, The Disappointed - Corrupted Final Form)
 

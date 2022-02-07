@@ -1,0 +1,103 @@
+<node>
+	<head>!!Run All Back To Back!!</>
+	<dsc>
+		In for the full yomisensei arcade experience?<br>
+		Run the entire game without story cuts here!
+	</>
+</>
+<node>
+	<head>The North American Arcade</>
+	<dsc>
+		Run the Arcade that contains the hunt for<br>
+		information about Yomisensei, the first attempts<br>
+		of Hitmen trying to kill you and a roadtrip<br>
+		through the US.
+	</>
+	<diff>2</>
+</>
+<node>
+	<head>Latin American Arcade</>
+	<dsc>
+		This arcade contains a few cool characters,<br>
+		multiple revenge stories and real evil dudes.
+	</>
+	<diff>3</>
+</>
+<node>
+	<head>Arcade Antarctica</>
+	<dsc>
+		This arcade unlocks if all content in Antarctica<br>
+		has been discovered. This option lets you play<br>
+		the full Antarctica experience.
+	</>
+	<diff>4</>
+</>
+<node>
+	<head>The African Arcade</>
+	<dsc>
+		Experience a trip of survival through desert,<br>
+		jungle and semi-urban environment with the<br>
+		African Arcade.
+	</>
+	<diff>6</>
+</>
+<node>
+	<head>The European Arcade</>
+	<dsc>
+		This arcade gets a little difficult.<br>
+		Also there is public transportation over here.<br>
+		Call it infrastructure!
+	</>
+	<diff>8</>
+</>
+<node>
+	<head>The Great East Arcade</>
+	<dsc>
+		Great Countries, Great Souls. A big variety of<br>
+		sceneries and even a little climbing on top of it.<br>
+		The Great East Arcade offers a lot of challenge<br>
+		and a lot of difference.
+	</>
+	<diff>10</>
+</>
+<node>
+	<head>The Asian Challenge Collection</>
+	<dsc>
+		...
+	</>
+	<diff>12</>
+</>
+<node>
+	<head>The Japanese Arcade</>
+	<dsc>
+		This one is all about the finale in Japan.<br>
+		It hosts a few of the hardest stages and<br>
+		bosses, including the final battle against<br>
+		yomisensei. Proceed with care!
+	</>
+	<diff>14</>
+</>
+<node>
+	<head>Cottonmind Arcade</>
+	<dsc>
+		Cottonmind Arcade
+	</>
+	<diff>7</>
+</>
+<node>
+	<head>Cottonmind: Rainbow Label</>
+	<dsc>
+		Unlocks if player met Cottonmind and<br>
+		collected all rainbow PCBs.
+	</>
+	<diff>9</>
+</>
+<node>
+	<head>Cottonmind: White Label</>
+	<dsc>
+		Unlocks if player met Cottonmind,<br>
+		beat his rainbow label arcade and<br>
+		inserted the white coin.
+	</>
+	<diff>11</>
+</>

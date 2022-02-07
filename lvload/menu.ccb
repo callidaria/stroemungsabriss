@@ -1,0 +1,20 @@
+sprite: 139 509 225 30 res/menu/eexit.png
+sprite: 227 399 50 100 res/menu/jexit.png
+sprite: 282 505 225 30 res/menu/eoptions.png
+sprite: 375 250 50 250 res/menu/joptions.png
+sprite: 438 510 225 30 res/menu/epractice.png
+sprite: 525 400 50 100 res/menu/jpractice.png
+sprite: 590 511 225 30 res/menu/earcade.png
+sprite: 675 250 50 250 res/menu/jarcade.png
+sprite: 739 511 225 30 res/menu/eload.png
+sprite: 825 350 50 150 res/menu/jload.png
+sprite: 888 511 225 30 res/menu/econtinue.png
+sprite: 975 400 50 100 res/menu/jcontinue.png
+sprite: 1043 509 225 30 res/menu/engame.png
+sprite: 1125 250 50 250 res/menu/jngame.png
+sprite: 205 60 200 600 res/diffs/normal_diff.png
+sprite: 425 60 200 600 res/diffs/master_diff.png
+sprite: 645 60 200 600 res/diffs/gmaster_diff.png
+sprite: 865 60 200 600 res/diffs/rhack_diff.png
+anim: -50 -200 100 400 res/vrt_title.png 1 4 30 0
+anim: -250 -42 500 83 res/hrz_title.png 4 1 30 0
