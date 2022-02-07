@@ -7,7 +7,7 @@ MenuDialogue::MenuDialogue() {  }
 */
 MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Renderer3D* r3d,Camera2D* cam2d,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight)
-	: m_r2d(r2d),m_r3d(r3d)
+	: m_r2d(r2d)
 {
 	// dialogue background
 	glGenVertexArrays(1,&bvao);
@@ -69,6 +69,10 @@ uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* 
 */
 void MenuDialogue::render(uint8_t &index)
 {
+	// setup selection state and interpret openness
+	sstate = index*open;
+	sstate += (!sstate&&open)-(sstate>srnd);
+
 	// render dialogue background
 	m_sh.enable();
 	glBindVertexArray(bvao);
@@ -98,13 +102,14 @@ void MenuDialogue::render(uint8_t &index)
 
 	// §§ POLICE POLICE -- OUT OF COMMISSION -- POLICE POLICE §§
 
-	index = open;
+	index = sstate;
 }
 
 /*
 
 */
 void MenuDialogue::open_dialogue() { open = true; }
+void MenuDialogue::close() { open = false; }
 
 /*
 

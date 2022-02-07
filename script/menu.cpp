@@ -122,19 +122,23 @@ void Menu::render(uint32_t &running,bool &reboot)
 {
 	bool is_shift;
 	uint8_t tmm;
-	bool hit_a = *cnt_start&&!trg_start,hit_b = *cnt_b&&!trg_b;
+
+	bool hit_a=*cnt_start&&!trg_start,hit_b=*cnt_b&&!trg_b;
+	bool hit_lft=*cnt_lft&&!trg_lft,hit_rgt=*cnt_rgt&&!trg_rgt;
+
 	int ml_delta = 0;
 	uint8_t thrzt,tvrtt;
 	int8_t mv_dlta = 0;
 
 	uint8_t i_ml = mselect-2+opt_index;
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
+	uint8_t dlgmod = hit_rgt-hit_lft;
 	// FIXME: remove branch from loop
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
 	uint8_t conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
-	if (conf_can==1) {
+	if (conf_can==1||(conf_can==2&&dsi_conf==2)) {
 		for (int i=7;i<11;i++) mls[i].reset();
 		mm = MenuMode::MENU_SELECTION;
 	} else if (conf_can==2) {
@@ -254,7 +258,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	glBindVertexArray(svao);
 
 	glm::vec2 dopen = glm::vec2(dsi_diff||dsi_conf);
-	glm::vec2 disp = glm::vec2(295,135)*glm::vec2(dsi_diff)+glm::vec2(257,285)*glm::vec2(dsi_conf);
+	glm::vec2 disp = glm::vec2(295,135)*glm::vec2(dsi_diff>0)+glm::vec2(257,285)*glm::vec2(dsi_conf>0);
+	disp.x += (dsi_diff-(dsi_diff>0))*75+(dsi_conf-(dsi_conf>0))*125;
 
 	sshd.upload_float("ptrans",ptrans);
 	sshd.upload_vec2("idx_mod[0]",(glm::vec2(-50,-25)+disp)*dopen);
@@ -379,6 +384,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
 	// render menu dialogue overlays
+	dsi_diff += dlgmod;
+	dsi_conf += dlgmod;
 	md_diff.render(dsi_diff);
 	md_conf.render(dsi_conf);
 }

@@ -26,15 +26,17 @@ public:
 	uint8_t stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back);
 	void render(uint8_t &index);
 	void open_dialogue();
+	void close();
 	uint8_t hit_dialogue(bool confirm);
 private:
 	// essentials
 	Shader m_sh;			// shader
 	Renderer2D* m_r2d;		// 2d renderer reference
-	Renderer3D* m_r3d;		// 3d renderer reference
-	Camera3D cam3d;
-	Material3D mat0;
+	//Renderer3D* m_r3d;		// 3d renderer reference
+	//Camera3D cam3d;
+	//Material3D mat0;
 	unsigned int bvao,bvbo;		// vertex array & vertex buffer for background
+	uint8_t sstate = 0;
 	bool open = false;		// dialogue is opened
 
 	// head dialogue
