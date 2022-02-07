@@ -1,0 +1,47 @@
+<node>
+	<head>Text Language</>
+	<dsc>
+		Choose subtitle and textbox<br>
+		language.
+	</>
+	<le>English,0</>
+	<le>German,1</>
+	<le>Japanese,2</>
+	<le>Japanese (Annotated Kanji),3</>
+	<le>Korean,4</>
+	<le>Korean (Annotated Hanja),5</>
+	<le>Russian,6</>
+	<le>Natives (Definitely Not Recommended),7</>
+	<dest>iGeneralTextLanguageFlag,0</>
+</>
+<node>
+	<head>Voiced Language</>
+	<dsc>
+		Native option means, that<br>
+		every character speaks their<br>
+		own native language depending<br>
+		on where they grew up / live.<br>
+		All the other options are<br>
+		pretty easy to understand.
+	</>
+	<le>Natives,0</>
+	<le>English,1</>
+	<le>Japanese,2</>
+	<le>German,3</>
+	<le>Russian,4</>
+	<le>Korean,5</>
+	<dest>iGeneralVoiceLanguageFlag,0</>
+</>
+<node>
+	<head>Input Style</>
+	<dsc>
+		Choose between Controller &<br>
+		Keyboard, as well as Controller<br>
+		& Keyboard mapping.
+	</>
+	<le>Controller,0</>
+	<le>Arcade Stick,1</>
+	<le>Keyboard,2</>
+	<le>Mouse & Keyboard,3</>
+	<dest>iGeneralPeripheralStyleFlag,0</>
+</>

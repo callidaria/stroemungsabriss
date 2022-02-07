@@ -1,0 +1,34 @@
+<node>
+	<head>Master Audio</>
+	<dsc>
+		Too loud? Too low?<br>
+		Adjust master audio here.
+	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioMasterVolume,80</>
+</>
+<node>
+	<head>Voices Volume</>
+	<dsc>
+		Spoken language volume.
+	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioVoicesVolume,75</>
+</>
+<node>
+	<head>Music Volume</>
+	<dsc>
+		Background jam volume.
+	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioMusicVolume,50</>
+</>
+<node>
+	<head>Effects Volume</>
+	<dsc>
+		Volume of interaction sound<br>
+		and SFX.
+	</>
+	<slider>0,100,0,1</>
+	<dest>fAudioEffectsVolume,65</>
+</>
