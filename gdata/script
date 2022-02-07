@@ -1,31 +1,65 @@
-NOTES
+- Orphansnatcher stage
+- Rescued by Nelly
+				Chapter 1 - Beginning the Hunt
+- Cletus (and Maria) Fight
+- Meeting Dante
+- Putting the Lawer out of Business
+- Rafting the Canyon
+- Hotshot Fight
+				Chapter 2 - Don't look down
+- Martha Fight
+- Meeting April
 
-
+- Pavel X Fight
 <Before you can finish off Pavel X a dialogue is initialized>
-pavel x (always breathing heavily):
-            Hold it right there, *dickhead*! I believe you don't understand the severity of your situation!
-            Your degenerate brain inside your degenerate skull is not able to grasp the limitlessness of my powers.
-            Give up or face a fate much worse than death!
-04:         1) What are you talking about? You suck at fighting. This was easier than I could have wished for.
-            2) Listen up *shithead*! Being dramatic is *my* job. Shut and give up. I have more threatening foes to 					fight.
-			3) Forfeit all your rambling and pathetic attempts, fritening me. This shall be the end of your free reign!
-			4) <surrender> Yes, I suppose you speak the truth. I surrender myself to your predetermined will.
-            5) Hey, thats cheating. Initiating a talk sequence right before beating a boss is so unsatisfying!
+RUN LC0002
 
+- Gustavo Fight
+- Climbing the Skyscraper
+- Sinclair Fight
+				Chapter 3 - Working where others go on Vacation
+- Black Belt Laura Fight
+- Taking the Gondola over the Lagoon
+- DJ JackIt Fight
+				Chapter 4 - A City in the middle of nowhere
+- Lost Child Chiaki Fight
+- Expedition into the Desert
+- Basilisk Fight
+				Chapter 5 - Wunderzirkus Chaosland
+- Moodmakers Cadence
+- Surviving the Jahrmarkt
+- Clocktower Fight
+- Feuersforst Fight
+- Entering the Luftschiff Spielzeugparadies
 
-April's Options before confronting her "father", what will she do while appearing in the fading smoke:
-			1) <break through the door> Father!
-			2) <break through the door> Guess whos back!
-			3) <break through the door> You have abandoned me but I'm still alive and well! Don't worry.
-			4) <break through the door> Great job asshole, your experiment worked after all!
+NOTES:
 			5) <break through the door, looking through a crack> Here's April
 !!amounts to him believing his daughter would have broken down the door with an explosion
 		-> then she responds with "wait for it" and you hear a distant explosion while spielzeugparadies is breaking
 		-> weirdly cute family reunion
-			6) <break through the door> What an Insult! *I'm* the greatest thing you've ever created. Not this airship!
-			7) <break through the door> Ah yes, finally we meet. Let this be our greatest battle! <begin boss fight>
-			8) <do not break through the door>
-				-> April<smiling to herself, making the selected option impossible to select again> yeah right...
-(ref.1)		1) No wait!
-				-> Dr. Kindsgesicht: "No wait"? what a compelling argument indeed... then again, i changed my mind.
-					<laughter> Keep shooting her! <begin main boss fight>
+- Dr. Kindsgesicht Fight
+
+                Chapter 6 - The Vast Cold Desert
+				Chapter 7 - The Summit
+- Dancing Pilot Fight
+- Sane Sorcerer Fight
+- Climbing Mount Everest
+- Red Belt Laura Fight
+				Chapter 8 - Spaced Out
+- Astral Adventurer Fight
+- Flying to the fucking MOON
+- Battle Angel Chiaki Fight
+				Chapter 9 - The Cold Lonely Woods
+- Noonday Witch Fight
+- Honourable Student Fight
+- Blind SAI Fight
+- Aurora Minerva Fight
+- Akkordeons Cadence
+- Travelling to Greenland
+- Sad Sailor Fight
+				Finale Furioso - 37, YOMI
+- Cottonmind fight
+- Styx' Echoed Cadence
+- Twin Blades Fight
+- YOMIs fireplace
+- YOMI fight
