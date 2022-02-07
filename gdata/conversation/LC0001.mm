@@ -1,7 +1,7 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1634767609037" ID="ID_1593322008" MODIFIED="1634767626449" TEXT="LC0001">
-<node CREATED="1634767646910" ID="ID_229180909" MODIFIED="1643336104634" POSITION="right">
+<node CREATED="1634767646910" ID="ID_229180909" MODIFIED="1643513901600" POSITION="right">
 <richcontent TYPE="NODE"><html>
   <head>
     
@@ -35,7 +35,7 @@
       Those are some heavy steps...
     </p>
     <p>
-      Damn he must weigh at least 145 kg!
+      Damn <i>the one approaching</i>&#160;must weigh at least 145 kg!
     </p>
     <p>
       
@@ -94,8 +94,7 @@
       Also I <i>volunteered</i>, because I though it would be <b>fun</b>.
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <node CREATED="1634770162384" ID="ID_1637920524" MODIFIED="1634770222660">
 <richcontent TYPE="NODE"><html>
   <head>
@@ -157,8 +156,7 @@
       Let's do&#160;this then, gimme a challenge pap&#225;!
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <node CREATED="1634770312275" ID="ID_477938759" MODIFIED="1643335831588">
 <richcontent TYPE="NODE"><html>
   <head>
@@ -169,8 +167,7 @@
       <b>!brk</b>
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 </node>
