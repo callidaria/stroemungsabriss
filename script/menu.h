@@ -70,7 +70,7 @@ private:
 	bool edge_sel = false;
 	uint8_t md_disp = 0;
 	uint8_t hrz_title = 0,vrt_title = 3;
-	float dlgrot_val = 0;
+	float dlgrot_val = 0,dlgrot_cnt = 0;
 
 	// menu title speedup animation
 	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;

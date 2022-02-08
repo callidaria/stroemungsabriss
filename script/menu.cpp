@@ -393,6 +393,17 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// m_r2d->render_sprite(msindex+14,msindex+18);
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
+	// render menu dialogue base selector
+	m_r2d->prepare();
+	bool dopen = dsi_diff||dsi_conf;
+	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
+	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
+	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp+glm::vec3(-5,15,0));
+	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_cnt),glm::vec3(0,0,1));
+	m_r2d->sl[msindex+18].model = disptrans*disprot;
+	m_r2d->render_sprite(msindex+18,msindex+19*dopen);
+	dlgrot_cnt -= 7-(dlgrot_cnt<-360)*360;
+
 	// render menu dialogue overlays
 	dsi_diff += dlgmod;
 	dsi_conf += dlgmod;
@@ -400,12 +411,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 	md_conf.render(dsi_conf);
 
 	// render menu dialogue focused selector
-	bool dopen = dsi_diff||dsi_conf;
-	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
-	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
-	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp);
-	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));
-	m_r2d->sl[msindex+18].model = disptrans*disprot;
-	m_r2d->render_sprite(msindex+18,msindex+19*dopen);
+	disptrans = glm::translate(glm::mat4(1.0f),disp);
+	disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));
+	m_r2d->sl[msindex+19].model = disptrans*disprot;
+	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 }
