@@ -39,8 +39,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	glm::vec3 r_rgb = glm::vec3(0,0,1);
 	float sverts[] = { // TODO: remove hardcoded secondary segment coords
 		// title splash
-		-25,0,25,0,.5f,0,0,0,420,720,-25,720,.5f,0,0,1,600,720,25,720,.5f,0,0,2,
-		600,720,25,720,.5f,0,0,2,50,0,160,0,.5f,0,0,3,-25,0,25,0,.5f,0,0,0,
+		-25,0,25,0,.5f,0,0,0, 420,720,-25,720,.5f,0,0,1, 600,720,25,720,.5f,0,0,2,
+		600,720,25,720,.5f,0,0,2, 50,0,160,0,.5f,0,0,3, -25,0,25,0,.5f,0,0,0,
 
 		// head splash
 		0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 0,500,0,550,h_rgb.x,h_rgb.y,h_rgb.z,1,
@@ -137,6 +137,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
+	if (diff_can==1) mm = MenuMode::MENU_LISTING;
+	else if (diff_can>1) difflv = diff_can-1;
+
 	uint8_t conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
 	if (conf_can==1||(conf_can==2&&dsi_conf==2)) {
 		for (int i=7;i<11;i++) mls[i].reset();
@@ -176,11 +179,12 @@ void Menu::render(uint32_t &running,bool &reboot)
 		hrz_title = (hrz_title+(hrz_title==thrzt&&!!mv_dlta))%4;
 		vrt_title = (vrt_title+(vrt_title==tvrtt&&!!mv_dlta))%4;
 		break;
-	case MenuMode::MENU_DIFFS:
+	case MenuMode::MENU_DIFFS:  // TODO: remove this state and control through keystalling
 		tmm = 3;
-		tmm -= *cnt_start&&!trg_start;
+		tmm -= difflv>0;//*cnt_start&&!trg_start;
 		tmm += *cnt_b&&!trg_b;
 		mm = (MenuMode)tmm;
+		md_diff.open_dialogue();
 		break;
 	case MenuMode::MENU_LISTING:
 		tmm = 4;
@@ -223,7 +227,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// animate movement within title positions
 	ptrans+=.1f*(mm==1&&ptrans<1);ptrans-=.1f*(mm==0&&ptrans>.01f); // !!use an epsilon, pretty please
 	dtrans+=.1f*(mm>2&&dtrans<1);dtrans-=.1f*(mm<2&&dtrans>.01f); // FIXME: reduce this
-	strans+=.1f*(mm==3&&strans<1);strans-=.1f*(mm!=3&&strans>.01f);
+	// strans+=.1f*(mm==3&&strans<1);strans-=.1f*(mm!=3&&strans>.01f);
 	m_r2d->sl.at(msindex+mselect*2-4).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
 	m_r2d->sl.at(msindex+mselect*2-3).model=glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
@@ -257,15 +261,21 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.enable();
 	glBindVertexArray(svao);
 
-	glm::vec2 dopen = glm::vec2(dsi_diff||dsi_conf);
-	glm::vec2 disp = glm::vec2(295,135)*glm::vec2(dsi_diff>0)+glm::vec2(257,285)*glm::vec2(dsi_conf>0);
-	disp.x += (dsi_diff-(dsi_diff>0))*75+(dsi_conf-(dsi_conf>0))*125;
+	//glm::vec2 dopen = glm::vec2(dsi_diff||dsi_conf);
+	//glm::mat4 dlgrot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));
+	//dlgrot_val += 5-(dlgrot_val>360)*360;
+	//glm::vec2 disp = glm::vec2(235,155)*glm::vec2(dsi_diff>0)+glm::vec2(257,285)*glm::vec2(dsi_conf>0);
+	//disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
 
 	sshd.upload_float("ptrans",ptrans);
-	sshd.upload_vec2("idx_mod[0]",(glm::vec2(-50,-25)+disp)*dopen);
-	sshd.upload_vec2("idx_mod[1]",(glm::vec2(0,-695)+disp)*dopen);
-	sshd.upload_vec2("idx_mod[2]",(glm::vec2(0,-695)+disp)*dopen);
-	sshd.upload_vec2("idx_mod[3]",(glm::vec2(-135,-25)+disp)*dopen);
+	/*sshd.upload_vec2("idx_mod[0]",(glm::vec2(dlgrot*(glm::vec4(glm::vec2(-50,-25)+disp))))*dopen);
+	sshd.upload_vec2("idx_mod[1]",(glm::vec2(dlgrot*(glm::vec4(glm::vec2(0,-695)+disp))))*dopen);
+	sshd.upload_vec2("idx_mod[2]",(glm::vec2(dlgrot*(glm::vec4(glm::vec2(0,-695)+disp))))*dopen);
+	sshd.upload_vec2("idx_mod[3]",(glm::vec2(dlgrot*(glm::vec4(glm::vec2(-135,-25)+disp))))*dopen);*/
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(0));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(0));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(0));
 
 	splash_fb.bind();
 	m_frame->clear(0,0,0);
@@ -380,7 +390,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render menu lists and sublists
 	m_r2d->prepare();
-	m_r2d->render_sprite(msindex+14,msindex+18);
+	// m_r2d->render_sprite(msindex+14,msindex+18);
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
 	// render menu dialogue overlays
@@ -388,4 +398,14 @@ void Menu::render(uint32_t &running,bool &reboot)
 	dsi_conf += dlgmod;
 	md_diff.render(dsi_diff);
 	md_conf.render(dsi_conf);
+
+	// render menu dialogue focused selector
+	bool dopen = dsi_diff||dsi_conf;
+	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
+	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
+	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp);
+	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));
+	m_r2d->sl[msindex+18].model = disptrans*disprot;
+	m_r2d->render_sprite(msindex+18,msindex+19*dopen);
+	dlgrot_val += 2-(dlgrot_val>360)*360;
 }
