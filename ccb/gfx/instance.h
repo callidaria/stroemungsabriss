@@ -8,7 +8,7 @@
 #ifdef __WIN32__
 #define STB_IMAGE_IMPLEMENTATION
 #ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "../ext/stb_image.h"
+#include "../../include/stb_image.h"
 #endif
 #else
 #include <SOIL/SOIL.h>

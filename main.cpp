@@ -1,6 +1,11 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
 #include <iostream>
 #include <glm/gtx/rotate_vector.hpp>
+
+#ifdef __WIN32__
+#include <windows.h>
+#endif
+
 #include "ccb/frm/frame.h"
 #include "ccb/gfx/renderer2d.h"
 #include "ccb/gfx/renderer3d.h"
@@ -172,7 +177,12 @@ int main(int argc,char** argv)
 		f.update();
 	}
 
-	if (reboot) system("./yomisensei &");
+	if (reboot)
+#ifdef __WIN32__
+		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
+#else
+		system("./yomisensei &");
+#endif
 
 	f.vanish();
 	return 0;
