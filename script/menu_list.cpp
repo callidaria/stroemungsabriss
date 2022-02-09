@@ -109,7 +109,6 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				t_line = "";	    // reset temporary line
 				break;
 			case 3: // selectable menu sublist element in dropdown
-				// TODO: read from system for some list elements (eg. monitor ID)
 				args = split_arguments(excnt,','); // getting argument list
 				t_sle = Text(lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
