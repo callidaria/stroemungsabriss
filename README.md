@@ -12,6 +12,7 @@ make
 ```
 ### windows
 ```
+make winlib
 make win
 ```
 ### DISCLAIMER
@@ -29,10 +30,9 @@ double click yomisensei.exe
 ***
 ## v0.0.2 [WIP]
 - Build in Dev Mode & Engine Terminal
-- dynamic entity loader & interpreter
-- Windows Port
-- Test Builds [WIP]
-- Main Menu Prototype [WIP]
+- Dynamic Entity Loader & Interpreter
+- Windows Port [WIP]
+- Test Builds
+- Main Menu Prototype
 - Options Configuration Save
-- Player Movement Prototype [WIP]
-- Dancing Pilot Test (Itr 0) [WIP]
+- First Player Movement Prototype
