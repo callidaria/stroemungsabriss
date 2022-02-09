@@ -28,10 +28,10 @@ double click yomisensei.exe
 ### DISCLAIMER
 *building is not required to run the game*
 ***
-## v0.0.2 [WIP]
+## v0.0.2
 - Build in Dev Mode & Engine Terminal
 - Dynamic Entity Loader & Interpreter
-- Windows Port [WIP]
+- Windows Port
 - Test Builds
 - Main Menu Prototype
 - Options Configuration Save
