@@ -3,6 +3,7 @@
 Init::Init(const char* path)
 {
 	std::ifstream file(path,std::ios::in);
+	if (!file) printf("no config file found!\n");
 	while (!file.eof()) {
 		std::string rclh;file >> rclh;
 		std::string val;file >> val;

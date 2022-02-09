@@ -16,5 +16,7 @@ sprite: 205 60 200 600 res/diffs/normal_diff.png
 sprite: 425 60 200 600 res/diffs/master_diff.png
 sprite: 645 60 200 600 res/diffs/gmaster_diff.png
 sprite: 865 60 200 600 res/diffs/rhack_diff.png
+sprite: -25 -25 50 50 res/menu/bgr_seldom.png
+sprite: -25 -25 50 50 res/menu/seldom.png
 anim: -50 -200 100 400 res/vrt_title.png 1 4 30 0
 anim: -250 -42 500 83 res/hrz_title.png 4 1 30 0
