@@ -11,6 +11,7 @@
 #include "ccb/gfx/renderer3d.h"
 #include "ccb/gfx/rendereri.h"
 #include "ccb/mat/camera2d.h"
+#include "ccb/mat/camera3d.h"
 #include "ccb/ppe/msaa.h"
 #include "ccb/ppe/bloom.h"
 #include "ccb/fcn/text.h"
@@ -37,12 +38,13 @@ int main(int argc,char** argv)
 	Renderer2D r2d = Renderer2D();
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
-	Camera2D cam2d = Camera2D(1280.0f,720.0f);
+	Camera2D cam2d=Camera2D(1280.0f,720.0f);
+	Camera3D cam3d=Camera3D(glm::vec3(0,0,10),1280.0f,720.0f,70.0f);
 
 #ifdef MENU_RENDER
 	bool dactive = false;
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d);
+	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
 #elif
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");

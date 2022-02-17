@@ -1,13 +1,20 @@
 #include "menu.h"
 
 #define NCOLOUR 1
-
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
+Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d,Camera3D* cam3d)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d)
 {
 	const char* GVERSION = "0.0.3d";
 
 	msindex = ccbm->add_lv("lvload/menu.ccb");
+
+	m_r3d->add("./res/terra.obj","./res/terra/albedo.png","./res/terra/spec.png","./res/terra/norm.png",
+			"./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
+	m_r3d->load(m_cam3d);
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
+	l3d.upload();
+	l3d.set_amnt(1);
+	mat0 = Material3D(r3d,4,32,1);
 
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -377,7 +384,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
 
 	tft.prepare();
-	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
+	tft.render(19*(1-ptrans),glm::vec4(1,0,0,1));
 
 	vtft.prepare();
 	vtft.render(100,glm::vec4(0,0,.5f,1));
@@ -415,4 +422,11 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->sl[msindex+19].model = disptrans*disprot;
 	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
+
+	// render 3d component as test
+	glEnable(GL_DEPTH_TEST);
+	glFrontFace(GL_CW);
+	m_r3d->prepare();
+	mat0.upload();
+	m_r3d->render_mesh(0,1);
 }

@@ -5,11 +5,18 @@
 #include "../ccb/frm/frame.h"
 #include "../ccb/fcn/ccb_linpr.h"
 #include "../ccb/fcn/ccb_manager.h"
+
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
+#include "../ccb/gfx/light3d.h"
+#include "../ccb/gfx/material3d.h"
+
 #include "../ccb/mat/camera2d.h"
+#include "../ccb/mat/camera3d.h"
+
 #include "../ccb/frm/framebuffer.h"
+
 #include "../ccb/fcn/text.h"
 #include "../ccb/fcn/buffer.h"
 
@@ -30,7 +37,8 @@ enum MenuMode
 class Menu
 {
 public:
-	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d);
+	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
+		Camera2D* cam2d,Camera3D* cam3d);
 	~Menu();
 	void render(uint32_t &running,bool &reboot);
 private:
@@ -40,8 +48,11 @@ private:
 	CCBManager* m_ccbm;
 	Frame* m_frame;
 	Renderer2D* m_r2d;
+	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
+	Camera3D* m_cam3d;
+	Material3D mat0;
 	Shader sshd;
 	FrameBuffer fb,splash_fb,title_fb,select_fb,cross_fb;
 	Text tft,vtft;
