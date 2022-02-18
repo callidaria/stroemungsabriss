@@ -19,10 +19,13 @@
 #include "ccb/aud/audio.h"
 #include "ccb/aud/listener.h"
 #include "ccb/fcn/ccb_manager.h"
+#include "ccb/gfx/light3d.h"
+#include "ccb/gfx/material3d.h"
 #include "script/menu.h"
 
 #define MVMT_SPEED 4
-#define MENU_RENDER
+#define MENU_RENDER 0
+#define TEST_DIMENSION 1
 #define BUILD_DEV_MODE 1
 
 int main(int argc,char** argv)
@@ -41,11 +44,19 @@ int main(int argc,char** argv)
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 	Camera3D cam3d=Camera3D(glm::vec3(0,0,10),1280.0f,720.0f,70.0f);
 
-#ifdef MENU_RENDER
 	bool dactive = false;
+#if MENU_RENDER
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
-#elif
+#elif TEST_DIMENSION
+	r3d.add("res/terra.obj","res/terra/albedo.jpg","res/terra/spec.png","res/terra/norm.png","res/none.png",
+			glm::vec3(0,0,0),1,glm::vec3(0,0,0));
+	r3d.load(&cam3d);
+	Light3D l0 = Light3D(&r3d,0,glm::vec3(-200,100,-250),glm::vec3(1,1,1),1);
+	l0.upload();
+	l0.set_amnt(1);
+	Material3D m0 = Material3D(&r3d,1,8,16);
+#else
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter_hit.png");
@@ -79,7 +90,7 @@ int main(int argc,char** argv)
 #endif
 
 	// CAMERAS
-	r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
+	//r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
 	uint32_t run=1,pause=false;
 	bool reboot = false;
 	while (run) {
@@ -88,12 +99,17 @@ int main(int argc,char** argv)
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
 
-#ifdef MENU_RENDER
+#if MENU_RENDER
 		menu.render(run,reboot);
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
-#elif
+#elif TEST_DIMENSION
+	f.clear(.1f,.1f,.1f);
+	r3d.prepare_wcam(&cam3d);
+	m0.upload();
+	r3d.render_mesh(0,1);
+#else
 		// ENEMY
 		if (state==0) { // use vector function later
 			if (ex>=600||ex<=-600) state++;
