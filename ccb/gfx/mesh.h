@@ -83,6 +83,7 @@ public:
 	}
 	void texture()
 	{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,tex);
 		int width,height;
 #ifdef __WIN32__
