@@ -60,8 +60,7 @@ float calc_shadow(vec4 ltp);
 void main()
 {
 	vec4 mix = texture(tex,TexCoords);
-	//mix = vec4(1,1,0,1);
-	/*vec4 amb = vec4(mix.rgb*ambient,mix.a);
+	vec4 amb = vec4(mix.rgb*ambient,mix.a);
 
 	vec4 alo = vec4(0.0,0.0,0.0,0.0);
 	for (int i=0;i<amnt_light_sun;i++) alo += lumen_sun(mix,al[i]);
@@ -72,13 +71,12 @@ void main()
 
 	vec3 emitmap = vec3(texture(emit,TexCoords));
 	float shadow = calc_shadow(light_transpos);
-	vec4 all = amb+(alo+plo+slo)*(1.0-shadow);*/
-	outColour = mix;
-	//outColour = vec4(max(all.rgb,emitmap),all.a);
+	vec4 all = amb+(alo+plo+slo)*(1.0-shadow);
+	outColour = vec4(max(all.rgb,emitmap),all.a);
 
-	//vec3 I = normalize(Position.xyz-view_pos);
-	//vec3 R = reflect(I,Normals);
-	//outColour = vec4(texture(cm,R).rgb,1.0);
+	/*vec3 I = normalize(Position.xyz-view_pos);
+	vec3 R = reflect(I,Normals);
+	outColour = vec4(texture(cm,R).rgb,1.0);*/
 }
 vec4 lumen_sun(vec4 o,light_sun l)
 {

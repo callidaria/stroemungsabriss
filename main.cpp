@@ -35,58 +35,27 @@ int main(int argc,char** argv)
 		init.rINT(init.FRAME_RESOLUTION_HEIGHT),(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
 
 	// AUDIO
-	//Listener listener=Listener();
+	Listener listener=Listener();
 
 	// RENDERERS
 	Renderer2D r2d = Renderer2D();
-	//Renderer3D r3d = Renderer3D();
+	Renderer3D r3d = Renderer3D();
 	//RendererI ri = RendererI();
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
-	Camera3D cam3d=Camera3D(glm::vec3(0,0,10),1280.0f,720.0f,70.0f);
+	Camera3D cam3d=Camera3D(glm::vec3(0,0,5),1280.0f,720.0f,70.0f);
 
 	bool dactive = false;
 #if MENU_RENDER
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
 #elif TEST_DIMENSION
-	/*r3d.add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
+	r3d.add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
 			"./res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
-	Light3D l0 = Light3D(&r3d,0,glm::vec3(-200,100,-250),glm::vec3(1,1,1),1);
+	r3d.load(&cam3d);
+	Light3D l0 = Light3D(&r3d,0,glm::vec3(200,100,250),glm::vec3(1,1,1),1);
 	l0.upload();
 	l0.set_amnt(1);
 	Material3D m0 = Material3D(&r3d,1,8,16);
-	r3d.load(&cam3d);*/
-
-	// 3D redevelopment
-	unsigned int vao,vbo;
-	Shader s3d;
-	glGenVertexArrays(1,&vao);
-	glGenBuffers(1,&vbo);
-	float tverts[] = {
-		-1,-1,0,0,0,
-		-1,1,0,1,0,
-		1,1,0,1,1,
-		1,1,0,1,1,
-		1,-1,0,1,0,
-		-1,-1,0,0,0,
-	};
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER,vbo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(tverts),tverts,GL_STATIC_DRAW);
-	s3d.compile_test("shader/vertex_test.shader","shader/fragment_test.shader");
-	unsigned int ttex;
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,ttex);
-	int width,height;
-	unsigned char* image = SOIL_load_image("./res/terra/albedo.jpg",&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	s3d.upload_int("tex",0);
 
 	// reference
 	r2d.add(glm::vec2(50,50),50,50,"res/terra/albedo.jpg");
@@ -128,6 +97,7 @@ int main(int argc,char** argv)
 	//r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
 	uint32_t run=1,pause=false;
 	bool reboot = false;
+	glm::mat4 model = glm::mat4(1.0f);
 	while (run) {
 		f.print_fps();f.input(run,dactive);
 
@@ -141,18 +111,10 @@ int main(int argc,char** argv)
 #endif
 #elif TEST_DIMENSION
 		f.clear(.1f,.1f,.1f);
-		/*r3d.prepare_wcam(&cam3d);
+		r3d.prepare_wcam(&cam3d);
+		glEnable(GL_CULL_FACE);
 		m0.upload();
-		r3d.render_mesh(0,1);*/
-
-		// redevelopment
-		s3d.enable();
-		s3d.upload_matrix("proj",cam3d.proj3D);
-		s3d.upload_matrix("view",cam3d.view3D);
-		glBindVertexArray(vao);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D,ttex);
-		glDrawArrays(GL_TRIANGLES,0,6);
+		r3d.render_mesh(0,1);
 
 		r2d.prepare();
 		r2d.render_sprite(0,1);
