@@ -24,8 +24,8 @@
 #include "script/menu.h"
 
 #define MVMT_SPEED 4
-#define MENU_RENDER 0
-#define TEST_DIMENSION 1
+#define MENU_RENDER 1
+#define TEST_DIMENSION 0
 #define BUILD_DEV_MODE 1
 
 int main(int argc,char** argv)
@@ -40,7 +40,7 @@ int main(int argc,char** argv)
 	// RENDERERS
 	Renderer2D r2d = Renderer2D();
 	Renderer3D r3d = Renderer3D();
-	//RendererI ri = RendererI();
+	RendererI ri = RendererI();
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
 	Camera3D cam3d=Camera3D(glm::vec3(0,0,5),1280.0f,720.0f,70.0f);
 
@@ -94,7 +94,7 @@ int main(int argc,char** argv)
 #endif
 
 	// CAMERAS
-	//r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
+	r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
 	uint32_t run=1,pause=false;
 	bool reboot = false;
 	glm::mat4 model = glm::mat4(1.0f);
@@ -106,10 +106,10 @@ int main(int argc,char** argv)
 
 #if MENU_RENDER
 		menu.render(run,reboot);
-#if BUILD_DEV_MODE
+//#if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
-#endif
-#elif TEST_DIMENSION
+//#endif
+/*#elif TEST_DIMENSION
 		f.clear(.1f,.1f,.1f);
 		r3d.prepare_wcam(&cam3d);
 		glEnable(GL_CULL_FACE);
@@ -117,7 +117,7 @@ int main(int argc,char** argv)
 		r3d.render_mesh(0,1);
 
 		r2d.prepare();
-		r2d.render_sprite(0,1);
+		r2d.render_sprite(0,1);*/
 #else
 		// ENEMY
 		if (state==0) { // use vector function later

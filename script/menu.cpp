@@ -6,16 +6,21 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 {
 	const char* GVERSION = "0.0.3d";
 
+	// loading 2D elements and environment file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
+	// 3D element definitions
 	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
 			"./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
 	m_r3d->load(m_cam3d);
+
+	// 3D shader materials and settings
 	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
 	l3d.upload();
 	l3d.set_amnt(1);
 	mat0 = Material3D(r3d,4,32,1);
 
+	// text and fonts
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 	tft = Text(fnt);vtft = Text(vfnt);
@@ -24,18 +29,19 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 			glm::vec2(600,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
-	mls[0]=MenuList();
-	mls[1]=MenuList(r2d,cam2d,"lvload/ml_mopt");
-	mls[2]=MenuList(r2d,cam2d,"lvload/ml_stages");
-	mls[3]=MenuList(r2d,cam2d,"lvload/ml_arcades");
-	mls[4]=MenuList();
-	mls[5]=MenuList();
-	mls[6]=MenuList();
-	mls[7]=MenuList(r2d,cam2d,"lvload/ml_optfrm");
-	mls[8]=MenuList(r2d,cam2d,"lvload/ml_optaud");
-	mls[9]=MenuList(r2d,cam2d,"lvload/ml_optgfx");
-	mls[10]=MenuList(r2d,cam2d,"lvload/ml_optgm");
-	mls[11]=MenuList(r2d,cam2d,"lvload/ml_optext");
+	// interactable listings
+	mls[0] = MenuList();
+	mls[1] = MenuList(r2d,cam2d,"lvload/ml_mopt");
+	mls[2] = MenuList(r2d,cam2d,"lvload/ml_stages");
+	mls[3] = MenuList(r2d,cam2d,"lvload/ml_arcades");
+	mls[4] = MenuList();
+	mls[5] = MenuList();
+	mls[6] = MenuList();
+	mls[7] = MenuList(r2d,cam2d,"lvload/ml_optfrm");
+	mls[8] = MenuList(r2d,cam2d,"lvload/ml_optaud");
+	mls[9] = MenuList(r2d,cam2d,"lvload/ml_optgfx");
+	mls[10] = MenuList(r2d,cam2d,"lvload/ml_optgm");
+	mls[11] = MenuList(r2d,cam2d,"lvload/ml_optext");
 	// FIXME: mess
 
 	buffer = Buffer();
@@ -99,6 +105,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	cross_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	globe_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 
@@ -390,6 +397,15 @@ void Menu::render(uint32_t &running,bool &reboot)
 	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
 
+	// render the location preview globe
+	globe_fb.bind();
+	m_frame->clear(0,0,0);
+	glEnable(GL_DEPTH_TEST);
+	m_r3d->prepare_wcam(m_cam3d);
+	mat0.upload();
+	m_r3d->render_mesh(0,1);
+	globe_fb.close();
+
 	// render splash overlay
 	m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),cross_fb.get_tex(),ptrans);
@@ -423,9 +439,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 
-	// render 3d component as test
-	glEnable(GL_DEPTH_TEST);
-	m_r3d->prepare_wcam(m_cam3d);
-	mat0.upload();
-	m_r3d->render_mesh(0,1);
+	// render globe location preview on top of menu
+	m_r2d->render_sprite(msindex+20,msindex+21,globe_fb.get_tex());
 }

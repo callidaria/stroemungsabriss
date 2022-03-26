@@ -54,7 +54,7 @@ private:
 	Camera3D* m_cam3d;
 	Material3D mat0;
 	Shader sshd;
-	FrameBuffer fb,splash_fb,title_fb,select_fb,cross_fb;
+	FrameBuffer fb,splash_fb,title_fb,select_fb,cross_fb,globe_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	int32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0,opt_index = 0;

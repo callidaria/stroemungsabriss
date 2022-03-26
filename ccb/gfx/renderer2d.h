@@ -81,6 +81,14 @@ public:
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 		}
 	}
+	void render_sprite(int b,int e,unsigned int tex)
+	{
+		for (int i=b;i<e;i++) {
+			upload_model(sl.at(i).model);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
+		}
+	}
 	void render_state(int s, glm::vec2 i) // !!float is taken but integer is needed. SPACE
 	{
 		glBindTexture(GL_TEXTURE_2D,al.at(s).tex);
