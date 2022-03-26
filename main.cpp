@@ -25,7 +25,6 @@
 
 #define MVMT_SPEED 4
 #define MENU_RENDER 1
-#define TEST_DIMENSION 0
 #define BUILD_DEV_MODE 1
 
 int main(int argc,char** argv)
@@ -48,18 +47,6 @@ int main(int argc,char** argv)
 #if MENU_RENDER
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
-#elif TEST_DIMENSION
-	r3d.add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
-			"./res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
-	r3d.load(&cam3d);
-	Light3D l0 = Light3D(&r3d,0,glm::vec3(200,100,250),glm::vec3(1,1,1),1);
-	l0.upload();
-	l0.set_amnt(1);
-	Material3D m0 = Material3D(&r3d,1,8,16);
-
-	// reference
-	r2d.add(glm::vec2(50,50),50,50,"res/terra/albedo.jpg");
-	r2d.load_wcam(&cam2d);
 #else
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 	r2d.add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
@@ -106,18 +93,9 @@ int main(int argc,char** argv)
 
 #if MENU_RENDER
 		menu.render(run,reboot);
-//#if BUILD_DEV_MODE
+#if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
-//#endif
-/*#elif TEST_DIMENSION
-		f.clear(.1f,.1f,.1f);
-		r3d.prepare_wcam(&cam3d);
-		glEnable(GL_CULL_FACE);
-		m0.upload();
-		r3d.render_mesh(0,1);
-
-		r2d.prepare();
-		r2d.render_sprite(0,1);*/
+#endif
 #else
 		// ENEMY
 		if (state==0) { // use vector function later
@@ -200,7 +178,6 @@ int main(int argc,char** argv)
 
 		if (pause) { bgr_pause.close();f.clear(0,0,0);bgr_pause.render(); }
 #endif
-
 		f.update();
 	}
 

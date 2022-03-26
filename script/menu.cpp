@@ -399,7 +399,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render the location preview globe
 	globe_fb.bind();
-	m_frame->clear(0,0,0);
+	m_frame->clear(.1f,.1f,.1f);
 	glEnable(GL_DEPTH_TEST);
 	m_r3d->prepare_wcam(m_cam3d);
 	mat0.upload();
@@ -440,5 +440,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 
 	// render globe location preview on top of menu
-	m_r2d->render_sprite(msindex+20,msindex+21,globe_fb.get_tex());
+	m_r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
+	m_r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
+	m_r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
 }
