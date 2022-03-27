@@ -18,7 +18,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
 	l3d.upload();
 	l3d.set_amnt(1);
-	mat0 = Material3D(r3d,4,32,1);
+	mat0 = Material3D(r3d,1,32,1);
 
 	// text and fonts
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
@@ -402,6 +402,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_frame->clear(.1f,.1f,.1f);
 	glEnable(GL_DEPTH_TEST);
 	m_r3d->prepare_wcam(m_cam3d);
+	glm::mat4 gmodel = glm::rotate(glm::mat4(1),glm::radians(180.0f),glm::vec3(0,0,1));
+	m_r3d->upload_model(gmodel);
 	mat0.upload();
 	m_r3d->render_mesh(0,1);
 	globe_fb.close();
