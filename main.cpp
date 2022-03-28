@@ -41,7 +41,7 @@ int main(int argc,char** argv)
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	Camera2D cam2d=Camera2D(1280.0f,720.0f);
-	Camera3D cam3d=Camera3D(glm::vec3(.15f,-.75f,1),1280.0f,720.0f,70.0f);
+	Camera3D cam3d=Camera3D(glm::vec3(.15f,-.75f,4),1280.0f,720.0f,70.0f);
 
 	bool dactive = false;
 #if MENU_RENDER
