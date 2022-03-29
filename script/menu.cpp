@@ -15,7 +15,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	m_r3d->load(m_cam3d);
 
 	// 3D shader materials and settings
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-750,750,100),glm::vec3(1,1,1),1);
 	l3d.upload();
 	l3d.set_amnt(1);
 	mat0 = Material3D(r3d,1,8,16);
@@ -402,6 +402,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_frame->clear(.1f,.1f,.1f);
 	glEnable(GL_DEPTH_TEST);
 	m_r3d->prepare_wcam(m_cam3d);
+	//glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(42.0f),glm::vec3(1,0,0));
+	glm::mat4 model = glm::rotate(model,glm::radians(96.0f),glm::vec3(0,1,0));
+	m_r3d->upload_model(model);
 	mat0.upload();
 	m_r3d->render_mesh(0,1);
 	globe_fb.close();

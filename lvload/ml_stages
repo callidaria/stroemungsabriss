@@ -7,6 +7,7 @@
 		Phase 4: Lost Child Chiaki
 	</>
 	<diff>5</>
+	<gRotate>37,36,54,0,59,28</>
 </>
 <node>
 	<head>Boss: The Dancing Pilot</>
@@ -15,4 +16,5 @@
 		Phase 2: Chett, The Dancing Pilot
 	</>
 	<diff>9</>
+	<gRotate>27,41,49,86,47,26</>
 </>

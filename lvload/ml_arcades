@@ -14,6 +14,7 @@
 		through the US.
 	</>
 	<diff>2</>
+	<gRotate>42,32,29,-96,31,27</>
 </>
 <node>
 	<head>Latin American Arcade</>
@@ -22,6 +23,7 @@
 		multiple revenge stories and real evil dudes.
 	</>
 	<diff>3</>
+	<gRotate>-18,7,27,-53,3,41</>
 </>
 <node>
 	<head>Arcade Antarctica</>
@@ -31,6 +33,7 @@
 		the full Antarctica experience.
 	</>
 	<diff>4</>
+	<gRotate>-69,42,38,17,10,4</>
 </>
 <node>
 	<head>The African Arcade</>
@@ -40,6 +43,7 @@
 		African Arcade.
 	</>
 	<diff>6</>
+	<gRotate>-1,26,42,29,36,48</>
 </>
 <node>
 	<head>The European Arcade</>
@@ -49,6 +53,15 @@
 		Call it infrastructure!
 	</>
 	<diff>8</>
+	<gRotate>45,44,18,9,6,52</>
+</>
+<node>
+	<head>The Skandinavian Arcade</>
+	<dsc>
+		...
+	</>
+	<diff>9</>
+	<gRotate>66,12,53,-2,29,21</>
 </>
 <node>
 	<head>The Great East Arcade</>
@@ -59,6 +72,7 @@
 		and a lot of difference.
 	</>
 	<diff>10</>
+	<gRotate>57,16,47,100,51,48</>
 </>
 <node>
 	<head>The Asian Challenge Collection</>
@@ -66,6 +80,7 @@
 		...
 	</>
 	<diff>12</>
+	<gRotate>28,30,45,103,54,10</>
 </>
 <node>
 	<head>The Japanese Arcade</>
@@ -76,6 +91,7 @@
 		yomisensei. Proceed with care!
 	</>
 	<diff>14</>
+	<gRotate>36,1,49,137,57,27</>
 </>
 <node>
 	<head>Cottonmind Arcade</>
@@ -83,6 +99,7 @@
 		Cottonmind Arcade
 	</>
 	<diff>7</>
+	<gRotate>36,1,49,137,57,27</>
 </>
 <node>
 	<head>Cottonmind: Rainbow Label</>
@@ -91,6 +108,7 @@
 		collected all rainbow PCBs.
 	</>
 	<diff>9</>
+	<gRotate>36,1,49,137,57,27</>
 </>
 <node>
 	<head>Cottonmind: White Label</>
@@ -100,4 +118,5 @@
 		inserted the white coin.
 	</>
 	<diff>11</>
+	<gRotate>36,1,49,137,57,27</>
 </>

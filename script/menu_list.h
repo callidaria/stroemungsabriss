@@ -22,6 +22,7 @@ struct LEntity
 	int32_t sl_min=0,sl_max=1;	// definition of visibile slider caps
 	float sl_vmin,sl_vmax;		// definition of slider save caps in file
 	uint8_t diff = 0;		// definition of estimated difficulty
+	std::vector<int32_t> gRot;	// definition of the globe preview rotation
 	uint32_t sID = 0;		// selection ID for active chosen option / slider input
 	std::string saveID;		// value, storing the config variable destination
 	// TODO: elements for save destination, values & additional parsing

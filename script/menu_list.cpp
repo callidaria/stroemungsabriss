@@ -9,7 +9,7 @@ MenuList::MenuList()
 	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
 	LEntity proc = {
 		Text(fproc),Text(fproc),std::vector<Text>(),std::vector<std::string>(),
-		false,0,0,0,0,0,0,""
+		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
 	esize = 0;
@@ -28,6 +28,7 @@ MenuList::MenuList()
 		(optional)<dest>*destination save name in config*,*default value*</dest>
 		(optional)<le_TargetMonitor></>
 		(optional)<diff>*estimated difficulty rating (no:0,kakusei:1-6,master:7-11,gm:12-14,ugm:15-17)*</>
+		(optional)<gRotation>*int*,*int*,*int*,*int*,*int*,*int* coordinates of desired destination
 */
 MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	: m_r2d(r2d)
@@ -151,6 +152,11 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				} break; // FIXME: display value not as integer but as comm name
 			case 7: // estimated difficulty rating
 				t_le.diff = stoi(excnt);
+				break;
+			case 8: // globe preview rotation towards coordinates
+				args = split_arguments(excnt,',');
+				for (int i=0;i<6;i++)
+					t_le.gRot.push_back(stoi(args[i]));
 				break;
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
@@ -352,7 +358,8 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 		+4*!strcmp(pcnt.c_str(),"slider")
 		+5*!strcmp(pcnt.c_str(),"dest")
 		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor")
-		+7*!strcmp(pcnt.c_str(),"diff");
+		+7*!strcmp(pcnt.c_str(),"diff")
+		+8*!strcmp(pcnt.c_str(),"gRotate");
 	// ??maybe do this with case
 }
 
