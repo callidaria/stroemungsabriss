@@ -156,7 +156,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 			case 8: // globe preview rotation towards coordinates
 				args = split_arguments(excnt,',');
 				for (int i=0;i<6;i++)
-					t_le.gRot.push_back(stoi(args[i]));
+					t_le.gRot[i] = stoi(args[i]);
 				break;
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
@@ -279,6 +279,14 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 	les[index].dtxt.prepare();
 	les[index].dtxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(0,-75*(is_diff),0)));
 	les[index].dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
+}
+
+/*
+
+*/
+glm::vec2 MenuList::globe_rotation(uint16_t li)
+{
+	return glm::vec2(les[li].gRot[0],les[li].gRot[3]);
 }
 
 /*

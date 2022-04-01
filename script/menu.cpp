@@ -15,7 +15,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	m_r3d->load(m_cam3d);
 
 	// 3D shader materials and settings
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-750,750,100),glm::vec3(1,1,1),1);
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
 	l3d.upload();
 	l3d.set_amnt(1);
 	mat0 = Material3D(r3d,1,8,16);
@@ -123,6 +123,10 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
 		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
 		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
+		cam_up = &f->kb.ka[SDL_SCANCODE_I];
+		cam_down = &f->kb.ka[SDL_SCANCODE_K];
+		cam_left = &f->kb.ka[SDL_SCANCODE_J];
+		cam_right = &f->kb.ka[SDL_SCANCODE_L];
 	}
 } Menu::~Menu() {  }
 
@@ -148,6 +152,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
 	uint8_t dlgmod = hit_rgt-hit_lft;
 	// FIXME: remove branch from loop
+	pitch += *cam_up-*cam_down;
+	yaw += *cam_right-*cam_left;
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
@@ -398,12 +404,18 @@ void Menu::render(uint32_t &running,bool &reboot)
 	fb.close();
 
 	// render the location preview globe
+	//std::cout << pitch << "   " << yaw << '\n';
 	globe_fb.bind();
 	m_frame->clear(.1f,.1f,.1f);
 	glEnable(GL_DEPTH_TEST);
+	m_cam3d->front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
+	m_cam3d->front.y = sin(glm::radians(pitch));
+	m_cam3d->front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
+	m_cam3d->front = glm::normalize(m_cam3d->front);
 	m_r3d->prepare_wcam(m_cam3d);
-	//glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(42.0f),glm::vec3(1,0,0));
-	glm::mat4 model = glm::rotate(model,glm::radians(96.0f),glm::vec3(0,1,0));
+	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
+	model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
 	m_r3d->upload_model(model);
 	mat0.upload();
 	m_r3d->render_mesh(0,1);

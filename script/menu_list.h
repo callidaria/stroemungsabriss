@@ -15,16 +15,16 @@
 //	To save list entity in a less cluttered way
 struct LEntity
 {	
-	Text ltxt,dtxt;			// variables for list entity text & description
-	std::vector<Text> lee;		// list of list entity elements in sublist
-	std::vector<std::string> lev;	// list of list entity flag values to write to config
-	bool slide = false;		// identifier of slideable values in list entity
-	int32_t sl_min=0,sl_max=1;	// definition of visibile slider caps
-	float sl_vmin,sl_vmax;		// definition of slider save caps in file
-	uint8_t diff = 0;		// definition of estimated difficulty
-	std::vector<int32_t> gRot;	// definition of the globe preview rotation
-	uint32_t sID = 0;		// selection ID for active chosen option / slider input
-	std::string saveID;		// value, storing the config variable destination
+	Text ltxt,dtxt;					// variables for list entity text & description
+	std::vector<Text> lee;				// list of list entity elements in sublist
+	std::vector<std::string> lev;			// list of list entity flag values to write to config
+	bool slide = false;				// identifier of slideable values in list entity
+	int32_t sl_min=0,sl_max=1;			// definition of visibile slider caps
+	float sl_vmin,sl_vmax;				// definition of slider save caps in file
+	uint8_t diff = 0;				// definition of estimated difficulty
+	std::vector<int32_t> gRot = { 0,0,0,0,0,0 };	// definition of the globe preview rotation
+	uint32_t sID = 0;				// selection ID for active chosen option / slider input
+	std::string saveID;				// value, storing the config variable destination
 	// TODO: elements for save destination, values & additional parsing
 };
 
@@ -38,6 +38,7 @@ public:
 	void save();
 	bool was_changed();
 	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md);
+	glm::vec2 globe_rotation(uint16_t li);
 	void write_tempID(uint8_t index);
 private:
 	std::string breakgrind(std::string nl,uint32_t &i);
