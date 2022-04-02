@@ -12,6 +12,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	// 3D element definitions
 	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
 			"./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
+	m_r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png","./res/dnormal.png",
+			"./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
 	m_r3d->load(m_cam3d);
 
 	// 3D shader materials and settings
@@ -152,8 +154,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
 	uint8_t dlgmod = hit_rgt-hit_lft;
 	// FIXME: remove branch from loop
-	pitch += *cam_up-*cam_down;
-	yaw += *cam_right-*cam_left;
+	/*pitch += *cam_up-*cam_down;
+	yaw += *cam_right-*cam_left;*/
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
@@ -419,6 +421,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r3d->upload_model(model);
 	mat0.upload();
 	m_r3d->render_mesh(0,1);
+	m_r3d->upload_model(glm::mat4(1.0f));
+	m_r3d->render_mesh(1,2);
 	globe_fb.close();
 
 	// render splash overlay

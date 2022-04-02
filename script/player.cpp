@@ -133,5 +133,5 @@ void Player::jet_focus(RendererI* rI)
 }
 void Player::jet_scientific(RendererI* rI)
 {
-	// TODO: scientific shot
+	// TODO: secondary shot
 }
