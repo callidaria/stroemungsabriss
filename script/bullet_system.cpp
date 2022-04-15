@@ -2,11 +2,17 @@
 
 BulletSystem::BulletSystem(RendererI* rI)
 	: m_rI(rI) {  }
-void BulletSystem::add_cluster(uint16_t width,uint16_t height,const uint32_t caps,const char* tPath)
+uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,const uint32_t caps,const char* tPath)
 {
 	m_rI->add(glm::vec2(0,0),width,height,tPath);
-	std::vector<glm::vec2> t_dirs(caps);std::vector<int32_t> t_ts(caps);
-	bCount.push_back(0);countCaps.push_back(caps);dirs.push_back(t_dirs);ts.push_back(t_ts);
+	std::vector<glm::vec2> t_dirs(caps);
+	std::vector<int32_t> t_ts(caps);
+
+	bCount.push_back(0);
+	countCaps.push_back(caps);
+	dirs.push_back(t_dirs);
+	ts.push_back(t_ts);
+	return bCount.size()-1;
 }
 // FIXME: add hitbox parameters when adding cluster
 void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
@@ -44,11 +50,11 @@ glm::vec2 BulletSystem::get_bltPos(uint8_t cluster,uint32_t index) { return m_rI
 glm::vec2 BulletSystem::get_bltDir(uint8_t cluster,uint32_t index) { return dirs.at(cluster)[index]; }
 uint16_t BulletSystem::get_bCount(uint8_t cluster) { return bCount.at(cluster); }
 int32_t BulletSystem::get_ts(uint8_t cluster,uint32_t index) { return ts.at(cluster).at(index); }
-bool BulletSystem::get_pHit(Player player)
+/*bool BulletSystem::get_pHit(Player player)
 {
 	// TODO: check if pHitbox intersects with framestopped bullet clusters
 	return false;
-}
+}*/
 void BulletSystem::render()
 {
 	m_rI->prepare();

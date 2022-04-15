@@ -26,9 +26,12 @@ private:
 	Renderer2D* m_r2d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
+
 	BGEnv m_bgenv = BGEnv(m_r2d);
-	Player m_player = Player(m_frame,m_r2d,m_rI);
 	BulletSystem m_bSys = BulletSystem(m_rI);
+
+	Player m_player = Player(m_frame,m_r2d,m_rI,&m_bSys);
+
 	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,int32_t*)> stg_ld = {
 		BossLChild::load,BossDPilot::load
 	};

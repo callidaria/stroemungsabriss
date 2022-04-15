@@ -9,11 +9,13 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	int32_t fwd_treg[16] = { 0 };
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(m_r2d,stg_idx2d,&m_bSys,fwd_treg);
-	// END
 
 	m_r2d->load_wcam(m_cam2d);m_rI->load_wcam(m_cam2d);
-	uint32_t running=rstate+1;while (running) { // ??maybe kill check if flush with static func ref
-		m_frame->print_fps();m_frame->input(running,false);m_frame->clear(.1f,.1f,.1f);
+	uint32_t running=rstate+1;
+	while (running) { // ??maybe kill check if flush with static func ref
+		m_frame->print_fps();
+		m_frame->input(running,false);
+		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break; // FIXME: kill this when light menu exists
 
 		m_bgenv.update(rstate);

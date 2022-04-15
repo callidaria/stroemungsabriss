@@ -1,8 +1,20 @@
 #include "../frm/framebuffer.h"
 
 FrameBuffer::FrameBuffer() {  } // !!how bout no
-FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp,bool float_buffer)
+FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp, bool float_buffer)
 	: frw(fr_width),frh(fr_height)
+{
+	init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer);
+}
+FrameBuffer::FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
+		bool float_buffer)
+	: frw(fr_width),frh(fr_height)
+{
+	init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer);
+}
+// TODO: make the resolution of framebuffers dynamic (cambased)
+void FrameBuffer::init(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
+		bool float_buffer)
 {
 	// setup
 	buffer = Buffer();
