@@ -4,7 +4,6 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../ccb/gfx/rendereri.h"
-//#include "player.h"
 
 class BulletSystem
 {
@@ -29,14 +28,14 @@ public:
 	glm::vec2 get_bltDir(uint8_t cluster,uint32_t index);
 	uint16_t get_bCount(uint8_t cluster);
 	int32_t get_ts(uint8_t cluster,uint32_t index);
-	//bool get_pHit(Player player);
+	uint8_t get_pHit(uint8_t cluster,glm::vec2 pos,uint8_t width,uint8_t height);
 
 	void render();
 private:
-	RendererI* m_rI;
+	RendererI* m_rI;				// index renderer pointer
 	std::vector<bool> fCount;
-	std::vector<uint16_t> bCount;
-	std::vector<uint32_t> countCaps;
-	std::vector<std::vector<glm::vec2>> dirs;
+	std::vector<uint16_t> bCount;			// bullet count to render
+	std::vector<uint32_t> countCaps;		// maximum bullet capacity loop cutoff
+	std::vector<std::vector<glm::vec2>> dirs;	// lists of all bullet directions
 	std::vector<std::vector<int32_t>> ts;
 };

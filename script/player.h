@@ -27,7 +27,7 @@ public:
 	Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys);
 	~Player();
 
-	void update(uint32_t &rstate);
+	void update(uint32_t &rstate,int32_t eDmg);
 	glm::vec2 get_pPos();
 private:
 	// additional

@@ -20,7 +20,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 		m_bgenv.update(rstate);
 		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos(),ePos,fwd_treg);
-		m_player.update(rstate);
+		m_player.update(rstate,fwd_treg[10]);
 		m_bSys.render();
 
 		m_frame->update();

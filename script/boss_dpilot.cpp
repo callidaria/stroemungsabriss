@@ -12,6 +12,7 @@
 	7: cooldown frames left for directional spawn
 	8: bullet spray chunk counter directionals
 	9: bullet cluster index id
+	10: boss health
 */
 
 void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg)
@@ -31,6 +32,7 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	treg[2]=1;
 	treg[5]=rand()%3+4;
 	treg[7]=rand()%2+3;
+	treg[10] = 5000;
 }
 void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,glm::vec2 ePos,
 		int32_t* treg)
@@ -82,9 +84,10 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 		bSys->set_bltPos(treg[9]+3,i,bSys->get_bltDir(treg[9]+3,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
 				pow(E,.35f*t)*glm::sin(t)));
 	} bSys->inc_tick(treg[9]+3);
-	for (int i=0;i<1;i++) {
+	for (int i=0;i<1;i++)
 		bSys->spwn_blt(treg[9]+3,ePos,ePos);
-	}
+	treg[10] -= bSys->get_pHit(0,ePos,50,50);
+
 	/*bSys->delta_fDir(3);
 	for (int i=0;i<2048;i++) {
 		glm::vec2 toDir = bSys->get_bltDir(2,i);float mult = glm::length(toDir);

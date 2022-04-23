@@ -24,6 +24,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 	shp.upload_matrix("proj",tc2d.proj2D);
 
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png");
+	treg[2] = 9;
 
 	rng_flib.push_back(&jet_wait);
 	rng_flib.push_back(&jet_wide);
@@ -77,7 +78,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 	}
 }
 Player::~Player() {  }
-void Player::update(uint32_t &rstate)
+void Player::update(uint32_t &rstate,int32_t eDmg)
 {
 	// movement processing
 	emulate_vectorized();
@@ -116,7 +117,7 @@ void Player::update(uint32_t &rstate)
 	// rendering health bar
 	shp.enable();
 	hpbuffer.bind();
-	float engbar_dist = 1000.0f;
+	float engbar_dist = eDmg/5;
 	shp.upload_float("edgediv[3]",engbar_dist);
 	shp.upload_float("edgediv[4]",engbar_dist);
 	glDrawArrays(GL_TRIANGLES,0,12);
@@ -134,14 +135,16 @@ void Player::jet_wait(BulletSystem* bsys,int32_t* treg)
 }
 void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 {
-	for (int i=-5;i<6;i++) {
-		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),i*.15f,glm::vec3(0,0,1));
-		bsys->spwn_blt(0,glm::vec2(treg[0]+25,treg[1]+55),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
-	}
+	for (int i=-10+50*(treg[2]<5);i<11;i++) {
+		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),i*.075f,glm::vec3(0,0,1));
+		bsys->spwn_blt(0,glm::vec2(treg[0]+20,treg[1]+55),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
+	} treg[2]--;
+	treg[2] += (treg[2]<1)*9;
 }
 void Player::jet_focus(BulletSystem* bsys,int32_t* treg)
 {
-	// TODO: focused projectile shot
+	for (int i=-10;i<11;i++)
+		bsys->spwn_blt(0,glm::vec2(treg[0]+20+i*7,treg[1]+55),glm::vec2(0,1)*glm::vec2(12));
 }
 void Player::jet_scientific(BulletSystem* bsys,int32_t* treg)
 {
