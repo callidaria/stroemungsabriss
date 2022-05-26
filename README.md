@@ -28,6 +28,11 @@ double click yomisensei.exe
 ### DISCLAIMER
 *building is not required to run the game*
 ***
+## v0.0.3 DEV
+
+### optimizations
+- menu dialogue documentation
+
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
 - Dynamic Entity Loader & Interpreter
