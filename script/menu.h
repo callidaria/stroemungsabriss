@@ -55,14 +55,14 @@ private:
 
 	// animation values
 	const glm::vec3 TITLE_START = glm::vec3(300,300,0);
-	const glm::vec3 ENTITLE_START = glm::vec3(590,762,0);
+	const glm::vec3 ENTITLE_START = glm::vec3(590,800,0);
 	const glm::vec3 TITLE_MENU = glm::vec3(100,250,0);
 	const glm::vec3 ENTITLE_MENU = glm::vec3(590,642,0);
 	uint32_t SELTRANS[16] = { 900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498 };
 	glm::mat4 pos_title,pos_entitle;
 	float ptrans=0,dtrans=0,strans=0;
 	glm::vec3 title_dir = TITLE_MENU-TITLE_START;
-	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
+	glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;  // FIXME: at compile time
 	uint32_t msindex;
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
