@@ -1,15 +1,30 @@
 #include "menu_dialogue.h"
 
+/*
+	Constructor(void)
+	purpose: empty constuctor to build dialogue before constructing it for real.
+	DEPRECATED: this is a bad way and not even necessary. please remove and fix instances.
+*/
 MenuDialogue::MenuDialogue() {  }
 
 /*
-
+	Constructor(glm::vec2,float,float,Renderer2D*,Camera2D*,const char*,std::vector<const char*>,float,float)
+	pos: position of the dialogue window on screen
+	width: width of the dialogue window
+	height: height of the dialogue window
+	r2d: renderer to handle the dialogue visuals
+	cam2d: camera to define the coordinate system, perspective and the camera relative position
+	head: title headline of dialogue screen
+	paths: list of textures, representing the selectable options
+	ewidth: entity width of selectable options inside dialogue window
+	eheight: entity height of selectable options inside dialogue window
+	purpose: constructor sets up a dialogue window in menu, to give player options to choose from.
 */
-MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Renderer3D* r3d,Camera2D* cam2d,
+MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight)
 	: m_r2d(r2d)
 {
-	// dialogue background
+	// dialogue background geometry
 	glGenVertexArrays(1,&bvao);
 	glGenBuffers(1,&bvbo);
 	m_sh = Shader();
@@ -24,13 +39,6 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	m_sh.upload_matrix("view",cam2d->view2D);
 	m_sh.upload_matrix("proj",cam2d->proj2D);
 
-	// selection identifier
-	/*cam3d = Camera3D(glm::vec3(0,1,10),16,9,90);
-	cam3d.view3D = glm::lookAt(cam3d.pos,glm::vec3(0,0,0),cam3d.up);
-	m_r3d->add("res/menu/selector.obj","res/dnormal.png","res/menu/dlg_all.png","res/dnormal.png",
-			"res/menu/dlg_nan.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
-	m_r3d->load(&cam3d);*/
-
 	// TODO: dialogue border
 
 	// dialogue text heading
@@ -44,28 +52,12 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	srnd = paths.size();
 	int32_t blank = (width-srnd*ewidth)/srnd+ewidth;
 	for (int i=0;i<srnd;i++) m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
-
-	// 3D lighting of selection identifier
-	/*Light3D l3d = Light3D(m_r3d,0,glm::vec3(1000,-750,-100),glm::vec3(1,1,1),1);
-	l3d.upload();
-	l3d.set_amnt(1);
-	mat0 = Material3D(r3d,4,32,.2);*/
 } MenuDialogue::~MenuDialogue() {  }
 
 /*
-
-*/
-uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
-{
-	uint8_t out = ((*back&&!*trg_stall[1])&&open)+2*((*conf&&!*trg_stall[0])&&open);
-	bool topen = open-open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));
-	for (int i=0;i<trg_stall.size()*open;i++) *trg_stall[i] = true;
-	open = topen;
-	return out;
-}
-
-/*
-
+	render(uint8_t&) -> void
+	index: current player selection index (subject to constant change)
+	purpose: render all visual components of the menu dialogue feature
 */
 void MenuDialogue::render(uint8_t &index)
 {
@@ -79,7 +71,6 @@ void MenuDialogue::render(uint8_t &index)
 	glDrawArrays(GL_TRIANGLES,0,6*open);
 
 	// TODO: render border
-	// TODO: handle selections
 
 	// render dialogue head
 	thead.prepare();
@@ -89,30 +80,49 @@ void MenuDialogue::render(uint8_t &index)
 	m_r2d->prepare();
 	m_r2d->render_sprite(irnd,irnd+srnd*open);
 
-	// §§ POLICE POLICE -- NOTHING TO SEE HERE -- POLICE POLICE §§
-
-	// render selection icosphere
-	/*glEnable(GL_DEPTH_TEST);
-	m_r3d->prepare_wcam(&cam3d);
-	mat0.upload();
-	m_r3d->upload_model(glm::rotate(glm::mat4(1.0f),glm::radians(mrot),glm::vec3(.5f,1,.2f)));
-	mrot += 2;
-	mrot = (int)mrot%360;
-	m_r3d->render_mesh(0,1);*/
-
-	// §§ POLICE POLICE -- OUT OF COMMISSION -- POLICE POLICE §§
-
 	index = sstate;
 }
 
 /*
+	stall_input(std::vector<bool*>,bool*,bool*) -> uint8_t
+	trg_stall: list of all input trigger pointers to stall while open
+		trg_stall[0]: must be trigger of confirmation button
+		trg_stall[1]: must be trigger of cancel button
+	conf: confirmation button pointer to receive confirmation of players choice
+	back: closing button pointer to be able to close the dialogue and the stalling process
+	purpose: as long as the dialogue is open the input regarding the background has to be stalled.
+		if open: all inputs will be overwritten, menu is locked for all user inputs
+			& dialogue is recieving left/right and confirm/close inputs.
+		if closed: all inputs are allowed, menu in bahaving normally.
+	return:
+		0: no decision has been made
+		1: close the dialogue, abort decision
+		2: close the dialogue, confirm last selected decision
+*/
+uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
+{
+	uint8_t out = ((*back&&!*trg_stall[1])&&open)+2*((*conf&&!*trg_stall[0])&&open);  // check for decision
+	bool topen = open-open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));  // check if still open
+	for (int i=0;i<trg_stall.size()*open;i++) *trg_stall[i] = true;  // stall for all triggers, if open
+	open = topen;  // set updated openness
+	return out;
+}	// FIXME: is it possible to achieve a 3 in decision, and what does it result in?
 
+/*
+	open_dialogue() -> void
+	close() -> void
+	purpose: opens and closes the dialogue according to the names of the methods
+	DEPRECATED: join dialogue opening and closing
 */
 void MenuDialogue::open_dialogue() { open = true; }
 void MenuDialogue::close() { open = false; }
 
 /*
-
+	hit_dialogue(bool) -> uint8_t
+	confirm: contains information if dialogue has been confirmed
+	purpose: this was a placeholder with no real function yet.
+	DEPRECATED: join this function with existing dialogue opening and closing.
+		also figure out why this method was created.
 */
 uint8_t MenuDialogue::hit_dialogue(bool confirm)
 {

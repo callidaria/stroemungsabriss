@@ -91,9 +91,9 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 		"res/diffs/normal_diff.png","res/diffs/master_diff.png",
 		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
 	};
-	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,r3d,m_cam2d,"select difficulty",pth_diff,150,450);
+	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,"select difficulty",pth_diff,150,450);
 	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
-	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,r3d,m_cam2d,"confirm changes?",pth_conf,75,75);
+	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",pth_conf,75,75);
 
 	if (f->m_gc.size()>0) { // TODO: include all axis and common intuitive input systems
 		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
