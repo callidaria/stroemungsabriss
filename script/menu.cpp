@@ -11,7 +11,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 	tft = Text(fnt);vtft = Text(vfnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
-	vtft.add("yomisensei by callidaria. danmaku version 0.0.2 - running on cascabel 1.3.1vE (OpenGL)",
+	vtft.add("yomisensei by callidaria. danmaku version 0.0.3D - running on cascabel 1.3.1vE (OpenGL)",
 			glm::vec2(630,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 

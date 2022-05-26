@@ -30,6 +30,9 @@ double click yomisensei.exe
 ***
 ## v0.0.3 DEV
 
+### fixes
+- FIXED: title animation leaks into camera view when not desired
+
 ### optimizations
 - menu dialogue documentation
 
