@@ -33,6 +33,7 @@ double click yomisensei.exe
 ### optimizations
 - menu dialogue documentation
 - structured buffer creation
+- removing all planning and progression scripts from repo
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
