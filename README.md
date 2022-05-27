@@ -30,11 +30,12 @@ double click yomisensei.exe
 ***
 ## v0.0.3 DEV
 
-### fixes
-- FIXED: title animation leaks into camera view when not desired
-
 ### optimizations
 - menu dialogue documentation
+- structured buffer creation
+
+### fixes
+- FIXED: title animation leaks into camera view when not desired
 
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal

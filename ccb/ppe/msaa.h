@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../frm/framebuffer.h"
 #include "../gfx/shader.h"
+#include "../fcn/buffer.h"
 
 class MSAA
 {
@@ -18,9 +19,10 @@ public:
 			-1.0f,1.0f,0.0f,1.0f,
 			1.0f,-1.0f,1.0f,0.0f,
 			1.0f,1.0f,1.0f,1.0f
-		}; glGenVertexArrays(1,&vao); glGenBuffers(1,&vbo);
-		glBindVertexArray(vao); glBindBuffer(GL_ARRAY_BUFFER,vbo);
-		glBufferData(GL_ARRAY_BUFFER,sizeof(verts),&verts,GL_STATIC_DRAW);
+		};
+		buffer = Buffer();
+		buffer.bind();
+		buffer.upload_vertices(verts,sizeof(verts));
 		sfb.compile2d(vsp,fsp);
 		glGenFramebuffers(1,&fbo);glBindFramebuffer(GL_FRAMEBUFFER,fbo);
 		glGenTextures(1,&tex);
@@ -48,7 +50,8 @@ public:
 	{
 		glActiveTexture(GL_TEXTURE0);
 		sfb.enable();
-		glBindVertexArray(vao);glBindTexture(GL_TEXTURE_2D,tex);
+		buffer.bind();
+		glBindTexture(GL_TEXTURE_2D,tex);
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 	unsigned int get_tex() { return tex; }
@@ -56,5 +59,6 @@ private:
 	Shader sfb;
 	uint32_t fbw,fbh;
 	unsigned int tex,rbo;
-	unsigned int vao,vbo,fbo;
+	Buffer buffer;
+	unsigned int fbo;
 };

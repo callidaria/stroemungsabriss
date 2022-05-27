@@ -8,6 +8,7 @@
 
 #include "../ccb/mat/camera2d.h"
 
+#include "../ccb/fcn/buffer.h"
 #include "../ccb/fcn/font.h"
 #include "../ccb/fcn/text.h"
 
@@ -29,7 +30,7 @@ public:
 	uint8_t hit_dialogue(bool confirm);
 private:
 	// essentials
-	unsigned int bvao,bvbo;		// vertex array & vertex buffer for background
+	Buffer buffer;				// buffer for background
 	Shader m_sh;				// shader
 	Renderer2D* m_r2d;			// 2d renderer reference
 

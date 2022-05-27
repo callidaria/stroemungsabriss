@@ -11,6 +11,7 @@
 #endif
 #include "shader.h"
 #include "../mat/camera3d.h"
+#include "../fcn/buffer.h"
 
 class Cubemap
 {
@@ -21,7 +22,8 @@ public:
 	void set_cubemap();
 	void render();
 private:
-	unsigned int vao,vbo,tex;
+	Buffer buffer;
+	unsigned int tex;
 public:
 	Shader s;
 };

@@ -6,14 +6,15 @@
 #include "sprite.h"
 #include "anim.h"
 #include "../mat/camera2d.h"
+#include "../fcn/buffer.h"
 
 class Renderer2D
 {
 public:
 	Renderer2D()
 	{
-		glGenVertexArrays(1,&vao);
-		glGenBuffers(1,&vbo); glGenBuffers(1,&ebo);
+		buffer = Buffer();
+		buffer.add_buffer();
 	}
 	int add(glm::vec2 p,float w,float h,const char* t)
 	{
@@ -40,10 +41,9 @@ public:
 			e[j*6] = j*4; e[j*6+1] = j*4+1; e[j*6+2] = j*4+2;
 			e[j*6+3] = j*4+2; e[j*6+4] = j*4+3; e[j*6+5] = j*4+0;
 		}
-		glBindVertexArray(vao); glBindBuffer(GL_ARRAY_BUFFER,vbo);
-		glBufferData(GL_ARRAY_BUFFER,sizeof(v),v,GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(e),e,GL_STATIC_DRAW);
+		buffer.bind();
+		buffer.upload_vertices(v,sizeof(v));
+		buffer.upload_elements(e,sizeof(e));
 	}
 	void load_texture()
 	{
@@ -68,7 +68,7 @@ public:
 	{
 		s2d.enable();
 		reset_shader();
-		glBindVertexArray(vao);
+		buffer.bind();
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glActiveTexture(GL_TEXTURE0);
@@ -113,7 +113,7 @@ public:
 	void upload_col(int i) { s2d.upload_int("col",i); }
 	void upload_tindex(glm::vec2 v) { s2d.upload_vec2("i_tex",v); }
 public:
-	unsigned int vao,vbo,ebo;
+	Buffer buffer;
 	Shader s2d;
 	std::vector<Sprite> sl;
 	std::vector<Anim> al;

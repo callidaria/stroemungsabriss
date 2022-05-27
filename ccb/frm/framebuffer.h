@@ -3,6 +3,7 @@
 #include <iostream>
 #include <GL/glew.h>
 #include "../gfx/shader.h"
+#include "../fcn/buffer.h"
 
 class FrameBuffer
 {
@@ -21,6 +22,7 @@ public:
 private:
 	Shader s;
 	unsigned int tex,rbo;
-	unsigned int vao,vbo,fbo;
+	Buffer buffer;
+	unsigned int fbo;
 	uint32_t frw,frh;
 };

@@ -3,10 +3,9 @@
 Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 {
 	// setup
-	glGenVertexArrays(1,&vao);
-	glGenBuffers(1,&vbo);
+	buffer = Buffer();
+	buffer.bind();  // FIXME: kill this call??
 	glGenTextures(1,&tex);
-	glBindVertexArray(vao);
 
 	// buffer data
 	float verts[] = {
@@ -16,9 +15,7 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 		-1.0f,-1.0f,1.0f,-1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,-1.0f,1.0f,-1.0f,-1.0f,1.0f,
 		-1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,-1.0f,
 		-1.0f,-1.0f,-1.0f,-1.0f,-1.0f,1.0f,1.0f,-1.0f,-1.0f,1.0f,-1.0f,-1.0f,-1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f
-	};
-	glBindBuffer(GL_ARRAY_BUFFER,vbo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(verts),&verts,GL_STATIC_DRAW);
+	}; buffer.upload_vertices(verts,sizeof(verts));
 
 	// shader compile
 	s.compile("shader/vertex_skybox.shader","shader/fragment_skybox.shader");
@@ -50,7 +47,7 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 void Cubemap::prepare()
 {
 	s.enable();
-	glBindVertexArray(vao);
+	buffer.bind();
 }
 void Cubemap::prepare_wcam(Camera3D* c)
 {
