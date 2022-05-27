@@ -32,11 +32,12 @@ void main()
 	vec4 spproc = calculate_sepia(proc);
 
 	// colour balancing
-	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);			// calculating the sepia swap
-	vec4 splash = vec4(sproc.rgb+tproc.rgb+selproc.rgb+crssproc.rgb,1.0);	// fuse the splashes
+	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);  // calculating the sepia swap
+	vec4 splash = vec4(tproc.rgb+selproc.rgb+crssproc.rgb,1.0);  // fuse the splashes
 
 	// render
-	outColour = sep_swap+splash;
+	int splashed = int(sproc.r+.9);
+	outColour = mix(sep_swap+splash,sproc,splashed-proc.b*splashed);
 }
 
 vec4 calculate_sepia(vec4 proc)
