@@ -4,11 +4,12 @@
 #include "shader.h"
 #include "mesh.h"
 #include "../mat/camera3d.h"
+#include "../fcn/buffer.h"
 
 class Renderer3D
 {
 public:
-	Renderer3D() { glGenVertexArrays(1,&vao);glGenBuffers(1,&vbo); }
+	Renderer3D() { Buffer buffer; }
 	void add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r)
 	{ Mesh proc=Mesh(m,t,sm,nm,em,p,s,r,&mofs);ml.push_back(proc); }
@@ -22,10 +23,8 @@ public:
 				//v[io+i]=ml.at(j).v[i];
 				v.push_back(ml.at(j).v[i]);
 			io+=ml.at(j).v.size();
-		} glBindVertexArray(vao);glBindBuffer(GL_ARRAY_BUFFER,vbo);
-		//glBufferData(GL_ARRAY_BUFFER,sizeof(v),v,GL_STATIC_DRAW);
-		glBufferData(GL_ARRAY_BUFFER,v.size()*sizeof(float),v.data(),
-				GL_STATIC_DRAW);
+		} buffer.bind();
+		buffer.upload_vertices(v);
 	}
 	void load_texture()
 	{
@@ -45,7 +44,7 @@ public:
 	void prepare()
 	{
 		s3d.enable();
-		glBindVertexArray(vao);
+		buffer.bind();
 		glActiveTexture(GL_TEXTURE0);
 	}
 	void prepare_wcam(Camera3D* c)
@@ -73,7 +72,7 @@ public:
 	void upload_proj(glm::mat4 m) { s3d.upload_matrix("proj",m); }
 	void upload_shadow(glm::mat4 m) { s3d.upload_matrix("light_trans",m); }
 private:
-	unsigned int vao,vbo;
+	Buffer buffer;
 	unsigned int mofs = 0;
 public:
 	Shader s3d,shs;

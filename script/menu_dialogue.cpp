@@ -24,17 +24,14 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight)
 	: m_r2d(r2d)
 {
-	// dialogue background geometry
-	glGenVertexArrays(1,&bvao);
-	glGenBuffers(1,&bvbo);
+	Buffer buffer;
 	m_sh = Shader();
 	float border_verts[] = {
 		pos.x,pos.y,pos.x,pos.y+height,pos.x+width,pos.y+height,	// 1st TRIANGLE
 		pos.x+width,pos.y+height,pos.x+width,pos.y,pos.x,pos.y		// 2nd TRIANGLE
 	};
-	glBindVertexArray(bvao);
-	glBindBuffer(GL_ARRAY_BUFFER,bvbo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(border_verts),border_verts,GL_STATIC_DRAW);
+	buffer.bind();
+	buffer.upload_vertices(border_verts,sizeof(border_verts));
 	m_sh.compile_mDlg("shader/fbv_mdialogue.shader","shader/fbf_mdialogue.shader");
 	m_sh.upload_matrix("view",cam2d->view2D);
 	m_sh.upload_matrix("proj",cam2d->proj2D);
@@ -67,7 +64,7 @@ void MenuDialogue::render(uint8_t &index)
 
 	// render dialogue background
 	m_sh.enable();
-	glBindVertexArray(bvao);
+	buffer.bind();
 	glDrawArrays(GL_TRIANGLES,0,6*open);
 
 	// TODO: render border

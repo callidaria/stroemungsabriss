@@ -5,6 +5,7 @@
 #include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/rendereri.h"
+#include "../ccb/fcn/buffer.h"
 
 struct PlayerControls
 {
@@ -40,8 +41,8 @@ private:
 	RendererI* m_rI;
 	int ri;
 	Shader shp;				// health bar shader
-	uint32_t hpvao,hpvbo;			// health bar buffers
-	uint8_t sal[2];				// sprite adress library
+	Buffer hpbuffer;		// health bar buffer
+	uint8_t sal[2];			// sprite adress library
 
 	// controlling
 	glm::vec3 pos = glm::vec3(200,200,0);

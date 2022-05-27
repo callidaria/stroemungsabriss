@@ -11,6 +11,7 @@
 #include "../ccb/mat/camera2d.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/fcn/text.h"
+#include "../ccb/fcn/buffer.h"
 
 #include "menu_list.h"
 #include "menu_dialogue.h"
@@ -18,10 +19,10 @@
 
 enum MenuMode
 {
-	MENU_TITLE,		// rv = 0
+	MENU_TITLE,			// rv = 0
 	MENU_SELECTION,		// rv = 1
-	MENU_START,		// rv = 2
-	MENU_DIFFS,		// rv = 3
+	MENU_START,			// rv = 2
+	MENU_DIFFS,			// rv = 3
 	MENU_LISTING,		// rv = 4
 	MENU_SUBLIST		// rv = 5
 };
@@ -35,7 +36,7 @@ public:
 private:
 	void fill_dialogue();
 private:
-	uint32_t svao,svbo;
+	Buffer buffer;
 	CCBManager* m_ccbm;
 	Frame* m_frame;
 	Renderer2D* m_r2d;

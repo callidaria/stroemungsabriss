@@ -29,8 +29,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	mls[11]=MenuList(r2d,cam2d,"lvload/ml_optext");
 	// FIXME: mess
 
-	glGenVertexArrays(1,&svao);
-	glGenBuffers(1,&svbo);
+	buffer = Buffer();
 	sshd = Shader();
 
 	glm::vec3 s_rgb = glm::vec3(.245f,.606f,.564f);
@@ -71,9 +70,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	}; // ??clockwise rotation triangle hardcoded replace
 	// FIXME: mess
 
-	glBindVertexArray(svao); // §§??
-	glBindBuffer(GL_ARRAY_BUFFER,svbo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(sverts),sverts,GL_STATIC_DRAW);
+	buffer.bind();
+	buffer.upload_vertices(sverts,sizeof(sverts));
 	sshd.compile_vCols("shader/fbv_select.shader","shader/fbf_select.shader");
 	sshd.upload_matrix("view",cam2d->view2D);
 	sshd.upload_matrix("proj",cam2d->proj2D);
@@ -259,7 +257,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render the title splash
 	sshd.enable();
-	glBindVertexArray(svao);
+	buffer.bind();
 
 	//glm::vec2 dopen = glm::vec2(dsi_diff||dsi_conf);
 	//glm::mat4 dlgrot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));

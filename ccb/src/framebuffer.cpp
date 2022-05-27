@@ -5,10 +5,8 @@ FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* 
 	: frw(fr_width),frh(fr_height)
 {
 	// setup
-	glGenVertexArrays(1,&vao);
-	glBindVertexArray(vao);
-	glGenBuffers(1,&vbo);
-	glBindBuffer(GL_ARRAY_BUFFER,vbo);
+	buffer = Buffer();
+	buffer.bind();
 	glGenFramebuffers(1,&fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,fbo);
 	glGenTextures(1,&tex);
@@ -18,7 +16,7 @@ FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* 
 	float verts[] = { // ??adding index buffer object later ??space or time
 		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,	// first triangle
 		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f		// second triangle
-	}; glBufferData(GL_ARRAY_BUFFER,sizeof(verts),verts,GL_STATIC_DRAW);
+	}; buffer.upload_vertices(verts,sizeof(verts));
 
 	s.compile2d(vsp,fsp);
 
@@ -42,7 +40,7 @@ void FrameBuffer::render()
 {
 	glActiveTexture(GL_TEXTURE0); // !!should be standard => after cleanup obsolete
 	s.enable();
-	glBindVertexArray(vao);
+	buffer.bind();
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
@@ -50,7 +48,8 @@ void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint
 {
 	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
-	glBindVertexArray(vao);glBindTexture(GL_TEXTURE_2D,tex);
+	buffer.bind();
+	glBindTexture(GL_TEXTURE_2D,tex);
 	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,atex);
 	glActiveTexture(GL_TEXTURE2);glBindTexture(GL_TEXTURE_2D,btex);
 	glActiveTexture(GL_TEXTURE3);glBindTexture(GL_TEXTURE_2D,ctex);

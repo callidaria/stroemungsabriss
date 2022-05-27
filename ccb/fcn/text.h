@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "../gfx/shader.h"
 #include "../mat/camera2d.h"
+#include "buffer.h"
 #include "font.h"
 
 #define MAX_CHAR_COUNT 4096
@@ -26,6 +27,6 @@ public:
 	void set_scroll(glm::mat4 model);
 private:
 	Shader sT;Font font;
-	unsigned int vao,vbo,ibo;
+	Buffer buffer;
 	std::vector<float> ibv;
 };

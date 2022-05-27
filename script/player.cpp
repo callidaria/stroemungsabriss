@@ -7,15 +7,14 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI)
 	ri = m_r2d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
 
 	// health bar
-	glGenVertexArrays(1,&hpvao);glGenBuffers(1,&hpvbo);
+	hpbuffer = Buffer();
 	shp = Shader();
 	float hpverts[] = {
 		10,10,0,0,10,35,0,0,310,35,0,1,310,35,0,1,310,10,0,2,10,10,0,0,
 		10,40,1,0,10,50,1,0,10,50,1,3,10,50,1,3,10,40,1,4,10,40,1,0,
 	};
-	glBindVertexArray(hpvao); // §§??
-	glBindBuffer(GL_ARRAY_BUFFER,hpvbo);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(hpverts),hpverts,GL_STATIC_DRAW);
+	hpbuffer.bind();
+	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
 	shp.compile_hp("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	shp.upload_matrix("view",tc2d.view2D);shp.upload_matrix("proj",tc2d.proj2D);
@@ -104,7 +103,8 @@ void Player::update(uint32_t &rstate)
 	m_r2d->prepare();m_r2d->render_sprite(ri,ri+1);
 
 	// rendering health bar
-	shp.enable();glBindVertexArray(hpvao);
+	shp.enable();
+	hpbuffer.bind();
 	float engbar_dist = 200.0f*((42.0f-drec)/42.0f);
 	shp.upload_float("edgediv[3]",engbar_dist);shp.upload_float("edgediv[4]",engbar_dist);
 	glDrawArrays(GL_TRIANGLES,0,12);
