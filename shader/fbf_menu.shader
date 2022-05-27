@@ -35,8 +35,12 @@ void main()
 	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);  // calculating the sepia swap
 	vec4 splash = vec4(tproc.rgb+selproc.rgb+crssproc.rgb,1.0);  // fuse the splashes
 
-	// render
-	int splashed = int(sproc.r+.9);
+	// menu splash
+	int splashed = int(sproc.r+.9);  // check if pixel has been splashed
+	sep_swap = mix(sep_swap,1.0-proc,splashed);  // invert writing when splashed
+	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
+
+	// render output
 	outColour = mix(sep_swap+splash,sproc,splashed-proc.b*splashed);
 }
 
