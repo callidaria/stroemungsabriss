@@ -34,10 +34,11 @@ double click yomisensei.exe
 - menu dialogue documentation
 - structured buffer creation
 - removing all planning and progression scripts from repo
+- reconceptualizing the basic menu colour scheme [DEV]
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
-- FIXED: title splash geometry gets modified by sepia vignette [DEV]
+- FIXED: title splash geometry gets modified by sepia vignette
 
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal

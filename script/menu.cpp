@@ -11,8 +11,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 	tft = Text(fnt);vtft = Text(vfnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
-	vtft.add("yomisensei by callidaria. danmaku version 0.0.3D - running on cascabel 1.3.1vE (OpenGL)",
-			glm::vec2(630,20)); // FIXME: hardcoded version number
+	vtft.add("yomisensei by callidaria. danmaku version 0.0.3d - running on cascabel 1.3.1vE (OpenGL)",
+			glm::vec2(600,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
 	mls[0]=MenuList();
@@ -379,7 +379,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 
 	vtft.prepare();
-	vtft.render(75,glm::vec4(0,0,.5f,1));
+	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
 
 	// render splash overlay

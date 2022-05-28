@@ -40,8 +40,12 @@ void main()
 	sep_swap = mix(sep_swap,1.0-proc,splashed);  // invert writing when splashed
 	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
 
+	// selection splash inversions
+	int stsplash = int(splash.g+.9)+int(splash.b+.9);
+	sep_swap = mix(sep_swap,vec4(1.0-proc.rgb,1.0),stsplash);
+
 	// render output
-	outColour = mix(sep_swap+splash,sproc,splashed-proc.b*splashed);
+	outColour = mix(sep_swap,sproc,splashed-proc.b*splashed);
 }
 
 vec4 calculate_sepia(vec4 proc)
