@@ -30,22 +30,24 @@ void main()
 
 	// effects
 	vec4 spproc = calculate_sepia(proc);
-
-	// colour balancing
 	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);  // calculating the sepia swap
-	vec4 splash = vec4(tproc.rgb+selproc.rgb+crssproc.rgb,1.0);  // fuse the splashes
 
 	// menu splash
 	int splashed = int(sproc.r+.9);  // check if pixel has been splashed
-	sep_swap = mix(sep_swap,1.0-proc,splashed);  // invert writing when splashed
+	sep_swap = mix(sep_swap,1.0-proc,splashed);  // invert writing
 	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
 
 	// selection splash inversions
-	int stsplash = int(splash.g+.9)+int(splash.b+.9);
-	sep_swap = mix(sep_swap,vec4(1.0-proc.rgb,1.0),stsplash);
+	int tsplash = int(tproc.b+.9);  // if hit by title splash
+	int ssplash = int(selproc.b+.9);  // if hit by selection splash
+	sep_swap = mix(sep_swap,vec4(0),proc.b*tsplash);  // invert title splash
+	sep_swap = mix(sep_swap,vec4(0),proc.r*ssplash);  // invert selection splash
+	sep_swap = mix(sep_swap,vec4(/*1.0-proc.rgb*/vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);
 
 	// render output
-	outColour = mix(sep_swap,sproc,splashed-proc.b*splashed);
+	outColour = mix(sep_swap+crssproc,sproc,splashed-proc.b*splashed);
+	outColour = mix(outColour,outColour+selproc,1-proc.b+tsplash);
+	outColour = mix(outColour,tproc,tsplash-proc.b*tsplash);
 }
 
 vec4 calculate_sepia(vec4 proc)

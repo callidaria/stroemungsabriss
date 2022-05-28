@@ -34,7 +34,7 @@ double click yomisensei.exe
 - menu dialogue documentation
 - structured buffer creation
 - removing all planning and progression scripts from repo
-- reconceptualizing the basic menu colour scheme [DEV]
+- reconceptualizing the basic menu colour scheme
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
@@ -48,3 +48,7 @@ double click yomisensei.exe
 - Main Menu Prototype
 - Options Configuration Save
 - First Player Movement Prototype
+***
+## Additional Info
+- Elapsed Worktime After Commit 120: 8h
+- Total Code Lines: 5120
