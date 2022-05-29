@@ -49,12 +49,6 @@ double click yomisensei.exe
 - Options Configuration Save
 - First Player Movement Prototype
 ***
-## Additional Info
-- Elapsed Worktime After Commit 120: 8h
-- Total Code Lines: 5120
-***
 ## Additional Information
-- Branch Times:
-	- 7: 5h 23min
-- Lines Of Code
-	- 7: 5177
+- Elapsed Worktime After Commit 120: 13h 53min
+- Total Code Lines: 5166
