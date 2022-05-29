@@ -38,8 +38,8 @@ void main()
 	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
 
 	// selection splash inversions
-	int tsplash = int(tproc.b+.9);  // if hit by title splash
-	int ssplash = int(selproc.b+.9);  // if hit by selection splash
+	int tsplash = int(tproc.r+.9);  // if hit by title splash
+	int ssplash = int(selproc.g+.9);  // if hit by selection splash
 	sep_swap = mix(sep_swap,vec4(0),proc.b*tsplash);  // invert title splash
 	sep_swap = mix(sep_swap,vec4(0),proc.r*ssplash);  // invert selection splash
 	sep_swap = mix(sep_swap,vec4(/*1.0-proc.rgb*/vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);

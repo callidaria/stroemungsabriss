@@ -29,7 +29,6 @@ double click yomisensei.exe
 *building is not required to run the game*
 ***
 ## v0.0.3 DEV
-
 ### optimizations
 - menu dialogue documentation
 - structured buffer creation

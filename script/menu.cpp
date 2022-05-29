@@ -1,9 +1,11 @@
 #include "menu.h"
 
+#define NCOLOUR 1
+
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
 	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
 {
-	const char* GVERSION = "0.0.2";
+	const char* GVERSION = "0.0.3d";
 
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
@@ -32,8 +34,13 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	buffer = Buffer();
 	sshd = Shader();
 
+#if NCOLOUR == 0
 	glm::vec3 s_rgb = glm::vec3(.245f,.606f,.564f);
 	glm::vec3 h_rgb = glm::vec3(.341f,.341f,.129f);
+#elif NCOLOUR == 1
+	glm::vec3 s_rgb = glm::vec3(.0985f,.270f,.037f);
+	glm::vec3 h_rgb = glm::vec3(.75f,.4125f,0);
+#endif
 	glm::vec3 l_rgb = glm::vec3(1,0,0);
 	glm::vec3 r_rgb = glm::vec3(0,0,1);
 	float sverts[] = { // TODO: remove hardcoded secondary segment coords
