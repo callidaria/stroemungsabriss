@@ -1,16 +1,27 @@
 #include "../fcn/init.h"
 
+/*
+	Constructor(const char*)
+	path: path to the config.ini file
+	purpose: read config values from file. If the expected file does not exists,
+		it is created with standard values and read afterwards.
+*/
 Init::Init(const char* path)
 {
+	// reading file
 	std::ifstream file(path,std::ios::in);
+
+	// create config file if non existent
 	if (!file) {
+		// copy standard config file
 		std::ifstream tplate("res/config.ini",std::ios::in);
-		std::ofstream trget("config.ini",std::ios::app);
+		std::ofstream trget(path,std::ios::app);
 		while (!tplate.eof()) {
 			std::string line;
 			getline(tplate,line);
 			trget << line << '\n';
-		} file = std::ifstream(path,std::ios::in);
+		} file = std::ifstream(path,std::ios::in); // read created file
+
 		/*std::vector<std::string> wkeys,wvals;
 		std::vector<const char*> files = {
 			"lvload/ml_optaud","lvload/ml_optfrm",
@@ -37,6 +48,8 @@ Init::Init(const char* path)
 		// FIXME: autocreation through MenuList worked accidentally while testing
 		// 		i do not know if this could be used to optimize the init creation
 	}
+
+	// extract values from config file
 	while (!file.eof()) {
 		std::string rclh;file >> rclh;
 		std::string val;file >> val;
@@ -48,8 +61,18 @@ Init::Init(const char* path)
 	}
 } // FIXME: find a faster way to do this
 
+/*
+	rINT(uint32_t) -> uint32_t
+	id: key id to get value by
+	returns: value according to given key id. Use key macros to identify values.
+*/
 uint32_t Init::rINT(uint32_t id) { return iConfig[id]; }
 
+/*
+	find_iKey(const char*) -> uint32_t
+	key: key string as referenced by in menu list file destinations
+	returns: converts string form of key into the key id integer and returns it
+*/
 uint32_t Init::find_iKey(const char* key)
 {
 	int out = 0;
@@ -59,6 +82,14 @@ uint32_t Init::find_iKey(const char* key)
 	} return out;
 }
 
+/*
+	read_cartesian(std::string) -> std::vector<uint32_t>
+	val: raw value, possibly containing string1xstring2xstring3 pattern
+	returns: cartesian writing style gets converted into list of all factors.
+		example: string1xstring2xstring3
+			-> { string1, string2, string3 } as std::vector<uint32_t>
+		the x contained in the string marks the seperation of contained values.
+*/
 std::vector<uint32_t> Init::read_cartesian(std::string val)
 {
 	std::string proc;

@@ -47,3 +47,9 @@ double click yomisensei.exe
 - Main Menu Prototype
 - Options Configuration Save
 - First Player Movement Prototype
+***
+## Additional Information
+- Branch Times:
+	- 7: 5h
+- Lines Of Code
+	- 7: 5174
