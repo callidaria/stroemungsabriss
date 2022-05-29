@@ -37,6 +37,7 @@ double click yomisensei.exe
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
+- FIXED: autocreation of initialization file, if not present
 
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
@@ -46,3 +47,9 @@ double click yomisensei.exe
 - Main Menu Prototype
 - Options Configuration Save
 - First Player Movement Prototype
+***
+## Additional Information
+- Branch Times:
+	- 7: 5h 23min
+- Lines Of Code
+	- 7: 5177
