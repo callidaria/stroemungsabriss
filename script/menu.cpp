@@ -1,5 +1,7 @@
 #include "menu.h"
 
+#define NCOLOUR 1
+
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
 	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
 {
@@ -12,7 +14,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	tft = Text(fnt);vtft = Text(vfnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	vtft.add("yomisensei by callidaria. danmaku version 0.0.3d - running on cascabel 1.3.1vE (OpenGL)",
-			glm::vec2(630,20)); // FIXME: hardcoded version number
+			glm::vec2(600,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
 	mls[0]=MenuList();
@@ -32,8 +34,13 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	buffer = Buffer();
 	sshd = Shader();
 
+#if NCOLOUR == 0
 	glm::vec3 s_rgb = glm::vec3(.245f,.606f,.564f);
 	glm::vec3 h_rgb = glm::vec3(.341f,.341f,.129f);
+#elif NCOLOUR == 1
+	glm::vec3 s_rgb = glm::vec3(.0985f,.270f,.037f);
+	glm::vec3 h_rgb = glm::vec3(.75f,.4125f,0);
+#endif
 	glm::vec3 l_rgb = glm::vec3(1,0,0);
 	glm::vec3 r_rgb = glm::vec3(0,0,1);
 	float sverts[] = { // TODO: remove hardcoded secondary segment coords
@@ -379,7 +386,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
 
 	vtft.prepare();
-	vtft.render(75,glm::vec4(0,0,.5f,1));
+	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
 
 	// render splash overlay

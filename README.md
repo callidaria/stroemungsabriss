@@ -29,15 +29,16 @@ double click yomisensei.exe
 *building is not required to run the game*
 ***
 ## v0.0.3 DEV
-
 ### optimizations
 - menu dialogue documentation
 - structured buffer creation
 - removing all planning and progression scripts from repo
+- reconceptualizing the basic menu colour scheme
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
 - FIXED: autocreation of initialization file, if not present
+- FIXED: title splash geometry gets modified by sepia vignette
 
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
@@ -47,6 +48,10 @@ double click yomisensei.exe
 - Main Menu Prototype
 - Options Configuration Save
 - First Player Movement Prototype
+***
+## Additional Info
+- Elapsed Worktime After Commit 120: 8h
+- Total Code Lines: 5120
 ***
 ## Additional Information
 - Branch Times:
