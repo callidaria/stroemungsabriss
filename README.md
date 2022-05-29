@@ -37,6 +37,7 @@ double click yomisensei.exe
 
 ### fixes
 - FIXED: title animation leaks into camera view when not desired
+- FIXED: autocreation of initialization file, if not present [DEV]
 
 ## v0.0.2
 - Build in Dev Mode & Engine Terminal
