@@ -50,6 +50,6 @@ double click yomisensei.exe
 ***
 ## Additional Information
 - Branch Times:
-	- 7: 5h
+	- 7: 5h 23min
 - Lines Of Code
-	- 7: 5174
+	- 7: 5177

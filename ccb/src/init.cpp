@@ -22,31 +22,9 @@ Init::Init(const char* path)
 			trget << line << '\n';
 		} file = std::ifstream(path,std::ios::in); // read created file
 
-		/*std::vector<std::string> wkeys,wvals;
-		std::vector<const char*> files = {
-			"lvload/ml_optaud","lvload/ml_optfrm",
-			"lvload/ml_optgfx","lvload/ml_optgm"
-		};
-		for (const char* path : files) {
-			std::ifstream lvfile(path,std::ios::in);
-			while (!lvfile.eof()) {
-				bool assess=false,read=false;
-				std::string mode;
-				std::string line;
-				getline(lvfile,line);
-				for (char ltr : line) {
-					assess = ltr=='<'||(ltr!='>'&&assess);
-					if (assess&&ltr!='<') mode += ltr;
-					else if (ltr=='>') {
-						if (!strcmp(mode.c_str(),"dest")) read = true;
-					}
-				}
-			}
-		}
-		std::ofstream nconf("config.ini",std::ios::app);*/
-		// TODO: write default init file automatically
-		// FIXME: autocreation through MenuList worked accidentally while testing
-		// 		i do not know if this could be used to optimize the init creation
+		// TODO: ??write default init file automatically based on descriptions in ml files
+		// FIXME: autocreation through MenuList worked accidentally while testing? wtf?
+		// 		i do not know if this could be used to maybe optimize the init creation?
 	}
 
 	// extract values from config file
