@@ -19,8 +19,7 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 
 	// shader compile
 	s.compile("shader/vertex_skybox.shader","shader/fragment_skybox.shader");
-	s.enable_location("position");
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	s.def_attributeF("position",3,0,3);
 
 	// cubemap textures
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);

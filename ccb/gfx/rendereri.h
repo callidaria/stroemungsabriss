@@ -35,7 +35,8 @@ public:
 		load_vertex();
 		sI.compile2d("shader/vertex_inst.shader",
 				"shader/fragment_inst.shader");
-		sI.load_index(buffer.get_indices());
+		buffer.bind_index();
+		sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
 		load_texture();
 	}
 	void load_wcam(Camera2D* c)
@@ -43,7 +44,8 @@ public:
 		load_vertex();
 		sI.compile2d("shader/vertex_inst.shader",
 				"shader/fragment_inst.shader");
-		sI.load_index(buffer.get_indices());
+		buffer.bind_index();
+		sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
 		load_texture();
 		upload_view(c->view2D); upload_proj(c->proj2D);
 	}

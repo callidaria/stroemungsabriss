@@ -1,137 +1,117 @@
 #include "../gfx/shader.h"
 
-Shader::Shader() {  } // ??why this again seriously i was this stupid 3 years ago
+/*
+	Constructor()
+	DEPRECATED: make an constructor maybe even autocompile at creation?
+*/
+Shader::Shader() {  }
+
+/*
+	compile(const char*,const char*) -> void
+	vsp: path to vertex shader code file
+	fsp: path to fragment shader code file
+	purpose: compiles the given code files and creates a shader program for later usage
+*/
 void Shader::compile(const char* vsp,const char* fsp)
 {
 	// compiler
-	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER); // !!delete after usage
+	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER); // FIXME: delete after usage
 	unsigned int fragmentShader = compile_shader(fsp,GL_FRAGMENT_SHADER);
 
 	// shader program
 	m_shaderProgram = glCreateProgram();
 	glAttachShader(m_shaderProgram,vertexShader);
 	glAttachShader(m_shaderProgram,fragmentShader);
-	glBindFragDataLocation(m_shaderProgram,0,"outColour"); // !!make char pointer parameter for outColour
+	glBindFragDataLocation(m_shaderProgram,0,"outColour");
 	glLinkProgram(m_shaderProgram);
 	enable();
 }
+
+/*
+	def_attributeF(const char*,uint8_t,uint8_t,uint8_t) -> void
+	vname: target variable name as referred to in shader code file
+	dim: dimension of variable -> 1 => float, 2 => vec2, 3 => vec3, 4 => vec4
+	offset: offset in upload array pattern -> (float,float,FLOAT,FLOAT,float,float) => 2
+	cap: capacity of upload array pattern. how many floats belong to a single vertex
+	purpose: define input pattern from array for shader variables, that are not uniform
+*/
+void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+{
+	size_t vsize = sizeof(float);
+	int attrib = glGetAttribLocation(m_shaderProgram,vname);
+	glEnableVertexAttribArray(attrib);
+	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
+}
+
+/*
+	def_indexF(unsigned int,const char*,uint8_t,uint8_t,uint8_t)
+	ibo: index buffer object to be used by shader and defined by layout pattern
+	vname, dim, offset, cap: same function as in def_attributeF
+	purpose: define input pattern of index buffer object for shader variables (not uniform)
+		!!! ibo needs to be bound first !!!
+*/
+void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+{
+	size_t vsize = sizeof(float);
+	int attrib = glGetAttribLocation(m_shaderProgram,vname);
+	glEnableVertexAttribArray(attrib);
+	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
+	glVertexAttribDivisor(attrib,1);
+}
+
+/*
+	compile<dimension>(const char*,const char*) -> void
+	vspath: path to vertex shader code file
+	fspath: path to fragment shader code file
+	purpose: standard compile process with common attribute setup
+		it is not necessary to compile first, these exist for most common shader structures
+*/
 void Shader::compile2d(const char* vspath,const char* fspath) // !!cleanup and launch with enumerator && casediff
 {
 	compile(vspath,fspath);
-
-	// enabling maybe obsolete cause of limited upload requests
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position"); // ??outsource to usage class
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),0); // ??reduction to one upload bitshift
-	int texAttrib = glGetAttribLocation(m_shaderProgram,"texCoords");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(2*sizeof(float)));
+	def_attributeF("position",2,0,4);
+	def_attributeF("texCoords",2,2,4);
 }
 void Shader::compile3d(const char* vspath,const char* fspath) // !!another cleanup
 {
 	compile(vspath,fspath);
+	def_attributeF("position",3,0,14);
+	def_attributeF("texCoords",2,3,14);
+	def_attributeF("normals",3,5,14);
+	def_attributeF("tangent",3,8,14);
+	def_attributeF("bitangent",3,11,14);
+}
 
-	// ??obsolete
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),0);
-	int texAttrib = glGetAttribLocation(m_shaderProgram,"texCoords");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib,2,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(3*sizeof(float)));
-	int nmlAttrib = glGetAttribLocation(m_shaderProgram,"normals");
-	glEnableVertexAttribArray(nmlAttrib);
-	glVertexAttribPointer(nmlAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(5*sizeof(float)));
-	int tgAttrib = glGetAttribLocation(m_shaderProgram,"tangent");
-	glEnableVertexAttribArray(tgAttrib);
-	glVertexAttribPointer(tgAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(8*sizeof(float)));
-	int btgAttrib = glGetAttribLocation(m_shaderProgram,"bitangent");
-	glEnableVertexAttribArray(btgAttrib);
-	glVertexAttribPointer(btgAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(11*sizeof(float)));
-}
-void Shader::compile_vCols(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-
-	// !!reduce recurring code chunks
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),0);
-	int dposAttrib = glGetAttribLocation(m_shaderProgram,"dposition");
-	glEnableVertexAttribArray(dposAttrib);
-	glVertexAttribPointer(dposAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(2*sizeof(float)));
-	int colAttrib = glGetAttribLocation(m_shaderProgram,"colour");
-	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer(colAttrib,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(4*sizeof(float)));
-	int idxAttrib = glGetAttribLocation(m_shaderProgram,"idx");
-	glEnableVertexAttribArray(idxAttrib);
-	glVertexAttribPointer(idxAttrib,1,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(7*sizeof(float)));
-	// !!reduce to int
-}
-void Shader::compile_hp(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),0);
-	int colAttrib = glGetAttribLocation(m_shaderProgram,"bar_id");
-	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer(colAttrib,1,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(2*sizeof(float)));
-	int edgeAttrib = glGetAttribLocation(m_shaderProgram,"edge_id");
-	glEnableVertexAttribArray(edgeAttrib);
-	glVertexAttribPointer(edgeAttrib,1,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(3*sizeof(float)));
-}
-void Shader::compile_mDlg(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
-}
-void Shader::load_index(unsigned int ibo) // !!index upload checking && double upload nessessary
-{
-	int offsetAttrib = glGetAttribLocation(m_shaderProgram,"offset");
-	glEnableVertexAttribArray(offsetAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER,ibo);
-	glVertexAttribPointer(offsetAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
-	glVertexAttribDivisor(offsetAttrib,1);
-}
-void Shader::load_text(unsigned int ibo) // !!check for stupid shit
-{
-	int offsetAttrib=glGetAttribLocation(m_shaderProgram,"offset");
-	glEnableVertexAttribArray(offsetAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER,ibo);
-	glVertexAttribPointer(offsetAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),0);
-	glVertexAttribDivisor(offsetAttrib,1);
-	int texposAttrib=glGetAttribLocation(m_shaderProgram,"texpos");
-	glEnableVertexAttribArray(texposAttrib);
-	glVertexAttribPointer(texposAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(2*sizeof(float)));
-	glVertexAttribDivisor(texposAttrib,1);
-	int boundsAttrib=glGetAttribLocation(m_shaderProgram,"bounds");
-	glEnableVertexAttribArray(boundsAttrib);
-	glVertexAttribPointer(boundsAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(4*sizeof(float)));
-	glVertexAttribDivisor(boundsAttrib,1);
-	int cursorAttrib=glGetAttribLocation(m_shaderProgram,"cursor");
-	glEnableVertexAttribArray(cursorAttrib);
-	glVertexAttribPointer(cursorAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
-	glVertexAttribDivisor(cursorAttrib,1);
-}
+/*
+	enable() -> void
+	purpose: enables the program, so that it can be used. deactivates all others!
+*/
 void Shader::enable() { glUseProgram(m_shaderProgram); }
-void Shader::enable_location(const char* loc)
+
+/*
+	compile_shader(const char*,GLenum) -> unsigned int
+	path: path to shader code file, meant to be compiled
+	stype: type of shader to compile the shader code file as:
+		vertex shader   -> GL_VERTEX_SHADER
+		geometry shader -> GL_GEOMETRY_SHADER
+		fragment shader -> GL_FRAGMENT_SHADER
+	returns: compiled and debugged shader. if shader could not be compiled successfully
+		a debug log will be posted into console at runtime.
+*/
+unsigned int Shader::compile_shader(const char* path,GLenum stype) // FIXME: uint and enum types
 {
-	int attrib = glGetAttribLocation(m_shaderProgram,loc);
-	glEnableVertexAttribArray(attrib);
-}
-unsigned int Shader::compile_shader(const char* path,GLenum stype) // ??int or enum !!unify with frame class
-{
-	// reads from source
-	std::string src; // !!delete after usage
+	// get source file
+	std::string src; // FIXME: delete after usage
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		printf("\033[1;31mno shader found at path: %s\033[0m\n",path);
 		return 0;
-	} std::string line = ""; // ??initialization madness
+	}
+
+	// reads from source
+	std::string line;
 	while (!file.eof()) {
-		std::getline(file,line); // !!unify string/char reading c/c++
+		std::getline(file,line);
 		src.append(line+"\n"); // ??standard && addable const char* is less performant bc stack
 	} file.close();
 	const char* source = src.c_str(); // ??conversion nessessary after read revolution or .usagerev
@@ -148,9 +128,17 @@ unsigned int Shader::compile_shader(const char* path,GLenum stype) // ??int or e
 		char log[512];
 		glGetShaderInfoLog(shader,512,NULL,log);
 		printf("\033[1;31mshader error at: %s\nerror:\033[033[36m%s\033[0m\n",path,log);
-	} return shader; // ??add comfirmation output
+	}
+
+	return shader;
 }
-// !!not to be a hater but why not outsource and make shader program gettable from outside
+
+/*
+	upload_<X>(const char*,X x) -> void
+	loc: name of uniform variable as referred to in the shader code file
+	x: variable in desired datatype to upload to the shader as variable defined by location
+	purpose: definition of uniform variables in shader by program
+*/
 void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
 void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
 void Shader::upload_vec2(const char* loc,glm::vec2 v)

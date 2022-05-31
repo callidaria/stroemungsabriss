@@ -32,7 +32,8 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	};
 	buffer.bind();
 	buffer.upload_vertices(border_verts,sizeof(border_verts));
-	m_sh.compile_mDlg("shader/fbv_mdialogue.shader","shader/fbf_mdialogue.shader");
+	m_sh.compile("shader/fbv_mdialogue.shader","shader/fbf_mdialogue.shader");
+	m_sh.def_attributeF("position",2,0,2);
 	m_sh.upload_matrix("view",cam2d->view2D);
 	m_sh.upload_matrix("proj",cam2d->proj2D);
 

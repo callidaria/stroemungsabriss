@@ -5,24 +5,23 @@
 #include <string>
 #include <vector>
 #include <GL/glew.h>
-#include <SDL2/SDL.h> // ??nessessary
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
 public:
-	Shader();
+	Shader();  // DEPRECATED
+
 	void compile(const char* vspath, const char* fspath);
+	void def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
+	void def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
+
 	void compile2d(const char* vspath, const char* fspath);
 	void compile3d(const char* vspath,const char* fspath);
-	void compile_vCols(const char* vspath,const char* fspath);
-	void compile_hp(const char* vspath,const char* fspath);
-	void compile_mDlg(const char* vspath,const char* fspath);
-	void load_index(unsigned int ibo);
-	void load_text(unsigned int ibo);
+	
 	void enable();
-	void enable_location(const char* loc);
 private:
 	unsigned int compile_shader(const char* path,GLenum stype);
 public:

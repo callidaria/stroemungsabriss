@@ -15,7 +15,10 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI)
 	};
 	hpbuffer.bind();
 	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
-	shp.compile_hp("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
+	shp.compile("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
+	shp.def_attributeF("position",2,0,4);
+	shp.def_attributeF("bar_id",1,2,4);
+	shp.def_attributeF("edge_id",1,3,4);
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	shp.upload_matrix("view",tc2d.view2D);shp.upload_matrix("proj",tc2d.proj2D);
 

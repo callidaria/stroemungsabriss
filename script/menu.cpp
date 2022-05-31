@@ -79,7 +79,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 	buffer.bind();
 	buffer.upload_vertices(sverts,sizeof(sverts));
-	sshd.compile_vCols("shader/fbv_select.shader","shader/fbf_select.shader");
+	sshd.compile("shader/fbv_select.shader","shader/fbf_select.shader");
+	sshd.def_attributeF("position",2,0,8);
+	sshd.def_attributeF("dposition",2,2,8);
+	sshd.def_attributeF("colour",3,4,8);
+	sshd.def_attributeF("idx",1,7,8);
 	sshd.upload_matrix("view",cam2d->view2D);
 	sshd.upload_matrix("proj",cam2d->proj2D);
 
