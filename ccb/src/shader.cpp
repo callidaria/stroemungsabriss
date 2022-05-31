@@ -1,20 +1,50 @@
 #include "../gfx/shader.h"
 
-Shader::Shader() {  } // ??why this again seriously i was this stupid 3 years ago
+/*
+	Constructor()
+	DEPRECATED: make an constructor maybe even autocompile at creation?
+*/
+Shader::Shader() {  }
+
+/*
+	compile(const char*,const char*) -> void
+	vsp: path to vertex shader code file
+	fsp: path to fragment shader code file
+	purpose: compiles the given code files and creates a shader program for later usage
+*/
 void Shader::compile(const char* vsp,const char* fsp)
 {
 	// compiler
-	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER); // !!delete after usage
+	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER); // FIXME: delete after usage
 	unsigned int fragmentShader = compile_shader(fsp,GL_FRAGMENT_SHADER);
 
 	// shader program
 	m_shaderProgram = glCreateProgram();
 	glAttachShader(m_shaderProgram,vertexShader);
 	glAttachShader(m_shaderProgram,fragmentShader);
-	glBindFragDataLocation(m_shaderProgram,0,"outColour"); // !!make char pointer parameter for outColour
+	glBindFragDataLocation(m_shaderProgram,0,"outColour");
 	glLinkProgram(m_shaderProgram);
 	enable();
 }
+
+/*
+	def_attributeF(const char*,uint8_t,uint8_t,uint8_t) -> void
+	vname: target variable name as referred to in shader code file
+	dim: dimension of variable -> 1 => float, 2 => vec2, 3 => vec3, 4 => vec4
+	offset: offset in upload array pattern -> (float,float,FLOAT,FLOAT,float,float) => 2
+	cap: capacity of upload array pattern. how many floats belong to a single vertex
+	purpose: define input pattern from array for shader variables, that are not uniform
+*/
+void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+{
+	size_t vsize = sizeof(float);
+	int attrib = glGetAttribLocation(m_shaderProgram,vname);
+	glEnableVertexAttribArray(attrib);
+	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
+}
+
+//	!DEPRECATION CHUNK START!
+
 void Shader::compile2d(const char* vspath,const char* fspath) // !!cleanup and launch with enumerator && casediff
 {
 	compile(vspath,fspath);
@@ -115,23 +145,51 @@ void Shader::load_text(unsigned int ibo) // !!check for stupid shit
 	glVertexAttribPointer(cursorAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
 	glVertexAttribDivisor(cursorAttrib,1);
 }
+
+// 	!DEPRECATION CHUNK END!
+
+/*
+	enable() -> void
+	purpose: enables the program, so that it can be used. deactivates all others!
+*/
 void Shader::enable() { glUseProgram(m_shaderProgram); }
+
+/*
+	enable_location(const char*) -> void
+	loc: variable name to find attribute which is to be enabled in shader
+	purpose: enables location by attribute name in shader
+	DEPRECATED: this seems unnessessary. find usages and assess the importance
+*/
 void Shader::enable_location(const char* loc)
 {
 	int attrib = glGetAttribLocation(m_shaderProgram,loc);
 	glEnableVertexAttribArray(attrib);
 }
-unsigned int Shader::compile_shader(const char* path,GLenum stype) // ??int or enum !!unify with frame class
+
+/*
+	compile_shader(const char*,GLenum) -> unsigned int
+	path: path to shader code file, meant to be compiled
+	stype: type of shader to compile the shader code file as:
+		vertex shader   -> GL_VERTEX_SHADER
+		geometry shader -> GL_GEOMETRY_SHADER
+		fragment shader -> GL_FRAGMENT_SHADER
+	returns: compiled and debugged shader. if shader could not be compiled successfully
+		a debug log will be posted into console at runtime.
+*/
+unsigned int Shader::compile_shader(const char* path,GLenum stype) // FIXME: uint and enum types
 {
-	// reads from source
-	std::string src; // !!delete after usage
+	// get source file
+	std::string src; // FIXME: delete after usage
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		printf("\033[1;31mno shader found at path: %s\033[0m\n",path);
 		return 0;
-	} std::string line = ""; // ??initialization madness
+	}
+
+	// reads from source
+	std::string line;
 	while (!file.eof()) {
-		std::getline(file,line); // !!unify string/char reading c/c++
+		std::getline(file,line);
 		src.append(line+"\n"); // ??standard && addable const char* is less performant bc stack
 	} file.close();
 	const char* source = src.c_str(); // ??conversion nessessary after read revolution or .usagerev
@@ -148,9 +206,17 @@ unsigned int Shader::compile_shader(const char* path,GLenum stype) // ??int or e
 		char log[512];
 		glGetShaderInfoLog(shader,512,NULL,log);
 		printf("\033[1;31mshader error at: %s\nerror:\033[033[36m%s\033[0m\n",path,log);
-	} return shader; // ??add comfirmation output
+	}
+
+	return shader;
 }
-// !!not to be a hater but why not outsource and make shader program gettable from outside
+
+/*
+	upload_<X>(const char*,X x) -> void
+	loc: name of uniform variable as referred to in the shader code file
+	x: variable in desired datatype to upload to the shader as variable defined by location
+	purpose: definition of uniform variables in shader by program
+*/
 void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
 void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
 void Shader::upload_vec2(const char* loc,glm::vec2 v)
