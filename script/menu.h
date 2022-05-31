@@ -78,7 +78,13 @@ private:
 	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
 
 	// dialogue relevant variables
-	MenuDialogue md_diff,md_conf;
+	std::vector<const char*> pth_diff = {
+		"res/diffs/normal_diff.png","res/diffs/master_diff.png",
+		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
+	};  // FIXME: remove those after path has been found
+	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
+	MenuDialogue md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,"select difficulty",pth_diff,150,450);
+	MenuDialogue md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",pth_conf,75,75);
 	uint8_t dsi_diff,dsi_conf;
 
 	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);

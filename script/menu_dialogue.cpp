@@ -1,13 +1,6 @@
 #include "menu_dialogue.h"
 
 /*
-	Constructor(void)
-	purpose: empty constuctor to build dialogue before constructing it for real.
-	DEPRECATED: this is a bad way and not even necessary. please remove and fix instances.
-*/
-MenuDialogue::MenuDialogue() {  }
-
-/*
 	Constructor(glm::vec2,float,float,Renderer2D*,Camera2D*,const char*,std::vector<const char*>,float,float)
 	pos: position of the dialogue window on screen
 	width: width of the dialogue window
@@ -108,22 +101,6 @@ uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* 
 
 /*
 	open_dialogue() -> void
-	close() -> void
-	purpose: opens and closes the dialogue according to the names of the methods
-	DEPRECATED: join dialogue opening and closing
+	purpose: opens the dialogue window
 */
 void MenuDialogue::open_dialogue() { open = true; }
-void MenuDialogue::close() { open = false; }
-
-/*
-	hit_dialogue(bool) -> uint8_t
-	confirm: contains information if dialogue has been confirmed
-	purpose: this was a placeholder with no real function yet.
-	DEPRECATED: join this function with existing dialogue opening and closing.
-		also figure out why this method was created.
-*/
-uint8_t MenuDialogue::hit_dialogue(bool confirm)
-{
-	open = false;
-	return 0;
-}
