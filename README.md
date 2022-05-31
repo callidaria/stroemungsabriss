@@ -53,6 +53,7 @@ double click yomisensei.exe
 - FIXED: autocreation of initialization file, if not present
 - FIXED: title splash geometry gets modified by sepia vignette
 - FIXED: standard splash's idle geometry gets modified by selection
+- FIXED: menu dialogue has deprecated functions
 
 <br>
 
@@ -70,4 +71,5 @@ double click yomisensei.exe
 ## Additional Information
 - Elapsed Worktime After Commit 120: 16h
     + 23: 1h 21min 43sec
-- Total Code Lines: 5174
+    + 17: 27min
+- Total Code Lines: 5143
