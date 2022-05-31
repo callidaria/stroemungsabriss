@@ -39,7 +39,11 @@ void Text::load_wcam(Camera2D* c)
 {
 	load_vertex();
 	sT.compile2d("shader/vertex_text.shader","shader/fragment_text.shader");
-	sT.load_text(buffer.get_indices());
+	buffer.bind_index();
+	sT.def_indexF(buffer.get_indices(),"offset",2,0,8);
+	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
+	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
+	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
 	font.texture();
 	sT.upload_float("wdt",font.mw);
 	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text

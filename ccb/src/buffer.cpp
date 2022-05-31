@@ -23,6 +23,12 @@ void Buffer::add_buffer() { glGenBuffers(1,&iebo); }
 void Buffer::bind() { glBindVertexArray(vao); }
 
 /*
+	bind_index() -> void
+	purpose: binds the index or the element buffer before usage
+*/
+void Buffer::bind_index() { glBindBuffer(GL_ARRAY_BUFFER,iebo); }
+
+/*
 	upload_vertices(float*,size_t) -> void
 	vertices: array of vertices to upload
 	vsize: size of array to upload (by sizeof return)

@@ -26,7 +26,8 @@ public:
 	void render(int amnt,glm::vec4 col);
 	void set_scroll(glm::mat4 model);
 private:
-	Shader sT;Font font;
+	Shader sT;
+	Font font;
 	Buffer buffer;
 	std::vector<float> ibv;
 };

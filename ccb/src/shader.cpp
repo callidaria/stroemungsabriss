@@ -43,128 +43,50 @@ void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 }
 
-//	!DEPRECATION CHUNK START!
+/*
+	def_indexF(unsigned int,const char*,uint8_t,uint8_t,uint8_t)
+	ibo: index buffer object to be used by shader and defined by layout pattern
+	vname, dim, offset, cap: same function as in def_attributeF
+	purpose: define input pattern of index buffer object for shader variables (not uniform)
+		!!! ibo needs to be bound first !!!
+*/
+void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+{
+	size_t vsize = sizeof(float);
+	int attrib = glGetAttribLocation(m_shaderProgram,vname);
+	glEnableVertexAttribArray(attrib);
+	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
+	glVertexAttribDivisor(attrib,1);
+}
 
+/*
+	compile<dimension>(const char*,const char*) -> void
+	vspath: path to vertex shader code file
+	fspath: path to fragment shader code file
+	purpose: standard compile process with common attribute setup
+		it is not necessary to compile first, these exist for most common shader structures
+*/
 void Shader::compile2d(const char* vspath,const char* fspath) // !!cleanup and launch with enumerator && casediff
 {
 	compile(vspath,fspath);
-
-	// enabling maybe obsolete cause of limited upload requests
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position"); // ??outsource to usage class
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),0); // ??reduction to one upload bitshift
-	int texAttrib = glGetAttribLocation(m_shaderProgram,"texCoords");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(2*sizeof(float)));
+	def_attributeF("position",2,0,4);
+	def_attributeF("texCoords",2,2,4);
 }
 void Shader::compile3d(const char* vspath,const char* fspath) // !!another cleanup
 {
 	compile(vspath,fspath);
-
-	// ??obsolete
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),0);
-	int texAttrib = glGetAttribLocation(m_shaderProgram,"texCoords");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib,2,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(3*sizeof(float)));
-	int nmlAttrib = glGetAttribLocation(m_shaderProgram,"normals");
-	glEnableVertexAttribArray(nmlAttrib);
-	glVertexAttribPointer(nmlAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(5*sizeof(float)));
-	int tgAttrib = glGetAttribLocation(m_shaderProgram,"tangent");
-	glEnableVertexAttribArray(tgAttrib);
-	glVertexAttribPointer(tgAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(8*sizeof(float)));
-	int btgAttrib = glGetAttribLocation(m_shaderProgram,"bitangent");
-	glEnableVertexAttribArray(btgAttrib);
-	glVertexAttribPointer(btgAttrib,3,GL_FLOAT,GL_FALSE,14*sizeof(float),(void*)(11*sizeof(float)));
+	def_attributeF("position",3,0,14);
+	def_attributeF("texCoords",2,3,14);
+	def_attributeF("normals",3,5,14);
+	def_attributeF("tangent",3,8,14);
+	def_attributeF("bitangent",3,11,14);
 }
-void Shader::compile_vCols(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-
-	// !!reduce recurring code chunks
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),0);
-	int dposAttrib = glGetAttribLocation(m_shaderProgram,"dposition");
-	glEnableVertexAttribArray(dposAttrib);
-	glVertexAttribPointer(dposAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(2*sizeof(float)));
-	int colAttrib = glGetAttribLocation(m_shaderProgram,"colour");
-	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer(colAttrib,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(4*sizeof(float)));
-	int idxAttrib = glGetAttribLocation(m_shaderProgram,"idx");
-	glEnableVertexAttribArray(idxAttrib);
-	glVertexAttribPointer(idxAttrib,1,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(7*sizeof(float)));
-	// !!reduce to int
-}
-void Shader::compile_hp(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,4*sizeof(float),0);
-	int colAttrib = glGetAttribLocation(m_shaderProgram,"bar_id");
-	glEnableVertexAttribArray(colAttrib);
-	glVertexAttribPointer(colAttrib,1,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(2*sizeof(float)));
-	int edgeAttrib = glGetAttribLocation(m_shaderProgram,"edge_id");
-	glEnableVertexAttribArray(edgeAttrib);
-	glVertexAttribPointer(edgeAttrib,1,GL_FLOAT,GL_FALSE,4*sizeof(float),(void*)(3*sizeof(float)));
-}
-void Shader::compile_mDlg(const char* vspath,const char* fspath)
-{
-	compile(vspath,fspath);
-	int posAttrib = glGetAttribLocation(m_shaderProgram,"position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
-}
-void Shader::load_index(unsigned int ibo) // !!index upload checking && double upload nessessary
-{
-	int offsetAttrib = glGetAttribLocation(m_shaderProgram,"offset");
-	glEnableVertexAttribArray(offsetAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER,ibo);
-	glVertexAttribPointer(offsetAttrib,2,GL_FLOAT,GL_FALSE,2*sizeof(float),0);
-	glVertexAttribDivisor(offsetAttrib,1);
-}
-void Shader::load_text(unsigned int ibo) // !!check for stupid shit
-{
-	int offsetAttrib=glGetAttribLocation(m_shaderProgram,"offset");
-	glEnableVertexAttribArray(offsetAttrib);
-	glBindBuffer(GL_ARRAY_BUFFER,ibo);
-	glVertexAttribPointer(offsetAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),0);
-	glVertexAttribDivisor(offsetAttrib,1);
-	int texposAttrib=glGetAttribLocation(m_shaderProgram,"texpos");
-	glEnableVertexAttribArray(texposAttrib);
-	glVertexAttribPointer(texposAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(2*sizeof(float)));
-	glVertexAttribDivisor(texposAttrib,1);
-	int boundsAttrib=glGetAttribLocation(m_shaderProgram,"bounds");
-	glEnableVertexAttribArray(boundsAttrib);
-	glVertexAttribPointer(boundsAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(4*sizeof(float)));
-	glVertexAttribDivisor(boundsAttrib,1);
-	int cursorAttrib=glGetAttribLocation(m_shaderProgram,"cursor");
-	glEnableVertexAttribArray(cursorAttrib);
-	glVertexAttribPointer(cursorAttrib,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
-	glVertexAttribDivisor(cursorAttrib,1);
-}
-
-// 	!DEPRECATION CHUNK END!
 
 /*
 	enable() -> void
 	purpose: enables the program, so that it can be used. deactivates all others!
 */
 void Shader::enable() { glUseProgram(m_shaderProgram); }
-
-/*
-	enable_location(const char*) -> void
-	loc: variable name to find attribute which is to be enabled in shader
-	purpose: enables location by attribute name in shader
-	DEPRECATED: this seems unnessessary. find usages and assess the importance
-*/
-void Shader::enable_location(const char* loc)
-{
-	int attrib = glGetAttribLocation(m_shaderProgram,loc);
-	glEnableVertexAttribArray(attrib);
-}
 
 /*
 	compile_shader(const char*,GLenum) -> unsigned int
