@@ -313,13 +313,12 @@ void Menu::render(uint32_t &running,bool &reboot)
 		630,0,		0,720,		s_rgb,		1,
 		650,0,		0,720,		s_rgb,		2,
 		650,0,		650,0,		s_rgb,		3,
-
 	*/
 
 	// render the vertical selection splash
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
-	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)+SELTRANS[0]*dtrans,0));
-	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)+SELTRANS[1]*dtrans,0));
+	sshd.upload_vec2("idx_mod[1]",glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)*ptrans+SELTRANS[0]*dtrans,0));
+	sshd.upload_vec2("idx_mod[2]",glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)*ptrans+SELTRANS[1]*dtrans,0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
 	select_fb.bind();
 	m_frame->clear(0,0,0);
