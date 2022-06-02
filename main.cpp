@@ -1,4 +1,4 @@
-#define GLM_ENABLE_EXPERIMENTAL 1
+#include "ccb/definition.h"
 #include <iostream>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -33,8 +33,9 @@ int main(int argc,char** argv)
 	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),init.rINT(init.FRAME_RESOLUTION_WIDTH),
 		init.rINT(init.FRAME_RESOLUTION_HEIGHT),(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
 
+#if !BUILD_VULKAN
 	// AUDIO
-	Listener listener=Listener();
+	Listener listener = Listener();
 
 	// RENDERERS
 	Renderer2D r2d = Renderer2D();
@@ -187,6 +188,8 @@ int main(int argc,char** argv)
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
 		system("./yomisensei &");
+#endif
+
 #endif
 
 	f.vanish();
