@@ -41,6 +41,9 @@ double click yomisensei.exe
 
 ## v0.0.3 DEV
 
+### feature:
+- possible to render with vulkan
+
 ### optimizations:
 - menu dialogue documentation
 - structured buffer creation
@@ -70,6 +73,7 @@ double click yomisensei.exe
 
 ## Additional Information
 - Elapsed Worktime After Commit 120: 16h
-    + 23: 1h 21min 43sec
+    + 23: 1h 22min
     + 17: 27min
+    + 10: 7h 37min
 - Total Code Lines: 5143
