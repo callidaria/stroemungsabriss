@@ -122,6 +122,20 @@ void Frame::vanish()
 	alcDestroyContext(m_alccon);
 	alcCloseDevice(m_alcdev);
 
+#if BUILD_VULKAN
+#if !BUILD_RELEASE
+
+	// closing error messenger
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(m_vkinst,"vkDestroyDebugUtilsMessengerEXT");
+	func(m_vkinst,m_errmsg,nullptr);
+
+#endif
+
+	// closing vulkan instance
+	vkDestroyInstance(m_vkinst,nullptr);
+
+#endif
+
 	// closing render context & program
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
@@ -139,7 +153,11 @@ void Frame::init()
 void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowFlags fs)
 {
 	// creating window
+#if BUILD_VULKAN
+	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_VULKAN);
+#else
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
+#endif
 	SDL_SetWindowFullscreen(m_frame,fs);
 	m_context = SDL_GL_CreateContext(m_frame);
 
@@ -149,6 +167,81 @@ void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowF
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	glViewport(0,0,width,height);
+
+#if BUILD_VULKAN
+
+	// setup application info
+	VkApplicationInfo vka_info{};
+	vka_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	vka_info.pApplicationName = "黄泉先生";  // FIXME: make this changable through variables
+	vka_info.applicationVersion = VK_MAKE_VERSION(0,0,3);  // FIXME: research deeper
+	vka_info.pEngineName = "cascabel";
+	vka_info.engineVersion = VK_MAKE_VERSION(1,3,1);
+	vka_info.apiVersion = VK_API_VERSION_1_0;  // FIXME: remove unnecessary
+
+	// prepare extensions
+	uint32_t extCount;
+	SDL_Vulkan_GetInstanceExtensions(m_frame,&extCount,nullptr);
+	std::vector<const char*> exts(extCount);  // ??maybe make this const char**
+	SDL_Vulkan_GetInstanceExtensions(m_frame,&extCount,exts.data());  // FIXME: double usage
+#if !BUILD_RELEASE
+	exts.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+	// setup vulkan instance
+	VkInstanceCreateInfo vki_info{};
+	vki_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	vki_info.pApplicationInfo = &vka_info;
+	vki_info.enabledExtensionCount = extCount;
+	vki_info.ppEnabledExtensionNames = exts.data();
+#if BUILD_RELEASE
+	vki_info.enabledLayerCount = 0;
+#else
+	const std::vector<const char*> vLayers = { "VK_LAYER_KHRONOS_validation" };
+	vki_info.enabledLayerCount = static_cast<uint32_t>(vLayers.size());
+	vki_info.ppEnabledLayerNames = vLayers.data();  // FIXME: optimize setup
+
+	// FIXME: duplicate debug preparation code following!
+	VkDebugUtilsMessengerCreateInfoEXT vkc_info{};
+	vkc_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	vkc_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	vkc_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	vkc_info.pfnUserCallback = debugCallback;
+	vki_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &vkc_info;
+#endif
+
+	// create instance
+	VkResult vkres = vkCreateInstance(&vki_info,nullptr,&m_vkinst);
+	vkCreateInstance(&vki_info,nullptr,&m_vkinst);
+
+	// enumerate extensions
+	/*vkEnumerateInstanceExtensionProperties(nullptr,&extCount,nullptr);
+	std::vector<VkExtensionProperties> vkexts(extCount);
+	vkEnumerateInstanceExtensionProperties(nullptr,&extCount,vkexts.data());*/
+
+#if !BUILD_RELEASE
+
+	// vulkan error messaging
+	vkc_info = {};
+	vkc_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	vkc_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	vkc_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	vkc_info.pfnUserCallback = debugCallback;
+	vkc_info.pUserData = nullptr;  // FIXME: remove
+
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(m_vkinst,"vkCreateDebugMessengerEXT");
+	func(m_vkinst,&vkc_info,nullptr,&m_errmsg);
+
+#endif
+#endif
 
 	// openal setup
 	m_alcdev = alcOpenDevice(NULL);
