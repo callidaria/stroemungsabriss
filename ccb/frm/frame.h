@@ -17,6 +17,11 @@ struct Keyboard { bool ka[285] = { false }; };
 struct Mouse { bool mcl=false,mcr=false;int mx,my,mxfr,myfr,mw; };
 struct XBox { int xba[6];bool xbb[16] = { false }; };
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL dbg_callback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT severity,VkDebugUtilsMessageTypeFlagsEXT type,
+	const VkDebugUtilsMessengerCallbackDataEXT* data,void* usr_data
+);
+
 class Frame
 {
 public:
@@ -55,13 +60,6 @@ private:
 #if BUILD_VULKAN
 	VkInstance m_vkinst;
 #if !BUILD_RELEASE
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT mSev,VkDebugUtilsMessageTypeFlagsEXT mType,
-		const VkDebugUtilsMessengerCallbackDataEXT* pCallDat,void* pUsrDat)
-	{
-		std::cerr << "validation layer: " << pCallDat->pMessage << std::endl;
-		return VK_FALSE;
-	}  // FIXME: move out of header
 	VkDebugUtilsMessengerEXT m_errmsg;
 #endif
 #endif

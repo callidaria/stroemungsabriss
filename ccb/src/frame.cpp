@@ -1,0 +1,283 @@
+#include "../frm/frame.h"
+
+/*
+ *	!!! ADD OUTPUT INFORMATION ABOUT SYSTEM !!!
+ *	ALSO MAYBE IMPLEMENT WITH VIEWPORT RIGHT FROM THE BEGINNING ?
+ * */
+Frame::Frame(const char* title,int screen,SDL_WindowFlags fs)
+{
+	init();
+
+	SDL_Rect dim_screen;
+	get_screen(screen,&dim_screen);
+
+	w_res = dim_screen.w;
+	h_res = dim_screen.h;
+	setup(title,dim_screen.x,dim_screen.y,dim_screen.w,dim_screen.h,fs);
+}
+Frame::Frame(const char* title,int width,int height,SDL_WindowFlags fs)
+	: w_res(width),h_res(height)
+{
+	init();
+	setup(title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,fs);
+}
+Frame::Frame(const char* title,int screen,int width,int height,SDL_WindowFlags fs)
+	: w_res(width),h_res(height)
+{
+	init();
+
+	SDL_Rect dim_screen;
+	get_screen(screen,&dim_screen);
+
+	setup(title,dim_screen.x+100,dim_screen.y+100,width,height,fs);
+}
+void Frame::clear(float cx,float cy,float cz)
+{
+	glClearColor(cx,cy,cz,1);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
+}
+void Frame::update() { SDL_GL_SwapWindow(m_frame); }
+void Frame::print_fps()
+{
+        m_fps++;
+	// !!reduce branch for pipeline
+        if (1000<=SDL_GetTicks()-m_pT) { // !!incredibly high numbers will be saved. lets not do this
+                m_pT = SDL_GetTicks();
+                printf("\rFPS: %i",m_fps);fflush(stdout);
+                m_fps = 0;
+        }
+}
+/*
+ *	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
+ *	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
+ *	THIS ISN'T THE 90s ANYMORE GODDAMMIT . THE LATER THIS HAPPENS THE MORE CODE HAS TO BE CHANGED WHEN IT DOES
+ * */
+void Frame::vsync(unsigned int mf)
+{
+	m_pT = m_cT;
+	m_cT = SDL_GetTicks();
+	m_tempFPS++;
+	if (m_cT-m_lO>=1000) {
+		m_lO = m_cT;
+		m_fps = m_tempFPS;
+		m_tempFPS = 0;
+	} if (m_cT-m_pT<1000/mf) SDL_Delay(1000/mf-SDL_GetTicks()+m_pT);
+}
+void Frame::input(uint32_t &running,bool tinput)
+{
+	// FIXME: this is loopcode. make it work as such !!branches!!
+	event_active = false;
+	while (SDL_PollEvent(&m_fe)) {
+		event_active = true;
+		running = m_fe.type!=SDL_QUIT; // exit the program when closing is requested
+
+		// read keyboard input
+		// ??are scancodes slower that sdlks
+		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
+		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
+		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
+			tline.pop_back();
+		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
+
+		// read mouse input
+		SDL_GetMouseState(&mouse.mx,&mouse.my);
+		mouse.mxfr = ((float)mouse.mx/w_res)*1920.0f; // ??make those optional
+		mouse.myfr = ((float)(h_res-mouse.my)/h_res)*1080.0f;
+		// !!fix on move cancellation && carry boolean when button released
+		/*if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
+			mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT;
+			mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT;
+		} if (m_fe.type==SDL_MOUSEBUTTONUP) { // !!not the practical way
+			mouse.mcl = m_fe.button.button!=SDL_BUTTON_LEFT;
+			mouse.mcr = m_fe.button.button!=SDL_BUTTON_RIGHT;
+		}*/
+		mouse.mcl = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_LEFT)
+				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_LEFT);
+		mouse.mcr = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_RIGHT)
+				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_RIGHT);
+		/*mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN;
+		mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN;*/
+		mouse.mw = m_fe.wheel.y;
+
+		// read controller input
+		for (int i=0;i<m_gc.size();i++) {
+			for (int j=0;j<6;j++)
+				xb.at(i).xba[j] = SDL_GameControllerGetAxis(m_gc.at(i),(SDL_GameControllerAxis)j);
+			for (int j=0;j<16;j++)
+				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),(SDL_GameControllerButton)j);
+		}
+		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
+		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers having exchanged a&b recognition
+		// switch input refuses to be read. conn ok but no prints
+	}
+}
+void Frame::vanish()
+{
+	printf("\n");
+	// ??doing this with an array reference even cleaner when converted & test when valgrind isn't mad anymore
+	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i)); // closing controller reference
+
+	// closing audio context & device
+	alcMakeContextCurrent(NULL);
+	alcDestroyContext(m_alccon);
+	alcCloseDevice(m_alcdev);
+
+#if BUILD_VULKAN
+#if !BUILD_RELEASE
+
+	// closing error messenger
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(m_vkinst,"vkDestroyDebugUtilsMessengerEXT");
+	func(m_vkinst,m_errmsg,nullptr);
+
+#endif
+
+	// closing vulkan instance
+	vkDestroyInstance(m_vkinst,nullptr);
+
+#endif
+
+	// closing render context & program
+	SDL_GL_DeleteContext(m_context);
+	SDL_Quit();
+}
+void Frame::init()
+{
+	// sdl setup
+	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
+	SDL_StopTextInput();
+}
+void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowFlags fs)
+{
+	// creating window
+#if BUILD_VULKAN
+	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_VULKAN);
+#else
+	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
+#endif
+	SDL_SetWindowFullscreen(m_frame,fs);
+
+#if BUILD_VULKAN
+
+	// setup application info
+	VkApplicationInfo vka_info{};
+	vka_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	vka_info.pApplicationName = title;
+	vka_info.applicationVersion = VK_MAKE_VERSION(0,0,3);  // FIXME: paras and definitions
+	vka_info.pEngineName = "cascabel";
+	vka_info.engineVersion = VK_MAKE_VERSION(1,3,1);
+	vka_info.apiVersion = VK_API_VERSION_1_0;
+
+	// prepare extensions
+	uint32_t ext_count;
+	SDL_Vulkan_GetInstanceExtensions(m_frame,&ext_count,nullptr);  // FIXME: double usage
+	std::vector<const char*> exts(ext_count);
+	SDL_Vulkan_GetInstanceExtensions(m_frame,&ext_count,exts.data());
+#if !BUILD_RELEASE
+	exts.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+	// setup vulkan instance
+	VkInstanceCreateInfo vki_info{};
+	vki_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	vki_info.pApplicationInfo = &vka_info;
+	vki_info.enabledExtensionCount = exts.size();
+	vki_info.ppEnabledExtensionNames = exts.data();
+#if BUILD_RELEASE
+	vki_info.enabledLayerCount = 0;
+#else
+	const std::vector<const char*> vLayers = { "VK_LAYER_KHRONOS_validation" };
+	vki_info.enabledLayerCount = vLayers.size();
+	vki_info.ppEnabledLayerNames = vLayers.data();
+
+	VkDebugUtilsMessengerCreateInfoEXT vkc_info{};
+	vkc_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	vkc_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	vkc_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+		| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	vkc_info.pfnUserCallback = dbg_callback;
+	vki_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &vkc_info;
+
+#endif
+
+	// create instance
+	vkCreateInstance(&vki_info,nullptr,&m_vkinst);
+
+#if !BUILD_RELEASE
+
+	// create error messenger
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(m_vkinst,"vkCreateDebugUtilsMessengerEXT");
+	func(m_vkinst,&vkc_info,nullptr,&m_errmsg);
+
+#endif
+#else
+
+	// opengl setup
+	m_context = SDL_GL_CreateContext(m_frame);
+	glewInit();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glViewport(0,0,width,height);
+
+#endif
+
+	// openal setup
+	m_alcdev = alcOpenDevice(NULL);
+	m_alccon = alcCreateContext(m_alcdev,NULL);
+	alcMakeContextCurrent(m_alccon);
+
+	// controller setup
+	int gcc = 0;
+	while (SDL_IsGameController(gcc)) {
+		m_gc.push_back(SDL_GameControllerOpen(gcc));
+		xb.push_back(XBox()); // !!negative points for style ...maybe stack usage instead???
+		gcc++;
+	} printf("\033[0;34mcontrollers: %i plugged in\n",gcc);
+
+	m_cT = 0; m_fps = 0; m_tempFPS = 0; m_lO = 0; // ??all necessary & syntax
+}
+void Frame::get_screen(int screen,SDL_Rect* dim_screen)
+{
+	if (screen<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen,dim_screen)==0)
+		printf("\033[1;36mmaximum resolution of selected screen is: %ix%i\n",dim_screen->w,dim_screen->h);
+	else {
+		printf("\033[1;31mscreen could not be set: %s\n",SDL_GetError());
+		printf("\033[1;36m\t=> falling back to standard configuration\n");
+		dim_screen->x = 0; dim_screen->y = 0; dim_screen->w = 1280; dim_screen->h = 720;
+	}
+}
+void Frame::input_start() { SDL_StartTextInput(); }
+void Frame::input_stop() { SDL_StopTextInput(); }
+
+#if BUILD_VULKAN&&!BUILD_RELEASE
+
+/*
+	dbg_callback([...]) -> VkBool32
+	severity: severity of error to handle, importance and value in order:
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT	-> analytical
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT	-> informations
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT	-> warnings
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT	-> errors
+	type: defines the nature of the message to print:
+		VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT		-> none of the below
+		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT	-> mistake or violation
+		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT	-> bad performance
+	data: data of the message to handle
+	usr_data: possible data to pass by callback through this pointer
+	purpose: defines how vulkan should handle it's error messages at runtime (callback)
+*/
+static VKAPI_ATTR VkBool32 VKAPI_CALL dbg_callback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT severity,VkDebugUtilsMessageTypeFlagsEXT type,
+	const VkDebugUtilsMessengerCallbackDataEXT* data,void* usr_data
+) {
+	std::cerr << "vulkan error: " << data->pMessage << '\n';
+	return VK_FALSE;
+}
+
+#endif

@@ -84,11 +84,14 @@ int main(int argc,char** argv)
 	// CAMERAS
 	r2d.load(&cam2d);
 	ri.load(&cam2d);
+#endif
 	uint32_t run=1,pause=false;
-	bool reboot = false;
+	bool reboot = false,dactive = false;
 	glm::mat4 model = glm::mat4(1.0f);
 	while (run) {
-		f.print_fps();f.input(run,dactive);
+		f.print_fps();
+		f.input(run,dactive);
+#if !BUILD_VULKAN
 
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
@@ -180,6 +183,7 @@ int main(int argc,char** argv)
 
 		if (pause) { bgr_pause.close();f.clear(0,0,0);bgr_pause.render(); }
 #endif
+#endif
 		f.update();
 	}
 
@@ -188,8 +192,6 @@ int main(int argc,char** argv)
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
 		system("./yomisensei &");
-#endif
-
 #endif
 
 	f.vanish();
