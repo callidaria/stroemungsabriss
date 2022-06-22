@@ -12,12 +12,12 @@
 
 struct PlayerControls
 {
-	int* flt_ud,*flt_lr;					// floating directionals
-	int* prc_ud,*prc_lr;					// precision shot
-	bool* abs_up,*abs_down,*abs_left,*abs_right;		// absolute directionals
-	bool* cq_def,*cq_atk,*rng_wide,*rng_focus;	// attack and defense
-	bool* bomb,*change,*dash,*target;			// additional tools
-	bool* pause,*rdetails,*qrestart;			// non-diegesis related
+	int* flt_ud,*flt_lr;							// floating directionals
+	int* prc_ud,*prc_lr;							// precision shot
+	bool* abs_up,*abs_down,*abs_left,*abs_right;	// absolute directionals
+	bool* cq_def,*cq_atk,*rng_wide,*rng_focus;		// attack and defense
+	bool* bomb,*change,*dash,*target;				// additional tools
+	bool* pause,*rdetails,*qrestart;				// non-diegesis related
 };
 
 class Player

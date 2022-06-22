@@ -41,6 +41,10 @@ double click yomisensei.exe
 
 ## v0.0.3 DEV
 
+### features:
+- preview practice & arcade position in menu
+- spawn player controlled bullets
+
 ### optimizations:
 - menu dialogue documentation
 - structured buffer creation
@@ -72,4 +76,5 @@ double click yomisensei.exe
 - Elapsed Worktime After Commit 120: 16h
     + 23: 1h 21min 43sec
     + 17: 27min
+    + 42: 1h 30min
 - Total Code Lines: 5143
