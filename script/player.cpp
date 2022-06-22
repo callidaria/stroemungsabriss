@@ -10,7 +10,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 	hpbuffer = Buffer();
 	shp = Shader();
 	float hpverts[] = {
-		10,10,0,0, 10,35,0,0, 310,35,0,1, 310,35,0,1, 310,10,0,2,10,10,0,0,
+		10,10,0,0, 10,35,0,0, 10,35,0,1, 10,35,0,1, 10,10,0,2,10,10,0,0,
 		140,670,1,0, 140,700,1,0, 140,700,1,3, 140,700,1,3, 140,670,1,4, 140,670,1,0,
 	};
 	hpbuffer.bind();
@@ -78,7 +78,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 	}
 }
 Player::~Player() {  }
-void Player::update(uint32_t &rstate,int32_t eDmg)
+void Player::update(uint32_t &rstate,int32_t eDmg,int32_t pDmg)
 {
 	// movement processing
 	emulate_vectorized();
@@ -102,8 +102,9 @@ void Player::update(uint32_t &rstate,int32_t eDmg)
 
 	treg[0] = pos.x;
 	treg[1] = pos.y;
+
 	m_bsys->delta_fDir(0);
-	rng_flib.at(0+((*cnt.rng_focus||*cnt.rng_wide)&&!*cnt.change)+2*(*cnt.change))(m_bsys,treg);
+	rng_flib.at(0+(*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))(m_bsys,treg);
 	// TODO: reassert
 
 	// TODO: bombs
@@ -117,7 +118,10 @@ void Player::update(uint32_t &rstate,int32_t eDmg)
 	// rendering health bar
 	shp.enable();
 	hpbuffer.bind();
+	float plgbar_dist = 400-pDmg*100;
 	float engbar_dist = eDmg/5;
+	shp.upload_float("edgediv[1]",plgbar_dist); // FIXME: do this somewhere more appropriate
+	shp.upload_float("edgediv[2]",plgbar_dist);
 	shp.upload_float("edgediv[3]",engbar_dist);
 	shp.upload_float("edgediv[4]",engbar_dist);
 	glDrawArrays(GL_TRIANGLES,0,12);

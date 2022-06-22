@@ -18,9 +18,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break; // FIXME: kill this when light menu exists
 
-		m_bgenv.update(rstate);
-		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos(),ePos,fwd_treg);
-		m_player.update(rstate,fwd_treg[10]);
+		m_bgenv.update(rstate);	
+		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
+		m_player.update(rstate,fwd_treg[10],fwd_treg[11]);
 		m_bSys.render();
 
 		m_frame->update();

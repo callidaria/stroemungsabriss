@@ -13,6 +13,10 @@
 	8: bullet spray chunk counter directionals
 	9: bullet cluster index id
 	10: boss health
+	11: player health
+	12: player iframes
+	13: player x
+	14: player y
 */
 
 void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg)
@@ -33,6 +37,7 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	treg[5]=rand()%3+4;
 	treg[7]=rand()%2+3;
 	treg[10] = 5000;
+	treg[12] = 12;
 }
 void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,glm::vec2 ePos,
 		int32_t* treg)
@@ -86,7 +91,16 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	} bSys->inc_tick(treg[9]+3);
 	for (int i=0;i<1;i++)
 		bSys->spwn_blt(treg[9]+3,ePos,ePos);
+
+	// collision check
 	treg[10] -= bSys->get_pHit(0,ePos,50,50);
+	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,20,20);
+	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,20,20);
+	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,12,12);
+	bool pHit = (n1_hit||n2_hit||n3_hit)&&treg[12]>11;
+	treg[11] -= pHit;
+	treg[12] -= treg[12]*pHit;
+	treg[12]++;
 
 	/*bSys->delta_fDir(3);
 	for (int i=0;i<2048;i++) {
