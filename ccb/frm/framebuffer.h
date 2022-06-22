@@ -9,8 +9,12 @@ class FrameBuffer
 {
 public:
 	FrameBuffer(); // !!trim down usages if possible
-	FrameBuffer(int fr_width, int fr_height, const char* vsp, const char* fsp, bool float_buffer);
+	FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp,bool float_buffer);
+	FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
+		bool float_buffer);
 
+	void init(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
+		bool float_buffer);
 	void bind(); 	// binds the framebuffer
 	void close(); 	// closes every framebuffer ??maybe get this into frame.h
 	void render(); 	// renders the framebuffer

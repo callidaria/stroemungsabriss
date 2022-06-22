@@ -2,13 +2,28 @@
 
 #define NCOLOUR 1
 
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d)
+Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d,Camera3D* cam3d)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d)
 {
 	const char* GVERSION = "0.0.3d";
 
+	// loading 2D elements and environment file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
+	// 3D element definitions
+	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
+			"./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
+	m_r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png","./res/dnormal.png",
+			"./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
+	m_r3d->load(m_cam3d);
+
+	// 3D shader materials and settings
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
+	l3d.upload();
+	l3d.set_amnt(1);
+	mat0 = Material3D(r3d,1,8,16);
+
+	// text and fonts
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 	tft = Text(fnt);vtft = Text(vfnt);
@@ -17,18 +32,19 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 			glm::vec2(600,20)); // FIXME: hardcoded version number
 	tft.load_wcam(cam2d);vtft.load_wcam(cam2d);
 
-	mls[0]=MenuList();
-	mls[1]=MenuList(r2d,cam2d,"lvload/ml_mopt");
-	mls[2]=MenuList(r2d,cam2d,"lvload/ml_stages");
-	mls[3]=MenuList(r2d,cam2d,"lvload/ml_arcades");
-	mls[4]=MenuList();
-	mls[5]=MenuList();
-	mls[6]=MenuList();
-	mls[7]=MenuList(r2d,cam2d,"lvload/ml_optfrm");
-	mls[8]=MenuList(r2d,cam2d,"lvload/ml_optaud");
-	mls[9]=MenuList(r2d,cam2d,"lvload/ml_optgfx");
-	mls[10]=MenuList(r2d,cam2d,"lvload/ml_optgm");
-	mls[11]=MenuList(r2d,cam2d,"lvload/ml_optext");
+	// interactable listings
+	mls[0] = MenuList();
+	mls[1] = MenuList(r2d,cam2d,"lvload/ml_mopt");
+	mls[2] = MenuList(r2d,cam2d,"lvload/ml_stages");
+	mls[3] = MenuList(r2d,cam2d,"lvload/ml_arcades");
+	mls[4] = MenuList();
+	mls[5] = MenuList();
+	mls[6] = MenuList();
+	mls[7] = MenuList(r2d,cam2d,"lvload/ml_optfrm");
+	mls[8] = MenuList(r2d,cam2d,"lvload/ml_optaud");
+	mls[9] = MenuList(r2d,cam2d,"lvload/ml_optgfx");
+	mls[10] = MenuList(r2d,cam2d,"lvload/ml_optgm");
+	mls[11] = MenuList(r2d,cam2d,"lvload/ml_optext");
 	// FIXME: mess
 
 	buffer = Buffer();
@@ -90,8 +106,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
 	splash_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
-	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader",
+		"shader/fbf_standard.shader",false);
 	cross_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	globe_fb = FrameBuffer(f->w_res,f->h_res,f->w_res/4,f->h_res/4,"shader/fbv_standard.shader",
+		"shader/fbf_standard.shader",false);
 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 
@@ -109,6 +128,10 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
 		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
 		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
+		cam_up = &f->kb.ka[SDL_SCANCODE_I];
+		cam_down = &f->kb.ka[SDL_SCANCODE_K];
+		cam_left = &f->kb.ka[SDL_SCANCODE_J];
+		cam_right = &f->kb.ka[SDL_SCANCODE_L];
 	}
 } Menu::~Menu() {  }
 
@@ -134,6 +157,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);
 	uint8_t dlgmod = hit_rgt-hit_lft;
 	// FIXME: remove branch from loop
+	/*pitch += *cam_up-*cam_down;
+	yaw += *cam_right-*cam_left;*/
 
 	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
@@ -377,11 +402,31 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
 
 	tft.prepare();
-	tft.render(50*(1-ptrans),glm::vec4(1,0,0,1));
+	tft.render(19*(1-ptrans),glm::vec4(1,0,0,1));
 
 	vtft.prepare();
 	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
+
+	// render the location preview globe
+	//std::cout << pitch << "   " << yaw << '\n';
+	globe_fb.bind();
+	m_frame->clear(.1f,.1f,.1f);
+	glEnable(GL_DEPTH_TEST);
+	m_cam3d->front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
+	m_cam3d->front.y = sin(glm::radians(pitch));
+	m_cam3d->front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
+	m_cam3d->front = glm::normalize(m_cam3d->front);
+	m_r3d->prepare_wcam(m_cam3d);
+	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
+	model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
+	m_r3d->upload_model(model);
+	mat0.upload();
+	m_r3d->render_mesh(0,1);
+	m_r3d->upload_model(glm::mat4(1.0f));
+	m_r3d->render_mesh(1,2);
+	globe_fb.close();
 
 	// render splash overlay
 	m_frame->clear(0,0,0);
@@ -415,4 +460,11 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->sl[msindex+19].model = disptrans*disprot;
 	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
+
+	// render globe location preview on top of menu
+	m_r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
+	m_r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
+	m_r2d->s2d.upload_float("vFlip",1.0f);  // FIXME: this bullshit no reason bullshit stupid ass vectorflip
+	m_r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
+	m_r2d->s2d.upload_float("vFlip",0);
 }

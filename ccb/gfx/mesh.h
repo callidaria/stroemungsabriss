@@ -83,15 +83,16 @@ public:
 	}
 	void texture()
 	{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,tex);
 		int width,height;
 #ifdef __WIN32__
-		unsigned char* image = stbi_load(empath, &width, &height, 0, STBI_rgb_alpha); // ??alpha needed in mesh
+		unsigned char* image = stbi_load(texpath, &width, &height, 0, STBI_rgb_alpha); // ??alpha needed in mesh
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
 #else
-		unsigned char* image = SOIL_load_image(empath, &width, &height, 0, SOIL_LOAD_RGBA);
+		unsigned char* image = SOIL_load_image(texpath, &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);
@@ -104,12 +105,12 @@ public:
 
 		glBindTexture(GL_TEXTURE_2D,specmap);
 #ifdef __WIN32__
-		image = stbi_load(empath, &width, &height, 0, 0); // !!research RGBA support
+		image = stbi_load(smpath, &width, &height, 0, 0); // !!research RGBA support
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
 #else
-		image = SOIL_load_image(empath, &width, &height, 0, SOIL_LOAD_RGBA);
+		image = SOIL_load_image(smpath, &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);
@@ -122,12 +123,12 @@ public:
 
 		glBindTexture(GL_TEXTURE_2D,normap);
 #ifdef __WIN32__
-		image = stbi_load(empath, &width, &height, 0, 0); // !!research RGBA support
+		image = stbi_load(nmpath, &width, &height, 0, 0); // !!research RGBA support
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
 #else
-		image = SOIL_load_image(empath, &width, &height, 0, SOIL_LOAD_RGBA);
+		image = SOIL_load_image(nmpath, &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);

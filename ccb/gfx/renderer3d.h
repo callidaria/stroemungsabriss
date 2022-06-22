@@ -29,12 +29,17 @@ public:
 	void load_texture()
 	{
 		for(int i=0;i<ml.size();i++) ml.at(i).texture();
-		s3d.upload_int("tex",0);s3d.upload_int("sm",1);
-		s3d.upload_int("emit",2);s3d.upload_int("shadow_map",3);
+		s3d.upload_int("tex",0);
+		s3d.upload_int("sm",1);
+		s3d.upload_int("emit",2);
+		s3d.upload_int("shadow_map",3);
 		s3d.upload_int("nmap",4);
 	}
 	void load(Camera3D* c)
 	{
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		load_vertex();
 		shs.compile3d("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
 		s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");

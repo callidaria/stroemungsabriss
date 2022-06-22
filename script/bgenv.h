@@ -17,6 +17,7 @@ private:
 private:
 	Renderer2D* m_r2d;
 	uint32_t idx2d;
+
 	std::vector<void(*)(Renderer2D*,uint32_t&)> env_slib = {
 		env_lchild,env_dpilot
 	};std::vector<std::string> lvpathlib = { "lchild","dpilot" };
