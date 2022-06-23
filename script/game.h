@@ -32,10 +32,28 @@ private:
 
 	Player m_player = Player(m_frame,m_r2d,m_rI,&m_bSys);
 
+	/*
+		func(Renderer2D*,uint32_t&,BulletSystem*,int32_t*) -> void
+			=> func(r2d,rnd_index,bSys,treg) -> void
+		r2d: pointer to renderer, used to render 2D elements
+		rnd_index: starting memory index of renderer, to be modified by first write
+		bSys: bullet system, the enemies use to spawn their bullet patterns
+		treg: variable register for externally saved and modified values
+	*/
 	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,int32_t*)> stg_ld = {
 		BossLChild::load,BossDPilot::load
 	};
+
+	/*
+		func(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void
+			=> func(r2d,rnd_index,bSys,pPos,ePos,treg)
+		r2d,rnd_index,bSys,treg: see definitions for stg_ld
+		pPos: updated pc position
+		ePos: updated enemy position
+	*/
 	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*)> stg_upd = {
 		BossLChild::update,BossDPilot::update
 	};
+
+	// FIXME: reduce all possible register values into register to keep parameters clean
 };

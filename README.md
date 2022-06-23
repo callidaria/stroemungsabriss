@@ -44,6 +44,7 @@ double click yomisensei.exe
 ### features:
 - preview practice & arcade position in menu
 - spawn player controlled bullets
+- dancing pilot patterns [DEV]
 
 ### optimizations:
 - menu dialogue documentation
@@ -77,4 +78,5 @@ double click yomisensei.exe
     + 23: 1h 21min 43sec
     + 17: 27min
     + 42: 1h 30min
+    + 13: 3h 12min
 - Total Code Lines: 5143
