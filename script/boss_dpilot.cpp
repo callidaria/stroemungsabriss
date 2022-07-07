@@ -30,17 +30,15 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	rnd_index = r2d->add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
 
 	// danmaku
-	treg[9] = bSys->add_cluster(21,21,2048,"./res/bllt_proj.png");
-	bSys->add_cluster(30,30,2048,"./res/bllt_norm.png");
-	/*bSys->add_cluster(17,17,1024,"./res/fast_bullet.png");
-	bSys->add_cluster(12,12,2048,"./res/bllt_ffdir.png");*/
+	treg[9] = bSys->add_cluster(15,15,2048,"./res/bllt_proj.png");
+	bSys->add_cluster(15,15,2048,"./res/bllt_norm.png");
 	bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png");
 	bSys->add_cluster(12,12,2048,"./res/fast_bullet.png");
 
 	// registers
-	treg[2] = 1;			// set initial direction multiplier to positive value
-	treg[5] = rand()%3+4;	// set flarespray stall counter to 4-2 frames
-	treg[7] = rand()%2+3;	// set directional spawn cooldown to 3-4 frames
+	treg[2]  = 1;			// set initial direction multiplier to positive value
+	treg[5]  = rand()%3+4;	// set flarespray stall counter to 4-2 frames
+	treg[7]  = rand()%2+3;	// set directional spawn cooldown to 3-4 frames
 	treg[10] = 5000;		// standard phase health
 	treg[12] = 12;			// set 12 iframes for player after hit
 }
@@ -76,19 +74,6 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	treg[11] -= pHit;
 	treg[12] -= treg[12]*pHit;
 	treg[12]++;
-
-	/*bSys->delta_fDir(3);
-	for (int i=0;i<2048;i++) {
-		glm::vec2 toDir = bSys->get_bltDir(2,i);float mult = glm::length(toDir);
-		glm::vec2 oDir = glm::normalize(toDir);
-		float angle = glm::orientedAngle(oDir,glm::vec2(1*treg[2],0));
-		glm::vec4 nDir = glm::vec4(oDir.x,oDir.y,0,0)*glm::rotate(glm::mat4(1.0f),
-			-angle/60,glm::vec3(0,0,1));
-		bSys->set_bltDir(2,i,glm::vec2(nDir.x,nDir.y));
-	} for (int i=0+6*!treg[3];i<6;i++) {
-		glm::vec2 bPos = glm::vec2(ePos.x-12*treg[2],ePos.y)+glm::vec2(i,5*i);
-		bSys->spwn_blt(2,bPos,bPos-ePos);
-	}*/
 
 	// VISUALS
 	r2d->prepare();
@@ -131,7 +116,7 @@ void flaredrop(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 		bSys->spwn_blt(treg[9],glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
 	for (int i=0+6*no_flares;i<6;i++)
 		bSys->spwn_blt(treg[9],glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
-	
+
 	// setup random cooldown time if flares spawned
 	treg[1] = !no_flares*(rand()%12+4)+no_flares*treg[1];
 	treg[1] -= !treg[3];  // tick cooldown frame counter
@@ -148,15 +133,12 @@ void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 	// constant downwards movement
 	for (int i=0;i<2048;i++)
 		bSys->delta_bltPos(treg[9]+1,i,glm::vec2(0,-1+(bSys->get_bltPos(treg[9]+1,i).y<50)*-100));
-	
+
 	// spawn after cooldown frames ticked down
 	for (int i=(treg[4]||!treg[3]);i<1;i++) {
 		bSys->spwn_blt(treg[9]+1,glm::vec2(ePos.x+20,ePos.y-15));
 		treg[4] = rand()%3+1;  // FIXME: kick this outside of loop to reduce the amount of rand()
-	}
-	
-	// tick cooldown frame counter
-	treg[4] -= treg[3];
+	} treg[4] -= treg[3];  // tick cooldown frame counter
 }
 
 /*
@@ -183,7 +165,7 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 		treg[8]--;
 		treg[7] = rand()%2+3+30*(treg[8]<1);  // FIXME: same issue with rand() as in function above.
 	}
-	
+
 	// counter ticks and reset
 	treg[8] += !treg[8]*30;
 	treg[7]--;

@@ -78,5 +78,5 @@ double click yomisensei.exe
     + 23: 1h 21min 43sec
     + 17: 27min
     + 42: 1h 30min
-    + 13: 5h 15min
+    + 13: 7h 26min
 - Total Code Lines: 5143
