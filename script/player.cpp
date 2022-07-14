@@ -66,10 +66,10 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 		cnt.abs_right = &f->kb.ka[SDL_SCANCODE_RIGHT];
 		cnt.cq_def = &f->kb.ka[SDL_SCANCODE_Q];
 		cnt.cq_atk = &f->kb.ka[SDL_SCANCODE_E];
-		cnt.rng_wide = &f->kb.ka[SDL_SCANCODE_SPACE];
-		cnt.rng_focus = &f->kb.ka[SDL_SCANCODE_LALT];
+		cnt.rng_wide = &f->kb.ka[SDL_SCANCODE_C];
+		cnt.rng_focus = &f->kb.ka[SDL_SCANCODE_Z];
 		cnt.bomb = &f->kb.ka[SDL_SCANCODE_F];
-		cnt.change = &f->kb.ka[SDL_SCANCODE_C];
+		cnt.change = &f->kb.ka[SDL_SCANCODE_V];
 		cnt.dash = &f->kb.ka[SDL_SCANCODE_LSHIFT];
 		cnt.target = &f->kb.ka[SDL_SCANCODE_RSHIFT];
 		cnt.pause = &f->kb.ka[SDL_SCANCODE_ESCAPE];

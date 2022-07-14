@@ -76,28 +76,90 @@ void BulletSystem::set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
 	dirs.at(cluster)[index] = nDir;
 }
 
+/*
+	delta_bltPos(uint8_t,uint32_t,glm::vec2) -> void
+	dPos: the direction and speed the bullet should move according to
+	purpose: move specific bullet according to outsidely precalculated direction and speed
+*/
 void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
 {
-	// setting frame update time defined delta between bullet positions (e.g. bullet movement)
 	m_rI->il.at(cluster).o[index] += dPos;
 }
-void BulletSystem::delta_bltDir(uint8_t cluster,uint32_t index,glm::vec2 dDir)
-{
-	dirs.at(cluster)[index] += dDir; // ??is this method stoopid and irrelevant
-}
+
+/*
+	delta_fDir(uint8_t) -> void
+	purpose: update all bullets in a specified cluster according to their current movement directions
+*/
 void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
 		m_rI->il.at(cluster).o[i] += dirs.at(cluster)[i];
 }
-void BulletSystem::inc_tick(uint8_t cluster) { for(int i=0;i<bCount.at(cluster);i++)ts.at(cluster).at(i)++; }
-void BulletSystem::reset_tick(uint8_t cluster,uint32_t index) { ts.at(cluster).at(index)=0; }
+
+/*
+	inc_tick(uint8_t) -> void
+	purpose: tick all bullets in a cluster
+*/
+void BulletSystem::inc_tick(uint8_t cluster)
+{
+	for(int i=0;i<bCount.at(cluster);i++)
+		ts.at(cluster).at(i)++;
+}
+
+/*
+	reset_tick(uint8_t,uint32_t) -> void
+	purpose: resetting tick counter of a specific bullet in a specific cluster
+*/
+void BulletSystem::reset_tick(uint8_t cluster,uint32_t index)
+{
+	ts.at(cluster).at(index) = 0;
+}
 // FIXME: deviation & naming
-glm::vec2 BulletSystem::get_bltPos(uint8_t cluster,uint32_t index) { return m_rI->il.at(cluster).o[index]; }
-glm::vec2 BulletSystem::get_bltDir(uint8_t cluster,uint32_t index) { return dirs.at(cluster)[index]; }
-uint16_t BulletSystem::get_bCount(uint8_t cluster) { return bCount.at(cluster); }
-int32_t BulletSystem::get_ts(uint8_t cluster,uint32_t index) { return ts.at(cluster).at(index); }
+
+/*
+	get_bltPos(uint8_t,uint32_t) -> vec2
+	returns: position of a specific bullet in a specific cluster
+*/
+glm::vec2 BulletSystem::get_bltPos(uint8_t cluster,uint32_t index)
+{
+	return m_rI->il.at(cluster).o[index];
+}
+
+/*
+	get_bltDir(uint8_t,uint32_t) -> vec2
+	returns: movement direction and speed of a specific bullet in a specific cluster
+*/
+glm::vec2 BulletSystem::get_bltDir(uint8_t cluster,uint32_t index)
+{
+	return dirs.at(cluster)[index];
+}
+
+/*
+	get_bCount(uint8_t) -> uint16_t
+	returns: the amount of active bullets in a cluster
+*/
+uint16_t BulletSystem::get_bCount(uint8_t cluster)
+{
+	return bCount.at(cluster);
+}
+
+/*
+	get_ts(uint8_t,uint32_t) -> int32_t
+	returns: get tick counter of a specific bullet in a specific cluster
+*/
+int32_t BulletSystem::get_ts(uint8_t cluster,uint32_t index)
+{
+	return ts.at(cluster).at(index);
+}
+
+/*
+	get_pHit(uint8_t,glm::vec2,uint8_t,uint8_t) -> uint8_t
+	pos: down-left position of the object the bullets from the cluster are in hostile relation to
+	width: x-axis range the object or character takes up as visualized from its down-left corner
+	height: y-axis range the object or character takes up as visualized from its down-left corner
+	returns: amount of bullets hitting the hostile object at the current moment
+*/
 uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,uint8_t width,uint8_t height)
 {
 	uint8_t out = 0;
@@ -109,6 +171,11 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,uint8_t width,uint8
 	}
 	return out;
 }
+
+/*
+	render() -> void
+	purpose: render all spawned bullets (active or not) from all clusters belonging to this system
+*/
 void BulletSystem::render()
 {
 	m_rI->prepare();
