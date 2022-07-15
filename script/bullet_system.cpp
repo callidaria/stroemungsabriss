@@ -154,19 +154,23 @@ int32_t BulletSystem::get_ts(uint8_t cluster,uint32_t index)
 }
 
 /*
-	get_pHit(uint8_t,glm::vec2,uint8_t,uint8_t) -> uint8_t
-	pos: down-left position of the object the bullets from the cluster are in hostile relation to
-	width: x-axis range the object or character takes up as visualized from its down-left corner
-	height: y-axis range the object or character takes up as visualized from its down-left corner
+	get_pHit(uint8_t,glm::vec2,float,float) -> uint8_t
+	pos: center position of the object, the bullets from the cluster are in hostile relation to
+	hr: object or character radius to define range of vulnerability for the hostile object
+	br: bullet radius to define effective collision range (should be slightly smaller than visuals)
 	returns: amount of bullets hitting the hostile object at the current moment
+		the collision check is done by calculating the distance between both centers of the colliders,
+		if the distance is smaller than the combined reach of both collider radii, collision happened
+			O------------------------O		=> d'<(r1+r2) | for r[i] is radius of sphere
+			v1		d'=|v2-v1|		v2						with center v[i]
 */
-uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,uint8_t width,uint8_t height)
+uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 {
 	uint8_t out = 0;
 	for (int i=0;i<countCaps[cluster];i++) {
-		glm::vec2 cPos = m_rI->il[cluster].o[i];
-		bool hit = cPos.x<pos.x+width&&cPos.x>pos.x&&cPos.y<pos.y+height&&cPos.y>pos.y;
-		m_rI->il[cluster].o[i] += glm::vec2(-10000,-10000)*glm::vec2((int)hit);
+		glm::vec2 cPos = m_rI->il[cluster].o[i];	// getting bullet position
+		bool hit = glm::length(cPos-pos)<=hr+br;	// check collision
+		m_rI->il[cluster].o[i] += glm::vec2(-10000,-10000)*glm::vec2((int)hit);  // "despawn"
 		out += hit;
 	}
 	return out;

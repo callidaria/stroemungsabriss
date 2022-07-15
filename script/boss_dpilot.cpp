@@ -66,10 +66,10 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	// whirlpool(bSys,treg,ePos);
 
 	// collision check
-	treg[10] -= bSys->get_pHit(0,ePos,50,50);
-	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,20,20);
-	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,20,20);
-	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,12,12);
+	treg[10] -= bSys->get_pHit(0,ePos+glm::vec2(12.5f),35,0);
+	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,10);
+	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,10);
+	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,9);
 	bool pHit = (n1_hit||n2_hit||n3_hit)&&treg[12]>11;
 	treg[11] -= pHit;
 	treg[12] -= treg[12]*pHit;
@@ -96,7 +96,7 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	purpose: spawns doubled flares behind the jet, falling down parallel to y axis
 		also flares spread by moving down in different speeds to take up more
 		movable space and thus create a higher threat and reduce dodgability
-			^|_|^  <-  enemy
+			Y|_|Y  <-  enemy
 			O   O  <-  mines
 			O	O
 	FIXME: flares are way to big and require to precise movement for a support pattern

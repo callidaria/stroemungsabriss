@@ -28,7 +28,7 @@ public:
 	glm::vec2 get_bltDir(uint8_t cluster,uint32_t index);
 	uint16_t get_bCount(uint8_t cluster);
 	int32_t get_ts(uint8_t cluster,uint32_t index);
-	uint8_t get_pHit(uint8_t cluster,glm::vec2 pos,uint8_t width,uint8_t height);
+	uint8_t get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br);
 
 	void render();
 private:

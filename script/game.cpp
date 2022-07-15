@@ -10,7 +10,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(m_r2d,stg_idx2d,&m_bSys,fwd_treg);
 
-	m_r2d->load_wcam(m_cam2d);m_rI->load_wcam(m_cam2d);
+	m_r2d->load_wcam(m_cam2d);
+	m_rI->load_wcam(m_cam2d);
+
 	uint32_t running=rstate+1;
 	while (running) { // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
