@@ -1,7 +1,7 @@
 #include "bullet_system.h"
 
 /*
-	Constructor(RendererI*)
+	constructor(RendererI*)
 	rI: points to index renderer the visualized bullets will be handled by
 	purpose: setting up the bullet system object
 */
