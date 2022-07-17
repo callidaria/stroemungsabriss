@@ -47,7 +47,7 @@ double click yomisensei.exe
 - dancing pilot patterns [DEV]
 
 ### optimizations:
-- menu dialogue documentation
+- improved documentation
 - structured buffer creation
 - removing all planning and progression scripts from repo
 - reconceptualizing the basic menu colour scheme
@@ -59,6 +59,7 @@ double click yomisensei.exe
 - FIXED: title splash geometry gets modified by sepia vignette
 - FIXED: standard splash's idle geometry gets modified by selection
 - FIXED: menu dialogue has deprecated functions
+- FIXED: collision sphere center off object center [DEV]
 
 <br>
 
@@ -73,10 +74,7 @@ double click yomisensei.exe
 
 ***
 
-## Additional Information
-- Elapsed Worktime After Commit 120: 16h
-    + 23: 1h 21min 43sec
-    + 17: 27min
-    + 42: 1h 30min
-    + 13: 13h 9min
-- Total Code Lines: 5624
+## Trivia
+- Elapsed Worktime After Commit 120: 19h 19min
+    + 13: 15h 16min
+- Total Code Lines: 5633

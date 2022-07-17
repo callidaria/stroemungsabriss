@@ -24,6 +24,10 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,const uint32_t
 	std::vector<glm::vec2> t_dirs(caps);			// creating temporary bullet direction list
 	std::vector<int32_t> t_ts(caps);				// creating temporary bullet tick counter list
 
+	// save bullet width and height of cluster
+	c_width.push_back(width);
+	c_height.push_back(height);
+
 	// setting initial values
 	bCount.push_back(0);		// add value of already spawned bullets set to 0
 	countCaps.push_back(caps);	// save capacity value to capacity value list
@@ -168,12 +172,16 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 {
 	uint8_t out = 0;
 	for (int i=0;i<countCaps[cluster];i++) {
-		glm::vec2 cPos = m_rI->il[cluster].o[i];	// getting bullet position
-		bool hit = glm::length(cPos-pos)<=hr+br;	// check collision
+
+		// get centered bullet position
+		glm::vec2 cPos = m_rI->il[cluster].o[i]+glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
+
+		// calculate if object got hit
+		bool hit = glm::length(cPos-pos)<=hr+br;  // check collision
 		m_rI->il[cluster].o[i] += glm::vec2(-10000,-10000)*glm::vec2((int)hit);  // "despawn"
-		out += hit;
-	}
-	return out;
+		out += hit;  // increment hit-meter
+
+	} return out;
 }
 
 /*

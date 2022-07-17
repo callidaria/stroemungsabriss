@@ -66,10 +66,10 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	// whirlpool(bSys,treg,ePos);
 
 	// collision check
-	treg[10] -= bSys->get_pHit(0,ePos+glm::vec2(12.5f),35,0);
-	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,10);
-	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,10);
-	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,9);
+	treg[10] -= bSys->get_pHit(0,ePos+glm::vec2(25),35,0);
+	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,5);
+	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,5);
+	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,7);
 	bool pHit = (n1_hit||n2_hit||n3_hit)&&treg[12]>11;
 	treg[11] -= pHit;
 	treg[12] -= treg[12]*pHit;
@@ -154,8 +154,8 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 	bSys->delta_fDir(treg[9]+2);
 
 	// aim bullets in normalized direction at player
-	glm::vec2 dPos = ePos+glm::vec2(glm::vec2(16,-17));
-	glm::vec2 norm = glm::normalize(glm::vec2(pPos.x+16,pPos.y+17)-dPos);
+	glm::vec2 dPos = ePos+glm::vec2(16.5f);
+	glm::vec2 norm = glm::normalize((pPos-glm::vec2(8.5f))-dPos);
 
 	// spawn bullets and set previously calculated direction aimed at player
 	for (int i=-2+5*!!treg[7];i<3;i++) {

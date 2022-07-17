@@ -3,7 +3,7 @@
 void Game::run(uint32_t &rstate,CCBManager* ccbm)
 {
 	m_bgenv.load(rstate,ccbm);
-	
+
 	// TODO: reduce
 	uint32_t stg_idx2d;
 	int32_t fwd_treg[16] = { 0 };
