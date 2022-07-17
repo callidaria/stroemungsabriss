@@ -13,6 +13,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	m_r2d->load_wcam(m_cam2d);
 	m_rI->load_wcam(m_cam2d);
 
+	// ui
+	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,1000);
+
 	uint32_t running=rstate+1;
 	while (running) { // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
@@ -22,8 +25,12 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 		m_bgenv.update(rstate);	
 		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
-		m_player.update(rstate,fwd_treg[10],fwd_treg[11]);
+		m_player.update(rstate,fwd_treg[11]);
 		m_bSys.render();
+
+		// healthbar
+		hbar.register_damage(fwd_treg[10]);
+		hbar.render();
 
 		m_frame->update();
 	} rstate=0; // TODO: choose between menu &|| desktop skip

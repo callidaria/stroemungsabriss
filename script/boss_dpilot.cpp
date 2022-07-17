@@ -12,8 +12,8 @@
 	 7 : cooldown frames left for directional spawn
 	 8 : bullet spray chunk counter directionals
 	 9 : bullet cluster index id
-	10 : boss health
-	11 : player health
+	10 : negative boss health modifier
+	11 : negative player health modifier
 	12 : player iframes
 	13 : player x
 	14 : player y
@@ -39,7 +39,6 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	treg[2]  = 1;			// set initial direction multiplier to positive value
 	treg[5]  = rand()%3+4;	// set flarespray stall counter to 4-2 frames
 	treg[7]  = rand()%2+3;	// set directional spawn cooldown to 3-4 frames
-	treg[10] = 5000;		// standard phase health
 	treg[12] = 12;			// set 12 iframes for player after hit
 }
 
@@ -51,31 +50,32 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 		int32_t* treg)
 {
 	// movement
-	ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
+	/*ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
 		+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
 	bool ex_ovfl = treg[0]<-600||treg[0]>600; // if B mv reached screen width cap
 	bool mult_swap = treg[0]*treg[2]>1;
 	treg[2] *= -1*mult_swap+1*!mult_swap; // invert movement direction multiplier
 	treg[3] += ex_ovfl-mult_swap;
 	treg[0] += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
-	treg[5] -= mult_swap;
+	treg[5] -= mult_swap;*/
 
-	flaredrop(bSys,treg,ePos);
+	// patterns
+	/*flaredrop(bSys,treg,ePos);
 	mines(bSys,treg,ePos);
 	directional_sweep(bSys,treg,pPos,ePos);
-	// whirlpool(bSys,treg,ePos);
+	whirlpool(bSys,treg,ePos);*/
 
 	// collision check
-	treg[10] -= bSys->get_pHit(0,ePos+glm::vec2(25),35,0);
+	treg[10] = bSys->get_pHit(0,ePos+glm::vec2(25),35,0);
 	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,5);
 	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,5);
 	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,7);
 	bool pHit = (n1_hit||n2_hit||n3_hit)&&treg[12]>11;
-	treg[11] -= pHit;
+	treg[11] = pHit;
 	treg[12] -= treg[12]*pHit;
 	treg[12]++;
 
-	// VISUALS
+	// visuals
 	r2d->prepare();
 	r2d->sl.at(rnd_index).model = glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0));
 	r2d->render_sprite(rnd_index,rnd_index+1);

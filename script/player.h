@@ -9,6 +9,7 @@
 #include "../ccb/fcn/buffer.h"
 
 #include "bullet_system.h"
+#include "ui/healthbar.h"
 
 struct PlayerControls
 {
@@ -27,7 +28,7 @@ public:
 	Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys);
 	~Player();
 
-	void update(uint32_t &rstate,int32_t eDmg,int32_t pDmg);
+	void update(uint32_t &rstate,int32_t pDmg);
 	glm::vec2 get_pPos();
 private:
 	// additional
@@ -44,9 +45,8 @@ private:
 	Renderer2D* m_r2d;
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
+	Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,4);
 	int ri;
-	Shader shp;				// health bar shader
-	Buffer hpbuffer;		// health bar buffer
 	uint8_t sal[2];			// sprite adress library
 	int32_t treg[16] = { 0 };
 

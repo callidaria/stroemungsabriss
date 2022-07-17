@@ -1,18 +1,17 @@
 #pragma once
 
 #include <iostream>
-#include "../ccb/frm/frame.h"
 
+#include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/rendereri.h"
-
 #include "../ccb/fcn/ccb_manager.h"
-
 #include "../ccb/mat/camera2d.h"
 
 #include "bgenv.h"
 #include "player.h"
 #include "bullet_system.h"
+#include "ui/healthbar.h"
 
 #include "boss_lchild.h"
 #include "boss_dpilot.h"

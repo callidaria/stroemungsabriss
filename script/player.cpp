@@ -14,23 +14,6 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 	// setup player character visualization
 	ri = m_r2d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
 
-	// health bar
-	hpbuffer = Buffer();
-	shp = Shader();
-	float hpverts[] = {
-		10,10,0,0, 10,35,0,0, 10,35,0,1, 10,35,0,1, 10,10,0,2,10,10,0,0,
-		140,670,1,0, 140,700,1,0, 140,700,1,3, 140,700,1,3, 140,670,1,4, 140,670,1,0,
-	};
-	hpbuffer.bind();
-	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
-	shp.compile("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
-	shp.def_attributeF("position",2,0,4);
-	shp.def_attributeF("bar_id",1,2,4);
-	shp.def_attributeF("edge_id",1,3,4);
-	Camera2D tc2d = Camera2D(1280.0f,720.0f);
-	shp.upload_matrix("view",tc2d.view2D);
-	shp.upload_matrix("proj",tc2d.proj2D);
-
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png");
 	treg[2] = 9;
@@ -91,11 +74,10 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 /*
 	update(uint32_t&,int32_t,int32_t) -> void
 	rstate: render state to derive player character visualization, animation and handling from
-	eDmg: enemy damage to reduce his healthbar length (FIXME: do enemy health bar outside)
 	pDmg: outside player damage to reduce health and healthbar length
 	purpose: to update the players state and render position, visualization & health bar
 */
-void Player::update(uint32_t &rstate,int32_t eDmg,int32_t pDmg)
+void Player::update(uint32_t &rstate,int32_t pDmg)
 {
 	// movement processing 8-way to vectorized
 	emulate_vectorized();
@@ -141,15 +123,8 @@ void Player::update(uint32_t &rstate,int32_t eDmg,int32_t pDmg)
 	m_r2d->render_sprite(ri,ri+1);
 
 	// render health bar
-	shp.enable();
-	hpbuffer.bind();
-	float plgbar_dist = 400-pDmg*100;
-	float engbar_dist = eDmg/5;
-	shp.upload_float("edgediv[1]",plgbar_dist); // FIXME: do this somewhere more appropriate
-	shp.upload_float("edgediv[2]",plgbar_dist);
-	shp.upload_float("edgediv[3]",engbar_dist);
-	shp.upload_float("edgediv[4]",engbar_dist);
-	glDrawArrays(GL_TRIANGLES,0,12);
+	hbar.register_damage(pDmg);
+	hbar.render();
 }
 
 /*
