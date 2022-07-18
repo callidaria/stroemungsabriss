@@ -59,7 +59,7 @@ double click yomisensei.exe
 - FIXED: title splash geometry gets modified by sepia vignette
 - FIXED: standard splash's idle geometry gets modified by selection
 - FIXED: menu dialogue has deprecated functions
-- FIXED: collision sphere center off object center [DEV]
+- FIXED: collision sphere center off object center
 
 <br>
 
@@ -76,5 +76,5 @@ double click yomisensei.exe
 
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
-    + 13: 19h 10min
+    + 13: 20h 57min
 - Total Code Lines: 5691

@@ -5,12 +5,15 @@
 	pos: down left position of the health bar on the screen
 	width: maximum width of the health bar if health points are at maximum value
 	height: height of the health bar
-	hp: maximum health points the bar contains (also current hp will be set at maximum after creation)
+	phases:
+	hp: (also current hp will initially be set to minimum)
 	purpose: creates an healthbar to save and visualize health stati with
 */
-Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,uint16_t hp)
-    : max_width(width),max_hp(hp),curr_hp(hp)
+Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<uint8_t> phases,
+		std::vector<uint16_t> hp)
+    : max_width(width),hb_phases(phases),hp_list(hp)
 {
+	// vertices
 	float hpverts[] = {
 		pos.x,pos.y,0, pos.x,pos.y+height,0, pos.x,pos.y+height,1,
 		pos.x,pos.y+height,1, pos.x,pos.y,1, pos.x,pos.y,0,
@@ -35,6 +38,16 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,uint16_t hp)
 */
 void Healthbar::render()
 {
+	// check for empty bar and maximum
+	bool nohp = !curr_hp;
+	max_hp = max_hp*!nohp+combine_hp()*nohp;
+
+	// fill if empty and not final bar
+	fill_cooldown *= !nohp;
+	bool filling = fill_cooldown<241;
+	curr_hp = (curr_hp*!filling)+(max_hp*((float)fill_cooldown/240)*filling);
+	fill_cooldown += filling;
+
 	// setup
 	shp.enable();
 	hpbuffer.bind();
@@ -55,4 +68,15 @@ void Healthbar::render()
 void Healthbar::register_damage(uint16_t dmg)
 {
 	curr_hp -= dmg;
+}
+
+/*
+	combine_hp() -> uint16_t
+*/
+uint16_t Healthbar::combine_hp()
+{
+	uint16_t out;
+	for (int i=0;i<hb_phases[chb];i++)
+		out += hp_list[cphase+i];
+	return out;
 }
