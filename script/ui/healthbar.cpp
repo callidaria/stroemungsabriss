@@ -40,13 +40,13 @@ void Healthbar::render()
 {
 	// check for empty bar and maximum
 	bool nohp = !curr_hp;
-	max_hp = max_hp*!nohp+combine_hp()*nohp;
+	max_hp = combine_hp();
 
 	// fill if empty and not final bar
 	fill_cooldown *= !nohp;
 	bool filling = fill_cooldown<241;
-	curr_hp = (curr_hp*!filling)+(max_hp*((float)fill_cooldown/240)*filling);
 	fill_cooldown += filling;
+	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);
 
 	// setup
 	shp.enable();
@@ -79,4 +79,4 @@ uint16_t Healthbar::combine_hp()
 	for (int i=0;i<hb_phases[chb];i++)
 		out += hp_list[cphase+i];
 	return out;
-}
+}  // FIXME: should return exactely 0 if last bar has been emptied
