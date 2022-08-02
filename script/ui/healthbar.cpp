@@ -15,21 +15,24 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 {
 	// vertices border
 	float brdverts[] = {
-		pos.x,pos.y,0, pos.x,pos.y+height,0, pos.x+width,pos.y+height,0,
-		pos.x+width,pos.y+height,0, pos.x+width,pos.y,0, pos.x,pos.y,0,
+		/*pos.x-2,pos.y-2, pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
+		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,*/
+		pos.x-2,pos.y-2, pos.x-2,pos.y+height+2,
+		pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
+		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2,
+		pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
 
 	// compile border shader
 	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
-	sborder.def_attributeF("position",2,0,3);
-	sborder.def_attributeF("edge_id",1,2,3);
+	sborder.def_attributeF("position",2,0,2);
 
 	// 2D projection border
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	sborder.upload_matrix("view",tc2d.view2D);
-	sborder.upload_matrix("proj",tc2d.proj2D); // TODO: write camera upload for view & projection
+	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
 
 	// vertices hpbar
 	float hpverts[] = {
@@ -70,15 +73,15 @@ void Healthbar::render()
 	brdbuffer.bind();
 
 	// draw border
-	glDrawArrays(GL_TRIANGLES,0,6);
+	glDrawArrays(GL_LINES,0,8);
 
 	// setup hpbar
 	shp.enable();
 	hpbuffer.bind();
 
 	// fill bar by status
-	int dist = ((float)max_width/max_hp)*curr_hp;
-	shp.upload_int("fill_width",dist);
+	float dist = ((float)max_width/max_hp)*curr_hp;
+	shp.upload_float("fill_width",dist);
 
 	// draw hpbar
 	glDrawArrays(GL_TRIANGLES,0,6);

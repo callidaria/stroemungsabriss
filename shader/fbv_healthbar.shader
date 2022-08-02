@@ -7,7 +7,7 @@ out vec3 coldef;
 
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
-uniform int fill_width;
+uniform float fill_width;
 
 void main()
 {
