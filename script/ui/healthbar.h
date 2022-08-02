@@ -22,8 +22,8 @@ public:
 private:
     uint16_t combine_hp();
 private:
-    Buffer hpbuffer = Buffer();
-    Shader shp = Shader();
+    Buffer hpbuffer = Buffer(),brdbuffer = Buffer();
+    Shader shp = Shader(),sborder = Shader();
     std::vector<uint8_t> hb_phases;
     std::vector<uint16_t> hp_list;
     uint16_t max_width,max_hp,curr_hp=0;

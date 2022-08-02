@@ -13,7 +13,25 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 		std::vector<uint16_t> hp)
     : max_width(width),hb_phases(phases),hp_list(hp)
 {
-	// vertices
+	// vertices border
+	float brdverts[] = {
+		pos.x,pos.y,0, pos.x,pos.y+height,0, pos.x+width,pos.y+height,0,
+		pos.x+width,pos.y+height,0, pos.x+width,pos.y,0, pos.x,pos.y,0,
+	};
+	brdbuffer.bind();
+	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
+
+	// compile border shader
+	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
+	sborder.def_attributeF("position",2,0,3);
+	sborder.def_attributeF("edge_id",1,2,3);
+
+	// 2D projection border
+	Camera2D tc2d = Camera2D(1280.0f,720.0f);
+	sborder.upload_matrix("view",tc2d.view2D);
+	sborder.upload_matrix("proj",tc2d.proj2D); // TODO: write camera upload for view & projection
+
+	// vertices hpbar
 	float hpverts[] = {
 		pos.x,pos.y,0, pos.x,pos.y+height,0, pos.x,pos.y+height,1,
 		pos.x,pos.y+height,1, pos.x,pos.y,1, pos.x,pos.y,0,
@@ -21,13 +39,12 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	hpbuffer.bind();
 	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
 
-	// compile shader
+	// compile hpbar shader
 	shp.compile("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
 	shp.def_attributeF("position",2,0,3);
 	shp.def_attributeF("edge_id",1,2,3);
 
-	// 2D projection
-	Camera2D tc2d = Camera2D(1280.0f,720.0f);
+	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
 	shp.upload_matrix("proj",tc2d.proj2D);
 } Healthbar::~Healthbar() {  }
@@ -48,15 +65,22 @@ void Healthbar::render()
 	fill_cooldown += filling;
 	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);
 
-	// setup
+	// setup border
+	sborder.enable();
+	brdbuffer.bind();
+
+	// draw border
+	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// setup hpbar
 	shp.enable();
 	hpbuffer.bind();
 
-	// fill by status
+	// fill bar by status
 	int dist = ((float)max_width/max_hp)*curr_hp;
 	shp.upload_int("fill_width",dist);
 
-	// draw
+	// draw hpbar
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 
