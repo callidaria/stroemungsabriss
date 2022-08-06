@@ -13,26 +13,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 		std::vector<uint16_t> hp)
     : max_width(width),hb_phases(phases),hp_list(hp)
 {
-	// vertices border
-	float brdverts[] = {
-		/*pos.x-2,pos.y-2, pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
-		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,*/
-		pos.x-2,pos.y-2, pos.x-2,pos.y+height+2,
-		pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
-		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2,
-		pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,
-	};
-	brdbuffer.bind();
-	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
-
-	// compile border shader
-	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
-	sborder.def_attributeF("position",2,0,2);
-
-	// 2D projection border
+	// projection into coordinate system
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
-	sborder.upload_matrix("view",tc2d.view2D);
-	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
 
 	// vertices hpbar
 	float hpverts[] = {
@@ -50,6 +32,41 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
 	shp.upload_matrix("proj",tc2d.proj2D);
+
+	// vertices border
+	float brdverts[] = {
+		pos.x-2,pos.y-2, pos.x-2,pos.y+height+2,
+		pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
+		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2,
+		pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,
+	};
+	brdbuffer.bind();
+	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
+
+	// compile border shader
+	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
+	sborder.def_attributeF("position",2,0,2);
+
+	// 2D projection border
+	sborder.upload_matrix("view",tc2d.view2D);
+	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
+
+	// vertices indexed splice
+	float splcverts[] = { 0,0, 0,height+4.0f, };
+	splcbuffer.bind();
+	splcbuffer.upload_vertices(splcverts,sizeof(splcverts));
+
+	// compile splice shader
+	ssplice.compile("shader/fbv_hpsplice.shader","shader/fbf_hpsplice.shader");
+	ssplice.def_attributeF("position",2,0,2);
+
+	// splice indexing
+	splcbuffer.bind_index();
+	ssplice.def_indexF(splcbuffer.get_indices(),"offset",2,0,2);
+
+	// 2D projection splice
+	ssplice.upload_matrix("view",tc2d.view2D);
+	ssplice.upload_matrix("proj",tc2d.proj2D);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -68,13 +85,6 @@ void Healthbar::render()
 	fill_cooldown += filling;
 	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);
 
-	// setup border
-	sborder.enable();
-	brdbuffer.bind();
-
-	// draw border
-	glDrawArrays(GL_LINES,0,8);
-
 	// setup hpbar
 	shp.enable();
 	hpbuffer.bind();
@@ -85,6 +95,22 @@ void Healthbar::render()
 
 	// draw hpbar
 	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// setup border
+	sborder.enable();
+	brdbuffer.bind();
+
+	// draw border
+	glDrawArrays(GL_LINES,0,8);
+
+	// setup splice
+	glm::vec2 os[] = { glm::vec2(100,100) };
+	ssplice.enable();
+	splcbuffer.bind();
+	splcbuffer.upload_indices(os,sizeof(glm::vec2));
+
+	// draw splice
+	glDrawArrays(GL_LINES,0,2);
 }
 
 /*
