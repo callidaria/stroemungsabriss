@@ -52,7 +52,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
 
 	// vertices indexed splice
-	float splcverts[] = { 0,0, 0,height+4.0f, };
+	float splcverts[] = { pos.x,pos.y-6.0f, pos.x,pos.y+height+12.0f, };
 	splcbuffer.bind();
 	splcbuffer.upload_vertices(splcverts,sizeof(splcverts));
 
@@ -62,7 +62,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"offset",2,0,2);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,1);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -104,13 +104,12 @@ void Healthbar::render()
 	glDrawArrays(GL_LINES,0,8);
 
 	// setup splice
-	glm::vec2 os[] = { glm::vec2(100,100) };
 	ssplice.enable();
 	splcbuffer.bind();
-	splcbuffer.upload_indices(os,sizeof(glm::vec2));
+	splcbuffer.upload_indices(ofs);
 
 	// draw splice
-	glDrawArrays(GL_LINES,0,2);
+	glDrawArraysInstanced(GL_LINES,0,2,hb_phases[chb]);
 }
 
 /*
@@ -125,11 +124,14 @@ void Healthbar::register_damage(uint16_t dmg)
 
 /*
 	combine_hp() -> uint16_t
+	TODO: outside main loop
 */
 uint16_t Healthbar::combine_hp()
 {
 	uint16_t out;
-	for (int i=0;i<hb_phases[chb];i++)
+	ofs.clear();
+	for (int i=0;i<hb_phases[chb];i++) {
 		out += hp_list[cphase+i];
-	return out;
+		ofs.push_back(out);
+	} return out;
 }  // FIXME: should return exactely 0 if last bar has been emptied
