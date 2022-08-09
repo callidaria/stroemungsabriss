@@ -4,8 +4,10 @@
 	constructor()
 	[...]
 */
-Renderer3D::Renderer3D() {  }
-Renderer3D::~Renderer3D() {  }
+Renderer3D::Renderer3D()
+{
+	buffer.add_buffer();
+} Renderer3D::~Renderer3D() {  }
 
 /*
 	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3)
@@ -146,7 +148,7 @@ void Renderer3D::upload_proj(glm::mat4 m)
 {
 	s3d.upload_matrix("proj",m);
 }
-// FIXME: fuse both into upload_camera(mat4)
+// FIXME: fuse both into upload_camera(mat4) or better yet, do this in shader method
 
 /*
 	upload_shadow(mat4) -> void
