@@ -15,9 +15,9 @@ Renderer2D::Renderer2D()
 */
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 {
-	Sprite t = Sprite(p,w,h,t);  // TODO: fall into output while push back
+	Sprite tmp = Sprite(p,w,h,t);  // TODO: fall into output while push back
 	uint16_t out = sl.size();
-	sl.push_back(t);
+	sl.push_back(tmp);
 	return out;
 }
 
@@ -28,9 +28,9 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,
 		uint8_t f,uint8_t itn)
 {
-	Anim t = Anim(p,w,h,t,r,c,f,itn);  // TODO: fall into output while push back also
+	Anim tmp = Anim(p,w,h,t,r,c,f,itn);  // TODO: fall into output while push back also
 	uint16_t out = al.size();
-	al.push_back(t);
+	al.push_back(tmp);
 	return out;
 }
 
@@ -46,7 +46,7 @@ void Renderer2D::load_vertex()
 
 	// create write arrays
 	float v[(ls+la)*16];
-	uint8_t e[(ls+la)*6];
+	unsigned int e[(ls+la)*6];
 
 	// write values to arrays
 	for (int j=0;j<ls+la;j++) {
