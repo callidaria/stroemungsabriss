@@ -91,10 +91,10 @@ void Sprite::transform(glm::vec2 tp,glm::vec2 ts,float tr)
 void Sprite::transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a)
 {
 	float ax=a.x-(pos.x+sclx/2);float ay=a.y-(pos.y+scly/2);
-	model=glm::translate(glm::mat4(1.0f),glm::vec3(pos.x+sclx/2+tp.x+ax,pos.y+scly/2+tp.y+ay,0));
-	model=glm::rotate(model,glm::radians(tr),glm::vec3(0,0,1));
-	model=glm::scale(model,glm::vec3(ts.x,ts.y,1));
-	model=glm::translate(model,glm::vec3(-(pos.x+sclx/2+ax),-(pos.y+scly/2+ay),0));
+	model = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x+sclx/2+tp.x+ax,pos.y+scly/2+tp.y+ay,0));
+	model = glm::rotate(model,glm::radians(tr),glm::vec3(0,0,1));
+	model = glm::scale(model,glm::vec3(ts.x,ts.y,1));
+	model = glm::translate(model,glm::vec3(-(pos.x+sclx/2+ax),-(pos.y+scly/2+ay),0));
 	// FIXME: last 3 lines are double-up code
 }
 
