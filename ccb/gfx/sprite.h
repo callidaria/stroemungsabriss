@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
@@ -25,16 +26,20 @@ public:
 	void texture();
 	void setup();
 
-	// translation
+	// transformation
 	void transform(glm::vec2 tp,glm::vec2 ts,float tr);
 	void transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a);
 	void translate(glm::vec2 tp);
 	void scale(float wscale,float hscale);
 	void scale_arbit(float wscale,float hscale);
 	void rotate(float rot);
+
 private:
+
 	const char* texpath;
+
 public:
+
 	glm::vec2 pos;
 	float sclx,scly;
 	float v[16];
