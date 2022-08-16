@@ -5,7 +5,7 @@
 	[...]
 */
 Instance::Instance(glm::vec2 p,float w,float h,const char* t)
-		: tp(t)
+	: tp(t)
 {
 	v[0] = p.x+w;
 	v[1] = p.y+h;
