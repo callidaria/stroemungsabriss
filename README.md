@@ -44,6 +44,7 @@ double click yomisensei.exe
 ### features:
 - preview practice & arcade position in menu
 - spawn player controlled bullets
+- health bar system [DEV]
 - dancing pilot patterns [DEV]
 
 ### optimizations:
@@ -76,5 +77,5 @@ double click yomisensei.exe
 
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
-    + 13: 25h 43min
+    + 46: 26h 30min
 - Total Code Lines: 5691

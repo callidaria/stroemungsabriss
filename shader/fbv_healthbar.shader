@@ -2,6 +2,8 @@
 
 in vec2 position;
 in float edge_id;
+in float ofs;
+in float wdt;
 
 out vec3 coldef;
 

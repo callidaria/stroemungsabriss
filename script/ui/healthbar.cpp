@@ -29,6 +29,11 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	shp.def_attributeF("position",2,0,3);
 	shp.def_attributeF("edge_id",1,2,3);
 
+	// hpbar indexing
+	hpbuffer.bind_index();
+	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,2);
+	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,2);
+
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
 	shp.upload_matrix("proj",tc2d.proj2D);
@@ -46,6 +51,11 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	// compile border shader
 	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
 	sborder.def_attributeF("position",2,0,2);
+
+	// border indexing
+	brdbuffer.bind_index();
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,2);
+	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -94,14 +104,14 @@ void Healthbar::render()
 	shp.upload_float("fill_width",dist);
 
 	// draw hpbar
-	glDrawArrays(GL_TRIANGLES,0,6);
+	glDrawArraysInstanced(GL_TRIANGLES,0,6,1);
 
 	// setup border
 	sborder.enable();
 	brdbuffer.bind();
 
 	// draw border
-	glDrawArrays(GL_LINES,0,8);
+	glDrawArraysInstanced(GL_LINES,0,8,1);
 
 	// setup splice
 	ssplice.enable();

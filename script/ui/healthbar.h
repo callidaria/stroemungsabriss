@@ -12,16 +12,25 @@
 class Healthbar
 {
 public:
+
+    // construction
     Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<uint8_t> phases,
             std::vector<uint16_t> hp);
     ~Healthbar();
 
+    // draw
     void render();
 
+    // interaction
     void register_damage(uint16_t dmg);
+
 private:
+
+    // calculators
     uint16_t combine_hp();
+
 private:
+
     Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
     Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
     std::vector<uint8_t> hb_phases;
