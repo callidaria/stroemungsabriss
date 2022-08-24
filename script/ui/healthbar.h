@@ -28,11 +28,23 @@ private:
 
     // calculators
     uint16_t combine_hp();
+    static void fill_hpbar();
+    static void ready_hpbar();
 
 private:
 
     Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
     Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
+
+    // index specifications
+    std::vector<std::vector<float>> dest_pos;
+    std::vector<std::vector<float>> dest_wdt;
+    std::vector<float> upload_pos;
+    std::vector<float> upload_wdt;
+
+    // stati
+    bool filling = true;
+
     std::vector<uint8_t> hb_phases;
     std::vector<uint16_t> hp_list;
     std::vector<float> ofs;

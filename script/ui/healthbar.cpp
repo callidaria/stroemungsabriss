@@ -77,6 +77,33 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
 	ssplice.upload_matrix("proj",tc2d.proj2D);
+
+	// calculate render specifications
+	uint8_t t_index = 0;
+	for (int i=0;i<hb_phases.size();i++) {
+
+		// calculate current phases combined hp
+		float target_hp = 0;
+		for (int j=0;j<hb_phases[i];j++)
+			target_hp += hp_list[t_index+j];
+
+		// calculate positions and widths
+		std::vector<float> t_pos,t_wdt;
+		float draw_cursor = 0;
+		for (int j=0;j<hb_phases[i];j++) {
+			t_pos.push_back(draw_cursor);
+			float t_width = (hp_list[j]/target_hp)*width;
+			t_wdt.push_back(t_width);
+			draw_cursor += t_width;
+		}
+
+		// save list to upload space
+		dest_pos.push_back(t_pos);
+		dest_wdt.push_back(t_wdt);
+
+		// increase index above phase counter
+		t_index += hb_phases[i];
+	}
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -86,7 +113,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 void Healthbar::render()
 {
 	// check for empty bar and maximum
-	bool nohp = !curr_hp;
+	/*bool nohp = !curr_hp;
 	max_hp = combine_hp();
 
 	// fill if empty and not final bar
@@ -119,7 +146,7 @@ void Healthbar::render()
 	splcbuffer.upload_indices(ofs);
 
 	// draw splice
-	glDrawArraysInstanced(GL_LINES,0,2,hb_phases[chb]);
+	glDrawArraysInstanced(GL_LINES,0,2,hb_phases[chb]);*/
 }
 
 /*
@@ -136,7 +163,7 @@ void Healthbar::register_damage(uint16_t dmg)
 	combine_hp() -> uint16_t
 	TODO: outside main loop
 */
-uint16_t Healthbar::combine_hp()
+/*uint16_t Healthbar::combine_hp()
 {
 	uint16_t out;
 	ofs.clear();
@@ -144,4 +171,14 @@ uint16_t Healthbar::combine_hp()
 		out += hp_list[cphase+i];
 		ofs.push_back(out);
 	} return out;
-}  // FIXME: should return exactely 0 if last bar has been emptied
+}*/  // FIXME: should return exactely 0 if last bar has been emptied
+
+static void Healthbar::fill_hpbar()
+{
+	// TODO: fill building process
+}
+
+static void Healthbar::ready_hpbar()
+{
+	// TODO: handle healthbar while fight
+}
