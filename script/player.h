@@ -45,7 +45,7 @@ private:
 	Renderer2D* m_r2d;
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
-	Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
+	//Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
 	int ri;
 	uint8_t sal[2];			// sprite adress library
 	int32_t treg[16] = { 0 };

@@ -9,9 +9,9 @@
 	hp: (also current hp will initially be set to minimum)
 	purpose: creates an healthbar to save and visualize health stati with
 */
-Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<uint8_t> phases,
-		std::vector<uint16_t> hp)
-    : max_width(width),hb_phases(phases),hp_list(hp)
+Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
+		std::vector<int> hp)
+    : max_width(width)
 {
 	// projection into coordinate system
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
@@ -78,31 +78,39 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 	ssplice.upload_matrix("view",tc2d.view2D);
 	ssplice.upload_matrix("proj",tc2d.proj2D);
 
+	std::cout << phases.size() << '\n';
+	for (int i=0;i<phases.size();i++) std::cout << phases[i] << '\n';
+	std::cout << '\n';
+
 	// calculate render specifications
 	uint8_t t_index = 0;
-	for (int i=0;i<hb_phases.size();i++) {
+	for (int i=0;i<phases.size();i++) {
+		std::cout << phases[i] << '\n';
 
 		// calculate current phases combined hp
 		float target_hp = 0;
-		for (int j=0;j<hb_phases[i];j++)
-			target_hp += hp_list[t_index+j];
+		for (int j=0;j<phases[i];j++)
+			target_hp += hp[t_index+j];
 
 		// calculate positions and widths
 		std::vector<float> t_pos,t_wdt;
 		float draw_cursor = 0;
-		for (int j=0;j<hb_phases[i];j++) {
+		for (int j=0;j<phases[i];j++) {
+			std::cout << draw_cursor << " -> ";
 			t_pos.push_back(draw_cursor);
-			float t_width = (hp_list[j]/target_hp)*width;
+			float t_width = (hp[t_index+j]/target_hp)*width;
 			t_wdt.push_back(t_width);
 			draw_cursor += t_width;
+			std::cout << draw_cursor << '\n';
 		}
 
 		// save list to upload space
-		dest_pos.push_back(t_pos);
-		dest_wdt.push_back(t_wdt);
+		hpswap.dest_pos.push_back(t_pos);
+		hpswap.dest_wdt.push_back(t_wdt);
 
 		// increase index above phase counter
-		t_index += hb_phases[i];
+		t_index += phases[i];
+		std::cout << "added\n";
 	}
 } Healthbar::~Healthbar() {  }
 
@@ -112,6 +120,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<ui
 */
 void Healthbar::render()
 {
+	fill_switch[frdy](frdy,hpswap);
 	// check for empty bar and maximum
 	/*bool nohp = !curr_hp;
 	max_hp = combine_hp();
@@ -120,21 +129,19 @@ void Healthbar::render()
 	fill_cooldown *= !nohp;
 	bool filling = fill_cooldown<241;
 	fill_cooldown += filling;
-	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);
+	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);*/
 
 	// setup hpbar
+	//for (int i=0;i<hpswap.upload.size();i++) std::cout << hpswap.upload[i] << '\n';
 	shp.enable();
 	hpbuffer.bind();
-
-	// fill bar by status
-	float dist = ((float)max_width/max_hp)*curr_hp;
-	shp.upload_float("fill_width",dist);
+	hpbuffer.upload_indices(hpswap.upload);
 
 	// draw hpbar
-	glDrawArraysInstanced(GL_TRIANGLES,0,6,1);
+	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/2);
 
 	// setup border
-	sborder.enable();
+	/*sborder.enable();
 	brdbuffer.bind();
 
 	// draw border
@@ -173,12 +180,18 @@ void Healthbar::register_damage(uint16_t dmg)
 	} return out;
 }*/  // FIXME: should return exactely 0 if last bar has been emptied
 
-static void Healthbar::fill_hpbar()
+void Healthbar::fill_hpbar(bool &frdy,HPBarSwap &hpswap)
 {
+	for (int i=0;i<hpswap.dest_pos[0].size();i++) {
+		hpswap.upload.push_back(hpswap.dest_pos[0][i]);
+		std::cout << hpswap.dest_pos[0][i];
+		hpswap.upload.push_back(hpswap.dest_wdt[0][i]);
+		std::cout << ", " <<  hpswap.dest_wdt[0][i] << '\n';
+	} frdy = true;
 	// TODO: fill building process
 }
 
-static void Healthbar::ready_hpbar()
+void Healthbar::ready_hpbar(bool &frdy,HPBarSwap &hpswap)
 {
 	// TODO: handle healthbar while fight
 }

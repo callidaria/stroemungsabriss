@@ -123,8 +123,8 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	m_r2d->render_sprite(ri,ri+1);
 
 	// render health bar
-	hbar.register_damage(pDmg);
-	hbar.render();
+	/*hbar.register_damage(pDmg);
+	hbar.render();*/
 }
 
 /*
