@@ -23,6 +23,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	};
 	hpbuffer.bind();
 	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
+	hpbuffer.add_buffer();
 
 	// compile hpbar shader
 	shp.compile("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
@@ -54,8 +55,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,2);
-	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,1);
+	//sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -135,6 +136,7 @@ void Healthbar::render()
 	//for (int i=0;i<hpswap.upload.size();i++) std::cout << hpswap.upload[i] << '\n';
 	shp.enable();
 	hpbuffer.bind();
+	hpbuffer.bind_index();
 	hpbuffer.upload_indices(hpswap.upload);
 
 	// draw hpbar
@@ -150,6 +152,7 @@ void Healthbar::render()
 	// setup splice
 	ssplice.enable();
 	splcbuffer.bind();
+	splcbuffer.bind_index();
 	splcbuffer.upload_indices(ofs);
 
 	// draw splice
