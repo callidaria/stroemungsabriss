@@ -77,5 +77,5 @@ double click yomisensei.exe
 
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
-    + 46: 31h 27min
+    + 46: 31h 49min
 - Total Code Lines: 5691

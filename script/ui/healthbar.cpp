@@ -41,22 +41,24 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices border
 	float brdverts[] = {
-		pos.x-2,pos.y-2, pos.x-2,pos.y+height+2,
-		pos.x-2,pos.y+height+2, pos.x+width+2,pos.y+height+2,
-		pos.x+width+2,pos.y+height+2, pos.x+width+2,pos.y-2,
-		pos.x+width+2,pos.y-2, pos.x-2,pos.y-2,
+		pos.x-2,pos.y-2,0, pos.x-2,pos.y+height+2,1,
+		pos.x-2,pos.y+height+2,1, pos.x,pos.y+height+2,3,
+		pos.x,pos.y+height+2,3, pos.x,pos.y-2,4,
+		pos.x,pos.y-2,4, pos.x-2,pos.y-2,0,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
+	brdbuffer.add_buffer();
 
 	// compile border shader
 	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
-	sborder.def_attributeF("position",2,0,2);
+	sborder.def_attributeF("position",2,0,3);
+	sborder.def_attributeF("edge_id",1,2,3);
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,1);
-	//sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,2);
+	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -79,14 +81,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.upload_matrix("view",tc2d.view2D);
 	ssplice.upload_matrix("proj",tc2d.proj2D);
 
-	std::cout << phases.size() << '\n';
-	for (int i=0;i<phases.size();i++) std::cout << phases[i] << '\n';
-	std::cout << '\n';
-
 	// calculate render specifications
 	uint8_t t_index = 0;
 	for (int i=0;i<phases.size();i++) {
-		std::cout << phases[i] << '\n';
 
 		// calculate current phases combined hp
 		float target_hp = 0;
@@ -97,12 +94,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 		std::vector<float> t_pos,t_wdt;
 		float draw_cursor = 0;
 		for (int j=0;j<phases[i];j++) {
-			std::cout << draw_cursor << " -> ";
 			t_pos.push_back(draw_cursor);
 			float t_width = (hp[t_index+j]/target_hp)*width;
 			t_wdt.push_back(t_width);
 			draw_cursor += t_width;
-			std::cout << draw_cursor << '\n';
 		}
 
 		// save list to upload space
@@ -111,7 +106,6 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 		// increase index above phase counter
 		t_index += phases[i];
-		std::cout << "added\n";
 	}
 } Healthbar::~Healthbar() {  }
 
@@ -122,6 +116,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 void Healthbar::render()
 {
 	fill_switch[frdy](frdy,hpswap);
+
 	// check for empty bar and maximum
 	/*bool nohp = !curr_hp;
 	max_hp = combine_hp();
@@ -143,14 +138,16 @@ void Healthbar::render()
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/2);
 
 	// setup border
-	/*sborder.enable();
+	sborder.enable();
 	brdbuffer.bind();
+	brdbuffer.bind_index();
+	brdbuffer.upload_indices(hpswap.upload);  // FIXME: remove and use hpbuffers index buffer
 
 	// draw border
-	glDrawArraysInstanced(GL_LINES,0,8,1);
+	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/2);
 
 	// setup splice
-	ssplice.enable();
+	/*ssplice.enable();
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(ofs);
@@ -187,9 +184,7 @@ void Healthbar::fill_hpbar(bool &frdy,HPBarSwap &hpswap)
 {
 	for (int i=0;i<hpswap.dest_pos[0].size();i++) {
 		hpswap.upload.push_back(hpswap.dest_pos[0][i]);
-		std::cout << hpswap.dest_pos[0][i];
 		hpswap.upload.push_back(hpswap.dest_wdt[0][i]);
-		std::cout << ", " <<  hpswap.dest_wdt[0][i] << '\n';
 	} frdy = true;
 	// TODO: fill building process
 }

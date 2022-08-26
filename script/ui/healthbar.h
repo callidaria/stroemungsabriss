@@ -48,8 +48,6 @@ private:
     bool frdy = false;
     std::vector<void(*)(bool&,HPBarSwap&)> fill_switch = { fill_hpbar,ready_hpbar };
 
-    /*std::vector<uint8_t> hb_phases;
-    std::vector<uint16_t> hp_list;*/
     std::vector<float> ofs;
     uint16_t max_width,max_hp,curr_hp=0;
     uint8_t hp_bars,cphase=0,chb=0,fill_cooldown=241;

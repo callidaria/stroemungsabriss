@@ -1,6 +1,8 @@
 #version 330 core
 
 in vec2 position;
+in float edge_id;
+
 in float ofs;
 in float wdt;
 
@@ -9,5 +11,6 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	gl_Position = proj*view*vec4(position.xy,0,1);
+	float wfac = clamp(edge_id-1,0,1);
+	gl_Position = proj*view*vec4(position.x+ofs+wdt*wfac,position.y,0,1);
 }
