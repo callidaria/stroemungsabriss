@@ -68,6 +68,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	float splcverts[] = { pos.x,pos.y-6.0f, pos.x,pos.y+height+12.0f, };
 	splcbuffer.bind();
 	splcbuffer.upload_vertices(splcverts,sizeof(splcverts));
+	splcbuffer.add_buffer();
 
 	// compile splice shader
 	ssplice.compile("shader/fbv_hpsplice.shader","shader/fbf_hpsplice.shader");
@@ -75,7 +76,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,1);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,2);
+	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,2);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -127,33 +129,27 @@ void Healthbar::render()
 	fill_cooldown += filling;
 	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);*/
 
-	// setup hpbar
-	//for (int i=0;i<hpswap.upload.size();i++) std::cout << hpswap.upload[i] << '\n';
+	// setup & draw hpbar
 	shp.enable();
 	hpbuffer.bind();
 	hpbuffer.bind_index();
 	hpbuffer.upload_indices(hpswap.upload);
-
-	// draw hpbar
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/2);
 
-	// setup border
+	// setup & draw border
 	sborder.enable();
 	brdbuffer.bind();
 	brdbuffer.bind_index();
 	brdbuffer.upload_indices(hpswap.upload);  // FIXME: remove and use hpbuffers index buffer
-
-	// draw border
 	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/2);
 
-	// setup splice
-	/*ssplice.enable();
+	// setup & draw splice
+	ssplice.enable();
 	splcbuffer.bind();
 	splcbuffer.bind_index();
-	splcbuffer.upload_indices(ofs);
-
-	// draw splice
-	glDrawArraysInstanced(GL_LINES,0,2,hb_phases[chb]);*/
+	splcbuffer.upload_indices(std::vector<float>(hpswap.upload.begin()+2,hpswap.upload.end()));
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload.size()/2-1);
+	// FIXME: remove and use hpbuffers index buffer
 }
 
 /*
