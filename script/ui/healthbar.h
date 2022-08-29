@@ -11,44 +11,45 @@
 
 struct HPBarSwap
 {
-	std::vector<std::vector<float>> dest_pos;
-	std::vector<std::vector<float>> dest_wdt;
-	std::vector<float> upload;
+	std::vector<std::vector<float>> dest_pos;	// all containing destination position
+	std::vector<std::vector<float>> dest_wdt;	// all containing destination widths
+    std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
+	std::vector<float> upload;					// indexing upload data. pattern: (p,w,p,w,...)
+    uint8_t target_itr = 0;						// iteration of target modification while filling
 };
 
 class Healthbar
 {
 public:
 
-    // construction
-    Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
-            std::vector<int> hp);
-    ~Healthbar();
+	// construction
+	Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
+			std::vector<int> hp);
+	~Healthbar();
 
-    // draw
-    void render();
+	// draw
+	void render();
 
-    // interaction
-    void register_damage(uint16_t dmg);
-
-private:
-
-    // calculators
-    uint16_t combine_hp();
-    static void fill_hpbar(bool &frdy,HPBarSwap &hpswap);
-    static void ready_hpbar(bool &frdy,HPBarSwap &hpswap);
+	// interaction
+	void register_damage(uint16_t dmg);
 
 private:
 
-    Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
-    Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
-    HPBarSwap hpswap;
+	// calculators
+	static void fill_hpbar(bool &frdy,HPBarSwap &hpswap);
+	static void ready_hpbar(bool &frdy,HPBarSwap &hpswap);
 
-    // statii
-    bool frdy = false;
-    std::vector<void(*)(bool&,HPBarSwap&)> fill_switch = { fill_hpbar,ready_hpbar };
+private:
 
-    std::vector<float> ofs;
-    uint16_t max_width,max_hp,curr_hp=0;
-    uint8_t hp_bars,cphase=0,chb=0,fill_cooldown=241;
+	Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
+	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
+	HPBarSwap hpswap;
+
+	// statii
+	bool frdy = false;
+	std::vector<void(*)(bool&,HPBarSwap&)> fill_switch = { fill_hpbar,ready_hpbar };
+
+	std::vector<float> ofs;
+	uint16_t max_width,max_hp,curr_hp=0;
+	uint8_t hp_bars,cphase=0,chb=0,fill_cooldown=241;
 };

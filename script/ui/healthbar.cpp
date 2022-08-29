@@ -41,10 +41,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices border
 	float brdverts[] = {
-		pos.x-2,pos.y-2,0, pos.x-2,pos.y+height+2,1,
-		pos.x-2,pos.y+height+2,1, pos.x,pos.y+height+2,3,
+		pos.x,pos.y-2,0, pos.x,pos.y+height+2,1,
+		pos.x,pos.y+height+2,1, pos.x,pos.y+height+2,3,
 		pos.x,pos.y+height+2,3, pos.x,pos.y-2,4,
-		pos.x,pos.y-2,4, pos.x-2,pos.y-2,0,
+		pos.x,pos.y-2,4, pos.x,pos.y-2,0,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
@@ -117,17 +117,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 */
 void Healthbar::render()
 {
+	// switch healthbar handlers
 	fill_switch[frdy](frdy,hpswap);
-
-	// check for empty bar and maximum
-	/*bool nohp = !curr_hp;
-	max_hp = combine_hp();
-
-	// fill if empty and not final bar
-	fill_cooldown *= !nohp;
-	bool filling = fill_cooldown<241;
-	fill_cooldown += filling;
-	curr_hp = (curr_hp*!filling)+(max_hp*(fill_cooldown/240.0f)*filling);*/
 
 	// setup & draw hpbar
 	shp.enable();
@@ -162,27 +153,24 @@ void Healthbar::register_damage(uint16_t dmg)
 	curr_hp -= dmg;
 }
 
-/*
-	combine_hp() -> uint16_t
-	TODO: outside main loop
-*/
-/*uint16_t Healthbar::combine_hp()
-{
-	uint16_t out;
-	ofs.clear();
-	for (int i=0;i<hb_phases[chb];i++) {
-		out += hp_list[cphase+i];
-		ofs.push_back(out);
-	} return out;
-}*/  // FIXME: should return exactely 0 if last bar has been emptied
-
 void Healthbar::fill_hpbar(bool &frdy,HPBarSwap &hpswap)
 {
-	for (int i=0;i<hpswap.dest_pos[0].size();i++) {
+	// load targets for upload vector
+	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[0].size();i++) {
 		hpswap.upload.push_back(hpswap.dest_pos[0][i]);
-		hpswap.upload.push_back(hpswap.dest_wdt[0][i]);
-	} frdy = true;
-	// TODO: fill building process
+		hpswap.upload_target.push_back(hpswap.dest_wdt[0][i]);
+		hpswap.upload.push_back(0);
+	}
+
+	// filling upload until target
+	uint8_t itr = hpswap.target_itr;
+	bool full_bar = hpswap.upload[itr*2+1]>=hpswap.upload_target[itr];
+	hpswap.target_itr += full_bar;
+	hpswap.upload[itr*2+1] += 4;
+	hpswap.upload[itr*2+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*2+1]*!full_bar;
+
+	// signal if bar has been filled
+	frdy = hpswap.target_itr>=hpswap.upload_target.size();
 }
 
 void Healthbar::ready_hpbar(bool &frdy,HPBarSwap &hpswap)
