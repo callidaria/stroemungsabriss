@@ -32,8 +32,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// hpbar indexing
 	hpbuffer.bind_index();
-	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,2);
-	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,2);
+	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,3);
+	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,3);
+	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,3);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -57,8 +58,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,2);
-	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,2);
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,3);
+	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,3);
+	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,3);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -76,8 +78,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,2);
-	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,2);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,3);
+	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,3);
+	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,3);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -125,21 +128,21 @@ void Healthbar::render()
 	hpbuffer.bind();
 	hpbuffer.bind_index();
 	hpbuffer.upload_indices(hpswap.upload);
-	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/2);
+	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/3);
 
 	// setup & draw border
 	sborder.enable();
 	brdbuffer.bind();
 	brdbuffer.bind_index();
 	brdbuffer.upload_indices(hpswap.upload);  // FIXME: remove and use hpbuffers index buffer
-	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/2);
+	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/3);
 
 	// setup & draw splice
 	ssplice.enable();
 	splcbuffer.bind();
 	splcbuffer.bind_index();
-	splcbuffer.upload_indices(std::vector<float>(hpswap.upload.begin()+2,hpswap.upload.end()));
-	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload.size()/2-1);
+	splcbuffer.upload_indices(std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end()));
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload.size()/3-1);
 	// FIXME: remove and use hpbuffers index buffer
 }
 
@@ -150,30 +153,50 @@ void Healthbar::render()
 */
 void Healthbar::register_damage(uint16_t dmg)
 {
-	curr_hp -= dmg;
+	if (hpswap.upload.size())
+		hpswap.upload[hpswap.target_itr*3+2] -= dmg*frdy;
 }
 
-void Healthbar::fill_hpbar(bool &frdy,HPBarSwap &hpswap)
+void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// load targets for upload vector
-	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[0].size();i++) {
-		hpswap.upload.push_back(hpswap.dest_pos[0][i]);
-		hpswap.upload_target.push_back(hpswap.dest_wdt[0][i]);
+	uint8_t ihp = hpswap.hpbar_itr;
+	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
+		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);
+		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);
+		hpswap.upload.push_back(0);
 		hpswap.upload.push_back(0);
 	}
 
 	// filling upload until target
 	uint8_t itr = hpswap.target_itr;
-	bool full_bar = hpswap.upload[itr*2+1]>=hpswap.upload_target[itr];
+	bool full_bar = hpswap.upload[itr*3+1]>=hpswap.upload_target[itr];
 	hpswap.target_itr += full_bar;
-	hpswap.upload[itr*2+1] += 4;
-	hpswap.upload[itr*2+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*2+1]*!full_bar;
+	hpswap.upload[itr*3+1] += 4;
+	hpswap.upload[itr*3+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*3+1]*!full_bar;
+	hpswap.upload[itr*3+2] += 4;
+	hpswap.upload[itr*3+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*3+2]*!full_bar;
 
-	// signal if bar has been filled
-	frdy = hpswap.target_itr>=hpswap.upload_target.size();
+	// signal ready if bars full
+	frdy += hpswap.target_itr>=hpswap.upload_target.size();
+	hpswap.target_itr -= frdy;
 }
 
-void Healthbar::ready_hpbar(bool &frdy,HPBarSwap &hpswap)
+void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
-	// TODO: handle healthbar while fight
+	// decease target iteration if nanobar is empty
+	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*3+2]<=0;
+
+	// signal refill if all bars empty
+	bool hpbar_empty = hpswap.target_itr<0;
+	hpswap.target_itr += hpbar_empty;
+	hpswap.hpbar_itr += hpbar_empty;
+	frdy += hpbar_empty;
+}
+
+void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+{
+	hpswap.upload_target.clear();
+	hpswap.upload.clear();
+	frdy = 0;
 }

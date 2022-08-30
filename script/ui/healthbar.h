@@ -14,8 +14,9 @@ struct HPBarSwap
 	std::vector<std::vector<float>> dest_pos;	// all containing destination position
 	std::vector<std::vector<float>> dest_wdt;	// all containing destination widths
     std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
-	std::vector<float> upload;					// indexing upload data. pattern: (p,w,p,w,...)
-    uint8_t target_itr = 0;						// iteration of target modification while filling
+	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)
+    uint8_t target_itr = 0;						// iteration of target bar modification
+	uint8_t hpbar_itr = 0;
 };
 
 class Healthbar
@@ -36,8 +37,9 @@ public:
 private:
 
 	// calculators
-	static void fill_hpbar(bool &frdy,HPBarSwap &hpswap);
-	static void ready_hpbar(bool &frdy,HPBarSwap &hpswap);
+	static void fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
+	static void ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
+	static void reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
 
 private:
 
@@ -46,10 +48,9 @@ private:
 	HPBarSwap hpswap;
 
 	// statii
-	bool frdy = false;
-	std::vector<void(*)(bool&,HPBarSwap&)> fill_switch = { fill_hpbar,ready_hpbar };
+	uint8_t frdy = 0;
+	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = { fill_hpbar,ready_hpbar,reset_hpbar };
 
 	std::vector<float> ofs;
-	uint16_t max_width,max_hp,curr_hp=0;
-	uint8_t hp_bars,cphase=0,chb=0,fill_cooldown=241;
+	uint16_t max_width;
 };

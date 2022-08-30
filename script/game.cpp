@@ -30,8 +30,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_bSys.render();
 
 		// healthbar
-		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
+		hbar.register_damage(fwd_treg[10]);
 
 		m_frame->update();
 	} rstate=0; // TODO: choose between menu &|| desktop skip

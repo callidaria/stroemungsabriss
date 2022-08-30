@@ -4,6 +4,7 @@ in vec2 position;
 
 in float ofs;
 in float wdt;
+in float dmg;
 
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
