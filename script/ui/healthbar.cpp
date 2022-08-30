@@ -11,7 +11,6 @@
 */
 Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
 		std::vector<int> hp)
-    : max_width(width)
 {
 	// projection into coordinate system
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
@@ -112,6 +111,12 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 		// increase index above phase counter
 		t_index += phases[i];
 	}
+
+	// set name and phase counter
+	phname.add("The Dancing Pilot",glm::vec2(pos.x+50,pos.y+5));
+	phname.load_wcam(&tc2d);
+	phcnt.add("1/2",glm::vec2(pos.x+width-50,pos.y+5));
+	phcnt.load_wcam(&tc2d);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -143,6 +148,12 @@ void Healthbar::render()
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
 	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/3);
+
+	// render name and phase counter
+	phname.prepare();
+	phname.render(128,glm::vec4(1,0,1,1));
+	phcnt.prepare();
+	phcnt.render(3,glm::vec4(1,0,1,1));
 }
 
 /*
@@ -208,7 +219,7 @@ void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 */
 void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
-	// decease target iteration if nanobar is empty
+	// decrease target iteration if nanobar is empty
 	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*3+2]<=0;
 
 	// signal refill if all bars empty

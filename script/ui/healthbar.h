@@ -9,6 +9,9 @@
 #include "../../ccb/mat/camera2d.h"
 #include "../../ccb/gfx/shader.h"
 
+#include "../../ccb/fcn/font.h"
+#include "../../ccb/fcn/text.h"
+
 struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all containing destination position
@@ -46,11 +49,16 @@ private:
 
 private:
 
+	// object
 	Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
 	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
 	HPBarSwap hpswap;
 
-	// statii
+	// text information
+	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
+	Text phcnt = Text(hbfont),phname = Text(hbfont);
+
+	// status
 	uint8_t frdy = 0;
 
 	/*
@@ -62,7 +70,4 @@ private:
 	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = {
 		fill_hpbar,splice_hpbar,ready_hpbar,reset_hpbar,signal_clear
 	};
-
-	std::vector<float> ofs;
-	uint16_t max_width;
 };
