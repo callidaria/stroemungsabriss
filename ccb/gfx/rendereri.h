@@ -21,7 +21,8 @@ public:
 	{
 		int li = il.size(); float v[li*24];
 		for (int j = 0; j < li; j++) {
-			for (int i = 0; i < 24; i++) v[j*24+i] = il.at(j).v[i];
+			for (int i = 0; i < 24; i++)
+				v[j*24+i] = il.at(j).v[i];
 		}
 		buffer.bind();
 		buffer.upload_vertices(v,sizeof(v));
@@ -33,8 +34,7 @@ public:
 	void load()
 	{
 		load_vertex();
-		sI.compile2d("shader/vertex_inst.shader",
-				"shader/fragment_inst.shader");
+		sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 		buffer.bind_index();
 		sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
 		load_texture();
@@ -42,8 +42,7 @@ public:
 	void load_wcam(Camera2D* c)
 	{
 		load_vertex();
-		sI.compile2d("shader/vertex_inst.shader",
-				"shader/fragment_inst.shader");
+		sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 		buffer.bind_index();
 		sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
 		load_texture();

@@ -185,10 +185,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 		break;
 	case MenuMode::MENU_SELECTION:
 		tmm = 1;
-		tmm += 3*(*cnt_start&&!trg_start);				// j listing
-		tmm -= 2*(*cnt_start&&!trg_start&&mselect==7); 			// j start
-		tmm = tmm*!(*cnt_b&&!trg_b);					// j title
-		running = !(*cnt_start&&!trg_start&&mselect==2);		// exit
+		tmm += 3*(*cnt_start&&!trg_start);					// j listing
+		tmm -= 2*(*cnt_start&&!trg_start&&mselect==7);		// j start
+		tmm = tmm*!(*cnt_b&&!trg_b);						// j title
+		running = !(*cnt_start&&!trg_start&&mselect==2);	// exit
 		mm = (MenuMode)tmm;
 		lselect=0;lscroll=0; // FIXME: reduce one set call. idc which one
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f); // ??breakdown logic | determine when to shift title

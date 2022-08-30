@@ -7,14 +7,12 @@ in float ofs;
 in float wdt;
 in float dmg;
 
-out vec3 coldef;
-
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	gl_Position = proj*view*vec4((position.x+ofs+dmg*edge_id-5*edge_id+5*(1-edge_id))*int(dmg>0),
+	float wfac = clamp(edge_id-1,0,1);
+	gl_Position = proj*view*vec4((position.x+ofs+wdt*wfac-3*wfac+3*(1-wfac))*int(wdt>0),
 			position.y,0,1);
-	coldef = vec3(58,0,84);
 }

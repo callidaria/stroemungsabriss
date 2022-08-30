@@ -44,9 +44,11 @@ double click yomisensei.exe
 ### features:
 - preview practice & arcade position in menu
 - spawn player controlled bullets
+- health bar system
+- dancing pilot patterns [DEV]
 
 ### optimizations:
-- menu dialogue documentation
+- improved documentation
 - structured buffer creation
 - removing all planning and progression scripts from repo
 - reconceptualizing the basic menu colour scheme
@@ -58,6 +60,7 @@ double click yomisensei.exe
 - FIXED: title splash geometry gets modified by sepia vignette
 - FIXED: standard splash's idle geometry gets modified by selection
 - FIXED: menu dialogue has deprecated functions
+- FIXED: collision sphere center off object center
 
 <br>
 
@@ -72,9 +75,7 @@ double click yomisensei.exe
 
 ***
 
-## Additional Information
-- Elapsed Worktime After Commit 120: 16h
-    + 23: 1h 21min 43sec
-    + 17: 27min
-    + 42: 1h 30min
-- Total Code Lines: 5143
+## Trivia
+- Elapsed Worktime After Commit 120: 19h 19min
+    + 46: 38h 55min
+- Total Code Lines: 5691
