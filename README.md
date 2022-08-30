@@ -44,7 +44,7 @@ double click yomisensei.exe
 ### features:
 - preview practice & arcade position in menu
 - spawn player controlled bullets
-- health bar system [DEV]
+- health bar system
 - dancing pilot patterns [DEV]
 
 ### optimizations:
