@@ -10,8 +10,12 @@
 	purpose: creates an healthbar to save and visualize health stati with
 */
 Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
-		std::vector<int> hp)
+		std::vector<int> hp,const char* boss_name)
 {
+	// save position and width to swap structure
+	hpswap.position = pos;
+	hpswap.max_width = width;
+
 	// projection into coordinate system
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 
@@ -113,10 +117,11 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	}
 
 	// set name and phase counter
-	phname.add("The Dancing Pilot",glm::vec2(pos.x+50,pos.y+5));
-	phname.load_wcam(&tc2d);
-	phcnt.add("1/2",glm::vec2(pos.x+width-50,pos.y+5));
-	phcnt.load_wcam(&tc2d);
+	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
+	hpswap.phname.add(boss_name,glm::vec2(pos.x+50,pos.y+5));
+	hpswap.phname.load_wcam(&tc2d);
+	hpswap.phcnt.add(("1/"+std::to_string(phases.size())).c_str(),glm::vec2(pos.x+width-50,pos.y+5));
+	hpswap.phcnt.load_wcam(&tc2d);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -150,10 +155,10 @@ void Healthbar::render()
 	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/3);
 
 	// render name and phase counter
-	phname.prepare();
-	phname.render(128,glm::vec4(1,0,1,1));
-	phcnt.prepare();
-	phcnt.render(3,glm::vec4(1,0,1,1));
+	hpswap.phname.prepare();
+	hpswap.phname.render(128,glm::vec4(1,0,1,1));
+	hpswap.phcnt.prepare();
+	hpswap.phcnt.render(3,glm::vec4(1,0,1,1));
 }
 
 /*
@@ -240,6 +245,14 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
+
+	// increase phase counter
+	Camera2D tc2d = Camera2D(1280.0f,720.0f);
+	hpswap.phcnt.clear();
+	hpswap.phcnt.add(
+			(std::to_string(hpswap.hpbar_itr+1)+'/'+std::to_string(hpswap.dest_pos.size())).c_str(),
+			glm::vec2(hpswap.position.x+hpswap.max_width-50,hpswap.position.y+5));
+	hpswap.phcnt.load_wcam(&tc2d);
 
 	// signal refill
 	frdy = 0;

@@ -21,6 +21,9 @@ struct HPBarSwap
 	std::vector<float> upload_splice;			// upload data for healthbar splicers
     int8_t target_itr = 0;						// iteration of target bar modification
 	uint8_t hpbar_itr = 0;						// iteration of current healthbar cluster
+	Text phname,phcnt;							// visuals for phase name and counter
+	glm::vec2 position;							// position of most left nanobar
+	uint16_t max_width;							// total width of all nanobars combined
 };
 
 class Healthbar
@@ -29,7 +32,7 @@ public:
 
 	// construction
 	Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
-			std::vector<int> hp);
+			std::vector<int> hp,const char* boss_name);
 	~Healthbar();
 
 	// draw
@@ -56,7 +59,6 @@ private:
 
 	// text information
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-	Text phcnt = Text(hbfont),phname = Text(hbfont);
 
 	// status
 	uint8_t frdy = 0;
