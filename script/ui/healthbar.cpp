@@ -168,9 +168,7 @@ void Healthbar::render()
 */
 void Healthbar::register_damage(uint16_t dmg)
 {
-	if (hpswap.upload.size())
-		hpswap.upload[hpswap.target_itr*3+2] -= dmg*(frdy==2);
-	// FIXME: everything performative about this method
+	hpswap.dmg_threshold += dmg*(frdy==2);
 }
 
 /*
@@ -224,6 +222,10 @@ void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 */
 void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
+	// subtract nanobar hp by damage in threshold
+	hpswap.upload[hpswap.target_itr*3+2] -= hpswap.dmg_threshold;
+	hpswap.dmg_threshold = 0;
+
 	// decrease target iteration if nanobar is empty
 	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*3+2]<=0;
 

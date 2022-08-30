@@ -24,6 +24,7 @@ struct HPBarSwap
 	Text phname,phcnt;							// visuals for phase name and counter
 	glm::vec2 position;							// position of most left nanobar
 	uint16_t max_width;							// total width of all nanobars combined
+	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
 };
 
 class Healthbar
