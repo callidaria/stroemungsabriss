@@ -141,9 +141,8 @@ void Healthbar::render()
 	ssplice.enable();
 	splcbuffer.bind();
 	splcbuffer.bind_index();
-	splcbuffer.upload_indices(std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end()));
-	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload.size()/3-1);
-	// FIXME: remove and use hpbuffers index buffer
+	splcbuffer.upload_indices(hpswap.upload_splice);
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/3);
 }
 
 /*
@@ -154,7 +153,8 @@ void Healthbar::render()
 void Healthbar::register_damage(uint16_t dmg)
 {
 	if (hpswap.upload.size())
-		hpswap.upload[hpswap.target_itr*3+2] -= dmg*frdy;
+		hpswap.upload[hpswap.target_itr*3+2] -= dmg*(frdy==2);
+	// FIXME: everything performative about this method
 }
 
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
@@ -169,7 +169,7 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	}
 
 	// filling upload until target
-	uint8_t itr = hpswap.target_itr;
+	int8_t itr = hpswap.target_itr;
 	bool full_bar = hpswap.upload[itr*3+1]>=hpswap.upload_target[itr];
 	hpswap.target_itr += full_bar;
 	hpswap.upload[itr*3+1] += 4;
@@ -182,6 +182,13 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.target_itr -= frdy;
 }
 
+void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+{
+	// defining splice index upload
+	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end());
+	frdy++;
+}
+
 void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// decease target iteration if nanobar is empty
@@ -191,12 +198,18 @@ void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	bool hpbar_empty = hpswap.target_itr<0;
 	hpswap.target_itr += hpbar_empty;
 	hpswap.hpbar_itr += hpbar_empty;
-	frdy += hpbar_empty;
+	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
 }
 
 void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
+	hpswap.upload_splice.clear();
 	frdy = 0;
+}
+
+void Healthbar::signal_clear(uint8_t &frdy,HPBarSwap &hpswap)
+{
+	// TODO: signal clear status
 }
