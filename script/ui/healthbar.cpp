@@ -157,6 +157,11 @@ void Healthbar::register_damage(uint16_t dmg)
 	// FIXME: everything performative about this method
 }
 
+/*
+	fill_hpbar(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: animate nano healthbar filling and capping value at max
+*/
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// load targets for upload vector
@@ -182,13 +187,25 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.target_itr -= frdy;
 }
 
+/*
+	splice_hpbar(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: insert cut geometry between nano healthbars
+*/
 void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
 	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end());
 	frdy++;
-}
+}  // TODO: animate healthbar splicing
 
+/*
+	ready_hpbar(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: checks if current nano healthbar is depleted and if so, changes to the previous one.
+		if all bars are empty, the method signals a refill.
+		if the last batch of bars exceeds the maximum amount of phases, a clearstate is signaled.
+*/
 void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// decease target iteration if nanobar is empty
@@ -201,15 +218,28 @@ void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
 }
 
+/*
+	reset_hpbar(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: reset hpswap upload and target lists to later refill them with new information
+*/
 void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
+	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
+
+	// signal refill
 	frdy = 0;
 }
 
+/*
+	signal_clear(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: represent boss clearstate with the healthbar
+*/
 void Healthbar::signal_clear(uint8_t &frdy,HPBarSwap &hpswap)
 {
-	// TODO: signal clear status
+	// TODO: visualize clear
 }

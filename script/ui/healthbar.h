@@ -52,6 +52,13 @@ private:
 
 	// statii
 	uint8_t frdy = 0;
+
+	/*
+		func(uint8_t&,HPBarSwap&) -> void
+			=> func(frdy,hpswap) -> void
+		frdy: state counter, represeting the current fill_switch index
+		hpswap: struct containing nanobar and upload information
+	*/
 	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = {
 		fill_hpbar,splice_hpbar,ready_hpbar,reset_hpbar,signal_clear
 	};
