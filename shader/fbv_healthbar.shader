@@ -14,8 +14,9 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
+	float wfac = clamp(edge_id-1,0,1);
 	float dmd = (dmg/wdt)*10-5;
-	gl_Position = proj*view*vec4((position.x+ofs+dmg*edge_id-dmd*edge_id+5*(1-edge_id))*int(dmg>0),
+	gl_Position = proj*view*vec4((position.x+ofs+dmg*wfac-dmd*wfac+5*(1-wfac))*int(dmg>0),
 			position.y,0,1);
 	coldef = vec3(58,0,84);
 }

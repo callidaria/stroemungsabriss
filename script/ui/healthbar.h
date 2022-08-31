@@ -19,7 +19,7 @@ constexpr uint8_t MAX_CHAR_NAME = 128;				// maximum characters for boss naming
 constexpr glm::vec4 TEXT_COL = glm::vec4(1,0,1,1);	// text render colour
 
 // other constants
-constexpr float PO_TICKS = 60.0f;	// animation tick maximum for phase upcounting
+constexpr float POT = 60.0f;		// animation tick maximum for phase upcounting
 constexpr uint8_t PT_REPEAT = 3;	// amount of floats the index pattern takes to repeat
 
 struct HPBarSwap

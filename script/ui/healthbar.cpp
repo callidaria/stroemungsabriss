@@ -21,8 +21,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices hpbar
 	float hpverts[] = {
-		pos.x,pos.y,0, pos.x,pos.y+height,0, pos.x,pos.y+height,1,
-		pos.x,pos.y+height,1, pos.x,pos.y,1, pos.x,pos.y,0,
+		pos.x,pos.y,0, pos.x,pos.y+height,1, pos.x,pos.y+height,3,
+		pos.x,pos.y+height,3, pos.x,pos.y,2, pos.x,pos.y,0,
 	};
 	hpbuffer.bind();
 	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
@@ -200,7 +200,7 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
 	hpswap.target_itr -= frdy;
-}
+}  // TODO: transform geometry randomized
 
 /*
 	splice_hpbar(uint8_t&,HPBarSwap&) -> void
@@ -222,23 +222,30 @@ void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// skip animation if not in first phase
-	hpswap.anim_tick += PO_TICKS*(hpswap.hpbar_itr>0);
+	hpswap.anim_tick += POT*(hpswap.hpbar_itr>0);
 
 	// increase phase counter
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add(
-			(std::to_string(hpswap.hpbar_itr+1)
-			+'/'+std::to_string((uint8_t)hpswap.dest_pos.size()*(hpswap.anim_tick/PO_TICKS))).c_str(),
-			glm::vec2(hpswap.position.x+hpswap.max_width-TEXT_MV,hpswap.position.y+5));
+			(/*std::to_string(hpswap.hpbar_itr+1)
+			+*/'/'+std::to_string((uint8_t)hpswap.dest_pos.size()*(hpswap.anim_tick/POT))).c_str(),
+			glm::vec2(0,0));
 	hpswap.phcnt.load_wcam(&tc2d);
+
+	// zoom scroll phase counter at increment
+	glm::mat4 mdl_trans = glm::translate(glm::mat4(1.0f),
+			glm::vec3(hpswap.position.x+hpswap.max_width-TEXT_MV,hpswap.position.y+5,0));
+	float zmscale = .5f*(hpswap.anim_tick/POT);
+	mdl_trans = glm::scale(mdl_trans,glm::vec3(1+zmscale,1+zmscale,1));
+	hpswap.phcnt.set_scroll(mdl_trans);
 
 	// signal hpbar readiness
 	hpswap.anim_tick++;
-	bool anim_ready = hpswap.anim_tick>PO_TICKS;
+	bool anim_ready = hpswap.anim_tick>POT;
 	frdy += anim_ready;
 	hpswap.anim_tick -= hpswap.anim_tick*anim_ready;
-}
+}  // TODO: tick-up zoomout when counting up phases
 
 /*
 	ready_hpbar(uint8_t&,HPBarSwap&) -> void
