@@ -120,9 +120,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
 	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+50,pos.y+5));
-	hpswap.phname.load(&tc2d);
-	hpswap.phcnt.add(("1/"+std::to_string(phases.size())).c_str(),glm::vec2(pos.x+width-50,pos.y+5));
-	hpswap.phcnt.load(&tc2d);
+	hpswap.phname.load_wcam(&tc2d);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -169,7 +167,7 @@ void Healthbar::render()
 */
 void Healthbar::register_damage(uint16_t dmg)
 {
-	hpswap.dmg_threshold += dmg*(frdy==2);
+	hpswap.dmg_threshold += dmg*(frdy==3);
 }
 
 /*
@@ -197,7 +195,7 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload[itr*3+2] += 4;
 	hpswap.upload[itr*3+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*3+2]*!full_bar;
 
-	// signal ready if bars full
+	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
 	hpswap.target_itr -= frdy;
 }
@@ -213,6 +211,32 @@ void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end());
 	frdy++;
 }  // TODO: animate healthbar splicing
+
+/*
+	count_phases(uint8_t&,HPBarSwap&) -> void
+	conforming to: fill_switch
+	purpose: animated phase count up from 0 towards full amount to increase tension
+*/
+void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
+{
+	// skip animation if not in first phase
+	hpswap.anim_tick += PO_TICKS*(hpswap.hpbar_itr>0);
+
+	// increase phase counter
+	Camera2D tc2d = Camera2D(1280.0f,720.0f);
+	hpswap.phcnt.clear();
+	hpswap.phcnt.add(
+			(std::to_string(hpswap.hpbar_itr+1)
+			+'/'+std::to_string((uint8_t)hpswap.dest_pos.size()*(hpswap.anim_tick/PO_TICKS))).c_str(),
+			glm::vec2(hpswap.position.x+hpswap.max_width-50,hpswap.position.y+5));
+	hpswap.phcnt.load_wcam(&tc2d);
+
+	// signal hpbar readiness
+	hpswap.anim_tick++;
+	bool anim_ready = hpswap.anim_tick>PO_TICKS;
+	frdy += anim_ready;
+	hpswap.anim_tick -= hpswap.anim_tick*anim_ready;
+}
 
 /*
 	ready_hpbar(uint8_t&,HPBarSwap&) -> void
@@ -248,14 +272,6 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
-
-	// increase phase counter
-	Camera2D tc2d = Camera2D(1280.0f,720.0f);
-	hpswap.phcnt.clear();
-	hpswap.phcnt.add(
-			(std::to_string(hpswap.hpbar_itr+1)+'/'+std::to_string(hpswap.dest_pos.size())).c_str(),
-			glm::vec2(hpswap.position.x+hpswap.max_width-50,hpswap.position.y+5));
-	hpswap.phcnt.load(&tc2d);
 
 	// signal refill
 	frdy = 0;

@@ -12,6 +12,8 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
+constexpr float PO_TICKS = 60;
+
 struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all containing destination position
@@ -25,6 +27,7 @@ struct HPBarSwap
 	glm::vec2 position;							// position of most left nanobar
 	uint16_t max_width;							// total width of all nanobars combined
 	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
+	uint8_t anim_tick = 0;						// counter for animation ticks
 };
 
 class Healthbar
@@ -47,6 +50,7 @@ private:
 	// calculators
 	static void fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
 	static void splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
+	static void count_phases(uint8_t &frdy,HPBarSwap &hpswap);
 	static void ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
 	static void reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
 	static void signal_clear(uint8_t &frdy,HPBarSwap &hpswap);
@@ -68,6 +72,6 @@ private:
 		hpswap: struct containing nanobar and upload information
 	*/
 	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = {
-		fill_hpbar,splice_hpbar,ready_hpbar,reset_hpbar,signal_clear
+		fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear
 	};
 };
