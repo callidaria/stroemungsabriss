@@ -98,5 +98,4 @@ make win
     + 63: 13h 25min
 	+ 79: 1h
 - Total Code Lines: 7573
-	+ 58: 11min
-	+ 58: 35min
+	+ 58: 47min

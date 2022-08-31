@@ -12,7 +12,15 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
-constexpr float PO_TICKS = 60;
+// text related constants
+constexpr uint8_t TEXT_MV = 50;						// inwards move offset for name and counter
+constexpr uint8_t TEXT_SIZE = 20;					// text size of name and phase counter
+constexpr uint8_t MAX_CHAR_NAME = 128;				// maximum characters for boss naming
+constexpr glm::vec4 TEXT_COL = glm::vec4(1,0,1,1);	// text render colour
+
+// other constants
+constexpr float PO_TICKS = 60.0f;	// animation tick maximum for phase upcounting
+constexpr uint8_t PT_REPEAT = 3;	// amount of floats the index pattern takes to repeat
 
 struct HPBarSwap
 {

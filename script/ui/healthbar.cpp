@@ -35,9 +35,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// hpbar indexing
 	hpbuffer.bind_index();
-	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,3);
-	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,3);
-	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,3);
+	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -61,9 +61,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,3);
-	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,3);
-	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,3);
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -81,9 +81,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,3);
-	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,3);
-	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,3);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -117,9 +117,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	}
 
 	// set name and phase counter
-	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
+	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",TEXT_SIZE,TEXT_SIZE);
 	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
-	hpswap.phname.add(boss_name,glm::vec2(pos.x+50,pos.y+5));
+	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+5));
 	hpswap.phname.load_wcam(&tc2d);
 } Healthbar::~Healthbar() {  }
 
@@ -137,27 +137,27 @@ void Healthbar::render()
 	hpbuffer.bind();
 	hpbuffer.bind_index();
 	hpbuffer.upload_indices(hpswap.upload);
-	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/3);
+	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/PT_REPEAT);
 
 	// setup & draw border
 	sborder.enable();
 	brdbuffer.bind();
 	brdbuffer.bind_index();
 	brdbuffer.upload_indices(hpswap.upload);  // FIXME: remove and use hpbuffers index buffer
-	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/3);
+	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/PT_REPEAT);
 
 	// setup & draw splice
 	ssplice.enable();
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
-	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/3);
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/PT_REPEAT);
 
 	// render name and phase counter
 	hpswap.phname.prepare();
-	hpswap.phname.render(128,glm::vec4(1,0,1,1));
+	hpswap.phname.render(MAX_CHAR_NAME,TEXT_COL);
 	hpswap.phcnt.prepare();
-	hpswap.phcnt.render(3,glm::vec4(1,0,1,1));
+	hpswap.phcnt.render(3,TEXT_COL);
 }
 
 /*
@@ -188,12 +188,14 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 
 	// filling upload until target
 	int8_t itr = hpswap.target_itr;
-	bool full_bar = hpswap.upload[itr*3+1]>=hpswap.upload_target[itr];
+	bool full_bar = hpswap.upload[itr*PT_REPEAT+1]>=hpswap.upload_target[itr];
 	hpswap.target_itr += full_bar;
-	hpswap.upload[itr*3+1] += 4;
-	hpswap.upload[itr*3+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*3+1]*!full_bar;
-	hpswap.upload[itr*3+2] += 4;
-	hpswap.upload[itr*3+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*3+2]*!full_bar;
+	hpswap.upload[itr*PT_REPEAT+1] += 4;
+	hpswap.upload[itr*PT_REPEAT+1]
+			= hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*PT_REPEAT+1]*!full_bar;
+	hpswap.upload[itr*PT_REPEAT+2] += 4;
+	hpswap.upload[itr*PT_REPEAT+2]
+			= hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*PT_REPEAT+2]*!full_bar;
 
 	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
@@ -208,7 +210,7 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
-	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+3,hpswap.upload.end());
+	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+PT_REPEAT,hpswap.upload.end());
 	frdy++;
 }  // TODO: animate healthbar splicing
 
@@ -228,7 +230,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.phcnt.add(
 			(std::to_string(hpswap.hpbar_itr+1)
 			+'/'+std::to_string((uint8_t)hpswap.dest_pos.size()*(hpswap.anim_tick/PO_TICKS))).c_str(),
-			glm::vec2(hpswap.position.x+hpswap.max_width-50,hpswap.position.y+5));
+			glm::vec2(hpswap.position.x+hpswap.max_width-TEXT_MV,hpswap.position.y+5));
 	hpswap.phcnt.load_wcam(&tc2d);
 
 	// signal hpbar readiness
@@ -248,11 +250,11 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// subtract nanobar hp by damage in threshold
-	hpswap.upload[hpswap.target_itr*3+2] -= hpswap.dmg_threshold;
+	hpswap.upload[hpswap.target_itr*PT_REPEAT+2] -= hpswap.dmg_threshold;
 	hpswap.dmg_threshold = 0;
 
 	// decrease target iteration if nanobar is empty
-	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*3+2]<=0;
+	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*PT_REPEAT+2]<=0;
 
 	// signal refill if all bars empty
 	bool hpbar_empty = hpswap.target_itr<0;
