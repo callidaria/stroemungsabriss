@@ -58,9 +58,6 @@ private:
 	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
 	HPBarSwap hpswap;
 
-	// text information
-	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-
 	// status
 	uint8_t frdy = 0;
 
