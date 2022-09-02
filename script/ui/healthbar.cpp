@@ -228,9 +228,9 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	uint8_t split_ticks = POT/(hpswap.dest_pos.size()+2);  // ticks after scaling is reversed
 	uint8_t aprog = hpswap.dest_pos.size()*((hpswap.anim_tick+split_ticks)/POT);
+	std::string pprefix = (hpswap.anim_tick>=POT)?std::to_string(hpswap.hpbar_itr+1)+'/':"";
 	hpswap.phcnt.clear();
-	hpswap.phcnt.add((/*std::to_string(hpswap.hpbar_itr+1)+'/'+*/std::to_string(aprog)).c_str(),
-			glm::vec2(0,0));
+	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
 	hpswap.phcnt.load_wcam(&tc2d);
 
 	// zoom scroll phase counter at increment
