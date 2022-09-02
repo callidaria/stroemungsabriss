@@ -119,7 +119,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	// set name and phase counter
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",TEXT_SIZE,TEXT_SIZE);
 	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
-	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+5));
+	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
 	hpswap.phname.load_wcam(&tc2d);
 } Healthbar::~Healthbar() {  }
 
@@ -226,17 +226,21 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 
 	// increase phase counter
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
+	uint8_t split_ticks = POT/(hpswap.dest_pos.size()+2);  // ticks after scaling is reversed
+	uint8_t aprog = hpswap.dest_pos.size()*((hpswap.anim_tick+split_ticks)/POT);
 	hpswap.phcnt.clear();
-	hpswap.phcnt.add(
-			(/*std::to_string(hpswap.hpbar_itr+1)
-			+*/'/'+std::to_string((uint8_t)hpswap.dest_pos.size()*(hpswap.anim_tick/POT))).c_str(),
+	hpswap.phcnt.add((/*std::to_string(hpswap.hpbar_itr+1)+'/'+*/std::to_string(aprog)).c_str(),
 			glm::vec2(0,0));
 	hpswap.phcnt.load_wcam(&tc2d);
 
 	// zoom scroll phase counter at increment
+	uint8_t mticks = hpswap.anim_tick%split_ticks;		// animation ticks after last revert
+	bool upscale = (hpswap.anim_tick/split_ticks)%2;	// distiguishing up and downscale phases
+	float zmscale = .5f*(((float)mticks/split_ticks)*(-2*upscale+1)+upscale);
+
+	// upload scroll towards expectation
 	glm::mat4 mdl_trans = glm::translate(glm::mat4(1.0f),
-			glm::vec3(hpswap.position.x+hpswap.max_width-TEXT_MV,hpswap.position.y+5,0));
-	float zmscale = .5f*(hpswap.anim_tick/POT);
+			glm::vec3(hpswap.position.x+hpswap.max_width-TEXT_MV,hpswap.position.y+TEXT_DV,0));
 	mdl_trans = glm::scale(mdl_trans,glm::vec3(1+zmscale,1+zmscale,1));
 	hpswap.phcnt.set_scroll(mdl_trans);
 

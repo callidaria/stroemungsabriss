@@ -13,7 +13,8 @@
 #include "../../ccb/fcn/text.h"
 
 // text related constants
-constexpr uint8_t TEXT_MV = 50;						// inwards move offset for name and counter
+constexpr uint8_t TEXT_MV = 25;						// inwards move offset for name and counter
+constexpr int8_t TEXT_DV = -7;						// y-axis dive of name and counter display
 constexpr uint8_t TEXT_SIZE = 20;					// text size of name and phase counter
 constexpr uint8_t MAX_CHAR_NAME = 128;				// maximum characters for boss naming
 constexpr glm::vec4 TEXT_COL = glm::vec4(1,0,1,1);	// text render colour
