@@ -28,6 +28,7 @@ struct HPBarSwap
 	std::vector<std::vector<float>> dest_pos;	// all containing destination position
 	std::vector<std::vector<float>> dest_wdt;	// all containing destination widths
     std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
+	std::vector<float> edge_target;				// raised edge values the upper right vertex reaches
 	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)
 	std::vector<float> upload_splice;			// upload data for healthbar splicers
     int8_t target_itr = 0;						// iteration of target bar modification

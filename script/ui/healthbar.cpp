@@ -181,22 +181,22 @@ void Healthbar::register_damage(uint16_t dmg)
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// randomize healthbar begin and end edge height
-	//uint8_t mv_height = hpswap.avg_height*.61f;
-	//uint8_t bheight = rand()%mv_height+mv_height,eheight = rand()%mv_height+mv_height;
+	int8_t bheight = rand()%21-15,eheight = rand()%21-15;
 
 	// load targets for upload vector
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
-	float cwdt = 0;						// current width progression
+	float cwdt = 0,chgt = 0;			// current width progression
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
 		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
 		hpswap.upload.push_back(0);									// current hp in healthbar
 		hpswap.upload.push_back(0);									// current damage to health
-		//hpswap.upload.push_back(bheight+(eheight-bheight)*(cwdt/hpswap.max_width));
-		hpswap.upload.push_back(-10);
+		hpswap.upload.push_back(bheight+chgt);
+		hpswap.upload.push_back(bheight+chgt);
 		cwdt += hpswap.dest_wdt[ihp][i];
-		//hpswap.upload.push_back(bheight+(eheight-bheight)*(cwdt/hpswap.max_width));
-		hpswap.upload.push_back(5);
+		float raised = (cwdt/hpswap.max_width)*(eheight-bheight);
+		hpswap.edge_target.push_back(raised);
+		chgt += raised;
 	}
 
 	// filling upload until target
@@ -209,6 +209,11 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload[itr*PT_REPEAT+2] += 4;
 	hpswap.upload[itr*PT_REPEAT+2]
 			= hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*PT_REPEAT+2]*!full_bar;
+
+	// raise y-axis edges for splash geometry
+	hpswap.upload[itr*PT_REPEAT+4]
+			= hpswap.upload[itr*PT_REPEAT+3]+hpswap.edge_target[itr]
+			*(hpswap.upload[itr*PT_REPEAT+1]/hpswap.upload_target[itr]);
 
 	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
@@ -297,6 +302,7 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
+	hpswap.edge_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
 
