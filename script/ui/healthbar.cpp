@@ -38,6 +38,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -64,6 +65,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -84,6 +86,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -177,13 +180,23 @@ void Healthbar::register_damage(uint16_t dmg)
 */
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
+	// randomize healthbar begin and end edge height
+	//uint8_t mv_height = hpswap.avg_height*.61f;
+	//uint8_t bheight = rand()%mv_height+mv_height,eheight = rand()%mv_height+mv_height;
+
 	// load targets for upload vector
-	uint8_t ihp = hpswap.hpbar_itr;
+	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
+	float cwdt = 0;						// current width progression
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
-		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);
-		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);
-		hpswap.upload.push_back(0);
-		hpswap.upload.push_back(0);
+		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
+		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
+		hpswap.upload.push_back(0);									// current hp in healthbar
+		hpswap.upload.push_back(0);									// current damage to health
+		//hpswap.upload.push_back(bheight+(eheight-bheight)*(cwdt/hpswap.max_width));
+		hpswap.upload.push_back(-10);
+		cwdt += hpswap.dest_wdt[ihp][i];
+		//hpswap.upload.push_back(bheight+(eheight-bheight)*(cwdt/hpswap.max_width));
+		hpswap.upload.push_back(5);
 	}
 
 	// filling upload until target
@@ -232,6 +245,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
 	hpswap.phcnt.load_wcam(&tc2d);
+	// TODO: split both counters in different text objects
 
 	// zoom scroll phase counter at increment
 	uint8_t mticks = hpswap.anim_tick%split_ticks;		// animation ticks after last revert
@@ -249,7 +263,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	bool anim_ready = hpswap.anim_tick>POT;
 	frdy += anim_ready;
 	hpswap.anim_tick -= hpswap.anim_tick*anim_ready;
-}  // TODO: tick-up zoomout when counting up phases
+}
 
 /*
 	ready_hpbar(uint8_t&,HPBarSwap&) -> void
