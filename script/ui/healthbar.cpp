@@ -48,8 +48,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	float brdverts[] = {
 		pos.x,pos.y-2,0, pos.x,pos.y+height+2,1,
 		pos.x,pos.y+height+2,1, pos.x,pos.y+height+2,3,
-		pos.x,pos.y+height+2,3, pos.x,pos.y-2,4,
-		pos.x,pos.y-2,4, pos.x,pos.y-2,0,
+		pos.x,pos.y+height+2,3, pos.x,pos.y-2,2,
+		pos.x,pos.y-2,2, pos.x,pos.y-2,0,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
@@ -181,7 +181,7 @@ void Healthbar::register_damage(uint16_t dmg)
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// randomize healthbar begin and end edge height
-	int8_t bheight = rand()%21-15,eheight = rand()%21-15;
+	int8_t bheight = rand()%16-10,eheight = rand()%16-10;
 
 	// load targets for upload vector
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration

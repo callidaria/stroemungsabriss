@@ -25,10 +25,11 @@ void main()
 	vec2 hfac = vec2(abs(upperedge-1),upperedge);
 	vec2 comb = hfac*edg;
 	int is_upper = int(edge_id)%2;
+	float ccomb = comb.x+comb.y;
 
 	// calculate final vertex positions
 	gl_Position = proj*view*vec4((position.x+ofs+dmg*wfac-dmd*wfac+5*(1-wfac))*int(dmg>0),
-			position.y+(comb.x+comb.y)*is_upper,0,1);
+			position.y+(ccomb*is_upper-ccomb*abs(is_upper-1))*mix(1,(dmg/wdt),hfac.y),0,1);
 
 	// experimental colour definition
 	coldef = vec3(.5,0,1);

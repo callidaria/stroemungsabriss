@@ -6,5 +6,5 @@ out vec4 outColour;
 
 void main()
 {
-	outColour = vec4(coldef.xyz,.4f);
+	outColour = vec4(coldef.xyz,1);
 }
