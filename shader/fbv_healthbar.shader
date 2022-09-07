@@ -16,9 +16,15 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
+	// result variables
+	vec2 pos = position;
+
 	// situational variables setup
 	float wfac = clamp(edge_id-1,0,1);
 	float dmd = (dmg/wdt)*10-5;
+	float pofs = ofs+dmg*wfac-dmd*wfac-dmd*wfac+5*(1-wfac);
+	pos.x += pofs;
+	pos.x *= int(dmg>0);
 
 	// setup splash-esque geometry
 	int upperedge = int(edge_id/2);
@@ -26,10 +32,11 @@ void main()
 	vec2 comb = hfac*edg;
 	int is_upper = int(edge_id)%2;
 	float ccomb = comb.x+comb.y;
+	ccomb = ccomb*is_upper-ccomb*abs(is_upper-1);
+	pos.y += ccomb;
 
 	// calculate final vertex positions
-	gl_Position = proj*view*vec4((position.x+ofs+dmg*wfac-dmd*wfac+5*(1-wfac))*int(dmg>0),
-			position.y+(ccomb*is_upper-ccomb*abs(is_upper-1))*mix(1,(dmg/wdt),hfac.y),0,1);
+	gl_Position = proj*view*vec4(pos,0,1);
 
 	// experimental colour definition
 	coldef = vec3(.5,0,1);

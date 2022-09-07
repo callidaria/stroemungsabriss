@@ -21,7 +21,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	l3d_ortho.set_ambient(1.0f);
 
 	// ui
-	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
+	Healthbar hbar = Healthbar(glm::vec2(140,650),1000,30,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	uint32_t running=rstate+1;

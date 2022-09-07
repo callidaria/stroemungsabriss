@@ -50,6 +50,7 @@ make win
 - spawn player controlled bullets
 - health bar system
 - engine build system
+- health bar style [DEV]
 
 ### optimizations:
 - improved documentation
@@ -98,4 +99,4 @@ make win
     + 63: 13h 25min
 	+ 79: 1h
 - Total Code Lines: 7573
-	+ 58: 6h 23min
+	+ 58: 7h 17min

@@ -66,15 +66,6 @@ private:
 	static void signal_clear(uint8_t &frdy,HPBarSwap &hpswap);
 
 private:
-
-	// object
-	Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
-	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
-	HPBarSwap hpswap;
-
-	// status
-	uint8_t frdy = 0;
-
 	/*
 		func(uint8_t&,HPBarSwap&) -> void
 			=> func(frdy,hpswap) -> void
@@ -84,4 +75,14 @@ private:
 	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = {
 		fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear
 	};
+
+private:
+
+	// object
+	Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
+	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
+	HPBarSwap hpswap;
+
+	// status
+	uint8_t frdy = 0;
 };

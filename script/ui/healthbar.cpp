@@ -187,10 +187,14 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
 	float cwdt = 0,chgt = 0;			// current width progression
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
+
+		// upload data until dmg & target width
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
 		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
 		hpswap.upload.push_back(0);									// current hp in healthbar
 		hpswap.upload.push_back(0);									// current damage to health
+
+		// calculate edge vertex manipulation steps
 		hpswap.upload.push_back(bheight+chgt);
 		hpswap.upload.push_back(bheight+chgt);
 		cwdt += hpswap.dest_wdt[ihp][i];
@@ -199,21 +203,24 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 		chgt += raised;
 	}
 
-	// filling upload until target
-	int8_t itr = hpswap.target_itr;
-	bool full_bar = hpswap.upload[itr*PT_REPEAT+1]>=hpswap.upload_target[itr];
+	// filling width & dmg until target
+	int8_t itr = hpswap.target_itr;		// temporary save of iteration until next tick
+	uint8_t ritr = itr*PT_REPEAT;		// rasterization of one dimensional list by upload size
+	bool full_bar = hpswap.upload[ritr+1]>=hpswap.upload_target[itr];
 	hpswap.target_itr += full_bar;
-	hpswap.upload[itr*PT_REPEAT+1] += 4;
-	hpswap.upload[itr*PT_REPEAT+1]
-			= hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*PT_REPEAT+1]*!full_bar;
-	hpswap.upload[itr*PT_REPEAT+2] += 4;
-	hpswap.upload[itr*PT_REPEAT+2]
-			= hpswap.upload_target[itr]*full_bar+hpswap.upload[itr*PT_REPEAT+2]*!full_bar;
+	hpswap.upload[ritr+1] += 4;
+	hpswap.upload[ritr+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+1]*!full_bar;
+	hpswap.upload[ritr+2] += 4;
+	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
 
-	// raise y-axis edges for splash geometry
-	hpswap.upload[itr*PT_REPEAT+4]
-			= hpswap.upload[itr*PT_REPEAT+3]+hpswap.edge_target[itr]
-			*(hpswap.upload[itr*PT_REPEAT+1]/hpswap.upload_target[itr]);
+	// filling edge target based on expected nanobar width
+	float curr_edge = hpswap.upload[ritr+3]+hpswap.edge_target[itr];
+	hpswap.upload[ritr+4] = curr_edge*(hpswap.upload[ritr+1]/hpswap.upload_target[itr]);
+
+	// cap upload values to ideal once target is full
+	hpswap.upload[ritr+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+1]*!full_bar;
+	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
+	hpswap.upload[ritr+4] = curr_edge*full_bar+hpswap.upload[ritr+4]*!full_bar;
 
 	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
