@@ -24,7 +24,7 @@ Anim::Anim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,uin
 
 	// texture generation
 	glGenTextures(1,&tex);
-}
+} Anim::~Anim() {  }
 
 /*
 	texture() -> void

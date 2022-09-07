@@ -25,7 +25,7 @@ public:
 	void load_vertex();  // TODO: make private
 	void load_texture();  // TODO: make private
 	void load();
-	void load_wcam(Camera2D* c);  // TODO: overload with load()
+	void load_wcam(Camera2D* cam2d);  // TODO: overload with load()
 
 	// preparation
 	void prepare();

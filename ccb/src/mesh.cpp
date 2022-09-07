@@ -118,7 +118,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 	// save and increase offset for mesh render index
 	size = v.size()/14;
 	*mofs += size;
-}
+} Mesh::~Mesh() {  }
 
 /*
 	texture() -> void

@@ -19,7 +19,7 @@ Sprite::Sprite(glm::vec2 p,float w,float h,const char* t)
 
 	// texture generation
 	glGenTextures(1,&tex);
-}
+} Sprite::~Sprite() {  }
 
 /*
 	texture() -> void

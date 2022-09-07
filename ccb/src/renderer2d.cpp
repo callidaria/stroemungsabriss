@@ -2,7 +2,7 @@
 
 /*
 	constructor()
-	[...]
+	purpose: create renderer object to subsequently add 2D objects to and draw them
 */
 Renderer2D::Renderer2D()
 {
@@ -11,7 +11,12 @@ Renderer2D::Renderer2D()
 
 /*
 	add(vec2,float,float,const char*) -> uint16_t
-	[...]
+	p: origin position of added sprite
+	w: width of added sprite
+	h: height of added sprite
+	t: path to file containing sprite texture
+	purpose: add new sprite to renderer to draw later
+	returns: memory index the sprite is to be referenced by when drawing
 */
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 {
@@ -23,12 +28,21 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 
 /*
 	add(vec2,float,float,const char*,uint8_t,uint8_t,uint8_t,uint8_t) -> uint16_t
-	[...]
+	p: origin position of added animation
+	w: width of added animation
+	h: height of added animation
+	t: path to file containing animation spritesheet
+	r: rows of spritesheet located by [t]
+	c: columns of spritesheet located by [t]
+	itn: number of textures held by spritesheet
+	f: frames the animation takes to fully iterate through all textures
+	purpose: add new animation to renderer to draw later
+	returns: memory index the animation is to be referenced by when drawing
 */
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,
-		uint8_t f,uint8_t itn)
+		uint8_t itn,uint8_t f)
 {
-	Anim tmp = Anim(p,w,h,t,r,c,f,itn);  // TODO: fall into output while push back also
+	Anim tmp = Anim(p,w,h,t,r,c,itn,f);  // TODO: fall into output while push back also
 	uint16_t out = al.size();
 	al.push_back(tmp);
 	return out;
@@ -36,13 +50,12 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uin
 
 /*
 	load_vertex() -> void
-	[...]
+	purpose: upload all vertices of sprites and animations to buffer
 */
 void Renderer2D::load_vertex()
 {
 	// getting list sizes
-	uint16_t ls = sl.size();
-	uint16_t la = al.size();
+	uint16_t ls = sl.size(),la = al.size();
 
 	// create write arrays
 	float v[(ls+la)*16];
@@ -51,19 +64,13 @@ void Renderer2D::load_vertex()
 	// write values to arrays
 	for (int j=0;j<ls+la;j++) {
 		for (int i=0;i<16;i++) {
-			if (j<ls)
-				v[j*16+i] = sl.at(j).v[i];
-			else
-				v[j*16+i] = al.at(j-ls).v[i];
+			if (j<ls) v[j*16+i] = sl.at(j).v[i];
+			else v[j*16+i] = al.at(j-ls).v[i];
 		}
 
 		// create elements for element buffer
-		e[j*6] = j*4;
-		e[j*6+1] = j*4+1;
-		e[j*6+2] = j*4+2;
-		e[j*6+3] = j*4+2;
-		e[j*6+4] = j*4+3;
-		e[j*6+5] = j*4+0;
+		e[j*6] = j*4;e[j*6+1] = j*4+1;e[j*6+2] = j*4+2;
+		e[j*6+3] = j*4+2;e[j*6+4] = j*4+3;e[j*6+5] = j*4+0;
 	}
 
 	// upload to buffers
@@ -72,22 +79,21 @@ void Renderer2D::load_vertex()
 	buffer.upload_elements(e,sizeof(e));
 }
 // FIXME: this can be way faster, what about the array -> vector && branching removal?
+// FIXME: constant branching due to loop combination of animations and sprites. easily removable
 
 /*
 	load_texture() -> void
-	[...]
+	purpose: load all textures for every added sprite and animation
 */
 void Renderer2D::load_texture()
 {
-	for (int i=0;i<sl.size();i++)
-		sl.at(i).texture();
-	for (int i=0;i<al.size();i++)
-		al.at(i).texture();
+	for (int i=0;i<sl.size();i++) sl.at(i).texture();
+	for (int i=0;i<al.size();i++) al.at(i).texture();
 }
 
 /*
 	load() -> void
-	[...]
+	purpose: combine vertex and texture loading and compile shader program in between
 */
 void Renderer2D::load()
 {
@@ -98,38 +104,46 @@ void Renderer2D::load()
 
 /*
 	load_wcam(Camera2D*) -> void
-	[...]
+	cam2d: the 2D camera used to render the loaded sprites and animations in relation to
+	purpose: additionally to the features of load() the view and projection matrices are uploaded
 */
-void Renderer2D::load_wcam(Camera2D* c)
+void Renderer2D::load_wcam(Camera2D* cam2d)
 {
 	load();
-	upload_view(c->view2D);
-	upload_proj(c->proj2D);
-}
+	upload_view(cam2d->view2D);
+	upload_proj(cam2d->proj2D);
+}  // FIXME: change to function overload instead of _wcam suffix
 
 /*
 	prepare() -> void
-	[...]
+	purpose: prepare shader, buffer & gl settings to render sprites and animations
 */
 void Renderer2D::prepare()
 {
+	// setup buffer & shader
 	s2d.enable();
 	reset_shader();
 	buffer.bind();
+
+	// gl settings
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 }
-// FIXME: which diables are necessary?
+// FIXME: which disables are necessary?
 
 /*
 	render_sprite(uint16_t,uint16_t) -> void
-	[...]
+	b: sprite index to begin the drawing at
+	e: sprite index to end the drawing at (sprite with this index is excluded from drawing)
+	purpose: draw all sprites within index range, excluding range maximum e:
+		the indices are given by the renderer as a return at creation
+		add(...) -> [index]
 */
 void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 {
 	for (int i=b;i<e;i++) {
-		upload_model(sl.at(i).model); // ??how expensive exactely
+		upload_model(sl.at(i).model);
 		glBindTexture(GL_TEXTURE_2D,sl.at(i).tex);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
@@ -137,7 +151,10 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 
 /*
 	render_sprite(uint16_t,uint16_t,unsigned int) -> void
-	[...]
+	b: sprite index to begin the drawing at
+	e: sprite index to end the drawing at (sprite with this index is excluded from drawing)
+	tex: texture, replacing the loaded texture before render
+	purpose: same basic functionality as the normal render_sprite but with previous texture change
 */
 void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
 {
@@ -147,10 +164,13 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
 }
+// FIXME: change last parameter from automatically declared unsigned int
 
 /*
 	render_state(uint16_t,vec2) -> void
-	[...]
+	s: index of the animation previously returned at creation
+	i: index of animation frame to permanently render
+	purpose: permanently render a specific frame of an animation
 */
 void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 {
@@ -168,7 +188,8 @@ void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 
 /*
 	render_anim(uint16_t) -> void
-	[...]
+	i: animation index previously returned at creation
+	purpose: render animation and automatically iterate through all textures on the spritesheet
 */
 void Renderer2D::render_anim(uint16_t i)
 {
@@ -192,7 +213,7 @@ void Renderer2D::render_anim(uint16_t i)
 
 /*
 	reset_shader() -> void
-	[...]
+	purpose: reset all animation relevant uniform variables in shader program
 */
 void Renderer2D::reset_shader()
 {
@@ -203,7 +224,8 @@ void Renderer2D::reset_shader()
 
 /*
 	upload_model(mat4) -> void
-	[...]
+	m: model matrix to upload to shader program
+	purpose: upload model matrix to shader program
 */
 void Renderer2D::upload_model(glm::mat4 m)
 {
@@ -212,7 +234,7 @@ void Renderer2D::upload_model(glm::mat4 m)
 
 /*
 	upload_view(mat4) -> void
-	[...]
+	DEPRECATED: a shader method has to be created to upload view & projection of camera
 */
 void Renderer2D::upload_view(glm::mat4 m)
 {
@@ -221,7 +243,7 @@ void Renderer2D::upload_view(glm::mat4 m)
 
 /*
 	upload_proj(mat4) -> void
-	[...]
+	DEPRECATED: a shader method has to be created to upload view & projection of camera
 */
 void Renderer2D::upload_proj(glm::mat4 m)
 {
@@ -230,7 +252,7 @@ void Renderer2D::upload_proj(glm::mat4 m)
 
 /*
 	upload_row(uint8_t) -> void
-	[...]
+	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
 */
 void Renderer2D::upload_row(uint8_t i)
 {
@@ -239,7 +261,7 @@ void Renderer2D::upload_row(uint8_t i)
 
 /*
 	upload_col(uint8_t) -> void
-	[...]
+	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
 */
 void Renderer2D::upload_col(uint8_t i)
 {
@@ -248,7 +270,7 @@ void Renderer2D::upload_col(uint8_t i)
 
 /*
 	upload_tindex(vec2) -> void
-	[...]
+	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
 */
 void Renderer2D::upload_tindex(glm::vec2 v)
 {
@@ -257,7 +279,7 @@ void Renderer2D::upload_tindex(glm::vec2 v)
 
 /*
 	get_max_sprite() -> uint16_t
-	[...]
+	returns: length of sprite list
 */
 uint16_t Renderer2D::get_max_sprite()
 {
@@ -266,7 +288,7 @@ uint16_t Renderer2D::get_max_sprite()
 
 /*
 	get_max_anim() -> uint16_t
-	[...]
+	returns: length of animation list
 */
 uint16_t Renderer2D::get_max_anim()
 {

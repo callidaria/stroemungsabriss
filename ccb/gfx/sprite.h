@@ -21,6 +21,7 @@ public:
 
 	// construction
 	Sprite(glm::vec2 p,float w,float h,const char* t);
+	~Sprite();
 
 	// setup
 	void texture();

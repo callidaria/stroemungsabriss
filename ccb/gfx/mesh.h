@@ -25,6 +25,7 @@ public:
 	// construction
 	Mesh(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 ip,float is,glm::vec3 ir,unsigned int* mofs);
+	~Mesh();
 
 	// setup
 	void texture();
