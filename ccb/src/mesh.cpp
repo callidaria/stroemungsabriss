@@ -3,7 +3,16 @@
 /*
 	constructor(const char*,const char*,const char*,const char*,const char*,
 			vec3,float,vec3,uint16_t*)
-	[...]
+	m: path to .obj file to load the mesh vertices from
+	t: path to main texture file
+	sm: path to specular map file
+	nm: path to normal map file
+	em: path to emitter map file
+	ip: the mesh objects origin position
+	is: the mesh objects initial scaling
+	ir: the mesh objects initial rotation
+	mofs: memory offset, describing at which position in vertex memory the created mesh starts
+	purpose: create components, read vertex data from source file and calculate normals
 */
 Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 		glm::vec3 ip,float is,glm::vec3 ir,unsigned int* mofs)
@@ -31,29 +40,20 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 			break;
 		else {
 
-			// check vertex prefix
-			if (strcmp(lh,"v")==0) {
+			// check value prefix
+			if (strcmp(lh,"v")==0) {			// vertex prefix
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				verts.push_back(p);
-			}
-
-			// check texture coordinate prefix
-			else if (strcmp(lh,"vt")==0) {
+			} else if (strcmp(lh,"vt")==0) {	// texture coordinate prefix
 				glm::vec2 p;
 				fscanf(file,"%f %f\n",&p.x,&p.y);
 				uv.push_back(p);
-			}
-
-			// check normals prefix
-			else if (strcmp(lh,"vn")==0) {
+			} else if (strcmp(lh,"vn")==0) {	// normals prefix
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				norm.push_back(p);
-			}
-
-			// check element index prefix
-			else if(strcmp(lh,"f")==0) {
+			} else if(strcmp(lh,"f")==0) {		// element index prefix
 
 				// read element node for current triangle
 				unsigned int vi[3],ui[3],ni[3];
@@ -66,20 +66,10 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 				pproc = transform(pproc,pos,scl,rot);
 				nproc = rotate(nproc,rot);
 
-				// save position vertices
-				ovi.push_back(vi[0]);
-				ovi.push_back(vi[1]);
-				ovi.push_back(vi[2]);
-
-				// save texture coordinates
-				oui.push_back(ui[0]);
-				oui.push_back(ui[1]);
-				oui.push_back(ui[2]);
-
-				// save object normals
-				oni.push_back(ni[0]);
-				oni.push_back(ni[1]);
-				oni.push_back(ni[2]);
+				// save values position vertices
+				ovi.push_back(vi[0]);ovi.push_back(vi[1]);ovi.push_back(vi[2]);		// position
+				oui.push_back(ui[0]);oui.push_back(ui[1]);oui.push_back(ui[2]);		// tex coords
+				oni.push_back(ni[0]);oni.push_back(ni[1]);oni.push_back(ni[2]);		// normals
 			}
 		}
 	}
@@ -106,6 +96,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 		btg.y = ff*(-duv2.x*e1.y+duv1.x*e2.y);
 		btg.z = ff*(-duv2.x*e1.z+duv1.x*e2.z);
 		btg = glm::normalize(btg);
+		// FIXME: using a matrix calculation might be significantly faster
 
 		// get read vertices to process and save
 		unsigned int tvi = ovi[i],tui = oui[i],tni = oni[i];
@@ -116,29 +107,12 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 		tv = transform(tv,pos,scl,rot);
 		tn = rotate(tn,rot);
 
-		// save position vertices to buffer vector
-		v.push_back(tv.x);
-		v.push_back(tv.y);
-		v.push_back(tv.z);
-
-		// save texture coordinates to buffer vector
-		v.push_back(tu.x);
-		v.push_back(tu.y);
-
-		// save normals to buffer vector
-		v.push_back(tn.x);
-		v.push_back(tn.y);
-		v.push_back(tn.z);
-
-		// save tangents to buffer vector
-		v.push_back(tg.x);
-		v.push_back(tg.y);
-		v.push_back(tg.z);
-
-		// save bitangents to buffer vector
-		v.push_back(btg.x);
-		v.push_back(btg.y);
-		v.push_back(btg.z);
+		// save data to buffer vector
+		v.push_back(tv.x);v.push_back(tv.y);v.push_back(tv.z);		// vertex positions
+		v.push_back(tu.x);v.push_back(tu.y);						// texture coordinates
+		v.push_back(tn.x);v.push_back(tn.y);v.push_back(tn.z);		// normals
+		v.push_back(tg.x);v.push_back(tg.y);v.push_back(tg.z);		// tangents
+		v.push_back(btg.x);v.push_back(btg.y);v.push_back(btg.z);	// bitangents
 	}
 
 	// save and increase offset for mesh render index
@@ -148,7 +122,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 
 /*
 	texture() -> void
-	[...]
+	purpose: upload texture data to shader program to be used as sampler2D
 */
 void Mesh::texture()
 {
@@ -247,12 +221,11 @@ void Mesh::texture()
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	// TODO: reduce repeated calls to helper function
-}
+}  // TODO: reduce repeated calls to helper function
 
 /*
 	transform(vec3,vec3,float,vec3) -> vec3
-	[...]
+	DEPRECATED: what usage did i intent for this abomination? model matrix is something that exists?
 */
 glm::vec3 Mesh::transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r)
 {
@@ -264,7 +237,7 @@ glm::vec3 Mesh::transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r)
 
 /*
 	rotate(vec3,vec3) -> vec3
-	[...]
+	DEPRECATED: 2018 i intended ?something? with these but nowadays its time to say goodbye!!
 */
 glm::vec3 Mesh::rotate(glm::vec3 o,glm::vec3 r)
 {

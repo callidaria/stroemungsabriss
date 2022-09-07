@@ -49,4 +49,6 @@ public:
 	unsigned int tex,specmap,normap,emitmap;
 	glm::vec3 pos,rot;
 	float scl;
+
+	// FIXME: private/public mishandling
 };
