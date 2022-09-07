@@ -45,4 +45,6 @@ public:
 	float v[16];
 	unsigned int tex;
 	glm::mat4 model = glm::mat4(1.0f);
+
+	// FIXME: private/public mishandling
 };

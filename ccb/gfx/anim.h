@@ -45,4 +45,6 @@ public:
 	glm::mat4 model = glm::mat4(1.0f);
 	unsigned int tex,r,c;
 	float tn, fl; float ft = 0;
+
+	// FIXME: private/public mishandling
 };
