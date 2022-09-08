@@ -2,7 +2,7 @@
 
 /*
 	constructor()
-	[...]
+	purpose: purpose: create renderer object to subsequently add instances to and draw them
 */
 RendererI::RendererI()
 {
@@ -11,26 +11,30 @@ RendererI::RendererI()
 
 /*
 	add(vec2,float,float,const char*) -> void
-	[...]
+	p: origin position of indexed 2D object
+	w: x-axis scaling resulting in initial object width
+	h: y-axis scaling resulting in initial object height
+	t: path to file holding the indexed objects texture
+	purpose: creating and adding an indexable 2D object to render memory
 */
 void RendererI::add(glm::vec2 p,float w,float h,const char* t)
 {
 	Instance tmp = Instance(p,w,h,t);  // FIXME: fuse creation into push_back
 	il.push_back(tmp);
 }
+// TODO: return the objects memory index instead of void
 
 /*
 	load_vertex() -> void
-	[...]
+	purpose: upload all added vertices to buffer
 */
 void RendererI::load_vertex()
 {
-	// setup
-	int li = il.size();
-	float v[li*24];
+	// clear memory for vertex list
+	float v[il.size()*24];
 
 	// load all vertices to master array
-	for (int j=0;j<li;j++) {
+	for (int j=0;j<il.size();j++) {
 		for (int i=0;i<24;i++)
 			v[j*24+i] = il.at(j).v[i];
 	}
@@ -42,17 +46,16 @@ void RendererI::load_vertex()
 
 /*
 	load_texture() -> void
-	[...]
+	purpose: texture all indexable objects
 */
 void RendererI::load_texture()
 {
-	for (int i=0;i<il.size();i++)
-		il.at(i).texture();
+	for (int i=0;i<il.size();i++) il.at(i).texture();
 }
 
 /*
 	load() -> void
-	[...]
+	purpose: combine vertex upload and texturing and compile shader
 */
 void RendererI::load()
 {
@@ -65,20 +68,21 @@ void RendererI::load()
 
 /*
 	load_wcam(Camera2D*) -> void
-	[...]
+	cam2d: camera to render indexable 2D objects in relation to
+	purpose: in addition to using the features of load the camera matrices get uploaded
 */
-void RendererI::load_wcam(Camera2D* c)
+void RendererI::load_wcam(Camera2D* cam2d)
 {
 	load();
 
 	// upload camera to shader program
-	upload_view(c->view2D);
-	upload_proj(c->proj2D);
+	upload_view(cam2d->view2D);
+	upload_proj(cam2d->proj2D);
 }
 
 /*
 	prepare() -> void
-	[...]
+	purpose: enable shader program and bind buffer to use its data
 */
 void RendererI::prepare()
 {
@@ -88,27 +92,36 @@ void RendererI::prepare()
 
 /*
 	render(uint16_t,uint16_t) -> void
-	[...]
+	i: memory index of previously added indexable object
+	amt: amount of identical objects to render from indexed source
+	purpose: draw object the target amount after uploading the position transforms to index buffer
 */
-void RendererI::render(uint16_t i, uint16_t amt)
+void RendererI::render(uint16_t i,uint16_t amt)
 {
+	// setup
 	glBindTexture(GL_TEXTURE_2D,il.at(i).tex);
 	buffer.upload_indices(il.at(i).o,sizeof(glm::vec2)*4096);
+
+	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
 }
 
 /*
 	set_offset(uint16_t,uint16_t,vec2) -> void
-	[...]
+	i: memory index of indexable object
+	j: memory index of position transform vector to change
+	o: vector value to set the selected position transform vector to
+	purpose: set a certain position transform vector of a specific object
 */
-void RendererI::set_offset(uint16_t i, uint16_t j, glm::vec2 o)
+void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 {
 	il.at(i).o[j] = o;
 }
 
 /*
 	upload_model(mat4) -> void
-	[...]
+	m: model matrix to upload to shader program
+	purpose: upload model matrix to shader program
 */
 void RendererI::upload_model(glm::mat4 m)
 {
