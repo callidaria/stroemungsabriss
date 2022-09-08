@@ -107,12 +107,11 @@ void Renderer2D::load()
 	cam2d: the 2D camera used to render the loaded sprites and animations in relation to
 	purpose: additionally to the features of load() the view and projection matrices are uploaded
 */
-void Renderer2D::load_wcam(Camera2D* cam2d)
+void Renderer2D::load(Camera2D* cam2d)
 {
 	load();
-	upload_view(cam2d->view2D);
-	upload_proj(cam2d->proj2D);
-}  // FIXME: change to function overload instead of _wcam suffix
+	s2d.upload_camera(*cam2d);
+}
 
 /*
 	prepare() -> void
@@ -143,7 +142,7 @@ void Renderer2D::prepare()
 void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 {
 	for (int i=b;i<e;i++) {
-		upload_model(sl.at(i).model);
+		s2d.upload_matrix("model",sl.at(i).model);
 		glBindTexture(GL_TEXTURE_2D,sl.at(i).tex);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
@@ -160,7 +159,7 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
 {
 	for (int i=b;i<e;i++) {
-		upload_model(sl.at(i).model);
+		s2d.upload_matrix("model",sl.at(i).model);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
@@ -178,12 +177,12 @@ void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 	glBindTexture(GL_TEXTURE_2D,al.at(s).tex);
 
 	// upload spritesheet specifications
-	upload_row(al.at(s).r);
-	upload_col(al.at(s).c);
-	upload_tindex(i);
+	s2d.upload_int("row",al.at(s).r);
+	s2d.upload_int("col",al.at(s).c);
+	s2d.upload_vec2("i_tex",i);
 
 	// transform and draw
-	upload_model(al.at(s).model);
+	s2d.upload_matrix("model",al.at(s).model);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((s+sl.size())*6*sizeof(int)));
 }
 
@@ -203,12 +202,12 @@ void Renderer2D::render_anim(uint16_t i)
 	glm::vec2 ind = glm::vec2((int)(index%c),(int)(index/c));
 
 	// upload spritesheet specifications
-	upload_row(r);
-	upload_col(c);
-	upload_tindex(ind);
+	s2d.upload_int("row",r);;
+	s2d.upload_int("col",c);
+	s2d.upload_vec2("i_tex",ind);
 
 	// transform and draw
-	upload_model(al.at(i).model);
+	s2d.upload_matrix("model",al.at(i).model);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sl.size())*6*sizeof(int)));
 }
 
@@ -218,64 +217,9 @@ void Renderer2D::render_anim(uint16_t i)
 */
 void Renderer2D::reset_shader()
 {
-	upload_row(1);
-	upload_col(1);
-	upload_tindex(glm::vec2(0,0));
-}
-
-/*
-	upload_model(mat4) -> void
-	m: model matrix to upload to shader program
-	purpose: upload model matrix to shader program
-*/
-void Renderer2D::upload_model(glm::mat4 m)
-{
-	s2d.upload_matrix("model",m);
-}
-
-/*
-	upload_view(mat4) -> void
-	DEPRECATED: a shader method has to be created to upload view & projection of camera
-*/
-void Renderer2D::upload_view(glm::mat4 m)
-{
-	s2d.upload_matrix("view",m);
-}
-
-/*
-	upload_proj(mat4) -> void
-	DEPRECATED: a shader method has to be created to upload view & projection of camera
-*/
-void Renderer2D::upload_proj(glm::mat4 m)
-{
-	s2d.upload_matrix("proj",m);
-}
-
-/*
-	upload_row(uint8_t) -> void
-	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
-*/
-void Renderer2D::upload_row(uint8_t i)
-{
-	s2d.upload_int("row",i);
-}
-
-/*
-	upload_col(uint8_t) -> void
-	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
-*/
-void Renderer2D::upload_col(uint8_t i)
-{
-	s2d.upload_int("col",i);
-}
-
-/*
-	upload_tindex(vec2) -> void
-	DEPRECATED: don't create unique methods for this. prepare location definitions and use shader
-*/
-void Renderer2D::upload_tindex(glm::vec2 v)
-{
-	s2d.upload_vec2("i_tex",v);
+	s2d.upload_int("row",1);
+	s2d.upload_int("col",1);
+	s2d.upload_vec2("i_tex",glm::vec2(0,0));
 }
 
 /*

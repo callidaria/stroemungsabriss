@@ -22,10 +22,8 @@ public:
 			uint8_t f,uint8_t itn);
 
 	// loaders
-	void load_vertex();  // TODO: make private
-	void load_texture();  // TODO: make private
 	void load();
-	void load_wcam(Camera2D* cam2d);  // TODO: overload with load()
+	void load(Camera2D* cam2d);
 
 	// preparation
 	void prepare();
@@ -33,24 +31,21 @@ public:
 	// renderers
 	void render_sprite(uint16_t b, uint16_t e);
 	void render_sprite(uint16_t b,uint16_t e,unsigned int tex);
-	void render_state(uint16_t s,glm::vec2 i);  // !!float is taken but integer is needed. SPACE
+	void render_state(uint16_t s,glm::vec2 i);
 	void render_anim(uint16_t i);
 
-	// helpers
+	// settings
 	void reset_shader();
-
-	// uploads
-	void upload_model(glm::mat4 m);
-	void upload_view(glm::mat4 m);
-	void upload_proj(glm::mat4 m);
-	void upload_row(uint8_t i);
-	void upload_col(uint8_t i);
-	void upload_tindex(glm::vec2 v);
-	// FIXME: check if some are replacable or obsolete
 
 	// getters
 	uint16_t get_max_sprite();
 	uint16_t get_max_anim();
+
+private:
+
+	// loaders
+	void load_vertex();
+	void load_texture();
 
 public:
 	Buffer buffer = Buffer();
