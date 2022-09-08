@@ -7,7 +7,7 @@
 	t: path to main texture file
 	sm: path to specular map file
 	nm: path to normal map file
-	em: path to emitter map file
+	em: path to emission map file
 	ip: the mesh objects origin position
 	is: the mesh objects initial scaling
 	ir: the mesh objects initial rotation

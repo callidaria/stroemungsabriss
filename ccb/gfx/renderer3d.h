@@ -19,11 +19,11 @@ public:
 
 	void load_vertex();
 	void load_texture();
-	void load(Camera3D* c);
+	void load(Camera3D* cam3d);
 
 	// preparations
 	void prepare();
-	void prepare_wcam(Camera3D* c);
+	void prepare_wcam(Camera3D* cam3d);
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);

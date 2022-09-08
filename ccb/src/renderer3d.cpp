@@ -2,7 +2,7 @@
 
 /*
 	constructor()
-	[...]
+	purpose: create renderer object to subsequently add 3D objects to and draw them
 */
 Renderer3D::Renderer3D()
 {
@@ -10,8 +10,16 @@ Renderer3D::Renderer3D()
 } Renderer3D::~Renderer3D() {  }
 
 /*
-	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3)
-	[...]
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> void
+	m: path to .obj file to read mesh vertices from
+	t: path to file to read texture from
+	sm: path to specular map file
+	nm: path to normal map file
+	em: path to emission map file
+	p: origin position of the mesh
+	s: initial mesh scaling
+	r: initial mesh rotation
+	purpose: add mesh object to renderer 
 */
 void Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 		glm::vec3 p,float s,glm::vec3 r)
@@ -19,10 +27,11 @@ void Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,c
 	Mesh tmp = Mesh(m,t,sm,nm,em,p,s,r,&mofs);  // FIXME: let tmp fall into push back call
 	ml.push_back(tmp);
 }
+// TODO: return the objects memory index instead of void
 
 /*
 	load_vertex() -> void
-	[...]
+	purpose: upload all added mesh vertices to buffer
 */
 void Renderer3D::load_vertex()
 {
@@ -40,13 +49,12 @@ void Renderer3D::load_vertex()
 
 /*
 	load_texture() -> void
-	[...]
+	purpose: texture all meshes & define texture locations in shader program
 */
 void Renderer3D::load_texture()
 {
 	// run texturing process for all meshes
-	for(int i=0;i<ml.size();i++)
-		ml.at(i).texture();
+	for(int i=0;i<ml.size();i++) ml.at(i).texture();
 
 	// texture references for shader program
 	s3d.upload_int("tex",0);
@@ -58,9 +66,10 @@ void Renderer3D::load_texture()
 
 /*
 	load(Camera3D*) -> void
-	[...]
+	cam3d: camera to relate mesh objects to
+	purpose: combine texture and vertex loading, define gl settings & compile shader program
 */
-void Renderer3D::load(Camera3D* c)
+void Renderer3D::load(Camera3D* cam3d)
 {
 	// opengl setup
 	glEnable(GL_DEPTH_TEST);
@@ -75,42 +84,49 @@ void Renderer3D::load(Camera3D* c)
 	load_texture();
 
 	// upload camera specifications to shader
-	upload_view(c->view3D);
-	upload_proj(c->proj3D);
+	upload_view(cam3d->view3D);
+	upload_proj(cam3d->proj3D);
 }
 
 /*
 	prepare() -> void
-	[...]
+	purpose: prepare shader and buffer for rendering
 */
 void Renderer3D::prepare()
 {
+	// prepare shader & buffer
 	s3d.enable();
 	buffer.bind();
-	glActiveTexture(GL_TEXTURE0);
+
+	// reset texture changes
+	glActiveTexture(GL_TEXTURE0);  // FIXME: probably idiotic to do this bc render_mesh resets again
 }
 
 /*
 	prepare_wcam(Camera3D*) -> void
-	[...]
+	cam3d: camera to relate mesh visuals to
+	purpose: additionally to the function of prepare, this method updates and uploads the camera
 */
-void Renderer3D::prepare_wcam(Camera3D* c)
+void Renderer3D::prepare_wcam(Camera3D* cam3d)
 {
 	// run normal preparations
 	prepare();
 
 	// update and upload camera
-	c->update();
-	upload_view(c->view3D);
-	upload_proj(c->proj3D);
+	cam3d->update();
+	upload_view(cam3d->view3D);
+	upload_proj(cam3d->proj3D);
 
 	// upload shader specifications for normal mapping
-	s3d.upload_vec3("view_pos",c->pos);
+	s3d.upload_vec3("view_pos",cam3d->pos);
 }
 
 /*
 	render_mesh(uint16_t,uint16_t) -> void
-	[...]
+	b: starting index of mesh that is to be drawn
+	e: index to stop rendering at (excluding this index)
+	purpose: render meshes until ending index without e value as mesh index
+	DEPRECATED: begin/end method of rendering a bunch is outdated due to branch reasons
 */
 void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 {
@@ -129,7 +145,8 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 
 /*
 	upload_model(mat4) -> void
-	[...]
+	m: model matrix to upload to shader program
+	purpose: upload model matrix to shader program
 */
 void Renderer3D::upload_model(glm::mat4 m)
 {
@@ -138,7 +155,7 @@ void Renderer3D::upload_model(glm::mat4 m)
 
 /*
 	upload_view(mat4) -> void
-	[...]
+	DEPRECATED: a shader method has to be created to upload view & projection of camera
 */
 void Renderer3D::upload_view(glm::mat4 m)
 {
@@ -152,7 +169,8 @@ void Renderer3D::upload_proj(glm::mat4 m)
 
 /*
 	upload_shadow(mat4) -> void
-	[...]
+	m: light translation matrix for shadow effect
+	purpose: upload matrix to render shadow overlay
 */
 void Renderer3D::upload_shadow(glm::mat4 m)
 {

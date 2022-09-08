@@ -155,6 +155,7 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 	e: sprite index to end the drawing at (sprite with this index is excluded from drawing)
 	tex: texture, replacing the loaded texture before render
 	purpose: same basic functionality as the normal render_sprite but with previous texture change
+	DEPRECATED: begin/end method of rendering a bunch is outdated due to branch reasons
 */
 void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
 {
