@@ -38,7 +38,7 @@ void RendererI::load_vertex()
 	for (int j=0;j<il.size();j++) {
 		for (int i=0;i<24;i++)
 			v[j*24+i] = il.at(j).v[i];
-	}
+	}  // TODO: compare runtimes
 
 	// upload to buffer
 	buffer.bind();

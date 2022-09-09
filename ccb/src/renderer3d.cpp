@@ -36,12 +36,9 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 */
 void Renderer3D::load_vertex()
 {
-	// writing all mesh vertices to a giant vertex list
+	// combining all mesh vertices to master vertex list
 	std::vector<float> v;
-	for (int j=0;j<ml.size();j++) {
-		for (int i=0;i<ml[j].v.size();i++)
-			v.push_back(ml[j].v[i]);
-	}
+	for (int i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
 
 	// upload to buffer
 	buffer.bind();
