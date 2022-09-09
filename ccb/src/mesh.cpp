@@ -23,6 +23,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 	glGenTextures(1,&specmap);	// specular map
 	glGenTextures(1,&normap);	// normal map
 	glGenTextures(1,&emitmap);	// light emission map
+	// FIXME: disgrace
 
 	// setup vertex information lists
 	std::vector<unsigned int> ovi,oui,oni;	// raw reads from source: vertex,uv,normals
@@ -126,103 +127,12 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 */
 void Mesh::texture()
 {
-	// setup
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,tex);
-	int width,height;
-
-	// load texture data from source
-#ifdef __WIN32__
-
-	unsigned char* image = stbi_load(texpath,&width,&height,0,STBI_rgb_alpha); // ??alpha needed in mesh
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	unsigned char* image = SOIL_load_image(texpath, &width, &height, 0, SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
-
-	// texture parameters & mipmap
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// load specular map data from source
-	glBindTexture(GL_TEXTURE_2D,specmap);
-#ifdef __WIN32__
-
-	image = stbi_load(smpath,&width,&height,0,0); // !!research RGBA support
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	image = SOIL_load_image(smpath,&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
-
-	// specular map parameters & mipmap
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// load normal map data from source
-	glBindTexture(GL_TEXTURE_2D,normap);
-#ifdef __WIN32__
-
-	image = stbi_load(nmpath,&width,&height,0,0); // !!research RGBA support
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	image = SOIL_load_image(nmpath,&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
-
-	// normal map parameters & mipmap
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// load light emission map data from source
-	glBindTexture(GL_TEXTURE_2D,emitmap);
-#ifdef __WIN32__
-
-	image = stbi_load(empath,&width,&height,0,0); // !!research RGBA support
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	image = SOIL_load_image(empath,&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
-
-	// light emission map parameters & mipmap
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	// glActiveTexture(GL_TEXTURE0);
+	Toolbox::load_texture(tex,texpath);
+	Toolbox::load_texture(specmap,smpath);
+	Toolbox::load_texture(normap,nmpath);
+	Toolbox::load_texture(emitmap,empath);
 }
-// TODO: reduce repeated calls to helper function
 
 /*
 	transform(vec3,vec3,float,vec3) -> vec3

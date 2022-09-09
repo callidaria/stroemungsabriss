@@ -7,14 +7,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
-#ifdef __WIN32__
-#define STB_IMAGE_IMPLEMENTATION
-#ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "../../include/stb_image.h"
-#endif
-#else
-#include <SOIL/SOIL.h>
-#endif
 
 #include "../mat/toolbox.h"
 #include "shader.h"
@@ -41,7 +33,7 @@ public:
 
 	std::vector<float> v;
 	glm::mat4 model = glm::mat4(1.0f);
-	unsigned int tex;  // FIXME: unsigned int as buffer to uint
+	GLuint tex;
 	glm::vec2 pos;
 	float sclx,scly;
 	uint8_t r,c;

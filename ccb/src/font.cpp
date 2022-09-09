@@ -40,21 +40,6 @@ Font::Font(const char* ff,const char* tf,float w,float h)
 }
 void Font::texture()
 {
-	glBindTexture(GL_TEXTURE_2D,tex);
-	int width,height;
-#ifdef __WIN32__
-	unsigned char* image = stbi_load(tp,&width,&height,0,STBI_rgb_alpha);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-#else
-	unsigned char* image = SOIL_load_image(tp,&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-#endif
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	Toolbox::load_texture(tex,tp);
 }
 void Font::setup() { glBindTexture(GL_TEXTURE_2D,tex); } // ??double texture setup in text.cpp

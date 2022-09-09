@@ -8,14 +8,6 @@
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#ifdef __WIN32__
-#define STB_IMAGE_IMPLEMENTATION
-#ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "../../include/stb_image.h"
-#endif
-#else
-#include <SOIL/SOIL.h>
-#endif
 
 #include "../mat/toolbox.h"
 
@@ -42,7 +34,7 @@ public:
 public:
 
 	std::vector<float> v;
-	unsigned int tex;
+	GLuint tex;
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::vec2 pos;
 	float sclx,scly;

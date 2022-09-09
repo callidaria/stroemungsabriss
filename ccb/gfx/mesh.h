@@ -5,18 +5,9 @@
 #include <vector>
 
 #include <GL/glew.h>
-
 #include <glm/gtx/rotate_vector.hpp>
 
-#ifdef __WIN32__
-#define STB_IMAGE_IMPLEMENTATION
-#ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "../../include/stb_image.h"
-#endif
-
-#else
-#include <SOIL/SOIL.h>
-#endif
+#include "../mat/toolbox.h"
 
 class Mesh
 {
@@ -33,7 +24,6 @@ public:
 private:
 
 	// helpers
-	//void load_texture(unsigned int &tex,);
 	glm::vec3 transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r);
 	glm::vec3 rotate(glm::vec3 o,glm::vec3 r);
 
@@ -41,7 +31,7 @@ public:
 
 	// upload data
 	std::vector<float> v;
-	unsigned int tex,specmap,normap,emitmap;  // FIXME: unsigned to uint
+	GLuint tex,specmap,normap,emitmap;
 
 	// transformation
 	glm::vec3 pos,rot;
