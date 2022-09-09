@@ -30,9 +30,6 @@ public:
 
 	// uploads
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
-	void upload_model(glm::mat4 m);
-	void upload_view(glm::mat4 m);
-	void upload_proj(glm::mat4 m);
 
 private:
 

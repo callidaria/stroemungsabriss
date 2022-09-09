@@ -39,8 +39,8 @@ void Renderer3D::load_vertex()
 	// writing all mesh vertices to a giant vertex list
 	std::vector<float> v;
 	for (int j=0;j<ml.size();j++) {
-		for (int i=0;i<ml.at(j).v.size();i++)
-			v.push_back(ml.at(j).v[i]);
+		for (int i=0;i<ml[j].v.size();i++)
+			v.push_back(ml[j].v[i]);
 	}
 
 	// upload to buffer

@@ -24,7 +24,6 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 	il.push_back(Instance(p,w,h,t));
 	return out;
 }
-// TODO: return the objects memory index instead of void
 
 /*
 	load_vertex() -> void
@@ -78,8 +77,7 @@ void RendererI::load(Camera2D* cam2d)
 	load();
 
 	// upload camera to shader program
-	upload_view(cam2d->view2D);
-	upload_proj(cam2d->proj2D);
+	sI.upload_camera(*cam2d);
 }
 
 /*
@@ -119,19 +117,3 @@ void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 {
 	il.at(i).o[j] = o;
 }
-
-/*
-	upload_model(mat4) -> void
-	m: model matrix to upload to shader program
-	purpose: upload model matrix to shader program
-*/
-void RendererI::upload_model(glm::mat4 m)
-{
-	sI.upload_matrix("model",m);
-}
-
-/*
-	DEPRECATED: this will be a joined shader function in the future
-*/
-void RendererI::upload_view(glm::mat4 m) { sI.upload_matrix("view",m); }
-void RendererI::upload_proj(glm::mat4 m) { sI.upload_matrix("proj",m); }

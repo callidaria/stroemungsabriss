@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -14,6 +15,8 @@
 #else
 #include <SOIL/SOIL.h>
 #endif
+
+#include "../mat/toolbox.h"
 #include "shader.h"
 
 class Anim
@@ -34,18 +37,17 @@ public:
 	void scale(float wscale,float hscale);
 	// TODO: add rotation feature
 
-private:
-
-	glm::vec2 pos;
-	float sclx,scly;
-	const char* tp;
-
 public:
 
-	float v[16];
+	std::vector<float> v;
 	glm::mat4 model = glm::mat4(1.0f);
-	unsigned int tex,r,c;
-	float tn, fl; float ft = 0;
+	unsigned int tex;  // FIXME: unsigned int as buffer to uint
+	glm::vec2 pos;
+	float sclx,scly;
+	uint8_t r,c;
 
-	// FIXME: private/public mishandling
+private:
+
+	const char* tp;
+	float tn,fl,ft = 0;
 };

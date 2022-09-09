@@ -32,24 +32,26 @@ public:
 
 private:
 
-	// translation
+	// helpers
+	//void load_texture(unsigned int &tex,);
 	glm::vec3 transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r);
 	glm::vec3 rotate(glm::vec3 o,glm::vec3 r);
 
-private:
-
-	const char* texpath;
-	const char* smpath;
-	const char* nmpath;
-	const char* empath;
-
 public:
 
-	unsigned int ofs,size;
+	// upload data
 	std::vector<float> v;
-	unsigned int tex,specmap,normap,emitmap;
+	unsigned int tex,specmap,normap,emitmap;  // FIXME: unsigned to uint
+
+	// transformation
 	glm::vec3 pos,rot;
 	float scl;
 
-	// FIXME: private/public mishandling
+	// information
+	unsigned int ofs,size;
+
+private:
+
+	// information
+	const char* texpath,*smpath,*nmpath,*empath;
 };

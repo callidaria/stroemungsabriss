@@ -221,7 +221,8 @@ void Mesh::texture()
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
-}  // TODO: reduce repeated calls to helper function
+}
+// TODO: reduce repeated calls to helper function
 
 /*
 	transform(vec3,vec3,float,vec3) -> vec3
@@ -233,7 +234,8 @@ glm::vec3 Mesh::transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r)
 	o *= s;
 	o += p;
 	return o;
-}  // FIXME: reduce
+}
+// FIXME: reduce
 
 /*
 	rotate(vec3,vec3) -> vec3
@@ -246,5 +248,4 @@ glm::vec3 Mesh::rotate(glm::vec3 o,glm::vec3 r)
 	o = glm::rotate(o,glm::radians(r.z),glm::vec3(0,0,1));
 	return o;
 }
-
 // TODO: don't return transformation vector, transform inside helper functions

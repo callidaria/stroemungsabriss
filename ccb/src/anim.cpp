@@ -15,14 +15,7 @@
 Anim::Anim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,uint8_t itn,uint8_t f)
 		: pos(p),sclx(w),scly(h),tp(t),r(row),c(col),fl(f),tn(itn)
 {
-	// triangle 1
-	v[0] = p.x;v[1] = p.y+h;v[2] = 0.0f;v[3] = 0.0f;
-	v[4] = p.x+w;v[5] = p.y+h;v[6] = 1.0f;v[7] = 0.0f;
-	v[8] = p.x+w;v[9] = p.y;v[10] = 1.0f;v[11] = 1.0f;
-	v[12] = p.x;v[13] = p.y;v[14] = 0.0;v[15] = 1.0f;
-	// FIXME: reocurring code chunk
-
-	// texture generation
+	v = Toolbox::create_sprite_canvas(p,w,h);
 	glGenTextures(1,&tex);
 } Anim::~Anim() {  }
 

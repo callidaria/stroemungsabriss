@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -14,6 +16,8 @@
 #else
 #include <SOIL/SOIL.h>
 #endif
+
+#include "../mat/toolbox.h"
 
 class Sprite
 {
@@ -35,17 +39,15 @@ public:
 	void scale_arbit(float wscale,float hscale);
 	void rotate(float rot);
 
+public:
+
+	std::vector<float> v;
+	unsigned int tex;
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::vec2 pos;
+	float sclx,scly;
+
 private:
 
 	const char* texpath;
-
-public:
-
-	glm::vec2 pos;
-	float sclx,scly;
-	float v[16];
-	unsigned int tex;
-	glm::mat4 model = glm::mat4(1.0f);
-
-	// FIXME: private/public mishandling
 };

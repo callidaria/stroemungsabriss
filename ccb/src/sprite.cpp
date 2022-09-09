@@ -11,13 +11,7 @@
 Sprite::Sprite(glm::vec2 p,float w,float h,const char* t)
 	: pos(p),sclx(w),scly(h),texpath(t)
 {
-	// definition of the corner vertices
-	v[0] = p.x;v[1] = p.y+h;v[2] = 0.0f;v[3] = 0.0f;
-	v[4] = p.x+w;v[5] = p.y+h;v[6] = 1.0f;v[7] = 0.0f;
-	v[8] = p.x+w;v[9] = p.y;v[10] = 1.0f;v[11] = 1.0f;
-	v[12] = p.x;v[13] = p.y;v[14] = 0.0;v[15] = 1.0f;
-
-	// texture generation
+	v = Toolbox::create_sprite_canvas(p,w,h);
 	glGenTextures(1,&tex);
 } Sprite::~Sprite() {  }
 
