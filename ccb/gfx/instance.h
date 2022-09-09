@@ -29,8 +29,11 @@ public:
 
 public:
 
-	const char* tp;
-	unsigned int tex;
 	float v[24];
+	unsigned int tex;
 	glm::vec2 o[4096] = { glm::vec2(0) };
+
+private:
+
+	const char* tp;
 };
