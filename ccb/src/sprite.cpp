@@ -63,7 +63,6 @@ void Sprite::transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a)
 	model = glm::rotate(model,glm::radians(tr),glm::vec3(0,0,1));
 	model = glm::scale(model,glm::vec3(ts.x,ts.y,1));
 	model = glm::translate(model,glm::vec3(-(pos.x+sclx/2+ax),-(pos.y+scly/2+ay),0));
-	// FIXME: last 3 lines are double-up code
 }
 
 /*
@@ -74,7 +73,6 @@ void Sprite::transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a)
 void Sprite::translate(glm::vec2 tp)
 {
 	model = glm::translate(model,glm::vec3(tp.x,tp.y,0));
-	// FIXME: change values directly like in scale for optimization
 }
 
 /*
@@ -91,14 +89,16 @@ void Sprite::scale(float wscale,float hscale)
 
 /*
 	scale_arbit(float,float) -> void
-	DEPRECATED: this scaling seems to be outdated.
-		-> if we need an inverse translation before scale, not like this please.
+	wscale: x-axis scale describing the sprites width
+	hscale: y-axis scale describing the sprites height
+	purpose: scale sprite canvas independent from origin position
 */
 void Sprite::scale_arbit(float wscale,float hscale)
 {
-	model = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x,pos.y,0));
-	model = glm::scale(model,glm::vec3(wscale,hscale,1));
-	model = glm::translate(model,glm::vec3(-pos.x,-pos.y,0));
+	model = glm::mat4(1.0f);
+	translate(-pos);
+	scale(wscale,hscale);
+	translate(pos);
 }
 
 /*

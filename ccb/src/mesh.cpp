@@ -64,8 +64,8 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 				glm::vec3 nproc = glm::vec3(ni[0],ni[1],ni[2]);
 
 				// translate triangle
-				pproc = transform(pproc,pos,scl,rot);
-				nproc = rotate(nproc,rot);
+				transform(pproc,pos,scl,rot);
+				rotate(nproc,rot);
 
 				// save values position vertices
 				ovi.push_back(vi[0]);ovi.push_back(vi[1]);ovi.push_back(vi[2]);		// position
@@ -105,8 +105,8 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 		glm::vec2 tu = uv[tui-1];
 
 		// translate vertices & normals
-		tv = transform(tv,pos,scl,rot);
-		tn = rotate(tn,rot);
+		transform(tv,pos,scl,rot);
+		rotate(tn,rot);
 
 		// save data to buffer vector
 		v.push_back(tv.x);v.push_back(tv.y);v.push_back(tv.z);		// vertex positions
@@ -127,7 +127,6 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 */
 void Mesh::texture()
 {
-	// glActiveTexture(GL_TEXTURE0);
 	Toolbox::load_texture(tex,texpath);
 	Toolbox::load_texture(specmap,smpath);
 	Toolbox::load_texture(normap,nmpath);
@@ -135,27 +134,31 @@ void Mesh::texture()
 }
 
 /*
-	transform(vec3,vec3,float,vec3) -> vec3
-	DEPRECATED: what usage did i intent for this abomination? model matrix is something that exists?
+	transform(vec3&,vec3,float,vec3) -> void
+	o: vector offset to transform
+	p: position vector to add to origin [o] vector position
+	s: relative scaling of [o] vector
+	r: relative rotation of [o] vector
+	helping: constructor(...)
+	purpose: transform offset vectors while reading .obj file
 */
-glm::vec3 Mesh::transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r)
+void Mesh::transform(glm::vec3 &o,glm::vec3 p,float s,glm::vec3 r)
 {
-	o = rotate(o,r);
+	rotate(o,r);
 	o *= s;
 	o += p;
-	return o;
 }
-// FIXME: reduce
 
 /*
-	rotate(vec3,vec3) -> vec3
-	DEPRECATED: 2018 i intended ?something? with these but nowadays its time to say goodbye!!
+	rotate(vec3&,vec3) -> void
+	o: vector offset to rotate
+	r: representative rotation vector around all axis
+	helping: constructor(...)
+	purpose: rotate offset vectors while reading .obj file
 */
-glm::vec3 Mesh::rotate(glm::vec3 o,glm::vec3 r)
+void Mesh::rotate(glm::vec3 &o,glm::vec3 r)
 {
 	o = glm::rotate(o,glm::radians(r.x),glm::vec3(1,0,0));
 	o = glm::rotate(o,glm::radians(r.y),glm::vec3(0,1,0));
 	o = glm::rotate(o,glm::radians(r.z),glm::vec3(0,0,1));
-	return o;
 }
-// TODO: don't return transformation vector, transform inside helper functions

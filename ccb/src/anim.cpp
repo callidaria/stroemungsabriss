@@ -39,49 +39,11 @@ uint8_t Anim::setup()
 	glBindTexture(GL_TEXTURE_2D,tex);
 
 	// iterate animation raster
-	ft++;
-	if(ft>=30)
-		ft=0;
+	bool nr_incr = ft<30;
+	ft += nr_incr-ft*!nr_incr;
 
 	// calculate animation substage
 	return ft/(fl/tn);
-}
-// FIXME: kill the branch. this is loopcode!
-
-/*
-	transform(vec2,vec2,float) -> mat4
-	tp: new object position, resets previous model translation
-	ts: new object scaling, resets previous model scaling
-	tr: new object rotation, resets prevous model rotation
-	returns: new model matrix comprised of given position, scaling and rotation
-	DEPRECATED: replace this method by resolving the [FIXME]
-*/
-glm::mat4 Anim::transform(glm::vec2 tp,glm::vec2 ts,float tr)
-{
-	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(pos.x+sclx/2+tp.x,pos.y+scly/2+tp.y,0));
-	trans = glm::rotate(trans,glm::radians(tr),glm::vec3(0,0,1));
-	trans = glm::scale(trans,glm::vec3(ts.x,ts.y,1));
-	trans = glm::translate(trans,glm::vec3(-(pos.x+sclx/2),-(pos.y+scly/2),0));
-	return trans;
-}  // FIXME: why return transformation and multiply outside if a model matrix member exists
-
-/*
-	transform(vec2,vec2,float,vec2) -> mat4
-	tp: new object position, resets previous model translation
-	ts: new object scaling, resets previous model scaling
-	tr: new object rotation, resets prevous model rotation
-	a: arbitrary axis to use as the animation objects pseudo-center
-	returns: new model matrix comprised of given parameters around an arbitrary axis
-*/
-glm::mat4 Anim::transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a)
-{
-	float ax=a.x-(pos.x+sclx/2);float ay=a.y-(pos.y+scly/2);
-	glm::mat4 trans = glm::translate(glm::mat4(1.0f),
-			glm::vec3(pos.x+sclx/2+tp.x+ax,pos.y+scly/2+tp.y+ay,0));
-		trans = glm::rotate(trans,glm::radians(tr),glm::vec3(0,0,1));
-		trans = glm::scale(trans,glm::vec3(ts.x,ts.y,1));
-		trans = glm::translate(trans,glm::vec3(-(pos.x+sclx/2+ax),-(pos.y+scly/2+ay),0));
-		return trans;
 }
 
 /*

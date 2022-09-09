@@ -24,8 +24,8 @@ public:
 private:
 
 	// helpers
-	glm::vec3 transform(glm::vec3 o,glm::vec3 p,float s,glm::vec3 r);
-	glm::vec3 rotate(glm::vec3 o,glm::vec3 r);
+	void transform(glm::vec3 &o,glm::vec3 p,float s,glm::vec3 r);
+	void rotate(glm::vec3 &o,glm::vec3 r);
 
 public:
 

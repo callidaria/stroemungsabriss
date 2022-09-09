@@ -24,10 +24,10 @@ public:
 	uint8_t setup();
 
 	// transformation
-	glm::mat4 transform(glm::vec2 tp,glm::vec2 ts,float tr);
-	glm::mat4 transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a);
 	void scale(float wscale,float hscale);
+	// TODO: add transformation feature
 	// TODO: add rotation feature
+	// TODO: add setup method without animation timing
 
 public:
 
