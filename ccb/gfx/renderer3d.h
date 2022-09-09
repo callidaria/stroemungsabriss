@@ -6,6 +6,8 @@
 #include "../mat/camera3d.h"
 #include "../fcn/buffer.h"
 
+const std::string shadow_matrix_location = "light_trans";
+
 class Renderer3D
 {
 public:
@@ -14,11 +16,11 @@ public:
 	Renderer3D();
 	~Renderer3D();
 
-	void add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
+	// creation
+	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r);
 
-	void load_vertex();
-	void load_texture();
+	// loaders
 	void load(Camera3D* cam3d);
 
 	// preparations
@@ -29,14 +31,21 @@ public:
 	void render_mesh(uint16_t b,uint16_t e);
 
 	// uploads
-	void upload_model(glm::mat4 m);
-	void upload_view(glm::mat4 m);
-	void upload_proj(glm::mat4 m);
 	void upload_shadow(glm::mat4 m);
+
 private:
-	Buffer buffer = Buffer();
+
+	// loaders
+	void load_vertex();
+	void load_texture();
+
+private:
+
 	unsigned int mofs = 0;
+
 public:
+
+	Buffer buffer = Buffer();
 	Shader s3d,shs;
 	std::vector<Mesh> ml;
 };

@@ -421,10 +421,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
 	model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
-	m_r3d->upload_model(model);
+	m_r3d->s3d.upload_matrix("model",model);
 	mat0.upload();
 	m_r3d->render_mesh(0,1);
-	m_r3d->upload_model(glm::mat4(1.0f));
+	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
 	m_r3d->render_mesh(1,2);
 	globe_fb.close();
 

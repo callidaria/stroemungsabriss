@@ -20,9 +20,8 @@ Renderer2D::Renderer2D()
 */
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 {
-	Sprite tmp = Sprite(p,w,h,t);  // TODO: fall into output while push back
 	uint16_t out = sl.size();
-	sl.push_back(tmp);
+	sl.push_back(Sprite(p,w,h,t));
 	return out;
 }
 
@@ -42,9 +41,8 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t)
 uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,
 		uint8_t itn,uint8_t f)
 {
-	Anim tmp = Anim(p,w,h,t,r,c,itn,f);  // TODO: fall into output while push back also
 	uint16_t out = al.size();
-	al.push_back(tmp);
+	al.push_back(Anim(p,w,h,t,r,c,itn,f));
 	return out;
 }
 
@@ -154,7 +152,6 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 	e: sprite index to end the drawing at (sprite with this index is excluded from drawing)
 	tex: texture, replacing the loaded texture before render
 	purpose: same basic functionality as the normal render_sprite but with previous texture change
-	DEPRECATED: begin/end method of rendering a bunch is outdated due to branch reasons
 */
 void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
 {

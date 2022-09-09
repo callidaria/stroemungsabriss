@@ -10,17 +10,19 @@ RendererI::RendererI()
 } RendererI::~RendererI() {  }
 
 /*
-	add(vec2,float,float,const char*) -> void
+	add(vec2,float,float,const char*) -> uint16_t
 	p: origin position of indexed 2D object
 	w: x-axis scaling resulting in initial object width
 	h: y-axis scaling resulting in initial object height
 	t: path to file holding the indexed objects texture
 	purpose: creating and adding an indexable 2D object to render memory
+	returns: memory index the created instanceable object is to referred by when drawing
 */
-void RendererI::add(glm::vec2 p,float w,float h,const char* t)
+uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 {
-	Instance tmp = Instance(p,w,h,t);  // FIXME: fuse creation into push_back
-	il.push_back(tmp);
+	uint16_t out = il.size();
+	il.push_back(Instance(p,w,h,t));
+	return out;
 }
 // TODO: return the objects memory index instead of void
 
@@ -67,11 +69,11 @@ void RendererI::load()
 }
 
 /*
-	load_wcam(Camera2D*) -> void
+	load(Camera2D*) -> void
 	cam2d: camera to render indexable 2D objects in relation to
 	purpose: in addition to using the features of load the camera matrices get uploaded
 */
-void RendererI::load_wcam(Camera2D* cam2d)
+void RendererI::load(Camera2D* cam2d)
 {
 	load();
 

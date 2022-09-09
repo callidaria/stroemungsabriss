@@ -55,9 +55,8 @@ public:
 		glClearColor(0,0,0,1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		r3d->prepare();
-		r3d->upload_view(view);
-		r3d->upload_proj(proj);
-
+		r3d->s3d.upload_matrix("view",view);
+		r3d->s3d.upload_matrix("proj",proj);
 	}
 	void close_shadow(int w_res, int h_res)
 	{

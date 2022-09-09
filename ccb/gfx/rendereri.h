@@ -16,13 +16,11 @@ public:
 	~RendererI();
 
 	// adders
-	void add(glm::vec2 p,float w,float h,const char* t);
+	uint16_t add(glm::vec2 p,float w,float h,const char* t);
 
 	// loaders
-	void load_vertex();
-	void load_texture();
 	void load();
-	void load_wcam(Camera2D* cam2d);
+	void load(Camera2D* cam2d);
 
 	// preparation
 	void prepare();
@@ -35,6 +33,12 @@ public:
 	void upload_model(glm::mat4 m);
 	void upload_view(glm::mat4 m);
 	void upload_proj(glm::mat4 m);
+
+private:
+
+	// loaders
+	void load_vertex();
+	void load_texture();
 
 private:
 
