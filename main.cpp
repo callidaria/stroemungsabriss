@@ -81,7 +81,8 @@ int main(int argc,char** argv)
 #endif
 
 	// CAMERAS
-	r2d.load_wcam(&cam2d);ri.load_wcam(&cam2d);
+	r2d.load(&cam2d);
+	ri.load(&cam2d);
 	uint32_t run=1,pause=false;
 	bool reboot = false;
 	glm::mat4 model = glm::mat4(1.0f);

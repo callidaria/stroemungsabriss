@@ -53,6 +53,7 @@ double click yomisensei.exe
 - removing all planning and progression scripts from repo
 - reconceptualizing the basic menu colour scheme
 - new dynamic shader program concept
+- new renderer code structure [DEV]
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -78,4 +79,5 @@ double click yomisensei.exe
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
     + 46: 38h 55min
-- Total Code Lines: 5691
+    + 54: 12h 40min
+- Total Code Lines: 6564

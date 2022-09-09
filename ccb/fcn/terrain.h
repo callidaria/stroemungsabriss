@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "../gfx/shader.h"
 #include "../mat/camera3d.h"
+#include "../mat/toolbox.h"
 
 
 
@@ -69,16 +70,7 @@ public:
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER,e.size()*sizeof(int),e.data(),GL_STATIC_DRAW);
 
 		ts.compile3d("shader/vertex_terrain.shader","shader/fragment_terrain.shader");
-		glBindTexture(GL_TEXTURE_2D,tex);
-		int width,height;
-		unsigned char* image=SOIL_load_image(txp,&width,&height,0,SOIL_LOAD_RGBA);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-		SOIL_free_image_data(image);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		Toolbox::load_texture(tex,txp);
 
 		ts.upload_int("tex",0);
 		ts.upload_int("shadow_map",1);

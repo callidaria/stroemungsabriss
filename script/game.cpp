@@ -10,8 +10,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(m_r2d,stg_idx2d,&m_bSys,fwd_treg);
 
-	m_r2d->load_wcam(m_cam2d);
-	m_rI->load_wcam(m_cam2d);
+	m_r2d->load(m_cam2d);
+	m_rI->load(m_cam2d);
 
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
