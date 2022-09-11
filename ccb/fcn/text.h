@@ -20,7 +20,7 @@ public:
 	void add(const char* s,glm::vec2 p);
 	void clear();
 	void load_vertex();
-	void load_wcam(Camera2D* c);
+	void load(Camera2D* c);
 	void prepare();
 	void render_propag(int amnt,glm::vec4 col);
 	void render(int amnt,glm::vec4 col);

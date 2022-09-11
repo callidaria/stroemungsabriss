@@ -35,7 +35,7 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 	buffer.bind();
 	buffer.upload_vertices(font.v,sizeof(font.v));
 }
-void Text::load_wcam(Camera2D* c)
+void Text::load(Camera2D* c)
 {
 	load_vertex();
 	sT.compile2d("shader/vertex_text.shader","shader/fragment_text.shader");
