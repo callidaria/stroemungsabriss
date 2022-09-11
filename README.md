@@ -53,6 +53,7 @@ double click yomisensei.exe
 - reconceptualizing the basic menu colour scheme
 - new dynamic shader program concept
 - new renderer code structure
+- simplifications of vertex loading
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -79,5 +80,5 @@ double click yomisensei.exe
 - Elapsed Worktime After Commit 120: 19h 19min
     + 46: 38h 55min
     + 54: 12h 40min
-    + 67: 10min
+    + 67: 1h 27min
 - Total Code Lines: 6564
