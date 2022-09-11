@@ -25,7 +25,7 @@ public:
 
 	// preparations
 	void prepare();
-	void prepare_wcam(Camera3D* cam3d);
+	void prepare(Camera3D* cam3d);
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);

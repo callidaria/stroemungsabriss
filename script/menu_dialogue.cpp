@@ -36,7 +36,7 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	Font thfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
 	thead = Text(thfont);
 	thead.add(head,pos+glm::vec2(15,height-15));
-	thead.load_wcam(cam2d);
+	thead.load(cam2d);
 
 	// selection entities
 	irnd = m_r2d->sl.size();

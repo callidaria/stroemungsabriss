@@ -119,9 +119,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	// set name and phase counter
 	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+50,pos.y+5));
-	hpswap.phname.load_wcam(&tc2d);
+	hpswap.phname.load(&tc2d);
 	hpswap.phcnt.add(("1/"+std::to_string(phases.size())).c_str(),glm::vec2(pos.x+width-50,pos.y+5));
-	hpswap.phcnt.load_wcam(&tc2d);
+	hpswap.phcnt.load(&tc2d);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -254,7 +254,7 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.phcnt.add(
 			(std::to_string(hpswap.hpbar_itr+1)+'/'+std::to_string(hpswap.dest_pos.size())).c_str(),
 			glm::vec2(hpswap.position.x+hpswap.max_width-50,hpswap.position.y+5));
-	hpswap.phcnt.load_wcam(&tc2d);
+	hpswap.phcnt.load(&tc2d);
 
 	// signal refill
 	frdy = 0;

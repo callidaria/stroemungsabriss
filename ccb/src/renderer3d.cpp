@@ -100,11 +100,11 @@ void Renderer3D::prepare()
 }
 
 /*
-	prepare_wcam(Camera3D*) -> void
+	prepare(Camera3D*) -> void
 	cam3d: camera to relate mesh visuals to
 	purpose: additionally to the function of prepare, this method updates and uploads the camera
 */
-void Renderer3D::prepare_wcam(Camera3D* cam3d)
+void Renderer3D::prepare(Camera3D* cam3d)
 {
 	// run normal preparations
 	prepare();

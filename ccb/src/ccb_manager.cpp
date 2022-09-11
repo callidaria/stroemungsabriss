@@ -9,7 +9,7 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));
 	int prog = ct.add('>',glm::vec2(750,console_y));
 	cl.add("lineerr",glm::vec2(700+prog,30));
-	ct.load_wcam(m_cam2d);cl.load_wcam(m_cam2d);
+	ct.load(m_cam2d);cl.load(m_cam2d);
 }
 int CCBManager::add_lv(const char* path,Text* txt)
 {
