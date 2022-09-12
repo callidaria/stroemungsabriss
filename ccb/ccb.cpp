@@ -14,6 +14,7 @@
 // toolbox
 void write_selection();
 bool get_selected();
+bool get_ftype(const char* file);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -97,6 +98,23 @@ bool get_selected()
 	return itr==idx&&inp==' ';
 }
 
+bool get_ftype(const char* file)
+{
+	// convert to string
+	std::string tfile = std::string(file);
+
+	// find file extension
+	bool reached_ext = false;
+	std::string fext = "";
+	for (char cfl : tfile) {
+		if (reached_ext) fext += cfl;
+		else if (cfl=='.') reached_ext = true;
+	}
+
+	// check for source file
+	return fext=="cpp"||!reached_ext;
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -127,7 +145,7 @@ std::string read_components(std::string &dir_path)
 	while (found!=NULL) {
 
 		// print current component if not parent or this
-		if (found->d_name[0]!='.') {
+		if (found->d_name[0]!='.'&&get_ftype(found->d_name)) {
 
 			// open directory on demand
 			if (itr==idx&&inp=='o'&&found->d_type==DT_DIR) {
