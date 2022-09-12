@@ -45,6 +45,7 @@ double click yomisensei.exe
 - preview practice & arcade position in menu
 - spawn player controlled bullets
 - health bar system
+- engine build system [DEV]
 
 ### optimizations:
 - improved documentation
@@ -83,4 +84,5 @@ double click yomisensei.exe
     + 54: 12h 40min
     + 20: 3h 8min
     + 67: 1h 27min
+    + 22: 51min
 - Total Code Lines: 6564
