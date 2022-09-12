@@ -8,44 +8,49 @@
 #define RESET "\033[0m"
 #define SELECT "\033[1;32m"
 
-void write_selection(uint8_t itr,uint8_t index);
-std::string read_components(uint8_t &itr,uint8_t &index,std::string &dir_path);
-std::string build_engine_component(uint8_t &itr,uint8_t &index);
-std::string build_project_component(uint8_t &itr,uint8_t &index);
-std::string build_full_order(uint8_t &itr,uint8_t &index);
-std::string count_lines(uint8_t &itr,uint8_t &index);
+// toolbox
+void write_selection();
+bool get_selected();
 
+// engine features
+std::string read_components(std::string &dir_path);
+std::string build_engine_component();
+std::string build_project_component();
+std::string build_full_order();
+std::string count_lines();
+
+// components
 char inp;
+uint8_t itr,idx = 0;
 
 int main(int argc,char* argv[])
 {
 	// setup and welcome message
 	printf("welcome to cascabel console\n");
 	std::string out,edir = "./ccb",pdir = "./script";
-	uint8_t index = 0;
 
 	// main loop
 	while (true) {
 
 		// setup component iterator
-		uint8_t itr = 0;
+		itr = 0;
 
 		// write engine contents
 		printf("\n\n\n\t\t\tENGINE\n");
-		out += read_components(itr,index,edir);
+		out += read_components(edir);
 		printf("\n");
-		out += build_engine_component(itr,index);
+		out += build_engine_component();
 
 		// write project contents
 		printf("\n\n\n\t\t\t%sPROJECT\n",RESET);
-		out += read_components(itr,index,pdir);
+		out += read_components(pdir);
 		printf("\n");
-		out += build_project_component(itr,index);
+		out += build_project_component();
 
 		// write additional features
 		printf("\n\n");
-		out += build_full_order(itr,index);
-		out += count_lines(itr,index);
+		out += build_full_order();
+		out += count_lines();
 
 		// write output message
 		printf("\033[0m\n\n\n\n> %s\n",out.c_str());
@@ -60,27 +65,26 @@ int main(int argc,char* argv[])
 		if (inp=='e') break;
 
 		// move selector
-		index += (inp=='B'&&index<itr-1)-(inp=='A'&&index>0);
+		idx += (inp=='B'&&idx<itr-1)-(inp=='A'&&idx>0);
 
-		// read user command
-		/*std::cin>>command;
-
-		if (command=="exit") break;
-		else if (command=="build") system("ccb/ccb_build.sh");
-		else if (command=="count_lines")
-			system("find ccb/src/ ccb/aud/ ccb/fcn/ ccb/gfx/ ccb/net/ ccb/frm/ ccb/mat/ ccb/ppe/ script/ shader/ main.cpp -type f | xargs wc -l | tail -n 1");
+		/*else if (command=="build") system("ccb/ccb_build.sh");
 		else printf("command not valid\n");*/
 	}
 	return 0;
 }
 
-void write_selection(uint8_t itr,uint8_t index)
+void write_selection()
 {
-	if (itr==index) printf("%s  ",SELECT);
+	if (itr==idx) printf("%s  ",SELECT);
 	else printf("%s",RESET);
 }
 
-std::string read_components(uint8_t &itr,uint8_t &index,std::string &dir_path)
+bool get_selected()
+{
+	return itr==idx&&inp==' ';
+}
+
+std::string read_components(std::string &dir_path)
 {
 	//open directory
 	std::string out = "";
@@ -94,7 +98,7 @@ std::string read_components(uint8_t &itr,uint8_t &index,std::string &dir_path)
 		if (found->d_name[0]!='.') {
 
 			// print selection
-			write_selection(itr,index);
+			write_selection();
 
 			// show component
 			printf("%s %s\n",(found->d_type==DT_DIR)?"+":"  ->",found->d_name);
@@ -110,42 +114,51 @@ std::string read_components(uint8_t &itr,uint8_t &index,std::string &dir_path)
 	return out;
 }
 
-std::string build_engine_component(uint8_t &itr,uint8_t &index)
+std::string build_engine_component()
 {
+	// draw option
 	std::string out = "";
-	write_selection(itr,index);
+	write_selection();
 	printf("   BUILD ENGINE");
+
+	// run in chosen
+	if (get_selected()) {
+		system("ccb/ccb_build.sh");
+		out = "all engine components built";
+	}
+
+	// prepare next
 	itr++;
 	return out;
 }
 
-std::string build_project_component(uint8_t &itr,uint8_t &index)
+std::string build_project_component()
 {
 	std::string out = "";
-	write_selection(itr,index);
+	write_selection();
 	printf("   BUILD PROJECT\n");
 	itr++;
 	return out;
 }
 
-std::string build_full_order(uint8_t &itr,uint8_t &index)
+std::string build_full_order()
 {
 	std::string out = "";
-	write_selection(itr,index);
+	write_selection();
 	printf(" BUILD ALL COMPONENTS\n");
 	itr++;
 	return out;
 }
 
-std::string count_lines(uint8_t &itr,uint8_t &index)
+std::string count_lines()
 {
 	// draw option
 	std::string out = "";
-	write_selection(itr,index);
+	write_selection();
 	printf(" COUNT LINES\n");
 
 	// run in chosen
-	if (itr==index&&inp==' ') system("find ccb/src/ ccb/aud/ ccb/fcn/ ccb/gfx/ ccb/net/ ccb/frm/ ccb/mat/ ccb/ppe/ script/ shader/ main.cpp -type f | xargs wc -l | tail -n 1");
+	if (get_selected()) system("find ccb/src/ ccb/aud/ ccb/fcn/ ccb/gfx/ ccb/net/ ccb/frm/ ccb/mat/ ccb/ppe/ script/ shader/ main.cpp -type f | xargs wc -l | tail -n 1");
 
 	// prepare next
 	itr++;
