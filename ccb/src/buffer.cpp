@@ -64,6 +64,17 @@ void Buffer::upload_elements(unsigned int* elements,size_t esize)
 }
 
 /*
+	upload_elements(std::vector<uint16_t>)
+	ie: list of elements to upload
+	purpose: overload previous to support std::vector format
+*/
+void Buffer::upload_elements(std::vector<unsigned int> ie)
+{
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,ie.size()*sizeof(unsigned int),&ie[0],GL_STATIC_DRAW);
+}
+
+/*
 	upload_indices(std::vector<float>) -> void
 	is: list of dynamic indices to upload additionally to static array buffer
 	purpose: upload index array for later usage in graphical processes
@@ -88,7 +99,10 @@ void Buffer::upload_indices(glm::vec2* is, size_t issize)
 }
 
 /*
-	get_indices() -> unsigned int
+	get_indices() -> GLuint
 	returns: index or element array buffer
 */
-unsigned int Buffer::get_indices() { return iebo; }
+GLuint Buffer::get_indices()
+{
+	return iebo;
+}

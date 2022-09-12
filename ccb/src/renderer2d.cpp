@@ -52,29 +52,26 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uin
 */
 void Renderer2D::load_vertex()
 {
-	// getting list sizes
-	uint16_t ls = sl.size(),la = al.size();
-
 	// create write arrays
-	float v[(ls+la)*16];
-	unsigned int e[(ls+la)*6];
+	std::vector<float> v;
+	std::vector<unsigned int> e;
 
-	// write values to arrays
-	for (int j=0;j<ls+la;j++) {
-		for (int i=0;i<16;i++) {
-			if (j<ls) v[j*16+i] = sl.at(j).v[i];
-			else v[j*16+i] = al.at(j-ls).v[i];
-		}
+	// write sprite vertex values to upload list
+	for (int i=0;i<sl.size();i++) {
+		v.insert(v.end(),sl[i].v.begin(),sl[i].v.end());
+		Toolbox::generate_elements(i,e);
+	}
 
-		// create elements for element buffer
-		e[j*6] = j*4;e[j*6+1] = j*4+1;e[j*6+2] = j*4+2;
-		e[j*6+3] = j*4+2;e[j*6+4] = j*4+3;e[j*6+5] = j*4+0;
+	// write animation vertex values to upload list
+	for(int i=0;i<al.size();i++) {
+		v.insert(v.end(),al[i].v.begin(),al[i].v.end());
+		Toolbox::generate_elements(i+sl.size(),e);
 	}
 
 	// upload to buffers
 	buffer.bind();
-	buffer.upload_vertices(v,sizeof(v));
-	buffer.upload_elements(e,sizeof(e));
+	buffer.upload_vertices(v);
+	buffer.upload_elements(e);
 }
 // FIXME: this can be way faster, what about the array -> vector && branching removal?
 // FIXME: constant branching due to loop combination of animations and sprites. easily removable
@@ -147,13 +144,13 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 }
 
 /*
-	render_sprite(uint16_t,uint16_t,unsigned int) -> void
+	render_sprite(uint16_t,uint16_t,GLuint) -> void
 	b: sprite index to begin the drawing at
 	e: sprite index to end the drawing at (sprite with this index is excluded from drawing)
 	tex: texture, replacing the loaded texture before render
 	purpose: same basic functionality as the normal render_sprite but with previous texture change
 */
-void Renderer2D::render_sprite(uint16_t b,uint16_t e,unsigned int tex)
+void Renderer2D::render_sprite(uint16_t b,uint16_t e,GLuint tex)
 {
 	for (int i=b;i<e;i++) {
 		s2d.upload_matrix("model",sl.at(i).model);

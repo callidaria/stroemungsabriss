@@ -11,6 +11,7 @@
 class Buffer
 {
 public:
+
 	Buffer();
 	~Buffer();
 
@@ -23,11 +24,14 @@ public:
 	void upload_vertices(float* vertices,size_t vsize);			// upload vertex array
 	void upload_vertices(std::vector<float> iv);				// upload vertex list
 	void upload_elements(unsigned int* elements,size_t esize);	// upload element array
+	void upload_elements(std::vector<unsigned int> ie);			// upload element list
 	void upload_indices(std::vector<float> is);					// upload indices array
 	void upload_indices(glm::vec2* is,size_t issize);			// upload vector indices array
 
 	// return
-	unsigned int get_indices();
+	GLuint get_indices();
+
 private:
-	unsigned int vao,vbo,iebo;
+
+	GLuint vao,vbo,iebo;
 };

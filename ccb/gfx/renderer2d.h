@@ -6,6 +6,7 @@
 #include "sprite.h"
 #include "anim.h"
 #include "../mat/camera2d.h"
+#include "../mat/toolbox.h"
 #include "../fcn/buffer.h"
 
 class Renderer2D
@@ -30,7 +31,7 @@ public:
 
 	// renderers
 	void render_sprite(uint16_t b, uint16_t e);
-	void render_sprite(uint16_t b,uint16_t e,unsigned int tex);
+	void render_sprite(uint16_t b,uint16_t e,GLuint tex);
 	void render_state(uint16_t s,glm::vec2 i);
 	void render_anim(uint16_t i);
 

@@ -45,7 +45,6 @@ double click yomisensei.exe
 - preview practice & arcade position in menu
 - spawn player controlled bullets
 - health bar system
-- dancing pilot patterns [DEV]
 
 ### optimizations:
 - improved documentation
@@ -55,6 +54,7 @@ double click yomisensei.exe
 - new dynamic shader program concept
 - new renderer code structure
 - readable menu code
+- simplifications of vertex loading
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -82,4 +82,5 @@ double click yomisensei.exe
     + 46: 38h 55min
     + 54: 12h 40min
     + 20: 3h 8min
+    + 67: 1h 27min
 - Total Code Lines: 6564
