@@ -99,7 +99,10 @@ void Buffer::upload_indices(glm::vec2* is, size_t issize)
 }
 
 /*
-	get_indices() -> unsigned int
+	get_indices() -> GLuint
 	returns: index or element array buffer
 */
-unsigned int Buffer::get_indices() { return iebo; }
+GLuint Buffer::get_indices()
+{
+	return iebo;
+}

@@ -11,6 +11,7 @@
 class Buffer
 {
 public:
+
 	Buffer();
 	~Buffer();
 
@@ -28,7 +29,9 @@ public:
 	void upload_indices(glm::vec2* is,size_t issize);			// upload vector indices array
 
 	// return
-	unsigned int get_indices();
+	GLuint get_indices();
+
 private:
-	unsigned int vao,vbo,iebo;
+
+	GLuint vao,vbo,iebo;
 };
