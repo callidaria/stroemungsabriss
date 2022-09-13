@@ -15,6 +15,7 @@
 void write_selection();
 bool get_selected();
 bool get_ftype(const char* file);
+std::string get_outfile(const char* file);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -117,6 +118,13 @@ bool get_ftype(const char* file)
 	return fext=="cpp"||!reached_ext;
 }
 
+std::string get_outfile(const char* file)
+{
+	std::string out = std::string(file);
+	out = out.substr(0,out.length()-3)+'o';
+	return out;
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -157,11 +165,33 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx)
 			}
 
 			// compile source on demand
-			else if (itr==idx&&inp==' '&&found->d_type!=DT_DIR&&!update) {
-				std::string out_file = std::string(found->d_name);
-				out_file = out_file.substr(0,out_file.length()-3)+'o';
+			else if (get_selected()&&found->d_type!=DT_DIR&&!update) {
+				std::string out_file = get_outfile(found->d_name);
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
 				out = "compiled "+out_file;
+			}
+
+			// compile all sources in directory on demand
+			else if (get_selected()&&found->d_type==DT_DIR&&!update) {
+
+				// open target directory
+				std::string compile_dir = dir_path+"/"+found->d_name;
+				DIR* cdir = opendir(compile_dir.c_str());
+				struct dirent* cfound = readdir(cdir);
+
+				// grind through compile targets
+				while (cfound!=NULL) {
+
+					// filter source components
+					if (cfound->d_name[0]!='.'&&get_ftype(cfound->d_name)) {
+
+						// show current compile status
+						printf("compiling %s\n",cfound->d_name);
+
+						// compile file
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
+					} cfound = readdir(cdir);
+				}
 			}
 
 			// print selection
