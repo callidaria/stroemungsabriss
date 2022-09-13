@@ -1,4 +1,4 @@
-#include "../fcn/buffer.h"
+#include "buffer.h"
 
 /*
 	Constructor()

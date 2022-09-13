@@ -1,4 +1,4 @@
-#include "../gfx/sprite.h"
+#include "sprite.h"
 
 /*
 	constructor(vec2,float,float,const char*)

@@ -1,4 +1,4 @@
-#include "../gfx/shader.h"
+#include "shader.h"
 
 /*
 	Constructor()

@@ -1,4 +1,4 @@
-#include "../fcn/text_field.h"
+#include "text_field.h"
 
 TextField::TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* bp,glm::vec2 bpos,float width,float height)
 	: m_r2d(r2d),m_pos(pos),m_bpos(bpos),m_width(width),m_height(height)

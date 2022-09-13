@@ -1,4 +1,4 @@
-#include "../gfx/instance.h"
+#include "instance.h"
 
 /*
 	constructor(vec2,float,float,const char*)

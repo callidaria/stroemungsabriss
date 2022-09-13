@@ -1,4 +1,4 @@
-#include "../frm/frame.h"
+#include "frame.h"
 
 /*
  *	!!! ADD OUTPUT INFORMATION ABOUT SYSTEM !!!
