@@ -18,7 +18,7 @@ bool get_ftype(const char* file);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
-std::string read_components(std::string &dir_path);
+std::string read_components(std::string &dir_path,uint8_t proj_idx);
 std::string build_engine_component();
 std::string build_project_component();
 std::string build_full_order();
@@ -47,7 +47,7 @@ int main(int argc,char* argv[])
 		// write engine contents
 		printf("\n\n\n\t\t\tENGINE\n");
 		offer_root(edir,ENGINE_ROOT);
-		out += read_components(edir);
+		out += read_components(edir,0);
 		printf("\n");
 		out += build_engine_component();
 		proj_idx = itr;
@@ -55,7 +55,7 @@ int main(int argc,char* argv[])
 		// write project contents
 		printf("\n\n\n\t\t\t%sPROJECT\n",RESET);
 		offer_root(pdir,PROJECT_ROOT);
-		out += read_components(pdir);
+		out += read_components(pdir,proj_idx);
 		printf("\n");
 		out += build_project_component();
 
@@ -66,7 +66,7 @@ int main(int argc,char* argv[])
 
 		// write output message
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
-		printf("[r] run game  [b] build main  [SPACE] run selected  [o] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 
 		// read user input
 		if (!update) {
@@ -78,11 +78,13 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') system("./yomisensei");
+		else if (inp=='b') system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
 		// move selector
 		idx += (inp=='B'&&idx<itr-1)-(inp=='A'&&idx>0);
+		out = "";
 	}
 	return 0;
 }
@@ -134,7 +136,7 @@ void offer_root(std::string &dir_path,std::string rt_dir)
 	}
 }
 
-std::string read_components(std::string &dir_path)
+std::string read_components(std::string &dir_path,uint8_t proj_idx)
 {
 	//open directory
 	std::string out = "";
@@ -148,10 +150,18 @@ std::string read_components(std::string &dir_path)
 		if (found->d_name[0]!='.'&&get_ftype(found->d_name)) {
 
 			// open directory on demand
-			if (itr==idx&&inp=='o'&&found->d_type==DT_DIR) {
+			if (itr==idx&&inp=='C'&&found->d_type==DT_DIR) {
+				idx = proj_idx;
 				dir_path += "/"+std::string(found->d_name);
-				idx = 0;
 				update = true;
+			}
+
+			// compile source on demand
+			else if (itr==idx&&inp==' '&&found->d_type!=DT_DIR&&!update) {
+				std::string out_file = std::string(found->d_name);
+				out_file = out_file.substr(0,out_file.length()-3)+'o';
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
+				out = "compiled "+out_file;
 			}
 
 			// print selection
