@@ -1,4 +1,4 @@
-#include "../gfx/mesh.h"
+#include "mesh.h"
 
 /*
 	constructor(const char*,const char*,const char*,const char*,const char*,

@@ -1,4 +1,4 @@
-#include "../gfx/anim.h"
+#include "anim.h"
 
 /*
 	constructor(vec2,float,float,const char*,uint8_t,uint8_t,uint8_t,uint8_t)

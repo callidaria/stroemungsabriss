@@ -1,4 +1,4 @@
-#include "../fcn/ccb_linpr.h"
+#include "ccb_linpr.h"
 
 CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,Text* txt,const char* path)
 	: m_r2d(r2d),m_txt(txt),lvpath(path) {  }

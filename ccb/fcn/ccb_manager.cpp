@@ -1,4 +1,4 @@
-#include "../fcn/ccb_manager.h"
+#include "ccb_manager.h"
 
 CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 	: m_frame(frame),m_r2d(r2d),m_cam2d(cam2d)

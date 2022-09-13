@@ -1,4 +1,4 @@
-#include "../gfx/cubemap.h"
+#include "cubemap.h"
 
 Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 {

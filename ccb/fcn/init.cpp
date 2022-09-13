@@ -1,4 +1,4 @@
-#include "../fcn/init.h"
+#include "init.h"
 
 /*
 	Constructor(const char*)

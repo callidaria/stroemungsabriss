@@ -1,4 +1,4 @@
-#include "../gfx/renderer2d.h"
+#include "renderer2d.h"
 
 /*
 	constructor()

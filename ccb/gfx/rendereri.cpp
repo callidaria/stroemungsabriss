@@ -1,4 +1,4 @@
-#include "../gfx/rendereri.h"
+#include "rendereri.h"
 
 /*
 	constructor()

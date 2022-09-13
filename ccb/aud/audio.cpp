@@ -1,4 +1,4 @@
-#include "../aud/audio.h"
+#include "audio.h"
 
 Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop)
 {

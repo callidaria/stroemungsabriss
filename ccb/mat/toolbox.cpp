@@ -1,4 +1,4 @@
-#include "../mat/toolbox.h"
+#include "toolbox.h"
 
 /*
 	create_sprite_canvas(vec2,float,float) -> std::vector<float>

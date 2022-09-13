@@ -1,4 +1,4 @@
-#include "../frm/framebuffer.h"
+#include "framebuffer.h"
 
 FrameBuffer::FrameBuffer() {  } // !!how bout no
 FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp, bool float_buffer)

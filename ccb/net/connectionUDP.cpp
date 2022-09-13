@@ -1,4 +1,4 @@
-#include "../net/connectionUDP.h"
+#include "connectionUDP.h"
 
 ConnectionUDP::ConnectionUDP(int loc_port,std::string stringIP,int rem_port)
 {

@@ -1,4 +1,4 @@
-#include "../aud/listener.h"
+#include "listener.h"
 
 Listener::Listener(glm::vec3 pos,glm::vec3 vel,glm::vec3 ori)
 {

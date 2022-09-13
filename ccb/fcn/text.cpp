@@ -1,4 +1,4 @@
-#include "../fcn/text.h"
+#include "text.h"
 
 Text::Text() { } // !!get rid of this pls
 Text::Text(Font f)
