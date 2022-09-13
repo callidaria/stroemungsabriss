@@ -19,10 +19,10 @@ std::string get_outfile(const char* file);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
-std::string read_components(std::string &dir_path,uint8_t proj_idx);
-std::string build_engine_component();
-std::string build_project_component();
-std::string build_full_order();
+std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all);
+std::string build_engine_component(bool &comp_all);
+std::string build_project_component(bool &comp_all);
+std::string build_full_order(bool &comp_engine,bool &comp_project);
 std::string count_lines();
 
 // components
@@ -33,6 +33,7 @@ uint8_t itr,idx = 0;
 int main(int argc,char* argv[])
 {
 	// setup
+	bool comp_engine = false,comp_project = false;
 	std::string out,edir = ENGINE_ROOT,pdir = PROJECT_ROOT;
 	uint8_t proj_idx;
 
@@ -48,21 +49,21 @@ int main(int argc,char* argv[])
 		// write engine contents
 		printf("\n\n\n\t\t\tENGINE\n");
 		offer_root(edir,ENGINE_ROOT);
-		out += read_components(edir,0);
+		out += read_components(edir,0,comp_engine);
 		printf("\n");
-		out += build_engine_component();
+		out += build_engine_component(comp_engine);
 		proj_idx = itr;
 
 		// write project contents
 		printf("\n\n\n\t\t\t%sPROJECT\n",RESET);
 		offer_root(pdir,PROJECT_ROOT);
-		out += read_components(pdir,proj_idx);
+		out += read_components(pdir,proj_idx,comp_project);
 		printf("\n");
-		out += build_project_component();
+		out += build_project_component(comp_project);
 
 		// write additional features
 		printf("\n\n");
-		out += build_full_order();
+		out += build_full_order(comp_engine,comp_project);
 		out += count_lines();
 
 		// write output message
@@ -70,11 +71,8 @@ int main(int argc,char* argv[])
 		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 
 		// read user input
-		if (!update) {
-			system("stty raw");
-			inp = getchar();
-			system("stty cooked");
-		} else update = false;
+		if (!update) { system("stty raw");inp = getchar();system("stty cooked"); }
+		else update = false;
 
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
@@ -137,6 +135,7 @@ void offer_root(std::string &dir_path,std::string rt_dir)
 		if (get_selected()) {
 			dir_path = rt_dir;
 			update = true;
+			inp = 'x';
 		}
 
 		// prepare next
@@ -144,7 +143,7 @@ void offer_root(std::string &dir_path,std::string rt_dir)
 	}
 }
 
-std::string read_components(std::string &dir_path,uint8_t proj_idx)
+std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all)
 {
 	//open directory
 	std::string out = "";
@@ -165,14 +164,14 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx)
 			}
 
 			// compile source on demand
-			else if (get_selected()&&found->d_type!=DT_DIR&&!update) {
+			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
 				out = "compiled "+out_file;
 			}
 
 			// compile all sources in directory on demand
-			else if (get_selected()&&found->d_type==DT_DIR&&!update) {
+			else if ((get_selected()&&found->d_type==DT_DIR&&!update)||(!update&&comp_all&&found->d_type==DT_DIR)) {
 
 				// open target directory
 				std::string compile_dir = dir_path+"/"+found->d_name;
@@ -204,33 +203,32 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx)
 
 		// read next component
 		found = readdir(dir);
-	}
+	} comp_all = false;
 
 	// close directory
 	closedir(dir);
 	return out;
 }
 
-std::string build_engine_component()
+std::string build_engine_component(bool &comp_all)
 {
 	// draw option
 	std::string out = "";
-	write_selection();
-	printf("   BUILD ENGINE");
-
-	// run in chosen
-	if (get_selected()) {
-		system("ccb/ccb_build.sh");
-		out = "all engine components built";
-	}
+	if (get_selected()) { comp_all = true;update = true;inp = 'x'; }
 
 	// prepare next
+	write_selection();
+	printf("   BUILD ENGINE");
 	itr++;
 	return out;
 }
 
-std::string build_project_component()
+std::string build_project_component(bool &comp_all)
 {
+	// get input
+	if (get_selected()) { comp_all = true;update = true;inp = 'x'; }
+
+	// draw option
 	std::string out = "";
 	write_selection();
 	printf("   BUILD PROJECT\n");
@@ -238,8 +236,12 @@ std::string build_project_component()
 	return out;
 }
 
-std::string build_full_order()
+std::string build_full_order(bool &comp_engine,bool &comp_project)
 {
+	// get input
+	if (get_selected()) { comp_engine = true;comp_project = true;update = true;inp = 'x'; }
+
+	// draw option
 	std::string out = "";
 	write_selection();
 	printf(" BUILD ALL COMPONENTS\n");
