@@ -1,18 +1,20 @@
 #include "player.h"
 
 /*
-	constructor(Frame*,Renderer2D*,RendererI*,BulletSystem*)
+	constructor(Frame*,Renderer3D*,RendererI*,BulletSystem*)
 	f: the frame the player is shown in
-	r2d: renderer to handle visualization of player character and other controllable entities
+	r3d: renderer to handle visualization of player character and other controllable entities
 	rI: index renderer to handle the particles emitted by the player character
 	bSys: bullet system to spawn player projectiles with
 	purpose: setting up the player object to be able to control and visualize pc later
 */
-Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
-	: m_frame(f),m_r2d(r2d),m_rI(rI),m_bsys(bsys)
+Player::Player(Frame* f,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys)
+	: m_frame(f),m_r3d(r3d),m_rI(rI),m_bsys(bsys)
 {
 	// setup player character visualization
-	ri = m_r2d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
+	//ri = m_r3d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
+	m_r3d->add("res/flyfighter.obj","res/flyfighter.png","res/none.png","res/dnormal.png",
+			"res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
 
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png");
@@ -118,9 +120,10 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	// TODO: close quarters
 
 	// render and move player character
-	m_r2d->sl.at(ri).model = glm::translate(glm::mat4(1.0f),pos);
-	m_r2d->prepare();
-	m_r2d->render_sprite(ri,ri+1);
+	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos));
+	m_r3d->prepare();
+	m_r3d->render_mesh(2,3);
+	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
 
 	// render health bar
 	/*hbar.register_damage(pDmg);

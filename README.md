@@ -60,6 +60,7 @@ make win
 - new renderer code structure
 - readable menu code
 - simplifications of vertex loading
+- 3D environment and protagonists placeholders dpilot [DEV]
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -92,3 +93,4 @@ make win
     + 22: 5h 23min
     + 56: 1h 5min
 - Total Code Lines: 7327
+    + 74: 43min

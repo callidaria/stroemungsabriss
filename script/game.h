@@ -4,6 +4,7 @@
 
 #include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
+#include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/mat/camera2d.h"
@@ -19,20 +20,21 @@
 class Game
 {
 public:
-	Game(Frame* f,Renderer2D* r2d,RendererI* rI,Camera2D* cam2d)
-		: m_frame(f),m_r2d(r2d),m_rI(rI),m_cam2d(cam2d) {  }
+	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
+		: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d) {  }
 	~Game() {  }
 	void run(uint32_t &rstate,CCBManager* ccbm);
 private:
 	Frame* m_frame;
 	Renderer2D* m_r2d;
+	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
 
 	BGEnv m_bgenv = BGEnv(m_r2d);
 	BulletSystem m_bSys = BulletSystem(m_rI);
 
-	Player m_player = Player(m_frame,m_r2d,m_rI,&m_bSys);
+	Player m_player = Player(m_frame,m_r3d,m_rI,&m_bSys);
 
 	/*
 		func(Renderer2D*,uint32_t&,BulletSystem*,int32_t*) -> void
