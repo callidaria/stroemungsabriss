@@ -475,7 +475,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// prepare globe preview draw
 	globe_fb.bind();
 	m_frame->clear(.1f,.1f,.1f);
-	glEnable(GL_DEPTH_TEST);
 
 	// rotate camera towards globe
 	m_cam3d->front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
@@ -493,6 +492,11 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render globe preview to framebuffer
 	mat0.upload();
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 	m_r3d->render_mesh(0,1);
 	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
 	m_r3d->render_mesh(1,2);

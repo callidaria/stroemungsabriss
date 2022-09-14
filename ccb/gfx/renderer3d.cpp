@@ -52,7 +52,7 @@ void Renderer3D::load_vertex()
 void Renderer3D::load_texture()
 {
 	// run texturing process for all meshes
-	for(int i=0;i<ml.size();i++) ml.at(i).texture();
+	for(int i=0;i<ml.size();i++) ml[i].texture();
 
 	// texture references for shader program
 	s3d.upload_int("tex",0);
@@ -70,9 +70,9 @@ void Renderer3D::load_texture()
 void Renderer3D::load(Camera3D* cam3d)
 {
 	// opengl setup
-	glEnable(GL_DEPTH_TEST);
+	/*glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	glCullFace(GL_BACK);*/
 	// FIXME: do this in frame and change less rigidy
 
 	// load and shader compilation
@@ -124,13 +124,13 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 {
 	for (int i=b;i<e;i++) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D,ml.at(i).tex);
+		glBindTexture(GL_TEXTURE_2D,ml[i].tex);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D,ml.at(i).specmap);
+		glBindTexture(GL_TEXTURE_2D,ml[i].specmap);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D,ml.at(i).emitmap);
+		glBindTexture(GL_TEXTURE_2D,ml[i].emitmap);
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D,ml.at(i).normap);
-		glDrawArrays(GL_TRIANGLES,ml.at(i).ofs,ml.at(i).size);
+		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
+		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	}
 }
