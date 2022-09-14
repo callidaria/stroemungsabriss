@@ -20,6 +20,8 @@
 #include "../ccb/fcn/text.h"
 #include "../ccb/fcn/buffer.h"
 
+#include "../ccb/ppe/msaa.h"
+
 #include "menu_list.h"
 #include "menu_dialogue.h"
 #include "game.h"
@@ -88,6 +90,7 @@ private:
 	FrameBuffer fb,splash_fb,title_fb,select_fb,cross_fb,globe_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
+	MSAA fb_msaa;
 
 	// input definition
 	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;

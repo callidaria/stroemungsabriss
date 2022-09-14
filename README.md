@@ -68,6 +68,7 @@ make win
 - FIXED: standard splash's idle geometry gets modified by selection
 - FIXED: menu dialogue has deprecated functions
 - FIXED: collision sphere center off object center
+- FIXED: missing anti aliasing on menu selection splash [DEV]
 
 <br>
 
@@ -89,4 +90,5 @@ make win
     + 20: 3h 8min
     + 67: 1h 27min
     + 22: 5h 23min
+    + 63: 42min
 - Total Code Lines: 7062
