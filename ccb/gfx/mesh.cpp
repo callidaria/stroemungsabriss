@@ -37,8 +37,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 		// read next line if exists
 		char lh[128];
 		int res = fscanf(file,"%s",lh);
-		if (res==EOF)
-			break;
+		if (res==EOF) break;
 		else {
 
 			// check value prefix
@@ -77,27 +76,29 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 
 	// translate vertex data to object vertices
 	glm::vec3 tg(1.0f),btg(1.0f);
-	for(int i=0;i<ovi.size();i+=3) {
+	for(int i=0;i<ovi.size();i++) {
 
 		// precalculations for normal mapping
-		glm::vec3 e1 = verts[ovi[i+1]-1]-verts[ovi[i]-1];
-		glm::vec3 e2 = verts[ovi[i+2]-1]-verts[ovi[i]-1];
-		glm::vec2 duv1 = uv[oui[i+1]-1]-uv[oui[i]-1];
-		glm::vec2 duv2 = uv[oui[i+2]-1]-uv[oui[i]-1];
+		if (i%3==0&&ovi.size()) {
+			glm::vec3 e1 = verts[ovi[i+1]-1]-verts[ovi[i]-1];
+			glm::vec3 e2 = verts[ovi[i+2]-1]-verts[ovi[i]-1];
+			glm::vec2 duv1 = uv[oui[i+1]-1]-uv[oui[i]-1];
+			glm::vec2 duv2 = uv[oui[i+2]-1]-uv[oui[i]-1];
 
-		// calculate tangent
-		float ff = 1.0f/(duv1.x*duv2.y-duv2.x*duv1.y);
-		tg.x = ff*(duv2.y*e1.x-duv1.y*e2.x);
-		tg.y = ff*(duv2.y*e1.y-duv1.y*e2.y);
-		tg.z = ff*(duv2.y*e1.z-duv1.y*e2.z);
-		tg = glm::normalize(tg);
+			// calculate tangent
+			float ff = 1.0f/(duv1.x*duv2.y-duv2.x*duv1.y);
+			tg.x = ff*(duv2.y*e1.x-duv1.y*e2.x);
+			tg.y = ff*(duv2.y*e1.y-duv1.y*e2.y);
+			tg.z = ff*(duv2.y*e1.z-duv1.y*e2.z);
+			tg = glm::normalize(tg);
 
-		// calculate bitangent
-		btg.x = ff*(-duv2.x*e1.x+duv1.x*e2.x);
-		btg.y = ff*(-duv2.x*e1.y+duv1.x*e2.y);
-		btg.z = ff*(-duv2.x*e1.z+duv1.x*e2.z);
-		btg = glm::normalize(btg);
-		// FIXME: using a matrix calculation might be significantly faster
+			// calculate bitangent
+			btg.x = ff*(-duv2.x*e1.x+duv1.x*e2.x);
+			btg.y = ff*(-duv2.x*e1.y+duv1.x*e2.y);
+			btg.z = ff*(-duv2.x*e1.z+duv1.x*e2.z);
+			btg = glm::normalize(btg);
+			// FIXME: using a matrix calculation might be significantly faster
+		}  // FIXME: remove branch from multiupload
 
 		// get read vertices to process and save
 		unsigned int tvi = ovi[i],tui = oui[i],tni = oni[i];

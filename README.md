@@ -68,7 +68,7 @@ make win
 - FIXED: standard splash's idle geometry gets modified by selection
 - FIXED: menu dialogue has deprecated functions
 - FIXED: collision sphere center off object center
-- FIXED: scuffed geometry of globe preview [DEV]
+- FIXED: scuffed geometry of globe preview
 
 <br>
 
@@ -90,5 +90,5 @@ make win
     + 20: 3h 8min
     + 67: 1h 27min
     + 22: 5h 23min
-    + 56: 30min
+    + 56: 55min
 - Total Code Lines: 7062
