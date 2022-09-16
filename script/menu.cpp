@@ -475,7 +475,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// prepare globe preview draw
 	globe_fb.bind();
 	m_frame->clear(.1f,.1f,.1f);
-	glEnable(GL_DEPTH_TEST);
 
 	// rotate camera towards globe
 	m_cam3d->front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));

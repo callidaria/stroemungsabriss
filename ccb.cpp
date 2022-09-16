@@ -258,7 +258,8 @@ std::string count_lines()
 
 	// run in chosen
 	if (get_selected())
-		system("find ccb/src/ ccb/aud/ ccb/fcn/ ccb/gfx/ ccb/net/ ccb/frm/ ccb/mat/ ccb/ppe/ script/ script/ui/ shader/ main.cpp -type f | xargs wc -l | tail -n 1");
+		system("find ccb/aud/ ccb/fcn/ ccb/gfx/ ccb/net/ ccb/frm/ ccb/mat/ ccb/ppe/ script/ script/ui/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
+	// TODO: auto find component directories
 
 	// prepare next
 	itr++;
