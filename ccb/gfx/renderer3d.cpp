@@ -69,12 +69,6 @@ void Renderer3D::load_texture()
 */
 void Renderer3D::load(Camera3D* cam3d)
 {
-	// opengl setup
-	/*glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);*/
-	// FIXME: do this in frame and change less rigidy
-
 	// load and shader compilation
 	load_vertex();
 	shs.compile3d("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
@@ -103,6 +97,11 @@ void Renderer3D::prepare()
 */
 void Renderer3D::prepare(Camera3D* cam3d)
 {
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	// run normal preparations
 	prepare();
 
