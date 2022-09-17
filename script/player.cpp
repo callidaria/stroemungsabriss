@@ -12,8 +12,7 @@ Player::Player(Frame* f,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys)
 	: m_frame(f),m_r3d(r3d),m_rI(rI),m_bsys(bsys)
 {
 	// setup player character visualization
-	//ri = m_r3d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
-	m_r3d->add("res/flyfighter.obj","res/flyfighter.png","res/none.png","res/dnormal.png",
+	ridx = m_r3d->add("res/flyfighter.obj","res/flyfighter.png","res/none.png","res/dnormal.png",
 			"res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0));
 
 	// add pc projectiles to bullet system
@@ -122,8 +121,7 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	// render and move player character
 	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos));
 	m_r3d->prepare();
-	m_r3d->render_mesh(2,3);
-	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
+	m_r3d->render_mesh(ridx,ridx+1);
 
 	// render health bar
 	/*hbar.register_damage(pDmg);

@@ -86,11 +86,11 @@ make win
 
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
-    + 46: 38h 55min
-    + 54: 12h 40min
-    + 20: 3h 8min
-    + 67: 1h 27min
-    + 22: 5h 23min
-    + 56: 1h 5min
+	+ 46: 38h 55min
+	+ 54: 12h 40min
+	+ 20: 3h 8min
+	+ 67: 1h 27min
+	+ 22: 5h 23min
+	+ 56: 1h 5min
+	+ 74: 59min
 - Total Code Lines: 7327
-    + 74: 43min

@@ -26,7 +26,7 @@ class Player
 public:
 
 	// construction
-	Player() { sal[0]=0;sal[1]=1; }
+	Player() {  }
 	Player(Frame* f,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys);
 	~Player();
 
@@ -55,8 +55,7 @@ private:
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
 	//Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
-	int ri;
-	uint8_t sal[2];			// sprite adress library
+	uint16_t ridx;
 	int32_t treg[16] = { 0 };
 
 	// controlling
