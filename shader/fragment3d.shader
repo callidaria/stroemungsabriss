@@ -28,6 +28,7 @@ uniform mat4 model;
 uniform int amnt_light_sun = 0;
 uniform int amnt_light_point = 0;
 uniform int amnt_light_spot = 0;
+
 struct light_sun {
 	vec3 pos;
 	vec3 col;
@@ -48,6 +49,7 @@ struct light_spot {
 	float cut_in;
 	float cut_out;
 };
+
 uniform light_sun al[5];
 uniform light_point pl[5];
 uniform light_spot sl[5];
@@ -78,6 +80,7 @@ void main()
 	vec3 R = reflect(I,Normals);
 	outColour = vec4(texture(cm,R).rgb,1.0);*/
 }
+
 vec4 lumen_sun(vec4 o,light_sun l)
 {
 	vec3 norm=texture(nmap,TexCoords).rgb;
@@ -100,6 +103,7 @@ vec4 lumen_sun(vec4 o,light_sun l)
 	vec3 out_spec=(cspec+diff*0.4);
 	return vec4(mix(out_diff,vec3(diff*0.4),specmap*pow(fresnel,4))+cspec*specmap,o.a);
 }
+
 vec4 lumen_point(vec4 o,light_point l)
 {
 	vec3 norm=normalize(Normals.xyz);
@@ -118,6 +122,7 @@ vec4 lumen_point(vec4 o,light_point l)
 	vec3 out_diff=o.rgb*cdiff*atten;
 	return vec4(out_spec+out_diff,o.a);
 }
+
 vec4 lumen_spot(vec4 o,light_spot l)
 {
 	vec3 norm=normalize(Normals.xyz);
@@ -137,6 +142,7 @@ vec4 lumen_spot(vec4 o,light_spot l)
 	vec3 out_diff=o.rgb*cdiff*ins;
 	return vec4(out_spec+out_diff,o.a);
 }
+
 float calc_shadow(vec4 ltp)
 {
 	vec3 pc=ltp.xyz/ltp.w;

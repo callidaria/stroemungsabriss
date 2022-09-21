@@ -11,6 +11,9 @@
 #include "bullet_system.h"
 #include "ui/healthbar.h"
 
+constexpr uint8_t JET_BORDER_WIDTH = 42;
+constexpr uint8_t JET_BORDER_HEIGHT = 18;
+
 struct PlayerControls
 {
 	int* flt_ud,*flt_lr;							// floating directionals

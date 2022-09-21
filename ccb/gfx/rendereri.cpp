@@ -99,6 +99,7 @@ void RendererI::prepare()
 void RendererI::render(uint16_t i,uint16_t amt)
 {
 	// setup
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,il.at(i).tex);
 	buffer.upload_indices(il.at(i).o,sizeof(glm::vec2)*4096);
 

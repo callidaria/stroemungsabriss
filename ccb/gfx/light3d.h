@@ -8,9 +8,12 @@
 class Light3D
 {
 public:
+
 	Light3D() {  }
+
 	Light3D(Renderer3D* in_r3d,int in_ind,glm::vec3 in_pos,glm::vec3 in_col,float in_ins)
 		: r3d(in_r3d),ind(in_ind),pos(in_pos),col(in_col),ins(in_ins) { }
+
 	void upload()
 	{
 		std::string base="al["+std::to_string(ind)+"].";
@@ -19,13 +22,21 @@ public:
 		r3d->s3d.upload_vec3((base+"col").c_str(),col);
 		r3d->s3d.upload_float((base+"ins").c_str(),ins);
 		r3d->s3d.upload_vec3("light_pos",pos);
-		r3d->s3d.enable();
 	}
+
 	void set_amnt(int n)
 	{
 		r3d->s3d.enable();
 		r3d->s3d.upload_int("amnt_light_sun",n);
 	}
+
+	void set_ambient(float amb)
+	{
+		r3d->s3d.enable();
+		r3d->s3d.upload_float("ambient",amb);
+	}
+	// FIXME: wtf. is a Light3D an object or a manager?????
+
 	void create_shadow(glm::vec3 to,float width,float height,float f,int res)
 	{
 		sh_res=res;
@@ -47,6 +58,7 @@ public:
 		view=glm::lookAt(pos/f+to,to,glm::vec3(0,1,0));
 		shadow_mat=proj*view;
 	}
+
 	void prepare_shadow()
 	{
 		glViewport(0,0,sh_res,sh_res);
@@ -58,23 +70,28 @@ public:
 		r3d->s3d.upload_matrix("view",view);
 		r3d->s3d.upload_matrix("proj",proj);
 	}
+
 	void close_shadow(int w_res, int h_res)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER,0);
 		glViewport(0,0,w_res,h_res);
 		glCullFace(GL_BACK);
 	}
+
 	void upload_shadow()
 	{
 		r3d->upload_shadow(shadow_mat);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D,dtex);
 	}
+
 	void upload_shadow_terra()
 	{
 		glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,dtex);
 	}
+
 public:
+
 	Renderer3D* r3d;
 	int ind;
 	glm::vec3 pos,col;

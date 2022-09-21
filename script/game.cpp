@@ -18,19 +18,18 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// ortho 3D element lighting
 	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(100,0,0),glm::vec3(1,1,1),1);
-	l3d_ortho.set_amnt(1);
-	l3d_ortho.upload();
+	l3d_ortho.set_ambient(1.0f);
 
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	uint32_t running=rstate+1;
-	while (running) { // ??maybe kill check if flush with static func ref
+	while (running) {  // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
-		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break; // FIXME: kill this when light menu exists
+		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
 
 		m_bgenv.update(rstate);	
 		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
