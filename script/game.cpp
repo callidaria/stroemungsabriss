@@ -11,9 +11,15 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	stg_ld.at(rstate)(m_r2d,stg_idx2d,&m_bSys,fwd_treg);
 
 	// vertex & texture load
+	Camera3D cam3d = Camera3D(1280.0f,720.0f);
 	m_r2d->load(m_cam2d);
 	m_rI->load(m_cam2d);
-	m_r3d->load(m_cam2d);
+	m_r3d->load(&cam3d);
+
+	// ortho 3D element lighting
+	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(100,0,0),glm::vec3(1,1,1),1);
+	l3d_ortho.set_amnt(1);
+	l3d_ortho.upload();
 
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
@@ -36,5 +42,5 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.render();
 
 		m_frame->update();
-	} rstate = 0; // TODO: choose between menu &|| desktop skip
+	} rstate = 0;  // TODO: choose between menu &|| desktop skip
 }

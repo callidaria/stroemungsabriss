@@ -2,10 +2,12 @@
 
 #include <iostream>
 
-#include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
+#include "../ccb/gfx/light3d.h"
+
+#include "../ccb/frm/frame.h"
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/mat/camera2d.h"
 
@@ -44,9 +46,8 @@ private:
 		bSys: bullet system, the enemies use to spawn their bullet patterns
 		treg: variable register for externally saved and modified values
 	*/
-	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,int32_t*)> stg_ld = {
-		BossLChild::load,BossDPilot::load
-	};
+	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,int32_t*)> stg_ld
+			= { BossLChild::load,BossDPilot::load };
 
 	/*
 		func(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void
@@ -55,9 +56,8 @@ private:
 		pPos: updated pc position
 		ePos: updated enemy position
 	*/
-	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*)> stg_upd = {
-		BossLChild::update,BossDPilot::update
-	};
+	std::vector<void(*)(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*)> stg_upd
+			= { BossLChild::update,BossDPilot::update };
 
 	// FIXME: reduce all possible register values into register to keep parameters clean
 };

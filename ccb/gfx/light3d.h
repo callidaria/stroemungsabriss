@@ -10,7 +10,7 @@ class Light3D
 public:
 	Light3D() {  }
 	Light3D(Renderer3D* in_r3d,int in_ind,glm::vec3 in_pos,glm::vec3 in_col,float in_ins)
-		:r3d(in_r3d),ind(in_ind),pos(in_pos),col(in_col),ins(in_ins) { }
+		: r3d(in_r3d),ind(in_ind),pos(in_pos),col(in_col),ins(in_ins) { }
 	void upload()
 	{
 		std::string base="al["+std::to_string(ind)+"].";
