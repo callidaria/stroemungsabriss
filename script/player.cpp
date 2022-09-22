@@ -125,14 +125,19 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	// TODO: shot modes and spawn
 	// TODO: close quarters
 
+	// calculate player jet tilt
+	tilt += *cnt.abs_left*5*(tilt<30)-*cnt.abs_right*5*(tilt>-30);
+	tilt += ((tilt<0)-(tilt>0))*5*(!*cnt.abs_left&&!*cnt.abs_right);
+	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
+
 	// render and move player character
 	m_r3d->prepare();
-	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos));
+	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos)*mdrot);
 	m_r3d->render_mesh(ridx,ridx+1);
 
 	// render player hitbox indicator
 	m_r2d->prepare();
-	m_r2d->sl[aidx].model = glm::translate(glm::mat4(1.0f),pos-glm::vec3(5,5,0));
+	m_r2d->sl[aidx].model = glm::translate(glm::mat4(1.0f),pos-glm::vec3(5,5,0))*mdrot;
 	m_r2d->render_sprite(aidx,aidx+1);
 
 	// render health bar

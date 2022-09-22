@@ -71,6 +71,9 @@ private:
 	int emuflt_ud,emuflt_lr;
 	uint32_t dz_epsilon = 0;
 
+	// animation
+	float tilt = 0;
+
 	// ranged method list
 	/*
 		func(BulletSystem*,int32_t*) -> void
