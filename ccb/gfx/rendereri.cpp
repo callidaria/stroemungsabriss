@@ -86,6 +86,12 @@ void RendererI::load(Camera2D* cam2d)
 */
 void RendererI::prepare()
 {
+	// gl settings
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	// prepare shader & buffer
 	sI.enable();
 	buffer.bind();
 }

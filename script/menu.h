@@ -131,10 +131,11 @@ private:
 	uint8_t dsi_diff,dsi_conf;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_rI,m_cam2d);
+	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d);
 	uint8_t difflv = 0;
 
-	// camera rotation
+	// globe preview
+	uint16_t ridx_terra;
 	float pitch = 15;
 	float yaw = -110;
 };

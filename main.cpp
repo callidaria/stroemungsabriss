@@ -40,8 +40,8 @@ int main(int argc,char** argv)
 	Renderer2D r2d = Renderer2D();
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
-	Camera2D cam2d=Camera2D(1280.0f,720.0f);
-	Camera3D cam3d=Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
+	Camera2D cam2d = Camera2D(1280.0f,720.0f);
+	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
 
 	bool dactive = false;
 #if MENU_RENDER

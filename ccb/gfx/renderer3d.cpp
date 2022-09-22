@@ -85,6 +85,10 @@ void Renderer3D::load(Camera3D* cam3d)
 */
 void Renderer3D::prepare()
 {
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
 	// prepare shader & buffer
 	s3d.enable();
 	buffer.bind();
@@ -97,11 +101,6 @@ void Renderer3D::prepare()
 */
 void Renderer3D::prepare(Camera3D* cam3d)
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
 	// run normal preparations
 	prepare();
 

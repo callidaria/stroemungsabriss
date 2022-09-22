@@ -60,6 +60,7 @@ make win
 - new renderer code structure
 - readable menu code
 - simplifications of vertex loading
+- 3D protagonists placeholders dpilot
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -85,10 +86,11 @@ make win
 
 ## Trivia
 - Elapsed Worktime After Commit 120: 19h 19min
-    + 46: 38h 55min
-    + 54: 12h 40min
-    + 20: 3h 8min
-    + 67: 1h 27min
-    + 22: 5h 23min
-    + 56: 1h 5min
-- Total Code Lines: 7327
+	+ 46: 38h 55min
+	+ 54: 12h 40min
+	+ 20: 3h 8min
+	+ 67: 1h 27min
+	+ 22: 5h 23min
+	+ 56: 1h 5min
+	+ 74: 4h 58min
+- Total Code Lines: 7426

@@ -5,11 +5,15 @@
 
 #include "../ccb/frm/frame.h"
 #include "../ccb/gfx/renderer2d.h"
+#include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
 #include "../ccb/fcn/buffer.h"
 
 #include "bullet_system.h"
 #include "ui/healthbar.h"
+
+constexpr uint8_t JET_BORDER_WIDTH = 42;
+constexpr uint8_t JET_BORDER_HEIGHT = 18;
 
 struct PlayerControls
 {
@@ -24,14 +28,21 @@ struct PlayerControls
 class Player
 {
 public:
-	Player() { sal[0]=0;sal[1]=1; }
-	Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys);
+
+	// construction
+	Player() {  }
+	Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys);
 	~Player();
 
+	// update
 	void update(uint32_t &rstate,int32_t pDmg);
+
+	// getter
 	glm::vec2 get_pPos();
+
 private:
-	// additional
+
+	// helper
 	void emulate_vectorized();
 
 	// ranged functions
@@ -39,15 +50,17 @@ private:
 	static void jet_wide(BulletSystem* bsys,int32_t* treg);
 	static void jet_focus(BulletSystem* bsys,int32_t* treg);
 	static void jet_scientific(BulletSystem* bsys,int32_t* treg);
+
 private:
+
 	// rendering
 	Frame* m_frame;
 	Renderer2D* m_r2d;
+	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
 	//Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
-	int ri;
-	uint8_t sal[2];			// sprite adress library
+	uint16_t ridx,aidx;
 	int32_t treg[16] = { 0 };
 
 	// controlling
@@ -57,6 +70,9 @@ private:
 	struct PlayerControls cnt;
 	int emuflt_ud,emuflt_lr;
 	uint32_t dz_epsilon = 0;
+
+	// animation
+	float tilt = 0;
 
 	// ranged method list
 	/*

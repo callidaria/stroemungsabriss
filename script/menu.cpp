@@ -19,8 +19,8 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	// add globe and pointer object
-	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png","./res/terra/norm.png",
-			"./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
+	ridx_terra = m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
+			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
 	m_r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
 	m_r3d->load(m_cam3d);
@@ -492,9 +492,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render globe preview to framebuffer
 	mat0.upload();
-	m_r3d->render_mesh(0,1);
+	m_r3d->render_mesh(ridx_terra,ridx_terra+1);
 	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_r3d->render_mesh(1,2);
+	m_r3d->render_mesh(ridx_terra+1,ridx_terra+2);
 	globe_fb.close();
 
 	// render combined splash overlay

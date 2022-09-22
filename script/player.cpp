@@ -1,18 +1,22 @@
 #include "player.h"
 
 /*
-	constructor(Frame*,Renderer2D*,RendererI*,BulletSystem*)
+	constructor(Frame*,Renderer3D*,RendererI*,BulletSystem*)
 	f: the frame the player is shown in
-	r2d: renderer to handle visualization of player character and other controllable entities
+	r3d: renderer to handle visualization of player character and other controllable entities
 	rI: index renderer to handle the particles emitted by the player character
 	bSys: bullet system to spawn player projectiles with
 	purpose: setting up the player object to be able to control and visualize pc later
 */
-Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
-	: m_frame(f),m_r2d(r2d),m_rI(rI),m_bsys(bsys)
+Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys)
+	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_bsys(bsys)
 {
 	// setup player character visualization
-	ri = m_r2d->add(glm::vec2(0,0),50,50,"res/flyfighter.png");
+	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
+			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
+
+	// setup player hitbox indicator
+	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png");
@@ -26,8 +30,6 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 
 	// setup controlling
 	if (f->m_gc.size()>0) {
-		// TODO: dynamic controller choosing
-		// TODO: dynamic controller and keyboard config
 		dz_epsilon = 5000; // FIXME: set static epsilon value to dynamic from ini
 		cnt.flt_lr = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_LEFTX];
 		cnt.flt_ud = &f->xb.at(0).xba[SDL_CONTROLLER_AXIS_LEFTY];
@@ -48,8 +50,9 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 		cnt.pause = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
 		cnt.rdetails = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_BACK];
 		cnt.qrestart = (bool*)&f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERLEFT];
+		// TODO: dynamic controller choosing
+		// TODO: dynamic controller and keyboard config
 	} else {
-		// TODO: define in case of keyboard
 		emulate_vectorized();
 		cnt.flt_ud = &emuflt_ud;
 		cnt.flt_lr = &emuflt_lr;
@@ -68,6 +71,7 @@ Player::Player(Frame* f,Renderer2D* r2d,RendererI* rI,BulletSystem* bsys)
 		cnt.pause = &f->kb.ka[SDL_SCANCODE_ESCAPE];
 		cnt.rdetails = &f->kb.ka[SDL_SCANCODE_TAB];
 		cnt.qrestart = &f->kb.ka[SDL_SCANCODE_5];
+		// TODO: define in case of keyboard
 	}
 } Player::~Player() {  }
 
@@ -100,8 +104,12 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	dhold = dhold*glm::vec2(ddur!=3)+mvdir*glm::vec2(ddur==3);  // FIXME: remove dash bullshit
 
 	// force player in-bounds
-	pos += glm::vec3((pos.x<0)*-pos.x-(pos.x>1230)*(pos.x-1230),	// vertical bounds
-			(pos.y<0)*-pos.y-(pos.y>670)*(pos.y-670),pos.z);		// horizontal bounds
+	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
+	uint16_t y_full_cap = 720-JET_BORDER_HEIGHT;
+	pos += glm::vec3((pos.x<JET_BORDER_WIDTH)*(JET_BORDER_WIDTH-pos.x)
+			-(pos.x>x_full_cap)*(pos.x-x_full_cap),
+			(pos.y<JET_BORDER_HEIGHT)*(JET_BORDER_HEIGHT-pos.y)
+			-(pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
 
 	// write player position to register
 	treg[0] = pos.x;
@@ -117,10 +125,20 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	// TODO: shot modes and spawn
 	// TODO: close quarters
 
+	// calculate player jet tilt
+	tilt += *cnt.abs_left*5*(tilt<30)-*cnt.abs_right*5*(tilt>-30);
+	tilt += ((tilt<0)-(tilt>0))*5*(!*cnt.abs_left&&!*cnt.abs_right);
+	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
+
 	// render and move player character
-	m_r2d->sl.at(ri).model = glm::translate(glm::mat4(1.0f),pos);
+	m_r3d->prepare();
+	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos)*mdrot);
+	m_r3d->render_mesh(ridx,ridx+1);
+
+	// render player hitbox indicator
 	m_r2d->prepare();
-	m_r2d->render_sprite(ri,ri+1);
+	m_r2d->sl[aidx].model = glm::translate(glm::mat4(1.0f),pos-glm::vec3(5,5,0))*mdrot;
+	m_r2d->render_sprite(aidx,aidx+1);
 
 	// render health bar
 	/*hbar.register_damage(pDmg);
@@ -166,7 +184,7 @@ void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10+50*(treg[2]<5);i<11;i++) {
 		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),i*.075f,glm::vec3(0,0,1));
-		bsys->spwn_blt(0,glm::vec2(treg[0]+20,treg[1]+55),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
 	} treg[2]--;
 	treg[2] += (treg[2]<1)*9;
 }
@@ -179,7 +197,7 @@ void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 void Player::jet_focus(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10;i<11;i++)
-		bsys->spwn_blt(0,glm::vec2(treg[0]+20+i*7,treg[1]+55),glm::vec2(0,1)*glm::vec2(12));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12));
 }
 
 /*
