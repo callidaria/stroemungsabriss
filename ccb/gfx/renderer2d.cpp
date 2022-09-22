@@ -114,15 +114,15 @@ void Renderer2D::load(Camera2D* cam2d)
 */
 void Renderer2D::prepare()
 {
+	// gl settings
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+
 	// setup buffer & shader
 	s2d.enable();
 	reset_shader();
 	buffer.bind();
-
-	// gl settings
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE0);
 }
 // FIXME: which disables are necessary?
 

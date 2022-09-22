@@ -24,10 +24,11 @@
 	conforming to: stg_ld
 	purpose: load the essentials for the dancing pilot fight and set initial register values
 */
-void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg)
+void BossDPilot::load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg)
 {
 	// visuals
-	rnd_index = r2d->add(glm::vec2(0,0),50,50,"./res/flyfighter.png");
+	rnd_index = r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
+			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
 	treg[9] = bSys->add_cluster(15,15,2048,"./res/bllt_proj.png");
@@ -46,8 +47,8 @@ void BossDPilot::load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int
 	update(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void
 	conforming to: stg_upd
 */
-void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,glm::vec2 ePos,
-		int32_t* treg)
+void BossDPilot::update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
+		glm::vec2 ePos,int32_t* treg)
 {
 	// movement
 	/*ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
@@ -66,7 +67,7 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	whirlpool(bSys,treg,ePos);*/
 
 	// collision check
-	treg[10] = bSys->get_pHit(0,ePos+glm::vec2(25),35,0);
+	treg[10] = bSys->get_pHit(0,ePos,35,0);
 	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,5);
 	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,5);
 	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,7);
@@ -76,9 +77,9 @@ void BossDPilot::update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,g
 	treg[12]++;
 
 	// visuals
-	r2d->prepare();
-	r2d->sl.at(rnd_index).model = glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0));
-	r2d->render_sprite(rnd_index,rnd_index+1);
+	r3d->prepare();
+	r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
+	r3d->render_mesh(rnd_index,rnd_index+1);
 	bSys->render();
 }
 

@@ -86,6 +86,12 @@ void RendererI::load(Camera2D* cam2d)
 */
 void RendererI::prepare()
 {
+	// gl settings
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	// prepare shader & buffer
 	sI.enable();
 	buffer.bind();
 }
@@ -99,7 +105,6 @@ void RendererI::prepare()
 void RendererI::render(uint16_t i,uint16_t amt)
 {
 	// setup
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,il.at(i).tex);
 	buffer.upload_indices(il.at(i).o,sizeof(glm::vec2)*4096);
 

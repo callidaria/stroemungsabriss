@@ -8,7 +8,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	uint32_t stg_idx2d;
 	int32_t fwd_treg[16] = { 0 };
 	glm::vec2 ePos = glm::vec2(615,600);
-	stg_ld.at(rstate)(m_r2d,stg_idx2d,&m_bSys,fwd_treg);
+	stg_ld.at(rstate)(m_r3d,stg_idx2d,&m_bSys,fwd_treg);
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
@@ -32,7 +32,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
 
 		m_bgenv.update(rstate);	
-		stg_upd.at(rstate)(m_r2d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
+		stg_upd.at(rstate)(m_r3d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
 		m_player.update(rstate,fwd_treg[11]);
 		m_bSys.render();
 

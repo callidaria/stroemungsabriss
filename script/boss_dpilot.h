@@ -4,7 +4,7 @@
 #include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/vector_angle.hpp>
-#include "../ccb/gfx/renderer2d.h"
+#include "../ccb/gfx/renderer3d.h"
 #include "bullet_system.h"
 
 #define E 2.7182818284
@@ -21,7 +21,7 @@ void bomb(BulletSystem*,int32_t*);
 class BossDPilot
 {
 public:
-	static void load(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg);
-	static void update(Renderer2D* r2d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
+	static void load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg);
+	static void update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
 			glm::vec2 ePos,int32_t* treg);
 };
