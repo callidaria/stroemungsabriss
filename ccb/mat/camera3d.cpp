@@ -2,7 +2,9 @@
 
 /*
 	constructor(float,float)
-	[...]
+	w_res: camera resolution width
+	h_res: camera resolution height
+	purpose: create orthogonal 3D camera for objects
 */
 Camera3D::Camera3D(float w_res,float h_res)
 {
@@ -13,7 +15,11 @@ Camera3D::Camera3D(float w_res,float h_res)
 
 /*
 	constructor(vec3,float,float,float)
-	[...]
+	cp: camera position vector
+	w_res: camera resolution width
+	h_res: camera resolution height
+	fov: cameras field of view
+	purpose: create perspective 3D camera for objects
 */
 Camera3D::Camera3D(glm::vec3 cp,float w_res,float h_res,float fov)
 	: pos(cp)
@@ -26,7 +32,7 @@ Camera3D::Camera3D(glm::vec3 cp,float w_res,float h_res,float fov)
 
 /*
 	update() -> void
-	[...]
+	purpose: recalculate view matrix after position and front change
 */
 void Camera3D::update()
 {

@@ -2,7 +2,9 @@
 
 /*
     constructor(float,float)
-    [...]
+	w_res: camera resolution width
+	h_res: camera resolution height
+	purpose: creates an orthogonal 2D camera for sprites
 */
 Camera2D::Camera2D(float w_res,float h_res)
 {
