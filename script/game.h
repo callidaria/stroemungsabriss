@@ -36,7 +36,7 @@ private:
 	BGEnv m_bgenv = BGEnv(m_r2d);
 	BulletSystem m_bSys = BulletSystem(m_rI);
 
-	Player m_player = Player(m_frame,m_r3d,m_rI,&m_bSys);
+	Player m_player = Player(m_frame,m_r2d,m_r3d,m_rI,&m_bSys);
 
 	/*
 		func(Renderer3D*,uint32_t&,BulletSystem*,int32_t*) -> void

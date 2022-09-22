@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "../ccb/frm/frame.h"
+#include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/rendereri.h"
 #include "../ccb/fcn/buffer.h"
@@ -30,7 +31,7 @@ public:
 
 	// construction
 	Player() {  }
-	Player(Frame* f,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys);
+	Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys);
 	~Player();
 
 	// update
@@ -54,11 +55,12 @@ private:
 
 	// rendering
 	Frame* m_frame;
+	Renderer2D* m_r2d;
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
 	//Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
-	uint16_t ridx;
+	uint16_t ridx,aidx;
 	int32_t treg[16] = { 0 };
 
 	// controlling
