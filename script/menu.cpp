@@ -131,7 +131,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 
 	// create msaa effect for selection splash
-	fb_msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
+	msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
 			m_frame->w_res,m_frame->h_res,16);
 
 	// setup user input
@@ -503,16 +503,15 @@ void Menu::render(uint32_t &running,bool &reboot)
 	globe_fb.close();
 
 	// render combined splash overlay
-	fb_msaa.bind();
+	msaa.bind();
 	m_frame->clear(0,0,0);
 	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),
 			cross_fb.get_tex(),ptrans);
-	// fb_msaa.blit(&fb);
-	fb_msaa.close();
 
 	// anti aliasing for selection splashes
+	msaa.blit();
 	m_frame->clear(0,0,0);
-	fb_msaa.render();
+	msaa.render();
 
 	// render menu lists and sublists
 	m_r2d->prepare();

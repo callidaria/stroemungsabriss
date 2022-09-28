@@ -2,9 +2,8 @@
 
 #include <iostream>
 
-#include "../frm/framebuffer.h"
-#include "../gfx/shader.h"
 #include "../fcn/buffer.h"
+#include "../gfx/shader.h"
 
 class MSAA
 {
@@ -17,22 +16,18 @@ public:
 
 	// action
 	void bind();
-	void blit(FrameBuffer* fb);
+	void blit();
 
 	// draw
 	void render();
 
-	// getter
-	unsigned int get_tex() { return tex; }
-
-	// static
-	static void close();
-
 private:
 
+	// extern
 	Shader sfb;
 	uint32_t fbw,fbh;
-	unsigned int tex,rbo;
+
+	// essentials
 	Buffer buffer = Buffer();
-	unsigned int fbo;
+	GLuint rfbo,wfbo,rbo,colbuffer,scrbuffer;
 };

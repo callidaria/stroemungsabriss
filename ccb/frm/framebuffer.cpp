@@ -1,11 +1,13 @@
 #include "framebuffer.h"
 
 FrameBuffer::FrameBuffer() {  } // !!how bout no
+
 FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp, bool float_buffer)
 	: frw(fr_width),frh(fr_height)
 {
 	init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer);
 }
+
 FrameBuffer::FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
 		bool float_buffer)
 	: frw(fr_width),frh(fr_height)
@@ -13,6 +15,7 @@ FrameBuffer::FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,cons
 	init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer);
 }
 // TODO: make the resolution of framebuffers dynamic (cambased)
+
 void FrameBuffer::init(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
 		bool float_buffer)
 {
@@ -46,8 +49,11 @@ void FrameBuffer::init(int fr_width,int fr_height,int fr_wres,int fr_hres,const 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,0); // !!very clean ??actually nessessary
 }
+
 void FrameBuffer::bind() { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
+
 void FrameBuffer::close() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
+
 void FrameBuffer::render()
 {
 	glActiveTexture(GL_TEXTURE0); // !!should be standard => after cleanup obsolete
@@ -56,6 +62,7 @@ void FrameBuffer::render()
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
+
 void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint32_t dtex,float ptrans)
 {
 	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
@@ -75,5 +82,7 @@ void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint
 	s.upload_float("ptrans",ptrans);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
+
 unsigned int FrameBuffer::get_fbo() { return fbo; }
+
 unsigned int FrameBuffer::get_tex() { return tex; }
