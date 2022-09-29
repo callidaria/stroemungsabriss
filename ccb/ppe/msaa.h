@@ -21,6 +21,9 @@ public:
 	// draw
 	void render();
 
+	// export
+	GLuint get_buffer();
+
 private:
 
 	// extern

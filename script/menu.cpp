@@ -116,14 +116,6 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 	// framebuffer creation
 	fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
-	splash_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader",
-			"shader/fbf_standard.shader",false);
-	title_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader",
-			"shader/fbf_standard.shader",false);
-	select_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader",
-			"shader/fbf_standard.shader",false);
-	cross_fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader",
-			"shader/fbf_standard.shader",false);
 	globe_fb = FrameBuffer(f->w_res,f->h_res,f->w_res/4,f->h_res/4,"shader/fbv_standard.shader",
 			"shader/fbf_standard.shader",false);
 
@@ -352,9 +344,13 @@ void Menu::render(uint32_t &running,bool &reboot)
 	for (int i=0;i<8;i++) sbar[i] = (diffsel!=lselect)*(rand()%30-15)+(diffsel==lselect)*sbar[i];
 	// FIXME: kill extra scrolling calculations
 
-	// setup title splash
+	// setup splashes
 	sshd.enable();
 	buffer.bind();
+
+	// start and clear msaa buffer
+	msaa.bind();
+	m_frame->clear(0,0,0);
 
 	// reset vertex modifications in shader program
 	sshd.upload_float("ptrans",ptrans);
@@ -364,10 +360,18 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(0));
 
 	// render title splash to framebuffer
-	splash_fb.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,0,6);
-	splash_fb.close();
+
+	// upload vertical selection scroll
+	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
+	sshd.upload_vec2("idx_mod[1]",
+			glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)*ptrans+SELTRANS[0]*dtrans,0));
+	sshd.upload_vec2("idx_mod[2]",
+			glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)*ptrans+SELTRANS[1]*dtrans,0));
+	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
+
+	// render vertical selection splash to framebuffer
+	glDrawArrays(GL_TRIANGLES,18,6);
 
 	// calculate selection splash vibration and presets
 	int rnd_edge[4];
@@ -385,24 +389,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,-15*(mm>2)-lcscroll+sbar[7]+(rand()%10-5)));
 
 	// render horizontal selection splash to framebuffer
-	title_fb.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,6,12);
-	title_fb.close();
-
-	// upload vertical selection scroll
-	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
-	sshd.upload_vec2("idx_mod[1]",
-			glm::vec2(SELTRANS[(mselect-1)*2]*(1-dtrans)*ptrans+SELTRANS[0]*dtrans,0));
-	sshd.upload_vec2("idx_mod[2]",
-			glm::vec2(SELTRANS[(mselect-1)*2+1]*(1-dtrans)*ptrans+SELTRANS[1]*dtrans,0));
-	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
-
-	// render vertical selection splash to framebuffer
-	select_fb.bind();
-	m_frame->clear(0,0,0);
-	glDrawArrays(GL_TRIANGLES,18,6);
-	select_fb.close();
 
 	// calculate the list splash edges for prism list selection
 	bool af = edge_mod==-1;
@@ -424,13 +411,13 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
 
 	// render prism list viewtype to framebuffer
-	cross_fb.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
-	cross_fb.close();
 
 	// deltasave lselect to compare list selection modification next frame
 	diffsel = lselect;
+
+	// antialiasing for selection splashes
+	msaa.blit();
 
 	// render menu
 	fb.bind();
@@ -504,8 +491,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// render combined splash overlay
 	msaa.bind();
 	m_frame->clear(0,0,0);
-	fb.render_wOverlay(splash_fb.get_tex(),title_fb.get_tex(),select_fb.get_tex(),
-			cross_fb.get_tex(),ptrans);
+	fb.render_wOverlay(msaa.get_buffer(),ptrans);
 
 	// anti aliasing for selection splashes
 	msaa.blit();

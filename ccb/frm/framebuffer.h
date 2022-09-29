@@ -18,7 +18,7 @@ public:
 	void bind(); 	// binds the framebuffer
 	void close(); 	// closes every framebuffer ??maybe get this into frame.h
 	void render(); 	// renders the framebuffer
-	void render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint32_t dtex,float ptrans);
+	void render_wOverlay(uint32_t itex,float ptrans);
 
 	//getters
 	unsigned int get_fbo(); // !!check if used

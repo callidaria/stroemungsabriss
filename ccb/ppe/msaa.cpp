@@ -96,3 +96,12 @@ void MSAA::render()
 	// draw
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
+
+/*
+	get_buffer() -> GLuint
+	[...]
+*/
+GLuint MSAA::get_buffer()
+{
+	return scrbuffer;
+}

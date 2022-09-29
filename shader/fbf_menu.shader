@@ -12,9 +12,6 @@ uniform float ptrans = 0;
 // framebuffers
 uniform sampler2D tex;
 uniform sampler2D splash;
-uniform sampler2D title;
-uniform sampler2D select;
-uniform sampler2D cross;
 
 // function definitions
 vec4 calculate_sepia(vec4 proc);
@@ -24,9 +21,6 @@ void main()
 	// texturing
 	vec4 proc = texture(tex,TexCoords);
 	vec4 sproc = texture(splash,TexCoords);
-	vec4 tproc = texture(title,TexCoords);
-	vec4 selproc = texture(select,TexCoords);
-	vec4 crssproc = texture(cross,TexCoords);
 
 	// effects
 	vec4 spproc = calculate_sepia(proc);
@@ -38,16 +32,16 @@ void main()
 	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
 
 	// selection splash inversions
-	int tsplash = int(tproc.r+.9);  // if hit by title splash
-	int ssplash = int(selproc.g+.9);  // if hit by selection splash
+	int tsplash = int(sproc.r+.9);  // if hit by title splash
+	int ssplash = int(sproc.g+.9);  // if hit by selection splash
 	sep_swap = mix(sep_swap,vec4(0),proc.b*tsplash);  // invert title splash
 	sep_swap = mix(sep_swap,vec4(0),proc.r*ssplash);  // invert selection splash
 	sep_swap = mix(sep_swap,vec4(/*1.0-proc.rgb*/vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);
 
 	// render output
-	outColour = mix(sep_swap+crssproc,sproc,splashed-proc.b*splashed);
-	outColour = mix(outColour,outColour+selproc,1-proc.b+tsplash);
-	outColour = mix(outColour,tproc,tsplash-proc.b*tsplash);
+	outColour = mix(sep_swap+sproc,sproc,splashed-proc.b*splashed);
+	outColour = mix(outColour,outColour+sproc,1-proc.b+tsplash);
+	outColour = mix(outColour,sproc,tsplash-proc.b*tsplash);
 }
 
 vec4 calculate_sepia(vec4 proc)
