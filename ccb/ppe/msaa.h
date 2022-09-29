@@ -11,7 +11,7 @@ public:
 
 	// construction
 	MSAA();
-	MSAA(const char* vsp,const char* fsp,uint32_t bw,uint32_t bh,int los);
+	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los);
 	// TODO: make resolution dynamic
 
 	// action
@@ -25,7 +25,7 @@ private:
 
 	// extern
 	Shader sfb;
-	uint32_t fbw,fbh;
+	uint16_t fbw,fbh;
 
 	// essentials
 	Buffer buffer = Buffer();

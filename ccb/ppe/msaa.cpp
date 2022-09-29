@@ -10,7 +10,7 @@ MSAA::MSAA() {  }
 	constructor(const char*,const char*,uint32_t,uint32_t,int)
 	[...]
 */
-MSAA::MSAA(const char* vsp,const char* fsp,uint32_t bw,uint32_t bh,int los)
+MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	: fbw(bw),fbh(bh)
 {
 	// create and upload canvas vertices
@@ -44,7 +44,7 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint32_t bw,uint32_t bh,int los)
 	glGenRenderbuffers(1,&rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER,rbo);
 	glRenderbufferStorageMultisample(GL_RENDERBUFFER,los,GL_DEPTH24_STENCIL8,fbw,fbh);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glBindFramebuffer(GL_RENDERBUFFER,0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
 
 	// generate and bind write framebuffer

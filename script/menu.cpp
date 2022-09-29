@@ -132,7 +132,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 	// create msaa effect for selection splash
 	msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
-			m_frame->w_res,m_frame->h_res,16);
+			m_frame->w_res,m_frame->h_res,8);
 
 	// setup user input
 	if (f->m_gc.size()>0) {
