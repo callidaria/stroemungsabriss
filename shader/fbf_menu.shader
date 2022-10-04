@@ -5,7 +5,7 @@ in vec2 TexCoords;
 out vec4 outColour;
 
 // sepia properties
-uniform vec2 fres = vec2(1920,1080); // ??obsolete if calculated pos is uniform
+uniform vec2 fres = vec2(1920,1080);  // ??obsolete if calculated pos is uniform
 uniform float vgnt = .45;
 uniform float ptrans = 0;
 
@@ -22,7 +22,7 @@ void main()
 	vec4 proc = texture(tex,TexCoords);
 	vec4 sproc = texture(splash,TexCoords);
 
-	// effects
+	// sepia transition
 	vec4 spproc = calculate_sepia(proc);
 	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);  // calculating the sepia swap
 
@@ -36,7 +36,7 @@ void main()
 	int ssplash = int(sproc.g+.9);  // if hit by selection splash
 	sep_swap = mix(sep_swap,vec4(0),proc.b*tsplash);  // invert title splash
 	sep_swap = mix(sep_swap,vec4(0),proc.r*ssplash);  // invert selection splash
-	sep_swap = mix(sep_swap,vec4(/*1.0-proc.rgb*/vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);
+	sep_swap = mix(sep_swap,vec4(vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);
 
 	// render output
 	outColour = mix(sep_swap+sproc,sproc,splashed-proc.b*splashed);

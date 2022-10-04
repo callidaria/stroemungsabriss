@@ -2,13 +2,18 @@
 
 /*
 	constructor()
-	[...]
+	purpose: creates a placeholder object for multisampling
 */
 MSAA::MSAA() {  }
 
 /*
 	constructor(const char*,const char*,uint32_t,uint32_t,int)
-	[...]
+	vsp: target vertex shader path
+	fsp: target fragment shader path
+	bw: renderbuffer width
+	bh: renderbuffer height
+	los: level of multisampling
+	purpose: create an object for multisampling
 */
 MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	: fbw(bw),fbh(bh)
@@ -62,7 +67,7 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 
 /*
 	bind() -> void
-	[...]
+	purpose: bind multisampling framebuffer
 */
 void MSAA::bind()
 {
@@ -71,7 +76,7 @@ void MSAA::bind()
 
 /*
 	blit() -> void
-	[...]
+	purpose: blit framebuffers, read from multisample buffer, write to screen buffer
 */
 void MSAA::blit()
 {
@@ -83,7 +88,7 @@ void MSAA::blit()
 
 /*
 	render() -> void
-	[...]
+	purpose: render multisampled buffer to msaa canvas
 */
 void MSAA::render()
 {
@@ -99,7 +104,7 @@ void MSAA::render()
 
 /*
 	get_buffer() -> GLuint
-	[...]
+	returns: screen buffer holding current multisampled frame
 */
 GLuint MSAA::get_buffer()
 {
