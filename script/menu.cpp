@@ -123,13 +123,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 
 	// create msaa effect for selection splash
-	msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
-			m_frame->w_res,m_frame->h_res,8);
-	vsel_msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
-			m_frame->w_res,m_frame->h_res,8);
-	hsel_msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
-			m_frame->w_res,m_frame->h_res,8);
-	prism_msaa = MSAA("shader/fbv_standard.shader","shader/fbf_standard.shader",
+	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",
 			m_frame->w_res,m_frame->h_res,8);
 
 	// setup user input
@@ -361,11 +355,12 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[2]",glm::vec2(0));
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(0));
 
-	// render title splash to framebuffer
+	// start splash msaa
 	msaa.bind();
 	m_frame->clear(0,0,0);
+
+	// render title splash to framebuffer
 	glDrawArrays(GL_TRIANGLES,0,6);
-	msaa.blit();
 
 	// upload vertical selection scroll
 	sshd.upload_vec2("idx_mod[0]",glm::vec2(300*dtrans,0));
@@ -376,10 +371,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[3]",glm::vec2(325*dtrans,0));
 
 	// render vertical selection splash to framebuffer
-	vsel_msaa.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,18,6);
-	vsel_msaa.blit();
 
 	// calculate selection splash vibration and presets
 	int rnd_edge[4];
@@ -397,10 +389,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(1280,-15*(mm>2)-lcscroll+sbar[7]+(rand()%10-5)));
 
 	// render horizontal selection splash to framebuffer
-	hsel_msaa.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,6,12);
-	hsel_msaa.blit();
 
 	// calculate the list splash edges for prism list selection
 	bool af = edge_mod==-1;
@@ -422,10 +411,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
 
 	// render prism list viewtype to framebuffer
-	prism_msaa.bind();
-	m_frame->clear(0,0,0);
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
-	prism_msaa.blit();
+
+	// blit msaa buffers
+	msaa.blit();
 
 	// deltasave lselect to compare list selection modification next frame
 	diffsel = lselect;
@@ -500,14 +489,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	globe_fb.close();
 
 	// render combined splash overlay
-	msaa.bind();
 	m_frame->clear(0,0,0);
-	fb.render_wOverlay(msaa.get_buffer(),hsel_msaa.get_buffer(),vsel_msaa.get_buffer(),
-			prism_msaa.get_buffer(),ptrans);
+	fb.render_wOverlay(msaa.get_buffer(),ptrans);
 
 	// anti aliasing for selection splashes
-	msaa.blit();
-	m_frame->clear(0,0,0);
 	msaa.render();
 
 	// render menu lists and sublists

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../mat/toolbox.h"
 #include "../fcn/buffer.h"
 #include "../gfx/shader.h"
 

@@ -86,6 +86,7 @@ make win
 ***
 
 ## Trivia
+- Estimated Worktime Before Commit 120: 120h
 - Elapsed Worktime After Commit 120: 19h 19min
 	+ 46: 38h 55min
 	+ 54: 12h 40min
@@ -94,5 +95,5 @@ make win
 	+ 22: 5h 23min
 	+ 56: 1h 5min
 	+ 74: 4h 58min
-    + 63: 6h 11min
-- Total Code Lines: 7506
+    + 63: 10h 22min
+- Total Code Lines: 7514

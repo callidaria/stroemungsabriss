@@ -18,19 +18,10 @@ MSAA::MSAA() {  }
 MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	: fbw(bw),fbh(bh)
 {
-	// create and upload canvas vertices
-	float verts[] = {
-		-1.0f,1.0f,0.0f,1.0f,
-		-1.0f,-1.0f,0.0f,0.0f,
-		1.0f,-1.0f,1.0f,0.0f,
-		-1.0f,1.0f,0.0f,1.0f,
-		1.0f,-1.0f,1.0f,0.0f,
-		1.0f,1.0f,1.0f,1.0f
-	};  // FIXME: streamline this mess
-
-	// buffer upload and shader compilation
+	// canvas creation, buffer upload and shader compilation
+	std::vector<float> verts = Toolbox::create_sprite_canvas(glm::vec2(0,0),fbw,fbh);
 	buffer.bind();
-	buffer.upload_vertices(verts,sizeof(verts));
+	buffer.upload_vertices(verts);
 	sfb.compile2d(vsp,fsp);
 
 	// generate and bind read framebuffer
@@ -95,8 +86,11 @@ void MSAA::render()
 	// prepare
 	sfb.enable();
 	buffer.bind();
+
+	// set backbuffer texture
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,scrbuffer);
+	glBindTexture(GL_TEXTURE_2D,get_buffer());
+	sfb.upload_int("tex",0);
 
 	// draw
 	glDrawArrays(GL_TRIANGLES,0,6);

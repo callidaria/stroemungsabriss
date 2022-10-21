@@ -90,7 +90,7 @@ private:
 	FrameBuffer fb,globe_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
-	MSAA msaa,vsel_msaa,hsel_msaa,prism_msaa;  // reduce prism buffer into hsel buffer
+	MSAA msaa;  // reduce prism buffer into hsel buffer
 
 	// input definition
 	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;

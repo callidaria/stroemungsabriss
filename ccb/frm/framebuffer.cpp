@@ -2,14 +2,15 @@
 
 FrameBuffer::FrameBuffer() {  } // !!how bout no
 
-FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp, bool float_buffer)
+FrameBuffer::FrameBuffer(int fr_width,int fr_height,const char* vsp,
+		const char* fsp,bool float_buffer)
 	: frw(fr_width),frh(fr_height)
 {
 	init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer);
 }
 
-FrameBuffer::FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
-		bool float_buffer)
+FrameBuffer::FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,
+		const char* fsp,bool float_buffer)
 	: frw(fr_width),frh(fr_height)
 {
 	init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer);
@@ -63,23 +64,20 @@ void FrameBuffer::render()
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 
-void FrameBuffer::render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint32_t dtex,float ptrans)
+void FrameBuffer::render_wOverlay(GLuint itex,float ptrans)
 {
+	// setup
 	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
 	buffer.bind();
 	glBindTexture(GL_TEXTURE_2D,tex);
-	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,atex);
-	glActiveTexture(GL_TEXTURE2);glBindTexture(GL_TEXTURE_2D,btex);
-	glActiveTexture(GL_TEXTURE3);glBindTexture(GL_TEXTURE_2D,ctex);
-	glActiveTexture(GL_TEXTURE4);glBindTexture(GL_TEXTURE_2D,dtex);
+	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,itex);
+
+	// render
 	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
 	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
-	s.upload_int("splash",1);
-	s.upload_int("title",2);
-	s.upload_int("select",3);
-	s.upload_int("cross",4);
 	s.upload_float("ptrans",ptrans);
+	s.upload_int("splash",1);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 

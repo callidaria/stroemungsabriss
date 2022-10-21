@@ -12,9 +12,6 @@ uniform float ptrans = 0;
 // framebuffers
 uniform sampler2D tex;
 uniform sampler2D splash;
-uniform sampler2D title;
-uniform sampler2D select;
-uniform sampler2D cross;
 
 // function definitions
 vec4 calculate_sepia(vec4 proc);
@@ -22,42 +19,25 @@ vec4 calculate_sepia(vec4 proc);
 void main()
 {
 	// texturing
-	vec4 proc = texture(tex,TexCoords);
-	vec4 sproc = texture(splash,TexCoords);
-	vec4 tproc = texture(title,TexCoords);
-	vec4 selproc = texture(select,TexCoords);
-	vec4 crssproc = texture(cross,TexCoords);
-
-	// effects
-	vec4 spproc = calculate_sepia(proc);
-	vec4 sep_swap = (spproc*(1-ptrans)+proc*ptrans);  // calculating the sepia swap
-
-	// menu splash
-	int splashed = int(sproc.r+.9);  // check if pixel has been splashed
-	sep_swap = mix(sep_swap,1.0-proc,splashed);  // invert writing
-	sep_swap = mix(sep_swap,proc,proc.b*2*abs(splashed-1));  // reset sepia when blue
-
-	// selection splash inversions
-	int tsplash = int(tproc.r+.9);  // if hit by title splash
-	int ssplash = int(selproc.g+.9);  // if hit by selection splash
-	sep_swap = mix(sep_swap,vec4(0),proc.b*tsplash);  // invert title splash
-	sep_swap = mix(sep_swap,vec4(0),proc.r*ssplash);  // invert selection splash
-	sep_swap = mix(sep_swap,vec4(/*1.0-proc.rgb*/vec3(1,0,1),1.0),(proc.b-proc.r)*ssplash);
-
-	// render output
-	outColour = mix(sep_swap+crssproc,sproc,splashed-proc.b*splashed);
-	outColour = mix(outColour,outColour+selproc,1-proc.b+tsplash);
-	outColour = mix(outColour,tproc,tsplash-proc.b*tsplash);
+	outColour = texture(tex,TexCoords);
+	outColour = outColour*ptrans+calculate_sepia(outColour)*(1-ptrans);  // calculate sepia swap
 }
 
 vec4 calculate_sepia(vec4 proc)
 {
+	// calculate vignette darkening
 	vec2 pos = (gl_FragCoord.xy/fres)-vec2(.5);
 	float vignette = smoothstep(0.75,0.75-vgnt,length(pos));
 	float falpha = min((proc.r+proc.g+proc.b)/1.5,1.0);
+
+	// modify pixel alpha
 	vec3 sepia_proc = vec3(1,.8,0)*(1-falpha)+proc.rgb*falpha;
 	sepia_proc = mix(sepia_proc.rgb,sepia_proc.rgb*vignette,.75);
+
+	// translate into sepia colour range
 	float alpha = (sepia_proc.r*0.299)+(sepia_proc.g*0.587)+(sepia_proc.b*0.114);
 	vec3 sepia = vec3(alpha)*vec3(1.35,1.0,0.65);
+
+	// mix alpha and and modified colour range and return
 	return vec4(mix(sepia_proc.rgb,sepia,.75),1.0);
 }
