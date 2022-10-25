@@ -62,20 +62,18 @@ void FrameBuffer::render()
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 
-void FrameBuffer::render_wOverlay(GLuint itex,float ptrans)
+void FrameBuffer::render_wOverlay(float ptrans)
 {
 	// setup
 	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
 	buffer.bind();
 	glBindTexture(GL_TEXTURE_2D,tex);
-	glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,itex);
 
 	// render
 	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
 	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
 	s.upload_float("ptrans",ptrans);
-	s.upload_int("splash",1);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
 

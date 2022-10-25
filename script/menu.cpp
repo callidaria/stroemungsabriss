@@ -489,7 +489,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render combined splash overlay
 	m_frame->clear(0,0,0);
-	fb.render_wOverlay(msaa.get_buffer(),ptrans);
+	fb.render_wOverlay(ptrans);
 
 	// anti aliasing for selection splashes
 	msaa.render(fb.get_tex());

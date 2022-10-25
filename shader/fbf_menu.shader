@@ -5,13 +5,12 @@ in vec2 TexCoords;
 out vec4 outColour;
 
 // sepia properties
-uniform vec2 fres = vec2(1920,1080);  // ??obsolete if calculated pos is uniform
+uniform vec2 fres = vec2(1280,720);  // ??obsolete if calculated pos is uniform
 uniform float vgnt = .45;
 uniform float ptrans = 0;
 
 // framebuffers
 uniform sampler2D tex;
-uniform sampler2D splash;
 
 // function definitions
 vec4 calculate_sepia(vec4 proc);

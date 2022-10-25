@@ -22,7 +22,6 @@ void main()
 	overlay_tex = (1-inv)*overlay_tex+inv*vec4(0,0,0,int(overlay_tex.g>.25));
 
 	// output pixel colour
-	outColour = splash_tex;
-	outColour *= ovwr;
+	outColour = splash_tex*ovwr;
 	outColour += overlay_tex*intr;  // §§nice effect if you replace *intr with *ovwr
 }
