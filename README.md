@@ -70,7 +70,7 @@ make win
 - FIXED: menu dialogue has deprecated functions
 - FIXED: collision sphere center off object center
 - FIXED: scuffed geometry of globe preview
-- FIXED: missing anti aliasing on menu selection splash [DEV]
+- FIXED: missing anti aliasing on menu selection splash
 
 <br>
 
@@ -95,5 +95,5 @@ make win
 	+ 22: 5h 23min
 	+ 56: 1h 5min
 	+ 74: 4h 58min
-    + 63: 13h 11min
-- Total Code Lines: 7514
+    + 63: 13h 18min
+- Total Code Lines: 7573

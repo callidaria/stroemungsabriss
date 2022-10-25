@@ -19,7 +19,7 @@ void main()
 
 	// colour inversion for selection splash
 	int inv = int(splash_tex.g>.25);
-	overlay_tex = (1-inv)*overlay_tex+inv*vec4(vec3(1)-overlay_tex.rgb,overlay_tex.g);
+	overlay_tex = (1-inv)*overlay_tex+inv*vec4(0,0,0,int(overlay_tex.g>.25));
 
 	// output pixel colour
 	outColour = splash_tex;
