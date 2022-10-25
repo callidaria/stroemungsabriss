@@ -1,9 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <GL/glew.h>
+
 #include "../gfx/shader.h"
 #include "../fcn/buffer.h"
+#include "../mat/toolbox.h"
 
 class FrameBuffer
 {
@@ -18,15 +21,15 @@ public:
 	void bind(); 	// binds the framebuffer
 	void close(); 	// closes every framebuffer ??maybe get this into frame.h
 	void render(); 	// renders the framebuffer
-	void render_wOverlay(uint32_t atex,uint32_t btex,uint32_t ctex,uint32_t dtex,float ptrans);
+	void render_wOverlay(float ptrans);
 
 	//getters
 	unsigned int get_fbo(); // !!check if used
 	unsigned int get_tex(); // !!check if used
 private:
-	Shader s;
-	unsigned int tex,rbo;
-	Buffer buffer;
+	Shader s = Shader();
+	GLuint tex,rbo;
+	Buffer buffer = Buffer();
 	unsigned int fbo;
 	uint32_t frw,frh;
 };

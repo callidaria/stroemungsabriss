@@ -2,7 +2,7 @@
 
 /*
 	Constructor()
-	DEPRECATED: make an constructor maybe even autocompile at creation?
+	DEPRECATED: make a constructor, maybe even autocompile at creation?
 */
 Shader::Shader() {  }
 
@@ -98,7 +98,7 @@ void Shader::enable() { glUseProgram(m_shaderProgram); }
 	returns: compiled and debugged shader. if shader could not be compiled successfully
 		a debug log will be posted into console at runtime.
 */
-unsigned int Shader::compile_shader(const char* path,GLenum stype) // FIXME: uint and enum types
+unsigned int Shader::compile_shader(const char* path,GLenum stype)
 {
 	// get source file
 	std::string src; // FIXME: delete after usage
@@ -114,17 +114,17 @@ unsigned int Shader::compile_shader(const char* path,GLenum stype) // FIXME: uin
 		std::getline(file,line);
 		src.append(line+"\n"); // ??standard && addable const char* is less performant bc stack
 	} file.close();
-	const char* source = src.c_str(); // ??conversion nessessary after read revolution or .usagerev
+	const char* source = src.c_str();
 
 	// shader creation
 	unsigned int shader = glCreateShader(stype);
-	glShaderSource(shader,1,&source,NULL); // !!change source usage
+	glShaderSource(shader,1,&source,NULL);
 	glCompileShader(shader);
 
 	// shader debug
 	int stat;
 	glGetShaderiv(shader,GL_COMPILE_STATUS,&stat);
-	if (stat!=GL_TRUE) { // ??GL_TRUE macro synonymous with boolean value expression
+	if (!stat) {
 		char log[512];
 		glGetShaderInfoLog(shader,512,NULL,log);
 		printf("\033[1;31mshader error at: %s\nerror:\033[033[36m%s\033[0m\n",path,log);

@@ -1,6 +1,19 @@
 #include "toolbox.h"
 
 /*
+	create_sprite_canvas() -> std::vector<float>
+	returns: primitive canvas vertices without camera ready coordinate system and element draw
+*/
+std::vector<float> Toolbox::create_sprite_canvas()
+{
+	std::vector<float> out = {
+		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,	// first triangle
+		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f		// second triangle
+	};
+	return out;
+}
+
+/*
 	create_sprite_canvas(vec2,float,float) -> std::vector<float>
 	pos: origin position of canvas
 	width: vertex distanced width of canvas

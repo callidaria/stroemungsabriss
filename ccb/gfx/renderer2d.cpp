@@ -116,7 +116,6 @@ void Renderer2D::prepare()
 {
 	// gl settings
 	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 
 	// setup buffer & shader
@@ -124,7 +123,6 @@ void Renderer2D::prepare()
 	reset_shader();
 	buffer.bind();
 }
-// FIXME: which disables are necessary?
 
 /*
 	render_sprite(uint16_t,uint16_t) -> void

@@ -2,30 +2,28 @@
 
 /*
 	constructor()
-	[...]
+	purpose: creates a placeholder object for multisampling
 */
 MSAA::MSAA() {  }
 
 /*
 	constructor(const char*,const char*,uint32_t,uint32_t,int)
-	[...]
+	vsp: target vertex shader path
+	fsp: target fragment shader path
+	bw: renderbuffer width
+	bh: renderbuffer height
+	los: level of multisampling
+	purpose: create an object for multisampling
 */
 MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	: fbw(bw),fbh(bh)
 {
-	// create and upload canvas vertices
-	float verts[] = {
-		-1.0f,1.0f,0.0f,1.0f,
-		-1.0f,-1.0f,0.0f,0.0f,
-		1.0f,-1.0f,1.0f,0.0f,
-		-1.0f,1.0f,0.0f,1.0f,
-		1.0f,-1.0f,1.0f,0.0f,
-		1.0f,1.0f,1.0f,1.0f
-	};  // FIXME: streamline this mess
-
-	// buffer upload and shader compilation
+	// buffer upload
+	std::vector<float> verts = Toolbox::create_sprite_canvas();
 	buffer.bind();
-	buffer.upload_vertices(verts,sizeof(verts));
+	buffer.upload_vertices(verts);
+
+	// canvas creation, buffer upload and shader compilation
 	sfb.compile2d(vsp,fsp);
 
 	// generate and bind read framebuffer
@@ -62,7 +60,7 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 
 /*
 	bind() -> void
-	[...]
+	purpose: bind multisampling framebuffer
 */
 void MSAA::bind()
 {
@@ -71,7 +69,7 @@ void MSAA::bind()
 
 /*
 	blit() -> void
-	[...]
+	purpose: blit framebuffers, read from multisample buffer, write to screen buffer
 */
 void MSAA::blit()
 {
@@ -83,16 +81,54 @@ void MSAA::blit()
 
 /*
 	render() -> void
-	[...]
+	purpose: render multisampled buffer to msaa canvas
 */
 void MSAA::render()
 {
-	// prepare
-	sfb.enable();
-	buffer.bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,scrbuffer);
+	prepare();
+	glDrawArrays(GL_TRIANGLES,0,6);
+}
+
+/*
+	render(GLuint) -> void
+	ovltex: overlay texture to be combined with base texture
+	purpose: render base combined with overlay texture if base texture has colour length > 0
+*/
+void MSAA::render(GLuint ovltex)
+{
+	// prepare & upload overlay texture
+	prepare();
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,ovltex);
+	sfb.upload_int("overlay",1);
 
 	// draw
 	glDrawArrays(GL_TRIANGLES,0,6);
+}
+
+/*
+	get_buffer() -> GLuint
+	returns: screen buffer holding current multisampled frame
+*/
+GLuint MSAA::get_buffer()
+{
+	return scrbuffer;
+}
+
+/*
+	prepare() -> void
+	purpose: used to prepare all render methods
+*/
+void MSAA::prepare()
+{
+	// buffer & shader
+	sfb.enable();
+	buffer.bind();
+
+	// gl setup
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_DEPTH_TEST);
+
+	// texture upload
+	glBindTexture(GL_TEXTURE_2D,get_buffer());
 }

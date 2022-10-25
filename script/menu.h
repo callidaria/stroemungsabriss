@@ -87,7 +87,7 @@ private:
 	Camera3D* m_cam3d;
 	Material3D mat0;
 	Shader sshd = Shader();
-	FrameBuffer fb,splash_fb,title_fb,select_fb,cross_fb,globe_fb;
+	FrameBuffer fb,globe_fb;
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../mat/toolbox.h"
 #include "../fcn/buffer.h"
 #include "../gfx/shader.h"
 
@@ -20,11 +21,19 @@ public:
 
 	// draw
 	void render();
+	void render(GLuint ovltex);
+
+	// export
+	GLuint get_buffer();
+
+private:
+
+	void prepare();
 
 private:
 
 	// extern
-	Shader sfb;
+	Shader sfb = Shader();
 	uint16_t fbw,fbh;
 
 	// essentials
