@@ -119,12 +119,11 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	globe_fb = FrameBuffer(f->w_res,f->h_res,f->w_res/4,f->h_res/4,"shader/fbv_standard.shader",
 			"shader/fbf_standard.shader",false);
 
+	// create msaa effect for selection splash
+	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",f->w_res,f->h_res,8);
+
 	// minimize difficulty choice banners
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
-
-	// create msaa effect for selection splash
-	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",
-			m_frame->w_res,m_frame->h_res,8);
 
 	// setup user input
 	if (f->m_gc.size()>0) {
@@ -496,7 +495,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	msaa.render();
 
 	// render menu lists and sublists
-	m_r2d->prepare();
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
 	// animate and move dialogue selector to dialogue choice

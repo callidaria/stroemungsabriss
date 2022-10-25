@@ -33,7 +33,7 @@ Frame::Frame(const char* title,int screen,int width,int height,SDL_WindowFlags f
 }
 void Frame::clear(float cx,float cy,float cz)
 {
-	glClearColor(cx,cy,cz,1);
+	glClearColor(cx,cy,cz,0);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
 }
 void Frame::update() { SDL_GL_SwapWindow(m_frame); }

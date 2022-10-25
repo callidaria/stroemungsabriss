@@ -28,7 +28,7 @@ public:
 private:
 
 	// extern
-	Shader sfb;
+	Shader sfb = Shader();
 	uint16_t fbw,fbh;
 
 	// essentials

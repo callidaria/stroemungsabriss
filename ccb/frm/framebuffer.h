@@ -1,9 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <GL/glew.h>
+
 #include "../gfx/shader.h"
 #include "../fcn/buffer.h"
+#include "../mat/toolbox.h"
 
 class FrameBuffer
 {
@@ -24,9 +27,9 @@ public:
 	unsigned int get_fbo(); // !!check if used
 	unsigned int get_tex(); // !!check if used
 private:
-	Shader s;
-	unsigned int tex,rbo;
-	Buffer buffer;
+	Shader s = Shader();
+	GLuint tex,rbo;
+	Buffer buffer = Buffer();
 	unsigned int fbo;
 	uint32_t frw,frh;
 };

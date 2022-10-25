@@ -98,7 +98,7 @@ void Shader::enable() { glUseProgram(m_shaderProgram); }
 	returns: compiled and debugged shader. if shader could not be compiled successfully
 		a debug log will be posted into console at runtime.
 */
-unsigned int Shader::compile_shader(const char* path,GLenum stype) // FIXME: uint and enum types
+unsigned int Shader::compile_shader(const char* path,GLenum stype)
 {
 	// get source file
 	std::string src; // FIXME: delete after usage
