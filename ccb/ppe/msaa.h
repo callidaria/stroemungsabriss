@@ -21,9 +21,14 @@ public:
 
 	// draw
 	void render();
+	void render(GLuint ovltex);
 
 	// export
 	GLuint get_buffer();
+
+private:
+
+	void prepare();
 
 private:
 

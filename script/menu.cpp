@@ -492,7 +492,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	fb.render_wOverlay(msaa.get_buffer(),ptrans);
 
 	// anti aliasing for selection splashes
-	msaa.render();
+	msaa.render(fb.get_tex());
 
 	// render menu lists and sublists
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);

@@ -85,14 +85,22 @@ void MSAA::blit()
 */
 void MSAA::render()
 {
-	// prepare
-	sfb.enable();
-	buffer.bind();
+	prepare();
+	glDrawArrays(GL_TRIANGLES,0,6);
+}
 
-	// set backbuffer texture
-	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_DEPTH_TEST);
-	glBindTexture(GL_TEXTURE_2D,get_buffer());
+/*
+	render(GLuint) -> void
+	ovltex: overlay texture to be combined with base texture
+	purpose: render base combined with overlay texture if base texture has colour length > 0
+*/
+void MSAA::render(GLuint ovltex)
+{
+	// prepare & upload overlay texture
+	prepare();
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,ovltex);
+	sfb.upload_int("overlay",1);
 
 	// draw
 	glDrawArrays(GL_TRIANGLES,0,6);
@@ -105,4 +113,22 @@ void MSAA::render()
 GLuint MSAA::get_buffer()
 {
 	return scrbuffer;
+}
+
+/*
+	prepare() -> void
+	purpose: used to prepare all render methods
+*/
+void MSAA::prepare()
+{
+	// buffer & shader
+	sfb.enable();
+	buffer.bind();
+
+	// gl setup
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_DEPTH_TEST);
+
+	// texture upload
+	glBindTexture(GL_TEXTURE_2D,get_buffer());
 }
