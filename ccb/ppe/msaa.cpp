@@ -33,7 +33,7 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	// generate multisampled colour buffer
 	glGenTextures(1,&colbuffer);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,colbuffer);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,los,GL_RGB,fbw,fbh,GL_TRUE);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,los,GL_RGBA,fbw,fbh,GL_TRUE);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D_MULTISAMPLE,
 			colbuffer,0);
@@ -52,7 +52,7 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	// generate screen buffer
 	glGenTextures(1,&scrbuffer);
 	glBindTexture(GL_TEXTURE_2D,scrbuffer);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fbw,fbh,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,fbw,fbh,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,scrbuffer,0);

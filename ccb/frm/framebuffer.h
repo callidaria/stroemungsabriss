@@ -11,7 +11,8 @@
 class FrameBuffer
 {
 public:
-	FrameBuffer(); // !!trim down usages if possible
+
+	FrameBuffer() {  }
 	FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp,bool float_buffer);
 	FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
 		bool float_buffer);
@@ -26,7 +27,9 @@ public:
 	//getters
 	unsigned int get_fbo(); // !!check if used
 	unsigned int get_tex(); // !!check if used
+
 private:
+
 	Shader s = Shader();
 	GLuint tex,rbo;
 	Buffer buffer = Buffer();
