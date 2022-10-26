@@ -11,25 +11,42 @@
 class FrameBuffer
 {
 public:
-	FrameBuffer(); // !!trim down usages if possible
-	FrameBuffer(int fr_width,int fr_height,const char* vsp,const char* fsp,bool float_buffer);
-	FrameBuffer(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
-		bool float_buffer);
 
-	void init(int fr_width,int fr_height,int fr_wres,int fr_hres,const char* vsp,const char* fsp,
-		bool float_buffer);
-	void bind(); 	// binds the framebuffer
-	void close(); 	// closes every framebuffer ??maybe get this into frame.h
-	void render(); 	// renders the framebuffer
-	void render_wOverlay(float ptrans);
+	// construction
+	FrameBuffer() {  }
+	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
+		const char* fsp,bool float_buffer);
+	FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
+		const char* vsp,const char* fsp,bool float_buffer);
+
+	// read
+	void bind();
+
+	// write
+	void render();
+	void render(float ptrans);
 
 	//getters
-	unsigned int get_fbo(); // !!check if used
-	unsigned int get_tex(); // !!check if used
+	GLuint get_fbo(); // !!check if used
+	GLuint get_tex(); // !!check if used
+
+	// statics
+	static void close();
+
 private:
-	Shader s = Shader();
-	GLuint tex,rbo;
+
+	// standard initialization
+	void init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
+		const char* vsp,const char* fsp,bool float_buffer);
+
+private:
+
+	// engine components
 	Buffer buffer = Buffer();
-	unsigned int fbo;
+	Shader s = Shader();
+
+	// buffers
+	GLuint tex,rbo;
+	GLuint fbo;
 	uint32_t frw,frh;
 };
