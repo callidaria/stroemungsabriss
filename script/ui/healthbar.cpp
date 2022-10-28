@@ -293,7 +293,7 @@ void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	// decrease target iteration if nanobar is empty
 	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*PT_REPEAT+2]<=0;
 
-	// signal refill if all bars empty
+	// signal refill if all bars are empty
 	bool hpbar_empty = hpswap.target_itr<0;
 	hpswap.target_itr += hpbar_empty;
 	hpswap.hpbar_itr += hpbar_empty;

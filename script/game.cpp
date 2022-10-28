@@ -17,7 +17,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	m_r3d->load(&cam3d);
 
 	// ortho 3D element lighting
-	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(0,100,0),glm::vec3(1,1,1),1);
+	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
 	l3d_ortho.set_amnt(1);
 	l3d_ortho.upload();
 
@@ -26,7 +26,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// post processing
-	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",1920,1080,8);
+	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
+			m_frame->w_res,m_frame->h_res,8);
 
 	// update until exit condition
 	uint32_t running = rstate+1;
@@ -48,6 +49,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 		// blit ui multisampling
 		msaa.blit();
+		m_frame->clear(.1f,.1f,.1f);
 
 		// stage
 		m_bgenv.update(rstate);	

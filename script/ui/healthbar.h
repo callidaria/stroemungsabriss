@@ -25,8 +25,8 @@ constexpr uint8_t PT_REPEAT = 5;	// amount of floats the index pattern takes to 
 
 struct HPBarSwap
 {
-	std::vector<std::vector<float>> dest_pos;	// all containing destination position
-	std::vector<std::vector<float>> dest_wdt;	// all containing destination widths
+	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
+	std::vector<std::vector<float>> dest_wdt;	// all destination widths per combined bar
     std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
 	std::vector<float> edge_target;				// raised edge values the upper right vertex reaches
 	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)

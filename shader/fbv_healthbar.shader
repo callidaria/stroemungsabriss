@@ -8,8 +8,6 @@ in float wdt;
 in float dmg;
 in vec2 edg;
 
-out vec3 coldef;
-
 // camera
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
@@ -17,7 +15,7 @@ uniform mat4 proj = mat4(1.0);
 void main()
 {
 	// result variables
-	vec2 pos = position;
+	vec2 pos = position;  // ??what is the meaning of this trash
 
 	// situational variables setup
 	float wfac = clamp(edge_id-1,0,1);
@@ -37,7 +35,4 @@ void main()
 
 	// calculate final vertex positions
 	gl_Position = proj*view*vec4(pos,0,1);
-
-	// experimental colour definition
-	coldef = vec3(.5,0,1);
 }
