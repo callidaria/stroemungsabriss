@@ -71,6 +71,7 @@ make win
 - FIXED: collision sphere center off object center
 - FIXED: scuffed geometry of globe preview
 - FIXED: missing anti aliasing on menu selection splash
+- FIXED: unused bullets get rendered at origin position
 
 <br>
 
@@ -97,4 +98,5 @@ make win
 	+ 74: 4h 58min
     + 63: 13h 25min
 	+ 79: 1h
-- Total Code Lines: 7573
+	+ 65: 43min
+- Total Code Lines: 7657

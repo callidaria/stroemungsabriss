@@ -80,7 +80,6 @@ void BossDPilot::update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,g
 	r3d->prepare();
 	r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
 	r3d->render_mesh(rnd_index,rnd_index+1);
-	bSys->render();
 }
 
 /*

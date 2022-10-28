@@ -24,6 +24,9 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,const uint32_t
 	std::vector<glm::vec2> t_dirs(caps);			// creating temporary bullet direction list
 	std::vector<int32_t> t_ts(caps);				// creating temporary bullet tick counter list
 
+	// moving all instanced objects outside orthogonal view
+	for (int i=0;i<caps;i++) m_rI->set_offset(bCount.size(),i,glm::vec2(-10000));
+
 	// save bullet width and height of cluster
 	c_width.push_back(width);
 	c_height.push_back(height);
@@ -174,7 +177,8 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 	for (int i=0;i<countCaps[cluster];i++) {
 
 		// get centered bullet position
-		glm::vec2 cPos = m_rI->il[cluster].o[i]+glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
+		glm::vec2 cPos = m_rI->il[cluster].o[i]
+				+glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
 
 		// calculate if object got hit
 		bool hit = glm::length(cPos-pos)<=hr+br;  // check collision
