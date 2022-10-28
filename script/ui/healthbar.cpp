@@ -123,7 +123,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",TEXT_SIZE,TEXT_SIZE);
 	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
-	hpswap.phname.load_wcam(&tc2d);
+	hpswap.phname.load(&tc2d);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -256,7 +256,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	std::string pprefix = (hpswap.anim_tick>=POT)?std::to_string(hpswap.hpbar_itr+1)+'/':"";
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
-	hpswap.phcnt.load_wcam(&tc2d);
+	hpswap.phcnt.load(&tc2d);
 	// TODO: split both counters in different text objects
 
 	// zoom scroll phase counter at increment

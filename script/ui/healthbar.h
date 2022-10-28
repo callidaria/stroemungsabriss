@@ -6,11 +6,11 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/fcn/buffer.h"
-#include "../../ccb/mat/camera2d.h"
-#include "../../ccb/gfx/shader.h"
-
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
+
+#include "../../ccb/mat/camera2d.h"
+#include "../../ccb/gfx/shader.h"
 
 // text related constants
 constexpr uint8_t TEXT_MV = 25;							// inwards move offset for name and counter
@@ -66,6 +66,7 @@ private:
 	static void signal_clear(uint8_t &frdy,HPBarSwap &hpswap);
 
 private:
+
 	/*
 		func(uint8_t&,HPBarSwap&) -> void
 			=> func(frdy,hpswap) -> void

@@ -17,29 +17,52 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	m_r3d->load(&cam3d);
 
 	// ortho 3D element lighting
-	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(100,0,0),glm::vec3(1,1,1),1);
-	l3d_ortho.set_ambient(1.0f);
+	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(0,100,0),glm::vec3(1,1,1),1);
+	l3d_ortho.set_amnt(1);
+	l3d_ortho.upload();
 
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(140,650),1000,30,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
-	uint32_t running=rstate+1;
+	// post processing
+	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",1920,1080,8);
+
+	// update until exit condition
+	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
+
+		// frame
 		m_frame->print_fps();
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
 
-		m_bgenv.update(rstate);	
-		stg_upd.at(rstate)(m_r3d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
-		m_player.update(rstate,fwd_treg[11]);
-		m_bSys.render();
+		// ui multisampling
+		msaa.bind();
+		m_frame->clear(0,0,0);
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
 
+		// blit ui multisampling
+		msaa.blit();
+
+		// stage
+		m_bgenv.update(rstate);	
+		stg_upd.at(rstate)(m_r3d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
+
+		// player
+		m_player.update(rstate,fwd_treg[11]);
+
+		// bullet system
+		m_bSys.render();
+
+		// draw
+		msaa.render();
+
+		// swap
 		m_frame->update();
 	} rstate = 0;  // TODO: choose between menu &|| desktop skip
 }

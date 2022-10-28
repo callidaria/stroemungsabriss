@@ -14,8 +14,8 @@ public:
 
 	// construction
 	FrameBuffer() {  }
-	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
-		const char* fsp,bool float_buffer);
+	FrameBuffer(uint32_t fr_width,uint32_t fr_height,
+		const char* vsp,const char* fsp,bool float_buffer);
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
 		const char* vsp,const char* fsp,bool float_buffer);
 
