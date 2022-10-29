@@ -24,12 +24,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
-	// post processing
-	fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+	// lightweight action menu
+	ActionMenu lgt_menu = ActionMenu(m_frame);
 
-	bool menu_trg = false,menu_sys = false,menu_inf = false;
-	float ptrans = 1;
 	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
@@ -37,20 +34,11 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
 
-		// action menu open requests
-		bool req_sysmenu = m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!menu_trg&&!menu_inf;
-		menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
-		bool req_infomenu = m_frame->kb.ka[SDL_SCANCODE_TAB]&&!menu_trg&&!menu_sys;
-		menu_inf = menu_inf*!req_infomenu+!menu_inf*req_infomenu;
-		menu_trg = m_frame->kb.ka[SDL_SCANCODE_RETURN]||m_frame->kb.ka[SDL_SCANCODE_TAB];
+		// action menu update
+		lgt_menu.update();
+		lgt_menu.bind();
 
-		// dynamic animation variable change
-		ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
-
-		// menu background framebuffer
-		fb.bind();
-		m_frame->clear(0,0,0);
-
+		// stage
 		m_bgenv.update(rstate);
 		stg_upd.at(rstate)(m_r3d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
 		m_player.update(rstate,fwd_treg[11]);
@@ -60,10 +48,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
 
-		// action menu
-		FrameBuffer::close();
-		m_frame->clear(0,0,0);
-		fb.render(ptrans);
+		// action menu render
+		lgt_menu.render();
 
 		m_frame->update();
 	} rstate = 0;  // TODO: choose between menu &|| desktop skip

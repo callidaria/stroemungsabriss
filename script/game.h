@@ -16,7 +16,9 @@
 #include "bgenv.h"
 #include "player.h"
 #include "bullet_system.h"
+
 #include "ui/healthbar.h"
+#include "ui/action_menu.h"
 
 #include "boss_lchild.h"
 #include "boss_dpilot.h"
