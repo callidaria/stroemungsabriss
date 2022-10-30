@@ -1,58 +1,113 @@
 #include "frame.h"
 
 /*
- *	!!! ADD OUTPUT INFORMATION ABOUT SYSTEM !!!
- *	ALSO MAYBE IMPLEMENT WITH VIEWPORT RIGHT FROM THE BEGINNING ?
- * */
-Frame::Frame(const char* title,int screen,SDL_WindowFlags fs)
+	PARAMETER DEFINITIONS:
+	title (callidaria-program): frame header title
+	screen (0): screen id of frame origin position
+	width (1280): frame pixel width
+	height (720): frame pixel height
+	fs (0): framestate to define if windowed/fullscreen/borderless
+*/
+
+/*
+	constructor(const char*,int8_t,SDL_WindowFlags)
+	purpose: create output frame with given title on given screen
+	ADD FEATURE: !!! ADD OUTPUT INFORMATION ABOUT SYSTEM !!!
+		ALSO MAYBE IMPLEMENT WITH VIEWPORT RIGHT FROM THE BEGINNING ?
+*/
+Frame::Frame(const char* title,int8_t screen,SDL_WindowFlags fs)
 {
+	// initializing
 	init();
 
+	// screen informations
 	SDL_Rect dim_screen;
 	get_screen(screen,&dim_screen);
 
+	// setup routine
 	w_res = dim_screen.w;
 	h_res = dim_screen.h;
 	setup(title,dim_screen.x,dim_screen.y,dim_screen.w,dim_screen.h,fs);
 }
-Frame::Frame(const char* title,int width,int height,SDL_WindowFlags fs)
+
+/*
+	constructor(const char*,int16_t,int16_t,SDL_WindowFlags)
+	purpose: create output frame with given title with given frame dimensions
+*/
+Frame::Frame(const char* title,int16_t width,int16_t height,SDL_WindowFlags fs)
 	: w_res(width),h_res(height)
 {
 	init();
 	setup(title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,fs);
 }
-Frame::Frame(const char* title,int screen,int width,int height,SDL_WindowFlags fs)
+
+/*
+	constructor(const char*,int8_t,int16_t,int16_t,SDL_WindowFlags)
+	purpose: create output frame with given title with given frame dimensions on given screen
+*/
+Frame::Frame(const char* title,int8_t screen,int16_t width,int16_t height,SDL_WindowFlags fs)
 	: w_res(width),h_res(height)
 {
+	// initializing
 	init();
 
+	// screen informations
 	SDL_Rect dim_screen;
 	get_screen(screen,&dim_screen);
 
+	// setup routine
 	setup(title,dim_screen.x+100,dim_screen.y+100,width,height,fs);
 }
-void Frame::clear(float cx,float cy,float cz)
+
+/*
+	clear(float,float,float) -> void
+	cr (0): red value of clear colour
+	cg (0): green value of clear colour
+	cb (0): blue value of clear colour
+	purpose: clear screen and active framebuffers with given colour
+		will overwrite all previous clears, alpha value is only significant in texture combinations
+*/
+void Frame::clear(float cr,float cg,float cb)
 {
-	glClearColor(cx,cy,cz,0);
+	glClearColor(cr,cg,cb,0);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
 }
-void Frame::update() { SDL_GL_SwapWindow(m_frame); }
+
+/*
+	update() -> void
+	purpose: swaps frame information
+*/
+void Frame::update()
+{
+	SDL_GL_SwapWindow(m_frame);
+}
+
+/*
+	print_fps() -> void
+	purpose: prints current fps and uts into cascabel console or terminal
+	!! DEPRECATED: let the frame counter run free and find a update tick capper !!
+*/
 void Frame::print_fps()
 {
-        m_fps++;
-	// !!reduce branch for pipeline
-        if (1000<=SDL_GetTicks()-m_pT) { // !!incredibly high numbers will be saved. lets not do this
-                m_pT = SDL_GetTicks();
-                printf("\rFPS: %i",m_fps);fflush(stdout);
-                m_fps = 0;
-        }
+	m_fps++;
+	if (1000<=SDL_GetTicks()-m_pT) {
+		m_pT = SDL_GetTicks();
+		printf("\rFPS: %i",m_fps);
+		fflush(stdout);
+		m_fps = 0;
+	}
 }
+
 /*
- *	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
- *	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
- *	THIS ISN'T THE 90s ANYMORE GODDAMMIT . THE LATER THIS HAPPENS THE MORE CODE HAS TO BE CHANGED WHEN IT DOES
- * */
-void Frame::vsync(unsigned int mf)
+	vsync(uint8_t) -> void
+	mf (60): maximum frames per second
+	purpose: capping frames per second to given value
+	DEPRECATED:
+	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
+	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
+	THIS ISN'T THE 90s ANYMORE GODDAMMIT . THE LATER THIS HAPPENS THE MORE CODE HAS TO BE CHANGED WHEN IT DOES
+*/
+void Frame::vsync(uint8_t mf)
 {
 	m_pT = m_cT;
 	m_cT = SDL_GetTicks();
@@ -63,6 +118,13 @@ void Frame::vsync(unsigned int mf)
 		m_tempFPS = 0;
 	} if (m_cT-m_pT<1000/mf) SDL_Delay(1000/mf-SDL_GetTicks()+m_pT);
 }
+
+/*
+	input(uint32_t&,bool) -> void
+	running: value to negate if the window gets closed
+	tinput (false): defines if text input mode is enabled
+	purpose: processes keyboard, controller and mouse input
+*/
 void Frame::input(uint32_t &running,bool tinput)
 {
 	// FIXME: this is loopcode. make it work as such !!branches!!
@@ -111,6 +173,11 @@ void Frame::input(uint32_t &running,bool tinput)
 		// switch input refuses to be read. conn ok but no prints
 	}
 }
+
+/*
+	vanish() -> void
+	purpose: close window and delete audio and render context
+*/
 void Frame::vanish()
 {
 	printf("\n");
@@ -126,6 +193,11 @@ void Frame::vanish()
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
 }
+
+/*
+	init() -> void
+	purpose: initialize basic background needs and set their parameters
+*/
 void Frame::init()
 {
 	// sdl setup
@@ -136,7 +208,15 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
 	SDL_StopTextInput();
 }
-void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowFlags fs)
+
+/*
+	setup(const char*,GLuint,GLuint,int16_t,int16_t,SDL_WindowFlags) -> void
+	x: x-axis position of the frame's upper left corner on the desktop
+	y: y-axis position of the frame's upper left corner on the desktop
+	purpose: setup routine used by all constructors to help create a frame with all it's details
+*/
+void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
+		SDL_WindowFlags fs)
 {
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
@@ -167,7 +247,13 @@ void Frame::setup(const char* title,int x,int y,int width,int height,SDL_WindowF
 
 	m_cT = 0; m_fps = 0; m_tempFPS = 0; m_lO = 0; // ??all necessary & syntax
 }
-void Frame::get_screen(int screen,SDL_Rect* dim_screen)
+
+/*
+	get_screen(int8_t,SDL_Rect*) -> void
+	dim_screen: read requested screen dimensions and write them to SDL_Rect address
+	purpose: get screen details to later use them in the setup routine
+*/
+void Frame::get_screen(int8_t screen,SDL_Rect* dim_screen)
 {
 	if (screen<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen,dim_screen)==0)
 		printf("\033[1;36mmaximum resolution of selected screen is: %ix%i\n",dim_screen->w,dim_screen->h);
@@ -177,5 +263,21 @@ void Frame::get_screen(int screen,SDL_Rect* dim_screen)
 		dim_screen->x = 0; dim_screen->y = 0; dim_screen->w = 1280; dim_screen->h = 720;
 	}
 }
-void Frame::input_start() { SDL_StartTextInput(); }
-void Frame::input_stop() { SDL_StopTextInput(); }
+
+/*
+	input_start() -> void
+	purpose: activate text input mode
+*/
+void Frame::input_start()
+{
+	SDL_StartTextInput();
+}
+
+/*
+	input_stop() -> void
+	purpose: deactivate text input mode
+*/
+void Frame::input_stop()
+{
+	SDL_StopTextInput();
+}
