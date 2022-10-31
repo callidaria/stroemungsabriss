@@ -89,34 +89,56 @@ void Frame::update()
 */
 void Frame::print_fps()
 {
-	m_fps++;
-	if (1000<=SDL_GetTicks()-m_pT) {
-		m_pT = SDL_GetTicks();
-		printf("\rFPS: %i",m_fps);
+	fps++;
+	if (1000<=SDL_GetTicks()-past_ticks) {
+		past_ticks = SDL_GetTicks();
+		printf("\rFPS: %i    TIME MOD: %f",fps,time_mod);
 		fflush(stdout);
-		m_fps = 0;
+		fps = 0;
 	}
 }
 
 /*
 	vsync(uint8_t) -> void
-	mf (60): maximum frames per second
+	max_frames (60): maximum frames per second
 	purpose: capping frames per second to given value
 	DEPRECATED:
 	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
 	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
 	THIS ISN'T THE 90s ANYMORE GODDAMMIT . THE LATER THIS HAPPENS THE MORE CODE HAS TO BE CHANGED WHEN IT DOES
+	!! PLEASE ALSO KILL BRANCHING, THIS IS PATHETIC LOOPCODE !!
 */
-void Frame::vsync(uint8_t mf)
+void Frame::vsync(uint8_t max_frames)
 {
-	m_pT = m_cT;
-	m_cT = SDL_GetTicks();
-	m_tempFPS++;
-	if (m_cT-m_lO>=1000) {
-		m_lO = m_cT;
-		m_fps = m_tempFPS;
-		m_tempFPS = 0;
-	} if (m_cT-m_pT<1000/mf) SDL_Delay(1000/mf-SDL_GetTicks()+m_pT);
+	// count continue
+	past_ticks = current_ticks;
+	current_ticks = SDL_GetTicks();
+	temp_fps++;
+
+	// reset after running second is completed
+	if (current_ticks-lO>=1000) {
+		lO = current_ticks;
+		fps = temp_fps;
+		temp_fps = 0;
+	}
+
+	// delay while counting second
+	if (current_ticks-past_ticks<1000/max_frames)
+		SDL_Delay(1000/max_frames-SDL_GetTicks()+past_ticks);
+}
+
+/*
+	calc_time_delta() -> void
+	purpose: calculate time delta to disconnect frame from update and make physics timebased
+*/
+void Frame::calc_time_delta()
+{
+	// circle ticks
+	time_pticks = time_cticks;
+	time_cticks = SDL_GetTicks();
+
+	// calculate time delta
+	time_delta = ((time_cticks-time_pticks)/1000.0f)*time_mod;
 }
 
 /*
@@ -244,8 +266,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 		xb.push_back(XBox()); // !!negative points for style ...maybe stack usage instead???
 		gcc++;
 	} printf("\033[0;34mcontrollers: %i plugged in\n",gcc);
-
-	m_cT = 0; m_fps = 0; m_tempFPS = 0; m_lO = 0; // ??all necessary & syntax
 }
 
 /*
@@ -280,4 +300,13 @@ void Frame::input_start()
 void Frame::input_stop()
 {
 	SDL_StopTextInput();
+}
+
+/*
+	time_delta() -> float
+	returns: time delta between render updates to disconnect physics from non-synced fps counts
+*/
+float Frame::get_time_delta()
+{
+	return time_delta;
 }

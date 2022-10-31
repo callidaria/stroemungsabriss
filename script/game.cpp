@@ -30,6 +30,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
+		m_frame->calc_time_delta();
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists

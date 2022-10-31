@@ -50,6 +50,7 @@ public:
 	// fps & update ticking
 	void print_fps();
 	void vsync(uint8_t frames=60);
+	void calc_time_delta();
 
 	// controlling
 	void input(uint32_t &running,bool tinput=false);
@@ -60,6 +61,9 @@ public:
 	// text input
 	void input_start();
 	void input_stop();
+
+	// getter
+	float get_time_delta();
 
 private:
 
@@ -90,6 +94,8 @@ private:
 	ALCdevice* m_alcdev;
 	ALCcontext* m_alccon;
 
-	// vsync
-	unsigned int m_pT, m_cT, m_fps, m_tempFPS, m_lO;	
+	// time & vsync
+	uint16_t past_ticks,current_ticks = 0,fps = 0,temp_fps = 0,lO = 0;
+	float time_mod = 1.0f,time_delta = 0;
+	uint16_t time_pticks,time_cticks = 0;
 };

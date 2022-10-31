@@ -87,7 +87,7 @@ int main(int argc,char** argv)
 	bool reboot = false;
 	glm::mat4 model = glm::mat4(1.0f);
 	while (run) {
-		f.print_fps();f.input(run,dactive);
+		f.print_fps();f.calc_time_delta();f.input(run,dactive);
 
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
