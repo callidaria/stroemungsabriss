@@ -47,10 +47,14 @@ public:
 	void clear(float cr=0,float cg=0,float cb=0);
 	void update();
 
-	// fps & update ticking
+	// fps
 	void print_fps();
 	void vsync(uint8_t frames=60);
+
+	// time
 	void calc_time_delta();
+	void set_tmod(float tmod);
+	void change_tmod(float goal,float rate);
 
 	// controlling
 	void input(uint32_t &running,bool tinput=false);

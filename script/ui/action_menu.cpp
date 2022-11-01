@@ -27,6 +27,9 @@ void ActionMenu::update()
 
 	// dynamic animation variable change
 	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
+
+	// game time modification
+	m_frame->set_tmod(ptrans);
 }
 
 /*

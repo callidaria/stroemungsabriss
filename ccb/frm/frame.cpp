@@ -142,6 +142,27 @@ void Frame::calc_time_delta()
 }
 
 /*
+	set_tmod(float) -> void
+	tmod: new value of time modificator to
+	purpose: directly set the value of the time modificator to the given value
+*/
+void Frame::set_tmod(float tmod)
+{
+	time_mod = tmod;
+}
+
+/*
+	change_tmod(float,float) -> void
+	goal: target value of time modificator time_mod after change
+	rate: rate at which the time modificator time_mod should change towards the target value
+	purpose: changing time modification to a set goal at a given rate
+*/
+void Frame::change_tmod(float goal,float rate)
+{
+	time_mod += rate*(goal>time_mod)-rate*(goal<time_mod);
+}
+
+/*
 	input(uint32_t&,bool) -> void
 	running: value to negate if the window gets closed
 	tinput (false): defines if text input mode is enabled
@@ -305,8 +326,9 @@ void Frame::input_stop()
 /*
 	time_delta() -> float
 	returns: time delta between render updates to disconnect physics from non-synced fps counts
+	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
 float Frame::get_time_delta()
 {
-	return time_delta;
+	return time_delta*60;
 }

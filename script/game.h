@@ -27,9 +27,12 @@ class Game
 {
 public:
 
+	// construction
 	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
 		: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d) {  }
 	~Game() {  }
+
+	// loop
 	void run(uint32_t &rstate,CCBManager* ccbm);
 
 private:
@@ -44,7 +47,7 @@ private:
 
 	// script
 	BGEnv m_bgenv = BGEnv(m_r2d);
-	BulletSystem m_bSys = BulletSystem(m_rI);
+	BulletSystem m_bSys = BulletSystem(m_frame,m_rI);
 	Player m_player = Player(m_frame,m_r2d,m_r3d,m_rI,&m_bSys);
 
 	/*

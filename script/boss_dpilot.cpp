@@ -20,7 +20,7 @@
 */
 
 /*
-	load(Renderer2D*,uint32_t&,BulletSystem*,int32_t*) -> void
+	load(Renderer2D*,uint32_t&,BulletSystem*,int32_t*) -> void (static)
 	conforming to: stg_ld
 	purpose: load the essentials for the dancing pilot fight and set initial register values
 */
@@ -44,27 +44,27 @@ void BossDPilot::load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int
 }
 
 /*
-	update(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void
+	update(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void (static)
 	conforming to: stg_upd
 */
 void BossDPilot::update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
 		glm::vec2 ePos,int32_t* treg)
 {
 	// movement
-	/*ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
+	ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
 		+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
 	bool ex_ovfl = treg[0]<-600||treg[0]>600; // if B mv reached screen width cap
 	bool mult_swap = treg[0]*treg[2]>1;
 	treg[2] *= -1*mult_swap+1*!mult_swap; // invert movement direction multiplier
 	treg[3] += ex_ovfl-mult_swap;
 	treg[0] += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
-	treg[5] -= mult_swap;*/
+	treg[5] -= mult_swap;
 
 	// patterns
-	/*flaredrop(bSys,treg,ePos);
+	flaredrop(bSys,treg,ePos);
 	mines(bSys,treg,ePos);
 	directional_sweep(bSys,treg,pPos,ePos);
-	whirlpool(bSys,treg,ePos);*/
+	// whirlpool(bSys,treg,ePos);
 
 	// collision check
 	treg[10] = bSys->get_pHit(0,ePos,35,0);
@@ -93,7 +93,7 @@ void BossDPilot::update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,g
 */
 
 /*
-	flaredrop(BulletSystem*,int32_t*,glm::vec2) -> void
+	flaredrop(BulletSystem*,int32_t*,glm::vec2) -> void (static)
 	purpose: spawns doubled flares behind the jet, falling down parallel to y axis
 		also flares spread by moving down in different speeds to take up more
 		movable space and thus create a higher threat and reduce dodgability
@@ -124,7 +124,7 @@ void flaredrop(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 }
 
 /*
-	mines(BulletSystem*,int32_t*,glm::vec2) -> void
+	mines(BulletSystem*,int32_t*,glm::vec2) -> void (static)
 	purpose: spawns mines right behind the boss, slowly moving down.
 		used to build horizontal walls to force the player character to minimize sideways movement.
 	FIXME: i don't really know why, but i know i don't like the current usage
@@ -143,7 +143,7 @@ void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 }
 
 /*
-	directional_sweep(BulletSystem*,int32_t*,glm::vec2,glm::vec2) -> void
+	directional_sweep(BulletSystem*,int32_t*,glm::vec2,glm::vec2) -> void (static)
 	purpose: spawns a spread of five bullets, where the middle is aimed at current player position.
 		this pretty standard pattern reduces the save range of player movability due to encasing.
 	FIXME: needed and an obvious but great idea for this fight, but add a spin axis to spawn	
@@ -173,7 +173,7 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 }
 
 /*
-	whirlpool(BulletSystem*,int32_t*,glm::vec2) -> void
+	whirlpool(BulletSystem*,int32_t*,glm::vec2) -> void (static)
 	purpose: this is supposed to spread in the opposite direction of enemy movement,
 		then it should circle back and a sideways movement of the player is required to dodge
 			1st: the walling created by the mines pattern
