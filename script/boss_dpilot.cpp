@@ -20,21 +20,22 @@
 */
 
 /*
-	load(Renderer2D*,uint32_t&,BulletSystem*,int32_t*) -> void (static)
+	load(CascabelBaseFeature*,uint32_t&,int32_t*) -> void (static)
 	conforming to: stg_ld
 	purpose: load the essentials for the dancing pilot fight and set initial register values
 */
-void BossDPilot::load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg)
+void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* treg)
 {
 	// visuals
-	rnd_index = r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
-			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
+	rnd_index = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png",
+			"./res/terra/spec.png","./res/terra/norm.png","./res/none.png",
+			glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	treg[9] = bSys->add_cluster(15,15,2048,"./res/bllt_proj.png");
-	bSys->add_cluster(15,15,2048,"./res/bllt_norm.png");
-	bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png");
-	bSys->add_cluster(12,12,2048,"./res/fast_bullet.png");
+	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png");
+	ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png");
+	ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png");
+	ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png");
 
 	// registers
 	treg[2]  = 1;			// set initial direction multiplier to positive value
@@ -44,43 +45,46 @@ void BossDPilot::load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int
 }
 
 /*
-	update(Renderer2D*,uint32_t&,BulletSystem*,glm::vec2,glm::vec2,int32_t*) -> void (static)
+	update(CascabelBaseFeature*,uint32_t&,glm::vec2,int32_t*) -> void (static)
 	conforming to: stg_upd
+	purpose: update boss fight circumstances and patterns for the dancing pilot fight
 */
-void BossDPilot::update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
-		glm::vec2 ePos,int32_t* treg)
+void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 &ePos,int32_t* treg)
 {
-	// movement
-	ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
-		+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
-	bool ex_ovfl = treg[0]<-600||treg[0]>600; // if B mv reached screen width cap
-	bool mult_swap = treg[0]*treg[2]>1;
-	treg[2] *= -1*mult_swap+1*!mult_swap; // invert movement direction multiplier
-	treg[3] += ex_ovfl-mult_swap;
-	treg[0] += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
-	treg[5] -= mult_swap;
+	if (ccbf->frame->get_time_delta()>.1f) {
 
-	// patterns
-	flaredrop(bSys,treg,ePos);
-	mines(bSys,treg,ePos);
-	directional_sweep(bSys,treg,pPos,ePos);
-	// whirlpool(bSys,treg,ePos);
+		// movement
+		ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
+			+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
+		bool ex_ovfl = treg[0]<-600||treg[0]>600;	// if B mv reached screen width cap
+		bool mult_swap = treg[0]*treg[2]>1;
+		treg[2] *= -1*mult_swap+1*!mult_swap;		// invert movement direction multiplier
+		treg[3] += ex_ovfl-mult_swap;
+		treg[0] += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
+		treg[5] -= mult_swap;
+
+		// patterns
+		flaredrop(ccbf->bSys,treg,ePos);
+		mines(ccbf->bSys,treg,ePos);
+		directional_sweep(ccbf->bSys,treg,ccbf->player->get_pPos(),ePos);
+		// whirlpool(ccbf->bSys,treg,ePos);
+	}
 
 	// collision check
-	treg[10] = bSys->get_pHit(0,ePos,35,0);
-	uint8_t n1_hit = bSys->get_pHit(treg[9],pPos,0,5);
-	uint8_t n2_hit = bSys->get_pHit(treg[9]+1,pPos,0,5);
-	uint8_t n3_hit = bSys->get_pHit(treg[9]+2,pPos,0,7);
+	treg[10] = ccbf->bSys->get_pHit(0,ePos,35,0);
+	uint8_t n1_hit = ccbf->bSys->get_pHit(treg[9],ccbf->player->get_pPos(),0,5);
+	uint8_t n2_hit = ccbf->bSys->get_pHit(treg[9]+1,ccbf->player->get_pPos(),0,5);
+	uint8_t n3_hit = ccbf->bSys->get_pHit(treg[9]+2,ccbf->player->get_pPos(),0,7);
 	bool pHit = (n1_hit||n2_hit||n3_hit)&&treg[12]>11;
 	treg[11] = pHit;
 	treg[12] -= treg[12]*pHit;
 	treg[12]++;
 
 	// visuals
-	r3d->prepare();
-	r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
-	r3d->render_mesh(rnd_index,rnd_index+1);
-	bSys->render();
+	ccbf->r3d->prepare();
+	ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
+	ccbf->r3d->render_mesh(rnd_index,rnd_index+1);
+	ccbf->bSys->render();
 }
 
 /*
@@ -185,7 +189,8 @@ void whirlpool(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 {
 	for (int i=0;i<2048;i++) {
 		float t = 0.1f*bSys->get_ts(treg[9]+3,i);
-		bSys->set_bltPos(treg[9]+3,i,bSys->get_bltDir(treg[9]+3,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
+		bSys->set_bltPos(treg[9]+3,i,
+				bSys->get_bltDir(treg[9]+3,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
 				pow(E,.35f*t)*glm::sin(t)));
 	} bSys->inc_tick(treg[9]+3);
 	for (int i=0;i<1;i++)

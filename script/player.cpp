@@ -118,7 +118,9 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	m_bsys->delta_fDir(0);
 
 	// run requested shot type or idle
-	rng_flib.at(0+(*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))(m_bsys,treg);
+	uint8_t sidx = 0+((*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))
+			*(m_frame->get_time_delta()>.1f);
+	rng_flib.at(sidx)(m_bsys,treg);
 
 	// TODO: bombs
 	// TODO: shot modes and spawn

@@ -2,18 +2,21 @@
 
 #include <iostream>
 #include <math.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/vector_angle.hpp>
-#include "../ccb/gfx/renderer3d.h"
+
+#include "struct/feature_base.h"
+
 #include "bullet_system.h"
 
 #define E 2.7182818284
 
 // 1st phase, 1st attack
-void flaredrop(BulletSystem*,int32_t*,glm::vec2 ePos);
-void mines(BulletSystem*,int32_t*,glm::vec2 ePos);
-void directional_sweep(BulletSystem*,int32_t*,glm::vec2 pPos,glm::vec2 ePos);
-void whirlpool(BulletSystem*,int32_t*,glm::vec2 ePos);
+void flaredrop(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos);
+void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos);
+void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2 ePos);
+void whirlpool(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos);
 
 // 1st phase, switching phase attack
 void bomb(BulletSystem*,int32_t*);
@@ -21,7 +24,6 @@ void bomb(BulletSystem*,int32_t*);
 class BossDPilot
 {
 public:
-	static void load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg);
-	static void update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,
-			glm::vec2 ePos,int32_t* treg);
+	static void load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* treg);
+	static void update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 &ePos,int32_t* treg);
 };

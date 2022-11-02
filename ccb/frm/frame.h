@@ -39,8 +39,8 @@ public:
 			SDL_WindowFlags fs=(SDL_WindowFlags)0);
 	Frame(const char* title="callidaria-program",int16_t width=1280,int16_t height=720,
 			SDL_WindowFlags fs=(SDL_WindowFlags)0);
-	Frame(const char* title="callidaria-program",int8_t screen=0,int16_t width=1280,int16_t height=720,
-			SDL_WindowFlags fs=(SDL_WindowFlags)0);
+	Frame(const char* title="callidaria-program",int8_t screen=0,int16_t width=1280,
+			int16_t height=720,SDL_WindowFlags fs=(SDL_WindowFlags)0);
 	~Frame() {  }
 
 	// modification
