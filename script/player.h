@@ -65,7 +65,7 @@ private:
 
 	// controlling
 	glm::vec3 pos = glm::vec3(200,200,0);
-	int ddur=0,drec=0;
+	int ddur = 0,drec = 0;
 	struct PlayerControls cnt;
 	int emuflt_ud,emuflt_lr;
 	uint32_t dz_epsilon = 0;

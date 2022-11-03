@@ -18,10 +18,10 @@ struct Keyboard
 
 struct Mouse
 {
-	bool mcl=false,mcr=false;	// mouse button requests
-	int32_t mx,my;				// mouse positions x,y
-	int32_t mxfr,myfr;			// mouse position x,y scaled to absolute range
-	int32_t mw;					// mouse wheel movements
+	bool mcl = false,mcr = false;	// mouse button requests
+	int32_t mx,my;					// mouse positions x,y
+	int32_t mxfr,myfr;				// mouse position x,y scaled to absolute range
+	int32_t mw;						// mouse wheel movements
 };
 
 struct XBox
@@ -99,7 +99,7 @@ private:
 	ALCcontext* m_alccon;
 
 	// time & vsync
-	uint16_t past_ticks,current_ticks = 0,fps = 0,temp_fps = 0,lO = 0;
+	uint32_t past_ticks,current_ticks = 0,fps = 0,temp_fps = 0,lO = 0;
 	float time_mod = 1.0f,time_delta = 0;
-	uint16_t time_pticks,time_cticks = 0;
+	uint32_t time_pticks,time_cticks = 0;
 };
