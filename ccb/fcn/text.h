@@ -22,7 +22,6 @@ public:
 	void load_vertex();
 	void load(Camera2D* c);
 	void prepare();
-	void render_propag(int amnt,glm::vec4 col);
 	void render(int amnt,glm::vec4 col);
 	void set_scroll(glm::mat4 model);
 private:
