@@ -6,9 +6,8 @@
 */
 MenuList::MenuList()
 {
-	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
 	LEntity proc = {
-		Text(fproc),Text(fproc),std::vector<Text>(),std::vector<std::string>(),
+		Text(&fproc),Text(&fproc),std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
@@ -38,11 +37,8 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
 	m_r2d->load(cam2d); // FIXME: sprite always in split, use different spritesheets
 
-	// setting up the different fonts & texts for menu parts
-	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
-	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	Text t_desc,t_sle; // temporary storage variable for node descriptions & sublist elements
-	// FIXME: do not make the fonts with static parameters
+	// setting up the different texts for menu features
+	Text t_sle,t_desc;
 
 	// gathering raw node data
 	std::ifstream mlfile(path,std::ios::in); // reading file
@@ -84,8 +80,8 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	bool written;
 	for (int i=0;i<ndata.size();i++) {
 		uint32_t ix = 0;     // index of raw node data
-		struct LEntity t_le; // temporary list element, getting pushed back later
-		t_le.ltxt = Text(lfnt);
+		LEntity t_le; // temporary list element, getting pushed back later
+		t_le.ltxt = Text(&lfnt);
 		while (ix<ndata[i].size()) {
 			uint8_t emode = get_readmode(ndata[i],ix);   // check character for mode annotation
 			std::string excnt = breakgrind(ndata[i],ix); // get content inside annotation area
@@ -96,7 +92,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				esize++;       // inc list element counter
 				break;
 			case 2: // menu splash description
-				t_desc = Text(dfnt); // temporary description to add later
+				t_desc = Text(&dfnt); // temporary description to add later
 				for (uint32_t iy=0;iy<excnt.size();iy++) { // reading through desc content
 					if (textgrind(excnt,iy)) { // detecting if character is innocent
 						t_desc.add(t_line.c_str(),glm::vec2(920,dscroll)); // add to desc
@@ -111,7 +107,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				break;
 			case 3: // selectable menu sublist element in dropdown
 				args = split_arguments(excnt,','); // getting argument list
-				t_sle = Text(lfnt);
+				t_sle = Text(&lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
 				t_sle.load(cam2d);
 				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
@@ -144,7 +140,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				break; // FIXME: double branching where better solutions
 			case 6: // reading target monitor for menu list insert
 				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
-					t_sle = Text(lfnt);
+					t_sle = Text(&lfnt);
 					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
 					t_sle.load(cam2d);
 					t_le.lee.push_back(t_sle);

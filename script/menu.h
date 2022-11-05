@@ -88,6 +88,7 @@ private:
 	Material3D mat0;
 	Shader sshd = Shader();
 	FrameBuffer fb,globe_fb;
+	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;

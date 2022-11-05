@@ -14,19 +14,34 @@
 class Text
 {
 public:
+
+	// construction
 	Text();
-	Text(Font f);
+	Text(Font* f);
+
+	// write
 	int add(char c,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
 	void clear();
-	void load_vertex();
+
+	// preparation
 	void load(Camera2D* c);
 	void prepare();
+
+	// draw
 	void render(int amnt,glm::vec4 col);
+
+	// uniform
 	void set_scroll(glm::mat4 model);
+
 private:
+
+	void load_vertex();
+
+private:
+
 	Shader sT;
-	Font font;
+	Font* m_font;
 	Buffer buffer;
 	std::vector<float> ibv;
 };

@@ -13,9 +13,7 @@ ActionMenu::ActionMenu(Frame* frame)
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 
 	// add menu text
-	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
-			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
-	mtext = Text(tfont);
+	mtext = Text(&tfont);
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
 	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS+TEXT_SIZE));
 	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS+2*TEXT_SIZE));
@@ -23,11 +21,11 @@ ActionMenu::ActionMenu(Frame* frame)
 	mtext.load(&cam2d);
 
 	// add text shadow
-	/*stext = Text(tfont);
-	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS));
-	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS+TEXT_SIZE));
-	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS+2*TEXT_SIZE));
-	stext.load(&cam2d);*/
+	stext = Text(&tfont);
+	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
+	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS+TEXT_SIZE-4));
+	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS+2*TEXT_SIZE-4));
+	stext.load(&cam2d);
 }
 
 /*
@@ -77,8 +75,8 @@ void ActionMenu::render()
 	game_fb.render(ptrans);
 
 	// render menu text
-	/*stext.prepare();
-	stext.render(1024*menu_inf,glm::vec4(0,0,0,.4f));*/			// text shadow
+	stext.prepare();
+	stext.render(1024*menu_inf,glm::vec4(0,0,0,.4f));			// text shadow
 	mtext.prepare();
 	mtext.render(1024*menu_inf,glm::vec4(.6f,.0824f,.6f,1));	// menu text
 }

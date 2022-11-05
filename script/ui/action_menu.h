@@ -41,6 +41,8 @@ private:
 	// cascabel
 	Frame* m_frame;
 	FrameBuffer game_fb;
+	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
+			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
 	Text mtext,stext;
 
 	// action menu trigger system

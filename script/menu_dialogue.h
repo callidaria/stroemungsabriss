@@ -36,6 +36,7 @@ private:
 	bool open = false;			// dialogue is opened
 
 	// text
+	Font thfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
 	Text thead;					// headings text
 
 	// selection entities

@@ -117,9 +117,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	}
 
 	// set name and phase counter
-	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
+	hpswap.phname = Text(&hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+50,pos.y+5));
 	hpswap.phname.load(&tc2d);
+	hpswap.phcnt = Text(&hbfont);
 	hpswap.phcnt.add(("1/"+std::to_string(phases.size())).c_str(),glm::vec2(pos.x+width-50,pos.y+5));
 	hpswap.phcnt.load(&tc2d);
 } Healthbar::~Healthbar() {  }

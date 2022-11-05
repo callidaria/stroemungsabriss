@@ -31,31 +31,49 @@ struct LEntity
 class MenuList
 {
 public:
+
+	// construction
 	MenuList();
 	MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path);
 	~MenuList() {  }
+
+	// modification
 	void reset();
 	void save();
-	bool was_changed();
-	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md);
 	glm::vec2 globe_rotation(uint16_t li);
 	void write_tempID(uint8_t index);
+
+	// information
+	bool was_changed();
+
+	// draw
+	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md);
+
 private:
+
 	std::string breakgrind(std::string nl,uint32_t &i);
 	uint8_t textgrind(std::string nl,uint32_t &i);
 	uint8_t get_readmode(std::string nl,uint32_t &i);
 	std::vector<std::string> split_arguments(std::string ext,char sep);
 	uint32_t translate_index(std::vector<std::string> lev,std::string arg);
+
 public:
+
 	uint16_t esize = 0;
+
 private:
+
 	Renderer2D* m_r2d;			// pointer to renderer
-	std::vector<struct LEntity> les;	// list of all extracted list entity elements
-	std::vector<struct LEntity> rles;	// list to reset and compare to if changes given
+	std::vector<LEntity> les;	// list of all extracted list entity elements
+	std::vector<LEntity> rles;	// list to reset and compare to if changes given
 	int32_t lscroll = 515,dscroll = 600;	// defines the scrolling values of description and list entity
 	bool lf_open = false;			// saves if sublist was open last frame
 	uint8_t t_slID;				// temporarily saves the sublist selection, def by user input
 	uint32_t diffRID = 0;			// ID of the difficulty spritesheet in renderer
+
+	Font fproc = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0);
+	Font lfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
+	Font dfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 
 	// animation of estimated difficulty
 	bool neg_scl=false,neg_rot=false;	// true if transformation of estimated difficulty is negative
