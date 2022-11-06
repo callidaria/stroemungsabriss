@@ -15,6 +15,8 @@
 class MenuDialogue
 {
 public:
+
+	// construction
 	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight);
 	~MenuDialogue();
@@ -25,7 +27,9 @@ public:
 	// dialogue state modification
 	uint8_t stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back);
 	void open_dialogue();
+
 private:
+
 	// essentials
 	Buffer buffer;				// buffer for background
 	Shader m_sh;				// shader

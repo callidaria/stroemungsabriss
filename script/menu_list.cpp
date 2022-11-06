@@ -7,7 +7,7 @@
 MenuList::MenuList()
 {
 	LEntity proc = {
-		Text(&fproc),Text(&fproc),std::vector<Text>(),std::vector<std::string>(),
+		Text(&lfnt),Text(&dfnt),std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
@@ -86,12 +86,12 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 			uint8_t emode = get_readmode(ndata[i],ix);   // check character for mode annotation
 			std::string excnt = breakgrind(ndata[i],ix); // get content inside annotation area
 			switch (emode) {
-			case 1: // conservative menu list element
+			case ReadMode::HEAD:
 				t_le.ltxt.add(excnt.c_str(),glm::vec2(250,lscroll)); // write to main list element
 				lscroll -= 45; // scroll down after write
 				esize++;       // inc list element counter
 				break;
-			case 2: // menu splash description
+			case ReadMode::DESCRIPTION:
 				t_desc = Text(&dfnt); // temporary description to add later
 				for (uint32_t iy=0;iy<excnt.size();iy++) { // reading through desc content
 					if (textgrind(excnt,iy)) { // detecting if character is innocent
@@ -105,7 +105,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				dscroll = 600;	    // reset cursor scroll
 				t_line = "";	    // reset temporary line
 				break;
-			case 3: // selectable menu sublist element in dropdown
+			case ReadMode::DROPDOWN_ELEMENT:
 				args = split_arguments(excnt,','); // getting argument list
 				t_sle = Text(&lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
@@ -113,7 +113,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
 				t_le.lev.push_back(args[1]); // save value parameter as value list element
 				break;
-			case 4: // slider element inserted
+			case ReadMode::SLIDER:
 				t_le.slide = true; // setting slider to be active and visible
 				args = split_arguments(excnt,','); // define the capacities according to pattern
 				t_le.sl_min = stoi(args[0]);
@@ -121,7 +121,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				t_le.sl_vmin = stoi(args[2]); // FIXME: remove slider value caps
 				t_le.sl_vmax = stoi(args[3]);
 				break;
-			case 5: // destination annotation
+			case ReadMode::GDESTINATION:
 				args = split_arguments(excnt,',');
 				t_le.saveID = args[0];
 				written = false;
@@ -138,7 +138,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 						o_conf << args[0] << ' ' << t_le.lev[stoi(args[1])] << '\n';
 				}
 				break; // FIXME: double branching where better solutions
-			case 6: // reading target monitor for menu list insert
+			case ReadMode::TARGET_MONITOR:
 				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
 					t_sle = Text(&lfnt);
 					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
@@ -146,10 +146,10 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 					t_le.lee.push_back(t_sle);
 					t_le.lev.push_back(std::to_string(disp));
 				} break; // FIXME: display value not as integer but as comm name
-			case 7: // estimated difficulty rating
+			case ReadMode::EST_DIFFICULTY:
 				t_le.diff = stoi(excnt);
 				break;
-			case 8: // globe preview rotation towards coordinates
+			case ReadMode::GROTATION:
 				args = split_arguments(excnt,',');
 				for (int i=0;i<6;i++)
 					t_le.gRot[i] = stoi(args[i]);
@@ -335,7 +335,7 @@ uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable
 }
 
 /*
-	get_readmode(std::string,uint8_t&)
+	get_readmode(std::string,uint8_t&) -> uint8_t
 	nl: represents the remaining nodeline to scan until break
 	i: reading index for nodeline
 	purpose: get the modeID, representing the mode in which the following text is supposed to be added
@@ -359,13 +359,13 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 		i++;		// increment line index
 	} i++;			// ready for further work with the nodeline
 	return !strcmp(pcnt.c_str(),"head")
-		+2*!strcmp(pcnt.c_str(),"dsc")
-		+3*!strcmp(pcnt.c_str(),"le")
-		+4*!strcmp(pcnt.c_str(),"slider")
-		+5*!strcmp(pcnt.c_str(),"dest")
-		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor")
-		+7*!strcmp(pcnt.c_str(),"diff")
-		+8*!strcmp(pcnt.c_str(),"gRotate");
+		+ReadMode::DESCRIPTION*!strcmp(pcnt.c_str(),"dsc")
+		+ReadMode::DROPDOWN_ELEMENT *!strcmp(pcnt.c_str(),"le")
+		+ReadMode::SLIDER*!strcmp(pcnt.c_str(),"slider")
+		+ReadMode::GDESTINATION*!strcmp(pcnt.c_str(),"dest")
+		+ReadMode::TARGET_MONITOR*!strcmp(pcnt.c_str(),"le_TargetMonitor")
+		+ReadMode::EST_DIFFICULTY*!strcmp(pcnt.c_str(),"diff")
+		+ReadMode::GROTATION*!strcmp(pcnt.c_str(),"gRotate");
 	// ??maybe do this with case
 }
 

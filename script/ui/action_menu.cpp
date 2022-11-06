@@ -12,19 +12,28 @@ ActionMenu::ActionMenu(Frame* frame)
 	game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 
+	// vertices for selection splash
+	float sverts[] = { 0,-25,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-25,3, 0,-25,0, };
+	splash_buffer.bind();
+	splash_buffer.upload_vertices(sverts,sizeof(sverts));
+	splash_shader.compile("shader/fbv_lselect.shader","shader/fbf_lselect.shader");
+	splash_shader.def_attributeF("position",2,0,3);
+	splash_shader.def_attributeF("index",1,2,3);
+	splash_shader.upload_camera(Camera2D(1280,720));
+
 	// add menu text
 	mtext = Text(&tfont);
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
-	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS+TEXT_SIZE));
-	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS+2*TEXT_SIZE));
+	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-TEXT_SIZE));
+	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*TEXT_SIZE));
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	mtext.load(&cam2d);
 
 	// add text shadow
 	stext = Text(&tfont);
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
-	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS+TEXT_SIZE-4));
-	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS+2*TEXT_SIZE-4));
+	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-TEXT_SIZE-4));
+	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*TEXT_SIZE-4));
 	stext.load(&cam2d);
 }
 
@@ -47,6 +56,11 @@ void ActionMenu::update(Player* player)
 
 	// game time modification
 	m_frame->set_tmod(ptrans);
+
+	// process user selection
+	msel += ((*player->cnt.abs_down&&!trg_smod)*(msel<2)-(*player->cnt.abs_up&&!trg_smod)*(msel>0))
+			*(ptrans<.1f);
+	trg_smod = *player->cnt.abs_down||*player->cnt.abs_up;
 }
 
 /*
@@ -73,6 +87,18 @@ void ActionMenu::render()
 	FrameBuffer::close();
 	m_frame->clear();
 	game_fb.render(ptrans);
+
+	// selection splash modifications
+	uint16_t strans = TEXT_YPOSITION_SYS-msel*TEXT_SIZE;
+	splash_shader.enable();
+	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans));
+	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans));
+	splash_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans));
+	splash_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans));
+
+	// render selection splash
+	splash_buffer.bind();
+	glDrawArrays(GL_TRIANGLES,0,6*(menu_sys||menu_inf));
 
 	// render menu text
 	stext.prepare();

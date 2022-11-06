@@ -8,9 +8,23 @@
 
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/mat/camera2d.h"
+
 #include "../ccb/fcn/font.h"
 #include "../ccb/fcn/text.h"
 
+// to identify how to interpret the values
+enum ReadMode
+{
+	INVALID,			// invalid read mode
+	HEAD,				// conservative menu list element
+	DESCRIPTION,		// menu splash description
+	DROPDOWN_ELEMENT,	// selectable menu sublist element in dropdown
+	SLIDER,				// slider element inserted
+	GDESTINATION,		// destination annotation
+	TARGET_MONITOR,		// reading target monitor for menu list insert
+	EST_DIFFICULTY,		// estimated difficulty rating
+	GROTATION			// globe preview rotation towards coordinates
+};
 
 //	To save list entity in a less cluttered way
 struct LEntity
@@ -63,17 +77,20 @@ public:
 
 private:
 
+	// text
+	Font lfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
+	Font dfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
+
+	// cascabel
 	Renderer2D* m_r2d;			// pointer to renderer
+
+	// entities
 	std::vector<LEntity> les;	// list of all extracted list entity elements
 	std::vector<LEntity> rles;	// list to reset and compare to if changes given
 	int32_t lscroll = 515,dscroll = 600;	// defines the scrolling values of description and list entity
 	bool lf_open = false;			// saves if sublist was open last frame
 	uint8_t t_slID;				// temporarily saves the sublist selection, def by user input
 	uint32_t diffRID = 0;			// ID of the difficulty spritesheet in renderer
-
-	Font fproc = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0);
-	Font lfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
-	Font dfnt = Font("./res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
 
 	// animation of estimated difficulty
 	bool neg_scl=false,neg_rot=false;	// true if transformation of estimated difficulty is negative

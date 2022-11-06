@@ -5,8 +5,11 @@
 #include "../../ccb/frm/frame.h"
 #include "../../ccb/frm/framebuffer.h"
 
+#include "../../ccb/fcn/buffer.h"
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
+
+#include "../../ccb/gfx/shader.h"
 
 #include "../player.h"
 
@@ -17,9 +20,9 @@ constexpr uint8_t TEXT_SIZE = 30;
 constexpr uint8_t TEXT_DISTANCE = 5;
 
 // menu position
-constexpr uint16_t TEXT_YPOSITION_SYS = 720/2+(SYS_OPTION_COUNT-SYS_OPTION_COUNT%2)*TEXT_SIZE
+constexpr uint16_t TEXT_YPOSITION_SYS = 720/2-TEXT_SIZE/2+(SYS_OPTION_COUNT/2)*TEXT_SIZE
 		+SYS_OPTION_COUNT%2*(TEXT_SIZE/2);
-constexpr uint16_t TEXT_YPOSITION_INFO = 720/2+(INFO_OPTION_COUNT-INFO_OPTION_COUNT%2)*TEXT_SIZE
+constexpr uint16_t TEXT_YPOSITION_INFO = 720/2-TEXT_SIZE/2+(INFO_OPTION_COUNT/2)*TEXT_SIZE
 		+INFO_OPTION_COUNT%2*(TEXT_SIZE/2);
 constexpr uint8_t TEXT_DRAW_SPACE = TEXT_SIZE-TEXT_DISTANCE;
 
@@ -40,6 +43,8 @@ private:
 
 	// cascabel
 	Frame* m_frame;
+	Buffer splash_buffer = Buffer();
+	Shader splash_shader = Shader();
 	FrameBuffer game_fb;
 	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
@@ -52,4 +57,8 @@ private:
 
 	// animation
 	float ptrans = 1.0f;
+
+	// selection
+	uint8_t msel = 0;
+	bool trg_smod = false;
 };
