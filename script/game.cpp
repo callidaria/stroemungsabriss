@@ -39,10 +39,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->calc_time_delta();
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
-		if (*m_player.cnt.pause) break;  // FIXME: kill this when light menu exists
 
 		// action menu update
-		lgt_menu.update(&m_player);
+		lgt_menu.update(&m_player,running);
 		lgt_menu.bind();
 
 		// stage

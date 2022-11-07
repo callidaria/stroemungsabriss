@@ -26,6 +26,10 @@ ActionMenu::ActionMenu(Frame* frame)
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
 	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-TEXT_SIZE));
 	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*TEXT_SIZE));
+	mtext.add("phone",glm::vec2(2240,TEXT_YPOSITION_INFO));
+	mtext.add("hitlist",glm::vec2(2240,TEXT_YPOSITION_INFO-TEXT_SIZE));
+	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*TEXT_SIZE));
+	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*TEXT_SIZE));
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	mtext.load(&cam2d);
 
@@ -34,6 +38,10 @@ ActionMenu::ActionMenu(Frame* frame)
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
 	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-TEXT_SIZE-4));
 	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*TEXT_SIZE-4));
+	stext.add("phone",glm::vec2(2237,TEXT_YPOSITION_INFO-4));
+	stext.add("hitlist",glm::vec2(2237,TEXT_YPOSITION_INFO-TEXT_SIZE-4));
+	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*TEXT_SIZE-4));
+	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*TEXT_SIZE-4));
 	stext.load(&cam2d);
 }
 
@@ -42,7 +50,7 @@ ActionMenu::ActionMenu(Frame* frame)
 	player: player controller holding custom input addresses for menu interaction
 	purpose: animation updates and user request interpretation regarding action menu
 */
-void ActionMenu::update(Player* player)
+void ActionMenu::update(Player* player,uint32_t &run_state)
 {
 	// action menu open requests
 	bool req_sysmenu = *player->cnt.pause&&!menu_trg&&!menu_inf;
@@ -51,16 +59,20 @@ void ActionMenu::update(Player* player)
 	menu_inf = menu_inf*!req_infomenu+!menu_inf*req_infomenu;
 	menu_trg = *player->cnt.pause||*player->cnt.rdetails;
 
-	// dynamic animation variable change
-	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
-
 	// game time modification
+	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
 	m_frame->set_tmod(ptrans);
 
 	// process user selection
-	msel += ((*player->cnt.abs_down&&!trg_smod)*(msel<2)-(*player->cnt.abs_up&&!trg_smod)*(msel>0))
+	int8_t smod = ((*player->cnt.abs_down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
+			-(*player->cnt.abs_up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
 			*(ptrans<.1f);
+	msel += smod*menu_sys;
+	isel += smod*menu_inf;
 	trg_smod = *player->cnt.abs_down||*player->cnt.abs_up;
+
+	// close when quit selected and hit
+	run_state *= !(*player->cnt.rng_focus&&msel==2&&menu_sys);
 }
 
 /*
@@ -89,12 +101,13 @@ void ActionMenu::render()
 	game_fb.render(ptrans);
 
 	// selection splash modifications
-	uint16_t strans = TEXT_YPOSITION_SYS-msel*TEXT_SIZE;
+	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf
+			-(msel*menu_sys+isel*menu_inf)*TEXT_SIZE;
 	splash_shader.enable();
-	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans));
-	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans));
-	splash_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans));
-	splash_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans));
+	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)));
+	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)));
+	splash_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)));
+	splash_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)));
 
 	// render selection splash
 	splash_buffer.bind();
@@ -102,7 +115,9 @@ void ActionMenu::render()
 
 	// render menu text
 	stext.prepare();
-	stext.render(1024*menu_inf,glm::vec4(0,0,0,.4f));			// text shadow
+	stext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
+	stext.render(1024*(menu_sys||menu_inf),glm::vec4(0,0,0,.4f));			// text shadow
 	mtext.prepare();
-	mtext.render(1024*menu_inf,glm::vec4(.6f,.0824f,.6f,1));	// menu text
+	mtext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
+	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(.6f,.0824f,.6f,1));	// menu text
 }

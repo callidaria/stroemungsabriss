@@ -35,7 +35,7 @@ public:
 	~ActionMenu() {  }
 
 	// runtime interactions
-	void update(Player* player);
+	void update(Player* player,uint32_t &run_state);
 	void bind();
 	void render();
 
@@ -59,6 +59,6 @@ private:
 	float ptrans = 1.0f;
 
 	// selection
-	uint8_t msel = 0;
+	uint8_t msel = 0,isel = 0;
 	bool trg_smod = false;
 };
