@@ -1,7 +1,10 @@
 #include "text.h"
 
-Text::Text() { } // !!get rid of this pls
-
+/*
+	constructor(Font*)
+	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
+	purpose: create an entity to later add text and characters to
+*/
 Text::Text(Font* f)
 	: m_font(f)
 {
@@ -9,7 +12,14 @@ Text::Text(Font* f)
 	buffer.add_buffer();
 }
 
-int Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
+/*
+	add(char,vec2) -> int32_t
+	c: character to add to the text entity
+	p: position to add the character at
+	returns: x-axis modification of cursor position after adding the given character
+	purpose: add a single character to the text entity
+*/
+int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
 	// identifying sprite sheet position
 	int i = 0;
@@ -32,6 +42,12 @@ int Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad
 	// ??do this with a vec2 pointer maybe & also with dynamic texdiv
 }
 
+/*
+	add(const char*,vec2) -> void
+	s: character array, also primitive string, to add to text entity
+	p: position to add string to text entity at
+	purpose: add a character array or primitive string to text entity at given position
+*/
 void Text::add(const char* s,glm::vec2 p)
 {
 	for (int i=0;i<strlen(s);i++) {
@@ -40,17 +56,20 @@ void Text::add(const char* s,glm::vec2 p)
 	}
 }
 
+/*
+	clear() -> void
+	purpose: clear all character entries from text entity index buffer
+*/
 void Text::clear()
 {
 	ibv.clear();
 }
 
-void Text::load_vertex() // !!no need to have this extra public vertex load function
-{
-	buffer.bind();
-	buffer.upload_vertices(m_font->v,sizeof(m_font->v));
-}
-
+/*
+	load(Camera2D*) -> void
+	c: camera and mainly coordinate system to render text vertices in relation to
+	purpose: upload to buffer as well as compile and setup shader
+*/
 void Text::load(Camera2D* c)
 {
 	load_vertex();
@@ -66,22 +85,51 @@ void Text::load(Camera2D* c)
 	sT.upload_matrix("proj",c->proj2D);
 }
 
+/*
+	prepare() -> void
+	purpose: prepare text shader, buffer and gl settings to render added characters
+*/
 void Text::prepare()
 {
 	sT.enable();
 	buffer.bind();
-	glDisable(GL_CULL_FACE); // !!define standard flagging by majority usage
+	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void Text::render(int amnt,glm::vec4 col)
+/*
+	render(int32_t,vec4) -> void
+	amnt: amount of characters to render
+	col: colour of rendered text in rgba format
+	purpose: render given amount of text characters in given colour
+*/
+void Text::render(int32_t amnt,glm::vec4 col)
 {
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
-	glBindTexture(GL_TEXTURE_2D,m_font->tex);
+	// glBindTexture(GL_TEXTURE_2D,m_font->tex);
+	m_font->setup();
 	buffer.upload_indices(ibv);
 	// !!buffer data call in main loop ´°___°`
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 
-void Text::set_scroll(glm::mat4 model) { sT.upload_matrix("model",model); }
+/*
+	set_scroll(mat4) -> void
+	model: model matrix to upload to shader
+	purpose: emulate a free text scrolling effect by common model transformation of sprites
+*/
+void Text::set_scroll(glm::mat4 model)
+{
+	sT.upload_matrix("model",model);
+}
+
+/*
+	load_vertex() -> void (private)
+	purpose: upload text vertices to buffer
+*/
+void Text::load_vertex() // !!no need to have this extra public vertex load function
+{
+	buffer.bind();
+	buffer.upload_vertices(m_font->v,sizeof(m_font->v));
+}

@@ -70,7 +70,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
 
 	// vertices indexed splice
-	float splcverts[] = { pos.x,pos.y-6.0f, pos.x,pos.y+height+12.0f, };
+	float splcverts[] = { pos.x,pos.y-6,pos.x,pos.y+height+12, };
 	splcbuffer.bind();
 	splcbuffer.upload_vertices(splcverts,sizeof(splcverts));
 	splcbuffer.add_buffer();

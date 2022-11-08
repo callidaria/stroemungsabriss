@@ -38,8 +38,13 @@ Font::Font(const char* ff,const char* tf,float w,float h)
 	v[20] = 0; v[21] = 0; v[22] = 0.0f; v[23] = 0.0f;
 	glGenTextures(1,&tex);
 }
+
 void Font::texture()
 {
 	Toolbox::load_texture(tex,tp);
 }
-void Font::setup() { glBindTexture(GL_TEXTURE_2D,tex); } // ??double texture setup in text.cpp
+
+void Font::setup()
+{
+	glBindTexture(GL_TEXTURE_2D,tex);
+} // ??double texture setup in text.cpp

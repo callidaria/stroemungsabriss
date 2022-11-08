@@ -16,11 +16,11 @@ class Text
 public:
 
 	// construction
-	Text();
+	Text() {  }
 	Text(Font* f);
 
 	// write
-	int add(char c,glm::vec2 p);
+	int32_t add(char c,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
 	void clear();
 
@@ -29,7 +29,7 @@ public:
 	void prepare();
 
 	// draw
-	void render(int amnt,glm::vec4 col);
+	void render(int32_t amnt,glm::vec4 col);
 
 	// uniform
 	void set_scroll(glm::mat4 model);
@@ -40,8 +40,11 @@ private:
 
 private:
 
+	// cascabel
 	Shader sT;
 	Font* m_font;
 	Buffer buffer;
+
+	// 
 	std::vector<float> ibv;
 };

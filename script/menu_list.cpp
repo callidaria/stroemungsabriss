@@ -35,29 +35,29 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	// setting up textures for 2D renderer
 	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
 	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->load(cam2d); // FIXME: sprite always in split, use different spritesheets
+	m_r2d->load(cam2d);  // FIXME: sprite always in split, use different spritesheets
 
 	// setting up the different texts for menu features
-	Text t_sle,t_desc;
+	Text t_sle = Text(&lfnt),t_desc = Text(&dfnt);
 
 	// gathering raw node data
-	std::ifstream mlfile(path,std::ios::in); // reading file
-	std::vector<std::string> ndata; 	 // variable for raw node data
-	std::string t_content;			 // temporary node content
-	std::string t_line = "";		 // temporary line content for description text before break
-	bool ractive = false;			 // active reading process (in node)
+	std::ifstream mlfile(path,std::ios::in);	// reading file
+	std::vector<std::string> ndata;				// variable for raw node data
+	std::string t_content;		// temporary node content
+	std::string t_line = "";	// temporary line content for description text before break
+	bool ractive = false;		// active reading process (in node)
 
 	// extracting raw node data from file
 	while (!mlfile.eof()) {
 		std::string line;getline(mlfile,line);	  // reading line by line
 		bool enode = !strcmp(line.c_str(),"</>"); // end node boolean true if line contains end annotation
-		if (ractive&&!enode) { // if reading in node & the end of node has not been reached
-			line.erase(std::remove(line.begin(),line.end(),'\t'),line.end()); // getting rid of tabs
-			t_content+=line; // add processed line to content collection
-		} else if (enode) { // if end of node has been reached
-			ractive = false;	    // stop active reading (outside node)
-			ndata.push_back(t_content); // save aquired content inside data list
-			t_content = "";		    // reset content variable
+		if (ractive&&!enode) {	// if reading in node & the end of node has not been reached
+			line.erase(std::remove(line.begin(),line.end(),'\t'),line.end());	// getting rid of tabs
+			t_content += line;				// add processed line to content collection
+		} else if (enode) {					// if end of node has been reached
+			ractive = false;	    		// stop active reading (outside node)
+			ndata.push_back(t_content);		// save aquired content inside data list
+			t_content = "";		    		// reset content variable
 		} else if (!strcmp(line.c_str(),"<node>")) ractive = true; // open node if marked accordingly
 	}
 
@@ -163,9 +163,13 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 } // TODO: write interpreter fault instead of letting the mem take the fall
 
 /*
-
+	reset() -> void
+	purpose: reset all changes of any list attribute entities
 */
-void MenuList::reset() { les = rles; }
+void MenuList::reset()
+{
+	les = rles;
+}
 
 /*
 	save(void)
@@ -181,7 +185,8 @@ void MenuList::save()
 }
 
 /*
-
+	was_changed() -> bool
+	returns: if any attributes of any list elements were changed
 */
 bool MenuList::was_changed()
 {
@@ -277,7 +282,9 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 }
 
 /*
-
+	globe_rotation(uint16_t) -> vec2
+	li: list index of selected entity to read globe preview rotation from
+	returns: globe rotation vector toward list entity preview destination
 */
 glm::vec2 MenuList::globe_rotation(uint16_t li)
 {
@@ -303,13 +310,13 @@ void MenuList::write_tempID(uint8_t index)
 std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 {
 	std::string out;
-	while (i<nl.length()) { // read nodeline per character
-		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') { // check for end annotation
-			i += 3; // go 3 steps further on nodeline
+	while (i<nl.length()) {		// read nodeline per character
+		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') {	// check for end annotation
+			i += 3;				// go 3 steps further on nodeline
 			return out;
-		} out += nl[i]; // add character to outputtable contents
-		i++;		// go one character further on nodeline
-	} return out; // catch contents if line apruptly ends & no mem shenanigans should occur somehow
+		} out += nl[i];			// add character to outputtable contents
+		i++;					// go one character further on nodeline
+	} return out;  // catch contents if line apruptly ends & no mem shenanigans should occur somehow
 	// FIXME: the mem issue if reading outside nl for "</>" annotation checks
 }
 
@@ -323,14 +330,14 @@ std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 */
 uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable into grind or getter??
 {
-	if (fline[i]=='<') { // character is not innocent
-		std::string cast = "";	  // variable for readable cast
-		i++;			  // go further on descline
-		while (fline[i]!='>') {   // scan for description end
-			cast += fline[i]; // add character to casted innocence description
-			i++;		  // go even further on descline
-		} if(!strcmp(cast.c_str(),"br")) return 1; // breakline annotation recognized
-		else return 0; // not innocent but annotation not recognized
+	if (fline[i]=='<') { 			// character is not innocent
+		std::string cast = "";		// variable for readable cast
+		i++;			  			// go further on descline
+		while (fline[i]!='>') { 	// scan for description end
+			cast += fline[i];		// add character to casted innocence description
+			i++;					// go even further on descline
+		} if(!strcmp(cast.c_str(),"br")) return 1;	// breakline annotation recognized
+		else return 0;				// not innocent but annotation not recognized
 	} return 0;
 }
 
@@ -351,13 +358,15 @@ uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable
 */
 uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 {
-	std::string pcnt = "";	// mode annotation cast variable
-	while (nl[i]!='<') i++;	// go to next annotation
-	i++;			// go further
-	while (nl[i]!='>') {	// scan until annotation bracket closes
-		pcnt += nl[i];	// add current character to the cast variable
-		i++;		// increment line index
-	} i++;			// ready for further work with the nodeline
+	std::string pcnt = "";		// mode annotation cast variable
+	while (nl[i]!='<') i++;		// go to next annotation
+	i++;						// go further
+	while (nl[i]!='>') {		// scan until annotation bracket closes
+		pcnt += nl[i];			// add current character to the cast variable
+		i++;					// increment line index
+	} i++;						// ready for further work with the nodeline
+
+	// return identified mode
 	return !strcmp(pcnt.c_str(),"head")
 		+ReadMode::DESCRIPTION*!strcmp(pcnt.c_str(),"dsc")
 		+ReadMode::DROPDOWN_ELEMENT *!strcmp(pcnt.c_str(),"le")
