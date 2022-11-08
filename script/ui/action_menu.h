@@ -57,6 +57,7 @@ private:
 
 	// animation
 	float ptrans = 1.0f;
+	int32_t sEdges[4] = { rand()%30-15,rand()%30-15,rand()%30-15,rand()%30-15 };
 
 	// selection
 	uint8_t msel = 0,isel = 0;

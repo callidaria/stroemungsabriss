@@ -71,6 +71,9 @@ void ActionMenu::update(Player* player,uint32_t &run_state)
 	isel += smod*menu_inf;
 	trg_smod = *player->cnt.abs_down||*player->cnt.abs_up;
 
+	// get new edge values
+	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
+
 	// close when quit selected and hit
 	run_state *= !(*player->cnt.rng_focus&&msel==2&&menu_sys);
 }
@@ -104,10 +107,10 @@ void ActionMenu::render()
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf
 			-(msel*menu_sys+isel*menu_inf)*TEXT_SIZE;
 	splash_shader.enable();
-	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)));
-	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)));
-	splash_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)));
-	splash_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)));
+	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
+	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
+	splash_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
+	splash_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
 
 	// render selection splash
 	splash_buffer.bind();

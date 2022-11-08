@@ -124,5 +124,5 @@ Worktime: 120h
 	+ 74: 4h 58min
     + 63: 13h 25min
 	+ 79: 1h
-	+ 78: 11h 34min
-- Total Code Lines: 8034
+	+ 78: 11h 51min
+- Total Code Lines: 8422
