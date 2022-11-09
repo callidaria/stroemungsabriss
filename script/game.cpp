@@ -22,7 +22,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	l3d_ortho.upload();
 
 	// ui
-	Healthbar hbar = Healthbar(glm::vec2(140,650),1000,30,{ 3,4 },
+	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// post processing

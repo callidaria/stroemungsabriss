@@ -38,7 +38,6 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -65,7 +64,6 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -86,7 +84,6 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	ssplice.def_indexF(splcbuffer.get_indices(),"edg",2,3,PT_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -180,27 +177,13 @@ void Healthbar::register_damage(uint16_t dmg)
 */
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
-	// randomize healthbar begin and end edge height
-	int8_t bheight = rand()%16-10,eheight = rand()%16-10;
-
 	// load targets for upload vector
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
-	float cwdt = 0,chgt = 0;			// current width progression
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
-
-		// upload data until dmg & target width
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
 		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
-		hpswap.upload.push_back(0);									// current hp in healthbar
-		hpswap.upload.push_back(0);									// current damage to health
-
-		// calculate edge vertex manipulation steps
-		hpswap.upload.push_back(bheight+chgt);
-		hpswap.upload.push_back(bheight+chgt);
-		cwdt += hpswap.dest_wdt[ihp][i];
-		float raised = (cwdt/hpswap.max_width)*(eheight-bheight);
-		hpswap.edge_target.push_back(raised);
-		chgt += raised;
+		hpswap.upload.push_back(0);		// current hp in healthbar
+		hpswap.upload.push_back(0);		// current damage to health
 	}
 
 	// filling width & dmg until target
@@ -213,14 +196,9 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload[ritr+2] += 4;
 	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
 
-	// filling edge target based on expected nanobar width
-	float curr_edge = hpswap.upload[ritr+3]+hpswap.edge_target[itr];
-	hpswap.upload[ritr+4] = curr_edge*(hpswap.upload[ritr+1]/hpswap.upload_target[itr]);
-
 	// cap upload values to ideal once target is full
 	hpswap.upload[ritr+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+1]*!full_bar;
 	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
-	hpswap.upload[ritr+4] = curr_edge*full_bar+hpswap.upload[ritr+4]*!full_bar;
 
 	// signal ready to splice if bars full
 	frdy += hpswap.target_itr>=hpswap.upload_target.size();
@@ -309,7 +287,6 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
 	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
-	hpswap.edge_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
 

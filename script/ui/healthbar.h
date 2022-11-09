@@ -15,20 +15,19 @@
 // text related constants
 constexpr uint8_t TEXT_MV = 25;							// inwards move offset for name and counter
 constexpr int8_t TEXT_DV = -7;							// y-axis dive of name and counter display
-constexpr uint8_t TEXT_SIZE = 20;						// text size of name and phase counter
+constexpr uint8_t TEXT_SIZE = 15;						// text size of name and phase counter
 constexpr uint8_t MAX_CHAR_NAME = 128;					// maximum characters for boss naming
 constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 
 // other constants
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
-constexpr uint8_t PT_REPEAT = 5;	// amount of floats the index pattern takes to repeat
+constexpr uint8_t PT_REPEAT = 3;	// amount of floats the index pattern takes to repeat
 
 struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
 	std::vector<std::vector<float>> dest_wdt;	// all destination widths per combined bar
     std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
-	std::vector<float> edge_target;				// raised edge values the upper right vertex reaches
 	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)
 	std::vector<float> upload_splice;			// upload data for healthbar splicers
     int8_t target_itr = 0;						// iteration of target bar modification
