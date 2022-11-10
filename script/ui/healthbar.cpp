@@ -38,6 +38,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -64,6 +68,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
+	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
+	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
+	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -84,6 +92,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
+	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
+	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
+	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
+	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -177,13 +189,24 @@ void Healthbar::register_damage(uint16_t dmg)
 */
 void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 {
-	// load targets for upload vector
+	// setup for upload creation
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
+	int32_t rnd_edge_dwn = 0,rnd_edge_up = 0;
+
+	// load upload vector and its targets
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
 		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
 		hpswap.upload.push_back(0);		// current hp in healthbar
 		hpswap.upload.push_back(0);		// current damage to health
+
+		// edge transformation on x-axis
+		hpswap.upload.push_back(rnd_edge_dwn);
+		hpswap.upload.push_back(rnd_edge_up);
+		bool inner_edge = i!=(hpswap.dest_pos[ihp].size()-1);
+		rnd_edge_dwn = (rand()%20-10)*inner_edge,rnd_edge_up = (rand()%20-10)*inner_edge;
+		hpswap.upload.push_back(rnd_edge_dwn);
+		hpswap.upload.push_back(rnd_edge_up);
 	}
 
 	// filling width & dmg until target

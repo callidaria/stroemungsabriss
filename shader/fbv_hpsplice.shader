@@ -5,6 +5,7 @@ in vec2 position;
 in float ofs;
 in float wdt;
 in float dmg;
+in vec2 edg_trans;
 
 // camera
 uniform mat4 view = mat4(1.0);

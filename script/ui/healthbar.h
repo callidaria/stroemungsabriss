@@ -21,7 +21,7 @@ constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 
 // other constants
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
-constexpr uint8_t PT_REPEAT = 3;	// amount of floats the index pattern takes to repeat
+constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
 
 struct HPBarSwap
 {
