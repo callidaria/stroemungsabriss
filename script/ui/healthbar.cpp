@@ -15,6 +15,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	// save position and width to swap structure
 	hpswap.position = pos;
 	hpswap.max_width = width;
+	hpswap.max_height = height;
 
 	// projection into coordinate system
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
@@ -78,24 +79,20 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
 
 	// vertices indexed splice
-	float splcverts[] = { pos.x,pos.y-6.0f, pos.x,pos.y+height+12.0f, };
+	float splcverts[] = { pos.x,pos.y,0, pos.x,pos.y+height,1, };
 	splcbuffer.bind();
 	splcbuffer.upload_vertices(splcverts,sizeof(splcverts));
 	splcbuffer.add_buffer();
 
 	// compile splice shader
 	ssplice.compile("shader/fbv_hpsplice.shader","shader/fbf_hpsplice.shader");
-	ssplice.def_attributeF("position",2,0,2);
+	ssplice.def_attributeF("position",2,0,3);
+	ssplice.def_attributeF("edge_id",1,2,3);
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
-	ssplice.def_indexF(splcbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
-	ssplice.def_indexF(splcbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
-	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
-	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
-	ssplice.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[0]",2,0,SL_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[1]",2,2,SL_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -130,7 +127,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// set name and phase counter
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",TEXT_SIZE,TEXT_SIZE);
-	hpswap.phcnt = Text(hbfont);hpswap.phname = Text(hbfont);
+	hpswap.phcnt = Text(hbfont),hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
 	hpswap.phname.load(&tc2d);
 } Healthbar::~Healthbar() {  }
@@ -163,7 +160,7 @@ void Healthbar::render()
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
-	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/PT_REPEAT);
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/SL_REPEAT);
 
 	// render name and phase counter
 	hpswap.phname.prepare();
@@ -179,7 +176,7 @@ void Healthbar::render()
 */
 void Healthbar::register_damage(uint16_t dmg)
 {
-	hpswap.dmg_threshold += dmg*(frdy==3);
+	hpswap.dmg_threshold += dmg*(frdy==HBState::READY);
 }
 
 /*
@@ -187,7 +184,7 @@ void Healthbar::register_damage(uint16_t dmg)
 	conforming to: fill_switch
 	purpose: animate nano healthbar filling and capping value at max
 */
-void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// setup for upload creation
 	uint8_t ihp = hpswap.hpbar_itr;		// readability of healthbar iteration
@@ -195,16 +192,22 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 
 	// load upload vector and its targets
 	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
+
+		// basis for upload and targets
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
 		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
 		hpswap.upload.push_back(0);		// current hp in healthbar
 		hpswap.upload.push_back(0);		// current damage to health
 
-		// edge transformation on x-axis
+		// left edge transformation for current nanobar
 		hpswap.upload.push_back(rnd_edge_dwn);
 		hpswap.upload.push_back(rnd_edge_up);
+
+		// generate new healthbar cut if not at last nanobar
 		bool inner_edge = i!=(hpswap.dest_pos[ihp].size()-1);
-		rnd_edge_dwn = (rand()%20-10)*inner_edge,rnd_edge_up = (rand()%20-10)*inner_edge;
+		rnd_edge_dwn = (rand()%30-15)*inner_edge,rnd_edge_up = (rand()%30-15)*inner_edge;
+
+		// right edge transformation for current nanobar
 		hpswap.upload.push_back(rnd_edge_dwn);
 		hpswap.upload.push_back(rnd_edge_up);
 	}
@@ -224,8 +227,8 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
 
 	// signal ready to splice if bars full
-	frdy += hpswap.target_itr>=hpswap.upload_target.size();
-	hpswap.target_itr -= frdy;
+	frdy = (HBState)((uint8_t)frdy+hpswap.target_itr>=hpswap.upload_target.size());
+	hpswap.target_itr -= (uint8_t)frdy;
 }  // TODO: transform geometry randomized
 
 /*
@@ -233,19 +236,37 @@ void Healthbar::fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	conforming to: fill_switch
 	purpose: insert cut geometry between nano healthbars
 */
-void Healthbar::splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
-	hpswap.upload_splice = std::vector<float>(hpswap.upload.begin()+PT_REPEAT,hpswap.upload.end());
-	frdy++;
-}  // TODO: animate healthbar splicing
+	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
+
+		// calculate vector continuation
+		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+3],0);
+		glm::vec2 splice_up = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+4],
+				hpswap.max_height);
+		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
+		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(6),
+				upload_up = splice_up+splice_dir*glm::vec2(6);
+
+		// upload vertex modifications
+		hpswap.upload_splice.push_back(upload_dwn.x);
+		hpswap.upload_splice.push_back(upload_dwn.y);
+		hpswap.upload_splice.push_back(upload_up.x);
+		hpswap.upload_splice.push_back(upload_up.y);
+	}
+
+	// signal splice readiness
+	frdy = HBState::PHASE_COUNT;
+}
+// TODO: animate healthbar splicing
 
 /*
 	count_phases(uint8_t&,HPBarSwap&) -> void
 	conforming to: fill_switch
 	purpose: animated phase count up from 0 towards full amount to increase tension
 */
-void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 {
 	// skip animation if not in first phase
 	hpswap.anim_tick += POT*(hpswap.hpbar_itr>0);
@@ -274,7 +295,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 	// signal hpbar readiness
 	hpswap.anim_tick++;
 	bool anim_ready = hpswap.anim_tick>POT;
-	frdy += anim_ready;
+	frdy = (HBState)((uint8_t)frdy+anim_ready);
 	hpswap.anim_tick -= hpswap.anim_tick*anim_ready;
 }
 
@@ -285,7 +306,7 @@ void Healthbar::count_phases(uint8_t &frdy,HPBarSwap &hpswap)
 		if all bars are empty, the method signals a refill.
 		if the last batch of bars exceeds the maximum amount of phases, a clearstate is signaled.
 */
-void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::ready_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// subtract nanobar hp by damage in threshold
 	hpswap.upload[hpswap.target_itr*PT_REPEAT+2] -= hpswap.dmg_threshold;
@@ -298,7 +319,7 @@ void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	bool hpbar_empty = hpswap.target_itr<0;
 	hpswap.target_itr += hpbar_empty;
 	hpswap.hpbar_itr += hpbar_empty;
-	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
+	frdy = (HBState)((uint8_t)frdy+hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size()));
 }
 
 /*
@@ -306,7 +327,7 @@ void Healthbar::ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	conforming to: fill_switch
 	purpose: reset hpswap upload and target lists to later refill them with new information
 */
-void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
@@ -314,7 +335,7 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	hpswap.upload_splice.clear();
 
 	// signal refill
-	frdy = 0;
+	frdy = HBState::FILLING;
 }
 
 /*
@@ -322,7 +343,7 @@ void Healthbar::reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap)
 	conforming to: fill_switch
 	purpose: represent boss clearstate with the healthbar
 */
-void Healthbar::signal_clear(uint8_t &frdy,HPBarSwap &hpswap)
+void Healthbar::signal_clear(HBState &frdy,HPBarSwap &hpswap)
 {
 	// TODO: visualize clear
 }

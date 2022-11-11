@@ -22,7 +22,20 @@ constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 // other constants
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
 constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
+constexpr uint8_t SL_REPEAT = 4;	// amount of floats the slice pattern takes to repeat
 
+// states of healthbar
+enum HBState
+{
+	FILLING,		// in the process of filling
+	SPLICING,		// splice animation between nano bars
+	PHASE_COUNT,	// counting up phases
+	READY,			// healthbar ready and damagable
+	RESET,			// reset healthbar parameters
+	CLEAR			// attached boss clear
+};
+
+// components for nanobar placement, filling and other information
 struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
@@ -34,7 +47,7 @@ struct HPBarSwap
 	uint8_t hpbar_itr = 0;						// iteration of current healthbar cluster
 	Text phname,phcnt;							// visuals for phase name and counter
 	glm::vec2 position;							// position of most left nanobar
-	uint16_t max_width;							// total width of all nanobars combined
+	uint16_t max_height,max_width;				// total width of all nanobars combined
 	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
 	uint8_t anim_tick = 0;						// counter for animation ticks
 };
@@ -57,12 +70,12 @@ public:
 private:
 
 	// calculators
-	static void fill_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
-	static void splice_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
-	static void count_phases(uint8_t &frdy,HPBarSwap &hpswap);
-	static void ready_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
-	static void reset_hpbar(uint8_t &frdy,HPBarSwap &hpswap);
-	static void signal_clear(uint8_t &frdy,HPBarSwap &hpswap);
+	static void fill_hpbar(HBState &frdy,HPBarSwap &hpswap);
+	static void splice_hpbar(HBState &frdy,HPBarSwap &hpswap);
+	static void count_phases(HBState &frdy,HPBarSwap &hpswap);
+	static void ready_hpbar(HBState &frdy,HPBarSwap &hpswap);
+	static void reset_hpbar(HBState &frdy,HPBarSwap &hpswap);
+	static void signal_clear(HBState &frdy,HPBarSwap &hpswap);
 
 private:
 
@@ -72,7 +85,7 @@ private:
 		frdy: state counter, represeting the current fill_switch index
 		hpswap: struct containing nanobar and upload information
 	*/
-	std::vector<void(*)(uint8_t&,HPBarSwap&)> fill_switch = {
+	std::vector<void(*)(HBState&,HPBarSwap&)> fill_switch = {
 		fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear
 	};
 
@@ -84,5 +97,5 @@ private:
 	HPBarSwap hpswap;
 
 	// status
-	uint8_t frdy = 0;
+	HBState frdy = HBState::FILLING;
 };
