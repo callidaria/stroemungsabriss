@@ -200,16 +200,16 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		hpswap.upload.push_back(0);		// current damage to health
 
 		// left edge transformation for current nanobar
-		hpswap.upload.push_back(rnd_edge_dwn);
-		hpswap.upload.push_back(rnd_edge_up);
+		hpswap.upload.push_back(rnd_edge_dwn);	// randomized left lower edge modification
+		hpswap.upload.push_back(rnd_edge_up);	// randomized left upper edge modification
 
 		// generate new healthbar cut if not at last nanobar
 		bool inner_edge = i!=(hpswap.dest_pos[ihp].size()-1);
 		rnd_edge_dwn = (rand()%30-15)*inner_edge,rnd_edge_up = (rand()%30-15)*inner_edge;
 
 		// right edge transformation for current nanobar
-		hpswap.upload.push_back(rnd_edge_dwn);
-		hpswap.upload.push_back(rnd_edge_up);
+		hpswap.upload.push_back(rnd_edge_dwn);	// randomized right lower edge modification
+		hpswap.upload.push_back(rnd_edge_up);	// randomized right upper edge modification
 	}
 
 	// filling width & dmg until target
@@ -246,8 +246,8 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		glm::vec2 splice_up = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+4],
 				hpswap.max_height);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
-		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(6),
-				upload_up = splice_up+splice_dir*glm::vec2(6);
+		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(12),
+				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(12);
 
 		// upload vertex modifications
 		hpswap.upload_splice.push_back(upload_dwn.x);
