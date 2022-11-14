@@ -19,6 +19,10 @@ constexpr uint8_t TEXT_SIZE = 15;						// text size of name and phase counter
 constexpr uint8_t MAX_CHAR_NAME = 128;					// maximum characters for boss naming
 constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 
+// pixel distances
+constexpr uint8_t BORDER_CLEARING = 2;
+constexpr uint8_t SPLICE_ELONGATION = 12;
+
 // other constants
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
 constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
@@ -76,6 +80,9 @@ private:
 	static void ready_hpbar(HBState &frdy,HPBarSwap &hpswap);
 	static void reset_hpbar(HBState &frdy,HPBarSwap &hpswap);
 	static void signal_clear(HBState &frdy,HPBarSwap &hpswap);
+
+	// helpers
+	static glm::vec2* calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,uint8_t dist);
 
 private:
 

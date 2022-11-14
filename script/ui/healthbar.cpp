@@ -50,10 +50,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices border
 	float brdverts[] = {
-		pos.x,pos.y-2,0, pos.x,pos.y+height+2,1,
-		pos.x,pos.y+height+2,1, pos.x,pos.y+height+2,3,
-		pos.x,pos.y+height+2,3, pos.x,pos.y-2,2,
-		pos.x,pos.y-2,2, pos.x,pos.y-2,0,
+		pos.x,pos.y-BORDER_CLEARING,0, pos.x,pos.y+height+BORDER_CLEARING,1,
+		pos.x,pos.y+height+BORDER_CLEARING,1, pos.x,pos.y+height+BORDER_CLEARING,3,
+		pos.x,pos.y+height+BORDER_CLEARING,3, pos.x,pos.y-BORDER_CLEARING,2,
+		pos.x,pos.y-BORDER_CLEARING,2, pos.x,pos.y-BORDER_CLEARING,0,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
@@ -240,20 +240,11 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
 	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
-
-		// calculate vector continuation
-		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+3],0);
-		glm::vec2 splice_up = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+4],
-				hpswap.max_height);
-		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
-		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(12),
-				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(12);
-
-		// upload vertex modifications
-		hpswap.upload_splice.push_back(upload_dwn.x);
-		hpswap.upload_splice.push_back(upload_dwn.y);
-		hpswap.upload_splice.push_back(upload_up.x);
-		hpswap.upload_splice.push_back(upload_up.y);
+		glm::vec2* vec_cont = calculate_vector_continuations(hpswap,i,SPLICE_ELONGATION);
+		hpswap.upload_splice.push_back(vec_cont[0].x);
+		hpswap.upload_splice.push_back(vec_cont[0].y);
+		hpswap.upload_splice.push_back(vec_cont[1].x);
+		hpswap.upload_splice.push_back(vec_cont[1].y);
 	}
 
 	// signal splice readiness
@@ -346,4 +337,26 @@ void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 void Healthbar::signal_clear(HBState &frdy,HPBarSwap &hpswap)
 {
 	// TODO: visualize clear
+}
+
+/*
+	[...]
+*/
+glm::vec2* Healthbar::calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,uint8_t dist)
+{
+	// reserve output memory
+	static glm::vec2 out[2];
+
+	// calculate vector continuation
+	glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+3],0);
+	glm::vec2 splice_up = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+4],
+			hpswap.max_height);
+	glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
+	glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(dist),
+			upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(dist);
+
+	// output
+	out[0] = upload_dwn;
+	out[1] = upload_up;
+	return out;
 }

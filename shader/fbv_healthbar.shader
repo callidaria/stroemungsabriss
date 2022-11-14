@@ -14,18 +14,18 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	// result variables to writable
+	// input variables to writable
 	vec2 pos = position;
 
 	// situational variables setup
-	float wfac = clamp(edge_id-1,0,1);
-	float dmd = (dmg/wdt)*10-5;
-	float pofs = ofs+dmg*wfac-dmd*wfac+5*(1-wfac);
-	pos.x += pofs;
-	pos.x *= int(dmg>0);
+	float wfac = clamp(edge_id-1,0,1);	// calculate if vertex is member of right edge
+	float dmd = (dmg/wdt)*10-5;			// approximate 0 offset when depleted to not self-overlap
 
-	// edge transformation
-	pos.x += edg_trans[int(edge_id)];
+	// modify position towards offset
+	pos.x += ofs+dmg*wfac;				// move vertex to current offset if on right edge
+	pos.x += -dmd*wfac+5*(1-wfac);		// squeezing nanobar edges where splicing
+	pos.x *= int(dmg>0);				// killing render when width value not natural
+	pos.x += edg_trans[int(edge_id)];	// manipulate edges around healthbar content
 
 	// calculate final vertex positions
 	gl_Position = proj*view*vec4(pos,0,1);

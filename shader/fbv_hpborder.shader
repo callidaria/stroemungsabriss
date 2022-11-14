@@ -14,10 +14,19 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
+	// temporary changable position
+	vec2 pos = position;
+	int edg_id = int(edge_id);
+
 	// situational variables setup
-	float wfac = clamp(edge_id-1,0,1);
+	float wfac = clamp(edge_id-1,0,1);	// calculate if vertex is member of right edge
+
+	// modify position towards offset
+	pos.x += ofs+wdt*wfac;			// move vertex towards current offset if on right edge
+	pos.x += -3*wfac+3*(1-wfac);	// squeezing nanobar edges where splicing
+	pos.x *= int(wdt>0);			// killing render when width value not natural
+	pos.x += edg_trans[edg_id];
 
 	// calculate final vertex positions
-	gl_Position = proj*view*vec4((position.x+ofs+wdt*wfac-3*wfac+3*(1-wfac))*int(wdt>0)
-			+edg_trans[int(edge_id)],position.y,0,1);
+	gl_Position = proj*view*vec4(pos,0,1);
 }
