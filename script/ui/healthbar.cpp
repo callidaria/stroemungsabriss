@@ -5,8 +5,9 @@
 	pos: down left position of the health bar on the screen
 	width: maximum width of the health bar if health points are at maximum value
 	height: height of the health bar
-	phases:
+	phases: list of phases per health bar refill
 	hp: (also current hp will initially be set to minimum)
+	boss_name: self explanatory
 	purpose: creates an healthbar to save and visualize health stati with
 */
 Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
@@ -50,10 +51,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices border
 	float brdverts[] = {
-		pos.x,pos.y-BORDER_CLEARING,0, pos.x,pos.y+height+BORDER_CLEARING,1,
-		pos.x,pos.y+height+BORDER_CLEARING,1, pos.x,pos.y+height+BORDER_CLEARING,3,
-		pos.x,pos.y+height+BORDER_CLEARING,3, pos.x,pos.y-BORDER_CLEARING,2,
-		pos.x,pos.y-BORDER_CLEARING,2, pos.x,pos.y-BORDER_CLEARING,0,
+		pos.x,pos.y,0, pos.x,pos.y+height,1,
+		pos.x,pos.y+height,1, pos.x,pos.y+height,3,
+		pos.x,pos.y+height,3, pos.x,pos.y,2,
+		pos.x,pos.y,2, pos.x,pos.y,0,
 	};
 	brdbuffer.bind();
 	brdbuffer.upload_vertices(brdverts,sizeof(brdverts));
@@ -66,13 +67,13 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
-	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
-	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
-	sborder.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[0]",1,3,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[1]",1,4,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[2]",1,5,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[3]",1,6,BRD_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -152,8 +153,10 @@ void Healthbar::render()
 	sborder.enable();
 	brdbuffer.bind();
 	brdbuffer.bind_index();
-	brdbuffer.upload_indices(hpswap.upload);  // FIXME: remove and use hpbuffers index buffer
-	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/PT_REPEAT);
+	brdbuffer.upload_indices(hpswap.upload);
+	sborder.upload_int("cnt_height",hpswap.max_height);
+	sborder.upload_int("brd_space",BORDER_CLEARING);
+	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/BRD_REPEAT);
 
 	// setup & draw splice
 	ssplice.enable();
@@ -240,7 +243,7 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
 	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
-		glm::vec2* vec_cont = calculate_vector_continuations(hpswap,i,SPLICE_ELONGATION);
+		glm::vec2* vec_cont = calculate_vector_continuations(hpswap,i,SPLICE_ELONGATION,false);
 		hpswap.upload_splice.push_back(vec_cont[0].x);
 		hpswap.upload_splice.push_back(vec_cont[0].y);
 		hpswap.upload_splice.push_back(vec_cont[1].x);
@@ -323,6 +326,7 @@ void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
+	// hpswap.upload_border.clear();
 	hpswap.upload_splice.clear();
 
 	// signal refill
@@ -340,17 +344,19 @@ void Healthbar::signal_clear(HBState &frdy,HPBarSwap &hpswap)
 }
 
 /*
-	[...]
+	TODO [...]
 */
-glm::vec2* Healthbar::calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,uint8_t dist)
+glm::vec2* Healthbar::calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,
+		uint8_t dist,bool rgt_edge)
 {
 	// reserve output memory
-	static glm::vec2 out[2];
+	static glm::vec2 out[2] = { glm::vec2(0) };
 
 	// calculate vector continuation
-	glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+3],0);
-	glm::vec2 splice_up = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[i*PT_REPEAT+4],
-			hpswap.max_height);
+	uint8_t ridx = i*PT_REPEAT+3+2*rgt_edge;
+	glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx],0);
+	glm::vec2 splice_up =
+			glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx+1],hpswap.max_height);
 	glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
 	glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(dist),
 			upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(dist);

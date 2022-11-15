@@ -20,12 +20,13 @@ constexpr uint8_t MAX_CHAR_NAME = 128;					// maximum characters for boss naming
 constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 
 // pixel distances
-constexpr uint8_t BORDER_CLEARING = 2;
-constexpr uint8_t SPLICE_ELONGATION = 12;
+constexpr uint8_t BORDER_CLEARING = 2;		// pixel distance between border and splicing
+constexpr uint8_t SPLICE_ELONGATION = 12;	// elongation distance of splicing after upper edge
 
 // other constants
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
 constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
+constexpr uint8_t BRD_REPEAT = 7;	// amount of floats the border pattern takes to repeat
 constexpr uint8_t SL_REPEAT = 4;	// amount of floats the slice pattern takes to repeat
 
 // states of healthbar
@@ -51,7 +52,7 @@ struct HPBarSwap
 	uint8_t hpbar_itr = 0;						// iteration of current healthbar cluster
 	Text phname,phcnt;							// visuals for phase name and counter
 	glm::vec2 position;							// position of most left nanobar
-	uint16_t max_height,max_width;				// total width of all nanobars combined
+	uint16_t max_height,max_width;				// dimensions of all frankensteind' nanobars
 	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
 	uint8_t anim_tick = 0;						// counter for animation ticks
 };
@@ -82,7 +83,8 @@ private:
 	static void signal_clear(HBState &frdy,HPBarSwap &hpswap);
 
 	// helpers
-	static glm::vec2* calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,uint8_t dist);
+	static glm::vec2* calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,
+			uint8_t dist,bool rgt_edge);
 
 private:
 
