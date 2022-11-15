@@ -243,11 +243,21 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
 	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
-		glm::vec2* vec_cont = calculate_vector_continuations(hpswap,i,SPLICE_ELONGATION,false);
-		hpswap.upload_splice.push_back(vec_cont[0].x);
-		hpswap.upload_splice.push_back(vec_cont[0].y);
-		hpswap.upload_splice.push_back(vec_cont[1].x);
-		hpswap.upload_splice.push_back(vec_cont[1].y);
+
+		// calculate vector continuation
+		uint8_t ridx = i*PT_REPEAT+3;
+		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx],0);
+		glm::vec2 splice_up =
+				glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx+1],hpswap.max_height);
+		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
+		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(SPLICE_ELONGATION),
+				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(SPLICE_ELONGATION);
+
+		// upload splice continuations
+		hpswap.upload_splice.push_back(upload_dwn.x);
+		hpswap.upload_splice.push_back(upload_dwn.y);
+		hpswap.upload_splice.push_back(upload_up.x);
+		hpswap.upload_splice.push_back(upload_up.y);
 	}
 
 	// signal splice readiness
@@ -326,7 +336,6 @@ void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	// ready hpswap lists for refill
 	hpswap.upload_target.clear();
 	hpswap.upload.clear();
-	// hpswap.upload_border.clear();
 	hpswap.upload_splice.clear();
 
 	// signal refill
@@ -341,28 +350,4 @@ void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 void Healthbar::signal_clear(HBState &frdy,HPBarSwap &hpswap)
 {
 	// TODO: visualize clear
-}
-
-/*
-	TODO [...]
-*/
-glm::vec2* Healthbar::calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,
-		uint8_t dist,bool rgt_edge)
-{
-	// reserve output memory
-	static glm::vec2 out[2] = { glm::vec2(0) };
-
-	// calculate vector continuation
-	uint8_t ridx = i*PT_REPEAT+3+2*rgt_edge;
-	glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx],0);
-	glm::vec2 splice_up =
-			glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx+1],hpswap.max_height);
-	glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
-	glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(dist),
-			upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(dist);
-
-	// output
-	out[0] = upload_dwn;
-	out[1] = upload_up;
-	return out;
 }

@@ -82,10 +82,6 @@ private:
 	static void reset_hpbar(HBState &frdy,HPBarSwap &hpswap);
 	static void signal_clear(HBState &frdy,HPBarSwap &hpswap);
 
-	// helpers
-	static glm::vec2* calculate_vector_continuations(HPBarSwap &hpswap,uint8_t i,
-			uint8_t dist,bool rgt_edge);
-
 private:
 
 	/*
