@@ -1,5 +1,11 @@
 #include "game.h"
 
+Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
+	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d)
+{
+	ccbf = { m_frame,m_r2d,m_r3d,m_rI,&m_bSys,&m_player };
+}
+
 void Game::run(uint32_t &rstate,CCBManager* ccbm)
 {
 	m_bgenv.load(rstate,ccbm);
@@ -8,7 +14,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	uint32_t stg_idx2d;
 	int32_t fwd_treg[16] = { 0 };
 	glm::vec2 ePos = glm::vec2(615,600);
-	stg_ld.at(rstate)(m_r3d,stg_idx2d,&m_bSys,fwd_treg);
+	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
@@ -24,21 +30,32 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
-	uint32_t running=rstate+1;
+	// lightweight action menu
+	ActionMenu lgt_menu = ActionMenu(m_frame);
+
+	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
 		m_frame->print_fps();
+		m_frame->calc_time_delta();
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
-		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
 
-		m_bgenv.update(rstate);	
-		stg_upd.at(rstate)(m_r3d,stg_idx2d,&m_bSys,m_player.get_pPos()+glm::vec2(25),ePos,fwd_treg);
+		// action menu update
+		lgt_menu.update(&m_player,running);
+		lgt_menu.bind();
+
+		// stage
+		m_bgenv.update(rstate);
+		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 		m_player.update(rstate,fwd_treg[11]);
 		m_bSys.render();
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
+
+		// action menu render
+		lgt_menu.render();
 
 		m_frame->update();
 	} rstate = 0;  // TODO: choose between menu &|| desktop skip

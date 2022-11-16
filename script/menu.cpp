@@ -32,14 +32,13 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	mat0 = Material3D(r3d,1,8,16);
 
 	// setup dare message on idle screen
-	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
-	tft = Text(fnt);
+	tft = Text(&fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	tft.load(cam2d);
 
 	// print title version message
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	vtft = Text(vfnt);
+	vtft = Text(&vfnt);
 	std::string title_vmessage = "yomisensei by callidaria. danmaku version "
 			+std::to_string(GVERSION_RELEASE)+'.'+std::to_string(GVERSION_SUBRELEASE)+'.'
 			+std::to_string(GVERSION_DEVSTEP)+GVERSION_SUFFIX+" - running on cascabel "

@@ -34,7 +34,8 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 
 	// dialogue text heading
 	Font thfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
-	thead = Text(thfont);
+	thead = Text(&thfont);
+	thead.texture();
 	thead.add(head,pos+glm::vec2(15,height-15));
 	thead.load(cam2d);
 
@@ -42,7 +43,8 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	irnd = m_r2d->sl.size();
 	srnd = paths.size();
 	int32_t blank = (width-srnd*ewidth)/srnd+ewidth;
-	for (int i=0;i<srnd;i++) m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
+	for (int i=0;i<srnd;i++)
+		m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
 } MenuDialogue::~MenuDialogue() {  }
 
 /*

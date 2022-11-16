@@ -51,6 +51,10 @@ private:
 	static void jet_focus(BulletSystem* bsys,int32_t* treg);
 	static void jet_scientific(BulletSystem* bsys,int32_t* treg);
 
+public:
+
+	PlayerControls cnt;
+
 private:
 
 	// rendering
@@ -65,9 +69,7 @@ private:
 
 	// controlling
 	glm::vec3 pos = glm::vec3(200,200,0);
-	glm::vec2 dhold;
-	int ddur=0,drec=0;
-	struct PlayerControls cnt;
+	int ddur = 0,drec = 0;
 	int emuflt_ud,emuflt_lr;
 	uint32_t dz_epsilon = 0;
 

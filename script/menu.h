@@ -88,6 +88,7 @@ private:
 	Material3D mat0;
 	Shader sshd = Shader();
 	FrameBuffer fb,globe_fb;
+	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
@@ -102,13 +103,13 @@ private:
 	int32_t lselect = 0,lbounds = 7,lscroll = 0,diffsel = 0,opt_index = 0;
 
 	// animation
-	int32_t sbar[8];
+	int32_t sbar[8] = { 0 };
 	uint32_t SELTRANS[16] = {
 		900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498
 	};
 	glm::mat4 pos_title,pos_entitle;
 	float ptrans = 0,dtrans = 0;
-	uint32_t msindex;
+	uint32_t msindex = 0;
 	uint8_t mselect = 7;
 	glm::vec2 mve,mvj;
 	float edge_mod;

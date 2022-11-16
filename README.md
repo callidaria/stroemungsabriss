@@ -2,11 +2,15 @@
 
 ## RUN
 
+<br>
+
 ### linux
 ```
 ./yomisensei
 ```
 or press [r] key in cascabel console
+
+<br>
 
 ### windows
 double click yomisensei.exe
@@ -14,9 +18,15 @@ double click yomisensei.exe
 ### DISCLAIMER
 *building is not required to run the game!*
 
+<br>
+
 ***
 
+<br>
+
 ## BUILD
+
+<br>
 
 ### linux
 ```
@@ -26,11 +36,15 @@ double click yomisensei.exe
 select BUILD ALL COMPONENTS and run with [SPACE] to build libraries \
 then, press [b] key to build executable
 
+<br>
+
 ### windows
 ```
 make winlib
 make win
 ```
+
+<br>
 
 ### DISCLAIMER
 *certain libraries are required to satisfy the compiler:*
@@ -41,7 +55,11 @@ make win
 - SOIL
 - OpenAL
 
+<br>
+
 ***
+
+<br>
 
 ## v0.0.3 DEV
 
@@ -50,6 +68,8 @@ make win
 - spawn player controlled bullets
 - health bar system
 - engine build system
+- action menu for system and informations
+- time delta disconnected from frames
 
 ### optimizations:
 - improved documentation
@@ -84,11 +104,18 @@ make win
 - Options Configuration Save
 - First Player Movement Prototype
 
+Worktime: 120h
+
+<br>
+
 ***
 
+<br>
+
 ## Trivia
-- Estimated Worktime Before Commit 120: 120h
-- Elapsed Worktime After Commit 120: 19h 19min
+- Total Worktime: 120h
+- Elapsed Worktime After v0.0.2:
+	+ ??: 19h 19min
 	+ 46: 38h 55min
 	+ 54: 12h 40min
 	+ 20: 3h 8min
@@ -99,4 +126,5 @@ make win
     + 63: 13h 25min
 	+ 79: 1h
 	+ 65: 43min
-- Total Code Lines: 7657
+	+ 78: 15h 41min
+- Total Code Lines: 8498

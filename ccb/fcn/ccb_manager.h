@@ -39,6 +39,6 @@ private:
 	glm::mat4 tmp_model = glm::mat4(1.0f);
 
 	// console graphics
-	Font cf;
-	Text ct,cl;
+	Font cf = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
+	Text ct = Text(&cf),cl = Text(&cf);
 };

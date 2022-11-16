@@ -1,12 +1,12 @@
 #include "bullet_system.h"
 
 /*
-	constructor(RendererI*)
+	constructor(Frame*,RendererI*)
 	rI: points to index renderer the visualized bullets will be handled by
 	purpose: setting up the bullet system object
 */
-BulletSystem::BulletSystem(RendererI* rI)
-	: m_rI(rI) {  }
+BulletSystem::BulletSystem(Frame* frame,RendererI* rI)
+	: m_frame(frame),m_rI(rI) {  }
 
 /*
 	add_cluster(uint16_t,uint16_t,const uint32_t,const char*) -> uint16_t
@@ -90,7 +90,7 @@ void BulletSystem::set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
 */
 void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
 {
-	m_rI->il.at(cluster).o[index] += dPos;
+	m_rI->il.at(cluster).o[index] += dPos*m_frame->get_time_delta();
 }
 
 /*
@@ -101,7 +101,7 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
-		m_rI->il.at(cluster).o[i] += dirs.at(cluster)[i];
+		m_rI->il.at(cluster).o[i] += dirs.at(cluster)[i]*m_frame->get_time_delta();
 }
 
 /*
@@ -184,8 +184,9 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 		bool hit = glm::length(cPos-pos)<=hr+br;  // check collision
 		m_rI->il[cluster].o[i] += glm::vec2(-10000,-10000)*glm::vec2((int)hit);  // "despawn"
 		out += hit;  // increment hit-meter
+	}
 
-	} return out;
+	return out;
 }
 
 /*

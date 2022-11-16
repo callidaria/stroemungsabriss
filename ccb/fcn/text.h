@@ -14,20 +14,39 @@
 class Text
 {
 public:
-	Text();
-	Text(Font f);
-	int add(char c,glm::vec2 p);
+
+	// construction
+	Text() {  }
+	Text(Font* f);
+
+	// write
+	int32_t add(char c,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
 	void clear();
-	void load_vertex();
+
+	// preparation
+	void texture();
 	void load(Camera2D* c);
 	void prepare();
-	void render_propag(int amnt,glm::vec4 col);
-	void render(int amnt,glm::vec4 col);
+
+	// draw
+	void render(int32_t amnt,glm::vec4 col);
+
+	// uniform
 	void set_scroll(glm::mat4 model);
+
 private:
+
+	void load_vertex();
+
+private:
+
+	// cascabel
 	Shader sT;
-	Font font;
+	Font* m_font;
 	Buffer buffer;
+
+	// vertices & texturing
 	std::vector<float> ibv;
+	GLuint ftexture;
 };

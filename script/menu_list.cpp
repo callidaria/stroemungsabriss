@@ -6,9 +6,8 @@
 */
 MenuList::MenuList()
 {
-	Font fproc = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",0,0); // TODO: minimize
 	LEntity proc = {
-		Text(fproc),Text(fproc),std::vector<Text>(),std::vector<std::string>(),
+		Text(&lfnt),Text(&dfnt),std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
@@ -36,32 +35,29 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	// setting up textures for 2D renderer
 	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
 	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->load(cam2d); // FIXME: sprite always in split, use different spritesheets
+	m_r2d->load(cam2d);  // FIXME: sprite always in split, use different spritesheets
 
-	// setting up the different fonts & texts for menu parts
-	Font lfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",30,30);
-	Font dfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	Text t_desc,t_sle; // temporary storage variable for node descriptions & sublist elements
-	// FIXME: do not make the fonts with static parameters
+	// setting up the different texts for menu features
+	Text t_sle = Text(&lfnt),t_desc = Text(&dfnt);
 
 	// gathering raw node data
-	std::ifstream mlfile(path,std::ios::in); // reading file
-	std::vector<std::string> ndata; 	 // variable for raw node data
-	std::string t_content;			 // temporary node content
-	std::string t_line = "";		 // temporary line content for description text before break
-	bool ractive = false;			 // active reading process (in node)
+	std::ifstream mlfile(path,std::ios::in);	// reading file
+	std::vector<std::string> ndata;				// variable for raw node data
+	std::string t_content;		// temporary node content
+	std::string t_line = "";	// temporary line content for description text before break
+	bool ractive = false;		// active reading process (in node)
 
 	// extracting raw node data from file
 	while (!mlfile.eof()) {
 		std::string line;getline(mlfile,line);	  // reading line by line
 		bool enode = !strcmp(line.c_str(),"</>"); // end node boolean true if line contains end annotation
-		if (ractive&&!enode) { // if reading in node & the end of node has not been reached
-			line.erase(std::remove(line.begin(),line.end(),'\t'),line.end()); // getting rid of tabs
-			t_content+=line; // add processed line to content collection
-		} else if (enode) { // if end of node has been reached
-			ractive = false;	    // stop active reading (outside node)
-			ndata.push_back(t_content); // save aquired content inside data list
-			t_content = "";		    // reset content variable
+		if (ractive&&!enode) {	// if reading in node & the end of node has not been reached
+			line.erase(std::remove(line.begin(),line.end(),'\t'),line.end());	// getting rid of tabs
+			t_content += line;				// add processed line to content collection
+		} else if (enode) {					// if end of node has been reached
+			ractive = false;	    		// stop active reading (outside node)
+			ndata.push_back(t_content);		// save aquired content inside data list
+			t_content = "";		    		// reset content variable
 		} else if (!strcmp(line.c_str(),"<node>")) ractive = true; // open node if marked accordingly
 	}
 
@@ -84,19 +80,19 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	bool written;
 	for (int i=0;i<ndata.size();i++) {
 		uint32_t ix = 0;     // index of raw node data
-		struct LEntity t_le; // temporary list element, getting pushed back later
-		t_le.ltxt = Text(lfnt);
+		LEntity t_le; // temporary list element, getting pushed back later
+		t_le.ltxt = Text(&lfnt);
 		while (ix<ndata[i].size()) {
 			uint8_t emode = get_readmode(ndata[i],ix);   // check character for mode annotation
 			std::string excnt = breakgrind(ndata[i],ix); // get content inside annotation area
 			switch (emode) {
-			case 1: // conservative menu list element
+			case ReadMode::HEAD:
 				t_le.ltxt.add(excnt.c_str(),glm::vec2(250,lscroll)); // write to main list element
 				lscroll -= 45; // scroll down after write
 				esize++;       // inc list element counter
 				break;
-			case 2: // menu splash description
-				t_desc = Text(dfnt); // temporary description to add later
+			case ReadMode::DESCRIPTION:
+				t_desc = Text(&dfnt); // temporary description to add later
 				for (uint32_t iy=0;iy<excnt.size();iy++) { // reading through desc content
 					if (textgrind(excnt,iy)) { // detecting if character is innocent
 						t_desc.add(t_line.c_str(),glm::vec2(920,dscroll)); // add to desc
@@ -109,15 +105,15 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				dscroll = 600;	    // reset cursor scroll
 				t_line = "";	    // reset temporary line
 				break;
-			case 3: // selectable menu sublist element in dropdown
+			case ReadMode::DROPDOWN_ELEMENT:
 				args = split_arguments(excnt,','); // getting argument list
-				t_sle = Text(lfnt);
+				t_sle = Text(&lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
 				t_sle.load(cam2d);
 				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
 				t_le.lev.push_back(args[1]); // save value parameter as value list element
 				break;
-			case 4: // slider element inserted
+			case ReadMode::SLIDER:
 				t_le.slide = true; // setting slider to be active and visible
 				args = split_arguments(excnt,','); // define the capacities according to pattern
 				t_le.sl_min = stoi(args[0]);
@@ -125,7 +121,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				t_le.sl_vmin = stoi(args[2]); // FIXME: remove slider value caps
 				t_le.sl_vmax = stoi(args[3]);
 				break;
-			case 5: // destination annotation
+			case ReadMode::GDESTINATION:
 				args = split_arguments(excnt,',');
 				t_le.saveID = args[0];
 				written = false;
@@ -142,18 +138,18 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 						o_conf << args[0] << ' ' << t_le.lev[stoi(args[1])] << '\n';
 				}
 				break; // FIXME: double branching where better solutions
-			case 6: // reading target monitor for menu list insert
+			case ReadMode::TARGET_MONITOR:
 				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
-					t_sle = Text(lfnt);
+					t_sle = Text(&lfnt);
 					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
 					t_sle.load(cam2d);
 					t_le.lee.push_back(t_sle);
 					t_le.lev.push_back(std::to_string(disp));
 				} break; // FIXME: display value not as integer but as comm name
-			case 7: // estimated difficulty rating
+			case ReadMode::EST_DIFFICULTY:
 				t_le.diff = stoi(excnt);
 				break;
-			case 8: // globe preview rotation towards coordinates
+			case ReadMode::GROTATION:
 				args = split_arguments(excnt,',');
 				for (int i=0;i<6;i++)
 					t_le.gRot[i] = stoi(args[i]);
@@ -167,9 +163,13 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 } // TODO: write interpreter fault instead of letting the mem take the fall
 
 /*
-
+	reset() -> void
+	purpose: reset all changes of any list attribute entities
 */
-void MenuList::reset() { les = rles; }
+void MenuList::reset()
+{
+	les = rles;
+}
 
 /*
 	save(void)
@@ -185,7 +185,8 @@ void MenuList::save()
 }
 
 /*
-
+	was_changed() -> bool
+	returns: if any attributes of any list elements were changed
 */
 bool MenuList::was_changed()
 {
@@ -197,7 +198,7 @@ bool MenuList::was_changed()
 /*
 	render(float,float,uint16_t,float&,int8_t,bool)
 	dtrans: represents the stage of transition in the menu's colouring & geometry
-	lscroll: shows how far the player scrolled through the menu
+	piscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
 	edge_mod: midedge modding for the sublist splash
 	delta: reads the slider sID increment from menu controlling
@@ -205,7 +206,8 @@ bool MenuList::was_changed()
 	md: returns the option entity render offset for menu
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md)
+void MenuList::render(float dtrans,float piscroll,uint16_t index,float &edge_mod,int8_t delta,
+		bool rsl,uint8_t &md)
 {
 	// rendering all head list entities
 	edge_mod = -1;
@@ -216,13 +218,12 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 
 		// rendering the selectable list text
 		les[i].ltxt.prepare();
-		int32_t fscroll = lscroll*45; // calculating the amount of scrolling
+		int32_t fscroll = piscroll*45; // calculating the amount of scrolling
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));		 // shadow scroll
-		les[i].ltxt.render(dtrans*64*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
-
+			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));
+		les[i].ltxt.render(dtrans*64*(index==i),glm::vec4(.54f,.17f,.89f,.75f));	// shadow
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(x_ofs,fscroll,0)));
-		les[i].ltxt.render(dtrans*64,glm::vec4(1,1,1,1));	// render main text
+		les[i].ltxt.render(dtrans*64,glm::vec4(1,1,1,1));							// main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: performance
 
@@ -281,7 +282,9 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 }
 
 /*
-
+	globe_rotation(uint16_t) -> vec2
+	li: list index of selected entity to read globe preview rotation from
+	returns: globe rotation vector toward list entity preview destination
 */
 glm::vec2 MenuList::globe_rotation(uint16_t li)
 {
@@ -307,13 +310,13 @@ void MenuList::write_tempID(uint8_t index)
 std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 {
 	std::string out;
-	while (i<nl.length()) { // read nodeline per character
-		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') { // check for end annotation
-			i += 3; // go 3 steps further on nodeline
+	while (i<nl.length()) {		// read nodeline per character
+		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') {	// check for end annotation
+			i += 3;				// go 3 steps further on nodeline
 			return out;
-		} out += nl[i]; // add character to outputtable contents
-		i++;		// go one character further on nodeline
-	} return out; // catch contents if line apruptly ends & no mem shenanigans should occur somehow
+		} out += nl[i];			// add character to outputtable contents
+		i++;					// go one character further on nodeline
+	} return out;  // catch contents if line apruptly ends & no mem shenanigans should occur somehow
 	// FIXME: the mem issue if reading outside nl for "</>" annotation checks
 }
 
@@ -327,19 +330,19 @@ std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 */
 uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable into grind or getter??
 {
-	if (fline[i]=='<') { // character is not innocent
-		std::string cast = "";	  // variable for readable cast
-		i++;			  // go further on descline
-		while (fline[i]!='>') {   // scan for description end
-			cast += fline[i]; // add character to casted innocence description
-			i++;		  // go even further on descline
-		} if(!strcmp(cast.c_str(),"br")) return 1; // breakline annotation recognized
-		else return 0; // not innocent but annotation not recognized
+	if (fline[i]=='<') { 			// character is not innocent
+		std::string cast = "";		// variable for readable cast
+		i++;			  			// go further on descline
+		while (fline[i]!='>') { 	// scan for description end
+			cast += fline[i];		// add character to casted innocence description
+			i++;					// go even further on descline
+		} if(!strcmp(cast.c_str(),"br")) return 1;	// breakline annotation recognized
+		else return 0;				// not innocent but annotation not recognized
 	} return 0;
 }
 
 /*
-	get_readmode(std::string,uint8_t&)
+	get_readmode(std::string,uint8_t&) -> uint8_t
 	nl: represents the remaining nodeline to scan until break
 	i: reading index for nodeline
 	purpose: get the modeID, representing the mode in which the following text is supposed to be added
@@ -355,21 +358,23 @@ uint8_t MenuList::textgrind(std::string fline,uint32_t &i) // FIXME: collapsable
 */
 uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 {
-	std::string pcnt = "";	// mode annotation cast variable
-	while (nl[i]!='<') i++;	// go to next annotation
-	i++;			// go further
-	while (nl[i]!='>') {	// scan until annotation bracket closes
-		pcnt += nl[i];	// add current character to the cast variable
-		i++;		// increment line index
-	} i++;			// ready for further work with the nodeline
+	std::string pcnt = "";		// mode annotation cast variable
+	while (nl[i]!='<') i++;		// go to next annotation
+	i++;						// go further
+	while (nl[i]!='>') {		// scan until annotation bracket closes
+		pcnt += nl[i];			// add current character to the cast variable
+		i++;					// increment line index
+	} i++;						// ready for further work with the nodeline
+
+	// return identified mode
 	return !strcmp(pcnt.c_str(),"head")
-		+2*!strcmp(pcnt.c_str(),"dsc")
-		+3*!strcmp(pcnt.c_str(),"le")
-		+4*!strcmp(pcnt.c_str(),"slider")
-		+5*!strcmp(pcnt.c_str(),"dest")
-		+6*!strcmp(pcnt.c_str(),"le_TargetMonitor")
-		+7*!strcmp(pcnt.c_str(),"diff")
-		+8*!strcmp(pcnt.c_str(),"gRotate");
+		+ReadMode::DESCRIPTION*!strcmp(pcnt.c_str(),"dsc")
+		+ReadMode::DROPDOWN_ELEMENT *!strcmp(pcnt.c_str(),"le")
+		+ReadMode::SLIDER*!strcmp(pcnt.c_str(),"slider")
+		+ReadMode::GDESTINATION*!strcmp(pcnt.c_str(),"dest")
+		+ReadMode::TARGET_MONITOR*!strcmp(pcnt.c_str(),"le_TargetMonitor")
+		+ReadMode::EST_DIFFICULTY*!strcmp(pcnt.c_str(),"diff")
+		+ReadMode::GROTATION*!strcmp(pcnt.c_str(),"gRotate");
 	// ??maybe do this with case
 }
 

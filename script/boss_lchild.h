@@ -1,13 +1,14 @@
 #pragma once
 
 #include <iostream>
-#include "../ccb/gfx/renderer3d.h"
+
+#include "struct/feature_base.h"
+
 #include "bullet_system.h"
 
 class BossLChild
 {
 public:
-	static void load(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,int32_t* treg);
-	static void update(Renderer3D* r3d,uint32_t &rnd_index,BulletSystem* bSys,glm::vec2 pPos,glm::vec2 ePos,
-				int32_t* treg);
+	static void load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* treg);
+	static void update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 &ePos,int32_t* treg);
 };
