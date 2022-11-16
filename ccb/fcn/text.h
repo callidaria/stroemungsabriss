@@ -25,6 +25,7 @@ public:
 	void clear();
 
 	// preparation
+	void texture();
 	void load(Camera2D* c);
 	void prepare();
 
@@ -45,6 +46,7 @@ private:
 	Font* m_font;
 	Buffer buffer;
 
-	// 
+	// vertices & texturing
 	std::vector<float> ibv;
+	GLuint ftexture;
 };

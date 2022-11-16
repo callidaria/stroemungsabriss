@@ -198,7 +198,7 @@ bool MenuList::was_changed()
 /*
 	render(float,float,uint16_t,float&,int8_t,bool)
 	dtrans: represents the stage of transition in the menu's colouring & geometry
-	lscroll: shows how far the player scrolled through the menu
+	piscroll: shows how far the player scrolled through the menu
 	index: shows the index of the selected menu point
 	edge_mod: midedge modding for the sublist splash
 	delta: reads the slider sID increment from menu controlling
@@ -206,7 +206,8 @@ bool MenuList::was_changed()
 	md: returns the option entity render offset for menu
 	purpose: renders the menu list on top of the menu visuals.
 */
-void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md)
+void MenuList::render(float dtrans,float piscroll,uint16_t index,float &edge_mod,int8_t delta,
+		bool rsl,uint8_t &md)
 {
 	// rendering all head list entities
 	edge_mod = -1;
@@ -217,13 +218,12 @@ void MenuList::render(float dtrans,float lscroll,uint16_t index,float &edge_mod,
 
 		// rendering the selectable list text
 		les[i].ltxt.prepare();
-		int32_t fscroll = lscroll*45; // calculating the amount of scrolling
+		int32_t fscroll = piscroll*45; // calculating the amount of scrolling
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),
-			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));		 // shadow scroll
-		les[i].ltxt.render(dtrans*64*(index==i),glm::vec4(.54f,.17f,.89f,.75f)); // rendering shadow
-
+			glm::vec3(x_ofs+rand()%10,fscroll+rand()%10,0)));
+		les[i].ltxt.render(dtrans*64*(index==i),glm::vec4(.54f,.17f,.89f,.75f));	// shadow
 		les[i].ltxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(x_ofs,fscroll,0)));
-		les[i].ltxt.render(dtrans*64,glm::vec4(1,1,1,1));	// render main text
+		les[i].ltxt.render(dtrans*64,glm::vec4(1,1,1,1));							// main text
 		// ??maybe do shadow calculation in shader
 		// FIXME: performance
 

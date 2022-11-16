@@ -31,19 +31,19 @@ public:
 private:
 
 	// essentials
-	Buffer buffer;				// buffer for background
-	Shader m_sh;				// shader
-	Renderer2D* m_r2d;			// 2d renderer reference
+	Buffer buffer;		// buffer for background
+	Shader m_sh;		// shader
+	Renderer2D* m_r2d;	// 2d renderer reference
 
 	// dialogue state variables
-	uint8_t sstate = 0;			// selection state of players choosing
-	bool open = false;			// dialogue is opened
+	uint8_t sstate = 0;		// selection state of players choosing
+	bool open = false;		// dialogue is opened
 
 	// text
 	Font thfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
-	Text thead;					// headings text
+	Text thead = Text(&thfont);		// headings text
 
 	// selection entities
-	uint32_t irnd;				// render index
-	uint8_t srnd;				// size read from point of index
+	uint32_t irnd;	// render index
+	uint8_t srnd;	// size read from point of index
 };

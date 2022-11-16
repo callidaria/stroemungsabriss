@@ -47,4 +47,4 @@ void Font::texture()
 void Font::setup()
 {
 	glBindTexture(GL_TEXTURE_2D,tex);
-} // ??double texture setup in text.cpp
+}

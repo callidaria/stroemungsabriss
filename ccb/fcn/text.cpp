@@ -4,12 +4,14 @@
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
+	WARNING: the created objects always have to lead with this contructor, else font texture breaks
 */
 Text::Text(Font* f)
 	: m_font(f)
 {
 	buffer = Buffer();
 	buffer.add_buffer();
+	texture();
 }
 
 /*
@@ -66,6 +68,14 @@ void Text::clear()
 }
 
 /*
+	[...] TODO
+*/
+void Text::texture()
+{
+	Toolbox::load_texture(ftexture,m_font->tp);
+}
+
+/*
 	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
@@ -79,7 +89,6 @@ void Text::load(Camera2D* c)
 	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
 	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
 	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
-	m_font->texture();
 	sT.upload_float("wdt",m_font->mw);
 	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
 	sT.upload_matrix("proj",c->proj2D);
@@ -107,10 +116,8 @@ void Text::prepare()
 void Text::render(int32_t amnt,glm::vec4 col)
 {
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
-	// glBindTexture(GL_TEXTURE_2D,m_font->tex);
-	m_font->setup();
 	buffer.upload_indices(ibv);
-	// !!buffer data call in main loop ´°___°`
+	glBindTexture(GL_TEXTURE_2D,ftexture);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 

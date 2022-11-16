@@ -60,12 +60,16 @@ public:
 	bool was_changed();
 
 	// draw
-	void render(float dtrans,float lscroll,uint16_t index,float &edge_mod,int8_t delta,bool rsl,uint8_t &md);
+	void render(float dtrans,float piscroll,uint16_t index,float &edge_mod,int8_t delta,
+			bool rsl,uint8_t &md);
 
 private:
 
+	// grinder
 	std::string breakgrind(std::string nl,uint32_t &i);
 	uint8_t textgrind(std::string nl,uint32_t &i);
+
+	// translation
 	uint8_t get_readmode(std::string nl,uint32_t &i);
 	std::vector<std::string> split_arguments(std::string ext,char sep);
 	uint32_t translate_index(std::vector<std::string> lev,std::string arg);
@@ -95,5 +99,3 @@ private:
 	bool neg_scl=false,neg_rot=false;	// true if transformation of estimated difficulty is negative
 	float val_scl=1,val_rot=0;			// values of description transformation
 };
-
-// FIXME: parameter lscroll & private variable lscroll naming bad practice
