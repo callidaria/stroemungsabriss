@@ -68,7 +68,10 @@ void Text::clear()
 }
 
 /*
-	[...] TODO
+	texture() -> void
+	purpose: load font texture from pointed texture path
+	WARNING: somehow it is necessary to use this additionally to the constructor when Text()
+		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
 {

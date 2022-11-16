@@ -68,8 +68,8 @@ make win
 - spawn player controlled bullets
 - health bar system
 - engine build system
-- action menu for system and informations [DEV]
-- time delta disconnected from frames [DEV]
+- action menu for system and informations
+- time delta disconnected from frames
 
 ### optimizations:
 - improved documentation
@@ -124,5 +124,5 @@ Worktime: 120h
 	+ 74: 4h 58min
     + 63: 13h 25min
 	+ 79: 1h
-	+ 78: 15h 22min
-- Total Code Lines: 8422
+	+ 78: 15h 41min
+- Total Code Lines: 8498

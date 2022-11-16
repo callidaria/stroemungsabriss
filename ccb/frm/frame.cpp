@@ -85,7 +85,6 @@ void Frame::update()
 /*
 	print_fps() -> void
 	purpose: prints current fps and uts into cascabel console or terminal
-	!! DEPRECATED: let the frame counter run free and find a update tick capper !!
 */
 void Frame::print_fps()
 {
@@ -102,11 +101,7 @@ void Frame::print_fps()
 	vsync(uint8_t) -> void
 	max_frames (60): maximum frames per second
 	purpose: capping frames per second to given value
-	DEPRECATED:
-	THIS MIGHT BE EFFICTIVE FOR A VSYNC FUNCTION BUT THIS IS !!!NOT!!! APPROPRIATE FOR DELTA TIME RELIANCE !
-	MAKE VSYNC OPTIONAL AND BASE TIME RELATED UPDATES AND PHYSICS TO A LEGITIMATE DELTA TIME .
-	THIS ISN'T THE 90s ANYMORE GODDAMMIT . THE LATER THIS HAPPENS THE MORE CODE HAS TO BE CHANGED WHEN IT DOES
-	!! PLEASE ALSO KILL BRANCHING, THIS IS PATHETIC LOOPCODE !!
+	!! DEPRECATED: PLEASE KILL BRANCHING, THIS IS PATHETIC LOOPCODE !!
 */
 void Frame::vsync(uint8_t max_frames)
 {
