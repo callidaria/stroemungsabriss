@@ -16,6 +16,7 @@ void main()
 {
 	// input variables to writable
 	vec2 pos = position;
+	int edg_id = int(edge_id);
 
 	// situational variables setup
 	float wfac = clamp(edge_id-1,0,1);	// calculate if vertex is member of right edge
@@ -25,7 +26,11 @@ void main()
 	pos.x += ofs+dmg*wfac;				// move vertex to current offset if on right edge
 	pos.x += -dmd*wfac+5*(1-wfac);		// squeezing nanobar edges where splicing
 	pos.x *= int(dmg>0);				// killing render when width value not natural
-	pos.x += edg_trans[int(edge_id)];	// manipulate edges around healthbar content
+
+	// interpolate between edge transformations
+	int is_upper = int(mod(edg_id,2));
+	float delta_trans = edg_trans[is_upper+2]-edg_trans[is_upper];
+	pos.x += edg_trans[is_upper]+delta_trans*(dmg/wdt)*wfac;
 
 	// calculate final vertex positions
 	gl_Position = proj*view*vec4(pos,0,1);
