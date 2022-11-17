@@ -27,7 +27,7 @@ constexpr uint8_t SPLICE_ELONGATION = 12;	// elongation distance of splicing aft
 constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
 constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
 constexpr uint8_t BRD_REPEAT = 7;	// amount of floats the border pattern takes to repeat
-constexpr uint8_t SL_REPEAT = 4;	// amount of floats the slice pattern takes to repeat
+constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to repeat
 
 // states of healthbar
 enum HBState

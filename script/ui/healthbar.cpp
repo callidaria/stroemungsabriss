@@ -94,6 +94,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	splcbuffer.bind_index();
 	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[0]",2,0,SL_REPEAT);
 	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[1]",2,2,SL_REPEAT);
+	ssplice.def_indexF(splcbuffer.get_indices(),"spread",1,4,SL_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -163,6 +164,7 @@ void Healthbar::render()
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
+	sborder.upload_int("cnt_height",hpswap.max_height);
 	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/SL_REPEAT);
 
 	// render name and phase counter
@@ -242,7 +244,7 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// defining splice index upload
-	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
+	for (int i=1+1000*(hpswap.upload_splice.size()>0);i<hpswap.upload.size()/PT_REPEAT;i++) {
 
 		// calculate vector continuation
 		uint8_t ridx = i*PT_REPEAT+3;
@@ -258,10 +260,16 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		hpswap.upload_splice.push_back(upload_dwn.y);
 		hpswap.upload_splice.push_back(upload_up.x);
 		hpswap.upload_splice.push_back(upload_up.y);
+		hpswap.upload_splice.push_back(0);
 	}
 
+	// animate splicing
+	for (int i=0;i<hpswap.upload_splice.size()/SL_REPEAT;i++)
+		hpswap.upload_splice[i*SL_REPEAT+4] += .1f;
+
 	// signal splice readiness
-	frdy = HBState::PHASE_COUNT;
+	uint8_t ifrdy = (uint8_t)frdy+(hpswap.upload_splice[4]>=1);
+	frdy = (HBState)ifrdy;
 }
 // TODO: animate healthbar splicing
 
