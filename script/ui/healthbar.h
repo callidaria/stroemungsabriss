@@ -23,8 +23,11 @@ constexpr glm::vec4 TEXT_COL = glm::vec4(.5f,0,1,1);	// text render colour
 constexpr uint8_t BORDER_CLEARING = 2;		// pixel distance between border and splicing
 constexpr uint8_t SPLICE_ELONGATION = 12;	// elongation distance of splicing after upper edge
 
-// other constants
-constexpr float POT = 40.0f;		// animation tick maximum for phase upcounting
+// timing
+constexpr float POT = 40.0f;			// animation tick maximum for phase upcounting
+constexpr uint8_t SPLICE_TICKS = 30;	// animation tick length for splicing animation
+
+// index repeater
 constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
 constexpr uint8_t BRD_REPEAT = 7;	// amount of floats the border pattern takes to repeat
 constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to repeat

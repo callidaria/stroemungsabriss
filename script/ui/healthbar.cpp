@@ -264,11 +264,25 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	}
 
 	// animate splicing
-	for (int i=0;i<hpswap.upload_splice.size()/SL_REPEAT;i++)
-		hpswap.upload_splice[i*SL_REPEAT+4] += .1f;
+	uint8_t amt_splice = hpswap.upload_splice.size()/SL_REPEAT;
+	float per_splice = 1.0f/(SPLICE_TICKS/amt_splice);
+
+	// all index spreads get updated
+	uint8_t index = 0;
+	while (index<amt_splice) {
+
+		// add length to splice when incomplete
+		uint8_t j = index*SL_REPEAT+4;
+		bool ncomplete = hpswap.upload_splice[j]<1;
+		hpswap.upload_splice[j] += per_splice*ncomplete;
+
+		// halt at index if incomplete
+		index += !ncomplete;
+		index += (amt_splice+1)*ncomplete;
+	}
 
 	// signal splice readiness
-	uint8_t ifrdy = (uint8_t)frdy+(hpswap.upload_splice[4]>=1);
+	uint8_t ifrdy = (uint8_t)frdy+(index==amt_splice);
 	frdy = (HBState)ifrdy;
 }
 // TODO: animate healthbar splicing
