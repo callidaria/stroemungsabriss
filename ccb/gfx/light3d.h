@@ -63,7 +63,7 @@ public:
 		glViewport(0,0,sh_res,sh_res);
 		glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 		glEnable(GL_CULL_FACE);glEnable(GL_DEPTH_TEST);glCullFace(GL_FRONT);
-		glClearColor(0,0,0,0);
+		glClearColor(0,0,0,1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		r3d->prepare();
 		r3d->s3d.upload_matrix("view",view);

@@ -25,10 +25,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
-	// post processing
-	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
-			m_frame->w_res,m_frame->h_res,8);
-
 	// update until exit condition
 	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
@@ -38,18 +34,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
 		if (m_frame->kb.ka[SDL_SCANCODE_ESCAPE]) break;  // FIXME: kill this when light menu exists
-
-		// ui multisampling
-		msaa.bind();
-		m_frame->clear(0,0,0);
-
-		// healthbar
-		hbar.register_damage(fwd_treg[10]);
-		hbar.render();
-
-		// blit ui multisampling
-		msaa.blit();
-		m_frame->clear(.1f,.1f,.1f);
 
 		// stage
 		m_bgenv.update(rstate);	
@@ -61,8 +45,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		// bullet system
 		m_bSys.render();
 
-		// draw
-		msaa.render();
+		// healthbar
+		hbar.register_damage(fwd_treg[10]);
+		hbar.render();
 
 		// swap
 		m_frame->update();

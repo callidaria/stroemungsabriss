@@ -11,7 +11,6 @@
 
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/mat/camera2d.h"
-#include "../ccb/ppe/msaa.h"
 
 #include "bgenv.h"
 #include "player.h"
@@ -38,7 +37,6 @@ private:
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
-	MSAA msaa;
 
 	// scripts
 	BGEnv m_bgenv = BGEnv(m_r2d);
