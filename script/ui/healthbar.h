@@ -28,9 +28,12 @@ constexpr float POT = 40.0f;			// animation tick maximum for phase upcounting
 constexpr uint8_t SPLICE_TICKS = 30;	// animation tick length for splicing animation
 
 // index repeater
-constexpr uint8_t PT_REPEAT = 7;	// amount of floats the index pattern takes to repeat
-constexpr uint8_t BRD_REPEAT = 7;	// amount of floats the border pattern takes to repeat
+constexpr uint8_t PT_REPEAT = 10;	// amount of floats the index pattern takes to repeat
+constexpr uint8_t BRD_REPEAT = 10;	// amount of floats the border pattern takes to repeat
 constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to repeat
+
+// physics
+constexpr float NBMOMENTUM_RESISTANCE = .25f;	// mellow the nanobar momentum after application
 
 // states of healthbar
 enum HBState
@@ -48,7 +51,6 @@ struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
 	std::vector<std::vector<float>> dest_wdt;	// all destination widths per combined bar
-    std::vector<float> upload_target;			// modification targets of upload widths (w,w,...)
 	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)
 	std::vector<float> upload_splice;			// upload data for healthbar splicers
     int8_t target_itr = 0;						// iteration of target bar modification
@@ -58,7 +60,14 @@ struct HPBarSwap
 	uint16_t max_height,max_width;				// dimensions of all frankensteind' nanobars
 	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
 	uint8_t anim_tick = 0;						// counter for animation ticks
+	std::vector<glm::vec2> mntm;				// momentum for all nanobars
 };
+
+/*
+	NOTE: to myself in about 2-3 years revisiting this code and having the *ultimate* knowledge,
+	i'm proud of you, u looking at this and just knowing all the things i did wrong here and
+	being naive about. keep going u are doing wonderfully. i wish i could see and ask u right now <3
+*/
 
 class Healthbar
 {
@@ -76,6 +85,9 @@ public:
 	void register_damage(uint16_t dmg);
 
 private:
+
+	// animations
+	void floating_nanobars();
 
 	// calculators
 	static void fill_hpbar(HBState &frdy,HPBarSwap &hpswap);

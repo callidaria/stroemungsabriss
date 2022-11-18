@@ -98,5 +98,5 @@ make win
 	+ 74: 4h 58min
     + 63: 13h 25min
 	+ 79: 1h
-	+ 58: 22h 15min
+	+ 58: 24h 7min
 - Total Code Lines: 8015

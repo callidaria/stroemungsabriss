@@ -44,6 +44,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
 	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"flt",2,7,PT_REPEAT);
+	shp.def_indexF(hpbuffer.get_indices(),"target",1,9,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -74,6 +76,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[1]",1,4,BRD_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[2]",1,5,BRD_REPEAT);
 	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[3]",1,6,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"flt",2,7,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.get_indices(),"target",1,9,BRD_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -143,6 +147,9 @@ void Healthbar::render()
 	// switch healthbar handlers
 	fill_switch[frdy](frdy,hpswap);
 
+	// animate momentum
+	floating_nanobars();
+
 	// setup & draw hpbar
 	shp.enable();
 	hpbuffer.bind();
@@ -185,7 +192,24 @@ void Healthbar::register_damage(uint16_t dmg)
 }
 
 /*
-	fill_hpbar(uint8_t&,HPBarSwap&) -> void
+	floating_nanobars() -> void (private)
+	purpose: let nanobars float slightly based on the slicing directions
+*/
+void Healthbar::floating_nanobars()
+{
+	for (int i=0+1000*((uint8_t)frdy<2);i<hpswap.mntm.size();i++) {
+
+		// apply momentum to position
+		hpswap.upload[i*PT_REPEAT+7] += hpswap.mntm[i].x;
+		hpswap.upload[i*PT_REPEAT+8] += hpswap.mntm[i].y;
+
+		// mellow momentum through appearance of resistance
+		// TODO
+	}
+}
+
+/*
+	fill_hpbar(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: animate nano healthbar filling and capping value at max
 */
@@ -196,11 +220,10 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	int32_t rnd_edge_dwn = 0,rnd_edge_up = 0;
 
 	// load upload vector and its targets
-	for (int i=0+1000*(hpswap.upload_target.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
+	for (int i=0+1000*(hpswap.upload.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
 
 		// basis for upload and targets
 		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
-		hpswap.upload_target.push_back(hpswap.dest_wdt[ihp][i]);	// target width after fill
 		hpswap.upload.push_back(0);		// current hp in healthbar
 		hpswap.upload.push_back(0);		// current damage to health
 
@@ -215,29 +238,38 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		// right edge transformation for current nanobar
 		hpswap.upload.push_back(rnd_edge_dwn);	// randomized right lower edge modification
 		hpswap.upload.push_back(rnd_edge_up);	// randomized right upper edge modification
+
+		// vertex information placeholders for floating effect
+		hpswap.upload.push_back(0);
+		hpswap.upload.push_back(0);
+
+		// upload tail specifying width target after fill
+		hpswap.upload.push_back(hpswap.dest_wdt[ihp][i]);
+
+		// memory reservations for nanobar momentum
+		hpswap.mntm.push_back(glm::vec2(-4,-2));
 	}
 
 	// filling width & dmg until target
-	int8_t itr = hpswap.target_itr;		// temporary save of iteration until next tick
-	uint8_t ritr = itr*PT_REPEAT;		// rasterization of one dimensional list by upload size
-	bool full_bar = hpswap.upload[ritr+1]>=hpswap.upload_target[itr];
+	uint8_t ritr = hpswap.target_itr*PT_REPEAT;		// rasterization of one dimensional list
+	bool full_bar = hpswap.upload[ritr+1]>=hpswap.upload[ritr+9];
 	hpswap.target_itr += full_bar;
 	hpswap.upload[ritr+1] += 4;
-	hpswap.upload[ritr+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+1]*!full_bar;
+	hpswap.upload[ritr+1] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+1]*!full_bar;
 	hpswap.upload[ritr+2] += 4;
-	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
+	hpswap.upload[ritr+2] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+2]*!full_bar;
 
 	// cap upload values to ideal once target is full
-	hpswap.upload[ritr+1] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+1]*!full_bar;
-	hpswap.upload[ritr+2] = hpswap.upload_target[itr]*full_bar+hpswap.upload[ritr+2]*!full_bar;
+	hpswap.upload[ritr+1] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+1]*!full_bar;
+	hpswap.upload[ritr+2] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+2]*!full_bar;
 
 	// signal ready to splice if bars full
-	frdy = (HBState)((uint8_t)frdy+hpswap.target_itr>=hpswap.upload_target.size());
+	frdy = (HBState)((uint8_t)frdy+hpswap.target_itr>=(hpswap.upload.size()/PT_REPEAT));
 	hpswap.target_itr -= (uint8_t)frdy;
-}  // TODO: transform geometry randomized
+}
 
 /*
-	splice_hpbar(uint8_t&,HPBarSwap&) -> void
+	splice_hpbar(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: insert cut geometry between nano healthbars
 */
@@ -261,6 +293,9 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		hpswap.upload_splice.push_back(upload_up.x);
 		hpswap.upload_splice.push_back(upload_up.y);
 		hpswap.upload_splice.push_back(0);
+
+		// calculate nanobar momentum based on the direction of the splices
+		// TODO
 	}
 
 	// animate splicing
@@ -285,10 +320,9 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	uint8_t ifrdy = (uint8_t)frdy+(index==amt_splice);
 	frdy = (HBState)ifrdy;
 }
-// TODO: animate healthbar splicing
 
 /*
-	count_phases(uint8_t&,HPBarSwap&) -> void
+	count_phases(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: animated phase count up from 0 towards full amount to increase tension
 */
@@ -326,7 +360,7 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 }
 
 /*
-	ready_hpbar(uint8_t&,HPBarSwap&) -> void
+	ready_hpbar(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: checks if current nano healthbar is depleted and if so, changes to the previous one.
 		if all bars are empty, the method signals a refill.
@@ -349,23 +383,23 @@ void Healthbar::ready_hpbar(HBState &frdy,HPBarSwap &hpswap)
 }
 
 /*
-	reset_hpbar(uint8_t&,HPBarSwap&) -> void
+	reset_hpbar(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: reset hpswap upload and target lists to later refill them with new information
 */
 void Healthbar::reset_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
 	// ready hpswap lists for refill
-	hpswap.upload_target.clear();
 	hpswap.upload.clear();
 	hpswap.upload_splice.clear();
+	hpswap.mntm.clear();
 
 	// signal refill
 	frdy = HBState::FILLING;
 }
 
 /*
-	signal_clear(uint8_t&,HPBarSwap&) -> void
+	signal_clear(HBState&,HPBarSwap&) -> void (private,static)
 	conforming to: fill_switch
 	purpose: represent boss clearstate with the healthbar
 */

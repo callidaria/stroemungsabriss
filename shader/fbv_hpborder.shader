@@ -7,6 +7,8 @@ in float ofs;
 in float wdt;
 in float dmg;
 in float edg_trans[4];
+in vec2 flt;
+in float target;
 
 // additional
 uniform int cnt_height = 10;
@@ -41,5 +43,5 @@ void main()
 	pos.x += -3*wfac+3*(1-wfac);
 
 	// output final vertex position
-	gl_Position = proj*view*vec4(pos,0,1);
+	gl_Position = proj*view*vec4(pos+flt,0,1);
 }

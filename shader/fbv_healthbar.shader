@@ -7,6 +7,8 @@ in float ofs;
 in float wdt;
 in float dmg;
 in float edg_trans[4];
+in vec2 flt;
+in float target;
 
 // camera
 uniform mat4 view = mat4(1.0);
@@ -33,5 +35,5 @@ void main()
 	pos.x += edg_trans[is_upper]+delta_trans*(dmg/wdt)*wfac;
 
 	// calculate final vertex positions
-	gl_Position = proj*view*vec4(pos,0,1);
+	gl_Position = proj*view*vec4(pos+flt,0,1);
 }
