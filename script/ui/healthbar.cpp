@@ -204,7 +204,7 @@ void Healthbar::floating_nanobars()
 		hpswap.upload[i*PT_REPEAT+8] += hpswap.mntm[i].y;
 
 		// mellow momentum through appearance of resistance
-		// TODO
+		hpswap.mntm[i] *= glm::vec2(NBMOMENTUM_RESISTANCE);
 	}
 }
 
@@ -246,8 +246,8 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		// upload tail specifying width target after fill
 		hpswap.upload.push_back(hpswap.dest_wdt[ihp][i]);
 
-		// memory reservations for nanobar momentum
-		hpswap.mntm.push_back(glm::vec2(-4,-2));
+		// memory reservation for leftest nanobar momentum
+		hpswap.mntm.push_back(glm::vec2(0));
 	}
 
 	// filling width & dmg until target
@@ -295,7 +295,9 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 		hpswap.upload_splice.push_back(0);
 
 		// calculate nanobar momentum based on the direction of the splices
-		// TODO
+		int8_t dir_mulid = (splice_dir.x<=0)-(splice_dir.x>0);
+		hpswap.mntm[i].y += SLICE_BLOWBACK*dir_mulid;
+		hpswap.mntm[i-1].y += SLICE_BLOWBACK*-dir_mulid;
 	}
 
 	// animate splicing

@@ -33,7 +33,8 @@ constexpr uint8_t BRD_REPEAT = 10;	// amount of floats the border pattern takes 
 constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to repeat
 
 // physics
-constexpr float NBMOMENTUM_RESISTANCE = .25f;	// mellow the nanobar momentum after application
+constexpr float NBMOMENTUM_RESISTANCE = .9f;	// mellow the nanobar momentum after application
+constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback constance from slice motion
 
 // states of healthbar
 enum HBState
