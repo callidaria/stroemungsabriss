@@ -35,6 +35,8 @@ constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to 
 // physics
 constexpr float NBMOMENTUM_RESISTANCE = .9f;	// mellow the nanobar momentum after application
 constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback constance from slice motion
+constexpr float ACC_CLEAREDBAR = .25f;			// acceleration of cleared nanobars
+constexpr float RED_DISCONSPLC = .1f;			// despawn reduction of disconnected splices
 
 // states of healthbar
 enum HBState

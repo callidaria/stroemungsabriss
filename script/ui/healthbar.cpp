@@ -279,10 +279,10 @@ void Healthbar::splice_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	for (int i=1+1000*(hpswap.upload_splice.size()>0);i<hpswap.upload.size()/PT_REPEAT;i++) {
 
 		// calculate vector continuation
-		uint8_t ridx = i*PT_REPEAT+3;
-		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx],0);
+		uint8_t ridx = i*PT_REPEAT;
+		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+3],0);
 		glm::vec2 splice_up =
-				glm::vec2(hpswap.upload[i*PT_REPEAT]+hpswap.upload[ridx+1],hpswap.max_height);
+				glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+4],hpswap.max_height);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
 		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(SPLICE_ELONGATION),
 				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(SPLICE_ELONGATION);
@@ -370,6 +370,28 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 */
 void Healthbar::ready_hpbar(HBState &frdy,HPBarSwap &hpswap)
 {
+	// accelerate healthbar momentum when empty
+	for (int i=0;i<hpswap.mntm.size();i++) {
+
+		// get splice direction
+		uint8_t ridx = i*PT_REPEAT;
+		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+3],0);
+		glm::vec2 splice_up =
+				glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+4],hpswap.max_height);
+		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
+		// FIXME: repeat code. reduce!
+
+		// accellerate if empty
+		bool not_empty = hpswap.upload[ridx+2]>0;
+		hpswap.mntm[i] += splice_dir*glm::vec2(ACC_CLEAREDBAR*!not_empty);
+
+		// despawn slices between empty nanobars
+		uint8_t curr_splice = (i-1)*(i!=0)*SL_REPEAT+4;
+		hpswap.upload_splice[curr_splice] -= RED_DISCONSPLC*!not_empty;
+		hpswap.upload_splice[curr_splice] += -hpswap.upload_splice[curr_splice]
+				*(hpswap.upload_splice[curr_splice]<0);
+	}
+
 	// subtract nanobar hp by damage in threshold
 	hpswap.upload[hpswap.target_itr*PT_REPEAT+2] -= hpswap.dmg_threshold;
 	hpswap.dmg_threshold = 0;
