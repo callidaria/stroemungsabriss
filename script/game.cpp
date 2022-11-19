@@ -23,18 +23,22 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	m_r3d->load(&cam3d);
 
 	// ortho 3D element lighting
-	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(100,0,0),glm::vec3(1,1,1),1);
-	l3d_ortho.set_ambient(1.0f);
+	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
+	l3d_ortho.set_amnt(1);
+	l3d_ortho.upload();
 
 	// ui
-	Healthbar hbar = Healthbar(glm::vec2(140,670),1000,30,{ 3,4 },
+	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
 
+	// update until exit condition
 	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref
+
+		// frame
 		m_frame->print_fps();
 		m_frame->calc_time_delta();
 		m_frame->input(running,false);
@@ -47,7 +51,11 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		// stage
 		m_bgenv.update(rstate);
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
+
+		// player
 		m_player.update(rstate,fwd_treg[11]);
+
+		// bullet system
 		m_bSys.render();
 
 		// healthbar
@@ -57,6 +65,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		// action menu render
 		lgt_menu.render();
 
+		// swap
 		m_frame->update();
 	} rstate = 0;  // TODO: choose between menu &|| desktop skip
 }

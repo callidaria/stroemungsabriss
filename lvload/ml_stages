@@ -1,22 +1,4 @@
 <node>
-	<head>Boss: Cletus & Mecharia</>
-	<dsc>
-		Phase 1: Cletus & Maria<br>
-		Phase 2: Fallen Cletus<br>
-		Phase 3: Mecharia
-	</>
-	<diff>1</>
-	<gRotate>30,43,25,-104,02,31</>
-</>
-<node>
-	<head>Boss: Hotshot</>
-	<dsc>
-		Phase 1: Hotshot, The Flaming Sniper
-	</>
-	<diff>1</>
-	<gRotate>38,55,28,-106,19,12</>
-</>
-<node>
 	<head>Boss: Warorphan Chiaki, The Lost Child</>
 	<dsc>
 		Phase 1: Warorphan Chiaki<br>

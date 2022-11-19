@@ -70,6 +70,7 @@ make win
 - engine build system
 - action menu for system and informations
 - time delta disconnected from frames
+- most basic health bar style
 
 ### optimizations:
 - improved documentation
@@ -127,4 +128,5 @@ Worktime: 120h
 	+ 79: 1h
 	+ 65: 43min
 	+ 78: 15h 41min
+	+ 58: 25h 32min
 - Total Code Lines: 8498

@@ -34,12 +34,11 @@ public:
 	{
 		r3d->s3d.enable();
 		r3d->s3d.upload_float("ambient",amb);
-	}
-	// FIXME: wtf. is a Light3D an object or a manager?????
+	} // FIXME: wtf. is a Light3D an object or a manager?????
 
 	void create_shadow(glm::vec3 to,float width,float height,float f,int res)
 	{
-		sh_res=res;
+		sh_res = res;
 		glGenFramebuffers(1,&depth_fbo);glGenTextures(1,&dtex);
 		glBindTexture(GL_TEXTURE_2D,dtex);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,res,res,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
@@ -54,9 +53,9 @@ public:
 		glDrawBuffer(GL_NONE);glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER,0);
 
-		proj=glm::ortho(-width/2,width/2,-height/2,height/2,0.1f,100.0f);
-		view=glm::lookAt(pos/f+to,to,glm::vec3(0,1,0));
-		shadow_mat=proj*view;
+		proj = glm::ortho(-width/2,width/2,-height/2,height/2,0.1f,100.0f);
+		view = glm::lookAt(pos/f+to,to,glm::vec3(0,1,0));
+		shadow_mat = proj*view;
 	}
 
 	void prepare_shadow()
