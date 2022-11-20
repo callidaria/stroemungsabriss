@@ -24,24 +24,24 @@ ActionMenu::ActionMenu(Frame* frame)
 	// add menu text
 	mtext = Text(&tfont);
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
-	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-TEXT_SIZE));
-	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*TEXT_SIZE));
+	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE));
+	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE));
 	mtext.add("phone",glm::vec2(2240,TEXT_YPOSITION_INFO));
-	mtext.add("hitlist",glm::vec2(2240,TEXT_YPOSITION_INFO-TEXT_SIZE));
-	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*TEXT_SIZE));
-	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*TEXT_SIZE));
+	mtext.add("hitlist",glm::vec2(2240,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE));
+	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE));
+	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE));
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	mtext.load(&cam2d);
 
 	// add text shadow
 	stext = Text(&tfont);
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
-	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-TEXT_SIZE-4));
-	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*TEXT_SIZE-4));
+	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE-4));
+	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE-4));
 	stext.add("phone",glm::vec2(2237,TEXT_YPOSITION_INFO-4));
-	stext.add("hitlist",glm::vec2(2237,TEXT_YPOSITION_INFO-TEXT_SIZE-4));
-	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*TEXT_SIZE-4));
-	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*TEXT_SIZE-4));
+	stext.add("hitlist",glm::vec2(2237,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE-4));
+	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE-4));
+	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE-4));
 	stext.load(&cam2d);
 }
 
@@ -105,7 +105,7 @@ void ActionMenu::render()
 
 	// selection splash modifications
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf
-			-(msel*menu_sys+isel*menu_inf)*TEXT_SIZE;
+			-(msel*menu_sys+isel*menu_inf)*ACT_TEXT_SIZE;
 	splash_shader.enable();
 	splash_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
 	splash_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
