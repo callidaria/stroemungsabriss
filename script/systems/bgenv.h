@@ -1,8 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../ccb/fcn/ccb_manager.h"
-#include "../ccb/gfx/renderer2d.h"
+
+#include "../../ccb/fcn/ccb_manager.h"
+#include "../../ccb/gfx/renderer2d.h"
 
 class BGEnv
 {

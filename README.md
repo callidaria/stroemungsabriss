@@ -82,6 +82,7 @@ make win
 - readable menu code
 - simplifications of vertex loading
 - 3D protagonists placeholders dpilot
+- sorted script source and header file
 
 ### fixes:
 - FIXED: title animation leaks into camera view when not desired
@@ -129,4 +130,5 @@ Worktime: 120h
 	+ 65: 43min
 	+ 78: 15h 41min
 	+ 58: 25h 44min
-- Total Code Lines: 8995
+	+ 85: 20min
+- Total Code Lines: 11.195

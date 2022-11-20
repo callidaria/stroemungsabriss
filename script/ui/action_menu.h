@@ -11,7 +11,7 @@
 
 #include "../../ccb/gfx/shader.h"
 
-#include "../player.h"
+#include "../systems/player.h"
 
 // constant
 constexpr uint8_t SYS_OPTION_COUNT = 3;

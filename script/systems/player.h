@@ -3,14 +3,14 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-#include "../ccb/frm/frame.h"
-#include "../ccb/gfx/renderer2d.h"
-#include "../ccb/gfx/renderer3d.h"
-#include "../ccb/gfx/rendereri.h"
-#include "../ccb/fcn/buffer.h"
+#include "../../ccb/frm/frame.h"
+#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/renderer3d.h"
+#include "../../ccb/gfx/rendereri.h"
+#include "../../ccb/fcn/buffer.h"
 
 #include "bullet_system.h"
-#include "ui/healthbar.h"
+#include "../ui/healthbar.h"
 
 constexpr uint8_t JET_BORDER_WIDTH = 42;
 constexpr uint8_t JET_BORDER_HEIGHT = 18;

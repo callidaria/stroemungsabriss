@@ -12,17 +12,17 @@
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/mat/camera2d.h"
 
-#include "bgenv.h"
-#include "player.h"
-#include "bullet_system.h"
+#include "systems/bgenv.h"
+#include "systems/player.h"
+#include "systems/bullet_system.h"
 
 #include "ui/healthbar.h"
 #include "ui/action_menu.h"
 
 #include "struct/feature_base.h"
 
-#include "boss_lchild.h"
-#include "boss_dpilot.h"
+#include "boss/boss_lchild.h"
+#include "boss/boss_dpilot.h"
 
 class Game
 {
