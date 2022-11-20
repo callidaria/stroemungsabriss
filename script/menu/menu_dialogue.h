@@ -3,14 +3,14 @@
 
 #include <glm/glm.hpp>
 
-#include "../ccb/gfx/shader.h"
-#include "../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/shader.h"
+#include "../../ccb/gfx/renderer2d.h"
 
-#include "../ccb/mat/camera2d.h"
+#include "../../ccb/mat/camera2d.h"
 
-#include "../ccb/fcn/buffer.h"
-#include "../ccb/fcn/font.h"
-#include "../ccb/fcn/text.h"
+#include "../../ccb/fcn/buffer.h"
+#include "../../ccb/fcn/font.h"
+#include "../../ccb/fcn/text.h"
 
 class MenuDialogue
 {

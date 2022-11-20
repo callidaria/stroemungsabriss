@@ -2,29 +2,29 @@
 
 #include <iostream>
 
-#include "../ccb/frm/frame.h"
-#include "../ccb/fcn/ccb_linpr.h"
-#include "../ccb/fcn/ccb_manager.h"
+#include "../../ccb/frm/frame.h"
+#include "../../ccb/fcn/ccb_linpr.h"
+#include "../../ccb/fcn/ccb_manager.h"
 
-#include "../ccb/gfx/renderer2d.h"
-#include "../ccb/gfx/renderer3d.h"
-#include "../ccb/gfx/rendereri.h"
-#include "../ccb/gfx/light3d.h"
-#include "../ccb/gfx/material3d.h"
+#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/renderer3d.h"
+#include "../../ccb/gfx/rendereri.h"
+#include "../../ccb/gfx/light3d.h"
+#include "../../ccb/gfx/material3d.h"
 
-#include "../ccb/mat/camera2d.h"
-#include "../ccb/mat/camera3d.h"
+#include "../../ccb/mat/camera2d.h"
+#include "../../ccb/mat/camera3d.h"
 
-#include "../ccb/frm/framebuffer.h"
+#include "../../ccb/frm/framebuffer.h"
 
-#include "../ccb/fcn/text.h"
-#include "../ccb/fcn/buffer.h"
+#include "../../ccb/fcn/text.h"
+#include "../../ccb/fcn/buffer.h"
 
-#include "../ccb/ppe/msaa.h"
+#include "../../ccb/ppe/msaa.h"
 
 #include "menu_list.h"
 #include "menu_dialogue.h"
-#include "game.h"
+#include "../game.h"
 
 #define NCOLOUR 1
 

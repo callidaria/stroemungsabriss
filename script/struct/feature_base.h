@@ -6,8 +6,8 @@
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
 
-#include "../bullet_system.h"
-#include "../player.h"
+#include "../systems/bullet_system.h"
+#include "../systems/player.h"
 
 struct CascabelBaseFeature {
 	Frame* frame;

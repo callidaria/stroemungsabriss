@@ -7,21 +7,29 @@
 #endif
 
 #include "ccb/frm/frame.h"
+
 #include "ccb/gfx/renderer2d.h"
 #include "ccb/gfx/renderer3d.h"
 #include "ccb/gfx/rendereri.h"
+
 #include "ccb/mat/camera2d.h"
 #include "ccb/mat/camera3d.h"
+
 #include "ccb/ppe/msaa.h"
 #include "ccb/ppe/bloom.h"
+
 #include "ccb/fcn/text.h"
 #include "ccb/fcn/init.h"
+
 #include "ccb/aud/audio.h"
 #include "ccb/aud/listener.h"
+
 #include "ccb/fcn/ccb_manager.h"
+
 #include "ccb/gfx/light3d.h"
 #include "ccb/gfx/material3d.h"
-#include "script/menu.h"
+
+#include "script/menu/menu.h"
 
 #define MVMT_SPEED 4
 #define MENU_RENDER 1

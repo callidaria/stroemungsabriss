@@ -6,11 +6,11 @@
 #include <vector>
 #include <algorithm>
 
-#include "../ccb/gfx/renderer2d.h"
-#include "../ccb/mat/camera2d.h"
+#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/mat/camera2d.h"
 
-#include "../ccb/fcn/font.h"
-#include "../ccb/fcn/text.h"
+#include "../../ccb/fcn/font.h"
+#include "../../ccb/fcn/text.h"
 
 // to identify how to interpret the values
 enum ReadMode

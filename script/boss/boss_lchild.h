@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "struct/feature_base.h"
+#include "../struct/feature_base.h"
 
-#include "bullet_system.h"
+#include "../systems/bullet_system.h"
 
 class BossLChild
 {

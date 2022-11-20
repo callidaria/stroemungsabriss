@@ -4,8 +4,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "../ccb/frm/frame.h"
-#include "../ccb/gfx/rendereri.h"
+#include "../../ccb/frm/frame.h"
+#include "../../ccb/gfx/rendereri.h"
 
 class BulletSystem
 {
