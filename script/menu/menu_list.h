@@ -96,6 +96,6 @@ private:
 	uint32_t diffRID = 0;		// ID of the difficulty spritesheet in renderer
 
 	// animation of estimated difficulty
-	bool neg_scl=false,neg_rot=false;	// true if transformation of estimated difficulty is negative
-	float val_scl=1,val_rot=0;			// values of description transformation
+	bool neg_scl = false,neg_rot = false;	// true if transformation of estimated difficulty is negative
+	float val_scl = 1,val_rot = 0;			// values of description transformation
 };

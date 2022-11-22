@@ -39,7 +39,7 @@ void main()
 	vrtx_up += vrtx_dir*vec2(brd_space);
 
 	// create position based on elevated vertices
-	pos = (vrtx_dwn*(1-is_upper)+vrtx_up*is_upper)*int(wdt>0);
+	// pos = (vrtx_dwn*(1-is_upper)+vrtx_up*is_upper)*int(wdt>0);
 	pos.x += -3*wfac+3*(1-wfac);
 
 	// output final vertex position

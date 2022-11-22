@@ -227,9 +227,9 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	for (int i=0+1000*(hpswap.upload.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
 
 		// basis for upload and targets
-		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
-		hpswap.upload.push_back(0);		// current hp in healthbar
-		hpswap.upload.push_back(0);		// current damage to health
+		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);	// x-axis position offset
+		hpswap.upload.push_back(0);							// current hp in healthbar
+		hpswap.upload.push_back(0);							// current damage to health
 
 		// left edge transformation for current nanobar
 		hpswap.upload.push_back(rnd_edge_dwn);	// randomized left lower edge modification

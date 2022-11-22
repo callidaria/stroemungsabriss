@@ -12,12 +12,14 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
+constexpr uint8_t MEMINDEX_DIALOGUE_FONT = 0;
+
 class MenuDialogue
 {
 public:
 
 	// construction
-	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
+	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,std::vector<Font>* fonts,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight);
 	~MenuDialogue();
 
@@ -40,7 +42,7 @@ private:
 	bool open = false;		// dialogue is opened
 
 	// text
-	Text thead;		// headings text
+	Text thead;
 
 	// selection entities
 	uint32_t irnd;	// render index

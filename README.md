@@ -61,7 +61,7 @@ make win
 
 <br>
 
-## v0.0.3 DEV
+## v0.0.3
 
 ### features:
 - preview practice & arcade position in menu
@@ -70,7 +70,7 @@ make win
 - engine build system
 - action menu for system and informations
 - time delta disconnected from frames
-- most basic health bar style
+- most basic healthbar style
 
 ### optimizations:
 - improved documentation
@@ -116,7 +116,7 @@ Worktime: 120h
 
 ## Trivia
 - Total Worktime: 120h
-- Elapsed Worktime After v0.0.2:
+- Elapsed Worktime After v0.0.2: 143h 48min
 	+ ??: 19h 19min
 	+ 46: 38h 55min
 	+ 54: 12h 40min
@@ -131,4 +131,5 @@ Worktime: 120h
 	+ 78: 15h 41min
 	+ 58: 25h 44min
 	+ 85: 20min
+	+ 94: 5h 2min
 - Total Code Lines: 11.195

@@ -12,8 +12,8 @@
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d)
+		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font>* fonts)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d),m_fonts(fonts)
 {
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");

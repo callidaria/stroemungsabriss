@@ -68,7 +68,7 @@ public:
 
 	// construction
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d);
+		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font>* fonts);
 	~Menu();
 
 	// draw
@@ -92,6 +92,9 @@ private:
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
+
+	// fonts
+	std::vector<Font>* m_fonts;
 
 	// input definition
 	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
@@ -128,14 +131,14 @@ private:
 		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
 	};  // FIXME: remove those after path has been found
 	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
-	MenuDialogue md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,
+	MenuDialogue md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,m_fonts,
 			"select difficulty",pth_diff,150,450);
-	MenuDialogue md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,
+	MenuDialogue md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,m_fonts,
 			"confirm changes?",pth_conf,75,75);
 	uint8_t dsi_diff,dsi_conf;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d);
+	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,m_fonts);
 	uint8_t difflv = 0;
 
 	// globe preview

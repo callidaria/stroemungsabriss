@@ -13,7 +13,7 @@
 	eheight: entity height of selectable options inside dialogue window
 	purpose: constructor sets up a dialogue window in menu, to give player options to choose from.
 */
-MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
+MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,std::vector<Font>* fonts,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight)
 	: m_r2d(r2d)
 {
@@ -33,9 +33,7 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	// TODO: dialogue border
 
 	// dialogue text heading
-	Font thfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
-	thead = Text(&thfont);
-	thead.texture();
+	thead = Text(&fonts->at(MEMINDEX_DIALOGUE_FONT));
 	thead.add(head,pos+glm::vec2(15,height-15));
 	thead.load(cam2d);
 

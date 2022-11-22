@@ -30,9 +30,9 @@ void main()
 	pos.x *= int(dmg>0);				// killing render when width value not natural
 
 	// interpolate between edge transformations
-	int is_upper = int(mod(edg_id,2));
+	int is_upper = int(mod(edge_id,2));
 	float delta_trans = edg_trans[is_upper+2]-edg_trans[is_upper];
-	pos.x += edg_trans[is_upper]+delta_trans*(dmg/wdt)*wfac;
+	// pos.x += edg_trans[is_upper+2]; //+delta_trans*(dmg/wdt)*wfac;
 
 	// calculate final vertex positions
 	gl_Position = proj*view*vec4(pos+flt,0,1);
