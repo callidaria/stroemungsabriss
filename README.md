@@ -57,6 +57,10 @@ make win
 
 <br>
 
+To see the full documentation for engine and script go [here](documentation/index.md)
+
+<br>
+
 ***
 
 <br>
@@ -131,4 +135,5 @@ Worktime: 120h
 	+ 78: 15h 41min
 	+ 58: 25h 44min
 	+ 85: 20min
+	+ 82: 1h 14min
 - Total Code Lines: 11.195
