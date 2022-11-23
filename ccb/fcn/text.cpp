@@ -11,7 +11,8 @@ Text::Text(Font* f)
 {
 	buffer = Buffer();
 	buffer.add_buffer();
-	texture();
+	glActiveTexture(GL_TEXTURE0);
+	Toolbox::load_texture(ftexture,f->tp);
 }
 
 /*
@@ -68,17 +69,6 @@ void Text::clear()
 }
 
 /*
-	texture() -> void
-	purpose: load font texture from pointed texture path
-	WARNING: somehow it is necessary to use this additionally to the constructor when Text()
-		was the first construction usage. yeah don't ask me why i don't understand this shit either
-*/
-void Text::texture()
-{
-	Toolbox::load_texture(ftexture,m_font->tp);
-}
-
-/*
 	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
@@ -92,6 +82,7 @@ void Text::load(Camera2D* c)
 	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
 	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
 	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
+	sT.upload_int("tex",0);
 	sT.upload_float("wdt",m_font->mw);
 	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
 	sT.upload_matrix("proj",c->proj2D);
@@ -119,8 +110,8 @@ void Text::prepare()
 void Text::render(int32_t amnt,glm::vec4 col)
 {
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
-	buffer.upload_indices(ibv);
 	glBindTexture(GL_TEXTURE_2D,ftexture);
+	buffer.upload_indices(ibv);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 

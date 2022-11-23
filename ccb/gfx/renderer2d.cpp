@@ -84,6 +84,7 @@ void Renderer2D::load_texture()
 {
 	for (int i=0;i<sl.size();i++) sl.at(i).texture();
 	for (int i=0;i<al.size();i++) al.at(i).texture();
+	s2d.upload_int("tex",0);
 }
 
 /*
@@ -166,7 +167,7 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e,GLuint tex)
 */
 void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 {
-	glBindTexture(GL_TEXTURE_2D,al.at(s).tex);
+	glBindTexture(GL_TEXTURE_2D,al[s].tex);
 
 	// upload spritesheet specifications
 	s2d.upload_int("row",al.at(s).r);

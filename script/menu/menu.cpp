@@ -12,8 +12,9 @@
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font>* fonts)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d),m_fonts(fonts)
+		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font> fonts)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),
+		m_cam3d(cam3d),m_fonts(fonts)
 {
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -499,7 +500,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// animate and move dialogue selector to dialogue choice
 	m_r2d->prepare();
 	bool dopen = dsi_diff||dsi_conf;
-	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
+	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)
+			+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
 	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
 	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp+glm::vec3(-5,15,0));
 	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_cnt),glm::vec3(0,0,1));

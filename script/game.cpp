@@ -1,6 +1,7 @@
 #include "game.h"
 
-Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d,std::vector<Font>* fonts)
+Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
+		Camera2D* cam2d,std::vector<Font> fonts)
 	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_fonts(fonts)
 {
 	ccbf = { m_frame,m_r2d,m_r3d,m_rI,&m_bSys,&m_player };

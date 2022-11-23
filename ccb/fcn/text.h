@@ -25,7 +25,6 @@ public:
 	void clear();
 
 	// preparation
-	void texture();
 	void load(Camera2D* c);
 	void prepare();
 

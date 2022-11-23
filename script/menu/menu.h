@@ -31,7 +31,7 @@
 constexpr uint8_t GVERSION_RELEASE = 0;
 constexpr uint8_t GVERSION_SUBRELEASE = 0;
 constexpr uint8_t GVERSION_DEVSTEP = 3;
-constexpr char GVERSION_SUFFIX = 'd';
+constexpr char GVERSION_SUFFIX = 'R';
 
 enum MenuMode
 {
@@ -68,7 +68,7 @@ public:
 
 	// construction
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font>* fonts);
+		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font> fonts);
 	~Menu();
 
 	// draw
@@ -94,7 +94,7 @@ private:
 	MSAA msaa;
 
 	// fonts
-	std::vector<Font>* m_fonts;
+	std::vector<Font> m_fonts;
 
 	// input definition
 	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
@@ -123,7 +123,7 @@ private:
 
 	// menu title speedup animation
 	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;
-	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
+	float val_vscl = 1,val_hscl = 1,val_vrot = 0,val_hrot = 0;
 
 	// dialogue
 	std::vector<const char*> pth_diff = {

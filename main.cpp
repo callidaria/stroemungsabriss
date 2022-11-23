@@ -41,7 +41,7 @@ int main(int argc,char** argv)
 		init.rINT(init.FRAME_RESOLUTION_HEIGHT),(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
 
 	// AUDIO
-	Listener listener=Listener();
+	Listener listener = Listener();
 
 	// RENDERERS
 	Renderer2D r2d = Renderer2D();
@@ -54,12 +54,11 @@ int main(int argc,char** argv)
 	std::vector<Font> fonts = {
 		Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20)
 	};
-	for (int i=0;i<fonts.size();i++) fonts[i].texture();
 
 	bool dactive = false;
 
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&fonts);
+	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,fonts);
 
 	// CAMERAS
 	r2d.load(&cam2d);

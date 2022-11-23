@@ -94,6 +94,7 @@ make win
 - FIXED: scuffed geometry of globe preview
 - FIXED: missing anti aliasing on menu selection splash
 - FIXED: unused bullets get rendered at origin position
+- FIXED: memory issues with font - text relationship
 
 <br>
 
@@ -131,5 +132,5 @@ Worktime: 120h
 	+ 78: 15h 41min
 	+ 58: 25h 44min
 	+ 85: 20min
-	+ 94: 5h 2min
+	+ 94: 6h 50min
 - Total Code Lines: 11.195
