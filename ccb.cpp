@@ -5,9 +5,19 @@
 #include <stdio.h>
 #include <dirent.h>
 
+#ifdef __WIN32__
+
+#include <windows.h>
+
+#else
+
+// colour definitions
 #define RESET "\033[0m"
 #define SELECT "\033[1;32m"
 
+#endif
+
+// root directory definitions
 #define ENGINE_ROOT "./ccb"
 #define PROJECT_ROOT "./script"
 
@@ -24,6 +34,11 @@ std::string build_engine_component(bool &comp_all);
 std::string build_project_component(bool &comp_all);
 std::string build_full_order(bool &comp_engine,bool &comp_project);
 std::string count_lines();
+
+// windows console colour setup
+#if __WIN32__
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
 
 // components
 char inp;
@@ -44,7 +59,11 @@ int main(int argc,char* argv[])
 		itr = 0;
 
 		// prepare write
+#ifdef __WIN32__
+		printf("CASCABEL CONSOLE\n");
+#else
 		printf("\033[0m\033[2J\033[1;1HCASCABEL CONSOLE\n");
+#endif
 
 		// write engine contents
 		printf("\n\n\n\t\t\tENGINE\n");
@@ -55,7 +74,12 @@ int main(int argc,char* argv[])
 		proj_idx = itr;
 
 		// write project contents
+#ifdef __WIN32__
+		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+		printf("\n\n\n\t\t\tPROJECT\n");
+#else
 		printf("\n\n\n\t\t\t%sPROJECT\n",RESET);
+#endif
 		offer_root(pdir,PROJECT_ROOT);
 		out += read_components(pdir,proj_idx,comp_project);
 		printf("\n");
@@ -67,11 +91,23 @@ int main(int argc,char* argv[])
 		out += count_lines();
 
 		// write output message
+#ifdef __WIN32__
+		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+		printf("\n\n\n\n> %s\033[30;47m\n",out.c_str());
+		SetConsoleTextAttribute(hConsole,BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
+		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
+		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+#else
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
 		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
+#endif
 
 		// read user input
+#ifdef __WIN32__
+		if (!update) inp = getchar();
+#else
 		if (!update) { system("stty raw");inp = getchar();system("stty cooked"); }
+#endif
 		else update = false;
 
 		// kill when exit request
@@ -82,7 +118,11 @@ int main(int argc,char* argv[])
 		else if (inp=='p') idx = proj_idx;
 
 		// move selector
+#ifdef __WIN32__
+		idx += (inp=='s'&&idx<itr-1)-(inp=='w'&&idx>0);
+#else
 		idx += (inp=='B'&&idx<itr-1)-(inp=='A'&&idx>0);
+#endif
 		out = "";
 	}
 	return 0;
@@ -90,8 +130,13 @@ int main(int argc,char* argv[])
 
 void write_selection()
 {
+#if __WIN32__
+	if (itr==idx) SetConsoleTextAttribute(hConsole,FOREGROUND_GREEN);
+	else SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+#else
 	if (itr==idx) printf("%s  ",SELECT);
 	else printf("%s",RESET);
+#endif
 }
 
 bool get_selected()
