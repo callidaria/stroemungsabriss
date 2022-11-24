@@ -21,9 +21,8 @@ uniform mat4 proj = mat4(1.0);
 void main()
 {
 	// modify texture coordinates based on requested character
-	//TexCoords = vec2(texCoords.x*(bounds.x/512.0)+texpos.x/512.0,
-	//		texCoords.y*(bounds.y/512.0)+texpos.y/512.0);
-	TexCoords = texCoords;
+	TexCoords = vec2(texCoords.x*(bounds.x/512.0)+texpos.x/512.0,
+			texCoords.y*(bounds.y/512.0)+texpos.y/512.0);
 
 	// transform character towards bounds and to cursor position
 	vec2 sp = vec2(position.x*(bounds.x/83.0),position.y*(bounds.y/83.0));

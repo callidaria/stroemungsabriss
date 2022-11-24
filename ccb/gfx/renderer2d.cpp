@@ -136,8 +136,8 @@ void Renderer2D::prepare()
 void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 {
 	for (int i=b;i<e;i++) {
-		s2d.upload_matrix("model",sl.at(i).model);
-		glBindTexture(GL_TEXTURE_2D,sl.at(i).tex);
+		s2d.upload_matrix("model",sl[i].model);
+		glBindTexture(GL_TEXTURE_2D,sl[i].tex);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
 }
@@ -152,8 +152,8 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e)
 void Renderer2D::render_sprite(uint16_t b,uint16_t e,GLuint tex)
 {
 	for (int i=b;i<e;i++) {
-		s2d.upload_matrix("model",sl.at(i).model);
-		glBindTexture(GL_TEXTURE_2D, tex);
+		s2d.upload_matrix("model",sl[i].model);
+		glBindTexture(GL_TEXTURE_2D,tex);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(int)));
 	}
 }
@@ -170,12 +170,12 @@ void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 	glBindTexture(GL_TEXTURE_2D,al[s].tex);
 
 	// upload spritesheet specifications
-	s2d.upload_int("row",al.at(s).r);
-	s2d.upload_int("col",al.at(s).c);
+	s2d.upload_int("row",al[s].r);
+	s2d.upload_int("col",al[s].c);
 	s2d.upload_vec2("i_tex",i);
 
 	// transform and draw
-	s2d.upload_matrix("model",al.at(s).model);
+	s2d.upload_matrix("model",al[s].model);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((s+sl.size())*6*sizeof(int)));
 }
 
@@ -187,9 +187,9 @@ void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 void Renderer2D::render_anim(uint16_t i)
 {
 	// get rows, columns and current index
-	int index = al.at(i).setup();
-	int r = al.at(i).r;
-	int c = al.at(i).c;
+	int index = al[i].setup();
+	int r = al[i].r;
+	int c = al[i].c;
 
 	// get 2D index from address reference integer at current frame
 	glm::vec2 ind = glm::vec2((int)(index%c),(int)(index/c));
@@ -200,7 +200,7 @@ void Renderer2D::render_anim(uint16_t i)
 	s2d.upload_vec2("i_tex",ind);
 
 	// transform and draw
-	s2d.upload_matrix("model",al.at(i).model);
+	s2d.upload_matrix("model",al[i].model);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sl.size())*6*sizeof(int)));
 }
 

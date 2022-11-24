@@ -110,8 +110,8 @@ void Text::prepare()
 void Text::render(int32_t amnt,glm::vec4 col)
 {
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
-	glBindTexture(GL_TEXTURE_2D,ftexture);
 	buffer.upload_indices(ibv);
+	glBindTexture(GL_TEXTURE_2D,ftexture);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 

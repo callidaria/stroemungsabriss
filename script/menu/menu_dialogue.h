@@ -20,8 +20,7 @@ public:
 
 	// construction
 	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
-		std::vector<Font> fonts,const char* head,std::vector<const char*> paths,
-		float ewidth,float eheight);
+		const char* head,std::vector<const char*> paths,float ewidth,float eheight);
 	~MenuDialogue();
 
 	// visuals
@@ -43,8 +42,8 @@ private:
 	bool open = false;		// dialogue is opened
 
 	// text
-	//Font font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
-	Text thead;// = Text(&font);
+	Font font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
+	Text thead = Text(&font);
 
 	// selection entities
 	uint32_t irnd;	// render index
