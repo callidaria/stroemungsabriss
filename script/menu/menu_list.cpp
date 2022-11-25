@@ -7,7 +7,7 @@
 MenuList::MenuList()
 {
 	LEntity proc = {
-		Text(&lfnt),Text(&dfnt),std::vector<Text>(),std::vector<std::string>(),
+		Text(lfnt),Text(dfnt),std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
@@ -38,7 +38,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	m_r2d->load(cam2d);  // FIXME: sprite always in split, use different spritesheets
 
 	// setting up the different texts for menu features
-	Text t_sle = Text(&lfnt),t_desc = Text(&dfnt);
+	Text t_sle = Text(lfnt),t_desc = Text(dfnt);
 
 	// gathering raw node data
 	std::ifstream mlfile(path,std::ios::in);	// reading file
@@ -81,7 +81,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	for (int i=0;i<ndata.size();i++) {
 		uint32_t ix = 0;     // index of raw node data
 		LEntity t_le; // temporary list element, getting pushed back later
-		t_le.ltxt = Text(&lfnt);
+		t_le.ltxt = Text(lfnt);
 		while (ix<ndata[i].size()) {
 			uint8_t emode = get_readmode(ndata[i],ix);   // check character for mode annotation
 			std::string excnt = breakgrind(ndata[i],ix); // get content inside annotation area
@@ -92,7 +92,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				esize++;       // inc list element counter
 				break;
 			case ReadMode::DESCRIPTION:
-				t_desc = Text(&dfnt); // temporary description to add later
+				t_desc = Text(dfnt); // temporary description to add later
 				for (uint32_t iy=0;iy<excnt.size();iy++) { // reading through desc content
 					if (textgrind(excnt,iy)) { // detecting if character is innocent
 						t_desc.add(t_line.c_str(),glm::vec2(920,dscroll)); // add to desc
@@ -107,7 +107,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				break;
 			case ReadMode::DROPDOWN_ELEMENT:
 				args = split_arguments(excnt,','); // getting argument list
-				t_sle = Text(&lfnt);
+				t_sle = Text(lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
 				t_sle.load(cam2d);
 				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
@@ -140,7 +140,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				break; // FIXME: double branching where better solutions
 			case ReadMode::TARGET_MONITOR:
 				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
-					t_sle = Text(&lfnt);
+					t_sle = Text(lfnt);
 					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
 					t_sle.load(cam2d);
 					t_le.lee.push_back(t_sle);
@@ -369,7 +369,7 @@ uint8_t MenuList::get_readmode(std::string nl,uint32_t &i)
 	// return identified mode
 	return !strcmp(pcnt.c_str(),"head")
 		+ReadMode::DESCRIPTION*!strcmp(pcnt.c_str(),"dsc")
-		+ReadMode::DROPDOWN_ELEMENT *!strcmp(pcnt.c_str(),"le")
+		+ReadMode::DROPDOWN_ELEMENT*!strcmp(pcnt.c_str(),"le")
 		+ReadMode::SLIDER*!strcmp(pcnt.c_str(),"slider")
 		+ReadMode::GDESTINATION*!strcmp(pcnt.c_str(),"dest")
 		+ReadMode::TARGET_MONITOR*!strcmp(pcnt.c_str(),"le_TargetMonitor")

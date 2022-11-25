@@ -33,13 +33,13 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	mat0 = Material3D(r3d,1,8,16);
 
 	// setup dare message on idle screen
-	tft = Text(&fnt);
+	tft = Text(fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	tft.load(cam2d);
 
 	// print title version message
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
-	vtft = Text(&vfnt);
+	vtft = Text(vfnt);
 	std::string title_vmessage = "yomisensei by callidaria. danmaku version "
 			+std::to_string(GVERSION_RELEASE)+'.'+std::to_string(GVERSION_SUBRELEASE)+'.'
 			+std::to_string(GVERSION_DEVSTEP)+GVERSION_SUFFIX+" - running on cascabel "
@@ -497,8 +497,18 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// render menu lists and sublists
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
-	// animate and move dialogue selector to dialogue choice
+	// animate globe location preview screen
+	m_r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
+	m_r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
+
+	// render globe location preview framebuffer
 	m_r2d->prepare();
+	m_r2d->s2d.upload_float("vFlip",1.0f);
+	m_r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
+	m_r2d->s2d.upload_float("vFlip",0);
+	m_r2d->render_sprite(0,0);
+
+	// animate and move dialogue selector to dialogue choice
 	bool dopen = dsi_diff||dsi_conf;
 	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)
 			+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
@@ -527,14 +537,4 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// render menu dialogue focused selector atop dialogue elements
 	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
-
-	// animate globe location preview screen
-	m_r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
-	m_r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
-	m_r2d->s2d.upload_float("vFlip",1.0f);
-	// FIXME: this bullshit no reason bullshit stupid ass vectorflip
-
-	// render globe location preview framebuffer
-	m_r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
-	m_r2d->s2d.upload_float("vFlip",0);
 }

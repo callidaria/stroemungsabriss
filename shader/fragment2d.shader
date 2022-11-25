@@ -10,18 +10,21 @@ uniform float ambient = 1.0;
 uniform float lint = 1.0;
 uniform float linr = 0.0014;
 uniform float quad = 0.000007;
+
 uniform int pla = 0;
 uniform int sla = 0;
 
 struct light_point {
 	vec2 pos;
 };
+
 struct light_spot {
 	vec2 pos;
 	vec2 dir;
 	float icut;
 	float ocut;
 };
+
 uniform light_point pl[5];
 uniform light_spot sl[5];
 

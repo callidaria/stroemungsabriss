@@ -134,10 +134,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	// set name and phase counter
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			HB_TEXT_SIZE,HB_TEXT_SIZE);
-	hpswap.phname = Text(&hbfont);
+	hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
 	hpswap.phname.load(&tc2d);
-	hpswap.phcnt = Text(&hbfont);
+	hpswap.phcnt = Text(hbfont);
 } Healthbar::~Healthbar() {  }
 
 /*

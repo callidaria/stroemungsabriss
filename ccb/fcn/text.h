@@ -3,11 +3,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include <glm/glm.hpp>
-#include "../gfx/shader.h"
-#include "../mat/camera2d.h"
+
 #include "buffer.h"
 #include "font.h"
+
+#include "../gfx/shader.h"
+
+#include "../mat/camera2d.h"
 
 #define MAX_CHAR_COUNT 4096
 
@@ -17,7 +21,7 @@ public:
 
 	// construction
 	Text() {  }
-	Text(Font* f);
+	Text(Font f);
 
 	// write
 	int32_t add(char c,glm::vec2 p);
@@ -42,10 +46,10 @@ private:
 
 	// cascabel
 	Shader sT;
-	Font* m_font;
-	Buffer buffer;
+	Font font;
+	Buffer buffer = Buffer();
 
 	// vertices & texturing
 	std::vector<float> ibv;
-	GLuint ftexture;
+	GLuint tex;
 };

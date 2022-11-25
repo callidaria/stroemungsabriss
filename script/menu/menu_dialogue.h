@@ -43,7 +43,7 @@ private:
 
 	// text
 	Font font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20);
-	Text thead = Text(&font);
+	Text thead = Text(font);
 
 	// selection entities
 	uint32_t irnd;	// render index

@@ -2,9 +2,12 @@
 
 #include <iostream>
 #include <vector>
+
 #include "shader.h"
 #include "instance.h"
+
 #include "../mat/camera2d.h"
+
 #include "../fcn/buffer.h"
 
 class RendererI

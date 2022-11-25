@@ -48,7 +48,7 @@ private:
 	FrameBuffer game_fb;
 	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
-	Text mtext,stext;
+	Text mtext = Text(tfont),stext = Text(tfont);
 
 	// action menu trigger system
 	bool menu_trg = false;	// input trigger for last frame menu requests

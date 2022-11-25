@@ -22,7 +22,6 @@ ActionMenu::ActionMenu(Frame* frame)
 	splash_shader.upload_camera(Camera2D(1280,720));
 
 	// add menu text
-	mtext = Text(&tfont);
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
 	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE));
 	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE));
@@ -34,7 +33,6 @@ ActionMenu::ActionMenu(Frame* frame)
 	mtext.load(&cam2d);
 
 	// add text shadow
-	stext = Text(&tfont);
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
 	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE-4));
 	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE-4));

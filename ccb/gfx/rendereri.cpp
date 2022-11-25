@@ -74,6 +74,7 @@ void RendererI::load()
 */
 void RendererI::load(Camera2D* cam2d)
 {
+	// standard loading process
 	load();
 
 	// upload camera to shader program
