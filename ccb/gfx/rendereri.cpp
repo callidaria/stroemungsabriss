@@ -20,9 +20,25 @@ RendererI::RendererI()
 */
 uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 {
-	uint16_t out = il.size();
 	il.push_back(Instance(p,w,h,t));
-	return out;
+	return il.size()-1;
+}
+
+/*
+	add(vec2,float,float,const char*,uint8_t,uint8_t,uint8_t,uint8_t) -> uint16_t
+	overloads: previous add()
+	row: amount of rows contained in the animation texture sprite sheet
+	col: amount of columns contained in the animation texture sprite sheet
+	itn: total number of subtexture states contained in the sprite sheet
+	f: amount of frames the animation should take to complete one full circle
+	purpose: creates an indexable 2D animation object to render later
+	returns: memory index the created instanceable animation object is to referred by when drawing
+*/
+uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,
+		uint8_t itn,uint8_t f)
+{
+	ial.push_back(InstancedAnim(p,w,h,t,row,col,itn,f));
+	return ial.size()-1;
 }
 
 /*
@@ -32,17 +48,17 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 void RendererI::load_vertex()
 {
 	// clear memory for vertex list
-	float v[il.size()*24];
+	std::vector<float> v;
 
-	// load all vertices to master array
-	for (int j=0;j<il.size();j++) {
-		for (int i=0;i<24;i++)
-			v[j*24+i] = il.at(j).v[i];
-	}
+	// write all object vertices to master array
+	for (int i=0;i<il.size();i++)
+		v.insert(v.end(),il[i].v.begin(),il[i].v.end());
+	for (int i=0;i<ial.size();i++)
+		v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
 
 	// upload to buffer
 	buffer.bind();
-	buffer.upload_vertices(v,sizeof(v));
+	buffer.upload_vertices(v);
 }
 
 /*

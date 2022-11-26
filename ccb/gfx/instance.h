@@ -10,6 +10,8 @@
 
 #include "../mat/toolbox.h"
 
+constexpr uint32_t INSTANCE_MCAP = 4096;
+
 class Instance
 {
 public:
@@ -24,11 +26,13 @@ public:
 
 public:
 
-	float v[24];
+	std::vector<float> v;
 	GLuint tex;
-	glm::vec2 o[4096] = { glm::vec2(0) };
+	glm::vec2 o[INSTANCE_MCAP] = { glm::vec2(0) };
 
 private:
 
 	const char* tp;
 };
+
+// FIXME: fix private/public as well as includes

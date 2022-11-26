@@ -23,6 +23,7 @@ class Toolbox
 public:
 	static std::vector<float> create_sprite_canvas();
 	static std::vector<float> create_sprite_canvas(glm::vec2 pos,float width,float height);
+	static std::vector<float> create_sprite_canvas_triangled(glm::vec2 pos,float width,float height);
 	static void load_texture(GLuint tex,const char* path);
 	static void generate_elements(uint16_t i,std::vector<unsigned int> &ls);
 };

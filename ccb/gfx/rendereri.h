@@ -2,10 +2,14 @@
 
 #include <iostream>
 #include <vector>
+
+#include "../mat/camera2d.h"
+
+#include "../fcn/buffer.h"
+
 #include "shader.h"
 #include "instance.h"
-#include "../mat/camera2d.h"
-#include "../fcn/buffer.h"
+#include "instanced_anim.h"
 
 class RendererI
 {
@@ -17,6 +21,8 @@ public:
 
 	// adders
 	uint16_t add(glm::vec2 p,float w,float h,const char* t);
+	uint16_t add(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,
+			uint8_t itn,uint8_t f);
 
 	// loaders
 	void load();
@@ -45,4 +51,5 @@ public:
 
 	Shader sI;
 	std::vector<Instance> il;
+	std::vector<InstancedAnim> ial;
 };
