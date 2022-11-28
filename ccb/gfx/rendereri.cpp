@@ -62,25 +62,23 @@ void RendererI::load_vertex()
 }
 
 /*
-	load_texture() -> void
-	purpose: texture all indexable objects
-*/
-void RendererI::load_texture()
-{
-	for (int i=0;i<il.size();i++) il.at(i).texture();
-}
-
-/*
 	load() -> void
 	purpose: combine vertex upload and texturing and compile shader
 */
 void RendererI::load()
 {
+	// vertex loading
 	load_vertex();
+	// TODO: remove helper function and insert raw code
+
+	// compile classical instance shader program
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
 	sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
-	load_texture();
+
+	// texture
+	for (int i=0;i<il.size();i++) il[i].texture();
+	for (int i=0;i<ial.size();i++) ial[i].texture();
 }
 
 /*
@@ -121,21 +119,79 @@ void RendererI::prepare()
 void RendererI::render(uint16_t i,uint16_t amt)
 {
 	// setup
-	glBindTexture(GL_TEXTURE_2D,il.at(i).tex);
-	buffer.upload_indices(il.at(i).o,sizeof(glm::vec2)*4096);
+	il.at(i).setup();
+	buffer.upload_indices(il.at(i).o,sizeof(float)*INSTANCE_MCAP);
 
 	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
 }
 
 /*
-	set_offset(uint16_t,uint16_t,vec2) -> void
+	render(uint16_t,uint16_t,vec2) -> void
+	overloads previous render()
+	i_tex: texture index vector indicating subtexture position on spritesheet raster
+	purpose: render specific animation frame of previously added instanced animation object
+*/
+void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
+{
+	// load texture & index buffer data
+	ial[i].setup();
+	buffer.upload_indices(ial[i].i);
+
+	// draw
+	glDrawArraysInstanced(GL_TRIANGLES,i,i+6,amt);
+}
+
+/*
+	render_anim(uint16_t,uint16_t) -> void
+	i: memory index of animated instanced object to render
+	amt: amount of duplicates to render from instanced animation object
+	purpose: 
+*/
+void RendererI::render_anim(uint16_t i,uint16_t amt)
+{
+	// load texture & index buffer data
+	ial[i].setup();
+	buffer.upload_indices(ial[i].i);
+
+	// draw
+	uint16_t idx = (i+il.size())*6;
+	glDrawArraysInstanced(GL_TRIANGLES,idx,idx+6,amt);
+}
+
+/*
+	PARAMETER DEFINITIONS:
 	i: memory index of indexable object
 	j: memory index of position transform vector to change
+*/
+
+/*
+	get_offset(uint16_t,uint16_t) -> vec2
+	returns: vectorized offset direction and length as derived from index upload list
+*/
+glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
+{
+	return glm::vec2(il[i].o[j*2],il[i].o[j*2+1]);
+}
+
+/*
+	set_offset(uint16_t,uint16_t,vec2) -> void
 	o: vector value to set the selected position transform vector to
 	purpose: set a certain position transform vector of a specific object
 */
 void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 {
-	il.at(i).o[j] = o;
+	il[i].o[j*2] = o.x;
+	il[i].o[j*2+1] = o.y;
+}
+
+/*
+	add_offset(uint16_t,uint16_t,vec2) -> void
+	dv: vector to change the current offset vector by
+	purpose: changes current, indexed offset by given distance and direction
+*/
+void RendererI::add_offset(uint16_t i,uint16_t j,glm::vec2 dv)
+{
+	il[i].o[j*2] += dv.x;
+	il[i].o[j*2+1] += dv.y;
 }

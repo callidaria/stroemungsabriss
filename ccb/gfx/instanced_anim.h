@@ -24,10 +24,13 @@ public:
 
 	// vertex and index upload
 	std::vector<float> v;
+	std::vector<float> i;
+
+	// texture
+	GLuint tex;
 
 private:
 
 	// texture
 	const char* tpath;
-	GLuint tex;
 };

@@ -166,6 +166,7 @@ void Renderer2D::render_sprite(uint16_t b,uint16_t e,GLuint tex)
 */
 void Renderer2D::render_state(uint16_t s,glm::vec2 i)
 {
+	// load texture data
 	glBindTexture(GL_TEXTURE_2D,al.at(s).tex);
 
 	// upload spritesheet specifications

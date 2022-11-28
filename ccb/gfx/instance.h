@@ -10,7 +10,7 @@
 
 #include "../mat/toolbox.h"
 
-constexpr uint32_t INSTANCE_MCAP = 4096;
+constexpr uint32_t INSTANCE_MCAP = 8192;
 
 class Instance
 {
@@ -18,7 +18,7 @@ public:
 
 	// construction
 	Instance(glm::vec2 p,float w,float h,const char* t);
-	~Instance();
+	~Instance() {  }
 
 	// setup
 	void texture();
@@ -28,7 +28,7 @@ public:
 
 	std::vector<float> v;
 	GLuint tex;
-	glm::vec2 o[INSTANCE_MCAP] = { glm::vec2(0) };
+	float o[INSTANCE_MCAP] = { 0 };
 
 private:
 

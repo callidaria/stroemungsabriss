@@ -33,9 +33,13 @@ public:
 
 	// draw
 	void render(uint16_t i,uint16_t amt);
+	void render(uint16_t i,uint16_t amt,glm::vec2 i_tex);
+	void render_anim(uint16_t i,uint16_t amt);
 
 	// uploads
+	glm::vec2 get_offset(uint16_t i,uint16_t j);
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
+	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
 
 private:
 
@@ -46,10 +50,15 @@ private:
 private:
 
 	Buffer buffer = Buffer();
+	Buffer aBuffer = Buffer();
 
 public:
 
+	// classic instances
 	Shader sI;
 	std::vector<Instance> il;
+
+	// animated instances
+	Shader sAI;
 	std::vector<InstancedAnim> ial;
 };

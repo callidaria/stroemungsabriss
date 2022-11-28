@@ -16,7 +16,7 @@ Instance::Instance(glm::vec2 p,float w,float h,const char* t)
 
 	// generate textures
 	glGenTextures(1,&tex);
-} Instance::~Instance() {  }
+}
 
 /*
 	texture() -> void
