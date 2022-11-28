@@ -18,15 +18,15 @@ BulletSystem::BulletSystem(Frame* frame,RendererI* rI)
 		return index to reference added cluster.
 */
 uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
-		const uint32_t caps,const char* tPath)
+		const uint32_t caps,const char* tPath,uint8_t rows,uint8_t cols,uint8_t itn,uint8_t f)
 {
 	// setting bullet parameter lists
-	m_rI->add(glm::vec2(0,0),width,height,tPath);	// adding bullets in instance renderer
-	std::vector<glm::vec2> t_dirs(caps);			// creating temporary bullet direction list
-	std::vector<int32_t> t_ts(caps);				// creating temporary bullet tick counter list
+	m_rI->add(glm::vec2(0,0),width,height,tPath,rows,cols,itn,f);	// adding bullets
+	std::vector<glm::vec2> t_dirs(caps);	// creating temporary bullet direction list
+	std::vector<int32_t> t_ts(caps);		// creating temporary bullet tick counter list
 
 	// moving all instanced objects outside orthogonal view
-	for (int i=0;i<caps;i++) m_rI->set_offset(bCount.size(),i,glm::vec2(10000));
+	for (int i=0;i<caps;i++) m_rI->set_aOffset(bCount.size(),i,glm::vec2(10000));
 
 	// save bullet width and height of cluster
 	c_width.push_back(width);
@@ -39,7 +39,6 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 	ts.push_back(t_ts);			// add bullet tick counter list
 	return bCount.size()-1;		// return the index, the cluster is to be referenced by
 }
-// FIXME: add hitbox parameters when adding cluster
 
 /*
 	PARAMETER DEFINITIONS:
@@ -56,11 +55,11 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 */
 void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 {
-	bCount.at(cluster) %= countCaps[cluster];  			// resetting bullet count if cap reached
-	m_rI->set_offset(cluster,bCount[cluster],nPos);		// move bullets from original position
+	bCount[cluster] %= countCaps[cluster];  			// resetting bullet count if cap reached
+	m_rI->set_aOffset(cluster,bCount[cluster],nPos);	// move bullets from original position
 	set_bltDir(cluster,bCount[cluster],nDir);			// setting bullet direction parameter
 	reset_tick(cluster,bCount[cluster]);				// resetting bullet time ticks to 0
-	bCount.at(cluster)++;								// increment bullet spawn counter
+	bCount[cluster]++;									// increment bullet spawn counter
 }
 
 /*
@@ -70,7 +69,7 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 */
 void BulletSystem::set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos)
 {
-	m_rI->set_offset(cluster,index,nPos);
+	m_rI->set_aOffset(cluster,index,nPos);
 }
 
 /*
@@ -90,7 +89,7 @@ void BulletSystem::set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
 */
 void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
 {
-	m_rI->add_offset(cluster,index,dPos*m_frame->get_time_delta());
+	m_rI->add_aOffset(cluster,index,dPos*m_frame->get_time_delta());
 }
 
 /*
@@ -101,7 +100,7 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
-		m_rI->add_offset(cluster,i,dirs[cluster][i]*m_frame->get_time_delta());
+		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*m_frame->get_time_delta());
 }
 
 /*
@@ -129,7 +128,7 @@ void BulletSystem::reset_tick(uint8_t cluster,uint32_t index)
 */
 glm::vec2 BulletSystem::get_bltPos(uint8_t cluster,uint32_t index)
 {
-	return m_rI->get_offset(cluster,index);
+	return m_rI->get_aOffset(cluster,index);
 }
 
 /*
@@ -176,12 +175,12 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 	for (int i=0;i<countCaps[cluster];i++) {
 
 		// get centered bullet position
-		glm::vec2 cPos = m_rI->get_offset(cluster,i)
+		glm::vec2 cPos = m_rI->get_aOffset(cluster,i)
 				+glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
 
 		// calculate if object got hit
 		bool hit = glm::length(cPos-pos)<=hr+br;	// check collision
-		m_rI->add_offset(cluster,i,glm::vec2(10000,10000)*glm::vec2((int)hit));		// "despawn"
+		m_rI->add_aOffset(cluster,i,glm::vec2(10000,10000)*glm::vec2((int)hit));	// "despawn"
 		out += hit;		// increment hit-o-meter
 	}
 
@@ -195,7 +194,7 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 void BulletSystem::render()
 {
 	m_rI->prepare();
-	for (int i=0;i<bCount.size();i++) m_rI->render(i,countCaps.at(i));
+	for (int i=0;i<bCount.size();i++) m_rI->render_anim(i,countCaps[i]);
 	// FIXME: find a solution to the bullets rendering at origin because of capping before setting
 }
 // TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)

@@ -16,7 +16,8 @@ public:
 	~BulletSystem() {  }
 
 	// creation
-	uint16_t add_cluster(uint16_t width,uint16_t height,const uint32_t caps,const char* tPath);
+	uint16_t add_cluster(uint16_t width,uint16_t height,const uint32_t caps,const char* tPath,
+			uint8_t rows,uint8_t cols,uint8_t itn,uint8_t f);
 	void spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir=glm::vec2(0));
 
 	// set

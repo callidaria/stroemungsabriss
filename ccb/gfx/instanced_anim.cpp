@@ -11,9 +11,9 @@
 	itn: total number of subtextures contained by linked spritesheet
 	f: ticks a total iterations through all subtextures on the spritesheet should take
 */
-InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,
+InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t irow,uint8_t icol,
 		uint8_t itn,uint8_t f)
-	: tpath(t)
+	: tpath(t),row(irow),col(icol)
 {
 	// create canvas & generate texture
 	v = Toolbox::create_sprite_canvas_triangled(p,w,h);
@@ -30,10 +30,16 @@ void InstancedAnim::texture()
 }
 
 /*
-	setup() -> void
+	setup(Shader*) -> void
+	shader: shader program to upload saved uniform variables to
 	purpose: takes all actions necessary to render instances from source object
 */
-void InstancedAnim::setup()
+void InstancedAnim::setup(Shader* shader)
 {
+	// upload texture
 	glBindTexture(GL_TEXTURE_2D,tex);
+
+	// upload uniform variables
+	shader->upload_int("row",row);
+	shader->upload_int("col",col);
 }

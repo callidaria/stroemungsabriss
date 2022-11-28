@@ -38,8 +38,11 @@ public:
 
 	// uploads
 	glm::vec2 get_offset(uint16_t i,uint16_t j);
+	glm::vec2 get_aOffset(uint16_t i,uint16_t j);
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
+	void set_aOffset(uint16_t i,uint16_t j,glm::vec2 o);
 	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
+	void add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv);
 
 private:
 
@@ -49,16 +52,12 @@ private:
 
 private:
 
+	// cascabel
 	Buffer buffer = Buffer();
-	Buffer aBuffer = Buffer();
-
-public:
-
-	// classic instances
 	Shader sI;
-	std::vector<Instance> il;
 
-	// animated instances
-	Shader sAI;
+	// instance object lists
+	std::vector<Instance> il;
 	std::vector<InstancedAnim> ial;
+
 };

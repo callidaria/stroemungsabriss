@@ -120,7 +120,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 {
 	// setup
 	il.at(i).setup();
-	buffer.upload_indices(il.at(i).o,sizeof(float)*INSTANCE_MCAP);
+	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_MCAP);
 
 	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
@@ -135,8 +135,9 @@ void RendererI::render(uint16_t i,uint16_t amt)
 void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 {
 	// load texture & index buffer data
-	ial[i].setup();
-	buffer.upload_indices(ial[i].i);
+	ial[i].setup(&sI);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_MCAP);
+	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
 	glDrawArraysInstanced(GL_TRIANGLES,i,i+6,amt);
@@ -146,13 +147,13 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	render_anim(uint16_t,uint16_t) -> void
 	i: memory index of animated instanced object to render
 	amt: amount of duplicates to render from instanced animation object
-	purpose: 
+	purpose: render instanced animation objects with interpolated animation updates
 */
 void RendererI::render_anim(uint16_t i,uint16_t amt)
 {
 	// load texture & index buffer data
-	ial[i].setup();
-	buffer.upload_indices(ial[i].i);
+	ial[i].setup(&sI);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_MCAP);
 
 	// draw
 	uint16_t idx = (i+il.size())*6;
@@ -175,6 +176,16 @@ glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
 }
 
 /*
+	get_aOffset(uint16_t i,uint16_t j) -> vec2
+	variation of: get_offset()
+	returns: vectorized offset direction and length as derived from index upload list of animation
+*/
+glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
+{
+	return glm::vec2(ial[i].i[j*2],ial[i].i[j*2+1]);
+}
+
+/*
 	set_offset(uint16_t,uint16_t,vec2) -> void
 	o: vector value to set the selected position transform vector to
 	purpose: set a certain position transform vector of a specific object
@@ -186,6 +197,17 @@ void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 }
 
 /*
+	set_aOffset(uint16_t,uint16_t,vec2) -> void
+	variation of: set_offset()
+	purpose: set a certain position transform vector of a specific animation object
+*/
+void RendererI::set_aOffset(uint16_t i,uint16_t j,glm::vec2 o)
+{
+	ial[i].i[j*2] = o.x;
+	ial[i].i[j*2+1] = o.y;
+}
+
+/*
 	add_offset(uint16_t,uint16_t,vec2) -> void
 	dv: vector to change the current offset vector by
 	purpose: changes current, indexed offset by given distance and direction
@@ -194,4 +216,15 @@ void RendererI::add_offset(uint16_t i,uint16_t j,glm::vec2 dv)
 {
 	il[i].o[j*2] += dv.x;
 	il[i].o[j*2+1] += dv.y;
+}
+
+/*
+	add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv) -> void
+	variation of: add_offset
+	purpose: changes current, indexed and animated offset by given distance and direction
+*/
+void RendererI::add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv)
+{
+	ial[i].i[j*2] += dv.x;
+	ial[i].i[j*2+1] += dv.y;
 }

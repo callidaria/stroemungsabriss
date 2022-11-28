@@ -19,7 +19,7 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// add pc projectiles to bullet system
-	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png");
+	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
 	treg[2] = 9;
 
 	// adressing indexable interaction methods
