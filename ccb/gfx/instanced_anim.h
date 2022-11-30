@@ -7,7 +7,10 @@
 
 #include "shader.h"
 
-constexpr uint32_t IANIMATION_MCAP = 8192;
+constexpr uint32_t IANIMATION_MCAP = 4096;
+constexpr uint32_t IANIMATION_REPEAT = 4;
+constexpr uint32_t IANIMATION_VALUES = IANIMATION_MCAP*IANIMATION_REPEAT;
+// FIXME: all of this always has to be equal to their counterparts in instance.h! remove & replace
 
 class InstancedAnim
 {
@@ -26,7 +29,7 @@ public:
 
 	// vertex and index upload
 	std::vector<float> v;
-	float i[IANIMATION_MCAP] = { 0 };
+	float i[IANIMATION_VALUES] = { 0,0,0,1 };
 
 	// texture
 	GLuint tex;

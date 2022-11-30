@@ -14,6 +14,14 @@ Instance::Instance(glm::vec2 p,float w,float h,const char* t)
 	// create canvas
 	v = Toolbox::create_sprite_canvas_triangled(p,w,h);
 
+	// fill index
+	for (int i=0;i<INSTANCE_VALUES;i+=INSTANCE_REPEAT) {
+		o[i] = 0;
+		o[i+1] = 0;
+		o[i+2] = 0;
+		o[i+3] = 1;
+	} // FIXME: this works but it is not beautiful. i imagine a shining lakeeeeuhhhhhhhh
+
 	// generate textures
 	glGenTextures(1,&tex);
 }

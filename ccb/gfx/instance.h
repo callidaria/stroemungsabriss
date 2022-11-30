@@ -10,7 +10,9 @@
 
 #include "../mat/toolbox.h"
 
-constexpr uint32_t INSTANCE_MCAP = 8192;
+constexpr uint32_t INSTANCE_MCAP = 4096;
+constexpr uint32_t INSTANCE_REPEAT = 4;
+constexpr uint32_t INSTANCE_VALUES = INSTANCE_MCAP*INSTANCE_REPEAT;
 
 class Instance
 {
@@ -28,7 +30,7 @@ public:
 
 	std::vector<float> v;
 	GLuint tex;
-	float o[INSTANCE_MCAP] = { 0 };
+	float o[INSTANCE_VALUES] = { 0,0,0,1 };
 
 private:
 

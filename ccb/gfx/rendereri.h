@@ -46,12 +46,6 @@ public:
 
 private:
 
-	// loaders
-	void load_vertex();
-	void load_texture();
-
-private:
-
 	// cascabel
 	Buffer buffer = Buffer();
 	Shader sI;

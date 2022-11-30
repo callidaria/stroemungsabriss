@@ -42,10 +42,10 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,ui
 }
 
 /*
-	load_vertex() -> void
-	purpose: upload all added vertices to buffer
+	load() -> void
+	purpose: combine vertex upload and texturing and compile shader
 */
-void RendererI::load_vertex()
+void RendererI::load()
 {
 	// clear memory for vertex list
 	std::vector<float> v;
@@ -59,22 +59,15 @@ void RendererI::load_vertex()
 	// upload to buffer
 	buffer.bind();
 	buffer.upload_vertices(v);
-}
-
-/*
-	load() -> void
-	purpose: combine vertex upload and texturing and compile shader
-*/
-void RendererI::load()
-{
-	// vertex loading
-	load_vertex();
-	// TODO: remove helper function and insert raw code
 
 	// compile classical instance shader program
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
-	sI.def_indexF(buffer.get_indices(),"offset",2,0,2);
+	sI.def_indexF(buffer.get_indices(),"offset",2,0,INSTANCE_REPEAT);
+	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,INSTANCE_REPEAT);
+	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,INSTANCE_REPEAT);
+	// ??maybe find a different way of representing instanced rotation??
+	// precalculating sine and cosine for a matrix 2D seemed like the most performant way of doing so
 
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
@@ -120,7 +113,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 {
 	// setup
 	il.at(i).setup();
-	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_MCAP);
+	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
 
 	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
@@ -136,7 +129,7 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 {
 	// load texture & index buffer data
 	ial[i].setup(&sI);
-	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_MCAP);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
@@ -153,7 +146,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 {
 	// load texture & index buffer data
 	ial[i].setup(&sI);
-	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_MCAP);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 
 	// draw
 	uint16_t idx = (i+il.size())*6;
@@ -172,7 +165,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 */
 glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
 {
-	return glm::vec2(il[i].o[j*2],il[i].o[j*2+1]);
+	return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]);
 }
 
 /*
@@ -182,7 +175,7 @@ glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
 */
 glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
 {
-	return glm::vec2(ial[i].i[j*2],ial[i].i[j*2+1]);
+	return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]);
 }
 
 /*
@@ -192,8 +185,8 @@ glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
 */
 void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 {
-	il[i].o[j*2] = o.x;
-	il[i].o[j*2+1] = o.y;
+	il[i].o[j*INSTANCE_REPEAT] = o.x;
+	il[i].o[j*INSTANCE_REPEAT+1] = o.y;
 }
 
 /*
@@ -203,8 +196,8 @@ void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 */
 void RendererI::set_aOffset(uint16_t i,uint16_t j,glm::vec2 o)
 {
-	ial[i].i[j*2] = o.x;
-	ial[i].i[j*2+1] = o.y;
+	ial[i].i[j*INSTANCE_REPEAT] = o.x;
+	ial[i].i[j*INSTANCE_REPEAT+1] = o.y;
 }
 
 /*
@@ -214,8 +207,8 @@ void RendererI::set_aOffset(uint16_t i,uint16_t j,glm::vec2 o)
 */
 void RendererI::add_offset(uint16_t i,uint16_t j,glm::vec2 dv)
 {
-	il[i].o[j*2] += dv.x;
-	il[i].o[j*2+1] += dv.y;
+	il[i].o[j*INSTANCE_REPEAT] += dv.x;
+	il[i].o[j*INSTANCE_REPEAT+1] += dv.y;
 }
 
 /*
@@ -225,6 +218,6 @@ void RendererI::add_offset(uint16_t i,uint16_t j,glm::vec2 dv)
 */
 void RendererI::add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv)
 {
-	ial[i].i[j*2] += dv.x;
-	ial[i].i[j*2+1] += dv.y;
+	ial[i].i[j*INSTANCE_REPEAT] += dv.x;
+	ial[i].i[j*INSTANCE_REPEAT+1] += dv.y;
 }
