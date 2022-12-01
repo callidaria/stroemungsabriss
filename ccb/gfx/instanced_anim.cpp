@@ -17,7 +17,6 @@ InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t i
 {
 	// create canvas & generate texture
 	v = Toolbox::create_sprite_canvas_triangled(p,w,h);
-	// fill index
 	for (int idx=0;idx<IANIMATION_VALUES;idx+=IANIMATION_REPEAT) {
 		i[idx] = 0;
 		i[idx+1] = 0;

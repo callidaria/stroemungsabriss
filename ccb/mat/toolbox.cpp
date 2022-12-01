@@ -1,6 +1,17 @@
 #include "toolbox.h"
 
 /*
+	calculate_vecangle(vec2,vec2) -> float
+	a: first vector, 0 degrees towards the origin
+	b: second vector, returned degrees from first vector
+	returns: angle between vectors in radians
+*/
+float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
+{
+	return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b)));
+}
+
+/*
 	create_sprite_canvas() -> std::vector<float>
 	returns: primitive canvas vertices without camera ready coordinate system and element draw
 */

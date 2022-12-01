@@ -67,7 +67,7 @@ void RendererI::load()
 	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,INSTANCE_REPEAT);
 	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,INSTANCE_REPEAT);
 	// ??maybe find a different way of representing instanced rotation??
-	// precalculating sine and cosine for a matrix 2D seemed like the most performant way of doing so
+	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
@@ -187,6 +187,28 @@ void RendererI::set_offset(uint16_t i,uint16_t j,glm::vec2 o)
 {
 	il[i].o[j*INSTANCE_REPEAT] = o.x;
 	il[i].o[j*INSTANCE_REPEAT+1] = o.y;
+}
+
+/*
+	set_rotation(uint16_t,uint16_t,float) -> void
+	r: radians rotation of referenced instance in upload
+	purpose: set radians rotation of referenced instance in upload list to given value
+*/
+void RendererI::set_rotation(uint16_t i,uint16_t j,float r)
+{
+	il[i].o[j*INSTANCE_REPEAT+2] = glm::sin(r);
+	il[i].o[j*INSTANCE_REPEAT+3] = glm::cos(r);
+}
+
+/*
+	set_aRotation(uint16_t,uint16_t,float) -> void
+	r: radians rotation of referenced animated instance in upload
+	purpose: set radians rotation of referenced animated instance in upload list to given value
+*/
+void RendererI::set_aRotation(uint16_t i,uint16_t j,float r)
+{
+	ial[i].i[j*IANIMATION_REPEAT+2] = glm::sin(r);
+	ial[i].i[j*IANIMATION_REPEAT+3] = glm::cos(r);
 }
 
 /*

@@ -165,7 +165,9 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 	for (int i=-2+5*!!treg[7];i<3;i++) {
 		glm::vec4 rVec = glm::vec4(norm.x,norm.y,0,0)
 				*glm::rotate(glm::mat4(1.0f),i*.175f,glm::vec3(0,0,1));
-		bSys->spwn_blt(treg[9]+2,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y));
+		bSys->spwn_blt(treg[9]+2,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
+				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
+				*((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		treg[8]--;
 		treg[7] = rand()%2+3+30*(treg[8]<1);  // FIXME: same issue with rand() as in function above.
 	}

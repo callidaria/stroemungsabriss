@@ -64,6 +64,18 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 }
 
 /*
+	spwn_blt(uint8_t,glm::vec2,glm::vec2,float) -> void
+	overloads: previous spwn_blt()
+	r: starting rotation of created bullet index in upload list
+	purpose: runs previous spwn_blt() and uploads a rotation value immediately afterwards
+*/
+void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float r)
+{
+	spwn_blt(cluster,nPos,nDir);
+	m_rI->set_aRotation(cluster,bCount[cluster]-1,r);
+}
+
+/*
 	delta_bltPos(uint8_t,uint32_t,glm::vec2) -> void
 	dPos: the direction and speed the bullet should move according to
 	purpose: move specific bullet according to outsidely precalculated direction and speed

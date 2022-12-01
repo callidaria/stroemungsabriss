@@ -26,7 +26,7 @@ void main()
 
 	// instance rotation
 	mat2 rmat = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos);
-	vec2 rpos = position*rmat;
+	vec2 rpos = rmat*position;
 
 	// upload final position
 	gl_Position = proj*view*model*vec4(rpos+offset,0.0,1.0);

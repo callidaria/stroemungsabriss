@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#include "../../ccb/mat/toolbox.h"
+
 #include "../struct/feature_base.h"
 
 #include "../systems/bullet_system.h"

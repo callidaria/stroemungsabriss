@@ -41,6 +41,8 @@ public:
 	glm::vec2 get_aOffset(uint16_t i,uint16_t j);
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
 	void set_aOffset(uint16_t i,uint16_t j,glm::vec2 o);
+	void set_rotation(uint16_t i,uint16_t j,float r);
+	void set_aRotation(uint16_t i,uint16_t j,float r);
 	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
 	void add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv);
 
@@ -53,5 +55,4 @@ private:
 	// instance object lists
 	std::vector<Instance> il;
 	std::vector<InstancedAnim> ial;
-
 };
