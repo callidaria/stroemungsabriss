@@ -6,6 +6,7 @@ in vec2 texCoords;
 in vec2 offset;
 in float rotation_sin;
 in float rotation_cos;
+in vec2 i_tex;
 
 out vec2 TexCoords;
 
@@ -17,12 +18,11 @@ uniform mat4 proj = mat4(1.0);
 // spritesheet rasterization
 uniform int row = 1;				// amount of rows on spritesheet
 uniform int col = 1;				// amount of columns on spritesheet
-uniform vec2 i_tex = vec2(0,0);		// 2D identification of subtexture on spritesheet raster
 
 void main()
 {
 	// calculate subtexture position on atlas
-	TexCoords = vec2(texCoords.x/col+i_tex.x/col,texCoords.y/row+i_tex/row);
+	TexCoords = vec2(texCoords.x/col+i_tex.x/col,texCoords.y/row+i_tex.y/row);
 
 	// instance rotation
 	mat2 rmat = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos);

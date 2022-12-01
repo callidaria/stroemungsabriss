@@ -8,7 +8,7 @@
 #include "shader.h"
 
 constexpr uint32_t IANIMATION_MCAP = 4096;
-constexpr uint32_t IANIMATION_REPEAT = 4;
+constexpr uint32_t IANIMATION_REPEAT = 6;
 constexpr uint32_t IANIMATION_VALUES = IANIMATION_MCAP*IANIMATION_REPEAT;
 // FIXME: all of this always has to be equal to their counterparts in instance.h! remove & replace
 
@@ -24,12 +24,13 @@ public:
 	// setup
 	void texture();
 	void setup(Shader* shader);
+	void update();
 
 public:
 
 	// vertex and index upload
 	std::vector<float> v;
-	float i[IANIMATION_VALUES] = { 0,0,0,1 };
+	float i[IANIMATION_VALUES];
 
 	// texture
 	GLuint tex;
@@ -39,6 +40,7 @@ private:
 	// texture
 	const char* tpath;
 
-	// uniform variables
-	uint8_t row,col;
+	// animation
+	std::vector<uint8_t> ticks = std::vector<uint8_t>(IANIMATION_MCAP,0);
+	uint8_t row,col,st_count,tick_cap,tps;
 };

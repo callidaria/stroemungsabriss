@@ -32,7 +32,8 @@ void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* tre
 			glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png",1,1,1,30);
+	treg[9] = //ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png",1,1,1,30);
+		ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
 	ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
 	ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);
 	ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
@@ -55,7 +56,7 @@ void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 
 
 		// movement
 		ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
-			+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
+			+glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
 		bool ex_ovfl = treg[0]<-600||treg[0]>600;	// if B mv reached screen width cap
 		bool mult_swap = treg[0]*treg[2]>1;
 		treg[2] *= -1*mult_swap+1*!mult_swap;		// invert movement direction multiplier

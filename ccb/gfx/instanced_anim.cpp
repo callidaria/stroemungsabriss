@@ -13,7 +13,7 @@
 */
 InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t irow,uint8_t icol,
 		uint8_t itn,uint8_t f)
-	: tpath(t),row(irow),col(icol)
+	: tpath(t),row(irow),col(icol),st_count(itn),tick_cap(f)
 {
 	// create canvas & generate texture
 	v = Toolbox::create_sprite_canvas_triangled(p,w,h);
@@ -22,8 +22,13 @@ InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t i
 		i[idx+1] = 0;
 		i[idx+2] = 0;
 		i[idx+3] = 1;
+		i[idx+4] = 0;
+		i[idx+5] = 0;
 	}
 	glGenTextures(1,&tex);
+
+	// calculate ticks per subtexture
+	tps = tick_cap/st_count;
 }
 
 /*
@@ -48,4 +53,25 @@ void InstancedAnim::setup(Shader* shader)
 	// upload uniform variables
 	shader->upload_int("row",row);
 	shader->upload_int("col",col);
+}
+
+/*
+	update() -> void
+	purpose: update ticks of all object related instances & upload current texture index accordingly
+*/
+void InstancedAnim::update()
+{
+	unsigned int tex_index,tex_x,tex_y;
+	for (int idx=0;idx<IANIMATION_MCAP;idx++) {
+
+		// calculate subtexture position
+		tex_index = ticks[idx]/tps;
+		tex_x = tex_index%col,tex_y = tex_index/col;
+		i[idx*IANIMATION_REPEAT+4] = tex_x;
+		i[idx*IANIMATION_REPEAT+5] = tex_y;
+
+		// increment update ticks
+		ticks[idx]++;
+		ticks[idx] %= tick_cap;
+	}
 }
