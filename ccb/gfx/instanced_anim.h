@@ -24,7 +24,7 @@ public:
 	// setup
 	void texture();
 	void setup(Shader* shader);
-	void update();
+	void update(float dtime);
 
 public:
 
@@ -41,6 +41,6 @@ private:
 	const char* tpath;
 
 	// animation
-	std::vector<uint8_t> ticks = std::vector<uint8_t>(IANIMATION_MCAP,0);
+	std::vector<float> ticks = std::vector<float>(IANIMATION_MCAP,0);
 	uint8_t row,col,st_count,tick_cap,tps;
 };

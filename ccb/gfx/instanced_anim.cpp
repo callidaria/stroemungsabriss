@@ -56,10 +56,11 @@ void InstancedAnim::setup(Shader* shader)
 }
 
 /*
-	update() -> void
+	update(float) -> void
+	dtime: time delta to bind animation updates to ingame speed, not gfx update frequency
 	purpose: update ticks of all object related instances & upload current texture index accordingly
 */
-void InstancedAnim::update()
+void InstancedAnim::update(float dtime)
 {
 	unsigned int tex_index,tex_x,tex_y;
 	for (int idx=0;idx<IANIMATION_MCAP;idx++) {
@@ -71,7 +72,7 @@ void InstancedAnim::update()
 		i[idx*IANIMATION_REPEAT+5] = tex_y;
 
 		// increment update ticks
-		ticks[idx]++;
-		ticks[idx] %= tick_cap;
+		ticks[idx] += dtime;
+		ticks[idx] *= (ticks[idx]<tick_cap);
 	}
 }

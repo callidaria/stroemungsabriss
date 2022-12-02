@@ -29,7 +29,7 @@ public:
 	void load(Camera2D* cam2d);
 
 	// preparation
-	void prepare();
+	void prepare(float dtime);
 
 	// draw
 	void render(uint16_t i,uint16_t amt);

@@ -150,7 +150,7 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 */
 void BulletSystem::render()
 {
-	m_rI->prepare();
+	m_rI->prepare(m_frame->get_time_delta());
 	for (int i=0;i<bCount.size();i++) m_rI->render_anim(i,countCaps[i]);
 	// FIXME: find a solution to the bullets rendering at origin because of capping before setting
 }

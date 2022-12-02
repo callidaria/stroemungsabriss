@@ -64,7 +64,7 @@ make win
 ## v0.0.4 DEV
 
 ### features:
-- individual rotations of instanced objects [DEV]
+- individual rotations of instanced objects
 - individual animations of instanced objects [DEV]
 
 ### fixes:
@@ -143,5 +143,5 @@ Worktime: 120h
 	+ 58: 25h 44min
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
-	+ 43: 8h 58min
-- Total Code Lines: 11.505
+	+ 43: 9h 8min
+- Total Code Lines: 11.545

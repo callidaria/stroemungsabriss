@@ -91,10 +91,11 @@ void RendererI::load(Camera2D* cam2d)
 }
 
 /*
-	prepare() -> void
+	prepare(float) -> void
+	dtime: delta time for animation updates
 	purpose: enable shader program and bind buffer to use its data
 */
-void RendererI::prepare()
+void RendererI::prepare(float dtime)
 {
 	// gl settings
 	glActiveTexture(GL_TEXTURE0);
@@ -106,7 +107,7 @@ void RendererI::prepare()
 	buffer.bind();
 
 	// update instance animations
-	for (int i=0;i<ial.size();i++) ial[i].update();
+	for (int i=0;i<ial.size();i++) ial[i].update(dtime);
 }
 
 /*
