@@ -25,6 +25,7 @@ public:
 	void texture();
 	void setup(Shader* shader);
 	void update(float dtime);
+	void reset_tick(uint16_t idx);
 
 public:
 

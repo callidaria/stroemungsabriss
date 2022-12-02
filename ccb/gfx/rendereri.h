@@ -30,6 +30,7 @@ public:
 
 	// preparation
 	void prepare(float dtime);
+	void reset_anim_tick(uint16_t cluster,uint16_t idx);
 
 	// draw
 	void render(uint16_t i,uint16_t amt);

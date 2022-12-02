@@ -58,6 +58,7 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 {
 	bCount[cluster] %= countCaps[cluster];  			// resetting bullet count if cap reached
 	m_rI->set_aOffset(cluster,bCount[cluster],nPos);	// move bullets from original position
+	m_rI->reset_anim_tick(cluster,bCount[cluster]);		// reset animation tick counter
 	set_bltDir(cluster,bCount[cluster],nDir);			// setting bullet direction parameter
 	reset_tick(cluster,bCount[cluster]);				// resetting bullet time ticks to 0
 	bCount[cluster]++;									// increment bullet spawn counter

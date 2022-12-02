@@ -111,6 +111,17 @@ void RendererI::prepare(float dtime)
 }
 
 /*
+	reset_anim_ticks(uint16_t,uint16_t) -> void
+	cluster: index identification of added cluster
+	idx: memory list index for animation update ticks
+	purpose: reset given tick within given cluster
+*/
+void RendererI::reset_anim_tick(uint16_t cluster,uint16_t idx)
+{
+	ial[cluster].reset_tick(idx);
+}
+
+/*
 	render(uint16_t,uint16_t) -> void
 	i: memory index of previously added indexable object
 	amt: amount of identical objects to render from indexed source

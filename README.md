@@ -65,7 +65,7 @@ make win
 
 ### features:
 - individual rotations of instanced objects
-- individual animations of instanced objects [DEV]
+- individual animations of instanced objects
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
@@ -143,5 +143,5 @@ Worktime: 120h
 	+ 58: 25h 44min
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
-	+ 43: 9h 8min
-- Total Code Lines: 11.545
+	+ 43: 9h 17min
+- Total Code Lines: 11.570

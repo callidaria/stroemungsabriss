@@ -76,3 +76,13 @@ void InstancedAnim::update(float dtime)
 		ticks[idx] *= (ticks[idx]<tick_cap);
 	}
 }
+
+/*
+	reset_tick(uint16_t) -> void
+	idx: memory index in offset list to reset ticks of
+	purpose: reset tick counter at given memory index
+*/
+void InstancedAnim::reset_tick(uint16_t idx)
+{
+	ticks[idx] = 0;
+}
