@@ -26,7 +26,7 @@ public:
 	void upload_elements(unsigned int* elements,size_t esize);	// upload element array
 	void upload_elements(std::vector<unsigned int> ie);			// upload element list
 	void upload_indices(std::vector<float> is);					// upload indices array
-	void upload_indices(glm::vec2* is,size_t issize);			// upload vector indices array
+	void upload_indices(float* is,size_t issize);			// upload vector indices array
 
 	// return
 	GLuint get_indices();

@@ -32,10 +32,11 @@ void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* tre
 			glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png");
-	ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png");
-	ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png");
-	ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png");
+	treg[9] = //ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png",1,1,1,30);
+		ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
+	ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
+	ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);
+	ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
 
 	// registers
 	treg[2]  = 1;			// set initial direction multiplier to positive value
@@ -55,7 +56,7 @@ void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 
 
 		// movement
 		ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
-			+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
+			+glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
 		bool ex_ovfl = treg[0]<-600||treg[0]>600;	// if B mv reached screen width cap
 		bool mult_swap = treg[0]*treg[2]>1;
 		treg[2] *= -1*mult_swap+1*!mult_swap;		// invert movement direction multiplier
@@ -165,7 +166,9 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 	for (int i=-2+5*!!treg[7];i<3;i++) {
 		glm::vec4 rVec = glm::vec4(norm.x,norm.y,0,0)
 				*glm::rotate(glm::mat4(1.0f),i*.175f,glm::vec3(0,0,1));
-		bSys->spwn_blt(treg[9]+2,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y));
+		bSys->spwn_blt(treg[9]+2,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
+				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
+				*((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		treg[8]--;
 		treg[7] = rand()%2+3+30*(treg[8]<1);  // FIXME: same issue with rand() as in function above.
 	}

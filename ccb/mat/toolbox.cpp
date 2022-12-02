@@ -1,6 +1,17 @@
 #include "toolbox.h"
 
 /*
+	calculate_vecangle(vec2,vec2) -> float
+	a: first vector, 0 degrees towards the origin
+	b: second vector, returned degrees from first vector
+	returns: angle between vectors in radians
+*/
+float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
+{
+	return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b)));
+}
+
+/*
 	create_sprite_canvas() -> std::vector<float>
 	returns: primitive canvas vertices without camera ready coordinate system and element draw
 */
@@ -27,6 +38,19 @@ std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float
 		pos.x+width,pos.y+height,1.0f,0.0f,
 		pos.x+width,pos.y,1.0f,1.0f,
 		pos.x,pos.y,0.0f,1.0f
+	};
+	return out;
+}
+
+std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float width,float height)
+{
+	std::vector<float> out = {
+		pos.x,pos.y+height,0.0f,0.0f,
+		pos.x+width,pos.y+height,1.0f,0.0f,
+		pos.x+width,pos.y,1.0f,1.0f,
+		pos.x+width,pos.y,1.0f,1.0f,
+		pos.x,pos.y,0.0f,1.0f,
+		pos.x,pos.y+height,0.0f,0.0f,
 	};
 	return out;
 }

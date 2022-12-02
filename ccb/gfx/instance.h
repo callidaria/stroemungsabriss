@@ -10,13 +10,17 @@
 
 #include "../mat/toolbox.h"
 
+constexpr uint32_t INSTANCE_MCAP = 4096;
+constexpr uint32_t INSTANCE_REPEAT = 6;
+constexpr uint32_t INSTANCE_VALUES = INSTANCE_MCAP*INSTANCE_REPEAT;
+
 class Instance
 {
 public:
 
 	// construction
 	Instance(glm::vec2 p,float w,float h,const char* t);
-	~Instance();
+	~Instance() {  }
 
 	// setup
 	void texture();
@@ -24,11 +28,13 @@ public:
 
 public:
 
-	float v[24];
+	std::vector<float> v;
 	GLuint tex;
-	glm::vec2 o[4096] = { glm::vec2(0) };
+	float o[INSTANCE_VALUES];
 
 private:
 
 	const char* tp;
 };
+
+// FIXME: fix private/public as well as includes

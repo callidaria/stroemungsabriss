@@ -281,7 +281,7 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 		m_gc.push_back(SDL_GameControllerOpen(gcc));
 		xb.push_back(XBox()); // !!negative points for style ...maybe stack usage instead???
 		gcc++;
-	} printf("\033[0;34mcontrollers: %i plugged in\n",gcc);
+	} printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
 }
 
 /*

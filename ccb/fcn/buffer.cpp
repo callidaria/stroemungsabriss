@@ -90,9 +90,8 @@ void Buffer::upload_indices(std::vector<float> is)
 	is: array of dynamic indices, to upload additionally to static array buffer
 	issize: size of array to upload
 	purpose: overload previous to work with glm::vec2 arrays
-	DEPRECATED: do this with templating or another clever trick maybe
 */
-void Buffer::upload_indices(glm::vec2* is, size_t issize)
+void Buffer::upload_indices(float* is,size_t issize)
 {
 	glBindBuffer(GL_ARRAY_BUFFER,iebo);
 	glBufferData(GL_ARRAY_BUFFER,issize,is,GL_DYNAMIC_DRAW);
