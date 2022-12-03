@@ -69,6 +69,7 @@ make win
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
+- FIXED: negative jet tilt according to movement input
 
 <br>
 
@@ -144,4 +145,5 @@ Worktime: 120h
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
+	+ 114: 2min
 - Total Code Lines: 11.570
