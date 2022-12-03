@@ -117,6 +117,7 @@ void Renderer2D::prepare()
 	// gl settings
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 
 	// setup buffer & shader
 	s2d.enable();

@@ -69,10 +69,12 @@ make win
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
+- FIXED: hitbox indicator over player character somehow gets covered by character model [DEV]
+- FIXED: bullet system renders spawned bullets twice with a slight offset [DEV]
 
 <br>
 
-## v0.0.3 DEV
+## v0.0.3 DEV [UNX]
 
 ### features:
 - preview practice & arcade position in menu
@@ -108,7 +110,7 @@ make win
 
 <br>
 
-## v0.0.2
+## v0.0.2 [WIN]
 - Build in Dev Mode & Engine Terminal
 - Dynamic Entity Loader & Interpreter
 - Windows Port
@@ -144,4 +146,5 @@ Worktime: 120h
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
+	+ 91: 50min
 - Total Code Lines: 11.570

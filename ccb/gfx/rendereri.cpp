@@ -85,8 +85,6 @@ void RendererI::load()
 void RendererI::load(Camera2D* cam2d)
 {
 	load();
-
-	// upload camera to shader program
 	sI.upload_camera(*cam2d);
 }
 

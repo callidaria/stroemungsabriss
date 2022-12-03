@@ -11,12 +11,12 @@
 Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys)
 	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_bsys(bsys)
 {
+	// setup player hitbox indicator
+	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
+
 	// setup player character visualization
 	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
-
-	// setup player hitbox indicator
-	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
