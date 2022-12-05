@@ -213,6 +213,7 @@ void MenuList::render(float dtrans,float piscroll,uint16_t index,float &edge_mod
 	edge_mod = -1;
 	md = 0;
 	for (int i=0;i<les.size();i++) {
+
 		// precalculations
 		float x_ofs = -150*(les[i].slide||les[i].lee.size()>0);
 

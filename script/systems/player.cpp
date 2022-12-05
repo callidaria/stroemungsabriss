@@ -184,8 +184,9 @@ void Player::jet_wait(BulletSystem* bsys,int32_t* treg)
 void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10+50*(treg[2]<5);i<11;i++) {
-		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),i*.075f,glm::vec3(0,0,1));
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
+		float rot = i*.075f;
+		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),rot,glm::vec3(0,0,1));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12),rot);
 	} treg[2]--;
 	treg[2] += (treg[2]<1)*9;
 }
@@ -198,7 +199,7 @@ void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 void Player::jet_focus(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10;i<11;i++)
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12),0);
 }
 
 /*
