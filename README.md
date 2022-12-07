@@ -67,6 +67,9 @@ make win
 - individual rotations of instanced objects
 - individual animations of instanced objects
 
+### optimizations:
+- beautifulize & disborify title speedup animations [DEV]
+
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
 - FIXED: negative jet tilt according to movement input
@@ -146,4 +149,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
-- Total Code Lines: 11.570
+	+ 4: 12min
+- Total Code Lines: 11.586

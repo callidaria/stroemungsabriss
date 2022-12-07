@@ -30,7 +30,7 @@
 
 constexpr uint8_t GVERSION_RELEASE = 0;
 constexpr uint8_t GVERSION_SUBRELEASE = 0;
-constexpr uint8_t GVERSION_DEVSTEP = 3;
+constexpr uint8_t GVERSION_DEVSTEP = 4;
 constexpr char GVERSION_SUFFIX = 'd';
 
 enum MenuMode
@@ -119,6 +119,7 @@ private:
 	float dlgrot_val = 0,dlgrot_cnt = 0;
 
 	// menu title speedup animation
+	glm::vec3 ofs_etpos = glm::vec3(0),ofs_jtpos = glm::vec3(0);
 	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;
 	float val_vscl=1,val_hscl=1,val_vrot=0,val_hrot=0;
 

@@ -407,6 +407,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 			-15-lcscroll+(sbar[4]+rnd_edge[2])*af+10*!af+ysld));
 	sshd.upload_vec2("idx_mod[6]",glm::vec2(xscr1,-40-lcscroll+sbar[5]+rnd_edge[3]));
 	sshd.upload_vec2("idx_mod[7]",glm::vec2(xscr1,-15-lcscroll+sbar[4]+rnd_edge[2]));
+	// FIXME: repeating calculations. combine those who can be combined
 
 	// render prism list viewtype to framebuffer
 	glDrawArrays(GL_TRIANGLES,24,18*(mm==5));
@@ -424,28 +425,33 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->s2d.upload_float("ptrans",ptrans);
 
 	// transform vertical titles
-	glm::mat4 tr_model = glm::scale(pos_title,glm::vec3(val_vscl,val_vscl,0));
+	glm::mat4 pos_comb = glm::translate(pos_title,ofs_jtpos);
+	glm::mat4 tr_model = glm::scale(pos_comb,glm::vec3(val_vscl,val_vscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_vrot),glm::vec3(0,0,1));
 	m_r2d->al[0].model = tr_model;
 
 	// transform horizontal title
-	tr_model = glm::scale(pos_entitle,glm::vec3(val_hscl,val_hscl,0));
+	pos_comb = glm::translate(pos_entitle,ofs_etpos);
+	tr_model = glm::scale(pos_comb,glm::vec3(val_hscl,val_hscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_hrot),glm::vec3(0,0,1));
 	m_r2d->al[1].model = tr_model;
+	// FIXME: do i seriously refer to animation list memory with a cardcoded value? please no!
 
 	// render titles
 	m_r2d->render_state(0,glm::vec2(vrt_title,0));	// vertical
 	m_r2d->render_state(1,glm::vec2(0,hrz_title));	// horizontal
 
 	// animate title speedup effect
-	neg_vscl += (val_vscl>1.1f&&!neg_vscl)-(val_vscl<.9f&&neg_vscl);
+	ofs_jtpos = glm::vec3(rand()%10-5,rand()%10-5,0);
+	ofs_etpos = glm::vec3(rand()%10-5,rand()%10-5,0);
+	/*neg_vscl += (val_vscl>1.1f&&!neg_vscl)-(val_vscl<.9f&&neg_vscl);
 	val_vscl += ((rand()%6+6)*.0001f)*(1-2*neg_vscl);	// vertical scale anim
 	neg_hscl += (val_hscl>1.1f&&!neg_hscl)-(val_hscl<.9f&&neg_hscl);
 	val_hscl += ((rand()%6+6)*.0001f)*(1-2*neg_hscl);	// horizontal scale anim
 	neg_vrot += (val_vrot>2&&!neg_vrot)-(val_vrot<-2&&neg_vrot);
 	val_vrot += ((rand()%5+10)*.001f)*(1-2*neg_vrot);	// vertical rotation
 	neg_hrot += (val_hrot>2&&!neg_hrot)-(val_hrot<-2&&neg_hrot);
-	val_hrot += ((rand()%5+10)*.001f)*(1-2*neg_hrot);	// horizontal rotation
+	val_hrot += ((rand()%5+10)*.001f)*(1-2*neg_hrot);*/	// horizontal rotation
 	// FIXME: breakdown the rhythm
 
 	// draw horizontal menu options
@@ -499,7 +505,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// animate and move dialogue selector to dialogue choice
 	m_r2d->prepare();
 	bool dopen = dsi_diff||dsi_conf;
-	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
+	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)
+			+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
 	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
 	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp+glm::vec3(-5,15,0));
 	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_cnt),glm::vec3(0,0,1));
