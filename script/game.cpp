@@ -34,6 +34,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
 
+	// conversation test
+	Conversation cnv_test = Conversation("./dat/casino_coup.mm");
+
 	// update until exit condition
 	uint32_t running = rstate+1;
 	while (running) {  // ??maybe kill check if flush with static func ref

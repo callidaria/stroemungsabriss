@@ -15,6 +15,7 @@
 #include "systems/bgenv.h"
 #include "systems/player.h"
 #include "systems/bullet_system.h"
+#include "systems/conversation.h"
 
 #include "ui/healthbar.h"
 #include "ui/action_menu.h"
