@@ -65,6 +65,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
 
+		// conversation test render
+		cnv_test.render();
+
 		// action menu render
 		lgt_menu.render();
 

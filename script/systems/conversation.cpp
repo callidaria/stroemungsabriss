@@ -16,26 +16,68 @@ Conversation::Conversation(const char* mm_path)
 
 	// extract nodes from raw content
 	uint32_t lidx = 2;
-	croot = compile_node_data(lines,lidx,0);
+	croot = compile_node_data(lines,lidx);
+
+	// background vertices
+	float tfield_verts[] = { 425,25, 425,150, 1200,150, 1200,150, 1200,25, 425,25, };
+	bgr_buffer.bind();
+	bgr_buffer.upload_vertices(tfield_verts,sizeof(tfield_verts));
+
+	// background shader
+	bgr_shader.compile("./shader/cnv_background_vertex.shader",
+			"./shader/cnv_background_fragment.shader");
+	bgr_shader.def_attributeF("position",2,0,2);
+
+	// 2D background projection
+	bgr_shader.upload_matrix("view",cam2D.view2D);
+	bgr_shader.upload_matrix("proj",cam2D.proj2D);
+
+	// create text
+	/*Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
+	tspoken = Text(&hbfont);
+	tspoken.add(croot.content.c_str(),glm::vec2(450,125));
+	tspoken.load(&cam2D);*/
 }
 
 /*
 	TODO
 */
-ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uint32_t &si,int dp)
+void Conversation::input()
+{
+
+}
+
+/*
+	TODO
+*/
+void Conversation::render()
+{
+	// draw background for spoken text
+	bgr_shader.enable();
+	bgr_buffer.bind();
+	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// draw spoken text contents
+	/*tspoken.prepare();
+	tspoken.render(2048,glm::vec4(.8f,.2f,0,1));*/
+}
+
+/*
+	TODO
+*/
+ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uint32_t &si)
 {
 	// node information
 	ConversationNode cnode;
 	cnode.node_id = convert_rawid(grind_raw_node_by_key(ls[si],"ID"));
 	cnode.content = grind_raw_node_by_key(ls[si],"TEXT");
-	std::cout << cnode.node_id << ":   " << cnode.content << " -> " << dp << '\n';
 
 	// handle related nodes until closed
 	si++;
 	while (strcmp(ls[si].c_str(),"</node>")) {
 
 		// recursion for children nodes
-		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(compile_node_data(ls,si,dp+1));
+		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(compile_node_data(ls,si));
 
 		// add jump links
 		else if (!ls[si].rfind("<arrowlink"))
@@ -43,7 +85,7 @@ ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uin
 
 		// move head
 		si++;
-	} std::cout << '\n' << "jmp: " << cnode.jmp_id << "\n\n";
+	}
 
 	// result
 	return cnode;
