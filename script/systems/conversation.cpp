@@ -26,9 +26,9 @@ ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uin
 {
 	// node information
 	ConversationNode cnode;
-	cnode.node_id = si;
-	cnode.content = ls[si];
-	std::cout << si << ":   " << ls[si] << " -> " << dp << '\n';
+	cnode.node_id = stoi(std::string(grind_raw_node_by_key(ls[si],"ID"),3));
+	cnode.content = grind_raw_node_by_key(ls[si],"TEXT");
+	std::cout << cnode.node_id << ":   " << cnode.content << " -> " << dp << '\n';
 
 	// recursion for children nodes
 	si++;
@@ -39,4 +39,51 @@ ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uin
 
 	// result
 	return cnode;
+}
+
+/*
+	TODO
+*/
+std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
+{
+	// setup
+	uint8_t emode = 0;			// grind mode identifier. switches interpretation modes
+	std::string ex_key = "";	// holding current extracted key to compare to target when '='
+	std::string out = "";		// variable to hold extracted value to return
+
+	// grind raw data
+	for (auto cproc : raw) {
+		switch (emode) {
+
+		// find keystart
+		case 0:
+			emode = cproc==' ';
+			break;
+
+		// read key
+		case 1:
+			emode += cproc=='=';
+			ex_key += cproc;
+			break;
+
+		// compare keys
+		case 2:
+			emode++;
+			emode += !strcmp(ex_key.c_str(),(key+'=').c_str());
+			ex_key = "";
+			break;
+
+		// discard until information ends
+		case 3:
+			emode *= cproc!='"';
+			break;
+
+		// extract value
+		case 4:
+			if (cproc=='"') return out;
+			out += cproc;
+			break;
+
+		}
+	} return "no such key in raw node data";
 }

@@ -27,6 +27,7 @@ public:
 private:
 
 	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t &si,int dp);
+	std::string grind_raw_node_by_key(std::string raw,std::string key);
 
 private:
 
