@@ -13,6 +13,7 @@ struct ConversationNode
 	uint32_t node_id;
 	std::string content;
 	std::vector<ConversationNode> child_nodes;
+	uint32_t jmp_id = 0;
 };
 
 class Conversation
@@ -28,6 +29,7 @@ private:
 
 	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t &si,int dp);
 	std::string grind_raw_node_by_key(std::string raw,std::string key);
+	uint32_t convert_rawid(std::string rawid);
 
 private:
 

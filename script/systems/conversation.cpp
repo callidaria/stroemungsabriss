@@ -26,16 +26,24 @@ ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uin
 {
 	// node information
 	ConversationNode cnode;
-	cnode.node_id = stoi(std::string(grind_raw_node_by_key(ls[si],"ID"),3));
+	cnode.node_id = convert_rawid(grind_raw_node_by_key(ls[si],"ID"));
 	cnode.content = grind_raw_node_by_key(ls[si],"TEXT");
 	std::cout << cnode.node_id << ":   " << cnode.content << " -> " << dp << '\n';
 
-	// recursion for children nodes
+	// handle related nodes until closed
 	si++;
 	while (strcmp(ls[si].c_str(),"</node>")) {
+
+		// recursion for children nodes
 		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(compile_node_data(ls,si,dp+1));
+
+		// add jump links
+		else if (!ls[si].rfind("<arrowlink"))
+			cnode.jmp_id = convert_rawid(grind_raw_node_by_key(ls[si],"DESTINATION"));
+
+		// move head
 		si++;
-	} std::cout << '\n';
+	} std::cout << '\n' << "jmp: " << cnode.jmp_id << "\n\n";
 
 	// result
 	return cnode;
@@ -87,3 +95,9 @@ std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 		}
 	} return "no such key in raw node data";
 }
+
+/*
+	TODO
+*/
+uint32_t Conversation::convert_rawid(std::string rawid)
+{ return stoi(std::string(rawid,3)); }
