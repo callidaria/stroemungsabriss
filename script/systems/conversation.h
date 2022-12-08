@@ -26,10 +26,10 @@ public:
 
 private:
 
-	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t si);
+	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t &si,int dp);
 
 private:
 
-	ConversationNode root;
+	ConversationNode croot;
 
 };

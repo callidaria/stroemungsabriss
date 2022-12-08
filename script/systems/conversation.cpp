@@ -15,23 +15,28 @@ Conversation::Conversation(const char* mm_path)
 	}
 
 	// extract nodes from raw content
-	compile_node_data(lines,0);
+	uint32_t lidx = 2;
+	croot = compile_node_data(lines,lidx,0);
 }
 
 /*
 	TODO
 */
-ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uint32_t si)
+ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uint32_t &si,int dp)
 {
+	// node information
 	ConversationNode cnode;
-	cnode.node_id = 0;
-	cnode.content = "test";
-	std::cout << '\n';
-	uint32_t i = si+1;
-	while (strcmp(ls[i].c_str(),"</node>")) {
-		std::cout << ls[i] << '\n';
-		cnode.child_nodes.push_back(compile_node_data(ls,i));
-		i++;
-	}
+	cnode.node_id = si;
+	cnode.content = ls[si];
+	std::cout << si << ":   " << ls[si] << " -> " << dp << '\n';
+
+	// recursion for children nodes
+	si++;
+	while (strcmp(ls[si].c_str(),"</node>")) {
+		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(compile_node_data(ls,si,dp+1));
+		si++;
+	} std::cout << '\n';
+
+	// result
 	return cnode;
 }
