@@ -147,5 +147,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
-	+ 108: 4h 31min
+	+ 108: 5h 42min
 - Total Code Lines: 11.852

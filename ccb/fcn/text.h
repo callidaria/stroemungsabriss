@@ -18,6 +18,7 @@ public:
 	// construction
 	Text() {  }
 	Text(Font* f);
+	~Text() {  }
 
 	// write
 	int32_t add(char c,glm::vec2 p);

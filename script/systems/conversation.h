@@ -24,6 +24,7 @@ struct ConversationNode
 	uint32_t jmp_id = 0;
 };
 
+// yes, the naming is very dramatic... it's on purpose.
 class Conversation
 {
 
@@ -50,8 +51,10 @@ private:
 	// cascabel
 	Buffer bgr_buffer = Buffer();
 	Shader bgr_shader = Shader();
-	Camera2D cam2D = Camera2D(1280,720);
-	Text tspoken;
+
+	// text
+	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
+	Text tspoken = Text(&bgrfont);
 
 	ConversationNode croot;
 

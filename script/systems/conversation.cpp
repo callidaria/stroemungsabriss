@@ -29,22 +29,13 @@ Conversation::Conversation(const char* mm_path)
 	bgr_shader.def_attributeF("position",2,0,2);
 
 	// 2D background projection
+	Camera2D cam2D = Camera2D(1280,720);
 	bgr_shader.upload_matrix("view",cam2D.view2D);
 	bgr_shader.upload_matrix("proj",cam2D.proj2D);
 
 	// create text
-	/*Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
-	tspoken = Text(&hbfont);
 	tspoken.add(croot.content.c_str(),glm::vec2(450,125));
-	tspoken.load(&cam2D);*/
-}
-
-/*
-	TODO
-*/
-void Conversation::input()
-{
-
+	tspoken.load(&cam2D);
 }
 
 /*
@@ -58,8 +49,8 @@ void Conversation::render()
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// draw spoken text contents
-	/*tspoken.prepare();
-	tspoken.render(2048,glm::vec4(.8f,.2f,0,1));*/
+	tspoken.prepare();
+	tspoken.render(2048,glm::vec4(.8f,.2f,0,1));
 }
 
 /*
