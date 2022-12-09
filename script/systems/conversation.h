@@ -35,7 +35,8 @@ public:
 	~Conversation() {  }
 
 	// interaction
-	void input();
+	void engage(std::string tree_path);
+	void input(bool cnf);
 
 	// draw
 	void render();
@@ -53,9 +54,13 @@ private:
 	Shader bgr_shader = Shader();
 
 	// text
+	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Text tspoken = Text(&bgrfont);
 
 	ConversationNode croot;
+	ConversationNode ctemp;
 
+	// animation
+	//uint16_t ltr_count = 0;
 };

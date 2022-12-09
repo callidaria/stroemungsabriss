@@ -36,6 +36,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// conversation test
 	Conversation cnv_test = Conversation("./dat/casino_coup.mm");
+	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// update until exit condition
 	uint32_t running = rstate+1;

@@ -29,13 +29,49 @@ Conversation::Conversation(const char* mm_path)
 	bgr_shader.def_attributeF("position",2,0,2);
 
 	// 2D background projection
-	Camera2D cam2D = Camera2D(1280,720);
 	bgr_shader.upload_matrix("view",cam2D.view2D);
 	bgr_shader.upload_matrix("proj",cam2D.proj2D);
+}
 
-	// create text
-	tspoken.add(croot.content.c_str(),glm::vec2(450,125));
+/*
+	TODO
+*/
+void Conversation::engage(std::string tree_path)
+{
+	// setup
+	std::string node_name = "";
+	ctemp = croot;
+
+	// follow tree path
+	for (auto cproc : tree_path) {
+
+		// check for node naming end
+		if (cproc=='/') {
+			for (auto child : ctemp.child_nodes) {
+
+				// check content equivalence for all children linked in temporary node
+				if (child.content==node_name) {
+					ctemp = child;
+					node_name = "";
+				}
+			}
+		} // FIXME: i'll gouge my fucking eyes out looking at this
+
+		// assemble node name from current character
+		else node_name += cproc;
+	}
+
+	// move into immediate content node
+	ConversationNode tmp_node = ctemp.child_nodes[0];
+	ctemp = tmp_node;
+
+	// set content result as display text
+	tspoken.clear();
+	tspoken.add(ctemp.content.c_str(),glm::vec2(450,125));
 	tspoken.load(&cam2D);
+
+	// reset letter count
+	//ltr_count = 0;
 }
 
 /*
@@ -43,6 +79,9 @@ Conversation::Conversation(const char* mm_path)
 */
 void Conversation::render()
 {
+	// update letter count
+	//ltr_count += (ltr_count<ctemp.content.length());
+
 	// draw background for spoken text
 	bgr_shader.enable();
 	bgr_buffer.bind();
