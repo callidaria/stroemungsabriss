@@ -43,9 +43,13 @@ public:
 
 private:
 
+	// tools
 	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t &si);
 	std::string grind_raw_node_by_key(std::string raw,std::string key);
 	uint32_t convert_rawid(std::string rawid);
+
+	// loader
+	void load_text();
 
 private:
 
@@ -58,9 +62,10 @@ private:
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Text tspoken = Text(&bgrfont);
 
-	ConversationNode croot;
-	ConversationNode ctemp;
+	// tree
+	ConversationNode croot,ctemp;	// root & head nodes
 
 	// animation
-	//uint16_t ltr_count = 0;
+	uint16_t ltr_count = 0;		// count of displayed letters
+	bool chlfr = false;			// trigger if input confirmed last frame
 };

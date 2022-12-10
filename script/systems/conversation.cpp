@@ -65,13 +65,23 @@ void Conversation::engage(std::string tree_path)
 	ConversationNode tmp_node = ctemp.child_nodes[0];
 	ctemp = tmp_node;
 
-	// set content result as display text
-	tspoken.clear();
-	tspoken.add(ctemp.content.c_str(),glm::vec2(450,125));
-	tspoken.load(&cam2D);
+	// set content result as display text & reset letter count
+	load_text();
+	ltr_count = 0;
+}
 
-	// reset letter count
-	//ltr_count = 0;
+/*
+	TODO
+*/
+void Conversation::input(bool cnf)
+{
+	if (cnf&&!chlfr) {
+		ConversationNode swp = ctemp.child_nodes[0];
+		ctemp = swp;
+
+		// set content result as display text
+		load_text();
+	} chlfr = cnf;
 }
 
 /*
@@ -80,7 +90,7 @@ void Conversation::engage(std::string tree_path)
 void Conversation::render()
 {
 	// update letter count
-	//ltr_count += (ltr_count<ctemp.content.length());
+	ltr_count += (ltr_count<ctemp.content.length());
 
 	// draw background for spoken text
 	bgr_shader.enable();
@@ -89,7 +99,7 @@ void Conversation::render()
 
 	// draw spoken text contents
 	tspoken.prepare();
-	tspoken.render(2048,glm::vec4(.8f,.2f,0,1));
+	tspoken.render(ltr_count,glm::vec4(.8f,.2f,0,1));
 }
 
 /*
@@ -173,3 +183,13 @@ std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 */
 uint32_t Conversation::convert_rawid(std::string rawid)
 { return stoi(std::string(rawid,3)); }
+
+/*
+	TODO
+*/
+void Conversation::load_text()
+{
+	tspoken.clear();
+	tspoken.add(ctemp.content.c_str(),glm::vec2(450,125));
+	tspoken.load(&cam2D);
+}
