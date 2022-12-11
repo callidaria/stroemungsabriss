@@ -61,11 +61,13 @@ private:
 	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
 	Text tspoken = Text(&bgrfont);
+	// Text tdecide = Text(&bgrfont);
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
 
 	// animation
 	uint16_t ltr_count = 0;		// count of displayed letters
+	// bool choice = false;
 	bool chlfr = false;			// trigger if input confirmed last frame
 };

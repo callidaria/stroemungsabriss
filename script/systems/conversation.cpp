@@ -65,9 +65,8 @@ void Conversation::engage(std::string tree_path)
 	ConversationNode tmp_node = ctemp.child_nodes[0];
 	ctemp = tmp_node;
 
-	// set content result as display text & reset letter count
+	// set content result as display text
 	load_text();
-	ltr_count = 0;
 }
 
 /*
@@ -76,12 +75,18 @@ void Conversation::engage(std::string tree_path)
 void Conversation::input(bool cnf)
 {
 	if (cnf&&!chlfr) {
+
+		// proceed with next child. need that adrenochrome
 		ConversationNode swp = ctemp.child_nodes[0];
 		ctemp = swp;
 
 		// set content result as display text
 		load_text();
-	} chlfr = cnf;
+
+	}
+
+	// set input trigger
+	chlfr = cnf;
 }
 
 /*
@@ -189,7 +194,25 @@ uint32_t Conversation::convert_rawid(std::string rawid)
 */
 void Conversation::load_text()
 {
+	// check for condition prefix
+	/*std::cout << "arrived at: " << ctemp.content;
+	if (ctemp.content[0]==':') {
+
+		// check for end node prefix and remove
+		choice = ctemp.content[1]=='0';
+
+		// continue processing condition reference
+		std::string cnd_addr = ctemp.content.substr(1,ctemp.content.find(' '));
+		std::cout << cnd_addr << '\n';
+
+	}*/
+	//tspoken.add((ctemp.content.substr(3*choice)).c_str(),glm::vec2(450,125));
+
+	// write text content
 	tspoken.clear();
 	tspoken.add(ctemp.content.c_str(),glm::vec2(450,125));
 	tspoken.load(&cam2D);
+
+	// reset letter count
+	ltr_count = 0;
 }

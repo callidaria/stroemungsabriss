@@ -53,14 +53,14 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		lgt_menu.bind();
 
 		// stage
-		m_bgenv.update(rstate);
+		/*m_bgenv.update(rstate);
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
 		m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
-		m_bSys.render();
+		m_bSys.render();*/
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);
