@@ -14,8 +14,8 @@ BulletSystem::BulletSystem(Frame* frame,RendererI* rI)
 	height: height of bullets in cluster
 	caps: maximum capacity of bullets handled in relation with the defined cluster
 	tPath: path to bullet texture (and also animation, when #50 is closed)
-	purpose: adding bullet cluster to spawn bullets with later.
-		return index to reference added cluster.
+	purpose: adding bullet cluster to spawn bullets with later
+	returns: index to reference added cluster
 */
 uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 		const uint32_t caps,const char* tPath,uint8_t rows,uint8_t cols,uint8_t itn,uint8_t f)

@@ -96,7 +96,8 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	glm::vec2 absmv=glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left), // absolute
 			(*cnt.abs_up)-(*cnt.abs_down)));
 	bool is_real = absmv.x==absmv.x;
-	glm::vec2 mvdir = (t_real?fltmv:glm::vec2(0))+glm::vec2(!t_real)*(is_real?absmv:glm::vec2(0));
+	glm::vec2 mvdir = (t_real ? fltmv : glm::vec2(0))
+			+glm::vec2(!t_real)*(is_real ? absmv : glm::vec2(0));
 	// FIXME: find something better than the ternary every frame
 
 	// change position of player based on calculated movement direction

@@ -79,6 +79,7 @@ void RendererI::load()
 
 /*
 	load(Camera2D*) -> void
+	overloads: previous load()
 	cam2d: camera to render indexable 2D objects in relation to
 	purpose: in addition to using the features of load the camera matrices get uploaded
 */
@@ -137,7 +138,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 
 /*
 	render(uint16_t,uint16_t,vec2) -> void
-	overloads previous render()
+	overloads: previous render()
 	i_tex: texture index vector indicating subtexture position on spritesheet raster
 	purpose: render specific animation frame of previously added instanced animation object
 */

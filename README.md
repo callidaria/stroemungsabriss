@@ -69,7 +69,7 @@ make win
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
-- FIXED: hitbox indicator over player character somehow gets covered by character model [DEV]
+- FIXED: hitbox indicator over player character somehow gets covered by character model
 - FIXED: bullet system renders spawned bullets twice with a slight offset [DEV]
 
 <br>
@@ -146,5 +146,5 @@ Worktime: 120h
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
-	+ 91: 1h 37min
+	+ 91: 3h 15min
 - Total Code Lines: 11.575
