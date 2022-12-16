@@ -1,5 +1,8 @@
 #include "audio.h"
 
+/*
+	TODO
+*/
 Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop)
 {
 	// buffer setup
@@ -46,12 +49,24 @@ Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel
 	alSourcei(m_audio,AL_BUFFER,m_buffer);
 	set_all(gain,pitch,pos,vel,play_loop);
 }
+
+/*
+	TODO
+*/
 void Audio::play() { alSourcePlay(m_audio); }
+
+/*
+	TODO
+*/
 void Audio::remove()
 {
 	alDeleteSources(1,&m_audio);
 	alDeleteBuffers(1,&m_buffer);
 }
+
+/*
+	TODO
+*/
 void Audio::set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop)
 {
 	set_gain(gain);
@@ -60,8 +75,33 @@ void Audio::set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play
 	set_velocity(vel);
 	set_loop(play_loop);
 }
-void Audio::set_gain(float gain) { alSourcef(m_audio,AL_GAIN,gain); }
-void Audio::set_pitch(float pitch) { alSourcef(m_audio,AL_PITCH,pitch); }
-void Audio::set_position(glm::vec3 pos) { alSource3f(m_audio,AL_POSITION,pos.x,pos.y,pos.z); }
-void Audio::set_velocity(glm::vec3 vel) { alSource3f(m_audio,AL_VELOCITY,vel.x,vel.y,vel.z); }
-void Audio::set_loop(bool play_loop) { alSourcei(m_audio,AL_LOOPING,play_loop); }
+
+/*
+	TODO
+*/
+void Audio::set_gain(float gain)
+{ alSourcef(m_audio,AL_GAIN,gain); }
+
+/*
+	TODO
+*/
+void Audio::set_pitch(float pitch)
+{ alSourcef(m_audio,AL_PITCH,pitch); }
+
+/*
+	TODO
+*/
+void Audio::set_position(glm::vec3 pos)
+{ alSource3f(m_audio,AL_POSITION,pos.x,pos.y,pos.z); }
+
+/*
+	TODO
+*/
+void Audio::set_velocity(glm::vec3 vel)
+{ alSource3f(m_audio,AL_VELOCITY,vel.x,vel.y,vel.z); }
+
+/*
+	TODO
+*/
+void Audio::set_loop(bool play_loop)
+{ alSourcei(m_audio,AL_LOOPING,play_loop); }
