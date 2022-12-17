@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+
 #include <AL/al.h>
 #include <glm/glm.hpp>
 
@@ -17,7 +18,7 @@ public:
 
 	// construction
 	Audio(const char* path,float gain=1.0f,float pitch=1.0f,glm::vec3 pos=glm::vec3(0.0f),
-			glm::vec3 vel=glm::vec3(1.0f),bool play_loop=false);
+			glm::vec3 vel=glm::vec3(0.0f),bool play_loop=false);
 
 	// action
 	void play();	// plays the sound
