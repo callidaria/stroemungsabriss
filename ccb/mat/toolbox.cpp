@@ -30,6 +30,7 @@ std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float
 	};
 	return out;
 }
+// FIXME: not intuitive if vertices returned are expecting element buffer
 
 /*
 	load_texture(GLuint,const char*) -> void
