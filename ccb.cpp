@@ -8,6 +8,7 @@
 #ifdef __WIN32__
 
 #include <windows.h>
+#include <conio.h>
 
 #else
 
@@ -20,6 +21,13 @@
 // root directory definitions
 #define ENGINE_ROOT "./ccb"
 #define PROJECT_ROOT "./script"
+
+// windows compile predefinition
+#ifdef __WIN32__
+const std::string path_mingw = "C:/MinGW/lib";
+const std::string cmp_winlinker = "-llibSDL2 -lglew32 -lglew32s -lopengl32 -lSOIL -lOpenAL32";
+const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED";
+#endif
 
 // toolbox
 void write_selection();
@@ -60,6 +68,7 @@ int main(int argc,char* argv[])
 
 		// prepare write
 #ifdef __WIN32__
+		system("cls");
 		printf("CASCABEL CONSOLE\n");
 #else
 		printf("\033[0m\033[2J\033[1;1HCASCABEL CONSOLE\n");
@@ -104,16 +113,27 @@ int main(int argc,char* argv[])
 
 		// read user input
 #ifdef __WIN32__
-		if (!update) inp = getchar();
+		if (!update) inp = _getch();
 #else
 		if (!update) { system("stty raw");inp = getchar();system("stty cooked"); }
 #endif
 		else update = false;
 
 		// kill when exit request
-		if (inp=='e') { system("clear");break; }
-		else if (inp=='r') system("./yomisensei");
-		else if (inp=='b') system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
+		if (inp=='e') {
+#ifdef __WIN32__
+			system("cls");
+#else
+			system("clear");
+#endif
+			break;
+		} else if (inp=='r') system("./yomisensei");
+		else if (inp=='b')
+#ifdef __WIN32__
+			system(("g++ main.cpp lib/* -o yomisensei.exe -L\""+path_mingw+"\" "+cmp_winlinker+' '+cmp_windef).c_str());
+#else
+			system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
+#endif
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -211,7 +231,13 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
+
+#ifdef __WIN32__
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c -L\""+path_mingw+"\" "+cmp_winlinker+' '+cmp_windef).c_str());
+#else
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
+#endif
+
 				out = "compiled "+out_file;
 			}
 
@@ -303,7 +329,11 @@ std::string count_lines()
 
 	// run in chosen
 	if (get_selected())
+#ifdef __WIN32__
+		system("echo feature not available on windows");
+#else
 		system("find ccb/aud/ ccb/fcn/ ccb/frm/ ccb/gfx/ ccb/mat/ ccb/net/ ccb/ppe/ script/ script/boss/ script/menu/ script/struct/ script/systems script/ui/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
+#endif
 	// TODO: auto find component directories
 
 	// prepare next

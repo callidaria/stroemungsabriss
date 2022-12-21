@@ -25,17 +25,17 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
 	int width,height;
 	for (int i = 0; i < tp.size(); i++) {
-#ifdef __WIN32__
+/*#ifdef __WIN32__
 		unsigned char* image = stbi_load(tp.at(i), &width, &height, 0, STBI_rgb); // ??alpha needed
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, image);
 		stbi_image_free(image);
-#else
+#else*/
 		unsigned char* image = SOIL_load_image(tp.at(i), &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);
-#endif
+//#endif
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);

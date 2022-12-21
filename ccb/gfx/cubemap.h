@@ -1,14 +1,14 @@
 #pragma once
 
 #include <iostream>
-#ifdef __WIN32__
+/*#ifdef __WIN32__
 #define STB_IMAGE_IMPLEMENTATION
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #include "../../include/stb_image.h"
 #endif
-#else
+#else*/
 #include <SOIL/SOIL.h>
-#endif
+//#endif
 #include "shader.h"
 #include "../mat/camera3d.h"
 #include "../fcn/buffer.h"
