@@ -25,7 +25,7 @@
 // windows compile predefinition
 #ifdef __WIN32__
 const std::string path_mingw = "C:/MinGW/lib";
-const std::string cmp_winlinker = "-llibSDL2 -lglew32 -lglew32s -lopengl32 -lSOIL -lOpenAL32";
+const std::string cmp_winlinker = "-lSDL2 -lSDL2main -lSDL2_test -lglew32 -lglew32s -lopengl32 -lSOIL -lOpenAL32";
 const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED";
 #endif
 
@@ -50,7 +50,7 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 // components
 char inp;
-bool update = false;
+bool update = false, waiting = false;
 uint8_t itr,idx = 0;
 
 int main(int argc,char* argv[])
@@ -65,6 +65,12 @@ int main(int argc,char* argv[])
 
 		// setup component iterator
 		itr = 0;
+
+		// waiting to refresh after build
+		if (waiting) {
+			printf("end of output...\n");
+			_getch();
+		} waiting = false;
 
 		// prepare write
 #ifdef __WIN32__
@@ -128,12 +134,14 @@ int main(int argc,char* argv[])
 #endif
 			break;
 		} else if (inp=='r') system("./yomisensei");
-		else if (inp=='b')
+		else if (inp=='b') {
 #ifdef __WIN32__
 			system(("g++ main.cpp lib/* -o yomisensei.exe -L\""+path_mingw+"\" "+cmp_winlinker+' '+cmp_windef).c_str());
 #else
 			system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
 #endif
+			waiting = true;
+		}
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -143,6 +151,8 @@ int main(int argc,char* argv[])
 #else
 		idx += (inp=='B'&&idx<itr-1)-(inp=='A'&&idx>0);
 #endif
+
+		// reset output
 		out = "";
 	}
 	return 0;
