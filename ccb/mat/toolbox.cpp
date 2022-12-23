@@ -44,19 +44,19 @@ void Toolbox::load_texture(GLuint tex,const char* path)
 	glBindTexture(GL_TEXTURE_2D,tex);
 
 	// load texture data from source
-/*#ifdef __WIN32__
+#ifdef __WIN32__
 
 	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
 	stbi_image_free(image);
 
-#else*/
+#else
 
 	unsigned char* image = SOIL_load_image(path,&width,&height,0,SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
 	SOIL_free_image_data(image);
 
-//#endif
+#endif
 
 	// texture parameters & mipmap
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
