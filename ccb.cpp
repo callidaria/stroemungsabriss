@@ -133,7 +133,12 @@ int main(int argc,char* argv[])
 			system("clear");
 #endif
 			break;
-		} else if (inp=='r') system("./yomisensei");
+		} else if (inp=='r')
+#ifdef __WIN32__
+			system(".\\yomisensei.exe");
+#else
+			system("./yomisensei");
+#endif
 		else if (inp=='b') {
 #ifdef __WIN32__
 			system(("g++ main.cpp lib/* -o yomisensei.exe -L\""+path_mingw+"\" "+cmp_winlinker+' '+cmp_windef).c_str());
