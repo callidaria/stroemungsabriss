@@ -2,9 +2,9 @@
 
 #include <iostream>
 #ifdef __WIN32__
-#define STB_IMAGE_IMPLEMENTATION
 #ifndef STBI_INCLUDE_STB_IMAGE_H
-#include "../../include/stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #endif
 #else
 #include <SOIL/SOIL.h>

@@ -25,8 +25,8 @@
 // windows compile predefinition
 #ifdef __WIN32__
 const std::string path_mingw = "C:/MinGW/lib";
-const std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lglew32s -lSOIL -lopengl32 -lOpenAL32";
-const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED";
+const std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lOpenAL32";
+const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STATIC";
 #endif
 
 // toolbox
@@ -269,7 +269,11 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
+#ifdef __WIN32__
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c "+cmp_windef).c_str());
+#else
 						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
+#endif
 					} cfound = readdir(cdir);
 				}
 			}
