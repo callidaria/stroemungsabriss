@@ -13,7 +13,8 @@ or press [r] key in cascabel console
 <br>
 
 ### windows
-double click yomisensei.exe
+double click yomisensei.exe \
+or press [r] key in cascabel console
 
 ### DISCLAIMER
 *building is not required to run the game!*
@@ -33,16 +34,15 @@ double click yomisensei.exe
 # to open cascabel console
 ./ccb_console
 ```
-select BUILD ALL COMPONENTS and run with [SPACE] to build libraries \
+select BUILD ALL COMPONENTS with arrow keys and run with [SPACE] to build libraries \
 then, press [b] key to build executable
 
 <br>
 
 ### windows
-```
-make winlib
-make win
-```
+run ccb_console.exe \
+select BUILD ALL COMPONENTS with [w] & [s] and run with [SPACE] to build libraries \
+then, press [b] key to build executable
 
 <br>
 
@@ -132,5 +132,5 @@ Worktime: 120h
 	+ 78: 15h 41min
 	+ 58: 25h 44min
 	+ 85: 20min
-	+ 94: 18h 52min
+	+ 94: 18h 56min
 - Total Code Lines: 11.195
