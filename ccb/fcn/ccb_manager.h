@@ -14,7 +14,7 @@ class CCBManager
 {
 public:
 	CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d);
-	int add_lv(const char* path,Text* txt=nullptr);
+	int add_lv(const char* path);
 	void dev_console(uint32_t &running,bool &dactive);
 private:
 	// background

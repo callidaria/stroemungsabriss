@@ -9,9 +9,9 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 	cl.add("lineerr",glm::vec2(700+prog,30));
 	ct.load(m_cam2d);cl.load(m_cam2d);
 }
-int CCBManager::add_lv(const char* path,Text* txt)
+int CCBManager::add_lv(const char* path)
 {
-	CCBLInterpreter proc = CCBLInterpreter(m_r2d,txt,path);
+	CCBLInterpreter proc = CCBLInterpreter(m_r2d,path);
 	int out = proc.load_level();
 	linpr.push_back(proc);
 	index.push_back(out);
