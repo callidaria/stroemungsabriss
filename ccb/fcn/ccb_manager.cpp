@@ -1,5 +1,12 @@
 #include "ccb_manager.h"
 
+/*
+	constructor(Frame*,Renderer2D*,Camera2D*)
+	frame: frame entity, handling the relevant input for dev console
+	r2d: renderer to handle loaded & added 2D entities
+	cam2d: reference to 2D camera defining the coordinate system and perspective for renderer
+	purpose: build a manager instance, for later usage of developer console and level loading
+*/
 CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 	: m_frame(frame),m_r2d(r2d),m_cam2d(cam2d)
 {
@@ -9,7 +16,14 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
 	cl.add("lineerr",glm::vec2(700+prog,30));
 	ct.load(m_cam2d);cl.load(m_cam2d);
 }
-int CCBManager::add_lv(const char* path)
+
+/*
+	add_lv(const char*) -> uint16_t
+	path: path to level environment file, specifying object loading
+	purpose: loads a cascabel level environment file
+	returns: start address of environment objects within 2D renderer memory
+*/
+uint16_t CCBManager::add_lv(const char* path)
 {
 	CCBLInterpreter proc = CCBLInterpreter(m_r2d,path);
 	int out = proc.load_level();
@@ -17,6 +31,13 @@ int CCBManager::add_lv(const char* path)
 	index.push_back(out);
 	return out;
 }
+
+/*
+	dev_console(uint32_t&,bool&) -> void
+	running: reference to runstate variable to possibly end program from console by setting it to 0
+	dactive: reference to triggered boolean holding confirmation input by user
+	purpose: renders and breaths life into developer console
+*/
 void CCBManager::dev_console(uint32_t &running,bool &dactive)
 {
 	m_r2d->prepare();m_r2d->render_sprite(0,1);
