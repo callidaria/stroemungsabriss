@@ -15,7 +15,7 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	// writable input
+	// input conversion
 	vec2 pos = position;
 	int edg_id = int(edge_id);
 

@@ -173,7 +173,7 @@ void Healthbar::render()
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
-	sborder.upload_int("cnt_height",hpswap.max_height);
+	ssplice.upload_int("cnt_height",hpswap.max_height);
 	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/SL_REPEAT);
 
 	// render name and phase counter
