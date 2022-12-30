@@ -34,7 +34,7 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 
 	// dialogue text heading
 	thead.add(head,pos+glm::vec2(15,height-15));
-	thead.load(cam2d);
+	thead.load();
 
 	// selection entities
 	irnd = m_r2d->sl.size();

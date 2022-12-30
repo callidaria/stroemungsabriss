@@ -29,7 +29,7 @@ public:
 	void clear();
 
 	// preparation
-	void load(Camera2D* c);
+	void load();
 	void prepare();
 
 	// draw

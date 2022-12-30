@@ -30,7 +30,7 @@ ActionMenu::ActionMenu(Frame* frame)
 	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE));
 	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE));
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
-	mtext.load(&cam2d);
+	mtext.load();
 
 	// add text shadow
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
@@ -40,9 +40,9 @@ ActionMenu::ActionMenu(Frame* frame)
 	stext.add("hitlist",glm::vec2(2237,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE-4));
 	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE-4));
 	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE-4));
-	stext.load(&cam2d);
+	stext.load();
 }
-
+ 
 /*
 	update(Player*) -> void
 	player: player controller holding custom input addresses for menu interaction

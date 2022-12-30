@@ -100,7 +100,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 						t_line = "";   // reset current temporary line
 					} else t_line += excnt[iy]; // add innocent character to temporary line
 				} t_desc.add(t_line.c_str(),glm::vec2(920,dscroll)); // add leftover line to desc
-				t_desc.load(cam2d);	// load written desc data
+				t_desc.load();	// load written desc data
 				t_le.dtxt = t_desc; // save description in the description list
 				dscroll = 600;	    // reset cursor scroll
 				t_line = "";	    // reset temporary line
@@ -109,7 +109,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				args = split_arguments(excnt,','); // getting argument list
 				t_sle = Text(lfnt);
 				t_sle.add(args[0].c_str(),glm::vec2(650,lscroll+45));
-				t_sle.load(cam2d);
+				t_sle.load();
 				t_le.lee.push_back(t_sle); // save entity parameter as sublist element
 				t_le.lev.push_back(args[1]); // save value parameter as value list element
 				break;
@@ -142,7 +142,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				for (int disp=0;disp<SDL_GetNumVideoDisplays();disp++) {
 					t_sle = Text(lfnt);
 					t_sle.add(std::to_string(disp).c_str(),glm::vec2(650,lscroll+45));
-					t_sle.load(cam2d);
+					t_sle.load();
 					t_le.lee.push_back(t_sle);
 					t_le.lev.push_back(std::to_string(disp));
 				} break; // FIXME: display value not as integer but as comm name
@@ -156,7 +156,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 				break;
 			default:printf("%s uses unknown or outdated annotation ID: %i\n",path,emode);
 			}
-		} t_le.ltxt.load(cam2d); // load conservative list element data
+		} t_le.ltxt.load(); // load conservative list element data
 		les.push_back(t_le);
 	} rles = les;
 	// FIXME: text with annotated \n in written file format -> is it \n or \\n?

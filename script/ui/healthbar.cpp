@@ -136,7 +136,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 			HB_TEXT_SIZE,HB_TEXT_SIZE);
 	hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
-	hpswap.phname.load(&tc2d);
+	hpswap.phname.load();
 	hpswap.phcnt = Text(hbfont);
 } Healthbar::~Healthbar() {  }
 
@@ -342,7 +342,7 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 	std::string pprefix = (hpswap.anim_tick>=POT)?std::to_string(hpswap.hpbar_itr+1)+'/':"";
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
-	hpswap.phcnt.load(&tc2d);
+	hpswap.phcnt.load();
 	// TODO: split both counters in different text objects
 
 	// zoom scroll phase counter at increment

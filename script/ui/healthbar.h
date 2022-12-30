@@ -108,17 +108,16 @@ private:
 		frdy: state counter, represeting the current fill_switch index
 		hpswap: struct containing nanobar and upload information
 	*/
-	std::vector<void(*)(HBState&,HPBarSwap&)> fill_switch = {
-		fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear
-	};
+	std::vector<void(*)(HBState&,HPBarSwap&)> fill_switch
+			= { fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear };
 
 private:
 
-	// object
+	// cascabel
 	Buffer hpbuffer = Buffer(),brdbuffer = Buffer(),splcbuffer = Buffer();
 	Shader shp = Shader(),sborder = Shader(),ssplice = Shader();
-	HPBarSwap hpswap;
 
 	// status
+	HPBarSwap hpswap;
 	HBState frdy = HBState::FILLING;
 };

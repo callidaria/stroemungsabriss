@@ -70,7 +70,7 @@ void Text::clear()
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
 */
-void Text::load(Camera2D* c)
+void Text::load()
 {
 	// setup
 	load_vertex();
@@ -87,10 +87,10 @@ void Text::load(Camera2D* c)
 	Toolbox::load_texture(tex,font.tp);
 
 	// uniform variable upload
+	Camera2D cam = Camera2D(1280.0f,720.0f);
 	sT.upload_int("tex",0);
 	sT.upload_float("wdt",font.mw);
-	sT.upload_matrix("view",c->view2D);
-	sT.upload_matrix("proj",c->proj2D);
+	sT.upload_camera(cam);
 }
 
 /*
@@ -117,9 +117,9 @@ void Text::prepare()
 */
 void Text::render(int32_t amnt,glm::vec4 col)
 {
+	buffer.upload_indices(ibv);
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
 	glBindTexture(GL_TEXTURE_2D,tex);
-	buffer.upload_indices(ibv);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 

@@ -35,7 +35,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	// setup dare message on idle screen
 	tft = Text(fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
-	tft.load(cam2d);
+	tft.load();
 
 	// print title version message
 	Font vfnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15);
@@ -45,7 +45,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 			+std::to_string(GVERSION_DEVSTEP)+GVERSION_SUFFIX+" - running on cascabel "
 			+"1.3.1vE (OpenGL)";
 	vtft.add(title_vmessage.c_str(),glm::vec2(600,20));
-	vtft.load(cam2d);
+	vtft.load();
 
 	// submenu lists to interact with and choose from
 	mls[0] = MenuList();

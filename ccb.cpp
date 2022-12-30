@@ -237,7 +237,12 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 		if (found->d_name[0]!='.'&&get_ftype(found->d_name)) {
 
 			// open directory on demand
-			if (itr==idx&&inp=='C'&&found->d_type==DT_DIR) {
+#ifdef __WIN32__
+			bool open_request = inp=='d';
+#else
+			bool open_request = inp=='C';
+#endif
+			if (itr==idx&&open_request&&found->d_type==DT_DIR) {
 				idx = proj_idx;
 				dir_path += "/"+std::string(found->d_name);
 				update = true;

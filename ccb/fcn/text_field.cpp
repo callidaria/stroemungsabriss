@@ -22,7 +22,7 @@ void TextField::render(Frame* frame,Camera2D* cam2d,glm::vec4 col)
 				cnt += c;
 				char_amount++;
 			}
-		} txt.load(cam2d);
+		} txt.load();
 	} // !!write input prefix for activating
 
 	m_r2d->prepare();
