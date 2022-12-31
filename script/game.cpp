@@ -31,7 +31,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// lightweight action menu
-	//ActionMenu lgt_menu = ActionMenu(m_frame);
+	ActionMenu lgt_menu = ActionMenu(m_frame);
 
 	// update until exit condition
 	uint32_t running = rstate+1;
@@ -44,15 +44,15 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 
 		// action menu update
-		//lgt_menu.update(&m_player,running);
-		//lgt_menu.bind();
+		lgt_menu.update(&m_player,running);
+		lgt_menu.bind();
 
 		// stage
-		/*m_bgenv.update(rstate);
-		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);*/
+		m_bgenv.update(rstate);
+		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
-		//m_player.update(rstate,fwd_treg[11]);
+		m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
 		m_bSys.render();
@@ -62,7 +62,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.render();
 
 		// action menu render
-		//lgt_menu.render();
+		lgt_menu.render();
 
 		// swap
 		m_frame->update();
