@@ -32,7 +32,6 @@ struct XBox
 
 class Frame
 {
-
 public:
 
 	// construction

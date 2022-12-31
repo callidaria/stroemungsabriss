@@ -68,7 +68,7 @@ public:
 
 	// construction
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,std::vector<Font> fonts);
+		Camera2D* cam2d,Camera3D* cam3d);
 	~Menu();
 
 	// draw
@@ -92,9 +92,6 @@ private:
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
-
-	// fonts
-	std::vector<Font> m_fonts;
 
 	// input definition
 	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
@@ -138,7 +135,7 @@ private:
 	uint8_t dsi_diff,dsi_conf;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,m_fonts);
+	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d);
 	uint8_t difflv = 0;
 
 	// globe preview

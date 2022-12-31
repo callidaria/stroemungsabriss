@@ -42,7 +42,7 @@ ActionMenu::ActionMenu(Frame* frame)
 	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE-4));
 	stext.load();
 }
- 
+
 /*
 	update(Player*) -> void
 	player: player controller holding custom input addresses for menu interaction

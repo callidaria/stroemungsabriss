@@ -12,8 +12,6 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
-constexpr uint8_t MEMINDEX_DIALOGUE_FONT = 0;
-
 class MenuDialogue
 {
 public:

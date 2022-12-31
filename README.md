@@ -96,6 +96,8 @@ then, press [b] key to build executable
 - FIXED: unused bullets get rendered at origin position
 - FIXED: memory issues with font - text relationship
 
+Worktime: 167h 51min
+
 <br>
 
 ## v0.0.2
@@ -116,21 +118,5 @@ Worktime: 120h
 <br>
 
 ## Trivia
-- Total Worktime: 120h
-- Elapsed Worktime After v0.0.2: 143h 48min
-	+ ??: 19h 19min
-	+ 46: 38h 55min
-	+ 54: 12h 40min
-	+ 20: 3h 8min
-	+ 67: 1h 27min
-	+ 22: 5h 23min
-	+ 56: 1h 5min
-	+ 74: 4h 58min
-    + 63: 13h 25min
-	+ 79: 1h
-	+ 65: 43min
-	+ 78: 15h 41min
-	+ 58: 25h 44min
-	+ 85: 20min
-	+ 94: 23h 33min
-- Total Code Lines: 11.195
+- Total Worktime: 287h 51min
+- Total Code Lines: 11.194

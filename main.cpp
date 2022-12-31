@@ -50,15 +50,10 @@ int main(int argc,char** argv)
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
 
-	// FONTS
-	std::vector<Font> fonts = {
-		Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",20,20)
-	};
-
 	bool dactive = false;
 
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,fonts);
+	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
 
 	// CAMERAS
 	r2d.load(&cam2d);
