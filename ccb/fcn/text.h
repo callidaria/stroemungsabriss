@@ -20,7 +20,7 @@ class Text
 public:
 
 	// construction
-	Text() {  }
+	Text();
 	Text(Font f);
 
 	// write

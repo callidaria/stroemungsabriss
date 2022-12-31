@@ -1,6 +1,15 @@
 #include "text.h"
 
 /*
+	TODO
+*/
+Text::Text()
+{
+	buffer.add_buffer();
+	glGenTextures(1,&tex);
+}
+
+/*
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
@@ -10,6 +19,7 @@ Text::Text(Font f)
 	: font(f)
 {
 	buffer.add_buffer();
+	glGenTextures(1,&tex);
 }
 
 /*

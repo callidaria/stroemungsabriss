@@ -310,13 +310,13 @@ void MenuList::write_tempID(uint8_t index)
 std::string MenuList::breakgrind(std::string nl,uint32_t &i)
 {
 	std::string out;
-	while (i<nl.length()) {		// read nodeline per character
+	while (i<nl.length()) {								// read nodeline per character
 		if (nl[i]=='<'&&nl[i+1]=='/'&&nl[i+2]=='>') {	// check for end annotation
-			i += 3;				// go 3 steps further on nodeline
-			return out;
-		} out += nl[i];			// add character to outputtable contents
-		i++;					// go one character further on nodeline
-	} return out;  // catch contents if line apruptly ends & no mem shenanigans should occur somehow
+			i += 3;			// go 3 steps further on nodeline
+			return out;		// break and return
+		} out += nl[i];		// add character to outputtable contents
+		i++;		// go one character further on nodeline
+	} return out;	// catch contents if line apruptly ends & no mem shenanigans should occur somehow
 	// FIXME: the mem issue if reading outside nl for "</>" annotation checks
 }
 
