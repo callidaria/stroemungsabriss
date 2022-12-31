@@ -69,7 +69,9 @@ int main(int argc,char* argv[])
 		// waiting to refresh after build
 		if (waiting) {
 			printf("end of output...\n");
+#ifdef __WIN32__
 			_getch();
+#endif
 		} waiting = false;
 
 		// prepare write
