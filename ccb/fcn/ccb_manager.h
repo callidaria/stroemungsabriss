@@ -40,5 +40,5 @@ private:
 
 	// console graphics
 	Font cf = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-	Text ct = Text(&cf),cl = Text(&cf);
+	Text ct = Text(cf),cl = Text(cf);
 };

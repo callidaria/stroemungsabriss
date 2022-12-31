@@ -134,12 +134,10 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	// set name and phase counter
 	Font hbfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			HB_TEXT_SIZE,HB_TEXT_SIZE);
-	hpswap.phname = Text(&hbfont);
-	hpswap.phname.texture();
+	hpswap.phname = Text(hbfont);
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
-	hpswap.phname.load(&tc2d);
-	hpswap.phcnt = Text(&hbfont);
-	hpswap.phcnt.texture();
+	hpswap.phname.load();
+	hpswap.phcnt = Text(hbfont);
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -175,7 +173,7 @@ void Healthbar::render()
 	splcbuffer.bind();
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
-	sborder.upload_int("cnt_height",hpswap.max_height);
+	ssplice.upload_int("cnt_height",hpswap.max_height);
 	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/SL_REPEAT);
 
 	// render name and phase counter
@@ -227,9 +225,9 @@ void Healthbar::fill_hpbar(HBState &frdy,HPBarSwap &hpswap)
 	for (int i=0+1000*(hpswap.upload.size()>0);i<hpswap.dest_pos[ihp].size();i++) {
 
 		// basis for upload and targets
-		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);			// x-axis position offset
-		hpswap.upload.push_back(0);		// current hp in healthbar
-		hpswap.upload.push_back(0);		// current damage to health
+		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);	// x-axis position offset
+		hpswap.upload.push_back(0);							// current hp in healthbar
+		hpswap.upload.push_back(0);							// current damage to health
 
 		// left edge transformation for current nanobar
 		hpswap.upload.push_back(rnd_edge_dwn);	// randomized left lower edge modification
@@ -344,7 +342,7 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 	std::string pprefix = (hpswap.anim_tick>=POT)?std::to_string(hpswap.hpbar_itr+1)+'/':"";
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
-	hpswap.phcnt.load(&tc2d);
+	hpswap.phcnt.load();
 	// TODO: split both counters in different text objects
 
 	// zoom scroll phase counter at increment

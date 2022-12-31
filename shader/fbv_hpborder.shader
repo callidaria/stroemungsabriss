@@ -29,8 +29,8 @@ void main()
 
 	// vertex directions
 	int is_upper = int(mod(edg_id,2));
-	vec2 vrtx_dwn = vec2(pos.x+ofs+wdt*wfac+edg_trans[int(edg_id/2)*2],pos.y-cnt_height*is_upper);
-	vec2 vrtx_up = vec2(pos.x+ofs+wdt*wfac+edg_trans[int(edg_id/2)*2+1],
+	vec2 vrtx_dwn = vec2(pos.x+ofs+wdt*wfac+edg_trans[int(edg_id/2*2.0)],pos.y-cnt_height*is_upper);
+	vec2 vrtx_up = vec2(pos.x+ofs+wdt*wfac+edg_trans[int(edg_id/2*2.0+1)],
 			pos.y+cnt_height*(1-is_upper));
 	vec2 vrtx_dir = normalize(vrtx_up-vrtx_dwn);
 

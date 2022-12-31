@@ -29,7 +29,8 @@ class Game
 public:
 
 	// construction
-	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d);
+	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
+			Camera2D* cam2d);
 	~Game() {  }
 
 	// loop

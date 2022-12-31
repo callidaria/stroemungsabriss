@@ -1,17 +1,25 @@
 #include "text.h"
 
 /*
+	TODO
+*/
+Text::Text()
+{
+	buffer.add_buffer();
+	glGenTextures(1,&tex);
+}
+
+/*
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
 	WARNING: the created objects always have to lead with this contructor, else font texture breaks
 */
-Text::Text(Font* f)
-	: m_font(f)
+Text::Text(Font f)
+	: font(f)
 {
-	buffer = Buffer();
 	buffer.add_buffer();
-	texture();
+	glGenTextures(1,&tex);
 }
 
 /*
@@ -26,21 +34,21 @@ int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very
 	// identifying sprite sheet position
 	int i = 0;
 	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
-		if (m_font->id[i]==(int)c) break;
+		if (font.id[i]==(int)c) break;
 		i++;
 	}
 
 	// character information write
 	ibv.push_back(p.x);
 	ibv.push_back(p.y);
-	ibv.push_back(m_font->x[i]);
-	ibv.push_back(m_font->y[i]);
-	ibv.push_back(m_font->wdt[i]);
-	ibv.push_back(m_font->hgt[i]);
-	ibv.push_back(m_font->xo[i]);
-	ibv.push_back(m_font->yo[i]);
+	ibv.push_back(font.x[i]);
+	ibv.push_back(font.y[i]);
+	ibv.push_back(font.wdt[i]);
+	ibv.push_back(font.hgt[i]);
+	ibv.push_back(font.xo[i]);
+	ibv.push_back(font.yo[i]);
 
-	return m_font->xa[i]*(m_font->mw/83.0f);
+	return font.xa[i]*(font.mw/83.0f);
 	// ??do this with a vec2 pointer maybe & also with dynamic texdiv
 }
 
@@ -54,7 +62,7 @@ void Text::add(const char* s,glm::vec2 p)
 {
 	for (int i=0;i<strlen(s);i++) {
 		if (s[i]!=' ') p.x += add(s[i],p);
-		else p.x += 57.0f*(m_font->mw/83.0f);
+		else p.x += 57.0f*(font.mw/83.0f);
 	}
 }
 
@@ -68,33 +76,31 @@ void Text::clear()
 }
 
 /*
-	texture() -> void
-	purpose: load font texture from pointed texture path
-	WARNING: somehow it is necessary to use this additionally to the constructor when Text()
-		was the first construction usage. yeah don't ask me why i don't understand this shit either
-*/
-void Text::texture()
-{
-	Toolbox::load_texture(ftexture,m_font->tp);
-}
-
-/*
 	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
 */
-void Text::load(Camera2D* c)
+void Text::load()
 {
+	// setup
 	load_vertex();
 	sT.compile2d("shader/vertex_text.shader","shader/fragment_text.shader");
 	buffer.bind_index();
+
+	// index upload mapping
 	sT.def_indexF(buffer.get_indices(),"offset",2,0,8);
 	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
 	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
 	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
-	sT.upload_float("wdt",m_font->mw);
-	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
-	sT.upload_matrix("proj",c->proj2D);
+
+	// load texture
+	Toolbox::load_texture(tex,font.tp);
+
+	// uniform variable upload
+	Camera2D cam = Camera2D(1280.0f,720.0f);
+	sT.upload_int("tex",0);
+	sT.upload_float("wdt",font.mw);
+	sT.upload_camera(cam);
 }
 
 /*
@@ -103,11 +109,14 @@ void Text::load(Camera2D* c)
 */
 void Text::prepare()
 {
+	// gl settings
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	// prepare shader & buffer
 	sT.enable();
 	buffer.bind();
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE0);
 }
 
 /*
@@ -118,9 +127,9 @@ void Text::prepare()
 */
 void Text::render(int32_t amnt,glm::vec4 col)
 {
-	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
 	buffer.upload_indices(ibv);
-	glBindTexture(GL_TEXTURE_2D,ftexture);
+	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
+	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 
@@ -141,5 +150,5 @@ void Text::set_scroll(glm::mat4 model)
 void Text::load_vertex() // !!no need to have this extra public vertex load function
 {
 	buffer.bind();
-	buffer.upload_vertices(m_font->v,sizeof(m_font->v));
+	buffer.upload_vertices(font.v,sizeof(font.v));
 }

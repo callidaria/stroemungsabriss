@@ -1,6 +1,5 @@
 #include "font.h"
 
-Font::Font() {  }
 Font::Font(const char* ff,const char* tf,float w,float h)
 	: tp(tf),mw(w)
 {
@@ -36,15 +35,4 @@ Font::Font(const char* ff,const char* tf,float w,float h)
 	v[12] = w; v[13] = 0; v[14] = 1.0f; v[15] = 0.0f;
 	v[16] = 0; v[17] = -h; v[18] = 0.0; v[19] = 1.0f;
 	v[20] = 0; v[21] = 0; v[22] = 0.0f; v[23] = 0.0f;
-	glGenTextures(1,&tex);
-}
-
-void Font::texture()
-{
-	Toolbox::load_texture(tex,tp);
-}
-
-void Font::setup()
-{
-	glBindTexture(GL_TEXTURE_2D,tex);
 }

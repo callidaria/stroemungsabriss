@@ -13,7 +13,8 @@ or press [r] key in cascabel console
 <br>
 
 ### windows
-double click yomisensei.exe
+double click yomisensei.exe \
+or press [r] key in cascabel console
 
 ### DISCLAIMER
 *building is not required to run the game!*
@@ -33,16 +34,15 @@ double click yomisensei.exe
 # to open cascabel console
 ./ccb_console
 ```
-select BUILD ALL COMPONENTS and run with [SPACE] to build libraries \
+select BUILD ALL COMPONENTS with arrow keys and run with [SPACE] to build libraries \
 then, press [b] key to build executable
 
 <br>
 
 ### windows
-```
-make winlib
-make win
-```
+run ccb_console.exe \
+select BUILD ALL COMPONENTS with [w] & [s] and run with [SPACE] to build libraries \
+then, press [b] key to build executable
 
 <br>
 
@@ -73,7 +73,7 @@ make win
 
 <br>
 
-## v0.0.3 DEV
+## v0.0.3
 
 ### features:
 - preview practice & arcade position in menu
@@ -82,7 +82,7 @@ make win
 - engine build system
 - action menu for system and informations
 - time delta disconnected from frames
-- most basic health bar style
+- most basic healthbar style
 
 ### optimizations:
 - improved documentation
@@ -106,6 +106,9 @@ make win
 - FIXED: scuffed geometry of globe preview
 - FIXED: missing anti aliasing on menu selection splash
 - FIXED: unused bullets get rendered at origin position
+- FIXED: memory issues with font - text relationship
+
+Worktime: 167h 51min
 
 <br>
 
@@ -127,22 +130,7 @@ Worktime: 120h
 <br>
 
 ## Trivia
-- Total Worktime: 120h
-- Elapsed Worktime After v0.0.2:
-	+ ??: 19h 19min
-	+ 46: 38h 55min
-	+ 54: 12h 40min
-	+ 20: 3h 8min
-	+ 67: 1h 27min
-	+ 22: 5h 23min
-	+ 56: 1h 5min
-	+ 74: 4h 58min
-    + 63: 13h 25min
-	+ 79: 1h
-	+ 65: 43min
-	+ 78: 15h 41min
-	+ 58: 25h 44min
-	+ 85: 20min
+- Total Worktime: 287h 51min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
