@@ -32,8 +32,7 @@ void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* tre
 			glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	treg[9] = //ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_proj.png",1,1,1,30);
-		ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
+	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
 	ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
 	ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);
 	ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
