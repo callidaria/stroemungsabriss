@@ -75,7 +75,7 @@ while (running) {
 // ask for development build at compile (optional)
 #ifdef DEV_BUILD
 
-// placeholder: define variable "dactive" through console activation process of choice
+// placeholder: define boolean variable "dactive" holding if developer console should be opened
 
 	ccb_manager.dev_console(running,dactive);
 
@@ -106,7 +106,6 @@ Construction depends on [Frame](frame.md), [Renderer2D](renderer2d.md) & [Camera
 
 ## Bugs & Issues
 
-- bad source documentation
-- unreadable code
+- heavy branching
 - developer console has not a lot of functions yet
 - no way of returning how many entities a renderer recieves per level environment file
