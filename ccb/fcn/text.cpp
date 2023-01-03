@@ -1,6 +1,15 @@
 #include "text.h"
 
 /*
+	TODO
+*/
+Text::Text()
+{
+	buffer.add_buffer();
+	glGenTextures(1,&ftexture);
+}
+
+/*
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
@@ -9,9 +18,8 @@
 Text::Text(Font* f)
 	: m_font(f)
 {
-	buffer = Buffer();
 	buffer.add_buffer();
-	texture();
+	glGenTextures(1,&ftexture);
 }
 
 /*
@@ -95,6 +103,7 @@ void Text::load(Camera2D* c)
 	sT.upload_float("wdt",m_font->mw);
 	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
 	sT.upload_matrix("proj",c->proj2D);
+	texture();
 }
 
 /*

@@ -16,6 +16,7 @@ void write_selection();
 bool get_selected();
 bool get_ftype(const char* file);
 std::string get_outfile(const char* file);
+char get_input_char();
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -27,7 +28,7 @@ std::string count_lines();
 
 // components
 char inp;
-bool update = false;
+bool update = false,waiting = false;
 uint8_t itr,idx = 0;
 
 int main(int argc,char* argv[])
@@ -42,6 +43,11 @@ int main(int argc,char* argv[])
 
 		// setup component iterator
 		itr = 0;
+
+		if (waiting) {
+			std::cout << "end of input...\n";
+			get_input_char();
+		} waiting = false;
 
 		// prepare write
 		printf("\033[0m\033[2J\033[1;1HCASCABEL CONSOLE\n");
@@ -71,13 +77,13 @@ int main(int argc,char* argv[])
 		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 
 		// read user input
-		if (!update) { system("stty raw");inp = getchar();system("stty cooked"); }
+		if (!update) inp = get_input_char();
 		else update = false;
 
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
-		else if (inp=='r') system("./yomisensei");
-		else if (inp=='b') system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
+		else if (inp=='r') { system("./yomisensei");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -120,6 +126,14 @@ std::string get_outfile(const char* file)
 {
 	std::string out = std::string(file);
 	out = out.substr(0,out.length()-3)+'o';
+	return out;
+}
+
+char get_input_char()
+{
+	system("stty raw");
+	char out = getchar();
+	system("stty cooked");
 	return out;
 }
 

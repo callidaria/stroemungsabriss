@@ -16,7 +16,7 @@ class Text
 public:
 
 	// construction
-	Text() {  }
+	Text();
 	Text(Font* f);
 	~Text() {  }
 
@@ -45,7 +45,7 @@ private:
 	// cascabel
 	Shader sT;
 	Font* m_font;
-	Buffer buffer;
+	Buffer buffer = Buffer();
 
 	// vertices & texturing
 	std::vector<float> ibv;
