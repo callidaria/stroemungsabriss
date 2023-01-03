@@ -67,7 +67,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.render();
 
 		// conversation test render
-		cnv_test.input(m_frame->kb.ka[SDL_SCANCODE_J]);
+		cnv_test.input(m_frame->kb.ka[SDL_SCANCODE_J],
+				m_frame->kb.ka[SDL_SCANCODE_UP],m_frame->kb.ka[SDL_SCANCODE_DOWN]);
 		cnv_test.render();
 
 		// action menu render

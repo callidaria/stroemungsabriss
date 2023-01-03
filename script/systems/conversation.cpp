@@ -72,21 +72,44 @@ void Conversation::engage(std::string tree_path)
 /*
 	TODO
 */
-void Conversation::input(bool cnf)
+void Conversation::input(bool cnf,bool up,bool down)
 {
-	if (cnf&&!chlfr) {
+	// in case of branch decision
+	if (cnf&&!chlfr&&dltr_count) {
 
-		// proceed with next child. need that adrenochrome
-		ConversationNode swp = ctemp.child_nodes[0];
+		// load initial child from selected branch
+		ConversationNode swp = ctemp.child_nodes[decision_id].child_nodes[0];
 		ctemp = swp;
 
-		// set content result as display text
+		// load resulting response
 		load_text();
 
+		// stop rendering decision lines
+		dltr_count = 0;
 	}
 
+	// in case of confirmation
+	else if (cnf&&!chlfr) {
+
+		// check for node branching
+		if (ctemp.child_nodes.size()>1) load_choice();
+		else {
+
+			// proceed with next child. need that adrenochrome
+			ConversationNode swp = ctemp.child_nodes[0];
+			ctemp = swp;
+
+			// set content result as display text
+			load_text();
+		}
+	}
+
+	// in case of choosing
+	else if ((up||down)&&!chlfr)
+		decision_id += down*(decision_id<ctemp.child_nodes.size())-up*(decision_id>0);
+
 	// set input trigger
-	chlfr = cnf;
+	chlfr = cnf||up||down;
 }
 
 /*
@@ -95,7 +118,7 @@ void Conversation::input(bool cnf)
 void Conversation::render()
 {
 	// update letter count
-	ltr_count += (ltr_count<ctemp.content.length());
+	sltr_count += sltr_count<ctemp.content.length();
 
 	// draw background for spoken text
 	bgr_shader.enable();
@@ -104,7 +127,11 @@ void Conversation::render()
 
 	// draw spoken text contents
 	tspoken.prepare();
-	tspoken.render(ltr_count,glm::vec4(.8f,.2f,0,1));
+	tspoken.render(sltr_count,glm::vec4(.8f,.2f,0,1));
+
+	// draw decision list text contents
+	tdecide.prepare();
+	tdecide.render(dltr_count,glm::vec4(1,1,1,1));
 }
 
 /*
@@ -194,25 +221,37 @@ uint32_t Conversation::convert_rawid(std::string rawid)
 */
 void Conversation::load_text()
 {
-	// check for condition prefix
-	/*std::cout << "arrived at: " << ctemp.content;
-	if (ctemp.content[0]==':') {
-
-		// check for end node prefix and remove
-		choice = ctemp.content[1]=='0';
-
-		// continue processing condition reference
-		std::string cnd_addr = ctemp.content.substr(1,ctemp.content.find(' '));
-		std::cout << cnd_addr << '\n';
-
-	}*/
-	//tspoken.add((ctemp.content.substr(3*choice)).c_str(),glm::vec2(450,125));
-
 	// write text content
 	tspoken.clear();
-	tspoken.add(ctemp.content.c_str(),glm::vec2(450,125));
+	tspoken.add(ctemp.content.c_str(),
+			glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y));
 	tspoken.load(&cam2D);
 
 	// reset letter count
-	ltr_count = 0;
+	sltr_count = 0;
+}
+
+/*
+	TODO
+*/
+void Conversation::load_choice()
+{
+	// reset previous branch data
+	tdecide.clear();
+	decision_id = 0;
+
+	// write conversation branching lines
+	for (uint16_t i=0;i<ctemp.child_nodes.size();i++) {
+
+		// write line
+		tdecide.add(ctemp.child_nodes[i].content.c_str(),
+				glm::vec2(CONVERSATION_CHOICE_ORIGIN_X,
+				CONVERSATION_CHOICE_ORIGIN_Y-i*CONVERSATION_CHOICE_OFFSET));
+
+		// calculate decision letter capacity
+		dltr_count += ctemp.child_nodes[i].content.length();
+	}
+
+	// load text instances & and reset letter count
+	tdecide.load(&cam2D);
 }

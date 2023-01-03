@@ -14,6 +14,13 @@
 
 #include "../../ccb/gfx/shader.h"
 
+// screen position specifications
+constexpr float CONVERSATION_SPOKEN_TEXT_X = 450;
+constexpr float CONVERSATION_SPOKEN_TEXT_Y = 125;
+constexpr float CONVERSATION_CHOICE_ORIGIN_X = 50;
+constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
+constexpr float CONVERSATION_CHOICE_OFFSET = 30;
+
 // OHOHO it looks like academia wasn't completely for nothing and worthless...
 // i can actually maybe use some knowledge from university here? that's a first!
 struct ConversationNode
@@ -27,7 +34,6 @@ struct ConversationNode
 // yes, the naming is very dramatic... it's on purpose.
 class Conversation
 {
-
 public:
 
 	// construction
@@ -36,7 +42,7 @@ public:
 
 	// interaction
 	void engage(std::string tree_path);
-	void input(bool cnf);
+	void input(bool cnf,bool up,bool down);
 
 	// draw
 	void render();
@@ -50,6 +56,7 @@ private:
 
 	// loader
 	void load_text();
+	void load_choice();
 
 private:
 
@@ -60,14 +67,13 @@ private:
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
-	Text tspoken = Text(&bgrfont);
-	// Text tdecide = Text(&bgrfont);
+	Text tspoken = Text(&bgrfont),tdecide = Text(&bgrfont);
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
 
 	// animation
-	uint16_t ltr_count = 0;		// count of displayed letters
-	// bool choice = false;
-	bool chlfr = false;			// trigger if input confirmed last frame
+	uint16_t sltr_count = 0,dltr_count = 0;		// count of displayed letters
+	uint8_t decision_id = 0;					// index of selected decision
+	bool chlfr = false;							// conserve if input happened last frame
 };
