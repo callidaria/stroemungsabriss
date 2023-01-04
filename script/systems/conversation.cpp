@@ -303,8 +303,8 @@ void Conversation::load_text()
 {
 	// write text content
 	tspoken.clear();
-	tspoken.add(ctemp.content.c_str(),
-			glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y));
+	tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y),
+			725,CONVERSATION_CHOICE_OFFSET);
 	tspoken.load(&cam2D);
 
 	// reset letter count

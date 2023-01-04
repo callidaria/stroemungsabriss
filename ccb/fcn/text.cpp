@@ -29,15 +29,18 @@ Text::Text(Font* f)
 	returns: x-axis modification of cursor position after adding the given character
 	purpose: add a single character to the text entity
 */
-int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
+uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
-	// identifying sprite sheet position
-	int i = 0;
-	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
-		if (m_font->id[i]==(int)c) break;
-		i++;
-	}
+	// identifying sprite sheet position & write
+	uint8_t i = get_spritesheet_location(c);
+	return add(i,p);
+}
 
+/*
+	TODO
+*/
+uint32_t Text::add(uint8_t i,glm::vec2 p)
+{
 	// character information write
 	ibv.push_back(p.x);
 	ibv.push_back(p.y);
@@ -63,6 +66,50 @@ void Text::add(const char* s,glm::vec2 p)
 	for (int i=0;i<strlen(s);i++) {
 		if (s[i]!=' ') p.x += add(s[i],p);
 		else p.x += 57.0f*(m_font->mw/83.0f);
+	}
+}
+
+/*
+	TODO
+*/
+void Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
+{
+	// pry apart words from given string
+	std::vector<std::string> wrds;
+	std::string crr_word = "";
+	for (auto c:s) {
+		if (c==' ') {
+			wrds.push_back(crr_word);
+			crr_word = "";
+		} else crr_word += c;
+	} wrds.push_back(crr_word);
+
+	// add found words without breaking border width
+	uint16_t crr_width = 0;
+	for (auto wrd:wrds) {
+
+		// calculate estimated word width
+		uint16_t estm_wwidth = 0;
+		std::vector<uint8_t> char_ids;
+		for (auto c:wrd) {
+			uint8_t ssloc = get_spritesheet_location(c);
+			estm_wwidth += m_font->xa[ssloc]*(m_font->mw/83.0f);	// ??outdated
+			char_ids.push_back(ssloc);
+		}
+
+		// break line if word violates border width
+		bool br_line = (crr_width+estm_wwidth)>bwdt;
+		p.x -= crr_width*br_line;p.y -= nline_offset*br_line;
+		crr_width *= !br_line;
+
+		// add characters to text entity
+		for (auto ic:char_ids) p.x += add(ic,p);
+
+		// add space after word & update current width
+		float wordspacing = 57.0f*(m_font->mw/83.0f);
+		p.x += wordspacing;
+		crr_width += estm_wwidth+wordspacing;
+		// FIXME: duplicate code!
 	}
 }
 
@@ -151,4 +198,17 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 {
 	buffer.bind();
 	buffer.upload_vertices(m_font->v,sizeof(m_font->v));
+}
+
+/*
+	TODO
+*/
+uint8_t Text::get_spritesheet_location(char c)
+{
+	int i = 0;
+	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
+		if (m_font->id[i]==(int)c) break;
+		i++;
+	}
+	return i;
 }

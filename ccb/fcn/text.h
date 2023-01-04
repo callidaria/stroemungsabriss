@@ -21,8 +21,10 @@ public:
 	~Text() {  }
 
 	// write
-	int32_t add(char c,glm::vec2 p);
+	uint32_t add(char c,glm::vec2 p);
+	uint32_t add(uint8_t i,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
+	void add(std::string s,glm::vec2 p,float bwdt,float nline_offset);
 	void clear();
 
 	// preparation
@@ -38,7 +40,9 @@ public:
 
 private:
 
+	// helper
 	void load_vertex();
+	uint8_t get_spritesheet_location(char c);
 
 private:
 
