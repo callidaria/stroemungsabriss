@@ -63,8 +63,8 @@ private:
 private:
 
 	// cascabel
-	Buffer bgr_buffer = Buffer();
-	Shader bgr_shader = Shader();
+	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer();
+	Shader slct_shader = Shader(),bgr_shader = Shader();
 
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
@@ -78,4 +78,5 @@ private:
 	uint16_t sltr_count = 0,dltr_count = 0;		// count of displayed letters
 	uint8_t decision_id = 0;					// index of selected decision
 	bool chlfr = false;							// conserve if input happened last frame
+	float sEdges[4] = { 0 };					// choice selection edge modification
 };

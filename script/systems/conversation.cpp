@@ -18,6 +18,15 @@ Conversation::Conversation(const char* mm_path)
 	uint32_t lidx = 2;
 	croot = rc_compile_node_data(lines,lidx);
 
+	// selector vertices
+	float sfield_verts[] = { 0,-25,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-25,3, 0,-25,0, };
+	slct_buffer.bind();
+	slct_buffer.upload_vertices(sfield_verts,sizeof(sfield_verts));
+	slct_shader.compile("./shader/fbv_lselect.shader","./shader/fbf_lselect.shader");
+	slct_shader.def_attributeF("position",2,0,3);
+	slct_shader.def_attributeF("index",1,2,3);
+	slct_shader.upload_camera(Camera2D(1280,720));
+
 	// background vertices
 	float tfield_verts[] = { 425,25, 425,150, 1200,150, 1200,150, 1200,25, 425,25, };
 	bgr_buffer.bind();
@@ -105,8 +114,14 @@ void Conversation::input(bool cnf,bool up,bool down)
 	}
 
 	// in case of choosing
-	else if ((up||down)&&!chlfr)
-		decision_id += down*(decision_id<ctemp.child_nodes.size())-up*(decision_id>0);
+	else if ((up||down)&&!chlfr) {
+
+		// change decision based on input, respective to minimum & maximum
+		decision_id += down*(decision_id<(ctemp.child_nodes.size()-1))-up*(decision_id>0);
+
+		// recalculate random selector edge changes
+		for (uint8_t i=0;i<4;i++) sEdges[i] = rand()%15-10;
+	}
 
 	// set input trigger
 	chlfr = cnf||up||down;
@@ -119,6 +134,18 @@ void Conversation::render()
 {
 	// update letter count
 	sltr_count += sltr_count<ctemp.content.length();
+
+	// upload selection splash modifications
+	uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
+	slct_shader.enable();
+	slct_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
+	slct_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
+	slct_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
+	slct_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
+
+	// draw selection indicator visuals
+	slct_buffer.bind();
+	glDrawArrays(GL_TRIANGLES,0,6*!!dltr_count);
 
 	// draw background for spoken text
 	bgr_shader.enable();
@@ -223,7 +250,6 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 {
 	// check id equivalence
 	if (root.node_id==id) return root;
-	std::cout << root.node_id << '?' << id << "  :  " << root.content << '\n';
 
 	// recursive depth search for all children
 	for (auto child : root.child_nodes) {
