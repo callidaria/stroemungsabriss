@@ -169,7 +169,40 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 	// node information
 	ConversationNode cnode;
 	cnode.node_id = convert_rawid(grind_raw_node_by_key(ls[si],"ID"));
-	cnode.content = grind_raw_node_by_key(ls[si],"TEXT");
+	std::string raw_content = grind_raw_node_by_key(ls[si],"TEXT");
+
+	// convert content to be more readable & save to node
+	bool rp_mode = false;	// is replace mode activated
+	std::string idf = "";	// placeholder identifier
+	for (auto tmp : raw_content) {
+
+		// enable/disable replace mode
+		bool replace_off = tmp==';';
+		rp_mode = ((!rp_mode&&tmp=='&')||rp_mode)&&(!replace_off);
+
+		// accumulate replacement identifier
+		if (rp_mode) idf += tmp;
+
+		// identify placeholder equivalent
+		else if (replace_off) {
+
+			// replace based on placeholder pattern
+			if (idf=="&apos") cnode.content += '\'';
+			else if (idf=="&quot") cnode.content += '\"';
+			else if (idf=="&#xfc") cnode.content += "ue";
+			else if (idf=="&#xf6") cnode.content += "oe";
+			else if (idf=="&#xe4") cnode.content += "ae";
+			else cnode.content += idf;
+			// FIXME: foolish ifelsing
+			// TODO: current font does not work with ü/ö/ä. replace font or remove them from dat
+
+			// reset identifier
+			idf = "";
+		}
+
+		// add innocent characters to content string
+		else cnode.content += tmp;
+	}
 
 	// handle related nodes until closed
 	si++;

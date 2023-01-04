@@ -26,7 +26,7 @@ constexpr float CONVERSATION_CHOICE_OFFSET = 30;
 struct ConversationNode
 {
 	uint32_t node_id;
-	std::string content;
+	std::string content = "";
 	std::vector<ConversationNode> child_nodes;
 	uint32_t jmp_id = 0;
 };
