@@ -50,13 +50,15 @@ public:
 private:
 
 	// tools
-	ConversationNode compile_node_data(std::vector<std::string> ls,uint32_t &si);
+	ConversationNode rc_compile_node_data(std::vector<std::string> ls,uint32_t &si);
 	std::string grind_raw_node_by_key(std::string raw,std::string key);
 	uint32_t convert_rawid(std::string rawid);
+	ConversationNode rc_depthsearch(ConversationNode root,uint32_t id);
 
 	// loader
 	void load_text();
 	void load_choice();
+	ConversationNode get_successor(ConversationNode node);
 
 private:
 

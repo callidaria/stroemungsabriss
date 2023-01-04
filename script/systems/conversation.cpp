@@ -16,7 +16,7 @@ Conversation::Conversation(const char* mm_path)
 
 	// extract nodes from raw content
 	uint32_t lidx = 2;
-	croot = compile_node_data(lines,lidx);
+	croot = rc_compile_node_data(lines,lidx);
 
 	// background vertices
 	float tfield_verts[] = { 425,25, 425,150, 1200,150, 1200,150, 1200,25, 425,25, };
@@ -62,7 +62,7 @@ void Conversation::engage(std::string tree_path)
 	}
 
 	// move into immediate content node
-	ConversationNode tmp_node = ctemp.child_nodes[0];
+	ConversationNode tmp_node = get_successor(ctemp);
 	ctemp = tmp_node;
 
 	// set content result as display text
@@ -78,7 +78,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 	if (cnf&&!chlfr&&dltr_count) {
 
 		// load initial child from selected branch
-		ConversationNode swp = ctemp.child_nodes[decision_id].child_nodes[0];
+		ConversationNode swp = get_successor(ctemp.child_nodes[decision_id]);
 		ctemp = swp;
 
 		// load resulting response
@@ -96,7 +96,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 		else {
 
 			// proceed with next child. need that adrenochrome
-			ConversationNode swp = ctemp.child_nodes[0];
+			ConversationNode swp = get_successor(ctemp);
 			ctemp = swp;
 
 			// set content result as display text
@@ -137,7 +137,7 @@ void Conversation::render()
 /*
 	TODO
 */
-ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uint32_t &si)
+ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,uint32_t &si)
 {
 	// node information
 	ConversationNode cnode;
@@ -149,7 +149,7 @@ ConversationNode Conversation::compile_node_data(std::vector<std::string> ls,uin
 	while (strcmp(ls[si].c_str(),"</node>")) {
 
 		// recursion for children nodes
-		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(compile_node_data(ls,si));
+		if (!ls[si].rfind("<node")) cnode.child_nodes.push_back(rc_compile_node_data(ls,si));
 
 		// add jump links
 		else if (!ls[si].rfind("<arrowlink"))
@@ -219,6 +219,27 @@ uint32_t Conversation::convert_rawid(std::string rawid)
 /*
 	TODO
 */
+ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
+{
+	// check id equivalence
+	if (root.node_id==id) return root;
+	std::cout << root.node_id << '?' << id << "  :  " << root.content << '\n';
+
+	// recursive depth search for all children
+	for (auto child : root.child_nodes) {
+
+		// get branch result over entire depth & return if valid
+		ConversationNode fnode = rc_depthsearch(child,id);
+		if (fnode.node_id) return fnode;
+	}
+
+	// if nothing has been found return error node
+	return { 0,"error: successor not found, jump disconnected",{},0 };
+}
+
+/*
+	TODO
+*/
 void Conversation::load_text()
 {
 	// write text content
@@ -254,4 +275,18 @@ void Conversation::load_choice()
 
 	// load text instances & and reset letter count
 	tdecide.load(&cam2D);
+}
+
+/*
+	TODO
+*/
+ConversationNode Conversation::get_successor(ConversationNode node)
+{
+	if (node.jmp_id) {
+
+		// find in jmp_id referenced node
+		return rc_depthsearch(croot,node.jmp_id);
+
+	// proceed with next child if no jump address. need that adrenochrome
+	} else return node.child_nodes[0];
 }
