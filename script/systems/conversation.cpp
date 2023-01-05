@@ -56,7 +56,7 @@ void Conversation::engage(std::string tree_path)
 
 		// check for node naming end
 		if (cproc=='/') {
-			for (auto child : ctemp.child_nodes) {
+			for (auto child:ctemp.child_nodes) {
 
 				// check content equivalence for all children linked in temporary node
 				if (child.content==node_name) {
@@ -71,11 +71,7 @@ void Conversation::engage(std::string tree_path)
 	}
 
 	// move into immediate content node
-	ConversationNode tmp_node = get_successor(ctemp);
-	ctemp = tmp_node;
-
-	// set content result as display text
-	load_text();
+	jmp_successor();
 }
 
 /*
@@ -86,31 +82,16 @@ void Conversation::input(bool cnf,bool up,bool down)
 	// in case of branch decision
 	if (cnf&&!chlfr&&dltr_count) {
 
-		// load initial child from selected branch
-		ConversationNode swp = get_successor(ctemp.child_nodes[decision_id]);
-		ctemp = swp;
-
-		// load resulting response
-		load_text();
-
-		// stop rendering decision lines
-		dltr_count = 0;
+		// load initial child from selected branch & reset
+		mv_decision(decision_id);
+		jmp_successor();
 	}
 
 	// in case of confirmation
 	else if (cnf&&!chlfr) {
 
-		// check for node branching
-		if (ctemp.child_nodes.size()>1) load_choice();
-		else {
-
-			// proceed with next child. need that adrenochrome
-			ConversationNode swp = get_successor(ctemp);
-			ctemp = swp;
-
-			// set content result as display text
-			load_text();
-		}
+		// if (ctemp.child_nodes.size()>1) load_choice();
+		jmp_successor();
 	}
 
 	// in case of choosing
@@ -172,9 +153,11 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 	std::string raw_content = grind_raw_node_by_key(ls[si],"TEXT");
 
 	// convert content to be more readable & save to node
-	bool rp_mode = false;	// is replace mode activated
-	std::string idf = "";	// placeholder identifier
-	for (auto tmp : raw_content) {
+	bool rp_mode = false;		// is replace mode activated
+	std::string idf = "";		// placeholder identifier
+	bool brc_mode = false;		// bracket command mode
+	std::string bracket = "";	// string to write bracket command to
+	for (auto tmp:raw_content) {
 
 		// enable/disable replace mode
 		bool replace_off = tmp==';';
@@ -189,16 +172,29 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 			// replace based on placeholder pattern
 			if (idf=="&apos") cnode.content += '\'';
 			else if (idf=="&quot") cnode.content += '\"';
-			else if (idf=="&#xfc") cnode.content += "ue";
-			else if (idf=="&#xf6") cnode.content += "oe";
-			else if (idf=="&#xe4") cnode.content += "ae";
+
+			// read & interpret bracket commands
+			else if (idf=="&lt") brc_mode = true;
+			else if (idf=="&gt") {
+
+				// interpret bracket command
+				cnode.valueless = cnode.valueless||(bracket=="null");
+
+				// reset bracket reader values
+				brc_mode = false;
+				bracket = "";
+			}
+
+			// accumulate innocent node content characters
 			else cnode.content += idf;
 			// FIXME: foolish ifelsing
-			// TODO: current font does not work with ü/ö/ä. replace font or remove them from dat
 
 			// reset identifier
 			idf = "";
 		}
+
+		// accumulate bracket command
+		else if (brc_mode&&!rp_mode) bracket += tmp;
 
 		// add innocent characters to content string
 		else cnode.content += tmp;
@@ -234,7 +230,7 @@ std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 	std::string out = "";		// variable to hold extracted value to return
 
 	// grind raw data
-	for (auto cproc : raw) {
+	for (auto cproc:raw) {
 		switch (emode) {
 
 		// find keystart
@@ -285,7 +281,7 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 	if (root.node_id==id) return root;
 
 	// recursive depth search for all children
-	for (auto child : root.child_nodes) {
+	for (auto child:root.child_nodes) {
 
 		// get branch result over entire depth & return if valid
 		ConversationNode fnode = rc_depthsearch(child,id);
@@ -339,13 +335,30 @@ void Conversation::load_choice()
 /*
 	TODO
 */
-ConversationNode Conversation::get_successor(ConversationNode node)
+void Conversation::jmp_successor()
 {
-	if (node.jmp_id) {
-
-		// find in jmp_id referenced node
-		return rc_depthsearch(croot,node.jmp_id);
-
 	// proceed with next child if no jump address. need that adrenochrome
-	} else return node.child_nodes[0];
+	bool multi_branch = false;
+	do {
+		if (ctemp.jmp_id) ctemp = rc_depthsearch(croot,ctemp.jmp_id);
+		else mv_decision(0);
+		multi_branch = ctemp.child_nodes.size()>1;
+	}
+
+	// run until conversation tree head has valued content or branches
+	while (ctemp.valueless&&!multi_branch);
+
+	// load text or choices based on value break
+	if (!ctemp.valueless) load_text();
+	if (multi_branch) load_choice();
+	else dltr_count = 0;
+}
+
+/*
+	TODO
+*/
+void Conversation::mv_decision(uint8_t i)
+{
+	ConversationNode swp = ctemp.child_nodes[i];
+	ctemp = swp;
 }

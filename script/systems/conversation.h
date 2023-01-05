@@ -29,6 +29,7 @@ struct ConversationNode
 	std::string content = "";
 	std::vector<ConversationNode> child_nodes;
 	uint32_t jmp_id = 0;
+	bool valueless = false;
 };
 
 // yes, the naming is very dramatic... it's on purpose.
@@ -58,7 +59,8 @@ private:
 	// loader
 	void load_text();
 	void load_choice();
-	ConversationNode get_successor(ConversationNode node);
+	void jmp_successor();
+	void mv_decision(uint8_t i);
 
 private:
 
