@@ -34,8 +34,12 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
 
+	// add spike to character list
+	CharacterManager cmanager = CharacterManager();
+	cmanager.add_character(2,"Spyke, Master of Cards");
+
 	// conversation test
-	Conversation cnv_test = Conversation("./dat/casino_coup.mm");
+	Conversation cnv_test = Conversation(&cmanager,"./dat/casino_coup.mm");
 	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// update until exit condition

@@ -14,6 +14,8 @@
 
 #include "../../ccb/gfx/shader.h"
 
+#include "character_manager.h"
+
 // screen position specifications
 constexpr float CONVERSATION_SPOKEN_TEXT_X = 450;
 constexpr float CONVERSATION_SPOKEN_TEXT_Y = 125;
@@ -30,6 +32,8 @@ struct ConversationNode
 	std::vector<ConversationNode> child_nodes;
 	uint32_t jmp_id = 0;
 	bool valueless = false;
+	uint16_t char_id = 0;
+	uint16_t condition_id = 0;
 };
 
 // yes, the naming is very dramatic... it's on purpose.
@@ -38,7 +42,7 @@ class Conversation
 public:
 
 	// construction
-	Conversation(const char* mm_path);
+	Conversation(CharacterManager* cm,const char* mm_path);
 	~Conversation() {  }
 
 	// interaction
@@ -67,6 +71,7 @@ private:
 	// cascabel
 	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer();
 	Shader slct_shader = Shader(),bgr_shader = Shader();
+	CharacterManager* charManager;
 
 	// text
 	Camera2D cam2D = Camera2D(1280,720);

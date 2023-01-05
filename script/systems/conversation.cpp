@@ -3,7 +3,8 @@
 /*
 	TODO
 */
-Conversation::Conversation(const char* mm_path)
+Conversation::Conversation(CharacterManager* cm, const char* mm_path)
+	: charManager(cm)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -158,6 +159,14 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 	cnode.node_id = convert_rawid(grind_raw_node_by_key(ls[si],"ID"));
 	std::string raw_content = grind_raw_node_by_key(ls[si],"TEXT");
 
+	// interpret prefix conditions & attributes
+	while (raw_content[0]==':') {
+		uint16_t prefix_value = uint16_t(raw_content[2]-'0');
+		cnode.char_id = prefix_value*(raw_content[1]=='c')+cnode.char_id;
+		cnode.condition_id = prefix_value*(raw_content[1]=='b')+cnode.condition_id;
+		raw_content.erase(0,4);
+	}
+
 	// convert content to be more readable & save to node
 	bool rp_mode = false;		// is replace mode activated
 	std::string idf = "";		// placeholder identifier
@@ -309,6 +318,8 @@ void Conversation::load_text()
 			725,CONVERSATION_CHOICE_OFFSET);
 	tspoken.load(&cam2D);
 
+	std::cout << ctemp.char_id << ',' << ctemp.condition_id << '\n';
+
 	// reset letter count
 	sltr_count = 0;
 }
@@ -325,6 +336,8 @@ void Conversation::load_choice()
 	// write conversation branching lines
 	for (uint16_t i=0;i<ctemp.child_nodes.size();i++) {
 
+		std::cout << ctemp.child_nodes[i].char_id << ',' << ctemp.child_nodes[i].condition_id << ' ';
+
 		// write line
 		tdecide.add(ctemp.child_nodes[i].content.c_str(),
 				glm::vec2(CONVERSATION_CHOICE_ORIGIN_X,
@@ -332,7 +345,7 @@ void Conversation::load_choice()
 
 		// calculate decision letter capacity
 		dltr_count += ctemp.child_nodes[i].content.length();
-	}
+	} std::cout << '\n';
 
 	// load text instances & and reset letter count
 	tdecide.load(&cam2D);
