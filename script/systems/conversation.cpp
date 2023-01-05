@@ -79,6 +79,11 @@ void Conversation::engage(std::string tree_path)
 */
 void Conversation::input(bool cnf,bool up,bool down)
 {
+	// block input & complete filling when text not ready
+	bool t_chlfr = chlfr;
+	chlfr = (sltr_count<ctemp.content.length())||chlfr;
+	sltr_count += (ctemp.content.length()-sltr_count)*(cnf&&!t_chlfr);
+
 	// in case of branch decision
 	if (cnf&&!chlfr&&dltr_count) {
 
@@ -114,7 +119,8 @@ void Conversation::input(bool cnf,bool up,bool down)
 void Conversation::render()
 {
 	// update letter count
-	sltr_count += sltr_count<ctemp.content.length();
+	bool filling = sltr_count<ctemp.content.length();
+	sltr_count += filling;
 
 	// upload selection splash modifications
 	uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
@@ -126,7 +132,7 @@ void Conversation::render()
 
 	// draw selection indicator visuals
 	slct_buffer.bind();
-	glDrawArrays(GL_TRIANGLES,0,6*!!dltr_count);
+	glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!filling));
 
 	// draw background for spoken text
 	bgr_shader.enable();
@@ -139,7 +145,7 @@ void Conversation::render()
 
 	// draw decision list text contents
 	tdecide.prepare();
-	tdecide.render(dltr_count,glm::vec4(1,1,1,1));
+	tdecide.render(dltr_count*!filling,glm::vec4(1,1,1,1));
 }
 
 /*
