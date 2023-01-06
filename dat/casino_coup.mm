@@ -18,13 +18,13 @@
 </node>
 <node CREATED="1669378719781" ID="ID_941975827" MODIFIED="1669378780747" TEXT="TODO: insert trading card game.">
 <node CREATED="1669378784617" ID="ID_1316011404" MODIFIED="1672957009228" TEXT=":c2 Haha, very funny. I&apos;m not playing trading card games.">
-<node CREATED="1669378834297" ID="ID_131108070" MODIFIED="1672957203258" TEXT="&lt;null&gt;remove option from tree and go back">
+<node CREATED="1669378834297" ID="ID_131108070" MODIFIED="1672967558002" TEXT="&lt;null&gt;remove option from tree and go back">
 <arrowlink DESTINATION="ID_1073600456" ENDARROW="Default" ENDINCLINATION="-275;-649;" ID="Arrow_ID_1446784239" STARTARROW="None" STARTINCLINATION="-113;-611;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-249;-57;" ID="Arrow_ID_968234403" SOURCE="ID_540215297" STARTARROW="None" STARTINCLINATION="176;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-191;29;" ID="Arrow_ID_1789446444" SOURCE="ID_739314705" STARTARROW="None" STARTINCLINATION="493;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="21;53;" ID="Arrow_ID_1304828984" SOURCE="ID_106907220" STARTARROW="None" STARTINCLINATION="-89;62;"/>
-<linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-68;142;" ID="Arrow_ID_1700531964" SOURCE="ID_961285423" STARTARROW="None" STARTINCLINATION="1431;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="742;0;" ID="Arrow_ID_1944065140" SOURCE="ID_172226210" STARTARROW="None" STARTINCLINATION="17;-115;"/>
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-35;49;" ID="Arrow_ID_1837161433" SOURCE="ID_58889641" STARTARROW="None" STARTINCLINATION="-70;-64;"/>
 </node>
 </node>
 </node>
@@ -68,8 +68,14 @@
 </node>
 </node>
 <node CREATED="1669259551938" ID="ID_1479981027" MODIFIED="1672957310325" TEXT=":b7 I really prefer &quot;Poor man&apos;s MahJongg&quot;">
-<node CREATED="1669341967938" ID="ID_961285423" MODIFIED="1672956913301" TEXT=":c2 That trash, played by pre-historic japanese farmers and peasants? I did not take you for a degenerate, but it seems like I have overestimated your cultural tastes. Fortunately for me, we don&apos;t have the personell to play this game. We don&apos;t have a west and east wind after all... Let&apos;s play something else!">
-<arrowlink DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-68;142;" ID="Arrow_ID_1700531964" STARTARROW="None" STARTINCLINATION="1431;0;"/>
+<node CREATED="1669341967938" ID="ID_961285423" MODIFIED="1672967464350" TEXT=":c2 That trash, played by pre-historic japanese farmers and peasants? I did not take you for a degenerate, but it seems like I have overestimated your cultural tastes.">
+<node CREATED="1672967444765" ID="ID_92278707" MODIFIED="1672967469765" TEXT="Fortunately for me, we don&apos;t have the personell to play this game. We don&apos;t have a west and east wind after all... Let&apos;s play something else!">
+<node CREATED="1672967485337" ID="ID_946146244" MODIFIED="1672967502121" TEXT=":c3 I wanna play!">
+<node CREATED="1672967507498" ID="ID_58889641" MODIFIED="1672967558002" TEXT=":c2 I know my degenerate little brother, but this game is for 4 players. Do you understand?">
+<arrowlink DESTINATION="ID_131108070" ENDARROW="Default" ENDINCLINATION="-35;49;" ID="Arrow_ID_1837161433" STARTARROW="None" STARTINCLINATION="-70;-64;"/>
+</node>
+</node>
+</node>
 </node>
 </node>
 <node CREATED="1669259622507" ID="ID_651024810" MODIFIED="1669345558142" TEXT="I&apos;ll let you choose.">

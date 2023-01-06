@@ -37,6 +37,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// add spike to character list
 	CharacterManager cmanager = CharacterManager();
 	cmanager.add_character(2,"Spyke, Master of Cards");
+	cmanager.add_character(3,"Curlhead Cross");
 
 	// conversation test
 	Conversation cnv_test = Conversation(&cmanager,"./dat/casino_coup.mm");

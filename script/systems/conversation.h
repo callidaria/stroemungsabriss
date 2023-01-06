@@ -76,7 +76,7 @@ private:
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
-	Text tspoken = Text(&bgrfont),tdecide = Text(&bgrfont);
+	Text tspoken = Text(&bgrfont),tdecide = Text(&bgrfont),tname = Text(&bgrfont);
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes

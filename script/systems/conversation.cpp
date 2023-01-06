@@ -147,6 +147,10 @@ void Conversation::render()
 	// draw decision list text contents
 	tdecide.prepare();
 	tdecide.render(dltr_count*!filling,glm::vec4(1,1,1,1));
+
+	// show conversing character's name
+	tname.prepare();
+	tname.render(1024,glm::vec4(1,1,1,1));
 }
 
 /*
@@ -318,7 +322,12 @@ void Conversation::load_text()
 			725,CONVERSATION_CHOICE_OFFSET);
 	tspoken.load(&cam2D);
 
-	std::cout << ctemp.char_id << ',' << ctemp.condition_id << '\n';
+	// load character name display
+	if (ctemp.char_id) {
+		tname.clear();
+		tname.add(charManager->get_character(ctemp.char_id).name,glm::vec2(850,200));
+		tname.load(&cam2D);
+	}
 
 	// reset letter count
 	sltr_count = 0;
