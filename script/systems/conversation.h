@@ -33,6 +33,7 @@ struct ConversationNode
 	uint32_t jmp_id = 0;
 	bool valueless = false;
 	uint16_t char_id = 0;
+	uint16_t mood_id = 0;
 	uint16_t condition_id = 0;
 };
 
@@ -69,8 +70,8 @@ private:
 private:
 
 	// cascabel
-	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer();
-	Shader slct_shader = Shader(),bgr_shader = Shader();
+	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),opps_buffer = Buffer();
+	Shader slct_shader = Shader(),bgr_shader = Shader(),opps_shader = Shader();
 	CharacterManager* charManager;
 
 	// text
@@ -86,4 +87,7 @@ private:
 	uint8_t decision_id = 0;					// index of selected decision
 	bool chlfr = false;							// conserve if input happened last frame
 	float sEdges[4] = { 0 };					// choice selection edge modification
+	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
+	GLuint curr_ctex;
+
 };

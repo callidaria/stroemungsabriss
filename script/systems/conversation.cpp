@@ -26,7 +26,20 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path)
 	slct_shader.compile("./shader/fbv_lselect.shader","./shader/fbf_lselect.shader");
 	slct_shader.def_attributeF("position",2,0,3);
 	slct_shader.def_attributeF("index",1,2,3);
-	slct_shader.upload_camera(Camera2D(1280,720));
+	slct_shader.upload_camera(cam2D);
+
+	// conversation opponent visualizations
+	std::vector<float> oppconv_verts
+			= Toolbox::create_sprite_canvas_triangled(glm::vec2(1100,0),180,720);
+	opps_buffer.bind();
+	opps_buffer.upload_vertices(oppconv_verts);
+	opps_shader.compile("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
+	opps_shader.def_attributeF("position",2,0,4);
+	opps_shader.def_attributeF("texCoords",2,2,4);
+	opps_shader.upload_camera(cam2D);
+
+	// load character spritesheets
+	charManager->load_spritesheets();
 
 	// background vertices
 	float tfield_verts[] = { 425,25, 425,150, 1200,150, 1200,150, 1200,25, 425,25, };
@@ -37,10 +50,7 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path)
 	bgr_shader.compile("./shader/cnv_background_vertex.shader",
 			"./shader/cnv_background_fragment.shader");
 	bgr_shader.def_attributeF("position",2,0,2);
-
-	// 2D background projection
-	bgr_shader.upload_matrix("view",cam2D.view2D);
-	bgr_shader.upload_matrix("proj",cam2D.proj2D);
+	bgr_shader.upload_camera(cam2D);
 }
 
 /*
@@ -135,6 +145,14 @@ void Conversation::render()
 	slct_buffer.bind();
 	glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!filling));
 
+	// draw opponent's mood visualization
+	opps_shader.enable();
+	opps_shader.upload_int("col_max",curr_cols);
+	opps_shader.upload_float("col_index",curr_mood);
+	opps_buffer.bind();
+	glBindTexture(GL_TEXTURE_2D,curr_ctex);
+	glDrawArrays(GL_TRIANGLES,0,6);
+
 	// draw background for spoken text
 	bgr_shader.enable();
 	bgr_buffer.bind();
@@ -167,6 +185,7 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 	while (raw_content[0]==':') {
 		uint16_t prefix_value = uint16_t(raw_content[2]-'0');
 		cnode.char_id = prefix_value*(raw_content[1]=='c')+cnode.char_id;
+		cnode.mood_id = prefix_value*(raw_content[1]=='m')+cnode.mood_id;
 		cnode.condition_id = prefix_value*(raw_content[1]=='b')+cnode.condition_id;
 		raw_content.erase(0,4);
 	}
@@ -324,9 +343,22 @@ void Conversation::load_text()
 
 	// load character name display
 	if (ctemp.char_id) {
+		curr_char = ctemp.char_id;
 		tname.clear();
-		tname.add(charManager->get_character(ctemp.char_id).name,glm::vec2(850,200));
+		tname.add(charManager->get_character(curr_char).name,glm::vec2(850,200));
 		tname.load(&cam2D);
+	}
+
+	// load characters mood
+	if (ctemp.mood_id) {
+		CharacterData tmp = charManager->get_character(curr_char);
+
+		// upload uniform variables
+		curr_cols = tmp.cols;
+		curr_mood = ctemp.mood_id-1;
+
+		// preload opponent's spritesheet
+		curr_ctex = tmp.tex_sheet;
 	}
 
 	// reset letter count

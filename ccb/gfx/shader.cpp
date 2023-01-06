@@ -139,24 +139,18 @@ unsigned int Shader::compile_shader(const char* path,GLenum stype)
 	x: variable in desired datatype to upload to the shader as variable defined by location
 	purpose: definition of uniform variables in shader by program
 */
-void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
-void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
+void Shader::upload_int(const char* loc,int i)
+{ glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
+void Shader::upload_float(const char* loc,float f)
+{ glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
 void Shader::upload_vec2(const char* loc,glm::vec2 v)
-{
-	glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y);
-}
+{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y); }
 void Shader::upload_vec3(const char* loc,glm::vec3 v)
-{
-	glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z);
-}
+{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z); }
 void Shader::upload_vec4(const char* loc,glm::vec4 v)
-{
-	glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w);
-}
+{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
 void Shader::upload_matrix(const char* loc,glm::mat4 m)
-{
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m));
-}
+{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
 
 /*
 	upload_camera(Camera2D||Camera3D) -> void

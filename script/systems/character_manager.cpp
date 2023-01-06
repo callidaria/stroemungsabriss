@@ -8,10 +8,22 @@ CharacterManager::CharacterManager() {  }
 /*
 	TODO
 */
-void CharacterManager::add_character(uint16_t id,const char* name)
+void CharacterManager::add_character(uint16_t id,const char* name,const char* texpath,uint8_t cols)
 {
-	CharacterData proc = { id,name };
+	GLuint tex;
+	glGenTextures(1,&tex);
+
+	CharacterData proc = { id,name,texpath,cols,tex };
 	char_list.push_back(proc);
+}
+
+/*
+	TODO
+*/
+void CharacterManager::load_spritesheets()
+{
+	for (uint16_t i=0;i<char_list.size();i++) 
+		Toolbox::load_texture(char_list[i].tex_sheet,char_list[i].texpath);
 }
 
 /*
