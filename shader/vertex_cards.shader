@@ -6,6 +6,7 @@ in vec2 texCoords;
 
 // index buffer upload
 in vec3 tofs;
+in vec2 i_tex;
 
 // output to fragment shader
 out vec2 TexCoords;
@@ -13,9 +14,6 @@ out vec2 TexCoords;
 // camera matrices
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
-
-// texture atlas index
-uniform vec2 i_tex = vec2(0);
 
 void main()
 {

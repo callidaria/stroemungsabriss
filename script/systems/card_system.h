@@ -10,6 +10,10 @@
 #include "../../ccb/mat/camera3d.h"
 #include "../../ccb/mat/toolbox.h"
 
+// upload capacity
+constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 5;
+
+// positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
 constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
 
@@ -22,6 +26,7 @@ public:
 	~CardSystem() {  };
 
 	// interaction
+	void place_card(uint8_t id,glm::vec3 pos);
 	void deal_card();
 
 	// draw
