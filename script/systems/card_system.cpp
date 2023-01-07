@@ -20,7 +20,7 @@ CardSystem::CardSystem()
 
 	// load card game texture
 	glGenTextures(1,&tex);
-	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png");
+	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.5f);
 
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();

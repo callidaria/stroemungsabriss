@@ -63,6 +63,76 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 */
 void Toolbox::load_texture(GLuint tex,const char* path)
 {
+	// bind and load texture data
+	load_texture_function_head(tex,path);
+
+	// texture parameters & mipmap
+	set_texture_parameter_clamp_to_edge();
+	set_texture_parameter_linear_mipmap();
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+/*
+	TODO
+*/
+void Toolbox::load_texture(GLuint tex,const char* path,float bias)
+{
+	// bind and load texture data
+	load_texture_function_head(tex,path);
+
+	// texture parameters & mipmap
+	set_texture_parameter_clamp_to_edge();
+	set_texture_parameter_linear_mipmap();
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,bias);
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+/*
+	TODO
+*/
+void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
+{
+	// bind and load texture data
+	load_texture_function_head(tex,path);
+
+	// texture paramteres without mipmap
+	set_texture_parameter_clamp_to_edge();
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	generate_elements(uint16_t,std::vector<uint16_t>&) -> void
+	i: objects index to use to rasterize element value generation
+	ls: element list input to add generated elements to
+	purpose: generate buffer elements based on object list index
+*/
+void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
+{
+	ls.push_back(i*4);ls.push_back(i*4+1);ls.push_back(i*4+2);		// map first triangle
+	ls.push_back(i*4+2);ls.push_back(i*4+3);ls.push_back(i*4+0);	// map second triangle
+}
+
+/*
+	TODO
+*/
+void Toolbox::set_texture_parameter_clamp_to_edge()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+}
+
+void Toolbox::set_texture_parameter_linear_mipmap()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	TODO
+*/
+void Toolbox::load_texture_function_head(GLuint tex,const char* path)
+{
 	// setup
 	int width,height;
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -81,23 +151,4 @@ void Toolbox::load_texture(GLuint tex,const char* path)
 	SOIL_free_image_data(image);
 
 #endif
-
-	// texture parameters & mipmap
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-}
-
-/*
-	generate_elements(uint16_t,std::vector<uint16_t>&) -> void
-	i: objects index to use to rasterize element value generation
-	ls: element list input to add generated elements to
-	purpose: generate buffer elements based on object list index
-*/
-void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
-{
-	ls.push_back(i*4);ls.push_back(i*4+1);ls.push_back(i*4+2);		// map first triangle
-	ls.push_back(i*4+2);ls.push_back(i*4+3);ls.push_back(i*4+0);	// map second triangle
 }

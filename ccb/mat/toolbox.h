@@ -32,5 +32,14 @@ public:
 
 	// graphical setup
 	static void load_texture(GLuint tex,const char* path);
+	static void load_texture(GLuint tex,const char* path,float bias);
+	static void load_texture_unfiltered(GLuint tex,const char* path);
 	static void generate_elements(uint16_t i,std::vector<unsigned int> &ls);
+
+private:
+
+	// helpers
+	static void set_texture_parameter_clamp_to_edge();
+	static void set_texture_parameter_linear_mipmap();
+	static void load_texture_function_head(GLuint tex,const char* path);
 };
