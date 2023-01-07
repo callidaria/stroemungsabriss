@@ -31,6 +31,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
+	// card game test
+	CardSystem crdSystem = CardSystem();
+
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
 
@@ -49,14 +52,17 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		lgt_menu.bind();
 
 		// stage
-		m_bgenv.update(rstate);
+		/*m_bgenv.update(rstate);
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
 		m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
-		m_bSys.render();
+		m_bSys.render();*/
+
+		// draw card game test
+		crdSystem.render();
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);
