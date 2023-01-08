@@ -21,6 +21,7 @@ constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
 struct DeckPile
 {
 	std::vector<uint8_t> cards;
+	glm::vec2 pos;
 };
 
 class CardSystem
@@ -32,9 +33,13 @@ public:
 	~CardSystem() {  };
 
 	// interaction
-	void shuffle_all(glm::vec2 pos);
-	void place_card(uint8_t id,glm::vec3 pos);
-	void deal_card();
+	void shuffle_all();
+	void deal_card(uint8_t pid);
+	void hand_to_pile(uint8_t pid,uint8_t idx);
+	void move_to_pile(uint8_t pid,uint8_t cid);
+
+	// creation
+	void create_pile(glm::vec2 pos);
 
 	// draw
 	void render();
@@ -47,7 +52,7 @@ private:
 	// cascabel
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
-	Camera3D cam3D = Camera3D(glm::vec3(0,4,10),1280.0f,720.0f,60.0f);
+	Camera3D cam3D = Camera3D(glm::vec3(0,4,15),1280.0f,720.0f,60.0f);
 
 	// texture
 	GLuint tex;
@@ -55,4 +60,5 @@ private:
 	// card information
 	std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
+	std::vector<uint8_t> hand;
 };

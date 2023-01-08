@@ -47,13 +47,14 @@ CardSystem::CardSystem()
 	}
 
 	// shuffle deck & place
-	shuffle_all(glm::vec2(0,0));
+	create_pile(glm::vec2(2.5f,0));
+	shuffle_all();
 }
 
 /*
 	TODO
 */
-void CardSystem::shuffle_all(glm::vec2 pos)
+void CardSystem::shuffle_all()
 {
 	// setup allocation list
 	std::vector<uint8_t> loose_list;
@@ -65,33 +66,52 @@ void CardSystem::shuffle_all(glm::vec2 pos)
 
 		// pick a random, uninitialized card & put it into pile
 		uint8_t rcard = rand()%loose_list.size();
-		dpile.cards.push_back(loose_list[rcard]);
-
-		// put physically atop of pile
-		set_position(loose_list[rcard],glm::vec3(pos.x,dpile.cards.size()*.017f,pos.y));
+		move_to_pile(0,loose_list[rcard]);
 
 		// un-loosen card status
 		loose_list.erase(loose_list.begin()+rcard,loose_list.begin()+rcard+1);
 	}
-
-	// reset all cards towards single deck pile
-	dpiles.clear();
-	dpiles.push_back(dpile);
 }
 
 /*
 	TODO
 */
-void CardSystem::place_card(uint8_t id,glm::vec3 pos)
-{ icpos.push_back(pos.x);icpos.push_back(pos.y);icpos.push_back(pos.z); }
-
-/*
-	TODO
-*/
-void CardSystem::deal_card()
+void CardSystem::deal_card(uint8_t pid)
 {
-	// TODO
+	// add card to hand
+	uint8_t tmp = dpiles[pid].cards.back();
+	hand.push_back(tmp);
+
+	// update card position
+	set_position(tmp,glm::vec3(-5+.5f*hand.size()-1,0.001f*hand.size()-1,7));
+
+	// remove drawn card id from deck pile
+	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
 }
+
+/*
+	TODO
+*/
+void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
+{
+	move_to_pile(pid,hand[idx]);
+	hand.erase(hand.begin()+idx,hand.begin()+idx+1);
+}
+
+/*
+	TODO
+*/
+void CardSystem::move_to_pile(uint8_t pid,uint8_t cid)
+{
+	dpiles[pid].cards.push_back(cid);
+	set_position(cid,glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y));
+}
+
+/*
+	TODO
+*/
+void CardSystem::create_pile(glm::vec2 pos)
+{ dpiles.push_back({ {},pos }); }
 
 /*
 	TODO

@@ -33,12 +33,14 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// card game test
 	CardSystem crdSystem = CardSystem();
+	crdSystem.create_pile(glm::vec2(0,0));
 
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
 
 	// update until exit condition
 	uint32_t running = rstate+1;
+	bool trg_deal = false;
 	while (running) {  // ??maybe kill check if flush with static func ref
 
 		// frame
@@ -62,6 +64,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_bSys.render();*/
 
 		// draw card game test
+		if (m_frame->kb.ka[SDL_SCANCODE_J]&&!trg_deal) crdSystem.deal_card(0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1,0);
+		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J]||m_frame->kb.ka[SDL_SCANCODE_H];
 		crdSystem.render();
 
 		// healthbar
