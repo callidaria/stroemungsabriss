@@ -17,6 +17,12 @@ constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 5;
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
 constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
 
+// to handle which cards are in a pile, as well as pile 'physics'
+struct DeckPile
+{
+	std::vector<uint8_t> cards;
+};
+
 class CardSystem
 {
 public:
@@ -26,11 +32,15 @@ public:
 	~CardSystem() {  };
 
 	// interaction
+	void shuffle_all(glm::vec2 pos);
 	void place_card(uint8_t id,glm::vec3 pos);
 	void deal_card();
 
 	// draw
 	void render();
+
+	// setters
+	void set_position(uint8_t id,glm::vec3 pos);
 
 private:
 
@@ -44,4 +54,5 @@ private:
 
 	// card information
 	std::vector<float> icpos;
+	std::vector<DeckPile> dpiles;
 };
