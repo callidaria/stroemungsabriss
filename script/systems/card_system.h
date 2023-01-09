@@ -11,7 +11,8 @@
 #include "../../ccb/mat/toolbox.h"
 
 // upload capacity
-constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 11;
+constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 6;
+constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
 
 // positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;

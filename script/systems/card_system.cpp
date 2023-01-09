@@ -8,14 +8,21 @@ CardSystem::CardSystem()
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
 	float cverts[] = {
-		-hwdt,0,-hhgt,0,0, -hwdt,0,hhgt,0,1, hwdt,0,hhgt,1,1,
-		hwdt,0,hhgt,1,1, hwdt,0,-hhgt,1,0, -hwdt,0,-hhgt,0,0,
+
+		// card front
+		-hwdt,0,-hhgt,0,0,0, -hwdt,0,hhgt,0,1,0, hwdt,0,hhgt,1,1,0,
+		hwdt,0,hhgt,1,1,0, hwdt,0,-hhgt,1,0,0, -hwdt,0,-hhgt,0,0,0,
+
+		// card back
+		hwdt,0,-hhgt,0,0,1, hwdt,0,hhgt,0,1,1, -hwdt,0,hhgt,1,1,1,
+		-hwdt,0,hhgt,1,1,1, -hwdt,0,-hhgt,1,0,1, hwdt,0,-hhgt,0,0,1,
 	};
 	bfr.bind();
 	bfr.upload_vertices(cverts,sizeof(cverts));
 	sdr.compile("./shader/vertex_cards.shader","./shader/fragment_cards.shader");
-	sdr.def_attributeF("position",3,0,5);
-	sdr.def_attributeF("texCoords",2,3,5);
+	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
+	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
+	sdr.def_attributeF("texID",1,5,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.upload_camera(cam3D);
 
 	// load card game texture
@@ -29,12 +36,14 @@ CardSystem::CardSystem()
 	sdr.def_indexF(bfr.get_indices(),"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
 
 	// spawn picture cards into space
 	for (uint8_t i=0;i<40;i++) {
 		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
 		icpos.push_back(i%10);icpos.push_back((uint8_t)(i/10));		// texture atlas index
-		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
+		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });					// rotation sine & cosine
+		icpos.push_back(i>19);										// deck identification
 	}
 
 	// spawn number cards into space
@@ -44,11 +53,13 @@ CardSystem::CardSystem()
 		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
 		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
 		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
+		icpos.push_back(0);
 
 		// card for second deck
 		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
 		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
 		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
+		icpos.push_back(1);
 	}
 
 	// shuffle deck & place
@@ -124,13 +135,15 @@ void CardSystem::create_pile(glm::vec2 pos)
 void CardSystem::render()
 {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
 	bfr.bind_index();
 	bfr.upload_indices(icpos);
 	glBindTexture(GL_TEXTURE_2D,tex);
-	glDrawArraysInstanced(GL_TRIANGLES,0,6,112);
+	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 }
 
 /*

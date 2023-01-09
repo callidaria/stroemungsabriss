@@ -3,12 +3,14 @@
 // buffer upload
 in vec3 position;
 in vec2 texCoords;
+in float texID;
 
 // index buffer upload
 in vec3 tofs;
 in vec2 i_tex;
 in vec3 rotation_sin;
 in vec3 rotation_cos;
+in float deckID;
 
 // output to fragment shader
 out vec2 TexCoords;
@@ -41,5 +43,6 @@ void main()
 	gl_Position = proj*view*vec4(Position+tofs,1);
 
 	// calculate texture coordinate manipulation on card game atlas
-	TexCoords = vec2(texCoords.x/10+i_tex.x/10,texCoords.y/8+i_tex.y/8);
+	vec2 tidx = i_tex*(1-texID)+vec2(9,4+deckID)*texID;
+	TexCoords = vec2(texCoords.x/10+tidx.x/10,texCoords.y/8+tidx.y/8);
 }
