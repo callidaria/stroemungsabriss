@@ -7,6 +7,8 @@ in vec2 texCoords;
 // index buffer upload
 in vec3 tofs;
 in vec2 i_tex;
+in vec3 rotation_sin;
+in vec3 rotation_cos;
 
 // output to fragment shader
 out vec2 TexCoords;
@@ -17,6 +19,27 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	gl_Position = proj*view*vec4(position+tofs,1);
+	// rotate individual cards by precalculated sine & cosine values
+	mat3 xrot = mat3(
+		1,	0,				0,
+		0,	rotation_cos.x,	-rotation_sin.x,
+		0,	rotation_sin.x,	rotation_cos.x
+	);
+	mat3 yrot = mat3(
+		rotation_cos.y, 0,	-rotation_sin.y,
+		0,				1,	0,
+		rotation_sin.y,	0,	rotation_cos.y
+	);
+	mat3 zrot = mat3(
+		rotation_cos.z,	-rotation_sin.z,	0,
+		rotation_sin.z,	rotation_cos.z,		0,
+		0,				0,					1
+	);
+	vec3 Position = zrot*yrot*xrot*position;
+
+	// calculate final vertex position
+	gl_Position = proj*view*vec4(Position+tofs,1);
+
+	// calculate texture coordinate manipulation on card game atlas
 	TexCoords = vec2(texCoords.x/10+i_tex.x/10,texCoords.y/8+i_tex.y/8);
 }

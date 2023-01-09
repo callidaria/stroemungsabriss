@@ -41,6 +41,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// update until exit condition
 	uint32_t running = rstate+1;
 	bool trg_deal = false;
+	float test_rotation = 0;
 	while (running) {  // ??maybe kill check if flush with static func ref
 
 		// frame
@@ -66,7 +67,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		// draw card game test
 		if (m_frame->kb.ka[SDL_SCANCODE_J]&&!trg_deal) crdSystem.deal_card(0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1,0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_O]) test_rotation++;
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J]||m_frame->kb.ka[SDL_SCANCODE_H];
+		crdSystem.set_rotation(4,glm::vec3(0,0,glm::radians(test_rotation)));
 		crdSystem.render();
 
 		// healthbar

@@ -27,11 +27,14 @@ CardSystem::CardSystem()
 	bfr.bind_index();
 	sdr.def_indexF(bfr.get_indices(),"tofs",3,0,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.get_indices(),"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
 
 	// spawn picture cards into space
 	for (uint8_t i=0;i<40;i++) {
-		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);		// position modification
-		icpos.push_back(i%10);icpos.push_back((uint8_t)(i/10));				// texture atlas index
+		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
+		icpos.push_back(i%10);icpos.push_back((uint8_t)(i/10));		// texture atlas index
+		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
 	}
 
 	// spawn number cards into space
@@ -40,10 +43,12 @@ CardSystem::CardSystem()
 		// card for first deck
 		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
 		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
+		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
 
 		// card for second deck
 		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
 		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
+		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
 	}
 
 	// shuffle deck & place
@@ -135,4 +140,17 @@ void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 	icpos[rid] = pos.x;icpos[rid+1] = pos.y;icpos[rid+2] = pos.z;
+}
+
+/*
+	TODO
+*/
+void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
+{
+	// rasterize id jumps
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+
+	// precalculate sine & cosine for rotation matrix in GPU
+	icpos[rid+5] = glm::sin(rot.x);icpos[rid+6] = glm::sin(rot.y);icpos[rid+7] = glm::sin(rot.z);
+	icpos[rid+8] = glm::cos(rot.x);icpos[rid+9] = glm::cos(rot.y);icpos[rid+10] = glm::cos(rot.z);
 }

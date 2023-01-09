@@ -11,7 +11,7 @@
 #include "../../ccb/mat/toolbox.h"
 
 // upload capacity
-constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 5;
+constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 11;
 
 // positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
@@ -46,6 +46,7 @@ public:
 
 	// setters
 	void set_position(uint8_t id,glm::vec3 pos);
+	void set_rotation(uint8_t id,glm::vec3 rot);
 
 private:
 
