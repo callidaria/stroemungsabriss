@@ -48,6 +48,13 @@ public:
 	// setters
 	void set_position(uint8_t id,glm::vec3 pos);
 	void set_rotation(uint8_t id,glm::vec3 rot);
+	void reset_rotation(uint8_t id);
+
+private:
+
+	// helpers
+	void create_card(glm::vec2 tex_id,bool deck_id);
+	void update_hand_position();
 
 private:
 

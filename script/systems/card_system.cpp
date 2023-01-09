@@ -38,28 +38,12 @@ CardSystem::CardSystem()
 	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
 
-	// spawn picture cards into space
-	for (uint8_t i=0;i<40;i++) {
-		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
-		icpos.push_back(i%10);icpos.push_back((uint8_t)(i/10));		// texture atlas index
-		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });					// rotation sine & cosine
-		icpos.push_back(i>19);										// deck identification
-	}
-
-	// spawn number cards into space
+	// spawn cards into space
+	for (uint8_t i=0;i<40;i++) create_card(glm::vec2(i%10,(uint8_t)(i/10)),i>19);
 	for (uint8_t i=0;i<36;i++) {
-
-		// card for first deck
-		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
-		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
-		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
-		icpos.push_back(0);
-
-		// card for second deck
-		icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);
-		icpos.push_back(i%9);icpos.push_back(4+(uint8_t)(i/9));
-		icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });
-		icpos.push_back(1);
+		glm::vec2 tex_id = glm::vec2(i%9,4+(uint8_t)(i/9));
+		create_card(tex_id,0);
+		create_card(tex_id,1);
 	}
 
 	// shuffle deck & place
@@ -84,6 +68,9 @@ void CardSystem::shuffle_all()
 		uint8_t rcard = rand()%loose_list.size();
 		move_to_pile(0,loose_list[rcard]);
 
+		// face down card
+		set_rotation(loose_list[rcard],glm::vec3(0,0,glm::radians(180.0f)));
+
 		// un-loosen card status
 		loose_list.erase(loose_list.begin()+rcard,loose_list.begin()+rcard+1);
 	}
@@ -94,15 +81,13 @@ void CardSystem::shuffle_all()
 */
 void CardSystem::deal_card(uint8_t pid)
 {
-	// add card to hand
+	// move card to hand
 	uint8_t tmp = dpiles[pid].cards.back();
 	hand.push_back(tmp);
-
-	// update card position
-	set_position(tmp,glm::vec3(-5+.5f*hand.size()-1,0.001f*hand.size()-1,7));
-
-	// remove drawn card id from deck pile
 	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
+
+	// update card position & rotation
+	update_hand_position();
 }
 
 /*
@@ -111,7 +96,9 @@ void CardSystem::deal_card(uint8_t pid)
 void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 {
 	move_to_pile(pid,hand[idx]);
+	reset_rotation(hand[idx]);
 	hand.erase(hand.begin()+idx,hand.begin()+idx+1);
+	update_hand_position();
 }
 
 /*
@@ -134,14 +121,21 @@ void CardSystem::create_pile(glm::vec2 pos)
 */
 void CardSystem::render()
 {
+	// gl enable features
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
+	// setup
 	sdr.enable();
 	bfr.bind();
 	bfr.bind_index();
 	bfr.upload_indices(icpos);
+
+	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
+
+	// gl disable features
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 }
@@ -166,4 +160,40 @@ void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 	// precalculate sine & cosine for rotation matrix in GPU
 	icpos[rid+5] = glm::sin(rot.x);icpos[rid+6] = glm::sin(rot.y);icpos[rid+7] = glm::sin(rot.z);
 	icpos[rid+8] = glm::cos(rot.x);icpos[rid+9] = glm::cos(rot.y);icpos[rid+10] = glm::cos(rot.z);
+}
+
+/*
+	TODO
+*/
+void CardSystem::reset_rotation(uint8_t id)
+{
+	// rasterize id jumps
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+
+	// precalculate sine & cosine for rotation matrix in GPU
+	icpos[rid+5] = 0;icpos[rid+6] = 0;icpos[rid+7] = 0;
+	icpos[rid+8] = 1;icpos[rid+9] = 1;icpos[rid+10] = 1;
+}
+
+/*
+	TODO
+*/
+void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
+{
+	icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
+	icpos.push_back(tex_id.x);icpos.push_back(tex_id.y);		// texture atlas index
+	icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });					// rotation sine & cosine
+	icpos.push_back(deck_id);									// deck identification
+}
+
+/*
+	TODO
+*/
+void CardSystem::update_hand_position()
+{
+	for (uint8_t i=0;i<hand.size();i++) {
+		set_position(hand[i],
+				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7));
+		set_rotation(hand[i],glm::vec3(glm::radians(-80.0f),0,0));
+	}
 }
