@@ -107,6 +107,7 @@ void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 void CardSystem::move_to_pile(uint8_t pid,uint8_t cid)
 {
 	dpiles[pid].cards.push_back(cid);
+	remove_animation(cid);
 	set_position(cid,glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y));
 }
 
@@ -121,6 +122,26 @@ void CardSystem::create_pile(glm::vec2 pos)
 */
 void CardSystem::render()
 {
+	// animate
+	uint8_t i = 0;
+	while (i<c_anims.size()) {
+		CardAnimation anim = c_anims[i];
+
+		// check if animation has been completed
+		if (anim.ctime>anim.etime) c_anims.erase(c_anims.begin()+i,c_anims.begin()+i+1);
+		else {
+
+			// interpolate position & rotation
+			float time_factor = (float)anim.ctime/anim.etime;
+			set_position(anim.card_id,anim.s_pos+(anim.t_pos-anim.s_pos)*time_factor);
+			set_rotation(anim.card_id,anim.s_rot+(anim.t_rot-anim.s_rot)*time_factor);
+
+			// increment ticks & animation index
+			c_anims[i].ctime++;
+			i++;
+		}
+	}
+
 	// gl enable features
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -178,6 +199,24 @@ void CardSystem::reset_rotation(uint8_t id)
 /*
 	TODO
 */
+glm::vec3 CardSystem::get_position(uint8_t id)
+{
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	return glm::vec3(icpos[rid],icpos[rid+1],icpos[rid+2]);
+}
+
+/*
+	TODO
+*/
+glm::vec3 CardSystem::get_rotation(uint8_t id)
+{
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	return glm::vec3(glm::asin(icpos[rid+5]),glm::asin(icpos[rid+6]),glm::asin(icpos[rid+7]));
+}
+
+/*
+	TODO
+*/
 void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 {
 	icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
@@ -191,9 +230,38 @@ void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 */
 void CardSystem::update_hand_position()
 {
-	for (uint8_t i=0;i<hand.size();i++) {
-		set_position(hand[i],
-				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7));
-		set_rotation(hand[i],glm::vec3(glm::radians(-80.0f),0,0));
-	}
+	for (uint8_t i=0;i<hand.size();i++)
+		create_animation(hand[i],
+				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7),
+				glm::vec3(glm::radians(-80.0f),0,0),20);
+}
+
+/*
+	TODO
+*/
+void CardSystem::create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime)
+{
+	int16_t idx = get_animation_id(id);
+	CardAnimation tmp = { id,get_position(id),get_rotation(id),pos,rot,0,etime };
+	if (!(idx+1)) c_anims.push_back(tmp);
+	else c_anims[idx] = tmp;
+}
+
+/*
+	TODO
+*/
+void CardSystem::remove_animation(uint8_t id)
+{
+	int16_t idx = get_animation_id(id);
+	if (idx+1) c_anims.erase(c_anims.begin()+idx,c_anims.begin()+idx+1);
+}
+
+/*
+	TODO
+*/
+int16_t CardSystem::get_animation_id(uint8_t id)
+{
+	int16_t out = -1;
+	for (uint8_t i=0;i<c_anims.size();i++) out += (1+i)*(c_anims[i].card_id==id);
+	return out;
 }

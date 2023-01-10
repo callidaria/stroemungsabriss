@@ -25,6 +25,15 @@ struct DeckPile
 	glm::vec2 pos;
 };
 
+// open animation processes acting on card
+struct CardAnimation
+{
+	uint8_t card_id;
+	glm::vec3 s_pos,s_rot;
+	glm::vec3 t_pos,t_rot;
+	uint16_t ctime,etime;
+};
+
 class CardSystem
 {
 public:
@@ -50,11 +59,20 @@ public:
 	void set_rotation(uint8_t id,glm::vec3 rot);
 	void reset_rotation(uint8_t id);
 
+	// getters
+	glm::vec3 get_position(uint8_t id);
+	glm::vec3 get_rotation(uint8_t id);
+
 private:
 
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
 	void update_hand_position();
+
+	// animation
+	void create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime);
+	void remove_animation(uint8_t id);
+	int16_t get_animation_id(uint8_t id);
 
 private:
 
@@ -70,4 +88,7 @@ private:
 	std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> hand;
+
+	// system
+	std::vector<CardAnimation> c_anims;
 };
