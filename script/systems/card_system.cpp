@@ -137,6 +137,14 @@ void CardSystem::render()
 		}
 	}
 
+	// building the render queue for correct transparency
+	render_queue.clear();
+	for (auto deck:dpiles) {
+		for (auto card:deck.cards)
+			card_to_queue(card);
+	} for (auto card:hand) card_to_queue(card);
+	// TODO: OPTIMIZE, THIS SHOULD NOT EXIST FOR LONG!
+
 	// gl enable features
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -145,7 +153,7 @@ void CardSystem::render()
 	sdr.enable();
 	bfr.bind();
 	bfr.bind_index();
-	bfr.upload_indices(icpos);
+	bfr.upload_indices(render_queue);
 
 	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -229,6 +237,15 @@ void CardSystem::update_hand_position()
 		create_animation(hand[i],
 				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7),
 				glm::vec3(glm::radians(-45.0f),0,0),20);
+}
+
+/*
+	TODO
+*/
+void CardSystem::card_to_queue(uint8_t id)
+{
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
 }
 
 /*

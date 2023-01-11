@@ -67,6 +67,7 @@ private:
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
 	void update_hand_position();
+	void card_to_queue(uint8_t id);
 
 	// animation
 	void create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime);
@@ -90,4 +91,5 @@ private:
 
 	// system
 	std::vector<CardAnimation> c_anims;
+	std::vector<float> render_queue;
 };
