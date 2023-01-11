@@ -23,6 +23,7 @@ CardSystem::CardSystem()
 	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texID",1,5,CARDSYSTEM_UPLOAD_REPEAT);
+	cam3D.view3D = glm::rotate(cam3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
 	sdr.upload_camera(cam3D);
 
 	// load card game texture
@@ -66,7 +67,9 @@ void CardSystem::shuffle_all()
 
 		// pick a random, uninitialized card & put it into pile
 		uint8_t rcard = rand()%loose_list.size();
-		move_to_pile(0,loose_list[rcard]);
+		dpiles[0].cards.push_back(loose_list[rcard]);
+		set_position(loose_list[rcard],
+				glm::vec3(dpiles[0].pos.x,dpiles[0].cards.size()*.017f,dpiles[0].pos.y));
 
 		// face down card
 		set_rotation(loose_list[rcard],glm::vec3(0,0,glm::radians(180.0f)));
@@ -95,20 +98,12 @@ void CardSystem::deal_card(uint8_t pid)
 */
 void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 {
-	move_to_pile(pid,hand[idx]);
-	reset_rotation(hand[idx]);
+	dpiles[pid].cards.push_back(hand[idx]);
+	create_animation(hand[idx],
+			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
+			glm::vec3(0),20);
 	hand.erase(hand.begin()+idx,hand.begin()+idx+1);
 	update_hand_position();
-}
-
-/*
-	TODO
-*/
-void CardSystem::move_to_pile(uint8_t pid,uint8_t cid)
-{
-	dpiles[pid].cards.push_back(cid);
-	remove_animation(cid);
-	set_position(cid,glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y));
 }
 
 /*
@@ -233,7 +228,7 @@ void CardSystem::update_hand_position()
 	for (uint8_t i=0;i<hand.size();i++)
 		create_animation(hand[i],
 				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7),
-				glm::vec3(glm::radians(-80.0f),0,0),20);
+				glm::vec3(glm::radians(-45.0f),0,0),20);
 }
 
 /*
