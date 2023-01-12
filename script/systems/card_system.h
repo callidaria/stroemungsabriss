@@ -79,7 +79,7 @@ private:
 	// cascabel
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
-	Camera3D cam3D = Camera3D(glm::vec3(0,-2,10),1280.0f,720.0f,60.0f);
+	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
 
 	// texture
 	GLuint tex;

@@ -213,8 +213,19 @@ glm::vec3 CardSystem::get_position(uint8_t id)
 */
 glm::vec3 CardSystem::get_rotation(uint8_t id)
 {
+	// get sine & cosine rotations
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	return glm::vec3(glm::asin(icpos[rid+5]),glm::asin(icpos[rid+6]),glm::asin(icpos[rid+7]));
+	glm::vec3 srot =
+			glm::vec3(glm::asin(icpos[rid+5]),glm::asin(icpos[rid+6]),glm::asin(icpos[rid+7]));
+	glm::vec3 crot =
+			glm::vec3(glm::acos(icpos[rid+8]),glm::acos(icpos[rid+9]),glm::acos(icpos[rid+10]));
+
+	// join rotation vectors to eliminate negative null rotations masquerading as actual null
+	return glm::vec3(srot.x+(crot.x-srot.x)*(glm::abs(srot.x)<0.0001f),
+			srot.y+(crot.y-srot.y)*(glm::abs(srot.y)<0.0001f),
+			srot.z+(crot.z-srot.z)*(glm::abs(srot.z)<0.0001f));
+	// TODO: a little hacky don't you think? maybe try to do this more *elegantly*?!?
+	// TODO: hamilton instead of euler?!?!?
 }
 
 /*
@@ -235,7 +246,7 @@ void CardSystem::update_hand_position()
 {
 	for (uint8_t i=0;i<hand.size();i++)
 		create_animation(hand[i],
-				glm::vec3(-4-1*(hand.size()/112.0f)+((float)i/hand.size()*5),0.001f*i,7),
+				glm::vec3(-5.5f-1.5f*(hand.size()/112.0f)+((float)i/hand.size()*5),7+0.001f*i,11),
 				glm::vec3(glm::radians(-45.0f),0,0),20);
 }
 
