@@ -34,6 +34,15 @@ struct CardAnimation
 	uint16_t ctime,etime;
 };
 
+// opposing player informations
+struct OpposingPlayer
+{
+	glm::vec2 position;
+	std::vector<uint8_t> deal;
+	std::vector<uint8_t> cards;
+	uint16_t capital;
+};
+
 class CardSystem
 {
 public:
@@ -45,9 +54,11 @@ public:
 	// interaction
 	void shuffle_all();
 	void deal_card(uint8_t pid);
+	void deal_card(uint8_t pid,uint8_t oid);
 	void hand_to_pile(uint8_t pid,uint8_t idx);
 
 	// creation
+	void create_player(glm::vec2 pos,uint16_t capital);
 	void create_pile(glm::vec2 pos);
 
 	// draw
@@ -88,6 +99,9 @@ private:
 	std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
+
+	// npc
+	std::vector<OpposingPlayer> ops;
 
 	// system
 	std::vector<CardAnimation> c_anims;

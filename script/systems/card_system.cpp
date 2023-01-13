@@ -28,7 +28,7 @@ CardSystem::CardSystem()
 
 	// load card game texture
 	glGenTextures(1,&tex);
-	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.5f);
+	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png");
 
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
@@ -90,10 +90,19 @@ void CardSystem::deal_card(uint8_t pid)
 			glm::vec3(glm::radians(-45.0f),0,0),20);
 	deal.push_back(tmp);
 	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
-
-	// update card position & rotation
-	//update_hand_position();
 }
+
+/*
+	TODO
+*/
+void CardSystem::deal_card(uint8_t pid,uint8_t oid)
+{
+	uint8_t tmp = dpiles[pid].cards.back();
+	glm::vec2 pos = ops[oid].position;
+	create_animation(tmp,glm::vec3(pos.x,0,pos.y),glm::vec3(0,0,glm::radians(180.0f)),20);
+	ops[oid].deal.push_back(tmp);
+	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
+} // FIXME: pattern replications
 
 /*
 	TODO
@@ -107,6 +116,12 @@ void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 	hand.erase(hand.begin()+idx,hand.begin()+idx+1);
 	update_hand_position();
 }
+
+/*
+	TODO
+*/
+void CardSystem::create_player(glm::vec2 pos,uint16_t capital)
+{ ops.push_back({ pos,{},{},capital }); }
 
 /*
 	TODO
@@ -130,6 +145,23 @@ void CardSystem::render()
 			arrival = true;
 		} else i++;
 	} if (arrival) update_hand_position();
+
+	// process opponent deal arrivals
+	uint8_t j = 0;
+	while (j<ops.size()) {
+		bool upd_opponent = false;
+		i = 0;
+		while (i<ops[j].deal.size()) {
+			int16_t idx = get_animation_id(ops[j].deal[i]);
+			if (!(idx+1)) {
+				ops[j].cards.push_back(ops[j].deal[i]);
+				ops[j].deal.erase(ops[j].deal.begin()+i,ops[j].deal.begin()+i+1);
+				upd_opponent = true;
+			} else i++;
+		} if (upd_opponent) {
+			// TODO: update opponent card placement
+		} j++;
+	}
 
 	// animate
 	i = 0;
@@ -156,7 +188,10 @@ void CardSystem::render()
 	for (auto deck:dpiles) {
 		for (auto card:deck.cards)
 			card_to_queue(card);
-	} for (auto card:deal) card_to_queue(card);
+	} for (auto opp:ops) {
+		for (auto card:opp.deal) card_to_queue(card);
+		for (auto card:opp.cards) card_to_queue(card);
+	} for (auto card:deal) card_to_queue(card); // TODO: FILO instead of FIFO will fix transparency
 	for (auto card:hand) card_to_queue(card);
 
 	// gl enable features
