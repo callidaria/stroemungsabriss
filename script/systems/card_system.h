@@ -87,7 +87,7 @@ private:
 	// card information
 	std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
-	std::vector<uint8_t> hand;
+	std::vector<uint8_t> deal,hand;
 
 	// system
 	std::vector<CardAnimation> c_anims;

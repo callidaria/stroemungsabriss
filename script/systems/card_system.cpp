@@ -86,11 +86,13 @@ void CardSystem::deal_card(uint8_t pid)
 {
 	// move card to hand
 	uint8_t tmp = dpiles[pid].cards.back();
-	hand.push_back(tmp);
+	create_animation(tmp,glm::vec3(4,7+0.001f*hand.size()+deal.size(),11),
+			glm::vec3(glm::radians(-45.0f),0,0),20);
+	deal.push_back(tmp);
 	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
 
 	// update card position & rotation
-	update_hand_position();
+	//update_hand_position();
 }
 
 /*
@@ -117,8 +119,20 @@ void CardSystem::create_pile(glm::vec2 pos)
 */
 void CardSystem::render()
 {
-	// animate
+	// process deal arrivals
+	bool arrival = false;
 	uint8_t i = 0;
+	while (i<deal.size()) {
+		int16_t idx = get_animation_id(deal[i]);
+		if (!(idx+1)) {
+			hand.push_back(deal[i]);
+			deal.erase(deal.begin()+i,deal.begin()+i+1);
+			arrival = true;
+		} else i++;
+	} if (arrival) update_hand_position();
+
+	// animate
+	i = 0;
 	while (i<c_anims.size()) {
 		CardAnimation anim = c_anims[i];
 
@@ -142,8 +156,8 @@ void CardSystem::render()
 	for (auto deck:dpiles) {
 		for (auto card:deck.cards)
 			card_to_queue(card);
-	} for (auto card:hand) card_to_queue(card);
-	// TODO: OPTIMIZE, THIS SHOULD NOT EXIST FOR LONG!
+	} for (auto card:deal) card_to_queue(card);
+	for (auto card:hand) card_to_queue(card);
 
 	// gl enable features
 	glEnable(GL_DEPTH_TEST);
@@ -163,6 +177,7 @@ void CardSystem::render()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 }
+// TODO: OPTIMIZE!
 
 /*
 	TODO
