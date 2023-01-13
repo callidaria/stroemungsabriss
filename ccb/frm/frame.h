@@ -78,15 +78,15 @@ private:
 
 public:
 
-	Keyboard kb; Mouse mouse; std::vector<XBox> xb;
+	// properties
+	int w_res,h_res;
 	bool event_active = false;
-	int w_res, h_res;
-
-	std::vector<SDL_GameController*> m_gc;
-	std::string tline = "";
 
 	// input
+	std::vector<SDL_GameController*> m_gc;
 	SDL_Event m_fe;
+	Keyboard kb; Mouse mouse; std::vector<XBox> xb;
+	std::string tline = "";
 
 private:
 
