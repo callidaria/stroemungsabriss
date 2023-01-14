@@ -38,6 +38,7 @@ struct CardAnimation
 struct OpposingPlayer
 {
 	glm::vec2 position;
+	float rotation;
 	std::vector<uint8_t> deal;
 	std::vector<uint8_t> cards;
 	uint16_t capital;
@@ -58,7 +59,7 @@ public:
 	void hand_to_pile(uint8_t pid,uint8_t idx);
 
 	// creation
-	void create_player(glm::vec2 pos,uint16_t capital);
+	void create_player(glm::vec2 pos,float rot,uint16_t capital);
 	void create_pile(glm::vec2 pos);
 
 	// draw
@@ -77,11 +78,17 @@ private:
 
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
-	void update_hand_position();
 	void card_to_queue(uint8_t id);
 
+	// update
+	void update_hand_position();
+	void update_opponent(uint8_t oid);
+
 	// animation
+	void create_animation(uint8_t id,glm::vec3 pos,uint16_t etime);
 	void create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime);
+	void force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime);
+	void force_create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime);
 	void remove_animation(uint8_t id);
 	int16_t get_animation_id(uint8_t id);
 
@@ -102,6 +109,7 @@ private:
 
 	// npc
 	std::vector<OpposingPlayer> ops;
+	glm::mat4 phead_mat;
 
 	// system
 	std::vector<CardAnimation> c_anims;

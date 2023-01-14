@@ -33,7 +33,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// card game test
 	CardSystem crdSystem = CardSystem();
-	crdSystem.create_player(glm::vec2(0,-10),1000);
+	crdSystem.create_player(glm::vec2(0,-10),180,1000);
+	crdSystem.create_player(glm::vec2(-10,0),90,1000);
+	crdSystem.create_player(glm::vec2(10,0),-90,1000);
 	crdSystem.create_pile(glm::vec2(0,0));
 
 	// lightweight action menu
@@ -68,9 +70,13 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		if (m_frame->kb.ka[SDL_SCANCODE_J]&&!trg_deal) crdSystem.deal_card(0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_G]&&!trg_deal) crdSystem.deal_card(0,0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_U]&&!trg_deal) crdSystem.deal_card(0,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_I]&&!trg_deal) crdSystem.deal_card(0,2);
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J]
-				||m_frame->kb.ka[SDL_SCANCODE_H]
-				||m_frame->kb.ka[SDL_SCANCODE_G];
+				|| m_frame->kb.ka[SDL_SCANCODE_H]
+				|| m_frame->kb.ka[SDL_SCANCODE_G]
+				|| m_frame->kb.ka[SDL_SCANCODE_U]
+				|| m_frame->kb.ka[SDL_SCANCODE_I];
 		crdSystem.render();
 
 		// healthbar

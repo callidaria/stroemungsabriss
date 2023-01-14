@@ -50,6 +50,9 @@ CardSystem::CardSystem()
 	// shuffle deck & place
 	create_pile(glm::vec2(2.5f,0));
 	shuffle_all();
+
+	// precalculations
+	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
 }
 
 /*
@@ -98,11 +101,12 @@ void CardSystem::deal_card(uint8_t pid)
 void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 {
 	uint8_t tmp = dpiles[pid].cards.back();
-	glm::vec2 pos = ops[oid].position;
-	create_animation(tmp,glm::vec3(pos.x,0,pos.y),glm::vec3(0,0,glm::radians(180.0f)),20);
+	create_animation(tmp,glm::vec3(ops[oid].position.x,0,ops[oid].position.y),
+			glm::vec3(0,glm::radians(ops[oid].rotation),glm::radians(180.0f)),20);
 	ops[oid].deal.push_back(tmp);
 	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
-} // FIXME: pattern replications
+}
+// FIXME: pattern replications
 
 /*
 	TODO
@@ -120,8 +124,8 @@ void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 /*
 	TODO
 */
-void CardSystem::create_player(glm::vec2 pos,uint16_t capital)
-{ ops.push_back({ pos,{},{},capital }); }
+void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
+{ ops.push_back({ pos,rot,{},{},capital }); }
 
 /*
 	TODO
@@ -158,9 +162,8 @@ void CardSystem::render()
 				ops[j].deal.erase(ops[j].deal.begin()+i,ops[j].deal.begin()+i+1);
 				upd_opponent = true;
 			} else i++;
-		} if (upd_opponent) {
-			// TODO: update opponent card placement
-		} j++;
+		} if (upd_opponent) update_opponent(j);
+		j++;
 	}
 
 	// animate
@@ -186,12 +189,11 @@ void CardSystem::render()
 	// building the render queue for correct transparency
 	render_queue.clear();
 	for (auto deck:dpiles) {
-		for (auto card:deck.cards)
-			card_to_queue(card);
+		for (auto card:deck.cards) card_to_queue(card);
 	} for (auto opp:ops) {
 		for (auto card:opp.deal) card_to_queue(card);
 		for (auto card:opp.cards) card_to_queue(card);
-	} for (auto card:deal) card_to_queue(card); // TODO: FILO instead of FIFO will fix transparency
+	} for (auto card:deal) card_to_queue(card);  // TODO: FILO instead of FIFO will fix transparency
 	for (auto card:hand) card_to_queue(card);
 
 	// gl enable features
@@ -292,6 +294,15 @@ void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 /*
 	TODO
 */
+void CardSystem::card_to_queue(uint8_t id)
+{
+	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
+}
+
+/*
+	TODO
+*/
 void CardSystem::update_hand_position()
 {
 	for (uint8_t i=0;i<hand.size();i++)
@@ -303,10 +314,30 @@ void CardSystem::update_hand_position()
 /*
 	TODO
 */
-void CardSystem::card_to_queue(uint8_t id)
+void CardSystem::update_opponent(uint8_t oid)
 {
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
+	// precalculate card additions
+	glm::vec2 norm_pos = -glm::normalize(ops[oid].position);
+
+	// create insert animation
+	for (uint8_t i=0;i<ops[oid].cards.size();i++) {
+		glm::vec4 add_dir = phead_mat*glm::vec4(norm_pos.x,norm_pos.y,0,1);
+		add_dir *= i/(float)(ops[oid].cards.size()-1);
+		add_dir += glm::vec4(ops[oid].position.x,ops[oid].position.y,0,0);
+		create_animation(ops[oid].cards[i],glm::vec3(add_dir.x,0.001f*i,add_dir.y),20);
+	}
+}
+
+/*
+	TODO
+*/
+void CardSystem::create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
+{
+	int16_t idx = get_animation_id(id);
+	glm::vec3 rot = get_rotation(id);
+	CardAnimation tmp = { id,get_position(id),rot,pos,rot,0,etime };
+	if (!(idx+1)) c_anims.push_back(tmp);
+	else c_anims[idx] = tmp;
 }
 
 /*
@@ -319,6 +350,21 @@ void CardSystem::create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_
 	if (!(idx+1)) c_anims.push_back(tmp);
 	else c_anims[idx] = tmp;
 }
+
+/*
+	TODO
+*/
+void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
+{
+	glm::vec3 rot = get_rotation(id);
+	c_anims.push_back({ id,get_position(id),rot,pos,rot,0,etime });
+}
+
+/*
+	TODO
+*/
+void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime)
+{ c_anims.push_back({ id,get_position(id),get_rotation(id),pos,rot,0,etime }); }
 
 /*
 	TODO
