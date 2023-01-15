@@ -72,11 +72,17 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		else if (m_frame->kb.ka[SDL_SCANCODE_G]&&!trg_deal) crdSystem.deal_card(0,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_U]&&!trg_deal) crdSystem.deal_card(0,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_I]&&!trg_deal) crdSystem.deal_card(0,2);
+		else if (m_frame->kb.ka[SDL_SCANCODE_E]&&!trg_deal) crdSystem.opponent_to_pile(0,1,0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_R]&&!trg_deal) crdSystem.opponent_to_pile(1,1,0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_T]&&!trg_deal) crdSystem.opponent_to_pile(2,1,0);
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J]
 				|| m_frame->kb.ka[SDL_SCANCODE_H]
 				|| m_frame->kb.ka[SDL_SCANCODE_G]
 				|| m_frame->kb.ka[SDL_SCANCODE_U]
-				|| m_frame->kb.ka[SDL_SCANCODE_I];
+				|| m_frame->kb.ka[SDL_SCANCODE_I]
+				|| m_frame->kb.ka[SDL_SCANCODE_E]
+				|| m_frame->kb.ka[SDL_SCANCODE_R]
+				|| m_frame->kb.ka[SDL_SCANCODE_T];
 		crdSystem.render();
 
 		// healthbar

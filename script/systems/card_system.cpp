@@ -127,6 +127,20 @@ void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
 /*
 	TODO
 */
+void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
+{
+	dpiles[pid].cards.push_back(ops[oid].cards[idx]);
+	create_animation(ops[oid].cards[idx],
+			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
+			glm::vec3(0),20);
+	ops[oid].cards.erase(ops[oid].cards.begin()+idx,ops[oid].cards.begin()+idx+1);
+	update_opponent(oid);
+}
+// FIXME: holds duplicate code chunk
+
+/*
+	TODO
+*/
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 { ops.push_back({ pos,rot,{},{},capital }); }
 

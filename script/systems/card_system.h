@@ -57,6 +57,7 @@ public:
 	void deal_card(uint8_t pid);
 	void deal_card(uint8_t pid,uint8_t oid);
 	void hand_to_pile(uint8_t pid,uint8_t idx);
+	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
