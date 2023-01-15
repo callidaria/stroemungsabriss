@@ -114,13 +114,13 @@ void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 /*
 	TODO
 */
-void CardSystem::hand_to_pile(uint8_t pid,uint8_t idx)
+void CardSystem::hand_to_pile(uint8_t pid)
 {
-	dpiles[pid].cards.push_back(hand[idx]);
-	create_animation(hand[idx],
+	dpiles[pid].cards.push_back(hand[choice]);
+	create_animation(hand[choice],
 			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
 			glm::vec3(0),20);
-	hand.erase(hand.begin()+idx,hand.begin()+idx+1);
+	hand.erase(hand.begin()+choice,hand.begin()+choice+1);
 	update_hand_position();
 }
 
@@ -149,6 +149,15 @@ void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 */
 void CardSystem::create_pile(glm::vec2 pos)
 { dpiles.push_back({ {},pos }); }
+
+/*
+	TODO
+*/
+void CardSystem::process_input(Frame* f)
+{
+	choice += (f->kb.ka[SDL_SCANCODE_RIGHT]-f->kb.ka[SDL_SCANCODE_LEFT])*!lfI;
+	lfI = f->kb.ka[SDL_SCANCODE_RIGHT]||f->kb.ka[SDL_SCANCODE_LEFT];
+}
 
 /*
 	TODO
@@ -211,7 +220,13 @@ void CardSystem::render()
 		for (auto card:opp.deal) card_to_queue(card);
 		for (auto card:opp.cards) card_to_queue(card);
 	} for (auto card:deal) card_to_queue(card);  // TODO: FILO instead of FIFO will fix transparency
-	for (auto card:hand) card_to_queue(card);
+	for (uint8_t i=0;i<hand.size();i++) {
+		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
+		bool selected = i==choice;
+		icpos[idx] += selected;
+		card_to_queue(hand[i]);
+		icpos[idx] -= selected;
+	}
 
 	// gl enable features
 	glEnable(GL_DEPTH_TEST);

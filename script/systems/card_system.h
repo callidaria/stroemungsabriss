@@ -6,6 +6,7 @@
 
 #include "../../ccb/fcn/buffer.h"
 #include "../../ccb/gfx/shader.h"
+#include "../../ccb/frm/frame.h"
 
 #include "../../ccb/mat/camera3d.h"
 #include "../../ccb/mat/toolbox.h"
@@ -56,14 +57,15 @@ public:
 	void shuffle_all();
 	void deal_card(uint8_t pid);
 	void deal_card(uint8_t pid,uint8_t oid);
-	void hand_to_pile(uint8_t pid,uint8_t idx);
+	void hand_to_pile(uint8_t pid);
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
 	void create_pile(glm::vec2 pos);
 
-	// draw
+	// update
+	void process_input(Frame* f);
 	void render();
 
 	// setters
@@ -107,6 +109,8 @@ private:
 	std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
+	uint8_t choice = 0;
+	bool lfI = false;
 
 	// npc
 	std::vector<OpposingPlayer> ops;

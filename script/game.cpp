@@ -68,7 +68,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 		// draw card game test
 		if (m_frame->kb.ka[SDL_SCANCODE_J]&&!trg_deal) crdSystem.deal_card(0);
-		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1,0);
+		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_G]&&!trg_deal) crdSystem.deal_card(0,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_U]&&!trg_deal) crdSystem.deal_card(0,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_I]&&!trg_deal) crdSystem.deal_card(0,2);
@@ -83,6 +83,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 				|| m_frame->kb.ka[SDL_SCANCODE_E]
 				|| m_frame->kb.ka[SDL_SCANCODE_R]
 				|| m_frame->kb.ka[SDL_SCANCODE_T];
+		crdSystem.process_input(m_frame);
 		crdSystem.render();
 
 		// healthbar
