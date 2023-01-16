@@ -155,8 +155,17 @@ void CardSystem::create_pile(glm::vec2 pos)
 */
 void CardSystem::process_input(Frame* f)
 {
+	// keyboard input
 	choice += (f->kb.ka[SDL_SCANCODE_RIGHT]-f->kb.ka[SDL_SCANCODE_LEFT])*!lfI;
 	lfI = f->kb.ka[SDL_SCANCODE_RIGHT]||f->kb.ka[SDL_SCANCODE_LEFT];
+	kinput = lfI;
+
+	// mouse input
+	bool mouse_input = f->mouse.my>150;
+	bool minput = !kinput&&(f->mouse.mx!=tmx);
+	choice *= !mouse_input;
+	choice += ((f->mouse.mx/640.0f)*hand.size())*mouse_input;
+	tmx = f->mouse.mx;
 }
 
 /*
@@ -222,10 +231,10 @@ void CardSystem::render()
 	} for (auto card:deal) card_to_queue(card);  // TODO: FILO instead of FIFO will fix transparency
 	for (uint8_t i=0;i<hand.size();i++) {
 		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
-		bool selected = i==choice;
-		icpos[idx] += selected;
+		float selected_mod = (i==choice)*.5f;
+		icpos[idx] += selected_mod;icpos[idx+1] -= selected_mod;
 		card_to_queue(hand[i]);
-		icpos[idx] -= selected;
+		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
 	}
 
 	// gl enable features
@@ -337,10 +346,13 @@ void CardSystem::card_to_queue(uint8_t id)
 */
 void CardSystem::update_hand_position()
 {
+	// move cards into homogeneous fan structure
 	for (uint8_t i=0;i<hand.size();i++)
 		create_animation(hand[i],
 				glm::vec3(-5.5f-1.5f*(hand.size()/112.0f)+((float)i/hand.size()*5),7+0.001f*i,11),
 				glm::vec3(glm::radians(-45.0f),0,0),20);
+
+	// TODO: understand how to project card positions onto 2D screen for input
 }
 
 /*

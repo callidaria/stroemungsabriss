@@ -110,7 +110,6 @@ private:
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
 	uint8_t choice = 0;
-	bool lfI = false;
 
 	// npc
 	std::vector<OpposingPlayer> ops;
@@ -119,4 +118,9 @@ private:
 	// system
 	std::vector<CardAnimation> c_anims;
 	std::vector<float> render_queue;
+
+	// controls
+	bool lfI = false,kinput = true;
+	int32_t tmx = 0;
+	float cstart = 0;
 };
