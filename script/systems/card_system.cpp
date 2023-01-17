@@ -3,8 +3,17 @@
 /*
 	TODO
 */
-CardSystem::CardSystem()
+CardSystem::CardSystem(Renderer3D* r3d)
+	: m_r3d(r3d)
 {
+	// background objects
+	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
+			"./res/none.png",glm::vec3(0),7,glm::vec3(45,0,0));
+	m_r3d->load(&cam3D);
+	m_r3d->s3d.enable();
+	m_r3d->s3d.upload_float("ambient",1);
+	m_r3d->s3d.upload_float("tex_repeat",10);
+
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
 	float cverts[] = {
@@ -28,7 +37,7 @@ CardSystem::CardSystem()
 
 	// load card game texture
 	glGenTextures(1,&tex);
-	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png");
+	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f);
 
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
@@ -237,21 +246,21 @@ void CardSystem::render()
 		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
 	}
 
-	// gl enable features
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// render background
+	m_r3d->prepare(&cam3D);
+	m_r3d->render_mesh(r3d_index,r3d_index+1);
 
-	// setup
+	// setup cards
 	sdr.enable();
 	bfr.bind();
 	bfr.bind_index();
 	bfr.upload_indices(render_queue);
 
-	// draw
+	// draw cards
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 
-	// gl disable features
+	// gl reset features
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 }

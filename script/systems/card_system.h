@@ -5,11 +5,13 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/fcn/buffer.h"
-#include "../../ccb/gfx/shader.h"
 #include "../../ccb/frm/frame.h"
 
 #include "../../ccb/mat/camera3d.h"
 #include "../../ccb/mat/toolbox.h"
+
+#include "../../ccb/gfx/shader.h"
+#include "../../ccb/gfx/renderer3d.h"
 
 // upload capacity
 constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 6;
@@ -50,7 +52,7 @@ class CardSystem
 public:
 
 	// construction
-	CardSystem();
+	CardSystem(Renderer3D* r3d);
 	~CardSystem() {  };
 
 	// interaction
@@ -101,9 +103,11 @@ private:
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
 	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
+	Renderer3D* m_r3d;
 
-	// texture
+	// render
 	GLuint tex;
+	uint16_t r3d_index;
 
 	// card information
 	std::vector<float> icpos;

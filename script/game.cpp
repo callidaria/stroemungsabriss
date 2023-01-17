@@ -32,7 +32,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// card game test
-	CardSystem crdSystem = CardSystem();
+	CardSystem crdSystem = CardSystem(m_r3d);
 	crdSystem.create_player(glm::vec2(0,-10),180,1000);
 	crdSystem.create_player(glm::vec2(-10,0),90,1000);
 	crdSystem.create_player(glm::vec2(10,0),-90,1000);

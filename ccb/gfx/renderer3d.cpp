@@ -130,5 +130,5 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
-	}
+	} glActiveTexture(GL_TEXTURE0);
 }

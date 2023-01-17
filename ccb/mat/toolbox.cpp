@@ -102,6 +102,20 @@ void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
 }
 
 /*
+	TODO
+*/
+void Toolbox::load_texture_repeat(GLuint tex,const char* path)
+{
+	// bind and load texture data
+	load_texture_function_head(tex,path);
+
+	// texture parameters repeating
+	set_texture_parameter_texture_repeat();
+	set_texture_parameter_linear_mipmap();
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+/*
 	generate_elements(uint16_t,std::vector<uint16_t>&) -> void
 	i: objects index to use to rasterize element value generation
 	ls: element list input to add generated elements to
@@ -122,6 +136,18 @@ void Toolbox::set_texture_parameter_clamp_to_edge()
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 }
 
+/*
+	TODO
+*/
+void Toolbox::set_texture_parameter_texture_repeat()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+}
+
+/*
+	TODO
+*/
 void Toolbox::set_texture_parameter_linear_mipmap()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);

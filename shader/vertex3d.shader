@@ -18,7 +18,7 @@ uniform mat4 model = mat4(1.0);
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 uniform mat4 light_trans;
-uniform int tex_repeat = 1;
+uniform float tex_repeat = 1;
 uniform vec3 light_pos;
 uniform vec3 view_pos;
 
