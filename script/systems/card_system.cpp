@@ -8,7 +8,7 @@ CardSystem::CardSystem(Renderer3D* r3d)
 {
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
-			"./res/none.png",glm::vec3(0),7,glm::vec3(45,0,0));
+			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(45,0,0));
 	m_r3d->load(&cam3D);
 	m_r3d->s3d.enable();
 	m_r3d->s3d.upload_float("ambient",1);
@@ -96,7 +96,6 @@ void CardSystem::shuffle_all()
 */
 void CardSystem::deal_card(uint8_t pid)
 {
-	// move card to hand
 	uint8_t tmp = dpiles[pid].cards.back();
 	create_animation(tmp,glm::vec3(4,7+0.001f*hand.size()+deal.size(),11),
 			glm::vec3(glm::radians(-45.0f),0,0),20);
@@ -109,12 +108,17 @@ void CardSystem::deal_card(uint8_t pid)
 */
 void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 {
+	// calculate positions for dealt playing cards
 	uint8_t tmp = dpiles[pid].cards.back();
 	glm::vec3 pos = glm::vec3(ops[oid].position.x,0,ops[oid].position.y);
 	glm::vec2 norm_pos = -glm::normalize(glm::vec2(pos.x,pos.z));
 	glm::vec4 add_pos = (phead_mat*glm::vec4(norm_pos.x,norm_pos.y,0,1))*glm::vec4(4);
+
+	// animation
 	create_animation(tmp,glm::vec3(add_pos.x,.5f,add_pos.y)+pos,
 			glm::vec3(0,glm::radians(ops[oid].rotation),glm::radians(180.0f)),20);
+
+	// transaction
 	ops[oid].deal.push_back(tmp);
 	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
 }
@@ -125,11 +129,14 @@ void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 */
 void CardSystem::hand_to_pile(uint8_t pid)
 {
-	dpiles[pid].cards.push_back(hand[choice]);
+	// animation
 	create_animation(hand[choice],
 			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
 			glm::vec3(0),20);
+
+	// transaction
 	hand.erase(hand.begin()+choice,hand.begin()+choice+1);
+	dpiles[pid].cards.push_back(hand[choice]);
 	update_hand_position();
 }
 
@@ -138,10 +145,13 @@ void CardSystem::hand_to_pile(uint8_t pid)
 */
 void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 {
-	dpiles[pid].cards.push_back(ops[oid].cards[idx]);
+	// animation
 	create_animation(ops[oid].cards[idx],
 			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
 			glm::vec3(0),20);
+
+	// transaction
+	dpiles[pid].cards.push_back(ops[oid].cards[idx]);
 	ops[oid].cards.erase(ops[oid].cards.begin()+idx,ops[oid].cards.begin()+idx+1);
 	update_opponent(oid);
 }
@@ -197,8 +207,10 @@ void CardSystem::render()
 	// process opponent deal arrivals
 	uint8_t j = 0;
 	while (j<ops.size()) {
-		bool upd_opponent = false;
-		i = 0;
+		bool upd_opponent = false;	// signal that opponent has been updated
+		i = 0;						// index for singular cards held by current opponent
+
+		// process status of cards that are being dealt
 		while (i<ops[j].deal.size()) {
 			int16_t idx = get_animation_id(ops[j].deal[i]);
 			if (!(idx+1)) {
@@ -232,16 +244,22 @@ void CardSystem::render()
 
 	// building the render queue for correct transparency
 	render_queue.clear();
-	for (auto deck:dpiles) {
+	for (auto deck:dpiles) {								// queue pile cards
 		for (auto card:deck.cards) card_to_queue(card);
-	} for (auto opp:ops) {
-		for (auto card:opp.deal) card_to_queue(card);
-		for (auto card:opp.cards) card_to_queue(card);
-	} for (auto card:deal) card_to_queue(card);  // TODO: FILO instead of FIFO will fix transparency
+	} for (auto opp:ops) {									// queue cards held by opponent
+		for (auto card:opp.deal) card_to_queue(card);		// first queue cards still arriving
+		for (auto card:opp.cards) card_to_queue(card);		// then queue cards held by opponent
+	} for (auto card:deal) card_to_queue(card);				// TODO: FILO instead of FIFO
+
+	// queue cards held by player
 	for (uint8_t i=0;i<hand.size();i++) {
+
+		// modify selected card to stand out compared to the others
 		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
 		float selected_mod = (i==choice)*.5f;
 		icpos[idx] += selected_mod;icpos[idx+1] -= selected_mod;
+
+		// queue card & revert modification
 		card_to_queue(hand[i]);
 		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
 	}
