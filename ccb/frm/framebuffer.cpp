@@ -18,9 +18,7 @@
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 		const char* fsp,bool float_buffer)
 	: frw(fr_width),frh(fr_height)
-{
-	init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer);
-}
+{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer); }
 
 /*
 	constructor(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool)
@@ -31,9 +29,8 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
 		const char* vsp,const char* fsp,bool float_buffer)
 	: frw(fr_width),frh(fr_height)
-{
-	init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer);
-} // TODO: make the resolution of framebuffers dynamic (cambased)
+{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer); }
+// TODO: make the resolution of framebuffers dynamic (cambased)
 
 /*
 	init(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool) -> void
@@ -128,24 +125,18 @@ void FrameBuffer::render(float ptrans)
 	returns: frame buffer object
 */
 GLuint FrameBuffer::get_fbo()
-{
-	return fbo;
-}
+{ return fbo; }
 
 /*
 	get_tex() -> GLuint
 	returns: frame buffer texture
 */
 GLuint FrameBuffer::get_tex()
-{
-	return tex;
-}
+{ return tex; }
 
 /*
 	close() -> void (static)
 	purpose: unbinds any bound framebuffer
 */
 void FrameBuffer::close()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
-}
+{ glBindFramebuffer(GL_FRAMEBUFFER,0); }

@@ -39,7 +39,7 @@ Frame test_frame3 = Frame(title,screen,width,height,fs);
 
 ## Features
 
-### Modification:
+### Modification
 
 - clear(float(0),float(0),float(0)) -> void : clears the screen in given rgb colour
 - update() -> void : update screen to show everything that has been drawn
