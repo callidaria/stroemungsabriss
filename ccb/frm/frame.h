@@ -57,7 +57,7 @@ public:
 	void change_tmod(float goal,float rate);
 
 	// controlling
-	void input(uint32_t &running,bool tinput=false);
+	void input(uint32_t &running);
 
 	// termination
 	void vanish();

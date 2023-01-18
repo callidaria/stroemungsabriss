@@ -38,8 +38,9 @@
 int main(int argc,char** argv)
 {
 	Init init = Init("config.ini");
-	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),init.rINT(init.FRAME_RESOLUTION_WIDTH),
-		init.rINT(init.FRAME_RESOLUTION_HEIGHT),(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
+	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
+			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
+			(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
 
 	// AUDIO
 	Listener listener=Listener();
@@ -97,7 +98,7 @@ int main(int argc,char** argv)
 	while (run) {
 		f.print_fps();
 		f.calc_time_delta();
-		f.input(run,dactive);
+		f.input(run);
 
 		// INPUT
 		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
