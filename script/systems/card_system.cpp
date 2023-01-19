@@ -149,6 +149,7 @@ void CardSystem::hand_to_pile(uint8_t pid)
 void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 {
 	// animation
+	reset_rotation(ops[oid].cards[idx]);
 	create_animation(ops[oid].cards[idx],
 			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
 			glm::vec3(0),20);
