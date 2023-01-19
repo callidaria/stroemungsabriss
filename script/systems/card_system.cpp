@@ -1,10 +1,13 @@
 #include "card_system.h"
 
 /*
-	TODO
+	constructor(Frame*,Renderer3D*)
+	f: pointer to cascabel frame for timing and input
+	r3d: pointer to general 3D renderer to add certain background elements
+	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(Renderer3D* r3d)
-	: m_r3d(r3d)
+CardSystem::CardSystem(Frame* f,Renderer3D* r3d)
+	: m_frame(f),m_r3d(r3d)
 {
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
@@ -65,7 +68,8 @@ CardSystem::CardSystem(Renderer3D* r3d)
 }
 
 /*
-	TODO
+	shuffle_all() -> void
+	purpose: places all cards, turned over into shuffled deck pile
 */
 void CardSystem::shuffle_all()
 {
@@ -92,7 +96,14 @@ void CardSystem::shuffle_all()
 }
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	pid: deck pile id, to place onto, take from or interact with in any other way
+	oid: opponent id, to reference held cards, positions & facing directions
+*/
+
+/*
+	deal_card(uint8_t) -> void
+	purpose: deal single card to player from given deck pile
 */
 void CardSystem::deal_card(uint8_t pid)
 {
@@ -104,7 +115,9 @@ void CardSystem::deal_card(uint8_t pid)
 }
 
 /*
-	TODO
+	deal_card(uint8_t,uint8_t) -> void
+	overloads: deal_card . uint8_t -> (uint8_t,uint8_t)
+	purpose: deal single card to given opponent from given deck pile
 */
 void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 {
@@ -125,13 +138,19 @@ void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 // FIXME: pattern replications
 
 /*
-	TODO
+	register_auto_deal(uint8_t,uint8_t,uint8_t) -> void
+	target: defines which player (npc or pc) will be dealt the given amount of cards:
+		either it references opponent id through oid = target-1
+		or target = 0 which references the player character
+	amount: amount of cards to deal to given player
+	purpose: register an auto deal task of a given amount of cards to the given player
 */
-void CardSystem::register_auto_deal(uint8_t source,uint8_t target,uint8_t amount)
-{ auto_deals.push_back({ source,target,amount }); }
+void CardSystem::register_auto_deal(uint8_t pid,uint8_t target,uint8_t amount)
+{ auto_deals.push_back({ pid,target,amount }); }
 
 /*
-	TODO
+	hand_to_pile(uint8_t) -> void
+	purpose: move the currently selected card from player's hand to given pile
 */
 void CardSystem::hand_to_pile(uint8_t pid)
 {
@@ -144,7 +163,9 @@ void CardSystem::hand_to_pile(uint8_t pid)
 }
 
 /*
-	TODO
+	opponent_to_pile(uint8_t,uint8_t,uint8_t) -> void
+	idx: index of card held by given opponent
+	purpose: move the indexed card from opponent's hand to given pile
 */
 void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 {
@@ -162,39 +183,51 @@ void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 // FIXME: holds duplicate code chunk
 
 /*
-	TODO
+	create_player(vec2,float,uint16_t) -> void
+	pos: position of new player
+	rot: direction the new player should face towards as indicated by rotation around y-axis
+	capital: lifeline stacks the new player brings to the table
+	purpose: create a new non player character involved in the game
 */
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 { ops.push_back({ pos,rot,{},{},capital }); }
 
 /*
-	TODO
+	create_pile(vec2) -> void
+	pos: position of newly defined pile
+	purpose: define a new place where cards can pile up
 */
 void CardSystem::create_pile(glm::vec2 pos)
 { dpiles.push_back({ {},pos }); }
 
 /*
-	TODO
+	process_input() -> void
+	purpose: update meta player selections based on input
 */
-void CardSystem::process_input(Frame* f)
+void CardSystem::process_input()
 {
 	// keyboard input
-	choice += (f->kb.ka[SDL_SCANCODE_RIGHT]-f->kb.ka[SDL_SCANCODE_LEFT])*!lfI;
-	lfI = f->kb.ka[SDL_SCANCODE_RIGHT]||f->kb.ka[SDL_SCANCODE_LEFT];
+	choice += (m_frame->kb.ka[SDL_SCANCODE_RIGHT]-m_frame->kb.ka[SDL_SCANCODE_LEFT])*!lfI;
+	lfI = m_frame->kb.ka[SDL_SCANCODE_RIGHT]||m_frame->kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
 	// mouse input
-	bool mouse_input = f->mouse.my>150;
-	bool minput = !kinput&&(f->mouse.mx!=tmx);
+	bool mouse_input = m_frame->mouse.my>150;
+	bool minput = !kinput&&(m_frame->mouse.mx!=tmx);
 	choice *= !mouse_input;
-	choice += ((f->mouse.mx/640.0f)*hand.size())*mouse_input;
-	tmx = f->mouse.mx;
+	choice += ((m_frame->mouse.mx/640.0f)*hand.size())*mouse_input;
+	tmx = m_frame->mouse.mx;
 }
 
 /*
-	TODO
+	render() -> void
+	purpose: render and updates everything visual related to the playing card system:
+		it starts with the processing of still dealing cards,
+		then the automatic dealing tasks get processed,
+		followed by playing card animation interpolations.
+		finally, the render queue can be compiled and all visuals can be drawn.
 */
-void CardSystem::render(Frame* f)
+void CardSystem::render()
 {
 	// process deal arrivals
 	bool arrival = false;
@@ -247,7 +280,7 @@ void CardSystem::render(Frame* f)
 		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
 
 	// update deal stall time
-	crr_dtime += f->get_time_delta();
+	crr_dtime += m_frame->get_time_delta();
 
 	// animate
 	i = 0;
@@ -312,7 +345,14 @@ void CardSystem::render(Frame* f)
 // TODO: OPTIMIZE!
 
 /*
-	TODO
+	PARAMETER DEFINITION:
+	id: value id of card as natural result by creation process
+*/
+
+/*
+	set_position(uint8_t,vec3) -> void
+	pos: instantly new position of indexed playing card
+	purpose: instantly set new position of given playing card
 */
 void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 {
@@ -321,7 +361,9 @@ void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 }
 
 /*
-	TODO
+	set_rotation(uint8_t,vec3) -> void
+	rot: rotations around x, y & z axis stored in their respective vector values (radians)
+	purpose: precalculate sines & consines for euler rotations in vertex shader
 */
 void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 {
@@ -334,7 +376,9 @@ void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 }
 
 /*
-	TODO
+	reset_rotation(uint8_t) -> void
+	purpose: instantly reset rotation of given playing card to default orientation.
+		much less expensive to use than set_rotation(id,vec3(0,0,0))
 */
 void CardSystem::reset_rotation(uint8_t id)
 {
@@ -347,7 +391,8 @@ void CardSystem::reset_rotation(uint8_t id)
 }
 
 /*
-	TODO
+	get_position(uint8_t) -> vec3
+	returns: current position of requested playing card
 */
 glm::vec3 CardSystem::get_position(uint8_t id)
 {
@@ -356,7 +401,9 @@ glm::vec3 CardSystem::get_position(uint8_t id)
 }
 
 /*
-	TODO
+	get_rotation(uint8_t) -> vec3
+	purpose: reverse precalculation of sines & cosines for euler rotation in vertex shader
+	returns: individual rotations around x, y & z axis (radians)
 */
 glm::vec3 CardSystem::get_rotation(uint8_t id)
 {
@@ -371,12 +418,15 @@ glm::vec3 CardSystem::get_rotation(uint8_t id)
 	return glm::vec3(srot.x+(crot.x-srot.x)*(glm::abs(srot.x)<0.0001f),
 			srot.y+(crot.y-srot.y)*(glm::abs(srot.y)<0.0001f),
 			srot.z+(crot.z-srot.z)*(glm::abs(srot.z)<0.0001f));
-	// TODO: a little hacky don't you think? maybe try to do this more *elegantly*?!?
-	// TODO: hamilton instead of euler?!?!?
 }
+// TODO: a little hacky don't you think? maybe try to do this more *elegantly*?!?
+// TODO: hamilton instead of euler?!?!?
 
 /*
-	TODO
+	create_card(vec2,bool) -> void (private)
+	tex_id: vector corresponding to the respective subtexture position on texture atlas
+	deck_id: definition if created card uses backside of first or second card game
+	purpose: create a shader index upload for a new playing card
 */
 void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 {
@@ -387,7 +437,8 @@ void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 }
 
 /*
-	TODO
+	card_to_queue(uint8_t) -> void (private)
+	purpose: insert all index upload floats belonging to the given card as next in render queue
 */
 void CardSystem::card_to_queue(uint8_t id)
 {
@@ -396,7 +447,8 @@ void CardSystem::card_to_queue(uint8_t id)
 }
 
 /*
-	TODO
+	update_hand_position() -> void (private)
+	purpose: update all animations for cards held by player character to build an even fan pattern
 */
 void CardSystem::update_hand_position()
 {
@@ -405,12 +457,12 @@ void CardSystem::update_hand_position()
 		create_animation(hand[i],
 				glm::vec3(-5.5f-1.5f*(hand.size()/112.0f)+((float)i/hand.size()*5),7+0.001f*i,11),
 				glm::vec3(glm::radians(-45.0f),0,0),20);
-
-	// TODO: understand how to project card positions onto 2D screen for input
 }
+// TODO: understand how to project card positions onto 2D screen for input
 
 /*
-	TODO
+	update_opponent(uint8_t) -> void (private)
+	purpose: update all animations for cards held by given opponent to build an even fan pattern
 */
 void CardSystem::update_opponent(uint8_t oid)
 {
@@ -427,7 +479,15 @@ void CardSystem::update_opponent(uint8_t oid)
 }
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	pos: position to move playing card to until animation ends
+	rot: rotation to interpolate towards until animation ends
+	etime: frames the animation should take to complete playing card movement
+*/
+
+/*
+	create_animation(uint8_t,vec3,uint16_t) -> void (private)
+	purpose: create an animation of given playing card, changing only position in given time
 */
 void CardSystem::create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 {
@@ -439,7 +499,9 @@ void CardSystem::create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 }
 
 /*
-	TODO
+	create_animation(uint8_t,vec3,vec3,uint16_t) -> void (private)
+	overloads: create_animation . (uint8_t,vec3,uint16_t) -> (uint8_t,vec3,vec3,uint16_t)
+	purpose: create an animation of given playing card, changing both position and rotation
 */
 void CardSystem::create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime)
 {
@@ -450,7 +512,9 @@ void CardSystem::create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_
 }
 
 /*
-	TODO
+	force_create_animation(uint8_t,vec3,uint16_t) -> void (private)
+	purpose: create new animation without checking duplications, changing only position.
+		trade off: less expensive than create_animation counterpart
 */
 void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 {
@@ -459,13 +523,17 @@ void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 }
 
 /*
-	TODO
+	force_create_animation(uint8_t,vec3,vec3,uint16_t) -> void (private)
+	overloads: force_create_animation . (uint8_t,vec3,uint16_t) -> (uint8_t,vec3,vec3,uint16_t)
+	purpose: create new animation without checkint duplications, changing both position & rotation.
+		trade off: less expensive than create_animation counterpart
 */
 void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,glm::vec3 rot,uint16_t etime)
 { c_anims.push_back({ id,get_position(id),get_rotation(id),pos,rot,0,etime }); }
 
 /*
-	TODO
+	remove_animation(uint8_t) -> void (private)
+	purpose: delete current animation of given playing card from animation task list, if exsits
 */
 void CardSystem::remove_animation(uint8_t id)
 {
@@ -474,7 +542,9 @@ void CardSystem::remove_animation(uint8_t id)
 }
 
 /*
-	TODO
+	get_animation_id(uint8_t) -> int16_t (private)
+	purpose: get not only the animation index of given playing card, but also if an animation exists
+	returns: either index of animation list, or -1 if no such animation exists
 */
 int16_t CardSystem::get_animation_id(uint8_t id)
 {
@@ -482,3 +552,4 @@ int16_t CardSystem::get_animation_id(uint8_t id)
 	for (uint8_t i=0;i<c_anims.size();i++) out += (1+i)*(c_anims[i].card_id==id);
 	return out;
 }
+// FIXME: use uint8_t and use 255 (or such) to index non-exsitance

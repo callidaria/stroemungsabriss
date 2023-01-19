@@ -32,7 +32,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// card game test
-	CardSystem crdSystem = CardSystem(m_r3d);
+	CardSystem crdSystem = CardSystem(m_frame,m_r3d);
 	crdSystem.create_player(glm::vec2(0,-10),180,1000);
 	crdSystem.create_player(glm::vec2(-10,0),90,1000);
 	crdSystem.create_player(glm::vec2(10,0),-90,1000);
@@ -85,8 +85,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 				|| m_frame->kb.ka[SDL_SCANCODE_I] || m_frame->kb.ka[SDL_SCANCODE_E]
 				|| m_frame->kb.ka[SDL_SCANCODE_R] || m_frame->kb.ka[SDL_SCANCODE_T]
 				|| m_frame->kb.ka[SDL_SCANCODE_Q];
-		crdSystem.process_input(m_frame);
-		crdSystem.render(m_frame);
+		crdSystem.process_input();
+		crdSystem.render();
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);

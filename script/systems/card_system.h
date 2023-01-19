@@ -63,14 +63,14 @@ class CardSystem
 public:
 
 	// construction
-	CardSystem(Renderer3D* r3d);
+	CardSystem(Frame* f,Renderer3D* r3d);
 	~CardSystem() {  };
 
 	// interaction
 	void shuffle_all();
 	void deal_card(uint8_t pid);
 	void deal_card(uint8_t pid,uint8_t oid);
-	void register_auto_deal(uint8_t source,uint8_t target,uint8_t amount);
+	void register_auto_deal(uint8_t pid,uint8_t target,uint8_t amount);
 	void hand_to_pile(uint8_t pid);
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 
@@ -79,8 +79,8 @@ public:
 	void create_pile(glm::vec2 pos);
 
 	// update
-	void process_input(Frame* f);
-	void render(Frame* f);
+	void process_input();
+	void render();
 
 	// setters
 	void set_position(uint8_t id,glm::vec3 pos);
@@ -90,6 +90,12 @@ public:
 	// getters
 	glm::vec3 get_position(uint8_t id);
 	glm::vec3 get_rotation(uint8_t id);
+
+	// TODO: create capital visualizations
+	// TODO: create a readable way of indexing playing cards
+	// FIXME: selection by mouse cursor is not aligned properly
+	// FIXME: do not allow to place held cards if selection has been purposely overflown
+	// FIXME: fix fan pattern maximum distances
 
 private:
 
@@ -115,6 +121,7 @@ private:
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
 	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
+	Frame* m_frame;
 	Renderer3D* m_r3d;
 
 	// render
