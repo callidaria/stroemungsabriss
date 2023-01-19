@@ -94,8 +94,6 @@ public:
 	// TODO: create capital visualizations
 	// TODO: create a readable way of indexing playing cards
 	// FIXME: selection by mouse cursor is not aligned properly
-	// FIXME: do not allow to place held cards if selection has been purposely overflown
-	// FIXME: fix fan pattern maximum distances
 
 private:
 

@@ -181,8 +181,8 @@ void Frame::input(uint32_t &running,bool tinput)
 
 		// read mouse input
 		SDL_GetMouseState(&mouse.mx,&mouse.my);
-		mouse.mxfr = ((float)mouse.mx/w_res)*1920.0f; // ??make those optional
-		mouse.myfr = ((float)(h_res-mouse.my)/h_res)*1080.0f;
+		mouse.mxfr = ((float)mouse.mx/w_res); // ??make those optional
+		mouse.myfr = ((float)(h_res-mouse.my)/h_res);
 		// !!fix on move cancellation && carry boolean when button released
 		/*if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
 			mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT;
@@ -245,6 +245,7 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
 	SDL_StopTextInput();
+	SDL_ShowCursor(SDL_DISABLE);
 }
 
 /*

@@ -154,12 +154,14 @@ void CardSystem::register_auto_deal(uint8_t pid,uint8_t target,uint8_t amount)
 */
 void CardSystem::hand_to_pile(uint8_t pid)
 {
-	dpiles[pid].cards.push_back(hand[choice]);
-	create_animation(hand[choice],
-			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
-			glm::vec3(0),20);
-	hand.erase(hand.begin()+choice,hand.begin()+choice+1);
-	update_hand_position();
+	if (choice<hand.size()) {
+		dpiles[pid].cards.push_back(hand[choice]);
+		create_animation(hand[choice],
+				glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
+				glm::vec3(0),20);
+		hand.erase(hand.begin()+choice,hand.begin()+choice+1);
+		update_hand_position();
+	}
 }
 
 /*
@@ -472,7 +474,7 @@ void CardSystem::update_opponent(uint8_t oid)
 	// create insert animation
 	for (uint8_t i=0;i<ops[oid].cards.size();i++) {
 		glm::vec4 add_dir = phead_mat*glm::vec4(norm_pos.x,norm_pos.y,0,1);
-		add_dir *= (i+1)/(float)(ops[oid].cards.size()+1);
+		add_dir *= 4*((i+1)/(float)(ops[oid].cards.size()+1));
 		add_dir += glm::vec4(ops[oid].position.x,ops[oid].position.y,0,0);
 		create_animation(ops[oid].cards[i],glm::vec3(add_dir.x,0.001f*i,add_dir.y),20);
 	}
