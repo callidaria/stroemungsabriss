@@ -16,6 +16,17 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
 
+	// card game test
+	CardSystem crdSystem = CardSystem(m_frame,m_r2d,m_r3d);
+	crdSystem.create_player(glm::vec2(0,-10),180,1000);
+	crdSystem.create_player(glm::vec2(-10,0),90,1000);
+	crdSystem.create_player(glm::vec2(10,0),-90,1000);
+	crdSystem.create_pile(glm::vec2(0,0));
+	crdSystem.register_auto_deal(0,0,7);
+	crdSystem.register_auto_deal(0,1,7);
+	crdSystem.register_auto_deal(0,2,7);
+	crdSystem.register_auto_deal(0,3,7);
+
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
 	m_r2d->load(m_cam2d);
@@ -30,17 +41,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
-
-	// card game test
-	CardSystem crdSystem = CardSystem(m_frame,m_r3d);
-	crdSystem.create_player(glm::vec2(0,-10),180,1000);
-	crdSystem.create_player(glm::vec2(-10,0),90,1000);
-	crdSystem.create_player(glm::vec2(10,0),-90,1000);
-	crdSystem.create_pile(glm::vec2(0,0));
-	crdSystem.register_auto_deal(0,0,7);
-	crdSystem.register_auto_deal(0,1,7);
-	crdSystem.register_auto_deal(0,2,7);
-	crdSystem.register_auto_deal(0,3,7);
 
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);

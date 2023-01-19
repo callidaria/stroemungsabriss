@@ -11,7 +11,10 @@
 #include "../../ccb/mat/toolbox.h"
 
 #include "../../ccb/gfx/shader.h"
+#include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
+
+#include "../ui/cursor.h"
 
 // upload capacity
 constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 6;
@@ -63,7 +66,7 @@ class CardSystem
 public:
 
 	// construction
-	CardSystem(Frame* f,Renderer3D* r3d);
+	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d);
 	~CardSystem() {  };
 
 	// interaction
@@ -94,6 +97,7 @@ public:
 	// TODO: create capital visualizations
 	// TODO: create a readable way of indexing playing cards
 	// FIXME: selection by mouse cursor is not aligned properly
+	// FIXME: table texture repetition broke after cursor was added
 
 private:
 
@@ -120,6 +124,7 @@ private:
 	Shader sdr = Shader();
 	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
 	Frame* m_frame;
+	Renderer2D* m_r2d;
 	Renderer3D* m_r3d;
 
 	// render
@@ -144,6 +149,7 @@ private:
 	float crr_dtime = 0;
 
 	// controls
+	Cursor cursor = Cursor(m_frame,m_r2d);
 	bool lfI = false,kinput = true;
 	int32_t tmx = 0;
 	float cstart = 0;

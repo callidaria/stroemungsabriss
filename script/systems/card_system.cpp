@@ -3,11 +3,12 @@
 /*
 	constructor(Frame*,Renderer3D*)
 	f: pointer to cascabel frame for timing and input
+	r2d: pointer to genera 2D renderer to show cursor & icons
 	r3d: pointer to general 3D renderer to add certain background elements
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(Frame* f,Renderer3D* r3d)
-	: m_frame(f),m_r3d(r3d)
+CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
+	: m_frame(f),m_r2d(r2d),m_r3d(r3d)
 {
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
@@ -243,6 +244,14 @@ void CardSystem::render()
 		} else i++;
 	} if (arrival) update_hand_position();
 
+	// §§TESTSTATE§§
+	if (hand.size()) {
+		glm::vec3 tpos = get_position(hand[0]);
+		glm::vec4 tale = cam3D.proj3D*cam3D.view3D*glm::vec4(tpos.x,tpos.y,tpos.z,1);
+		std::cout << tale.x << ' ' << tale.y << ' ' << tale.z << '\n';
+	}
+	// §§END§§
+
 	// process opponent deal arrivals
 	uint8_t j = 0;
 	while (j<ops.size()) {
@@ -343,6 +352,9 @@ void CardSystem::render()
 	// gl reset features
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
+	// render cursor
+	cursor.render();
 }
 // TODO: OPTIMIZE!
 
@@ -460,7 +472,6 @@ void CardSystem::update_hand_position()
 				glm::vec3(-5.5f-1.5f*(hand.size()/112.0f)+((float)i/hand.size()*5),7+0.001f*i,11),
 				glm::vec3(glm::radians(-45.0f),0,0),20);
 }
-// TODO: understand how to project card positions onto 2D screen for input
 
 /*
 	update_opponent(uint8_t) -> void (private)
