@@ -21,6 +21,9 @@ constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
 constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
 
+// TIMING
+constexpr float CARDSYSTEM_DEAL_WAIT = 15;
+
 // to handle which cards are in a pile, as well as pile 'physics'
 struct DeckPile
 {
@@ -47,6 +50,14 @@ struct OpposingPlayer
 	uint16_t capital;
 };
 
+// pipeline entites to automatically deal cards
+struct DealProcess
+{
+	uint8_t source;
+	uint8_t target;
+	uint8_t amount;
+};
+
 class CardSystem
 {
 public:
@@ -59,6 +70,7 @@ public:
 	void shuffle_all();
 	void deal_card(uint8_t pid);
 	void deal_card(uint8_t pid,uint8_t oid);
+	void register_auto_deal(uint8_t source,uint8_t target,uint8_t amount);
 	void hand_to_pile(uint8_t pid);
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 
@@ -68,7 +80,7 @@ public:
 
 	// update
 	void process_input(Frame* f);
-	void render();
+	void render(Frame* f);
 
 	// setters
 	void set_position(uint8_t id,glm::vec3 pos);
@@ -122,6 +134,9 @@ private:
 	// system
 	std::vector<CardAnimation> c_anims;
 	std::vector<float> render_queue;
+	std::vector<DealProcess> auto_deals;
+	uint8_t crr_deal = 0;
+	float crr_dtime = 0;
 
 	// controls
 	bool lfI = false,kinput = true;

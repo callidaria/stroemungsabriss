@@ -37,6 +37,10 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	crdSystem.create_player(glm::vec2(-10,0),90,1000);
 	crdSystem.create_player(glm::vec2(10,0),-90,1000);
 	crdSystem.create_pile(glm::vec2(0,0));
+	crdSystem.register_auto_deal(0,0,7);
+	crdSystem.register_auto_deal(0,1,7);
+	crdSystem.register_auto_deal(0,2,7);
+	crdSystem.register_auto_deal(0,3,7);
 
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
@@ -75,16 +79,14 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		else if (m_frame->kb.ka[SDL_SCANCODE_E]&&!trg_deal) crdSystem.opponent_to_pile(0,1,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_R]&&!trg_deal) crdSystem.opponent_to_pile(1,1,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_T]&&!trg_deal) crdSystem.opponent_to_pile(2,1,0);
-		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J]
-				|| m_frame->kb.ka[SDL_SCANCODE_H]
-				|| m_frame->kb.ka[SDL_SCANCODE_G]
-				|| m_frame->kb.ka[SDL_SCANCODE_U]
-				|| m_frame->kb.ka[SDL_SCANCODE_I]
-				|| m_frame->kb.ka[SDL_SCANCODE_E]
-				|| m_frame->kb.ka[SDL_SCANCODE_R]
-				|| m_frame->kb.ka[SDL_SCANCODE_T];
+		else if (m_frame->kb.ka[SDL_SCANCODE_Q]&&!trg_deal) crdSystem.register_auto_deal(1,0,4);
+		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J] || m_frame->kb.ka[SDL_SCANCODE_H]
+				|| m_frame->kb.ka[SDL_SCANCODE_G] || m_frame->kb.ka[SDL_SCANCODE_U]
+				|| m_frame->kb.ka[SDL_SCANCODE_I] || m_frame->kb.ka[SDL_SCANCODE_E]
+				|| m_frame->kb.ka[SDL_SCANCODE_R] || m_frame->kb.ka[SDL_SCANCODE_T]
+				|| m_frame->kb.ka[SDL_SCANCODE_Q];
 		crdSystem.process_input(m_frame);
-		crdSystem.render();
+		crdSystem.render(m_frame);
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);

@@ -127,16 +127,19 @@ void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 /*
 	TODO
 */
+void CardSystem::register_auto_deal(uint8_t source,uint8_t target,uint8_t amount)
+{ auto_deals.push_back({ source,target,amount }); }
+
+/*
+	TODO
+*/
 void CardSystem::hand_to_pile(uint8_t pid)
 {
-	// animation
+	dpiles[pid].cards.push_back(hand[choice]);
 	create_animation(hand[choice],
 			glm::vec3(dpiles[pid].pos.x,dpiles[pid].cards.size()*.017f,dpiles[pid].pos.y),
 			glm::vec3(0),20);
-
-	// transaction
 	hand.erase(hand.begin()+choice,hand.begin()+choice+1);
-	dpiles[pid].cards.push_back(hand[choice]);
 	update_hand_position();
 }
 
@@ -190,7 +193,7 @@ void CardSystem::process_input(Frame* f)
 /*
 	TODO
 */
-void CardSystem::render()
+void CardSystem::render(Frame* f)
 {
 	// process deal arrivals
 	bool arrival = false;
@@ -221,6 +224,29 @@ void CardSystem::render()
 		} if (upd_opponent) update_opponent(j);
 		j++;
 	}
+
+	// process automatic deals
+	bool stall = (crr_dtime<CARDSYSTEM_DEAL_WAIT||!auto_deals.size());
+	crr_dtime *= stall;
+	crr_deal *= crr_deal<auto_deals.size();
+
+	// process currently active deal
+	if (auto_deals[crr_deal].amount&&!stall) {
+		if (auto_deals[crr_deal].target)
+			deal_card(auto_deals[crr_deal].source,auto_deals[crr_deal].target-1);
+		else deal_card(auto_deals[crr_deal].source);
+
+		// move to next deal and decrease left amount of cards to deal
+		auto_deals[crr_deal].amount--;
+		crr_deal++;
+	}
+
+	// remove if deal is completed
+	else if (!auto_deals[crr_deal].amount&&!stall)
+		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
+
+	// update deal stall time
+	crr_dtime += f->get_time_delta();
 
 	// animate
 	i = 0;
