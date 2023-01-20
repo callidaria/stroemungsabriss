@@ -99,7 +99,6 @@ public:
 	// TODO: create capital visualizations
 	// TODO: create a readable way of indexing playing cards
 	// TODO: variable text annotations & descriptions for playing cards
-	// FIXME: table texture repetition broke after cursor was added
 
 private:
 

@@ -13,10 +13,6 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(45,0,0));
-	m_r3d->load(&cam3D);
-	m_r3d->s3d.enable();
-	m_r3d->s3d.upload_float("ambient",1);
-	m_r3d->s3d.upload_float("tex_repeat",10);
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -217,7 +213,9 @@ void CardSystem::process_input()
 	kinput = lfI;
 
 	// transform from clip space & compare screen spaces with cursor position for choice
-	if (hand.size()) {
+	bool mouse_input
+			= (m_frame->mouse.mxfr!=tmx)&&(m_frame->mouse.myfr<.35f)&&(m_frame->mouse.mxfr<.5f);
+	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
 		float end = (get_card_screen_space(hand[hand.size()-1]).x+1)/2;
 		float stapled_pos = m_frame->mouse.mxfr-start;
@@ -225,14 +223,7 @@ void CardSystem::process_input()
 		choice = stapled_pos/single_card;
 		bool overselected = choice>=hand.size();
 		choice = overselected*(hand.size()-1)+!overselected*choice;
-	}
-
-	// mouse input
-	/*bool mouse_input = m_frame->mouse.my>150;
-	bool minput = !kinput&&(m_frame->mouse.mx!=tmx);
-	choice *= !mouse_input;
-	choice += ((m_frame->mouse.mx/640.0f)*hand.size())*mouse_input;
-	tmx = m_frame->mouse.mx;*/
+	} tmx = m_frame->mouse.mxfr;
 }
 
 /*
@@ -256,16 +247,6 @@ void CardSystem::render()
 			arrival = true;
 		} else i++;
 	} if (arrival) update_hand_position();
-
-	// §§TESTSTATE§§
-	/*if (hand.size()) {
-		glm::vec3 tpos = get_position(hand[0])
-				+ glm::vec3(-CARDSYSTEM_CARD_WIDTH/2,0,CARDSYSTEM_CARD_HEIGHT/2);
-		glm::vec4 cstale = cam3D.proj3D*cam3D.view3D*glm::vec4(tpos.x,tpos.y,tpos.z,1);
-		glm::vec3 tale = glm::vec3(cstale.x,cstale.y,cstale.z)/glm::vec3(cstale.w);
-		std::cout << tale.x << ' ' << tale.y << ' ' << tale.z << '\n';
-	}*/
-	// §§END§§
 
 	// process opponent deal arrivals
 	uint8_t j = 0;
@@ -352,6 +333,8 @@ void CardSystem::render()
 
 	// render background
 	m_r3d->prepare(&cam3D);
+	m_r3d->s3d.upload_float("ambient",1);
+	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// setup cards
