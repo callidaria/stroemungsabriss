@@ -23,12 +23,14 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	float cverts[] = {
 
 		// card front
-		-hwdt,0,-hhgt,0,0,0, -hwdt,0,hhgt,0,1,0, hwdt,0,hhgt,1,1,0,
-		hwdt,0,hhgt,1,1,0, hwdt,0,-hhgt,1,0,0, -hwdt,0,-hhgt,0,0,0,
+		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,
+		CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0, CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,
+		CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0, -CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,
 
 		// card back
-		hwdt,0,-hhgt,0,0,1, hwdt,0,hhgt,0,1,1, -hwdt,0,hhgt,1,1,1,
-		-hwdt,0,hhgt,1,1,1, -hwdt,0,-hhgt,1,0,1, hwdt,0,-hhgt,0,0,1,
+		CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,1, CARD_HWIDTH,0,CARD_HHEIGHT,0,1,1,
+		-CARD_HWIDTH,0,CARD_HHEIGHT,1,1,1, -CARD_HWIDTH,0,CARD_HHEIGHT,1,1,1,
+		-CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,1, CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,1,
 	};
 	bfr.bind();
 	bfr.upload_vertices(cverts,sizeof(cverts));
@@ -214,12 +216,23 @@ void CardSystem::process_input()
 	lfI = m_frame->kb.ka[SDL_SCANCODE_RIGHT]||m_frame->kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
+	// transform from clip space & compare screen spaces with cursor position for choice
+	if (hand.size()) {
+		float start = (get_card_screen_space(hand[0]).x+1)/2;
+		float end = (get_card_screen_space(hand[hand.size()-1]).x+1)/2;
+		float stapled_pos = m_frame->mouse.mxfr-start;
+		float single_card = (end-start)/(hand.size()-1);
+		choice = stapled_pos/single_card;
+		bool overselected = choice>=hand.size();
+		choice = overselected*(hand.size()-1)+!overselected*choice;
+	}
+
 	// mouse input
-	bool mouse_input = m_frame->mouse.my>150;
+	/*bool mouse_input = m_frame->mouse.my>150;
 	bool minput = !kinput&&(m_frame->mouse.mx!=tmx);
 	choice *= !mouse_input;
 	choice += ((m_frame->mouse.mx/640.0f)*hand.size())*mouse_input;
-	tmx = m_frame->mouse.mx;
+	tmx = m_frame->mouse.mx;*/
 }
 
 /*
@@ -245,11 +258,13 @@ void CardSystem::render()
 	} if (arrival) update_hand_position();
 
 	// §§TESTSTATE§§
-	if (hand.size()) {
-		glm::vec3 tpos = get_position(hand[0]);
-		glm::vec4 tale = cam3D.proj3D*cam3D.view3D*glm::vec4(tpos.x,tpos.y,tpos.z,1);
+	/*if (hand.size()) {
+		glm::vec3 tpos = get_position(hand[0])
+				+ glm::vec3(-CARDSYSTEM_CARD_WIDTH/2,0,CARDSYSTEM_CARD_HEIGHT/2);
+		glm::vec4 cstale = cam3D.proj3D*cam3D.view3D*glm::vec4(tpos.x,tpos.y,tpos.z,1);
+		glm::vec3 tale = glm::vec3(cstale.x,cstale.y,cstale.z)/glm::vec3(cstale.w);
 		std::cout << tale.x << ' ' << tale.y << ' ' << tale.z << '\n';
-	}
+	}*/
 	// §§END§§
 
 	// process opponent deal arrivals
@@ -458,6 +473,18 @@ void CardSystem::card_to_queue(uint8_t id)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
+}
+
+/*
+	get_card_screen_space(uint8_t) -> vec3
+	purpose: transform card vertices into screen space to make it smoothly interact with 2D elements
+	returns: upper-left card edge, translated into screen space coordinate system
+*/
+glm::vec3 CardSystem::get_card_screen_space(uint8_t id)
+{
+	glm::vec3 card_pos = get_position(id)+glm::vec3(-CARD_HWIDTH,0,CARD_HHEIGHT);
+	glm::vec4 clip_space = cam3D.proj3D*cam3D.view3D*glm::vec4(card_pos,1);
+	return glm::vec3(clip_space)/glm::vec3(clip_space.w);
 }
 
 /*

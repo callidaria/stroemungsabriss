@@ -16,7 +16,7 @@ Cursor::Cursor(Frame* frame,Renderer2D* r2d)
 void Cursor::render()
 {
 	// calculate drawn position
-	glm::vec2 cpos = glm::vec2(pFrame->mouse.mxfr,pFrame->mouse.myfr);
+	glm::vec2 cpos = glm::vec2(pFrame->mouse.mxfr*1280.0f,pFrame->mouse.myfr*720.0f);
 
 	// render cursor counter rotation
 	pR2D->prepare();

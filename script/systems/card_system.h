@@ -23,6 +23,8 @@ constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
 // positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
 constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
+constexpr float CARD_HWIDTH = CARDSYSTEM_CARD_WIDTH/2;
+constexpr float CARD_HHEIGHT = CARDSYSTEM_CARD_HEIGHT/2;
 
 // TIMING
 constexpr float CARDSYSTEM_DEAL_WAIT = 15;
@@ -96,7 +98,7 @@ public:
 
 	// TODO: create capital visualizations
 	// TODO: create a readable way of indexing playing cards
-	// FIXME: selection by mouse cursor is not aligned properly
+	// TODO: variable text annotations & descriptions for playing cards
 	// FIXME: table texture repetition broke after cursor was added
 
 private:
@@ -104,6 +106,7 @@ private:
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
 	void card_to_queue(uint8_t id);
+	glm::vec3 get_card_screen_space(uint8_t id);
 
 	// update
 	void update_hand_position();

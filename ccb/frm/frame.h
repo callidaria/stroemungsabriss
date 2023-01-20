@@ -20,7 +20,7 @@ struct Mouse
 {
 	bool mcl = false,mcr = false;	// mouse button requests
 	int32_t mx,my;					// mouse positions x,y
-	int32_t mxfr,myfr;				// mouse position x,y scaled to absolute range
+	float mxfr,myfr;				// mouse position x,y scaled to absolute range
 	int32_t mw;						// mouse wheel movements
 };
 
