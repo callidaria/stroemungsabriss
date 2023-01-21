@@ -19,10 +19,10 @@ A common usage of knowledge about this class is to modify the model matrix, whic
 
 ```c++
 // variable setup
-glm::vec2 position = glm::vec2(0);
-float width = 100;
-float height = 100;
-const char* path = "./path/to/texture.png";
+glm::vec2 position = glm::vec2(0);				// sprite position
+float width = 100;								// sprite scaling width
+float height = 100;								// sprite scaling height
+const char* path = "./path/to/texture.png";		// path to sprite texture
 
 // construction
 Sprite sprite = Sprite(position,widht,height,path);
