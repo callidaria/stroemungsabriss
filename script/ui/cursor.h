@@ -15,6 +15,10 @@ public:
 	Cursor(Frame* frame,Renderer2D* r2d);
 	void render();
 
+public:
+
+	glm::vec2 position;
+
 private:
 
 	// cascabel

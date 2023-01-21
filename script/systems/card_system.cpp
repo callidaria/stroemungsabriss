@@ -251,8 +251,8 @@ void CardSystem::render()
 	// process opponent deal arrivals
 	uint8_t j = 0;
 	while (j<ops.size()) {
-		bool upd_opponent = false;	// signal that opponent has been updated
-		i = 0;						// index for singular cards held by current opponent
+		bool upd_opponent = false;
+		i = 0;
 
 		// process status of cards that are being dealt
 		while (i<ops[j].deal.size()) {
