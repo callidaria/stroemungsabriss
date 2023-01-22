@@ -109,16 +109,16 @@ void flaredrop(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 {
 	// downwards movement depending on index
 	for (int i=0;i<2048;i++)
-		bSys->delta_bltPos(treg[9],i,glm::vec2(0,((i%6)+1)*-1));
+		bSys->delta_bltPos(treg[9]+BMEM_FLARES,i,glm::vec2(0,((i%6)+1)*-1));
 	// FIXME: count of movement loop
 	// ??cut spray while state 1 or continuous
 
 	// flaredrop spawn if cooldown over
 	bool no_flares = treg[1]||treg[3];
 	for (int i=0+6*no_flares;i<6;i++)
-		bSys->spwn_blt(treg[9],glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
+		bSys->spwn_blt(treg[9]+BMEM_FLARES,glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
 	for (int i=0+6*no_flares;i<6;i++)
-		bSys->spwn_blt(treg[9],glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
+		bSys->spwn_blt(treg[9]+BMEM_FLARES,glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
 
 	// setup random cooldown time if flares spawned
 	treg[1] = !no_flares*(rand()%12+4)+no_flares*treg[1];
@@ -135,11 +135,12 @@ void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 {
 	// constant downwards movement
 	for (int i=0;i<2048;i++)
-		bSys->delta_bltPos(treg[9]+1,i,glm::vec2(0,-1+(bSys->get_bltPos(treg[9]+1,i).y<50)*-100));
+		bSys->delta_bltPos(treg[9]+BMEM_MINES,i,
+				glm::vec2(0,-1+(bSys->get_bltPos(treg[9]+BMEM_MINES,i).y<50)*-100));
 
 	// spawn after cooldown frames ticked down
 	for (int i=(treg[4]||!treg[3]);i<1;i++) {
-		bSys->spwn_blt(treg[9]+1,glm::vec2(ePos.x+20,ePos.y-15));
+		bSys->spwn_blt(treg[9]+BMEM_MINES,glm::vec2(ePos.x+20,ePos.y-15));
 		treg[4] = rand()%3+1;  // FIXME: kick this outside of loop to reduce the amount of rand()
 	} treg[4] -= treg[3];  // tick cooldown frame counter
 }
@@ -154,7 +155,7 @@ void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2 ePos)
 {
 	// move bullets towards set directions
-	bSys->delta_fDir(treg[9]+2);
+	bSys->delta_fDir(treg[9]+BMEM_SPREAD);
 
 	// aim bullets in normalized direction at player
 	glm::vec2 dPos = ePos+glm::vec2(16.5f);
@@ -164,7 +165,7 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 	for (int i=-2+5*!!treg[7];i<3;i++) {
 		glm::vec4 rVec = glm::vec4(norm.x,norm.y,0,0)
 				*glm::rotate(glm::mat4(1.0f),i*.175f,glm::vec3(0,0,1));
-		bSys->spwn_blt(treg[9]+2,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
+		bSys->spwn_blt(treg[9]+BMEM_SPREAD,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
 				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
 				*((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		treg[8]--;
@@ -188,11 +189,11 @@ void directional_sweep(BulletSystem* bSys,int32_t* treg,glm::vec2 pPos,glm::vec2
 void whirlpool(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos)
 {
 	for (int i=0;i<2048;i++) {
-		float t = 0.1f*bSys->get_ts(treg[9]+3,i);
-		bSys->set_bltPos(treg[9]+3,i,
-				bSys->get_bltDir(treg[9]+3,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
+		float t = 0.1f*bSys->get_ts(treg[9]+BMEM_WHIRL,i);
+		bSys->set_bltPos(treg[9]+BMEM_WHIRL,i,
+				bSys->get_bltDir(treg[9]+BMEM_WHIRL,i)+glm::vec2(-pow(E,.35f*t)*glm::cos(t),
 				pow(E,.35f*t)*glm::sin(t)));
-	} bSys->inc_tick(treg[9]+3);
+	} bSys->inc_tick(treg[9]+BMEM_WHIRL);
 	for (int i=0;i<1;i++)
-		bSys->spwn_blt(treg[9]+3,ePos,ePos);
+		bSys->spwn_blt(treg[9]+BMEM_WHIRL,ePos,ePos);
 }

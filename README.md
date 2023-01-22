@@ -61,7 +61,7 @@ make win
 
 <br>
 
-## v0.0.4 DEV
+## v0.0.4 DEV [UNX]
 
 ### features:
 - individual rotations of instanced objects
@@ -75,7 +75,7 @@ make win
 
 <br>
 
-## v0.0.3 DEV [UNX]
+## v0.0.3 [WIN]
 
 ### features:
 - preview practice & arcade position in menu
@@ -111,7 +111,7 @@ make win
 
 <br>
 
-## v0.0.2 [WIN]
+## v0.0.2
 - Build in Dev Mode & Engine Terminal
 - Dynamic Entity Loader & Interpreter
 - Windows Port
@@ -147,5 +147,5 @@ Worktime: 120h
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
-	+ 91: 5h 3min
+	+ 91: 5h 57min
 - Total Code Lines: 11.575
