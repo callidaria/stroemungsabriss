@@ -18,14 +18,9 @@ InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t i
 	// create canvas & generate texture
 	v = Toolbox::create_sprite_canvas_triangled(p,w,h);
 	for (int idx=0;idx<IANIMATION_VALUES;idx+=IANIMATION_REPEAT) {
-		i[idx] = 0;
-		i[idx+1] = 0;
-		i[idx+2] = 0;
-		i[idx+3] = 1;
-		i[idx+4] = 0;
-		i[idx+5] = 0;
-	}
-	glGenTextures(1,&tex);
+		i[idx] = 0;i[idx+1] = 0;i[idx+2] = 0;
+		i[idx+3] = 1;i[idx+4] = 0;i[idx+5] = 0;
+	} glGenTextures(1,&tex);
 
 	// calculate ticks per subtexture
 	tps = tick_cap/st_count;

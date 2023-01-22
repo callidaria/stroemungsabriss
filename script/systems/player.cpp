@@ -90,10 +90,10 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	float mvspeed = !ddur*(4+(3*!(*cnt.rng_focus||*cnt.change)));
 
 	// calculate movement in direction of stick or 8-way input
-	glm::vec2 fltmv=glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>dz_epsilon), // vectorized
-			*cnt.flt_ud*(abs(*cnt.flt_ud)>dz_epsilon)*-1));
+	glm::vec2 fltmv = glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>dz_epsilon),	// vector
+			* cnt.flt_ud*(abs(*cnt.flt_ud)>dz_epsilon)*-1));
 	bool t_real = fltmv.x==fltmv.x;
-	glm::vec2 absmv=glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left), // absolute
+	glm::vec2 absmv = glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left),	// absolute
 			(*cnt.abs_up)-(*cnt.abs_down)));
 	bool is_real = absmv.x==absmv.x;
 	glm::vec2 mvdir = (t_real ? fltmv : glm::vec2(0))
@@ -116,11 +116,11 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	treg[1] = pos.y;
 
 	// update bullet position by current direction
-	m_bsys->delta_fDir(0);
+	//m_bsys->delta_fDir(0);
 
 	// run requested shot type or idle
-	uint8_t sidx = 0+((*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))
-			*(m_frame->get_time_delta()>.1f);
+	uint8_t sidx = ((*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))
+			* (m_frame->get_time_delta()>.1f);
 	rng_flib.at(sidx)(m_bsys,treg);
 
 	// TODO: bombs

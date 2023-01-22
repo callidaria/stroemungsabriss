@@ -5,9 +5,8 @@
 	purpose: purpose: create renderer object to subsequently add instances to and draw them
 */
 RendererI::RendererI()
-{
-	buffer.add_buffer();
-} RendererI::~RendererI() {  }
+{ buffer.add_buffer(); }
+RendererI::~RendererI() {  }
 
 /*
 	add(vec2,float,float,const char*) -> uint16_t
@@ -37,6 +36,7 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,
 		uint8_t itn,uint8_t f)
 {
+	std::cout << w << 'x' << h << '\n';
 	ial.push_back(InstancedAnim(p,w,h,t,row,col,itn,f));
 	return ial.size()-1;
 }
@@ -47,14 +47,12 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,ui
 */
 void RendererI::load()
 {
-	// clear memory for vertex list
-	std::vector<float> v;
-
 	// write all object vertices to master array
-	for (int i=0;i<il.size();i++)
-		v.insert(v.end(),il[i].v.begin(),il[i].v.end());
-	for (int i=0;i<ial.size();i++)
-		v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+	std::vector<float> v;
+	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
+	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+	std::cout << "loading vertices, " << il.size() << " sprites / "
+			<< ial.size() << " animations" << '\n';
 
 	// upload to buffer
 	buffer.bind();
@@ -116,9 +114,7 @@ void RendererI::prepare(float dtime)
 	purpose: reset given tick within given cluster
 */
 void RendererI::reset_anim_tick(uint16_t cluster,uint16_t idx)
-{
-	ial[cluster].reset_tick(idx);
-}
+{ ial[cluster].reset_tick(idx); }
 
 /*
 	render(uint16_t,uint16_t) -> void
@@ -150,7 +146,7 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
-	glDrawArraysInstanced(GL_TRIANGLES,i,i+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
 }
 
 /*
@@ -181,9 +177,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 	returns: vectorized offset direction and length as derived from index upload list
 */
 glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
-{
-	return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]);
-}
+{ return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]); }
 
 /*
 	get_aOffset(uint16_t i,uint16_t j) -> vec2
@@ -191,9 +185,7 @@ glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
 	returns: vectorized offset direction and length as derived from index upload list of animation
 */
 glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
-{
-	return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]);
-}
+{ return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]); }
 
 /*
 	set_offset(uint16_t,uint16_t,vec2) -> void

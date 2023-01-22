@@ -21,7 +21,7 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 		const uint32_t caps,const char* tPath,uint8_t rows,uint8_t cols,uint8_t itn,uint8_t f)
 {
 	// setting bullet parameter lists
-	m_rI->add(glm::vec2(0,0),width,height,tPath,rows,cols,itn,f);	// adding bullets
+	m_rI->add(glm::vec2(width/2,height/2),width,height,tPath,rows,cols,itn,f);	// adding bullets
 	std::vector<glm::vec2> t_dirs(caps);	// creating temporary bullet direction list
 	std::vector<int32_t> t_ts(caps);		// creating temporary bullet tick counter list
 
@@ -34,11 +34,11 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 	c_height.push_back(height);
 
 	// setting initial values
-	bCount.push_back(0);		// add value of already spawned bullets set to 0
+	bCount.push_back(0);		// add value of already spawned bullets, set to 0
 	countCaps.push_back(caps);	// save capacity value to capacity value list
 	dirs.push_back(t_dirs);		// add bullet direction list
 	ts.push_back(t_ts);			// add bullet tick counter list
-	return bCount.size()-1;		// return the index, the cluster is to be referenced by
+	return bCount.size()-1;		// return the index the cluster is to be referenced by
 }
 
 /*
@@ -146,7 +146,6 @@ void BulletSystem::render()
 {
 	m_rI->prepare(m_frame->get_time_delta());
 	for (int i=0;i<bCount.size();i++) m_rI->render_anim(i,countCaps[i]);
-	// FIXME: find a solution to the bullets rendering at origin because of capping before setting
 }
 
 /*
