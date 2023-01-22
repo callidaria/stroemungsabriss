@@ -71,6 +71,7 @@ make win
 - FIXED: despawned directed projectiles sometimes appear in view
 - FIXED: hitbox indicator over player character somehow gets covered by character model
 - FIXED: bullet system renders spawned bullets twice with a slight offset [DEV]
+- FIXED: texture issues with opponent's flyfighter object
 
 <br>
 
@@ -146,5 +147,5 @@ Worktime: 120h
 	+ 85: 20min
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
-	+ 91: 3h 15min
+	+ 91: 5h 3min
 - Total Code Lines: 11.575

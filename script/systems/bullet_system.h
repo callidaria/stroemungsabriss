@@ -23,7 +23,6 @@ public:
 
 	// relative movement
 	void delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos);
-	void delta_bltDir(uint8_t cluster,uint32_t index,glm::vec2 dDir);
 	void delta_fDir(uint8_t cluster);
 
 	// update

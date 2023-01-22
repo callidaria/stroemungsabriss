@@ -9,6 +9,7 @@
 Text::Text(Font* f)
 	: m_font(f)
 {
+	glGenTextures(1,&ftexture);
 	buffer = Buffer();
 	buffer.add_buffer();
 	texture();

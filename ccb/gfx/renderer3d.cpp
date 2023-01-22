@@ -5,9 +5,8 @@
 	purpose: create renderer object to subsequently add 3D objects to and draw them
 */
 Renderer3D::Renderer3D()
-{
-	buffer.add_buffer();
-} Renderer3D::~Renderer3D() {  }
+{ buffer.add_buffer(); }
+Renderer3D::~Renderer3D() {  }
 
 /*
 	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> uint16_t

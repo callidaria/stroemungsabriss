@@ -27,9 +27,8 @@
 void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* treg)
 {
 	// visuals
-	rnd_index = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png",
-			"./res/terra/spec.png","./res/terra/norm.png","./res/none.png",
-			glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
+	rnd_index = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
 	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);

@@ -15,8 +15,8 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// setup player character visualization
-	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
-			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
+	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
@@ -97,7 +97,7 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 			(*cnt.abs_up)-(*cnt.abs_down)));
 	bool is_real = absmv.x==absmv.x;
 	glm::vec2 mvdir = (t_real ? fltmv : glm::vec2(0))
-			+glm::vec2(!t_real)*(is_real ? absmv : glm::vec2(0));
+			+ glm::vec2(!t_real)*(is_real ? absmv : glm::vec2(0));
 	// FIXME: find something better than the ternary every frame
 
 	// change position of player based on calculated movement direction
@@ -107,9 +107,9 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
 	uint16_t y_full_cap = 720-JET_BORDER_HEIGHT;
 	pos += glm::vec3((pos.x<JET_BORDER_WIDTH)*(JET_BORDER_WIDTH-pos.x)
-			-(pos.x>x_full_cap)*(pos.x-x_full_cap),
+			- (pos.x>x_full_cap)*(pos.x-x_full_cap),
 			(pos.y<JET_BORDER_HEIGHT)*(JET_BORDER_HEIGHT-pos.y)
-			-(pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
+			- (pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
 
 	// write player position to register
 	treg[0] = pos.x;
