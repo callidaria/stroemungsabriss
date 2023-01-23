@@ -15,7 +15,7 @@ A common usage of knowledge about this class is to modify the model matrix, whic
 
 ## Construction
 
-### Technical Construction
+### Traditional Construction
 
 ```c++
 // variable setup
@@ -28,11 +28,11 @@ const char* path = "./path/to/texture.png";		// path to sprite texture
 Sprite sprite = Sprite(position,widht,height,path);
 ```
 
-### Common Construction
+### Ideal Construction
 
 ```c++
 // predefinition
-Renderer2D r2d;		// construction & previous actions have been cut
+Renderer2D r2d = Renderer2D();
 
 // construction
 r2d.add(position,width,height,path);
