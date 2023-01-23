@@ -71,7 +71,7 @@ r2d.add(position,width,height,path,rows,columns,number_of_iterations,frames_to_l
 
 ### System
 
-- (*) v -> std::vector<float> : animation vertices to combine into render buffer
+- (*) v -> std::vector<float> : animation vertices to combine in renderer
 - (*) tex -> GLuint : bindable animation sprite sheet
 
 ### Values

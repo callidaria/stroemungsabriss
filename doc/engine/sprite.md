@@ -71,7 +71,7 @@ r2d.add(position,width,height,path);
 
 ### System
 
-- (*) v -> std::vector<float> : sprite vertices to combine into render buffer
+- (*) v -> std::vector<float> : sprite vertices to combine in shader
 - (*) tex -> GLuint : bindable sprite texture
 
 ### Position
