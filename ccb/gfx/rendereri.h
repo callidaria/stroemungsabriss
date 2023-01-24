@@ -26,7 +26,6 @@ public:
 
 	// loaders
 	void load();
-	void load(Camera2D* cam2d);
 
 	// preparation
 	void prepare(float dtime);

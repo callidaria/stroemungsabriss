@@ -21,6 +21,7 @@ InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t i
 		i[idx] = 0;i[idx+1] = 0;i[idx+2] = 0;
 		i[idx+3] = 1;i[idx+4] = 0;i[idx+5] = 0;
 	} glGenTextures(1,&tex);
+	std::cout << "ld:" << v.size() << '\n';
 
 	// calculate ticks per subtexture
 	tps = tick_cap/st_count;
@@ -63,8 +64,7 @@ void InstancedAnim::update(float dtime)
 		// calculate subtexture position
 		tex_index = ticks[idx]/tps;
 		tex_x = tex_index%col,tex_y = tex_index/col;
-		i[idx*IANIMATION_REPEAT+4] = tex_x;
-		i[idx*IANIMATION_REPEAT+5] = tex_y;
+		i[idx*IANIMATION_REPEAT+4] = tex_x;i[idx*IANIMATION_REPEAT+5] = tex_y;
 
 		// increment update ticks
 		ticks[idx] += dtime;

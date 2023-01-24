@@ -17,7 +17,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
 	m_r2d->load(m_cam2d);
-	m_rI->load(m_cam2d);
+	m_rI->load();
 	m_r3d->load(&cam3d);
 
 	// ortho 3D element lighting

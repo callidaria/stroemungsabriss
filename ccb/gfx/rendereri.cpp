@@ -36,7 +36,6 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t)
 uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,
 		uint8_t itn,uint8_t f)
 {
-	std::cout << w << 'x' << h << '\n';
 	ial.push_back(InstancedAnim(p,w,h,t,row,col,itn,f));
 	return ial.size()-1;
 }
@@ -51,8 +50,6 @@ void RendererI::load()
 	std::vector<float> v;
 	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
 	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
-	std::cout << "loading vertices, " << il.size() << " sprites / "
-			<< ial.size() << " animations" << '\n';
 
 	// upload to buffer
 	buffer.bind();
@@ -73,18 +70,10 @@ void RendererI::load()
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
 	for (int i=0;i<ial.size();i++) ial[i].texture();
-}
 
-/*
-	load(Camera2D*) -> void
-	overloads: previous load()
-	cam2d: camera to render indexable 2D objects in relation to
-	purpose: in addition to using the features of load the camera matrices get uploaded
-*/
-void RendererI::load(Camera2D* cam2d)
-{
-	load();
-	sI.upload_camera(*cam2d);
+	// coordinate system
+	Camera2D cam2D = Camera2D(1280,720);
+	sI.upload_camera(cam2D);
 }
 
 /*
@@ -129,7 +118,8 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
 
 	// render instanced
-	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
+	GLsizei vjump = i*6;
+	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
 }
 
 /*
@@ -146,7 +136,8 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
-	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
+	GLsizei vjump = (il.size()+i)*6;
+	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
 }
 
 /*
@@ -162,8 +153,8 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 
 	// draw
-	uint16_t idx = (i+il.size())*6;
-	glDrawArraysInstanced(GL_TRIANGLES,idx,idx+6,amt);
+	uint16_t vjump = (il.size()+i)*6;
+	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
 }
 
 /*
