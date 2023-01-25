@@ -21,7 +21,7 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 		const uint32_t caps,const char* tPath,uint8_t rows,uint8_t cols,uint8_t itn,uint8_t f)
 {
 	// setting bullet parameter lists
-	m_rI->add(glm::vec2(width/2,height/2),width,height,tPath,rows,cols,itn,f);	// adding bullets
+	m_rI->add(glm::vec2(0),width,height,tPath,rows,cols,itn,f);		// adding bullets
 	std::vector<glm::vec2> t_dirs(caps);	// creating temporary bullet direction list
 	std::vector<int32_t> t_ts(caps);		// creating temporary bullet tick counter list
 

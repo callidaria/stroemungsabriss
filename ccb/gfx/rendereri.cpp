@@ -51,6 +51,9 @@ void RendererI::load()
 	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
 	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
 
+	for (uint8_t i=0;i<v.size();i+=4)
+		std::cout << "vert: " << v[i] << ',' << v[i+1] << ',' << v[i+2] << ',' << v[i+3] << '\n';
+
 	// upload to buffer
 	buffer.bind();
 	buffer.upload_vertices(v);
