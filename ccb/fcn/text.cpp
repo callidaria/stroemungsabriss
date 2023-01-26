@@ -32,14 +32,10 @@ int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very
 	}
 
 	// character information write
-	ibv.push_back(p.x);
-	ibv.push_back(p.y);
-	ibv.push_back(m_font->x[i]);
-	ibv.push_back(m_font->y[i]);
-	ibv.push_back(m_font->wdt[i]);
-	ibv.push_back(m_font->hgt[i]);
-	ibv.push_back(m_font->xo[i]);
-	ibv.push_back(m_font->yo[i]);
+	ibv.push_back(p.x);ibv.push_back(p.y);
+	ibv.push_back(m_font->x[i]);ibv.push_back(m_font->y[i]);
+	ibv.push_back(m_font->wdt[i]);ibv.push_back(m_font->hgt[i]);
+	ibv.push_back(m_font->xo[i]);ibv.push_back(m_font->yo[i]);
 
 	return m_font->xa[i]*(m_font->mw/83.0f);
 	// ??do this with a vec2 pointer maybe & also with dynamic texdiv
@@ -64,9 +60,7 @@ void Text::add(const char* s,glm::vec2 p)
 	purpose: clear all character entries from text entity index buffer
 */
 void Text::clear()
-{
-	ibv.clear();
-}
+{ ibv.clear(); }
 
 /*
 	texture() -> void
@@ -75,9 +69,7 @@ void Text::clear()
 		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
-{
-	Toolbox::load_texture(ftexture,m_font->tp);
-}
+{ Toolbox::load_texture(ftexture,m_font->tp); }
 
 /*
 	load(Camera2D*) -> void
@@ -131,9 +123,7 @@ void Text::render(int32_t amnt,glm::vec4 col)
 	purpose: emulate a free text scrolling effect by common model transformation of sprites
 */
 void Text::set_scroll(glm::mat4 model)
-{
-	sT.upload_matrix("model",model);
-}
+{ sT.upload_matrix("model",model); }
 
 /*
 	load_vertex() -> void (private)

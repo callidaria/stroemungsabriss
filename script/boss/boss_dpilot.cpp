@@ -32,8 +32,8 @@ void BossDPilot::load(CascabelBaseFeature* ccbf,uint32_t &rnd_index,int32_t* tre
 
 	// danmaku
 	treg[9] = ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
-	ccbf->bSys->add_cluster(30,30,2048,"./res/bllt_norm.png",1,1,1,30);
-	ccbf->bSys->add_cluster(50,50,1024,"./res/bllt_ffdir.png",1,1,1,30);
+	ccbf->bSys->add_cluster(50,50,2048,"./res/bllt_norm.png",1,1,1,30);
+	ccbf->bSys->add_cluster(30,30,1024,"./res/bllt_ffdir.png",1,1,1,30);
 	//ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
 
 	// registers
@@ -80,9 +80,9 @@ void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 
 	treg[12]++;
 
 	// visuals
-	ccbf->r3d->prepare();
+	/*ccbf->r3d->prepare();
 	ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
-	ccbf->r3d->render_mesh(rnd_index,rnd_index+1);
+	ccbf->r3d->render_mesh(rnd_index,rnd_index+1);*/
 }
 
 /*

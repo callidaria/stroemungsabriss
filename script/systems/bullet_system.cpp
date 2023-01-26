@@ -127,12 +127,12 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 
 		// get centered bullet position
 		glm::vec2 cPos = m_rI->get_aOffset(cluster,i)
-				+glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
+				+ glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
 
-		// calculate if object got hit
-		bool hit = glm::length(cPos-pos)<=hr+br;	// check collision
-		m_rI->add_aOffset(cluster,i,glm::vec2(10000)*glm::vec2((int)hit));	// "despawn"
-		out += hit;		// increment hit-o-meter
+		// calculate if object got hit & "despawn"
+		bool hit = glm::length(cPos-pos)<=hr+br;
+		m_rI->add_aOffset(cluster,i,glm::vec2(10000)*glm::vec2((int)hit));
+		out += hit;
 	}
 
 	return out;

@@ -19,7 +19,7 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// add pc projectiles to bullet system
-	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
+	m_bsys->add_cluster(25,25,4096,"./res/hntblt.png",1,1,1,30);
 	treg[2] = 9;
 
 	// adressing indexable interaction methods
@@ -133,14 +133,14 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
 
 	// render and move player character
-	m_r3d->prepare();
+	/*m_r3d->prepare();
 	m_r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),pos)*mdrot);
 	m_r3d->render_mesh(ridx,ridx+1);
 
 	// render player hitbox indicator
 	m_r2d->prepare();
 	m_r2d->sl[aidx].model = glm::translate(glm::mat4(1.0f),pos-glm::vec3(5,5,0));
-	m_r2d->render_sprite(aidx,aidx+1);
+	m_r2d->render_sprite(aidx,aidx+1);*/
 
 	// render health bar
 	/*hbar.register_damage(pDmg);
