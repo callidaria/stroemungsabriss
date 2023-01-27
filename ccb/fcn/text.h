@@ -29,6 +29,7 @@ public:
 	void clear();
 
 	// preparation
+	void texture();
 	void load();
 	void prepare();
 

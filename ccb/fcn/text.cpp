@@ -18,7 +18,6 @@ Text::Text()
 Text::Text(Font f)
 	: font(f)
 {
-	glGenTextures(1,&ftexture);
 	buffer.add_buffer();
 	glGenTextures(1,&tex);
 }
@@ -41,9 +40,9 @@ int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very
 
 	// character information write
 	ibv.push_back(p.x);ibv.push_back(p.y);
-	ibv.push_back(m_font->x[i]);ibv.push_back(m_font->y[i]);
-	ibv.push_back(m_font->wdt[i]);ibv.push_back(m_font->hgt[i]);
-	ibv.push_back(m_font->xo[i]);ibv.push_back(m_font->yo[i]);
+	ibv.push_back(font.x[i]);ibv.push_back(font.y[i]);
+	ibv.push_back(font.wdt[i]);ibv.push_back(font.hgt[i]);
+	ibv.push_back(font.xo[i]);ibv.push_back(font.yo[i]);
 
 	return font.xa[i]*(font.mw/83.0f);
 	// ??do this with a vec2 pointer maybe & also with dynamic texdiv
@@ -77,10 +76,10 @@ void Text::clear()
 		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
-{ Toolbox::load_texture(ftexture,m_font->tp); }
+{ Toolbox::load_texture(tex,font.tp); }
 
 /*
-	load(Camera2D*) -> void
+	load() -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
 */
