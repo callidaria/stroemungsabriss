@@ -61,7 +61,7 @@ then, press [b] key to build executable
 
 <br>
 
-## v0.0.4 DEV
+## v0.0.4 DEV [UNX]
 
 ### features:
 - individual rotations of instanced objects
@@ -70,10 +70,13 @@ then, press [b] key to build executable
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
 - FIXED: negative jet tilt according to movement input
+- FIXED: hitbox indicator over player character somehow gets covered by character model
+- FIXED: bullet system renders spawned bullets twice with a slight offset
+- FIXED: texture issues with opponent's flyfighter object
 
 <br>
 
-## v0.0.3
+## v0.0.3 [WIN]
 
 ### features:
 - preview practice & arcade position in menu
@@ -134,4 +137,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
-- Total Code Lines: 11.570
+	+ 91: 16h 3min
+- Total Code Lines: 11.575

@@ -56,8 +56,6 @@ int main(int argc,char** argv)
 	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
 
 	// CAMERAS
-	r2d.load(&cam2d);
-	ri.load(&cam2d);
 	uint32_t run=1,pause=false;
 	bool reboot = false;
 	glm::mat4 model = glm::mat4(1.0f);

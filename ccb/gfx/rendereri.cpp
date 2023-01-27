@@ -5,9 +5,8 @@
 	purpose: purpose: create renderer object to subsequently add instances to and draw them
 */
 RendererI::RendererI()
-{
-	buffer.add_buffer();
-} RendererI::~RendererI() {  }
+{ buffer.add_buffer(); }
+RendererI::~RendererI() {  }
 
 /*
 	add(vec2,float,float,const char*) -> uint16_t
@@ -47,14 +46,10 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,ui
 */
 void RendererI::load()
 {
-	// clear memory for vertex list
-	std::vector<float> v;
-
 	// write all object vertices to master array
-	for (int i=0;i<il.size();i++)
-		v.insert(v.end(),il[i].v.begin(),il[i].v.end());
-	for (int i=0;i<ial.size();i++)
-		v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+	std::vector<float> v;
+	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
+	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
 
 	// upload to buffer
 	buffer.bind();
@@ -75,20 +70,10 @@ void RendererI::load()
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
 	for (int i=0;i<ial.size();i++) ial[i].texture();
-}
 
-/*
-	load(Camera2D*) -> void
-	cam2d: camera to render indexable 2D objects in relation to
-	purpose: in addition to using the features of load the camera matrices get uploaded
-*/
-void RendererI::load(Camera2D* cam2d)
-{
-	// standard loading process
-	load();
-
-	// upload camera to shader program
-	sI.upload_camera(*cam2d);
+	// coordinate system
+	Camera2D cam2D = Camera2D(1280,720);
+	sI.upload_camera(cam2D);
 }
 
 /*
@@ -118,9 +103,7 @@ void RendererI::prepare(float dtime)
 	purpose: reset given tick within given cluster
 */
 void RendererI::reset_anim_tick(uint16_t cluster,uint16_t idx)
-{
-	ial[cluster].reset_tick(idx);
-}
+{ ial[cluster].reset_tick(idx); }
 
 /*
 	render(uint16_t,uint16_t) -> void
@@ -135,12 +118,12 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
 
 	// render instanced
-	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
 
 /*
 	render(uint16_t,uint16_t,vec2) -> void
-	overloads previous render()
+	overloads: previous render()
 	i_tex: texture index vector indicating subtexture position on spritesheet raster
 	purpose: render specific animation frame of previously added instanced animation object
 */
@@ -152,7 +135,7 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
-	glDrawArraysInstanced(GL_TRIANGLES,i,i+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
 /*
@@ -168,8 +151,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 
 	// draw
-	uint16_t idx = (i+il.size())*6;
-	glDrawArraysInstanced(GL_TRIANGLES,idx,idx+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
 /*
@@ -183,9 +165,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 	returns: vectorized offset direction and length as derived from index upload list
 */
 glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
-{
-	return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]);
-}
+{ return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]); }
 
 /*
 	get_aOffset(uint16_t i,uint16_t j) -> vec2
@@ -193,9 +173,7 @@ glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
 	returns: vectorized offset direction and length as derived from index upload list of animation
 */
 glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
-{
-	return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]);
-}
+{ return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]); }
 
 /*
 	set_offset(uint16_t,uint16_t,vec2) -> void

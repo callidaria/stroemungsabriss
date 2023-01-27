@@ -11,12 +11,12 @@
 Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys)
 	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_bsys(bsys)
 {
-	// setup player character visualization
-	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/terra/spec.png",
-			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
-
 	// setup player hitbox indicator
 	aidx = m_r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
+
+	// setup player character visualization
+	ridx = m_r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// add pc projectiles to bullet system
 	m_bsys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
@@ -90,13 +90,14 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	float mvspeed = !ddur*(4+(3*!(*cnt.rng_focus||*cnt.change)));
 
 	// calculate movement in direction of stick or 8-way input
-	glm::vec2 fltmv=glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>dz_epsilon), // vectorized
-			*cnt.flt_ud*(abs(*cnt.flt_ud)>dz_epsilon)*-1));
+	glm::vec2 fltmv = glm::normalize(glm::vec2(*cnt.flt_lr*(abs(*cnt.flt_lr)>dz_epsilon),	// vector
+			* cnt.flt_ud*(abs(*cnt.flt_ud)>dz_epsilon)*-1));
 	bool t_real = fltmv.x==fltmv.x;
-	glm::vec2 absmv=glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left), // absolute
+	glm::vec2 absmv = glm::normalize(glm::vec2((*cnt.abs_right)-(*cnt.abs_left),	// absolute
 			(*cnt.abs_up)-(*cnt.abs_down)));
 	bool is_real = absmv.x==absmv.x;
-	glm::vec2 mvdir = (t_real?fltmv:glm::vec2(0))+glm::vec2(!t_real)*(is_real?absmv:glm::vec2(0));
+	glm::vec2 mvdir = (t_real ? fltmv : glm::vec2(0))
+			+ glm::vec2(!t_real)*(is_real ? absmv : glm::vec2(0));
 	// FIXME: find something better than the ternary every frame
 
 	// change position of player based on calculated movement direction
@@ -106,9 +107,9 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
 	uint16_t y_full_cap = 720-JET_BORDER_HEIGHT;
 	pos += glm::vec3((pos.x<JET_BORDER_WIDTH)*(JET_BORDER_WIDTH-pos.x)
-			-(pos.x>x_full_cap)*(pos.x-x_full_cap),
+			- (pos.x>x_full_cap)*(pos.x-x_full_cap),
 			(pos.y<JET_BORDER_HEIGHT)*(JET_BORDER_HEIGHT-pos.y)
-			-(pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
+			- (pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
 
 	// write player position to register
 	treg[0] = pos.x;
@@ -118,8 +119,8 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	m_bsys->delta_fDir(0);
 
 	// run requested shot type or idle
-	uint8_t sidx = 0+((*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))
-			*(m_frame->get_time_delta()>.1f);
+	uint8_t sidx = ((*cnt.rng_wide&&!*cnt.rng_focus)+2*(*cnt.rng_focus))
+			* (m_frame->get_time_delta()>.1f);
 	rng_flib.at(sidx)(m_bsys,treg);
 
 	// TODO: bombs
@@ -184,8 +185,9 @@ void Player::jet_wait(BulletSystem* bsys,int32_t* treg)
 void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10+50*(treg[2]<5);i<11;i++) {
-		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),i*.075f,glm::vec3(0,0,1));
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12));
+		float rot = i*.075f;
+		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),rot,glm::vec3(0,0,1));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12),rot);
 	} treg[2]--;
 	treg[2] += (treg[2]<1)*9;
 }
@@ -198,7 +200,7 @@ void Player::jet_wide(BulletSystem* bsys,int32_t* treg)
 void Player::jet_focus(BulletSystem* bsys,int32_t* treg)
 {
 	for (int i=-10;i<11;i++)
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12),0);
 }
 
 /*

@@ -14,6 +14,15 @@
 
 #define E 2.7182818284
 
+// register memory
+// TODO
+
+// bullet memory
+constexpr uint8_t BMEM_FLARES = 0;
+constexpr uint8_t BMEM_MINES = 1;
+constexpr uint8_t BMEM_SPREAD = 2;
+constexpr uint8_t BMEM_WHIRL = 3;
+
 // 1st phase, 1st attack
 void flaredrop(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos);
 void mines(BulletSystem* bSys,int32_t* treg,glm::vec2 ePos);

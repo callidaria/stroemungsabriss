@@ -30,8 +30,8 @@
 
 constexpr uint8_t GVERSION_RELEASE = 0;
 constexpr uint8_t GVERSION_SUBRELEASE = 0;
-constexpr uint8_t GVERSION_DEVSTEP = 3;
-constexpr char GVERSION_SUFFIX = 'R';
+constexpr uint8_t GVERSION_DEVSTEP = 4;
+constexpr char GVERSION_SUFFIX = 'd';
 
 enum MenuMode
 {
