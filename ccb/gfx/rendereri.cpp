@@ -51,9 +51,6 @@ void RendererI::load()
 	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
 	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
 
-	for (uint8_t i=0;i<v.size();i+=4)
-		std::cout << "vert: " << v[i] << ',' << v[i+1] << ',' << v[i+2] << ',' << v[i+3] << '\n';
-
 	// upload to buffer
 	buffer.bind();
 	buffer.upload_vertices(v);
@@ -121,8 +118,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
 
 	// render instanced
-	GLsizei vjump = i*6;
-	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
 
 /*
@@ -139,8 +135,7 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
-	GLsizei vjump = (il.size()+i)*6;
-	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
 /*
@@ -156,8 +151,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 
 	// draw
-	uint16_t vjump = (il.size()+i)*6;
-	glDrawArraysInstanced(GL_TRIANGLES,vjump,vjump+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
 /*
