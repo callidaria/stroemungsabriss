@@ -470,6 +470,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_cam3d->front.y = sin(glm::radians(pitch));
 	m_cam3d->front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
 	m_cam3d->front = glm::normalize(m_cam3d->front);
+	m_cam3d->update();
 	m_r3d->prepare(m_cam3d);
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 

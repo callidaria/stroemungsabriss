@@ -5,9 +5,7 @@
 	purpose: create renderer object to subsequently add 3D objects to and draw them
 */
 Renderer3D::Renderer3D()
-{
-	buffer.add_buffer();
-} Renderer3D::~Renderer3D() {  }
+{ ibuffer.add_buffer(); }
 
 /*
 	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> uint16_t
@@ -25,9 +23,24 @@ Renderer3D::Renderer3D()
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 		glm::vec3 p,float s,glm::vec3 r)
 {
-	uint16_t out = ml.size();
 	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&mofs));
-	return out;
+	return ml.size()-1;
+}
+
+/*
+	TODO
+*/
+uint16_t Renderer3D::add_inst(const char* m,const char* t,const char* sm,const char* nm,
+		const char* em,glm::vec3 p,float s,glm::vec3 r)
+{
+	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
+	std::vector<float> cmesh_index;
+	for (uint8_t i=0;i<128;i++) {
+		cmesh_index.push_back(0);
+		cmesh_index.push_back(i*.1f);
+		cmesh_index.push_back(i*.1f);
+	} mesh_indices.push_back(cmesh_index);
+	return iml.size()-1;
 }
 
 /*
@@ -36,13 +49,17 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 */
 void Renderer3D::load_vertex()
 {
-	// combining all mesh vertices to master vertex list
+	// combine all mesh vertices to master vertex list & upload
 	std::vector<float> v;
-	for (int i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
-
-	// upload to buffer
+	for (uint16_t i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
 	buffer.bind();
 	buffer.upload_vertices(v);
+
+	// combine all added instance vertices to master instance vertex list & upload
+	/*std::vector<float> iv;
+	for (uint16_t i=0;i<iml.size();i++) iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
+	ibuffer.bind();
+	ibuffer.upload_vertices(iv);*/
 }
 
 /*
@@ -52,14 +69,8 @@ void Renderer3D::load_vertex()
 void Renderer3D::load_texture()
 {
 	// run texturing process for all meshes
-	for(int i=0;i<ml.size();i++) ml[i].texture();
-
-	// texture references for shader program
-	s3d.upload_int("tex",0);
-	s3d.upload_int("sm",1);
-	s3d.upload_int("emit",2);
-	s3d.upload_int("shadow_map",3);
-	s3d.upload_int("nmap",4);
+	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
+	//for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
 }
 
 /*
@@ -69,14 +80,42 @@ void Renderer3D::load_texture()
 */
 void Renderer3D::load(Camera3D* cam3d)
 {
-	// load and shader compilation
-	load_vertex();
+	// compile shadow shader
 	shs.compile3d("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
-	s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
-	load_texture();
 
-	// upload camera specifications to shader
+	// combine all mesh vertices to master vertex list & upload
+	std::vector<float> v;
+	for (uint16_t i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
+	buffer.bind();
+	buffer.upload_vertices(v);
+
+	// compile shader & load textures
+	s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
+	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
+	s3d.upload_int("tex",0);
+	s3d.upload_int("sm",1);
+	s3d.upload_int("emit",2);
+	s3d.upload_int("shadow_map",3);
+	s3d.upload_int("nmap",4);
 	s3d.upload_camera(*cam3d);
+
+	// combine all added instance vertices to master instance vertex list & upload
+	std::vector<float> iv;
+	for (uint16_t i=0;i<iml.size();i++) iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
+	ibuffer.bind();
+	ibuffer.upload_vertices(iv);
+
+	// compile instance shader & load textures
+	is3d.compile3d("shader/vertexi3d.shader","shader/fragmenti3d.shader");
+	ibuffer.bind_index();
+	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,3);
+	for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
+	is3d.upload_int("tex",0);
+	is3d.upload_int("sm",1);
+	is3d.upload_int("emit",2);
+	is3d.upload_int("shadow_map",3);
+	is3d.upload_int("nmap",4);
+	is3d.upload_camera(*cam3d);
 }
 
 /*
@@ -104,12 +143,27 @@ void Renderer3D::prepare(Camera3D* cam3d)
 	// run normal preparations
 	prepare();
 
-	// update and upload camera
-	cam3d->update();
+	// update and upload camera & position for normal mapping
 	s3d.upload_camera(*cam3d);
-
-	// upload shader specifications for normal mapping
 	s3d.upload_vec3("view_pos",cam3d->pos);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_inst(Camera3D* cam3d)
+{
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// prepare shader & buffer
+	is3d.enable();
+	ibuffer.bind();
+
+	// update camera
+	is3d.upload_camera(*cam3d);
+	is3d.upload_vec3("view_pos",cam3d->pos);
 }
 
 /*
@@ -131,4 +185,22 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	} glActiveTexture(GL_TEXTURE0);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_inst(uint16_t i,uint16_t c)
+{
+	ibuffer.upload_indices(mesh_indices[i]);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,iml[i].tex);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,iml[i].specmap);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,iml[i].emitmap);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
+	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,c);
+	glActiveTexture(GL_TEXTURE0);
 }

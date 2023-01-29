@@ -131,7 +131,8 @@ private:
 
 	// render
 	GLuint tex;
-	uint16_t r3d_index;
+	uint16_t r3d_index,ir3d_index;
+	uint8_t rfr = 128;
 
 	// card information
 	std::vector<float> icpos;

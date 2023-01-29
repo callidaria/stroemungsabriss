@@ -14,10 +14,12 @@ public:
 
 	// construction
 	Renderer3D();
-	~Renderer3D();
+	~Renderer3D() {  }
 
 	// creation
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
+			glm::vec3 p,float s,glm::vec3 r);
+	uint16_t add_inst(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r);
 
 	// loaders
@@ -26,12 +28,14 @@ public:
 	// preparations
 	void prepare();
 	void prepare(Camera3D* cam3d);
+	void prepare_inst(Camera3D* cam3d);
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);
+	void render_inst(uint16_t i,uint16_t c);
 
 	// uploads
-	void upload_shadow(glm::mat4 m);
+	void upload_shadow(glm::mat4 m);  // TODO: implement this, it's important
 
 private:
 
@@ -41,11 +45,13 @@ private:
 
 private:
 
-	unsigned int mofs = 0;
+	uint32_t mofs = 0,imofs = 0;
 
 public:
 
-	Buffer buffer = Buffer();
-	Shader s3d,shs;
+	Buffer buffer,ibuffer;
+	Shader s3d,shs,is3d;
 	std::vector<Mesh> ml;
+	std::vector<Mesh> iml;
+	std::vector<std::vector<float>> mesh_indices;
 };

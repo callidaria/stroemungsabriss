@@ -62,6 +62,10 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	create_pile(glm::vec2(2.5f,0));
 	shuffle_all();
 
+	// create payment visualization
+	ir3d_index = m_r3d->add_inst("./res/coin.obj","./res/flyfighter_tex.png","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(7,3.5f,-3.5f),1,glm::vec3(45,0,0));
+
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
 }
@@ -208,7 +212,8 @@ void CardSystem::create_pile(glm::vec2 pos)
 void CardSystem::process_input()
 {
 	// keyboard input
-	choice += (m_frame->kb.ka[SDL_SCANCODE_RIGHT]-m_frame->kb.ka[SDL_SCANCODE_LEFT])*!lfI;
+	choice += (m_frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
+			- m_frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
 	lfI = m_frame->kb.ka[SDL_SCANCODE_RIGHT]||m_frame->kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
@@ -332,10 +337,18 @@ void CardSystem::render()
 	}
 
 	// render background
+	cam3D.update();
 	m_r3d->prepare(&cam3D);
 	m_r3d->s3d.upload_float("ambient",1);
 	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
+
+	// render currency
+	m_r3d->prepare_inst(&cam3D);
+	m_r3d->s3d.upload_float("ambient",1);
+	m_r3d->render_inst(ir3d_index,rfr);
+	rfr--;
+	rfr += (rfr<1)*128;
 
 	// setup cards
 	sdr.enable();
