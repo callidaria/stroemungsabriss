@@ -37,8 +37,8 @@ uint16_t Renderer3D::add_inst(const char* m,const char* t,const char* sm,const c
 	std::vector<float> cmesh_index;
 	for (uint8_t i=0;i<128;i++) {
 		cmesh_index.push_back(0);
-		cmesh_index.push_back(i*.1f);
-		cmesh_index.push_back(i*.1f);
+		cmesh_index.push_back(i*.15f);
+		cmesh_index.push_back(i*.15f);
 	} mesh_indices.push_back(cmesh_index);
 	return iml.size()-1;
 }

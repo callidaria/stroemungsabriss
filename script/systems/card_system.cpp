@@ -63,7 +63,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_r3d->add_inst("./res/coin.obj","./res/flyfighter_tex.png","./res/none.png",
+	ir3d_index = m_r3d->add_inst("./res/coin.obj","./res/coin_tex.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(7,3.5f,-3.5f),1,glm::vec3(45,0,0));
 
 	// precalculations
@@ -346,9 +346,7 @@ void CardSystem::render()
 	// render currency
 	m_r3d->prepare_inst(&cam3D);
 	m_r3d->s3d.upload_float("ambient",1);
-	m_r3d->render_inst(ir3d_index,rfr);
-	rfr--;
-	rfr += (rfr<1)*128;
+	m_r3d->render_inst(ir3d_index,4);
 
 	// setup cards
 	sdr.enable();
