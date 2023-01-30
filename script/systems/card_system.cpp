@@ -63,8 +63,12 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_r3d->add_inst("./res/coin.obj","./res/coin_tex.png","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(7,3.5f,-3.5f),1,glm::vec3(45,0,0));
+	ir3d_index = m_r3d->add("./res/coin.obj","./res/coin_tex.png","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),1,glm::vec3(45,0,0),128);
+	for (uint8_t i=0;i<128;i++) {
+		m_r3d->inst_position(ir3d_index,i,glm::vec3(7,3.5f,-3.5f)+glm::vec3(0,i*.15f,i*.15f));
+		m_r3d->inst_rotation(ir3d_index,i,glm::vec3(0,0,0));
+	}
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
@@ -380,7 +384,7 @@ void CardSystem::render()
 void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	icpos[rid] = pos.x;icpos[rid+1] = pos.y;icpos[rid+2] = pos.z;
+	icpos[rid] = pos.x,icpos[rid+1] = pos.y,icpos[rid+2] = pos.z;
 }
 
 /*
@@ -394,9 +398,10 @@ void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
-	icpos[rid+5] = glm::sin(rot.x);icpos[rid+6] = glm::sin(rot.y);icpos[rid+7] = glm::sin(rot.z);
-	icpos[rid+8] = glm::cos(rot.x);icpos[rid+9] = glm::cos(rot.y);icpos[rid+10] = glm::cos(rot.z);
+	icpos[rid+5] = glm::sin(rot.x),icpos[rid+6] = glm::sin(rot.y),icpos[rid+7] = glm::sin(rot.z),
+	icpos[rid+8] = glm::cos(rot.x),icpos[rid+9] = glm::cos(rot.y),icpos[rid+10] = glm::cos(rot.z);
 }
+// FIXME: duplicate of mesh instance setting in renderer3d
 
 /*
 	reset_rotation(uint8_t) -> void
@@ -409,8 +414,8 @@ void CardSystem::reset_rotation(uint8_t id)
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
-	icpos[rid+5] = 0;icpos[rid+6] = 0;icpos[rid+7] = 0;
-	icpos[rid+8] = 1;icpos[rid+9] = 1;icpos[rid+10] = 1;
+	icpos[rid+5] = 0,icpos[rid+6] = 0,icpos[rid+7] = 0,
+	icpos[rid+8] = 1,icpos[rid+9] = 1,icpos[rid+10] = 1;
 }
 
 /*

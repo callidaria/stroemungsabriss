@@ -7,6 +7,8 @@ in vec3 tangent;
 in vec3 bitangent;
 
 in vec3 offset;
+in vec3 rotation_sin;
+in vec3 rotation_cos;
 
 out vec4 Position;
 out vec2 TexCoords;
@@ -26,13 +28,33 @@ uniform vec3 view_pos;
 
 void main()
 {
+	// rotate individual mesh duplicates
+	mat3 xrot = mat3(
+		1,	0,				0,
+		0,	rotation_cos.x,	-rotation_sin.x,
+		0,	rotation_sin.x,	rotation_cos.x
+	);
+	mat3 yrot = mat3(
+		rotation_cos.y, 0,	-rotation_sin.y,
+		0,				1,	0,
+		rotation_sin.y,	0,	rotation_cos.y
+	);
+	mat3 zrot = mat3(
+		rotation_cos.z,	-rotation_sin.z,	0,
+		rotation_sin.z,	rotation_cos.z,		0,
+		0,				0,					1
+	);
+	vec3 rPosition = zrot*yrot*xrot*position;
+
+	// attribute positioning
 	TexCoords=texCoords*tex_repeat;
 	mat3 norm_mat=mat3(transpose(inverse(model)));
 	Normals=normalize(norm_mat*normals);
-	Position=model*vec4(position+offset,1.0);
+	Position=model*vec4(rPosition+offset,1.0);
 	gl_Position=proj*view*Position;
 	light_transpos=light_trans*Position;
 
+	// normal map precalculations
 	vec3 T = normalize(norm_mat*tangent);
 	T = normalize(T-dot(T,Normals)*Normals);
 	vec3 B = cross(Normals,T);

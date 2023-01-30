@@ -6,6 +6,8 @@
 #include "../mat/camera3d.h"
 #include "../fcn/buffer.h"
 
+constexpr uint8_t R3D_INDEX_REPEAT = 9;
+
 const std::string shadow_matrix_location = "light_trans";
 
 class Renderer3D
@@ -19,8 +21,8 @@ public:
 	// creation
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r);
-	uint16_t add_inst(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-			glm::vec3 p,float s,glm::vec3 r);
+	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
+			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap);
 
 	// loaders
 	void load(Camera3D* cam3d);
@@ -36,6 +38,10 @@ public:
 
 	// uploads
 	void upload_shadow(glm::mat4 m);  // TODO: implement this, it's important
+
+	// setters
+	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);
+	void inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot);
 
 private:
 

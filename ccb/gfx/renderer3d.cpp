@@ -30,15 +30,15 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 /*
 	TODO
 */
-uint16_t Renderer3D::add_inst(const char* m,const char* t,const char* sm,const char* nm,
-		const char* em,glm::vec3 p,float s,glm::vec3 r)
+uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,
+		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap)
 {
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
 	std::vector<float> cmesh_index;
-	for (uint8_t i=0;i<128;i++) {
-		cmesh_index.push_back(0);
-		cmesh_index.push_back(i*.15f);
-		cmesh_index.push_back(i*.15f);
+	for (uint8_t i=0;i<dcap;i++) {
+		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
+		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
+		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
 	} mesh_indices.push_back(cmesh_index);
 	return iml.size()-1;
 }
@@ -105,10 +105,14 @@ void Renderer3D::load(Camera3D* cam3d)
 	ibuffer.bind();
 	ibuffer.upload_vertices(iv);
 
-	// compile instance shader & load textures
+	// compile instance shader
 	is3d.compile3d("shader/vertexi3d.shader","shader/fragmenti3d.shader");
 	ibuffer.bind_index();
-	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,3);
+	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
+	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
+	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
+
+	// load textures
 	for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
 	is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
@@ -203,4 +207,27 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
 	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,c);
 	glActiveTexture(GL_TEXTURE0);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
+{
+	uint16_t rid = mid*R3D_INDEX_REPEAT;
+	mesh_indices[id][rid] = pos.x,mesh_indices[id][rid+1] = pos.y,mesh_indices[id][rid+2] = pos.z;
+}
+
+/*
+	TODO
+*/
+void Renderer3D::inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot)
+{
+	// rasterize id jumps
+	uint16_t rid = mid*R3D_INDEX_REPEAT;
+
+	// precalculate sine & cosine for rotation matrix in GPU
+	mesh_indices[id][rid+3] = glm::sin(rot.x),mesh_indices[id][rid+6] = glm::cos(rot.x),
+	mesh_indices[id][rid+4] = glm::sin(rot.y),mesh_indices[id][rid+7] = glm::cos(rot.y),
+	mesh_indices[id][rid+5] = glm::sin(rot.z),mesh_indices[id][rid+8] = glm::cos(rot.z);
 }
