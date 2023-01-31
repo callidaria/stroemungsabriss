@@ -35,8 +35,8 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
 	std::vector<float> cmesh_index;
-	for (uint8_t i=0;i<dcap;i++) {
-		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
+	for (uint16_t i=0;i<dcap;i++) {
+		cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),
 		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
 		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
 	} mesh_indices.push_back(cmesh_index);

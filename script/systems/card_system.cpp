@@ -1,13 +1,14 @@
 #include "card_system.h"
 
 /*
-	constructor(Frame*,Renderer3D*)
+	constructor(Frame*,Renderer3D*,std::vector<Currency>)
 	f: pointer to cascabel frame for timing and input
 	r2d: pointer to genera 2D renderer to show cursor & icons
 	r3d: pointer to general 3D renderer to add certain background elements
+	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
+CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path)
 	: m_frame(f),m_r2d(r2d),m_r3d(r3d)
 {
 	// background objects
@@ -62,12 +63,10 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_r3d->add("./res/coin.obj","./res/coin_tex.png","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0),128);
-	for (uint8_t i=0;i<128;i++) {
-		m_r3d->inst_position(ir3d_index,i,glm::vec3(7,0,-4)+glm::vec3(0,i*.2f,0));
-		m_r3d->inst_rotation(ir3d_index,i,glm::vec3(0,glm::radians(i*7.0f),0));
-	}
+	ir3d_index = m_r3d->iml.size();
+	for (auto cstage:curr_path)
+		m_r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
+				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP);
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
@@ -189,6 +188,22 @@ void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 	update_opponent(oid);
 }
 // FIXME: holds duplicate code chunk
+
+/*
+	TODO
+*/
+void CardSystem::add_currency(uint8_t cid,uint16_t count)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
+{
+	// TODO
+}
 
 /*
 	create_player(vec2,float,uint16_t) -> void

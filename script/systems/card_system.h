@@ -19,6 +19,7 @@
 // upload capacity
 constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 6;
 constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
+constexpr uint16_t CSYS_CURRENCY_CAP = 1024;
 
 // positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
@@ -28,6 +29,14 @@ constexpr float CARD_HHEIGHT = CARDSYSTEM_CARD_HEIGHT/2;
 
 // TIMING
 constexpr float CARDSYSTEM_DEAL_WAIT = 15;
+
+// structure to hold currency object & texture path
+struct Currency
+{
+	const char* object;
+	const char* texture,*specular,*normals,*emission;
+	uint16_t value;
+};
 
 // to handle which cards are in a pile, as well as pile 'physics'
 struct DeckPile
@@ -68,7 +77,7 @@ class CardSystem
 public:
 
 	// construction
-	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d);
+	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path);
 	~CardSystem() {  };
 
 	// interaction
@@ -78,6 +87,8 @@ public:
 	void register_auto_deal(uint8_t pid,uint8_t target,uint8_t amount);
 	void hand_to_pile(uint8_t pid);
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
+	void add_currency(uint8_t cid,uint16_t count);
+	void add_currency(uint8_t cid,uint8_t oid,uint16_t count);
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);

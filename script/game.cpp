@@ -15,7 +15,12 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
 
 	// card game test
-	CardSystem crdSystem = CardSystem(m_frame,m_r2d,m_r3d);
+	std::vector<Currency> curr_path;
+	curr_path.push_back({
+		"./res/coin.obj","./res/coin_tex.png","./res/none.png",
+		"./res/dnormal.png","./res/none.png",5
+	});
+	CardSystem crdSystem = CardSystem(m_frame,m_r2d,m_r3d,curr_path);
 	crdSystem.create_player(glm::vec2(0,-10),180,1000);
 	crdSystem.create_player(glm::vec2(-10,0),90,1000);
 	crdSystem.create_player(glm::vec2(10,0),-90,1000);
