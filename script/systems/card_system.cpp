@@ -12,7 +12,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 {
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
-			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(45,0,0));
+			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -54,8 +54,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 	for (uint8_t i=0;i<40;i++) create_card(glm::vec2(i%10,(uint8_t)(i/10)),i>19);
 	for (uint8_t i=0;i<36;i++) {
 		glm::vec2 tex_id = glm::vec2(i%9,4+(uint8_t)(i/9));
-		create_card(tex_id,0);
-		create_card(tex_id,1);
+		create_card(tex_id,0);create_card(tex_id,1);
 	}
 
 	// shuffle deck & place
@@ -64,10 +63,10 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d)
 
 	// create payment visualization
 	ir3d_index = m_r3d->add("./res/coin.obj","./res/coin_tex.png","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),1,glm::vec3(45,0,0),128);
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),1,glm::vec3(0,0,0),128);
 	for (uint8_t i=0;i<128;i++) {
-		m_r3d->inst_position(ir3d_index,i,glm::vec3(7,3.5f,-3.5f)+glm::vec3(0,i*.15f,i*.15f));
-		m_r3d->inst_rotation(ir3d_index,i,glm::vec3(0,0,0));
+		m_r3d->inst_position(ir3d_index,i,glm::vec3(7,0,-4)+glm::vec3(0,i*.2f,0));
+		m_r3d->inst_rotation(ir3d_index,i,glm::vec3(0,glm::radians(i*7.0f),0));
 	}
 
 	// precalculations
@@ -341,7 +340,6 @@ void CardSystem::render()
 	}
 
 	// render background
-	cam3D.update();
 	m_r3d->prepare(&cam3D);
 	m_r3d->s3d.upload_float("ambient",1);
 	m_r3d->s3d.upload_float("tex_repeat",10);

@@ -45,12 +45,6 @@ public:
 
 private:
 
-	// loaders
-	void load_vertex();
-	void load_texture();
-
-private:
-
 	uint32_t mofs = 0,imofs = 0;
 
 public:

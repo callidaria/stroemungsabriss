@@ -44,36 +44,6 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	load_vertex() -> void
-	purpose: upload all added mesh vertices to buffer
-*/
-void Renderer3D::load_vertex()
-{
-	// combine all mesh vertices to master vertex list & upload
-	std::vector<float> v;
-	for (uint16_t i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
-	buffer.bind();
-	buffer.upload_vertices(v);
-
-	// combine all added instance vertices to master instance vertex list & upload
-	/*std::vector<float> iv;
-	for (uint16_t i=0;i<iml.size();i++) iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
-	ibuffer.bind();
-	ibuffer.upload_vertices(iv);*/
-}
-
-/*
-	load_texture() -> void
-	purpose: texture all meshes & define texture locations in shader program
-*/
-void Renderer3D::load_texture()
-{
-	// run texturing process for all meshes
-	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
-	//for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
-}
-
-/*
 	load(Camera3D*) -> void
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
