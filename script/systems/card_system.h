@@ -150,6 +150,11 @@ private:
 	std::vector<uint8_t> deal,hand;
 	uint8_t choice = 0;
 
+	// currency information
+	std::vector<uint16_t> currency_value;
+	std::vector<uint16_t> currency_spawn;
+	std::vector<uint16_t> currency_stacks;
+
 	// npc
 	std::vector<OpposingPlayer> ops;
 	glm::mat4 phead_mat;

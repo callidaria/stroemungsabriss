@@ -64,9 +64,13 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 
 	// create payment visualization
 	ir3d_index = m_r3d->iml.size();
-	for (auto cstage:curr_path)
+	for (auto cstage:curr_path) {
 		m_r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
 				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP);
+		currency_value.push_back(cstage.value);
+		currency_spawn.push_back(0);
+		currency_stacks.push_back(0);
+	}
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
@@ -194,7 +198,17 @@ void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 */
 void CardSystem::add_currency(uint8_t cid,uint16_t count)
 {
-	// TODO
+	// move currency representation towards players side
+	for (uint16_t i=0;i<count;i++) {
+		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+				glm::vec3(7,.2f*currency_stacks[cid]+i,-7));
+		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+				glm::vec3(0,glm::radians((float)(rand()%360)),0));
+	}
+
+	// increment currency spawn & stack counts
+	currency_spawn[cid] += count;
+	currency_stacks[cid] += count;
 }
 
 /*
@@ -363,7 +377,7 @@ void CardSystem::render()
 	// render currency
 	m_r3d->prepare_inst(&cam3D);
 	m_r3d->s3d.upload_float("ambient",1);
-	m_r3d->render_inst(ir3d_index,4);
+	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
 
 	// setup cards
 	sdr.enable();
