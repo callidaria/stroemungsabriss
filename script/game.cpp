@@ -19,6 +19,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	curr_path.push_back({
 		"./res/coin.obj","./res/coin_tex.png","./res/none.png",
 		"./res/dnormal.png","./res/none.png",5
+	});curr_path.push_back({
+		"./res/coin.obj","./res/coin10_tex.png","./res/none.png",
+		"./res/dnormal.png","./res/none.png",10
 	});
 	CardSystem crdSystem = CardSystem(m_frame,m_r2d,m_r3d,curr_path);
 	crdSystem.create_player(glm::vec2(0,-10),180,1000);
@@ -84,11 +87,13 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		else if (m_frame->kb.ka[SDL_SCANCODE_T]&&!trg_deal) crdSystem.opponent_to_pile(2,1,0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_Q]&&!trg_deal) crdSystem.register_auto_deal(1,0,4);
 		else if (m_frame->kb.ka[SDL_SCANCODE_1]&&!trg_deal) crdSystem.add_currency(0,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_2]&&!trg_deal) crdSystem.add_currency(1,1);
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J] || m_frame->kb.ka[SDL_SCANCODE_H]
 				|| m_frame->kb.ka[SDL_SCANCODE_G] || m_frame->kb.ka[SDL_SCANCODE_U]
 				|| m_frame->kb.ka[SDL_SCANCODE_I] || m_frame->kb.ka[SDL_SCANCODE_E]
 				|| m_frame->kb.ka[SDL_SCANCODE_R] || m_frame->kb.ka[SDL_SCANCODE_T]
-				|| m_frame->kb.ka[SDL_SCANCODE_Q] || m_frame->kb.ka[SDL_SCANCODE_1];
+				|| m_frame->kb.ka[SDL_SCANCODE_Q] || m_frame->kb.ka[SDL_SCANCODE_1]
+				|| m_frame->kb.ka[SDL_SCANCODE_2];
 		crdSystem.process_input();
 		crdSystem.render();
 
