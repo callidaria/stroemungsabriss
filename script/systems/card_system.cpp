@@ -222,15 +222,24 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 /*
 	TODO
 */
-void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count,glm::vec2 pos)
+void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
 {
-	// TODO
+	// move players currency representation to the selected field stack
+	for (uint16_t i=0;i<count;i++) {
+		m_r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
+				glm::vec3(field_stacks[sid].position.x+2*cid,.2f*field_stacks[sid].stacks[cid].size(),
+					field_stacks[sid].position.y));
+
+		// update physical coin status beyond visualization
+		field_stacks[sid].stacks[cid].push_back(cstack.stacks[cid][cstack.stacks[cid].size()-1]);
+		cstack.stacks[cid].pop_back();
+	}
 }
 
 /*
 	TODO
 */
-void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count,glm::vec2 pos)
+void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count)
 {
 	// TODO
 }
@@ -258,7 +267,7 @@ void CardSystem::create_pile(glm::vec2 pos)
 	TODO
 */
 void CardSystem::create_currency_stack(glm::vec2 pos)
-{ field_stacks.push_back({ pos,{} }); }
+{ field_stacks.push_back({ pos,std::vector<std::vector<uint16_t>>(currency_value.size()) }); }
 
 /*
 	process_input() -> void

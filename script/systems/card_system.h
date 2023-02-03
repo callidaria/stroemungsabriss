@@ -96,8 +96,8 @@ public:
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 	void add_currency(uint8_t cid,uint16_t count);
 	void add_currency(uint8_t cid,uint8_t oid,uint16_t count);
-	void move_currency(uint8_t cid,uint8_t sid,uint16_t count,glm::vec2 pos);
-	void move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count,glm::vec2 pos);
+	void move_currency(uint8_t cid,uint8_t sid,uint16_t count);
+	void move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count);
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
