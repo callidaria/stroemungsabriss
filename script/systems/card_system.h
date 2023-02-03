@@ -38,6 +38,13 @@ struct Currency
 	uint16_t value;
 };
 
+// currency stacking
+struct CurrencyStack
+{
+	glm::vec2 position;
+	std::vector<std::vector<uint16_t>> stacks;
+};
+
 // to handle which cards are in a pile, as well as pile 'physics'
 struct DeckPile
 {
@@ -89,10 +96,13 @@ public:
 	void opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx);
 	void add_currency(uint8_t cid,uint16_t count);
 	void add_currency(uint8_t cid,uint8_t oid,uint16_t count);
+	void move_currency(uint8_t cid,uint8_t sid,uint16_t count,glm::vec2 pos);
+	void move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count,glm::vec2 pos);
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
 	void create_pile(glm::vec2 pos);
+	void create_currency_stack(glm::vec2 pos);
 
 	// update
 	void process_input();
@@ -153,7 +163,8 @@ private:
 	// currency information
 	std::vector<uint16_t> currency_value;
 	std::vector<uint16_t> currency_spawn;
-	std::vector<std::vector<uint16_t>> currency_stacks;
+	CurrencyStack cstack = { glm::vec2(7,7),{} };
+	std::vector<CurrencyStack> field_stacks;
 
 	// npc
 	std::vector<OpposingPlayer> ops;

@@ -32,6 +32,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	crdSystem.register_auto_deal(0,1,7);
 	crdSystem.register_auto_deal(0,2,7);
 	crdSystem.register_auto_deal(0,3,7);
+	crdSystem.create_currency_stack(glm::vec2(4,3));
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);

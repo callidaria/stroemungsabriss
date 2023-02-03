@@ -69,7 +69,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP);
 		currency_value.push_back(cstage.value);
 		currency_spawn.push_back(0);
-		currency_stacks.push_back({});
+		cstack.stacks.push_back({});
 	}
 
 	// precalculations
@@ -201,12 +201,12 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 	// move currency representation towards players side
 	for (uint16_t i=0;i<count;i++) {
 		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
-				glm::vec3(7+2*cid,.2f*currency_stacks[cid].size()+i,7));
+				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size()+i,cstack.position.y));
 		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & stack counts
-		currency_stacks[cid].push_back(currency_spawn[cid]);
+		cstack.stacks[cid].push_back(currency_spawn[cid]);
 		currency_spawn[cid]++;
 	}
 }
@@ -215,6 +215,22 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 	TODO
 */
 void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count,glm::vec2 pos)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count,glm::vec2 pos)
 {
 	// TODO
 }
@@ -237,6 +253,12 @@ void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 */
 void CardSystem::create_pile(glm::vec2 pos)
 { dpiles.push_back({ {},pos }); }
+
+/*
+	TODO
+*/
+void CardSystem::create_currency_stack(glm::vec2 pos)
+{ field_stacks.push_back({ pos,{} }); }
 
 /*
 	process_input() -> void
