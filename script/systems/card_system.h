@@ -68,7 +68,7 @@ struct OpposingPlayer
 	float rotation;
 	std::vector<uint8_t> deal;
 	std::vector<uint8_t> cards;
-	std::vector<std::vector<uint16_t>> stacks;
+	CurrencyStack capital;
 };
 
 // pipeline entites to automatically deal cards

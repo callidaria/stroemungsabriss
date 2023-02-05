@@ -201,7 +201,7 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 	// move currency representation towards players side
 	for (uint16_t i=0;i<count;i++) {
 		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
-				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size()+i,cstack.position.y));
+				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size(),cstack.position.y));
 		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
@@ -216,8 +216,25 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 */
 void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
-	// TODO
+	// 
+	glm::vec3 orth_direction
+			= glm::rotate(glm::mat4(1),glm::radians(ops[oid].rotation),glm::vec3(0,1,0))
+			* glm::vec4(1,0,0,0);
+
+	// move currency representation towards opponents side
+	for (uint16_t i=0;i<count;i++) {
+		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+				glm::vec3(ops[oid].capital.position.x,ops[oid].capital.stacks[cid].size()*.2f,
+					ops[oid].capital.position.y)+orth_direction*glm::vec3(cid*2));
+		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+				glm::vec3(0,glm::radians((float)(rand()%360)),0));
+
+		// increment currency spawn & respective opponent stack count
+		ops[oid].capital.stacks[cid].push_back(currency_spawn[cid]);
+		currency_spawn[cid]++;
+	}
 }
+// TODO: remove code duplicates
 
 /*
 	TODO
@@ -252,7 +269,7 @@ void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t coun
 	purpose: create a new non player character involved in the game
 */
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
-{ ops.push_back({ pos,rot,{},{},std::vector<std::vector<uint16_t>>(currency_value.size()) }); }
+{ ops.push_back({ pos,rot,{},{},{pos,std::vector<std::vector<uint16_t>>(currency_value.size())} }); }
 // TODO: auto create currency stacks from capital value
 
 /*
