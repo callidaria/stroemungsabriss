@@ -17,16 +17,17 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	// card game test
 	std::vector<Currency> curr_path;
 	curr_path.push_back({
-		"./res/coin.obj","./res/coin_tex.png","./res/none.png",
-		"./res/dnormal.png","./res/none.png",5
-	});curr_path.push_back({
 		"./res/coin.obj","./res/coin10_tex.png","./res/none.png",
 		"./res/dnormal.png","./res/none.png",10
 	});
+	curr_path.push_back({
+		"./res/coin.obj","./res/coin_tex.png","./res/none.png",
+		"./res/dnormal.png","./res/none.png",5
+	});
 	CardSystem crdSystem = CardSystem(m_frame,m_r2d,m_r3d,curr_path);
-	crdSystem.create_player(glm::vec2(0,-10),180,1000);
-	crdSystem.create_player(glm::vec2(-10,0),90,1000);
-	crdSystem.create_player(glm::vec2(10,0),-90,1000);
+	crdSystem.create_player(glm::vec2(0,-10),180,100);
+	crdSystem.create_player(glm::vec2(-10,0),-90,100);
+	crdSystem.create_player(glm::vec2(10,0),90,100);
 	crdSystem.create_pile(glm::vec2(0,0));
 	crdSystem.register_auto_deal(0,0,7);
 	crdSystem.register_auto_deal(0,1,7);

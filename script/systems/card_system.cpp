@@ -75,6 +75,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
 }
+// TODO: sort currency by value
 
 /*
 	shuffle_all() -> void
@@ -274,13 +275,27 @@ void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t coun
 */
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 {
+	// precalculate stack direction & position
 	glm::vec3 dir = glm::rotate(glm::mat4(1),glm::radians(rot),glm::vec3(0,1,0))*glm::vec4(1,0,0,0);
-	ops.push_back({
-		pos,rot,{},{},{ pos,dir,std::vector<std::vector<uint16_t>>(currency_value.size()) }
-	});
+	glm::vec3 cspos = glm::vec3(pos.x,0,pos.y)+dir*glm::vec3(7);
+
+	// add player to opponent list
+	ops.push_back({ pos,rot,{},{},{
+		glm::vec2(cspos.x,cspos.z),dir,std::vector<std::vector<uint16_t>>(currency_value.size())
+	} });
+
+	// auto create piles of capital (i wish)
+	for (uint8_t i=0;i<currency_value.size();i++) {
+
+		// calculate how much of the current value has to be added
+		uint16_t amount = capital/currency_value[i];
+		amount -= !!amount&&(i<currency_value.size()-1);
+
+		// add currency and subtract from goal capital
+		add_currency(i,ops.size()-1,amount);
+		capital -= currency_value[i]*amount;
+	}
 }
-// TODO: auto create currency stacks from capital value
-// TODO: precalculate desired currency positioning
 
 /*
 	create_pile(vec2) -> void
