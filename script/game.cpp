@@ -90,16 +90,16 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		else if (m_frame->kb.ka[SDL_SCANCODE_Q]&&!trg_deal) crdSystem.register_auto_deal(1,0,4);
 		else if (m_frame->kb.ka[SDL_SCANCODE_1]&&!trg_deal) crdSystem.add_currency(0,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_2]&&!trg_deal) crdSystem.add_currency(1,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_3]&&!trg_deal) crdSystem.move_currency(0,0,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_4]&&!trg_deal) crdSystem.move_currency(1,0,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_3]&&!trg_deal) crdSystem.set_currency(0,0,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_4]&&!trg_deal) crdSystem.set_currency(1,0,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_5]&&!trg_deal) crdSystem.add_currency(0,0,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_6]&&!trg_deal) crdSystem.add_currency(1,0,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_7]&&!trg_deal) crdSystem.move_currency(0,0,1,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_8]&&!trg_deal) crdSystem.move_currency(1,0,1,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_7]&&!trg_deal) crdSystem.set_currency(0,0,1,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_8]&&!trg_deal) crdSystem.set_currency(1,0,1,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_9]&&!trg_deal) crdSystem.add_currency(0,1,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_0]&&!trg_deal) crdSystem.add_currency(1,1,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_N]&&!trg_deal) crdSystem.move_currency(0,1,2,1);
-		else if (m_frame->kb.ka[SDL_SCANCODE_M]&&!trg_deal) crdSystem.move_currency(1,1,2,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_N]&&!trg_deal) crdSystem.set_currency(0,1,2,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_M]&&!trg_deal) crdSystem.set_currency(1,1,2,1);
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J] || m_frame->kb.ka[SDL_SCANCODE_H]
 				|| m_frame->kb.ka[SDL_SCANCODE_G] || m_frame->kb.ka[SDL_SCANCODE_U]
 				|| m_frame->kb.ka[SDL_SCANCODE_I] || m_frame->kb.ka[SDL_SCANCODE_E]

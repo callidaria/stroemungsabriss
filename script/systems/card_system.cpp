@@ -109,6 +109,8 @@ void CardSystem::shuffle_all()
 	PARAMETER DEFINITIONS:
 	pid: deck pile id, to place onto, take from or interact with in any other way
 	oid: opponent id, to reference held cards, positions & facing directions
+	cid: currency value id, holding index of value and currency stack lists
+	sid: currency stack id, to reference field stack to add money to
 */
 
 /*
@@ -195,7 +197,13 @@ void CardSystem::opponent_to_pile(uint8_t oid,uint8_t pid,uint8_t idx)
 // FIXME: holds duplicate code chunk
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	count: amount of currency with specified value to add to the stack
+*/
+
+/*
+	add_currency(uint8_t,uint16_t) -> void
+	purpose: add currency to the player's money pile
 */
 void CardSystem::add_currency(uint8_t cid,uint16_t count)
 {
@@ -213,7 +221,8 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 }
 
 /*
-	TODO
+	add_currency(uint8_t,uint8_t,uint16_t) -> void
+	purpose: add currency to the specified opponent's money pile
 */
 void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
@@ -233,9 +242,10 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 // FIXME: remove code duplicates
 
 /*
-	TODO
+	set_currency(uint8_t,uint8_t,uint16_t) -> void
+	purpose: set amount of player's currency to specified pile (not value-based)
 */
-void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
+void CardSystem::set_currency(uint8_t cid,uint8_t sid,uint16_t count)
 {
 	// move players currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
@@ -250,9 +260,10 @@ void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
 }
 
 /*
-	TODO
+	set_currency(uint8_t,uint8_t,uint8_t,uint16_t) -> void
+	purpose: set amount of specified opponent's currency to specified pile (not value-based)
 */
-void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count)
+void CardSystem::set_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count)
 {
 	// move opponents currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
@@ -306,7 +317,10 @@ void CardSystem::create_pile(glm::vec2 pos)
 { dpiles.push_back({ {},pos }); }
 
 /*
-	TODO
+	create_currency_stack(vec2,float) -> void
+	pos: position of new currency stack
+	rot: rotation of direction the stacks are lined up towards
+	purpose: create a new empty in-field currency stack
 */
 void CardSystem::create_currency_stack(glm::vec2 pos,float rot)
 {
