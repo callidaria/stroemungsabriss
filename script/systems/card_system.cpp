@@ -216,7 +216,7 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 */
 void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
-	// 
+	// precalculate vector, orthogonal to the direction the opponent faces
 	glm::vec3 orth_direction
 			= glm::rotate(glm::mat4(1),glm::radians(ops[oid].rotation),glm::vec3(0,1,0))
 			* glm::vec4(1,0,0,0);
@@ -234,7 +234,7 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 		currency_spawn[cid]++;
 	}
 }
-// TODO: remove code duplicates
+// FIXME: remove code duplicates
 
 /*
 	TODO
@@ -248,7 +248,7 @@ void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
 					field_stacks[sid].position.y));
 
 		// update physical coin status beyond visualization
-		field_stacks[sid].stacks[cid].push_back(cstack.stacks[cid][cstack.stacks[cid].size()-1]);
+		field_stacks[sid].stacks[cid].push_back(cstack.stacks[cid].back());
 		cstack.stacks[cid].pop_back();
 	}
 }
@@ -258,7 +258,16 @@ void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
 */
 void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count)
 {
-	// TODO
+	// move opponents currency representation to the selected field stack
+	for (uint16_t i=0;i<count;i++) {
+		m_r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
+				glm::vec3(field_stacks[sid].position.x+cid*2,field_stacks[sid].stacks[cid].size()*.2f,
+					field_stacks[sid].position.y));
+
+		// update physical coin status beyond visualization
+		field_stacks[sid].stacks[cid].push_back(ops[oid].capital.stacks[cid].back());
+		ops[oid].capital.stacks[cid].pop_back();
+	}
 }
 
 /*
@@ -271,6 +280,7 @@ void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t coun
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 { ops.push_back({ pos,rot,{},{},{pos,std::vector<std::vector<uint16_t>>(currency_value.size())} }); }
 // TODO: auto create currency stacks from capital value
+// TODO: precalculate desired currency positioning
 
 /*
 	create_pile(vec2) -> void
@@ -285,6 +295,7 @@ void CardSystem::create_pile(glm::vec2 pos)
 */
 void CardSystem::create_currency_stack(glm::vec2 pos)
 { field_stacks.push_back({ pos,std::vector<std::vector<uint16_t>>(currency_value.size()) }); }
+// TODO: introduce rotation for currency stacks
 
 /*
 	process_input() -> void
