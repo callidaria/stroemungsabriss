@@ -32,8 +32,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	crdSystem.register_auto_deal(0,1,7);
 	crdSystem.register_auto_deal(0,2,7);
 	crdSystem.register_auto_deal(0,3,7);
-	crdSystem.create_currency_stack(glm::vec2(4,3));
-	crdSystem.create_currency_stack(glm::vec2(1,-3));
+	crdSystem.create_currency_stack(glm::vec2(4,3),0);
+	crdSystem.create_currency_stack(glm::vec2(1,-3),180);
+	crdSystem.create_currency_stack(glm::vec2(-3,0),90);
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
@@ -96,6 +97,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		else if (m_frame->kb.ka[SDL_SCANCODE_8]&&!trg_deal) crdSystem.move_currency(1,0,1,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_9]&&!trg_deal) crdSystem.add_currency(0,1,1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_0]&&!trg_deal) crdSystem.add_currency(1,1,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_N]&&!trg_deal) crdSystem.move_currency(0,1,2,1);
+		else if (m_frame->kb.ka[SDL_SCANCODE_M]&&!trg_deal) crdSystem.move_currency(1,1,2,1);
 		trg_deal = m_frame->kb.ka[SDL_SCANCODE_J] || m_frame->kb.ka[SDL_SCANCODE_H]
 				|| m_frame->kb.ka[SDL_SCANCODE_G] || m_frame->kb.ka[SDL_SCANCODE_U]
 				|| m_frame->kb.ka[SDL_SCANCODE_I] || m_frame->kb.ka[SDL_SCANCODE_E]
@@ -105,7 +108,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 				|| m_frame->kb.ka[SDL_SCANCODE_4] || m_frame->kb.ka[SDL_SCANCODE_5]
 				|| m_frame->kb.ka[SDL_SCANCODE_6] || m_frame->kb.ka[SDL_SCANCODE_9]
 				|| m_frame->kb.ka[SDL_SCANCODE_0] || m_frame->kb.ka[SDL_SCANCODE_7]
-				|| m_frame->kb.ka[SDL_SCANCODE_8];
+				|| m_frame->kb.ka[SDL_SCANCODE_8] || m_frame->kb.ka[SDL_SCANCODE_N]
+				|| m_frame->kb.ka[SDL_SCANCODE_M];
 		crdSystem.process_input();
 		crdSystem.render();
 

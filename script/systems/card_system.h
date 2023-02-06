@@ -42,6 +42,7 @@ struct Currency
 struct CurrencyStack
 {
 	glm::vec2 position;
+	glm::vec3 direction;
 	std::vector<std::vector<uint16_t>> stacks;
 };
 
@@ -102,7 +103,7 @@ public:
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
 	void create_pile(glm::vec2 pos);
-	void create_currency_stack(glm::vec2 pos);
+	void create_currency_stack(glm::vec2 pos,float rot);
 
 	// update
 	void process_input();

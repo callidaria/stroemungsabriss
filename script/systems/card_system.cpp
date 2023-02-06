@@ -120,7 +120,7 @@ void CardSystem::deal_card(uint8_t pid)
 	create_animation(tmp,glm::vec3(4,7+0.001f*hand.size()+deal.size(),11),
 			glm::vec3(glm::radians(-45.0f),0,0),20);
 	deal.push_back(tmp);
-	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
+	dpiles[pid].cards.pop_back();
 }
 
 /*
@@ -142,7 +142,7 @@ void CardSystem::deal_card(uint8_t pid,uint8_t oid)
 
 	// transaction
 	ops[oid].deal.push_back(tmp);
-	dpiles[pid].cards.erase(dpiles[pid].cards.end()-1,dpiles[pid].cards.end());
+	dpiles[pid].cards.pop_back();
 }
 // FIXME: pattern replications
 
@@ -216,16 +216,11 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 */
 void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
-	// precalculate vector, orthogonal to the direction the opponent faces
-	glm::vec3 orth_direction
-			= glm::rotate(glm::mat4(1),glm::radians(ops[oid].rotation),glm::vec3(0,1,0))
-			* glm::vec4(1,0,0,0);
-
 	// move currency representation towards opponents side
 	for (uint16_t i=0;i<count;i++) {
 		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(ops[oid].capital.position.x,ops[oid].capital.stacks[cid].size()*.2f,
-					ops[oid].capital.position.y)+orth_direction*glm::vec3(cid*2));
+					ops[oid].capital.position.y)+ops[oid].capital.direction*glm::vec3(cid*2));
 		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
@@ -244,8 +239,8 @@ void CardSystem::move_currency(uint8_t cid,uint8_t sid,uint16_t count)
 	// move players currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
 		m_r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
-				glm::vec3(field_stacks[sid].position.x+2*cid,.2f*field_stacks[sid].stacks[cid].size(),
-					field_stacks[sid].position.y));
+				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
+					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
 		// update physical coin status beyond visualization
 		field_stacks[sid].stacks[cid].push_back(cstack.stacks[cid].back());
@@ -261,8 +256,8 @@ void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t coun
 	// move opponents currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
 		m_r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
-				glm::vec3(field_stacks[sid].position.x+cid*2,field_stacks[sid].stacks[cid].size()*.2f,
-					field_stacks[sid].position.y));
+				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
+					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
 		// update physical coin status beyond visualization
 		field_stacks[sid].stacks[cid].push_back(ops[oid].capital.stacks[cid].back());
@@ -278,7 +273,12 @@ void CardSystem::move_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t coun
 	purpose: create a new non player character involved in the game
 */
 void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
-{ ops.push_back({ pos,rot,{},{},{pos,std::vector<std::vector<uint16_t>>(currency_value.size())} }); }
+{
+	glm::vec3 dir = glm::rotate(glm::mat4(1),glm::radians(rot),glm::vec3(0,1,0))*glm::vec4(1,0,0,0);
+	ops.push_back({
+		pos,rot,{},{},{ pos,dir,std::vector<std::vector<uint16_t>>(currency_value.size()) }
+	});
+}
 // TODO: auto create currency stacks from capital value
 // TODO: precalculate desired currency positioning
 
@@ -293,9 +293,11 @@ void CardSystem::create_pile(glm::vec2 pos)
 /*
 	TODO
 */
-void CardSystem::create_currency_stack(glm::vec2 pos)
-{ field_stacks.push_back({ pos,std::vector<std::vector<uint16_t>>(currency_value.size()) }); }
-// TODO: introduce rotation for currency stacks
+void CardSystem::create_currency_stack(glm::vec2 pos,float rot)
+{
+	glm::vec3 dir = glm::rotate(glm::mat4(1),glm::radians(rot),glm::vec3(0,1,0))*glm::vec4(1,0,0,0);
+	field_stacks.push_back({ pos,dir,std::vector<std::vector<uint16_t>>(currency_value.size()) });
+}
 
 /*
 	process_input() -> void
