@@ -37,7 +37,7 @@ public:
 	void render_inst(uint16_t i,uint16_t c);
 
 	// uploads
-	void upload_shadow(glm::mat4 m);  // TODO: implement this, it's important
+	void upload_shadow(glm::mat4 m);
 
 	// setters
 	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);

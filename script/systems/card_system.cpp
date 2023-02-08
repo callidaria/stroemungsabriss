@@ -14,6 +14,8 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
+	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
+			"./res/terra/norm.png","./res/terra/emit.png",glm::vec3(0,2.5f,0),5,glm::vec3(0));
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -74,6 +76,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
+	l3d.create_shadow(glm::vec3(0),25,25,5,4096);
 }
 // TODO: sort currency by value
 
@@ -459,11 +462,20 @@ void CardSystem::render()
 		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
 	}
 
+	// render shadow projection
+	l3d.prepare_shadow();
+	m_r3d->render_mesh(r3d_index+1,r3d_index+2);
+	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
+	m_frame->clear(.1f,.1f,.1f);
+
 	// render background
 	m_r3d->prepare(&cam3D);
+	l3d.upload_shadow();
 	m_r3d->s3d.upload_float("ambient",1);
 	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
+	/*m_r3d->s3d.upload_float("tex_repeat",1);
+	m_r3d->render_mesh(r3d_index+1,r3d_index+2);*/
 
 	// render currency
 	m_r3d->prepare_inst(&cam3D);

@@ -182,6 +182,12 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 /*
 	TODO
 */
+void Renderer3D::upload_shadow(glm::mat4 shadow_matrix)
+{ s3d.upload_matrix("light_trans",shadow_matrix); }
+
+/*
+	TODO
+*/
 void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 {
 	uint16_t rid = mid*R3D_INDEX_REPEAT;

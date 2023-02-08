@@ -26,9 +26,12 @@ public:
 	void render();
 	void render(float ptrans);
 
-	//getters
+	// getters
 	GLuint get_fbo(); // !!check if used
 	GLuint get_tex(); // !!check if used
+
+	// setters
+	void overwrite_texture(GLuint tex);
 
 	// statics
 	static void close();
