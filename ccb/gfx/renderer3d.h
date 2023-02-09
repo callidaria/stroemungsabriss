@@ -30,6 +30,7 @@ public:
 	// preparations
 	void prepare();
 	void prepare(Camera3D* cam3d);
+	void prepare_inst();
 	void prepare_inst(Camera3D* cam3d);
 
 	// draw

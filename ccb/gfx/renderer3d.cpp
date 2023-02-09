@@ -125,7 +125,7 @@ void Renderer3D::prepare(Camera3D* cam3d)
 /*
 	TODO
 */
-void Renderer3D::prepare_inst(Camera3D* cam3d)
+void Renderer3D::prepare_inst()
 {
 	// gl settings
 	glEnable(GL_DEPTH_TEST);
@@ -134,6 +134,15 @@ void Renderer3D::prepare_inst(Camera3D* cam3d)
 	// prepare shader & buffer
 	is3d.enable();
 	ibuffer.bind();
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_inst(Camera3D* cam3d)
+{
+	//run normal preparations
+	prepare_inst();
 
 	// update camera
 	is3d.upload_camera(*cam3d);

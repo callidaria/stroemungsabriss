@@ -5,9 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/fcn/buffer.h"
-
 #include "../../ccb/frm/frame.h"
-#include "../../ccb/frm/framebuffer.h"
 
 #include "../../ccb/mat/camera3d.h"
 #include "../../ccb/mat/toolbox.h"
@@ -153,9 +151,7 @@ private:
 	Frame* m_frame;
 	Renderer2D* m_r2d;
 	Renderer3D* m_r3d;
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-200,100,250),glm::vec3(1,1,1),1);
-	FrameBuffer fb = FrameBuffer(1280.0f,720.0f,"./shader/fbv_standard.shader",
-			"./shader/fbf_standard.shader",false);
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-200,200,-250),glm::vec3(1,1,1),1);
 
 	// render
 	GLuint tex;

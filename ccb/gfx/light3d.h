@@ -24,6 +24,17 @@ public:
 		r3d->s3d.upload_vec3("light_pos",pos);
 	}
 
+	void upload_inst()
+	{
+		std::string base="al["+std::to_string(ind)+"].";
+		r3d->is3d.enable();
+		r3d->is3d.upload_vec3((base+"pos").c_str(),pos);
+		r3d->is3d.upload_vec3((base+"col").c_str(),col);
+		r3d->is3d.upload_float((base+"ins").c_str(),ins);
+		r3d->is3d.upload_vec3("light_pos",pos);
+	}
+	// FIXME: pattern duplicates
+
 	void set_amnt(int n)
 	{
 		r3d->s3d.enable();
@@ -44,10 +55,10 @@ public:
 		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,res,res,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-		/*float bc[] = { 1.0f,1.0f,1.0f,1.0f };
-		glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR,bc);*/
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
+		float bc[] = { 1.0f,1.0f,1.0f,1.0f };
+		glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR,bc);
 		glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dtex,0);
 		glDrawBuffer(GL_NONE);glReadBuffer(GL_NONE);
