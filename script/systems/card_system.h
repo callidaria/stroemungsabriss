@@ -18,7 +18,7 @@
 #include "../ui/cursor.h"
 
 // upload capacity
-constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 6;
+constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 9;
 constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
 constexpr uint16_t CSYS_CURRENCY_CAP = 1024;
 
@@ -151,7 +151,7 @@ private:
 	Frame* m_frame;
 	Renderer2D* m_r2d;
 	Renderer3D* m_r3d;
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-200,200,-250),glm::vec3(1,1,1),1);
+	Light3D l3d = Light3D(m_r3d,0,glm::vec3(100,200,150),glm::vec3(1,1,1),1);
 
 	// render
 	GLuint tex;

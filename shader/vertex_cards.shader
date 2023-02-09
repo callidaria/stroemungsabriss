@@ -3,6 +3,7 @@
 // buffer upload
 in vec3 position;
 in vec2 texCoords;
+in vec3 normals;
 in float texID;
 
 // index buffer upload
@@ -13,7 +14,9 @@ in vec3 rotation_cos;
 in float deckID;
 
 // output to fragment shader
+out vec3 Position;
 out vec2 TexCoords;
+out vec3 Normals;
 
 // camera matrices
 uniform mat4 view = mat4(1.0);
@@ -37,10 +40,11 @@ void main()
 		rotation_sin.z,	rotation_cos.z,		0,
 		0,				0,					1
 	);
-	vec3 Position = zrot*yrot*xrot*position;
+	Position = (zrot*yrot*xrot*position)+tofs;
+	Normals = normalize(zrot*yrot*xrot*normals);
 
 	// calculate final vertex position
-	gl_Position = proj*view*vec4(Position+tofs,1);
+	gl_Position = proj*view*vec4(Position,1);
 
 	// calculate texture coordinate manipulation on card game atlas
 	vec2 tidx = i_tex*(1-texID)+vec2(9,4+deckID)*texID;

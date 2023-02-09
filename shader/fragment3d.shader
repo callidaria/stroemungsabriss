@@ -61,9 +61,11 @@ float calc_shadow(vec4 ltp);
 
 void main()
 {
+	// texture processing
 	vec4 mix = texture(tex,TexCoords);
 	vec4 amb = vec4(mix.rgb*ambient,mix.a);
 
+	// simulate lighting
 	vec4 alo = vec4(0.0,0.0,0.0,0.0);
 	for (int i=0;i<amnt_light_sun;i++) alo += lumen_sun(mix,al[i]);
 	vec4 plo = vec4(0.0,0.0,0.0,0.0);
@@ -71,11 +73,15 @@ void main()
 	vec4 slo = vec4(0.0,0.0,0.0,0.0);
 	for (int k=0;k<amnt_light_spot;k++) slo += lumen_spot(mix,sl[k]);
 
+	// mapping for emission and on-object shadow
 	vec3 emitmap = vec3(texture(emit,TexCoords));
 	float shadow = calc_shadow(light_transpos);
+
+	// return colour mix
 	vec4 all = amb+(alo+plo+slo)*(1.0-shadow);
 	outColour = vec4(max(all.rgb,emitmap),all.a);
 
+	// cubemap testing from the good ol' engine days
 	/*vec3 I = normalize(Position.xyz-view_pos);
 	vec3 R = reflect(I,Normals);
 	outColour = vec4(texture(cm,R).rgb,1.0);*/

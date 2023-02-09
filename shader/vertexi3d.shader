@@ -45,12 +45,12 @@ void main()
 		0,				0,					1
 	);
 	vec3 rPosition = zrot*yrot*xrot*position;
-	vec3 rNormal = zrot*yrot*xrot*normals;
 
 	// attribute positioning
 	TexCoords=texCoords*tex_repeat;
 	mat3 norm_mat=mat3(transpose(inverse(model)));
-	Normals=normalize(norm_mat*rNormal);
+	Normals=normalize(norm_mat*normals);
+	Normals=zrot*yrot*xrot*Normals;
 	Position=model*vec4(rPosition+offset,1.0);
 	gl_Position=proj*view*Position;
 	light_transpos=light_trans*Position;

@@ -22,21 +22,22 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	float cverts[] = {
 
 		// card front
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,
-		CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0, CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,
-		CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0, -CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,
+		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,0,
+		CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0, CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0,
+		CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,0, -CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0,
 
 		// card back
-		CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,1, CARD_HWIDTH,0,CARD_HHEIGHT,0,1,1,
-		-CARD_HWIDTH,0,CARD_HHEIGHT,1,1,1, -CARD_HWIDTH,0,CARD_HHEIGHT,1,1,1,
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,1, CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,1,
+		CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1, CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,1,
+		-CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1, -CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1,
+		-CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,1, CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1,
 	};
 	bfr.bind();
 	bfr.upload_vertices(cverts,sizeof(cverts));
 	sdr.compile("./shader/vertex_cards.shader","./shader/fragment_cards.shader");
 	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("texID",1,5,CARDSYSTEM_UPLOAD_REPEAT);
+	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);
+	sdr.def_attributeF("texID",1,8,CARDSYSTEM_UPLOAD_REPEAT);
 	cam3D.view3D = glm::rotate(cam3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
 	sdr.upload_camera(cam3D);
 
@@ -76,7 +77,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
-	l3d.create_shadow(glm::vec3(0),25,25,5,4096);
+	l3d.create_shadow(glm::vec3(0),50,50,5,4096);
 }
 // TODO: sort currency by value
 
@@ -495,6 +496,10 @@ void CardSystem::render()
 	bfr.bind();
 	bfr.bind_index();
 	bfr.upload_indices(render_queue);
+	std::string base="al[0].";
+	sdr.upload_vec3((base+"pos").c_str(),l3d.pos);
+	sdr.upload_vec3((base+"col").c_str(),l3d.col);
+	sdr.upload_float((base+"ins").c_str(),l3d.ins);
 
 	// draw cards
 	glBindTexture(GL_TEXTURE_2D,tex);
