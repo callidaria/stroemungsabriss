@@ -159,7 +159,7 @@ float calc_shadow(vec4 ltp)
 	for (int x=-1;x<=1;x++) {
 		for (int y=-1;y<=1;y++) {
 			float pcf_depth = texture(shadow_map,pc.xy+vec2(x,y)*texel).r;
-			out_shadow += float(curr_depth-0.00001>pcf_depth);
+			out_shadow += float(curr_depth-0.0005>pcf_depth);
 		}
 	} out_shadow /= 9.0;
 	return out_shadow;

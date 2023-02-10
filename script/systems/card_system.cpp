@@ -14,8 +14,6 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
-	m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
-			"./res/terra/norm.png","./res/terra/emit.png",glm::vec3(0,2,0),2,glm::vec3(0));
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -471,11 +469,13 @@ void CardSystem::render()
 	m_r3d->is3d.upload_matrix("view",l3d.view);
 	m_r3d->is3d.upload_matrix("proj",l3d.proj);
 	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
-	/*glDisable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
+	sdr.upload_matrix("view",l3d.view);
+	sdr.upload_matrix("proj",l3d.proj);
 	bfr.upload_indices(render_queue);
-	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);*/
+	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
 	m_frame->clear(.1f,.1f,.1f);
 
@@ -487,8 +487,6 @@ void CardSystem::render()
 	l3d.upload_shadow();
 	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
-	/*m_r3d->s3d.upload_float("tex_repeat",1);
-	m_r3d->render_mesh(r3d_index+1,r3d_index+2);*/
 
 	// render currency
 	m_r3d->prepare_inst(&cam3D);
@@ -509,6 +507,7 @@ void CardSystem::render()
 	sdr.upload_vec3((base+"col").c_str(),l3d.col);
 	sdr.upload_float((base+"ins").c_str(),l3d.ins);
 	sdr.upload_matrix("light_trans",l3d.shadow_mat);
+	sdr.upload_camera(cam3D);
 
 	// draw cards
 	glActiveTexture(GL_TEXTURE3);
@@ -525,6 +524,7 @@ void CardSystem::render()
 	cursor.render();
 }
 // TODO: OPTIMIZE!
+// TODO: minimize when light manager is fixed, ! especially the shadow cast & receive !
 
 /*
 	PARAMETER DEFINITION:
