@@ -44,6 +44,8 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	// load card game texture
 	glGenTextures(1,&tex);
 	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f);
+	sdr.upload_int("tex",0);
+	sdr.upload_int("shadow_map",3);
 
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
@@ -469,6 +471,11 @@ void CardSystem::render()
 	m_r3d->is3d.upload_matrix("view",l3d.view);
 	m_r3d->is3d.upload_matrix("proj",l3d.proj);
 	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
+	/*glDisable(GL_CULL_FACE);
+	sdr.enable();
+	bfr.bind();
+	bfr.upload_indices(render_queue);
+	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);*/
 	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
 	m_frame->clear(.1f,.1f,.1f);
 
@@ -488,20 +495,25 @@ void CardSystem::render()
 	m_r3d->is3d.upload_float("ambient",.1f);
 	m_r3d->is3d.upload_int("amnt_light_sun",1);
 	l3d.upload_inst();
-	l3d.upload_shadow();
+	m_r3d->is3d.upload_matrix("light_trans",l3d.shadow_mat);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
 	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
 
 	// setup cards
 	sdr.enable();
 	bfr.bind();
-	bfr.bind_index();
 	bfr.upload_indices(render_queue);
 	std::string base="al[0].";
 	sdr.upload_vec3((base+"pos").c_str(),l3d.pos);
 	sdr.upload_vec3((base+"col").c_str(),l3d.col);
 	sdr.upload_float((base+"ins").c_str(),l3d.ins);
+	sdr.upload_matrix("light_trans",l3d.shadow_mat);
 
 	// draw cards
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 
