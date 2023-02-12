@@ -66,7 +66,7 @@ make win
 ### features:
 - individual rotations of instanced objects
 - individual animations of instanced objects
-- system for interactable playing card games [DEV]
+- system for interactable playing card games
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
@@ -147,5 +147,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
-	+ 106: 60h 40min
+	+ 106: 61h 46min
 - Total Code Lines: 11.570

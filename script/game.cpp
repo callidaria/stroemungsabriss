@@ -64,21 +64,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->input(running,false);
 		m_frame->clear(.1f,.1f,.1f);
 
-		// action menu update
-		/*lgt_menu.update(&m_player,running);
-		lgt_menu.bind();*/
-
-		// stage
-		/*m_bgenv.update(rstate);
-		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
-
-		// player
-		m_player.update(rstate,fwd_treg[11]);
-
-		// bullet system
-		m_bSys.render();*/
-
-		// draw card game test
+		// update card game test
 		if (m_frame->kb.ka[SDL_SCANCODE_J]&&!trg_deal) crdSystem.deal_card(0);
 		else if (m_frame->kb.ka[SDL_SCANCODE_H]&&!trg_deal) crdSystem.hand_to_pile(1);
 		else if (m_frame->kb.ka[SDL_SCANCODE_G]&&!trg_deal) crdSystem.deal_card(0,0);
@@ -112,6 +98,22 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 				|| m_frame->kb.ka[SDL_SCANCODE_8] || m_frame->kb.ka[SDL_SCANCODE_N]
 				|| m_frame->kb.ka[SDL_SCANCODE_M];
 		crdSystem.process_input();
+		crdSystem.update();
+
+		// action menu update
+		lgt_menu.update(&m_player,running);
+		lgt_menu.bind();
+
+		// stage
+		/*m_bgenv.update(rstate);
+		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
+
+		// player
+		m_player.update(rstate,fwd_treg[11]);
+
+		// bullet system
+		m_bSys.render();*/
+
 		crdSystem.render();
 
 		// healthbar
@@ -119,7 +121,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.render();
 
 		// action menu render
-		//lgt_menu.render();
+		lgt_menu.render();
 
 		// swap
 		m_frame->update();

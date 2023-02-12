@@ -349,7 +349,8 @@ void CardSystem::process_input()
 			= (m_frame->mouse.mxfr!=tmx)&&(m_frame->mouse.myfr<.35f)&&(m_frame->mouse.mxfr<.5f);
 	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
-		float end = (get_card_screen_space(hand[hand.size()-1]).x+1)/2;
+		float end = (get_card_screen_space(hand.back()).x+1)/2;
+		std::cout << get_card_screen_space(hand[0]).x << '\n';
 		float stapled_pos = m_frame->mouse.mxfr-start;
 		float single_card = (end-start)/(hand.size()-1);
 		choice = stapled_pos/single_card;
@@ -359,14 +360,14 @@ void CardSystem::process_input()
 }
 
 /*
-	render() -> void
-	purpose: render and updates everything visual related to the playing card system:
+	update() -> void
+	purpose: updates everything visually related to the playing card system:
 		it starts with the processing of still dealing cards,
 		then the automatic dealing tasks get processed,
 		followed by playing card animation interpolations.
-		finally, the render queue can be compiled and all visuals can be drawn.
+		finally, the scene gets rendered for the purpose of shadow map creation
 */
-void CardSystem::render()
+void CardSystem::update()
 {
 	// process deal arrivals
 	bool arrival = false;
@@ -478,7 +479,14 @@ void CardSystem::render()
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
 	m_frame->clear(.1f,.1f,.1f);
+}
 
+/*
+	render() -> void
+	purpose: the render queue can be compiled and all visuals can be drawn
+*/
+void CardSystem::render()
+{
 	// render background
 	m_r3d->prepare(&cam3D);
 	l3d.set_ambient(.1f);

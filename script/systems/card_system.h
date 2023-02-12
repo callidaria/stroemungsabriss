@@ -108,6 +108,7 @@ public:
 
 	// update
 	void process_input();
+	void update();
 	void render();
 
 	// setters
@@ -119,7 +120,6 @@ public:
 	glm::vec3 get_position(uint8_t id);
 	glm::vec3 get_rotation(uint8_t id);
 
-	// TODO: create capital visualizations
 	// TODO: create a readable way of indexing playing cards
 	// TODO: variable text annotations & descriptions for playing cards
 
