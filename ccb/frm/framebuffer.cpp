@@ -133,7 +133,9 @@ GLuint FrameBuffer::get_tex()
 { return tex; }
 
 /*
-	TODO
+	overwrite_texture(GLuint) -> void
+	wTex: texture to write as the framebuffer output texture at render
+	purpose: set the given texture as framebuffer texture output
 */
 void FrameBuffer::overwrite_texture(GLuint wTex)
 { tex = wTex; }

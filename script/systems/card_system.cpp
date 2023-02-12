@@ -493,7 +493,7 @@ void CardSystem::render()
 	l3d.set_amnt(1);
 	l3d.upload();
 	l3d.upload_shadow();
-	m_r3d->s3d.upload_float("tex_repeat",10);
+	m_r3d->s3d.upload_int("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency

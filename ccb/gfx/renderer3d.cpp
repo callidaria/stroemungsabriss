@@ -28,7 +28,12 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	TODO
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,uint16_t)
+			-> uint16_t
+	overloads previous add()
+	dcap: maximum amount of duplicates created from added instance
+	purpose: add instanced object to renderer
+	returns: memory index to refer to the created instanced object by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,
 		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap)
@@ -108,8 +113,13 @@ void Renderer3D::prepare()
 }
 
 /*
+	PARAMETER DEFINITIONS:
+	cam3d: camera to relate mesh/instance visuals to
+*/
+
+/*
 	prepare(Camera3D*) -> void
-	cam3d: camera to relate mesh visuals to
+	overloads previous prepare()
 	purpose: additionally to the function of prepare, this method updates and uploads the camera
 */
 void Renderer3D::prepare(Camera3D* cam3d)
@@ -123,7 +133,8 @@ void Renderer3D::prepare(Camera3D* cam3d)
 }
 
 /*
-	TODO
+	prepare_inst() -> void
+	purpose: prepare shader & buffer for instanced rendering
 */
 void Renderer3D::prepare_inst()
 {
@@ -137,7 +148,9 @@ void Renderer3D::prepare_inst()
 }
 
 /*
-	TODO
+	prepare_inst(Camera3D*) -> void
+	overloads previous prepare
+	purpose: not only prepare instanced rendering, but also upload camera
 */
 void Renderer3D::prepare_inst(Camera3D* cam3d)
 {
@@ -171,7 +184,10 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 }
 
 /*
-	TODO
+	render_inst(uint16_t i,uint16_t) -> void
+	i: memory index of instanced object that is to be drawn
+	c: amount of duplicates, in order of instance buffer upload, to be drawn
+	purpose: render given amount of desired instance's duplicates
 */
 void Renderer3D::render_inst(uint16_t i,uint16_t c)
 {
@@ -189,13 +205,22 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 }
 
 /*
-	TODO
+	upload_shadow(mat4) -> void
+	DEPRECATED: this will be removed after completing #135
 */
 void Renderer3D::upload_shadow(glm::mat4 shadow_matrix)
 { s3d.upload_matrix("light_trans",shadow_matrix); }
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	id: index of instanced object the duplicate to transform is from
+	mid: index of duplicate to transform
+*/
+
+/*
+	inst_position(uint8_t,uint8_t,vec3) -> void
+	pos: position to translate the duplicate to
+	purpose: move desired duplicate to given position
 */
 void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 {
@@ -204,7 +229,9 @@ void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 }
 
 /*
-	TODO
+	inst_rotation(uint8_t,uint8_t,vec3) -> void
+	rot: new rotation of given duplicate (radians)
+	purpose: rotate desired duplicate by given rotation
 */
 void Renderer3D::inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot)
 {

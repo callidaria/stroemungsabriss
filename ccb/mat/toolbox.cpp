@@ -1,7 +1,7 @@
 #include "toolbox.h"
 
 /*
-	calculate_vecangle(vec2,vec2) -> float
+	calculate_vecangle(vec2,vec2) -> float (static)
 	a: first vector, 0 degrees towards the origin
 	b: second vector, returned degrees from first vector
 	returns: angle between vectors in radians
@@ -25,10 +25,14 @@ std::vector<float> Toolbox::create_sprite_canvas()
 }
 
 /*
-	create_sprite_canvas(vec2,float,float) -> std::vector<float>
+	PARAMETER DEFINITIONS:
 	pos: origin position of canvas
 	width: vertex distanced width of canvas
 	height: vertex distanced height of canvas
+*/
+
+/*
+	create_sprite_canvas(vec2,float,float) -> std::vector<float> (static)
 	returns: created canvas vertices to later base 2D object generation on
 */
 std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float height)
@@ -42,6 +46,10 @@ std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float
 	return out;
 }
 
+/*
+	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)
+	returns: the same canvas as create_sprite_canvas, but without relying on element buffer
+*/
 std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float width,float height)
 {
 	std::vector<float> out = {
@@ -56,9 +64,13 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 }
 
 /*
-	load_texture(GLuint,const char*) -> void
+	PARAMETER DEFINITIONS:
 	tex: reference to be associated with texture value when bound
 	path: path to file holding texture value
+*/
+
+/*
+	load_texture(GLuint,const char*) -> void (static)
 	purpose: load texture value, generate mipmap and associate it with given texture reference
 */
 void Toolbox::load_texture(GLuint tex,const char* path)
@@ -73,7 +85,10 @@ void Toolbox::load_texture(GLuint tex,const char* path)
 }
 
 /*
-	TODO
+	load_texture(GLuint,const char*,float) -> void (static)
+	overloads previous load_texture()
+	bias: mipmapping level-of-detail bias
+	purpose: load mipmapped texture with modified lod bias
 */
 void Toolbox::load_texture(GLuint tex,const char* path,float bias)
 {
@@ -88,7 +103,8 @@ void Toolbox::load_texture(GLuint tex,const char* path,float bias)
 }
 
 /*
-	TODO
+	load_texture_unfiltered(GLuint,const char*) -> void (static)
+	purpose: load texture without mipmapping
 */
 void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
 {
@@ -102,7 +118,8 @@ void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
 }
 
 /*
-	TODO
+	load_texture_repeat(GLuint,const char*) -> void (static)
+	purpose: load repeating mipmapped texture
 */
 void Toolbox::load_texture_repeat(GLuint tex,const char* path)
 {
@@ -114,9 +131,10 @@ void Toolbox::load_texture_repeat(GLuint tex,const char* path)
 	set_texture_parameter_linear_mipmap();
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
+// TODO: break edge cases apart and let the statii be determined separately with additional methods
 
 /*
-	generate_elements(uint16_t,std::vector<uint16_t>&) -> void
+	generate_elements(uint16_t,std::vector<uint16_t>&) -> void (static)
 	i: objects index to use to rasterize element value generation
 	ls: element list input to add generated elements to
 	purpose: generate buffer elements based on object list index
@@ -128,7 +146,8 @@ void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 }
 
 /*
-	TODO
+	set_texture_parameter_clamp_to_edge() -> void (private,static)
+	purpose: define texture as to be stretched out towards the borders
 */
 void Toolbox::set_texture_parameter_clamp_to_edge()
 {
@@ -137,7 +156,8 @@ void Toolbox::set_texture_parameter_clamp_to_edge()
 }
 
 /*
-	TODO
+	set_texture_parameter_texture_repeat() -> void (private,static)
+	purpose: define texture as repeatable
 */
 void Toolbox::set_texture_parameter_texture_repeat()
 {
@@ -146,7 +166,8 @@ void Toolbox::set_texture_parameter_texture_repeat()
 }
 
 /*
-	TODO
+	set_texture_parameter_linear_mipmap() -> void (private,static)
+	purpose: define texture as mipmappable
 */
 void Toolbox::set_texture_parameter_linear_mipmap()
 {
@@ -155,7 +176,8 @@ void Toolbox::set_texture_parameter_linear_mipmap()
 }
 
 /*
-	TODO
+	load_texture_function_head(GLuint tex,const char* path) -> void (private,static)
+	purpose: load texture value from given file
 */
 void Toolbox::load_texture_function_head(GLuint tex,const char* path)
 {
