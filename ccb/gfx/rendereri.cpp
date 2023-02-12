@@ -134,7 +134,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
 
 	// render instanced
-	glDrawArraysInstanced(GL_TRIANGLES,i*6,i*6+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
 
 /*
@@ -151,7 +151,7 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 	sI.upload_vec2("i_tex",i_tex);
 
 	// draw
-	glDrawArraysInstanced(GL_TRIANGLES,i,i+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,i,6,amt);
 }
 
 /*
@@ -168,7 +168,7 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 
 	// draw
 	uint16_t idx = (i+il.size())*6;
-	glDrawArraysInstanced(GL_TRIANGLES,idx,idx+6,amt);
+	glDrawArraysInstanced(GL_TRIANGLES,idx,6,amt);
 }
 
 /*

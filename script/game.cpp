@@ -32,7 +32,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// update until exit condition
 	uint32_t running = rstate+1;
-	bool trg_deal = false;
 	while (running) {  // ??maybe kill check if flush with static func ref
 
 		// frame
