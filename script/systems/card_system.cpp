@@ -350,7 +350,6 @@ void CardSystem::process_input()
 	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
 		float end = (get_card_screen_space(hand.back()).x+1)/2;
-		std::cout << get_card_screen_space(hand[0]).x << '\n';
 		float stapled_pos = m_frame->mouse.mxfr-start;
 		float single_card = (end-start)/(hand.size()-1);
 		choice = stapled_pos/single_card;
@@ -464,12 +463,14 @@ void CardSystem::update()
 		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
 	}
 
-	// render shadow projection
+	// render shadow projection of shown currency
 	l3d.prepare_shadow();
 	m_r3d->prepare_inst();
 	m_r3d->is3d.upload_matrix("view",l3d.view);
 	m_r3d->is3d.upload_matrix("proj",l3d.proj);
 	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
+
+	// render shadow projection of playing cards
 	glDisable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
@@ -478,7 +479,6 @@ void CardSystem::update()
 	bfr.upload_indices(render_queue);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
-	m_frame->clear(.1f,.1f,.1f);
 }
 
 /*
@@ -644,7 +644,7 @@ void CardSystem::card_to_queue(uint8_t id)
 */
 glm::vec3 CardSystem::get_card_screen_space(uint8_t id)
 {
-	glm::vec3 card_pos = get_position(id)+glm::vec3(-CARD_HWIDTH,0,CARD_HHEIGHT);
+	glm::vec3 card_pos = get_position(id)-glm::vec3(CARD_HWIDTH,0,0);
 	glm::vec4 clip_space = cam3D.proj3D*cam3D.view3D*glm::vec4(card_pos,1);
 	return glm::vec3(clip_space)/glm::vec3(clip_space.w);
 }
