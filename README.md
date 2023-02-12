@@ -66,6 +66,7 @@ then, press [b] key to build executable
 ### features:
 - individual rotations of instanced objects
 - individual animations of instanced objects
+- system for interactable playing card games
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
@@ -138,4 +139,5 @@ Worktime: 120h
 	+ 43: 9h 17min
 	+ 114: 2min
 	+ 91: 16h 37min
+	+ 106: 64h 7min
 - Total Code Lines: 11.495

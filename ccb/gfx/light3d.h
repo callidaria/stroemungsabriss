@@ -21,8 +21,19 @@ public:
 		r3d->s3d.upload_vec3((base+"pos").c_str(),pos);
 		r3d->s3d.upload_vec3((base+"col").c_str(),col);
 		r3d->s3d.upload_float((base+"ins").c_str(),ins);
-		r3d->s3d.upload_vec3("light_pos",pos);
+		r3d->s3d.upload_vec3("light_pos",pos);  // TODO: remove this upload and correct in shaders
 	}
+
+	void upload_inst()
+	{
+		std::string base="al["+std::to_string(ind)+"].";
+		r3d->is3d.enable();
+		r3d->is3d.upload_vec3((base+"pos").c_str(),pos);
+		r3d->is3d.upload_vec3((base+"col").c_str(),col);
+		r3d->is3d.upload_float((base+"ins").c_str(),ins);
+		r3d->is3d.upload_vec3("light_pos",pos);
+	}
+	// FIXME: pattern duplicates
 
 	void set_amnt(int n)
 	{

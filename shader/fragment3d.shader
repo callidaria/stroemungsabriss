@@ -61,9 +61,11 @@ float calc_shadow(vec4 ltp);
 
 void main()
 {
+	// texture processing
 	vec4 mix = texture(tex,TexCoords);
 	vec4 amb = vec4(mix.rgb*ambient,mix.a);
 
+	// simulate lighting
 	vec4 alo = vec4(0.0,0.0,0.0,0.0);
 	for (int i=0;i<amnt_light_sun;i++) alo += lumen_sun(mix,al[i]);
 	vec4 plo = vec4(0.0,0.0,0.0,0.0);
@@ -71,11 +73,15 @@ void main()
 	vec4 slo = vec4(0.0,0.0,0.0,0.0);
 	for (int k=0;k<amnt_light_spot;k++) slo += lumen_spot(mix,sl[k]);
 
+	// mapping for emission and on-object shadow
 	vec3 emitmap = vec3(texture(emit,TexCoords));
 	float shadow = calc_shadow(light_transpos);
+
+	// return colour mix
 	vec4 all = amb+(alo+plo+slo)*(1.0-shadow);
 	outColour = vec4(max(all.rgb,emitmap),all.a);
 
+	// cubemap testing from the good ol' engine days
 	/*vec3 I = normalize(Position.xyz-view_pos);
 	vec3 R = reflect(I,Normals);
 	outColour = vec4(texture(cm,R).rgb,1.0);*/
@@ -145,17 +151,16 @@ vec4 lumen_spot(vec4 o,light_spot l)
 
 float calc_shadow(vec4 ltp)
 {
-	vec3 pc=ltp.xyz/ltp.w;
-	pc=pc*0.5+0.5;
-	float curr_depth=pc.z;
-	float out_shadow=0.0;
-	vec2 texel=1.0/textureSize(shadow_map,0);
-	for (int x=-1;x<=1;++x) {
-		for (int y=-1;y<=1;++y) {
-			float pcf_depth=texture(shadow_map,pc.xy+vec2(x,y)*texel)
-				.r;
-			out_shadow+=curr_depth-0.00001>pcf_depth?1.0:0.0;
+	vec3 pc = ltp.xyz/ltp.w;
+	pc = pc*.5+.5;
+	float curr_depth = pc.z;
+	float out_shadow = 0;
+	vec2 texel = 1.0/textureSize(shadow_map,0);
+	for (int x=-1;x<=1;x++) {
+		for (int y=-1;y<=1;y++) {
+			float pcf_depth = texture(shadow_map,pc.xy+vec2(x,y)*texel).r;
+			out_shadow += float(curr_depth-0.0005>pcf_depth);
 		}
-	} out_shadow/=9.0;
+	} out_shadow /= 9.0;
 	return out_shadow;
 }

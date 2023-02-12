@@ -34,6 +34,7 @@ void write_selection();
 bool get_selected();
 bool get_ftype(const char* file);
 std::string get_outfile(const char* file);
+char get_input_char();
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -50,7 +51,7 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 // components
 char inp;
-bool update = false, waiting = false;
+bool update = false,waiting = false;
 uint8_t itr,idx = 0;
 
 int main(int argc,char* argv[])
@@ -202,6 +203,14 @@ std::string get_outfile(const char* file)
 {
 	std::string out = std::string(file);
 	out = out.substr(0,out.length()-3)+'o';
+	return out;
+}
+
+char get_input_char()
+{
+	system("stty raw");
+	char out = getchar();
+	system("stty cooked");
 	return out;
 }
 

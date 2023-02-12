@@ -8,7 +8,7 @@ class Camera2D
 {
 public:
 
-	Camera2D(float w_res, float h_res);
+	Camera2D(float w_res,float h_res);
 
 public:
 
