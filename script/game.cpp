@@ -16,9 +16,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
-	m_r2d->load(m_cam2d);
-	m_rI->load();
-	m_r3d->load(&cam3d);
+	m_r2d->load(m_cam2d);m_rI->load();m_r3d->load(&cam3d);
 
 	// ortho 3D element lighting
 	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
@@ -51,14 +49,14 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
-		m_player.update(rstate,fwd_treg[11]);
+		//m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
 		m_bSys.render();
 
 		// healthbar
-		hbar.register_damage(fwd_treg[10]);
-		hbar.render();
+		/*hbar.register_damage(fwd_treg[10]);
+		hbar.render();*/
 
 		// action menu render
 		lgt_menu.render();

@@ -20,7 +20,7 @@ public:
 
 	// construction
 	RendererI();
-	~RendererI();
+	~RendererI() {  }
 
 	// adders
 	uint16_t add(glm::vec2 p,float w,float h,const char* t);

@@ -6,7 +6,6 @@
 */
 RendererI::RendererI()
 { buffer.add_buffer(); }
-RendererI::~RendererI() {  }
 
 /*
 	add(vec2,float,float,const char*) -> uint16_t
