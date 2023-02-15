@@ -49,6 +49,10 @@ public:
 	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
 	void add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv);
 
+	// getters
+	uint16_t get_next_instindex();
+	uint16_t get_next_animindex();
+
 private:
 
 	// cascabel

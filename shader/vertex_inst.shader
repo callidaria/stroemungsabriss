@@ -29,5 +29,6 @@ void main()
 	vec2 rpos = rmat*position;
 
 	// upload final position
-	gl_Position = proj*view*model*vec4(rpos+offset,0.0,1.0);
+	gl_Position = proj*view*model*vec4(rpos+offset,0,1);
+	gl_Position = vec4(position*.01,0,1);
 }

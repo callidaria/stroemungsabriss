@@ -40,6 +40,7 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 	ts.push_back(t_ts);			// add bullet tick counter list
 	return bCount.size()-1;		// return the index the cluster is to be referenced by
 }
+// TODO: find a way to index cluster attributes and independent renderer draws alike
 
 /*
 	PARAMETER DEFINITIONS:

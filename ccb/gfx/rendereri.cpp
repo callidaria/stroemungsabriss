@@ -69,9 +69,10 @@ void RendererI::load()
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
 	for (int i=0;i<ial.size();i++) ial[i].texture();
+	sI.upload_int("tex",0);
 
 	// coordinate system
-	Camera2D cam2D = Camera2D(1280,720);
+	Camera2D cam2D = Camera2D(1280.0f,720.0f);
 	sI.upload_camera(cam2D);
 }
 
@@ -119,7 +120,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
-
+ 
 /*
 	render(uint16_t,uint16_t,vec2) -> void
 	overloads: previous render()
@@ -239,3 +240,17 @@ void RendererI::add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv)
 	ial[i].i[j*INSTANCE_REPEAT] += dv.x;
 	ial[i].i[j*INSTANCE_REPEAT+1] += dv.y;
 }
+
+/*
+	get_next_instindex() -> uint16_t
+	returns: memory index of instance, that will be uploaded next
+*/
+uint16_t RendererI::get_next_instindex()
+{ return il.size(); }
+
+/*
+	get_next_animindex() -> uint16_t
+	returns: memory index of animated instance, that will be uploaded next
+*/
+uint16_t RendererI::get_next_animindex()
+{ return ial.size(); }
