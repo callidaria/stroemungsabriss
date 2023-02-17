@@ -15,7 +15,7 @@ Shader::Shader() {  }
 void Shader::compile(const char* vsp,const char* fsp)
 {
 	// compiler
-	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER); // FIXME: delete after usage
+	unsigned int vertexShader = compile_shader(vsp,GL_VERTEX_SHADER);  // FIXME: delete after usage
 	unsigned int fragmentShader = compile_shader(fsp,GL_FRAGMENT_SHADER);
 
 	// shader program
@@ -25,6 +25,30 @@ void Shader::compile(const char* vsp,const char* fsp)
 	glBindFragDataLocation(m_shaderProgram,0,"outColour");
 	glLinkProgram(m_shaderProgram);
 	enable();
+}
+
+/*
+	compile<dimension>(const char*,const char*) -> void
+	vspath: path to vertex shader code file
+	fspath: path to fragment shader code file
+	purpose: standard compile process with common attribute setup
+		it is not necessary to compile first, these exist for most common shader structures
+*/
+void Shader::compile2d(const char* vspath,const char* fspath)
+{
+	compile(vspath,fspath);
+	def_attributeF("position",2,0,4);
+	def_attributeF("texCoords",2,2,4);
+}
+
+void Shader::compile3d(const char* vspath,const char* fspath)
+{
+	compile(vspath,fspath);
+	def_attributeF("position",3,0,14);
+	def_attributeF("texCoords",2,3,14);
+	def_attributeF("normals",3,5,14);
+	def_attributeF("tangent",3,8,14);
+	def_attributeF("bitangent",3,11,14);
 }
 
 /*
@@ -58,35 +82,53 @@ void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t o
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 	glVertexAttribDivisor(attrib,1);
 }
-
-/*
-	compile<dimension>(const char*,const char*) -> void
-	vspath: path to vertex shader code file
-	fspath: path to fragment shader code file
-	purpose: standard compile process with common attribute setup
-		it is not necessary to compile first, these exist for most common shader structures
-*/
-void Shader::compile2d(const char* vspath,const char* fspath) // !!cleanup and launch with enumerator && casediff
-{
-	compile(vspath,fspath);
-	def_attributeF("position",2,0,4);
-	def_attributeF("texCoords",2,2,4);
-}
-void Shader::compile3d(const char* vspath,const char* fspath) // !!another cleanup
-{
-	compile(vspath,fspath);
-	def_attributeF("position",3,0,14);
-	def_attributeF("texCoords",2,3,14);
-	def_attributeF("normals",3,5,14);
-	def_attributeF("tangent",3,8,14);
-	def_attributeF("bitangent",3,11,14);
-}
+// FIXME: unsigned int usage
 
 /*
 	enable() -> void
 	purpose: enables the program, so that it can be used. deactivates all others!
 */
 void Shader::enable() { glUseProgram(m_shaderProgram); }
+
+/*
+	upload_<X>(const char*,X x) -> void
+	loc: name of uniform variable as referred to in the shader code file
+	x: variable in desired datatype to upload to the shader as variable defined by location
+	purpose: definition of uniform variables in shader by program
+*/
+void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
+// FIXME: int usage
+
+void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
+
+void Shader::upload_vec2(const char* loc,glm::vec2 v)
+{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y); }
+
+void Shader::upload_vec3(const char* loc,glm::vec3 v)
+{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z); }
+
+void Shader::upload_vec4(const char* loc,glm::vec4 v)
+{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
+
+void Shader::upload_matrix(const char* loc,glm::mat4 m)
+{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
+
+/*
+	upload_camera(Camera2D||Camera3D) -> void
+	cam2d||cam3d: camera to upload as uniform to shader program
+	purpose: upload relevant camera matrices
+*/
+void Shader::upload_camera(Camera2D cam2d)
+{
+	upload_matrix("view",cam2d.view2D);
+	upload_matrix("proj",cam2d.proj2D);
+}
+
+void Shader::upload_camera(Camera3D cam3d)
+{
+	upload_matrix("view",cam3d.view3D);
+	upload_matrix("proj",cam3d.proj3D);
+}
 
 /*
 	compile_shader(const char*,GLenum) -> unsigned int
@@ -132,44 +174,4 @@ unsigned int Shader::compile_shader(const char* path,GLenum stype)
 
 	return shader;
 }
-
-/*
-	upload_<X>(const char*,X x) -> void
-	loc: name of uniform variable as referred to in the shader code file
-	x: variable in desired datatype to upload to the shader as variable defined by location
-	purpose: definition of uniform variables in shader by program
-*/
-void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
-void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
-void Shader::upload_vec2(const char* loc,glm::vec2 v)
-{
-	glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y);
-}
-void Shader::upload_vec3(const char* loc,glm::vec3 v)
-{
-	glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z);
-}
-void Shader::upload_vec4(const char* loc,glm::vec4 v)
-{
-	glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w);
-}
-void Shader::upload_matrix(const char* loc,glm::mat4 m)
-{
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m));
-}
-
-/*
-	upload_camera(Camera2D||Camera3D) -> void
-	cam2d||cam3d: camera to upload as uniform to shader program
-	purpose: upload relevant camera matrices
-*/
-void Shader::upload_camera(Camera2D cam2d)
-{
-	upload_matrix("view",cam2d.view2D);
-	upload_matrix("proj",cam2d.proj2D);
-}
-void Shader::upload_camera(Camera3D cam3d)
-{
-	upload_matrix("view",cam3d.view3D);
-	upload_matrix("proj",cam3d.proj3D);
-}
+// FIXME: change return data type

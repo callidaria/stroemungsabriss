@@ -118,12 +118,10 @@ sprite.scale(desired_scale.x,desired_scale.y);
 sprite.scale_arbit(desired_scale.x,desired_scale.y);
 
 // rotate existing model matrix (around z obviously, because it is a 2D entity - pac)
-// (((& i can't see, temporarilyyyy - frank zappa, the only well adjusted musician)))
-float resulting_rotation = 270.0f;	// (rotation is in degrees) can't stop rhymin' wth
+float resulting_rotation = 270.0f;	// (rotation is in degrees, obviously) can't stop rhymin' wth
 sprite.rotate(resulting_rotation);
 ```
-*most of the time the way of addressing sprites differs from this example. realistic showcase below* \
-*also, i apologize for the insanityyyy*
+*most of the time the way of addressing sprites differs from this example. realistic showcase below*
 
 ### Common Way of Addressing Sprite Objects
 
