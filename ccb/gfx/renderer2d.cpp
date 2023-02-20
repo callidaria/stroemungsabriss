@@ -73,8 +73,6 @@ void Renderer2D::load_vertex()
 	buffer.upload_vertices(v);
 	buffer.upload_elements(e);
 }
-// FIXME: this can be way faster, what about the array -> vector && branching removal?
-// FIXME: constant branching due to loop combination of animations and sprites. easily removable
 
 /*
 	load_texture() -> void
