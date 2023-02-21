@@ -89,6 +89,13 @@ void Shader::compile3d(const char* vspath,const char* fspath) // !!another clean
 void Shader::enable() { glUseProgram(m_shaderProgram); }
 
 /*
+	disable() -> void
+	purpose: disables any shader program that might still be enabled
+*/
+void Shader::disable()
+{ glUseProgram(0); }
+
+/*
 	compile_shader(const char*,GLenum) -> unsigned int
 	path: path to shader code file, meant to be compiled
 	stype: type of shader to compile the shader code file as:

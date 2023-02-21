@@ -31,6 +31,7 @@ public:
 
 	// settings
 	void enable();
+	static void disable();
 
 private:
 

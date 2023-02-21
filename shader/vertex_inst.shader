@@ -30,5 +30,5 @@ void main()
 
 	// upload final position
 	gl_Position = proj*view*model*vec4(rpos+offset,0,1);
-	gl_Position = vec4(position*.01,0,1);
+	gl_Position = vec4(position,0,1);
 }
