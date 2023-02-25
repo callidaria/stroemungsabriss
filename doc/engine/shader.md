@@ -2,6 +2,8 @@
 
 ## Purpose
 
+Compiles vertex & fragment shader (no support for geometry shader yet) and combines them as a shader program, which can be enabled before rendering related structures.
+
 <br>
 
 ***
@@ -67,6 +69,29 @@ shader.def_indexF(buffer.get_indices(),"test_location",var_dim,pattern_offset,pa
 
 ## Usage
 
+### Compile & Define Upload Structure
+
+```c++
+// setup for structure
+// [pos,pos,pos,pos,col,col,col,scale,scale]
+// for shader in vec4 pos, in vec3 col, in vec2 scale
+shader.compile("./path/to/vertex.shader","./path/to/fragment.shader");
+shader.def_attributeF("pos",4,0,9);
+shader.def_attributeF("col",3,4,9);
+shader.def_attributeF("scale",2,7,9);
+
+// OR
+// setup for general 2D structure
+// [position,position,texture coordinate,texture coordinate]
+shader.compile2d("./path/to/vertex.shader","./path/to/fragment.shader");
+
+// OR
+// setup for general 3D structure
+// [position,position,position,texture coordinate,texture coordinate,normal,normal,normal,
+//  tangent,tangent,tangent,bitangent,bitangent,bitangent]
+shader.compile3d("./path/to/vertex.shader","./path/to/fragment.shader");
+```
+
 <br>
 
 ***
@@ -92,3 +117,4 @@ shader.def_indexF(buffer.get_indices(),"test_location",var_dim,pattern_offset,pa
 - delete shaders after programm attachment
 - lingering unsigned integer as return value
 - colour setting for console output only viable for linux, returns gibberish on windows
+- feature for optional geometry shader has to be added
