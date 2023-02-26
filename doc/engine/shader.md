@@ -56,10 +56,18 @@ Trivial, construction at definition.
 ### Bind Index Buffer Object Before Defining Index Pattern
 
 ```c++
+// IF NOT ALREADY DONE
+buffer.add_buffer();
+
+shader.enable();
+// IF NOT
+shader.compile("./path/to/vertex.shader","./path/to/fragment.shader");
+// can also be compile2d() or compile3d
+
 buffer.bind_index();
 shader.def_indexF(buffer.get_indices(),"test_location",var_dim,pattern_offset,pattern_cap);
 ```
-*pipeline depends on [buffer](buffer.md)*
+*pipeline depends on [Buffer](buffer.md)*
 
 <br>
 
@@ -74,7 +82,7 @@ shader.def_indexF(buffer.get_indices(),"test_location",var_dim,pattern_offset,pa
 ```c++
 // setup for structure
 // [pos,pos,pos,pos,col,col,col,scale,scale]
-// for shader in vec4 pos, in vec3 col, in vec2 scale
+// for shader: in vec4 pos, in vec3 col, in vec2 scale
 shader.compile("./path/to/vertex.shader","./path/to/fragment.shader");
 shader.def_attributeF("pos",4,0,9);
 shader.def_attributeF("col",3,4,9);
@@ -91,6 +99,37 @@ shader.compile2d("./path/to/vertex.shader","./path/to/fragment.shader");
 //  tangent,tangent,tangent,bitangent,bitangent,bitangent]
 shader.compile3d("./path/to/vertex.shader","./path/to/fragment.shader");
 ```
+
+### Define Index Upload Structure
+
+```c++
+// IF ANOTHER SHADER HAS BEEN ENABLED SINCE COMPILATION
+shader.enable();
+
+// define index upload structure [offset,offset,rotation_sin,rotation_cos]
+// for shader: in vec2 offset, in float rotation_sin, in float rotation_cos
+buffer.bind_index();
+shader.def_indexF(buffer.get_indices(),"offset",2,0,4);
+shader.def_indexF(buffer.get_indices(),"rotation_sin",1,2,4);
+shader.def_indexF(buffer.get_indices(),"rotation_cos",1,3,4);
+```
+*example uses [Buffer](buffer.md)* \
+*shaders have to be compiled already for this to work*
+
+### Upload To Uniform Variables
+
+```c++
+// representative example for all upload_<datatype>() functions, please refer to feature list
+// upload for shader: uniform float test_value
+float test_value = 4.7f;
+shader.upload_float("test_value",test_value);
+
+// uploading a camera
+// required uniforms in shader: uniform mat4 view, uniform mat4 proj
+Camera2D cam2D;		// construction is trivial
+shader.upload_camera(cam2D);
+```
+*example uses [Camera2D](camera2d.md)*
 
 <br>
 
