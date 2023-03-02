@@ -10,12 +10,14 @@
 
 class Buffer
 {
+
 public:
 
+	// construction
 	Buffer();
 	~Buffer();
 
-	// common
+	// usage
 	void add_buffer();	// create element array buffer additionally
     void bind();		// bind the vertex array object
 	void bind_index();	// bind index or element buffer
@@ -28,7 +30,7 @@ public:
 	void upload_indices(std::vector<float> is);					// upload indices array
 	void upload_indices(float* is,size_t issize);			// upload vector indices array
 
-	// return
+	// getter
 	GLuint get_indices();
 
 private:

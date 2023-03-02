@@ -1,8 +1,20 @@
 #include "ccb_linpr.h"
 
-CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,Text* txt,const char* path)
-	: m_r2d(r2d),m_txt(txt),lvpath(path) {  }
-int CCBLInterpreter::load_level()
+/*
+	constructor(Renderer2D*,const char*)
+	r2d: points to 2D renderer handling all sprite & anim creation requests
+	path: path to environment cascabel file holding all creation requests & parameters
+	purpose: saves path & renderer for later usage
+*/
+CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,const char* path)
+	: m_r2d(r2d),lvpath(path) {  }
+
+/*
+	load_level() -> uint16_t
+	purpose: process all creation requests held by the cascabel environment file
+	returns: starting draw address for 2D renderer
+*/
+uint16_t CCBLInterpreter::load_level()
 {
 	int out = m_r2d->get_max_sprite();
 	std::ifstream lvfile(lvpath,std::ios::in);
@@ -35,6 +47,11 @@ int CCBLInterpreter::load_level()
 		}
 	} return out;
 }
+
+/*
+	write_level() -> void
+	purpose: used by the developer console; writes changes to the creation list
+*/
 void CCBLInterpreter::write_level()
 {
 	std::ofstream lvfile(lvpath,std::ios::out);

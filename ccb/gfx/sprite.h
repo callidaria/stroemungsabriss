@@ -33,8 +33,11 @@ public:
 
 public:
 
+	// system
 	std::vector<float> v;
 	GLuint tex;
+
+	// position
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::vec2 pos;
 	float sclx,scly;

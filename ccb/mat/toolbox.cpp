@@ -45,6 +45,7 @@ std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float
 	};
 	return out;
 }
+// FIXME: not intuitive if vertices returned are expecting element buffer
 
 /*
 	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)

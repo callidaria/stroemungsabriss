@@ -14,19 +14,22 @@ Buffer::Buffer()
 	add_buffer() -> void
 	purpose: creating optional buffer if used by any feature
 */
-void Buffer::add_buffer() { glGenBuffers(1,&iebo); }
+void Buffer::add_buffer()
+{ glGenBuffers(1,&iebo); }
 
 /*
 	bind() -> void
 	purpose: binds the vertex array before uploading and rendering
 */
-void Buffer::bind() { glBindVertexArray(vao); }
+void Buffer::bind()
+{ glBindVertexArray(vao); }
 
 /*
 	bind_index() -> void
 	purpose: binds the index or the element buffer before usage
 */
-void Buffer::bind_index() { glBindBuffer(GL_ARRAY_BUFFER,iebo); }
+void Buffer::bind_index()
+{ glBindBuffer(GL_ARRAY_BUFFER,iebo); }
 
 /*
 	upload_vertices(float*,size_t) -> void

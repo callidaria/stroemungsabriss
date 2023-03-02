@@ -21,6 +21,8 @@ public:
 	// setup
 	void texture();
 
+	// TODO: object transformation features & store model matrix
+
 private:
 
 	// helpers

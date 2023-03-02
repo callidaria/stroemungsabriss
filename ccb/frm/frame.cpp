@@ -163,7 +163,7 @@ void Frame::change_tmod(float goal,float rate)
 	tinput (false): defines if text input mode is enabled
 	purpose: processes keyboard, controller and mouse input
 */
-void Frame::input(uint32_t &running,bool tinput)
+void Frame::input(uint32_t &running)
 {
 	// FIXME: this is loopcode. make it work as such !!branches!!
 	event_active = false;

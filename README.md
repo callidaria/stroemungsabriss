@@ -57,6 +57,10 @@ then, press [b] key to build executable
 
 <br>
 
+To see the full documentation of engine go [here](doc/index.md)
+
+<br>
+
 ***
 
 <br>
@@ -140,4 +144,5 @@ Worktime: 120h
 	+ 114: 2min
 	+ 91: 16h 37min
 	+ 106: 64h 7min
+	+ 82: 20h 50min
 - Total Code Lines: 11.495

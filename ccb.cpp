@@ -262,13 +262,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
-
-#ifdef __WIN32__
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
-#else
-				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
-#endif
-
 				out = "compiled "+out_file;
 			}
 
@@ -290,11 +284,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
-#ifdef __WIN32__
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c "+cmp_windef).c_str());
-#else
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal").c_str());
-#endif
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c").c_str());
 					} cfound = readdir(cdir);
 				}
 			}
