@@ -128,4 +128,3 @@ sfx.remove();
 ## Bugs & Issues
 
 - Apparently there is a weird bug when playing sounds right after construction
-- Code commentary is incomplete

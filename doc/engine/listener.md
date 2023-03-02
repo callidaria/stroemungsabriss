@@ -84,5 +84,4 @@ listener.set_orientation(camera_direction);		// camera has been rotated
 
 ## Bugs & Issues
 
-- Code commentary is incomplete
 - Could be elegantly solved with static functions

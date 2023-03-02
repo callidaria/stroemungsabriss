@@ -1,7 +1,14 @@
 #include "audio.h"
 
 /*
-	TODO
+	construction(const char*,float,float,vec3,vec3,bool)
+	path: path to .wav audio file
+	gain: starting gain of extracted audio when playing
+	pitch: starting pitch of of extracted audio when playing
+	pos: 3D position, the audio originates from
+	vel: velocity & direction the audio emitter travels in
+	play_loop: if audio should loop
+	purpose: read audio from file & create an audio emission source
 */
 Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop)
 {
@@ -51,12 +58,15 @@ Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel
 }
 
 /*
-	TODO
+	play() -> void
+	purpose: play sound or music
 */
-void Audio::play() { alSourcePlay(m_audio); }
+void Audio::play()
+{ alSourcePlay(m_audio); }
 
 /*
-	TODO
+	remove() -> void
+	purpose: remove audio should it not be needed anymore
 */
 void Audio::remove()
 {
@@ -65,7 +75,13 @@ void Audio::remove()
 }
 
 /*
-	TODO
+	set_all(float,float,vec3,vec3,bool) -> void
+	gain: new gain of audio
+	pitch: new pitch of audio
+	pos: new position of audio emitter
+	vel: new velocity & direction the audio emitter travels in
+	play_loop: information if audio should loop
+	purpose: change all audio emitter specifications at once
 */
 void Audio::set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop)
 {
@@ -77,31 +93,41 @@ void Audio::set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play
 }
 
 /*
-	TODO
+	set_gain(float) -> void
+	gain: new gain of audio
+	purpose: update gain of emission
 */
 void Audio::set_gain(float gain)
 { alSourcef(m_audio,AL_GAIN,gain); }
 
 /*
-	TODO
+	set_pitch(float) -> void
+	pitch: new pitch of audio
+	purpose: update pitch of emission
 */
 void Audio::set_pitch(float pitch)
 { alSourcef(m_audio,AL_PITCH,pitch); }
 
 /*
-	TODO
+	set_position(vec3) -> void
+	pos: new position of audio emitter
+	purpose: update position of emitter
 */
 void Audio::set_position(glm::vec3 pos)
 { alSource3f(m_audio,AL_POSITION,pos.x,pos.y,pos.z); }
 
 /*
-	TODO
+	set_velocity(vec3) -> void
+	vel: new velocity & direction the audio emitter travels in
+	purpose: update velocity & direction of emitter movement
 */
 void Audio::set_velocity(glm::vec3 vel)
 { alSource3f(m_audio,AL_VELOCITY,vel.x,vel.y,vel.z); }
 
 /*
-	TODO
+	set_loop(bool) -> void
+	play_loop: new information if audio should loop
+	purpose: update if audio is supposed to loop
 */
 void Audio::set_loop(bool play_loop)
 { alSourcei(m_audio,AL_LOOPING,play_loop); }
