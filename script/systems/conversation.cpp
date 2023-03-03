@@ -161,7 +161,7 @@ void Conversation::render()
 
 	// draw spoken text contents
 	tspoken.prepare();
-	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
+	tspoken.render(speaker_name.length()+sltr_count+1,glm::vec4(1,.7f,0,1));
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -336,19 +336,23 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 */
 void Conversation::load_text()
 {
-	// write text content
-	tspoken.clear();
-	tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y),
-			725,CONVERSATION_CHOICE_OFFSET);
-	tspoken.load(&cam2D);
-
 	// load character name display
+	speaker_name = "04";
 	if (ctemp.char_id) {
 		curr_char = ctemp.char_id;
+		speaker_name = charManager->get_character(curr_char).name;
 		tname.clear();
-		tname.add(charManager->get_character(curr_char).name,glm::vec2(905,33));
+		tname.add(speaker_name.c_str(),glm::vec2(905,33));
 		tname.load(&cam2D);
 	}
+
+	// write text content
+	tspoken.clear();
+	tspoken.add((speaker_name+':').c_str(),
+			glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y));
+	tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y
+			-CONVERSATION_CHOICE_OFFSET),380,CONVERSATION_CHOICE_OFFSET);
+	tspoken.load(&cam2D);
 
 	// load characters mood
 	if (ctemp.mood_id) {

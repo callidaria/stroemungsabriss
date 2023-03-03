@@ -85,7 +85,7 @@ void Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 	} wrds.push_back(crr_word);
 
 	// add found words without breaking border width
-	uint16_t crr_width = 0;
+	float crr_width = 0;
 	for (auto wrd:wrds) {
 
 		// calculate estimated word width
@@ -118,9 +118,7 @@ void Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 	purpose: clear all character entries from text entity index buffer
 */
 void Text::clear()
-{
-	ibv.clear();
-}
+{ ibv.clear(); }
 
 /*
 	texture() -> void
@@ -129,9 +127,7 @@ void Text::clear()
 		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
-{
-	Toolbox::load_texture(ftexture,m_font->tp);
-}
+{ Toolbox::load_texture(ftexture,m_font->tp); }
 
 /*
 	load(Camera2D*) -> void

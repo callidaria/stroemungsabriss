@@ -21,7 +21,7 @@ constexpr float CONVERSATION_SPOKEN_TEXT_X = 720;
 constexpr float CONVERSATION_SPOKEN_TEXT_Y = 655;
 constexpr float CONVERSATION_CHOICE_ORIGIN_X = 50;
 constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
-constexpr float CONVERSATION_CHOICE_OFFSET = 30;
+constexpr float CONVERSATION_CHOICE_OFFSET = 25;
 
 // OHOHO it looks like academia wasn't completely for nothing and worthless...
 // i can actually maybe use some knowledge from university here? that's a first!
@@ -88,5 +88,6 @@ private:
 	bool chlfr = false;							// conserve if input happened last frame
 	float sEdges[4] = { 0 };					// choice selection edge modification
 	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
+	std::string speaker_name;
 	GLuint curr_ctex;
 };
