@@ -17,8 +17,8 @@
 #include "character_manager.h"
 
 // screen position specifications
-constexpr float CONVERSATION_SPOKEN_TEXT_X = 450;
-constexpr float CONVERSATION_SPOKEN_TEXT_Y = 125;
+constexpr float CONVERSATION_SPOKEN_TEXT_X = 720;
+constexpr float CONVERSATION_SPOKEN_TEXT_Y = 655;
 constexpr float CONVERSATION_CHOICE_ORIGIN_X = 50;
 constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
 constexpr float CONVERSATION_CHOICE_OFFSET = 30;
@@ -76,7 +76,7 @@ private:
 
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
-	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);
+	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
 	Text tspoken = Text(&bgrfont),tdecide = Text(&bgrfont),tname = Text(&bgrfont);
 
 	// tree
@@ -89,5 +89,4 @@ private:
 	float sEdges[4] = { 0 };					// choice selection edge modification
 	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
 	GLuint curr_ctex;
-
 };

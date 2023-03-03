@@ -37,12 +37,13 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path)
 	opps_shader.def_attributeF("position",2,0,4);
 	opps_shader.def_attributeF("texCoords",2,2,4);
 	opps_shader.upload_camera(cam2D);
+	// FIXME: isn't this compile2d() worthy?
 
 	// load character spritesheets
 	charManager->load_spritesheets();
 
 	// background vertices
-	float tfield_verts[] = { 425,25, 425,150, 1200,150, 1200,150, 1200,25, 425,25, };
+	float tfield_verts[] = { 705,50, 705,670, 1105,670, 1105,670, 1105,50, 705,50, };
 	bgr_buffer.bind();
 	bgr_buffer.upload_vertices(tfield_verts,sizeof(tfield_verts));
 
@@ -160,7 +161,7 @@ void Conversation::render()
 
 	// draw spoken text contents
 	tspoken.prepare();
-	tspoken.render(sltr_count,glm::vec4(.8f,.2f,0,1));
+	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -345,7 +346,7 @@ void Conversation::load_text()
 	if (ctemp.char_id) {
 		curr_char = ctemp.char_id;
 		tname.clear();
-		tname.add(charManager->get_character(curr_char).name,glm::vec2(850,200));
+		tname.add(charManager->get_character(curr_char).name,glm::vec2(905,33));
 		tname.load(&cam2D);
 	}
 
