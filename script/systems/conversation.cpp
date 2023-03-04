@@ -158,6 +158,7 @@ void Conversation::render()
 	// draw spoken text contents
 	tspoken.prepare();
 	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
+	std::cout << sltr_count << '<' << sltr_target << '\n';
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -330,6 +331,16 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 /*
 	TODO
 */
+uint16_t Conversation::count_instances(std::string text)
+{
+	uint16_t out = 0;
+	for (auto chr : text) out += chr!=' ';
+	return out;
+}
+
+/*
+	TODO
+*/
 void Conversation::load_text()
 {
 	// load character name display
@@ -343,7 +354,6 @@ void Conversation::load_text()
 	}
 
 	// write text content
-	//tspoken.clear();
 	tspoken.add((speaker_name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
 	cursor_y -= CONVERSATION_CHOICE_OFFSET;
 	cursor_y = tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
@@ -369,8 +379,8 @@ void Conversation::load_text()
 	}
 
 	// advance target count
-	sltr_count += speaker_name.length()+1;
-	sltr_target = sltr_count+ctemp.content.length();
+	sltr_count += count_instances(speaker_name)+1;
+	sltr_target = sltr_count+count_instances(ctemp.content);
 	std::cout << sltr_count << ',' << sltr_target << '\n';
 }
 

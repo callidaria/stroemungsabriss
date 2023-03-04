@@ -59,6 +59,7 @@ private:
 	std::string grind_raw_node_by_key(std::string raw,std::string key);
 	uint32_t convert_rawid(std::string rawid);
 	ConversationNode rc_depthsearch(ConversationNode root,uint32_t id);
+	uint16_t count_instances(std::string text);
 
 	// loader
 	void load_text();
