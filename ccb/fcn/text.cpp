@@ -72,7 +72,7 @@ void Text::add(const char* s,glm::vec2 p)
 /*
 	TODO
 */
-void Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
+glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 {
 	// pry apart words from given string
 	std::vector<std::string> wrds;
@@ -111,6 +111,9 @@ void Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 		crr_width += estm_wwidth+wordspacing;
 		// FIXME: duplicate code!
 	}
+
+	// return cursor position
+	return glm::vec2(crr_width,p.y);
 }
 
 /*
@@ -177,14 +180,21 @@ void Text::render(int32_t amnt,glm::vec4 col)
 }
 
 /*
+	TODO
+*/
+void Text::set_scroll(glm::vec2 scroll)
+{
+	glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(scroll.x,scroll.y,0));
+	sT.upload_matrix("model",model);
+}
+
+/*
 	set_scroll(mat4) -> void
 	model: model matrix to upload to shader
 	purpose: emulate a free text scrolling effect by common model transformation of sprites
 */
 void Text::set_scroll(glm::mat4 model)
-{
-	sT.upload_matrix("model",model);
-}
+{ sT.upload_matrix("model",model); }
 
 /*
 	load_vertex() -> void (private)

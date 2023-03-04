@@ -18,7 +18,6 @@
 
 // screen position specifications
 constexpr float CONVERSATION_SPOKEN_TEXT_X = 720;
-constexpr float CONVERSATION_SPOKEN_TEXT_Y = 655;
 constexpr float CONVERSATION_CHOICE_ORIGIN_X = 50;
 constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
 constexpr float CONVERSATION_CHOICE_OFFSET = 25;
@@ -84,10 +83,13 @@ private:
 
 	// animation
 	uint16_t sltr_count = 0,dltr_count = 0;		// count of displayed letters
+	uint16_t sltr_target = 0;					// target to count displayed letters towards
+	float tscroll = 0;							// defines scroll advancement of backlog
 	uint8_t decision_id = 0;					// index of selected decision
 	bool chlfr = false;							// conserve if input happened last frame
 	float sEdges[4] = { 0 };					// choice selection edge modification
 	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
 	std::string speaker_name;
+	float cursor_y = 655;
 	GLuint curr_ctex;
 };

@@ -20,7 +20,7 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path)
 	croot = rc_compile_node_data(lines,lidx);
 
 	// selector vertices
-	float sfield_verts[] = { 0,-25,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-25,3, 0,-25,0, };
+	float sfield_verts[] = { 0,-20,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-20,3, 0,-20,0, };
 	slct_buffer.bind();
 	slct_buffer.upload_vertices(sfield_verts,sizeof(sfield_verts));
 	slct_shader.compile("./shader/fbv_lselect.shader","./shader/fbf_lselect.shader");
@@ -93,8 +93,8 @@ void Conversation::input(bool cnf,bool up,bool down)
 {
 	// block input & complete filling when text not ready
 	bool t_chlfr = chlfr;
-	chlfr = (sltr_count<ctemp.content.length())||chlfr;
-	sltr_count += (ctemp.content.length()-sltr_count)*(cnf&&!t_chlfr);
+	chlfr = (sltr_count<sltr_target)||chlfr;
+	sltr_count += (sltr_target-sltr_count)*(cnf&&!t_chlfr);
 
 	// in case of branch decision
 	if (cnf&&!chlfr&&dltr_count) {
@@ -105,11 +105,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 	}
 
 	// in case of confirmation
-	else if (cnf&&!chlfr) {
-
-		// if (ctemp.child_nodes.size()>1) load_choice();
-		jmp_successor();
-	}
+	else if (cnf&&!chlfr) jmp_successor();
 
 	// in case of choosing
 	else if ((up||down)&&!chlfr) {
@@ -131,7 +127,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 void Conversation::render()
 {
 	// update letter count
-	bool filling = sltr_count<ctemp.content.length();
+	bool filling = sltr_count<sltr_target;
 	sltr_count += filling;
 
 	// upload selection splash modifications
@@ -161,7 +157,7 @@ void Conversation::render()
 
 	// draw spoken text contents
 	tspoken.prepare();
-	tspoken.render(speaker_name.length()+sltr_count+1,glm::vec4(1,.7f,0,1));
+	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -347,12 +343,18 @@ void Conversation::load_text()
 	}
 
 	// write text content
-	tspoken.clear();
-	tspoken.add((speaker_name+':').c_str(),
-			glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y));
-	tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,CONVERSATION_SPOKEN_TEXT_Y
-			-CONVERSATION_CHOICE_OFFSET),380,CONVERSATION_CHOICE_OFFSET);
+	//tspoken.clear();
+	tspoken.add((speaker_name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
+	cursor_y -= CONVERSATION_CHOICE_OFFSET;
+	cursor_y = tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
+			CONVERSATION_CHOICE_OFFSET).y;
+	cursor_y -= CONVERSATION_CHOICE_OFFSET;
 	tspoken.load(&cam2D);
+
+	// advance scroll if y-axis border has been violated
+	float scr_cursor = cursor_y+tscroll;
+	tscroll -= (scr_cursor-50)*(scr_cursor<50);
+	tspoken.set_scroll(glm::vec2(0,tscroll));
 
 	// load characters mood
 	if (ctemp.mood_id) {
@@ -366,8 +368,10 @@ void Conversation::load_text()
 		curr_ctex = tmp.tex_sheet;
 	}
 
-	// reset letter count
-	sltr_count = 0;
+	// advance target count
+	sltr_count += speaker_name.length()+1;
+	sltr_target = sltr_count+ctemp.content.length();
+	std::cout << sltr_count << ',' << sltr_target << '\n';
 }
 
 /*
@@ -382,8 +386,6 @@ void Conversation::load_choice()
 	// write conversation branching lines
 	for (uint16_t i=0;i<ctemp.child_nodes.size();i++) {
 
-		std::cout << ctemp.child_nodes[i].char_id << ',' << ctemp.child_nodes[i].condition_id << ' ';
-
 		// write line
 		tdecide.add(ctemp.child_nodes[i].content.c_str(),
 				glm::vec2(CONVERSATION_CHOICE_ORIGIN_X,
@@ -391,7 +393,7 @@ void Conversation::load_choice()
 
 		// calculate decision letter capacity
 		dltr_count += ctemp.child_nodes[i].content.length();
-	} std::cout << '\n';
+	}
 
 	// load text instances & and reset letter count
 	tdecide.load(&cam2D);

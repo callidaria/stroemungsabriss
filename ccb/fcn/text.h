@@ -24,7 +24,7 @@ public:
 	uint32_t add(char c,glm::vec2 p);
 	uint32_t add(uint8_t i,glm::vec2 p);
 	void add(const char* s,glm::vec2 p);
-	void add(std::string s,glm::vec2 p,float bwdt,float nline_offset);
+	glm::vec2 add(std::string s,glm::vec2 p,float bwdt,float nline_offset);
 	void clear();
 
 	// preparation
@@ -36,6 +36,7 @@ public:
 	void render(int32_t amnt,glm::vec4 col);
 
 	// uniform
+	void set_scroll(glm::vec2 scroll);
 	void set_scroll(glm::mat4 model);
 
 private:
