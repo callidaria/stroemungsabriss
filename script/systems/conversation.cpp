@@ -3,8 +3,8 @@
 /*
 	TODO
 */
-Conversation::Conversation(CharacterManager* cm, const char* mm_path,std::string pname)
-	: charManager(cm),protag_name(pname)
+Conversation::Conversation(Renderer2D* r2D,CharacterManager* cm,const char* mm_path,std::string pname)
+	: m_r2D(r2D),charManager(cm),protag_name(pname)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -54,6 +54,10 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path,std::string
 	bgr_shader.def_attributeF("edge_id",1,2,3);
 	bgr_shader.upload_camera(cam2D);
 	manipulate_background_edges();
+
+	// load continue button animation
+	btn_rindex = m_r2D->add(glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-50),50,50,
+			"./res/continue_dialogue.png",2,3,5,30);
 }
 
 /*
@@ -177,6 +181,13 @@ void Conversation::render()
 	// show conversing character's name
 	tname.prepare();
 	tname.render(1024,name_colour);
+
+	// animate continue request
+	m_r2D->prepare();
+	m_r2D->al[btn_rindex].model = glm::translate(glm::mat4(1.0f),
+			glm::vec3(btn_position.x+1280*(sltr_count<sltr_target||dltr_count),
+			btn_position.y+tscroll,0));
+	m_r2D->render_anim(btn_rindex);
 }
 
 /*
@@ -497,11 +508,15 @@ void Conversation::log_speaker(std::string name,glm::vec4 colour)
 */
 void Conversation::log_content(std::string content)
 {
+	// write content to spoken text output
 	Text proc = Text(&bgrfont);
-	cursor_y = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
-			CONVERSATION_CHOICE_OFFSET).y;
+	glm::vec2 cpos = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
+			CONVERSATION_CHOICE_OFFSET);
 	proc.load(&cam2D);
 	tspoken.push_back(proc);
 	tcolour.push_back(name_colour);
-	cursor_y -= CONVERSATION_CHOICE_OFFSET;
+
+	// update confirmation request & newline
+	btn_position = cpos;
+	cursor_y = cpos.y-CONVERSATION_CHOICE_OFFSET;
 }

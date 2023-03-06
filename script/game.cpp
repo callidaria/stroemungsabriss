@@ -2,9 +2,7 @@
 
 Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
 	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d)
-{
-	ccbf = { m_frame,m_r2d,m_r3d,m_rI,&m_bSys,&m_player };
-}
+{ ccbf = { m_frame,m_r2d,m_r3d,m_rI,&m_bSys,&m_player }; }
 
 void Game::run(uint32_t &rstate,CCBManager* ccbm)
 {
@@ -15,6 +13,16 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	int32_t fwd_treg[16] = { 0 };
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
+
+	// add spike to character list
+	CharacterManager cmanager = CharacterManager();
+	cmanager.add_character(2,"Spike, Master of Cards","./res/mood/spike.png",
+			6,glm::vec4(.4f,.7f,.2f,1));
+	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
+
+	// conversation test
+	Conversation cnv_test = Conversation(m_r2d,&cmanager,"./dat/casino_coup.mm","04");
+	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
@@ -33,16 +41,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// lightweight action menu
 	ActionMenu lgt_menu = ActionMenu(m_frame);
-
-	// add spike to character list
-	CharacterManager cmanager = CharacterManager();
-	cmanager.add_character(2,"Spike, Master of Cards","./res/mood/spike.png",
-			6,glm::vec4(.4f,.7f,.2f,1));
-	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
-
-	// conversation test
-	Conversation cnv_test = Conversation(&cmanager,"./dat/casino_coup.mm","04");
-	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// update until exit condition
 	uint32_t running = rstate+1;
