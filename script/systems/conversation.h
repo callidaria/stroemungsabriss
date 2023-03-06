@@ -60,6 +60,7 @@ private:
 	uint32_t convert_rawid(std::string rawid);
 	ConversationNode rc_depthsearch(ConversationNode root,uint32_t id);
 	uint16_t count_instances(std::string text);
+	void manipulate_background_edges();
 
 	// loader
 	void load_text();

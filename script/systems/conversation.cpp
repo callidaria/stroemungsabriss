@@ -43,15 +43,17 @@ Conversation::Conversation(CharacterManager* cm, const char* mm_path)
 	charManager->load_spritesheets();
 
 	// background vertices
-	float tfield_verts[] = { 705,50, 705,670, 1105,670, 1105,670, 1105,50, 705,50, };
+	float tfield_verts[] = { 705,0,0, 705,720,1, 1105,720,2, 1105,720,2, 1105,0,3, 705,0,0, };
 	bgr_buffer.bind();
 	bgr_buffer.upload_vertices(tfield_verts,sizeof(tfield_verts));
 
 	// background shader
 	bgr_shader.compile("./shader/cnv_background_vertex.shader",
 			"./shader/cnv_background_fragment.shader");
-	bgr_shader.def_attributeF("position",2,0,2);
+	bgr_shader.def_attributeF("position",2,0,3);
+	bgr_shader.def_attributeF("edge_id",1,2,3);
 	bgr_shader.upload_camera(cam2D);
+	manipulate_background_edges();
 }
 
 /*
@@ -97,15 +99,16 @@ void Conversation::input(bool cnf,bool up,bool down)
 	sltr_count += (sltr_target-sltr_count)*(cnf&&!t_chlfr);
 
 	// in case of branch decision
-	if (cnf&&!chlfr&&dltr_count) {
+	if (cnf&&!chlfr) {
 
 		// load initial child from selected branch & reset
-		mv_decision(decision_id);
+		if (dltr_count) mv_decision(decision_id);
 		jmp_successor();
-	}
 
-	// in case of confirmation
-	else if (cnf&&!chlfr) jmp_successor();
+		// refresh edge manipulation
+		bgr_shader.enable();
+		manipulate_background_edges();
+	}
 
 	// in case of choosing
 	else if ((up||down)&&!chlfr) {
@@ -158,7 +161,6 @@ void Conversation::render()
 	// draw spoken text contents
 	tspoken.prepare();
 	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
-	std::cout << sltr_count << '<' << sltr_target << '\n';
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -340,6 +342,18 @@ uint16_t Conversation::count_instances(std::string text)
 
 /*
 	TODO
+	NOTE: background shader has to be enabled beforehand
+*/
+void Conversation::manipulate_background_edges()
+{
+	bgr_shader.upload_int("edge_offset[0]",rand()%37-30);
+	bgr_shader.upload_int("edge_offset[1]",rand()%37-30);
+	bgr_shader.upload_int("edge_offset[2]",rand()%37-7);
+	bgr_shader.upload_int("edge_offset[3]",rand()%37-7);
+}
+
+/*
+	TODO
 */
 void Conversation::load_text()
 {
@@ -381,7 +395,6 @@ void Conversation::load_text()
 	// advance target count
 	sltr_count += count_instances(speaker_name)+1;
 	sltr_target = sltr_count+count_instances(ctemp.content);
-	std::cout << sltr_count << ',' << sltr_target << '\n';
 }
 
 /*
