@@ -8,12 +8,13 @@ CharacterManager::CharacterManager() {  }
 /*
 	TODO
 */
-void CharacterManager::add_character(uint16_t id,const char* name,const char* texpath,uint8_t cols)
+void CharacterManager::add_character(uint16_t id,const char* name,const char* texpath,uint8_t cols,
+		glm::vec4 text_colour)
 {
 	GLuint tex;
 	glGenTextures(1,&tex);
 
-	CharacterData proc = { id,name,texpath,cols,tex };
+	CharacterData proc = { id,name,texpath,cols,tex,text_colour };
 	char_list.push_back(proc);
 }
 

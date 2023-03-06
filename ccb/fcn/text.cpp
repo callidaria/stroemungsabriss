@@ -133,6 +133,12 @@ void Text::texture()
 { Toolbox::load_texture(ftexture,m_font->tp); }
 
 /*
+	TODO
+*/
+void Text::enable_shader()
+{ sT.enable(); }
+
+/*
 	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader

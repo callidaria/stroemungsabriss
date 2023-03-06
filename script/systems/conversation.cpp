@@ -158,9 +158,17 @@ void Conversation::render()
 	bgr_buffer.bind();
 	glDrawArrays(GL_TRIANGLES,0,6);
 
+	// draw speaker labels
+	for (auto name : tspoken_names) {
+		name.prepare();
+		name.render(1024,glm::vec4(0,0,0,1));
+	}
+
 	// draw spoken text contents
-	tspoken.prepare();
-	tspoken.render(sltr_count,glm::vec4(1,.7f,0,1));
+	for (uint16_t i=0;i<tspoken.size();i++) {
+		tspoken[i].prepare();
+		tspoken[i].render(sltr_count+1024*(i!=tspoken.size()-1),tcolour[i]);
+	}
 
 	// draw decision list text contents
 	tdecide.prepare();
@@ -168,7 +176,7 @@ void Conversation::render()
 
 	// show conversing character's name
 	tname.prepare();
-	tname.render(1024,glm::vec4(1,1,1,1));
+	tname.render(1024,name_colour);
 }
 
 /*
@@ -358,27 +366,46 @@ void Conversation::manipulate_background_edges()
 void Conversation::load_text()
 {
 	// load character name display
-	speaker_name = "04";
 	if (ctemp.char_id) {
 		curr_char = ctemp.char_id;
-		speaker_name = charManager->get_character(curr_char).name;
+		std::string speaker_name = charManager->get_character(curr_char).name;
+
+		// write name to spoken text output
+		Text proc = Text(&bgrfont);
+		proc.add((speaker_name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
+		proc.load(&cam2D);
+		tspoken_names.push_back(proc);
+		cursor_y -= CONVERSATION_CHOICE_OFFSET;
+		name_colour = charManager->get_character(curr_char).text_colour;
+
+		// update lower name display
 		tname.clear();
 		tname.add(speaker_name.c_str(),glm::vec2(905,33));
 		tname.load(&cam2D);
 	}
 
 	// write text content
-	tspoken.add((speaker_name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
-	cursor_y -= CONVERSATION_CHOICE_OFFSET;
-	cursor_y = tspoken.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
+	Text proc = Text(&bgrfont);
+	cursor_y = proc.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
 			CONVERSATION_CHOICE_OFFSET).y;
+	proc.load(&cam2D);
+	tspoken.push_back(proc);
+	tcolour.push_back(name_colour);
 	cursor_y -= CONVERSATION_CHOICE_OFFSET;
-	tspoken.load(&cam2D);
 
 	// advance scroll if y-axis border has been violated
 	float scr_cursor = cursor_y+tscroll;
 	tscroll -= (scr_cursor-50)*(scr_cursor<50);
-	tspoken.set_scroll(glm::vec2(0,tscroll));
+	glm::mat4 tmodel = glm::translate(glm::mat4(1.0f),glm::vec3(0,tscroll,0));
+	for (auto ltxt : tspoken_names) {
+		ltxt.enable_shader();
+		ltxt.set_scroll(tmodel);
+	} for (auto stxt : tspoken) {
+		stxt.enable_shader();
+		stxt.set_scroll(tmodel);
+	}
+	// FIXME: scrolling gets more expensive in a linear fashion in relation to text
+	// TODO: ??add a text instance for every participant in conversation and add upon those
 
 	// load characters mood
 	if (ctemp.mood_id) {
@@ -393,8 +420,8 @@ void Conversation::load_text()
 	}
 
 	// advance target count
-	sltr_count += count_instances(speaker_name)+1;
-	sltr_target = sltr_count+count_instances(ctemp.content);
+	sltr_count = 0;
+	sltr_target = count_instances(ctemp.content);
 }
 
 /*

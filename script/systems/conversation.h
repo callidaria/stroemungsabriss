@@ -78,7 +78,10 @@ private:
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-	Text tspoken = Text(&bgrfont),tdecide = Text(&bgrfont),tname = Text(&bgrfont);
+	Text tdecide = Text(&bgrfont),tname = Text(&bgrfont);
+	std::vector<Text> tspoken,tspoken_names;
+	std::vector<glm::vec4> tcolour;
+	glm::vec4 name_colour;
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
@@ -91,7 +94,6 @@ private:
 	bool chlfr = false;							// conserve if input happened last frame
 	float sEdges[4] = { 0 };					// choice selection edge modification
 	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
-	std::string speaker_name;
 	float cursor_y = 655;
 	GLuint curr_ctex;
 };

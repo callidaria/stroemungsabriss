@@ -9,8 +9,6 @@
 #include "buffer.h"
 #include "font.h"
 
-#define MAX_CHAR_COUNT 4096
-
 class Text
 {
 public:
@@ -29,6 +27,7 @@ public:
 
 	// preparation
 	void texture();
+	void enable_shader();
 	void load(Camera2D* c);
 	void prepare();
 
