@@ -3,8 +3,8 @@
 /*
 	TODO
 */
-Conversation::Conversation(CharacterManager* cm, const char* mm_path)
-	: charManager(cm)
+Conversation::Conversation(CharacterManager* cm, const char* mm_path,std::string pname)
+	: charManager(cm),protag_name(pname)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -371,12 +371,7 @@ void Conversation::load_text()
 		std::string speaker_name = charManager->get_character(curr_char).name;
 
 		// write name to spoken text output
-		Text proc = Text(&bgrfont);
-		proc.add((speaker_name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
-		proc.load(&cam2D);
-		tspoken_names.push_back(proc);
-		cursor_y -= CONVERSATION_CHOICE_OFFSET;
-		name_colour = charManager->get_character(curr_char).text_colour;
+		log_speaker(speaker_name,charManager->get_character(curr_char).text_colour);
 
 		// update lower name display
 		tname.clear();
@@ -385,13 +380,7 @@ void Conversation::load_text()
 	}
 
 	// write text content
-	Text proc = Text(&bgrfont);
-	cursor_y = proc.add(ctemp.content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
-			CONVERSATION_CHOICE_OFFSET).y;
-	proc.load(&cam2D);
-	tspoken.push_back(proc);
-	tcolour.push_back(name_colour);
-	cursor_y -= CONVERSATION_CHOICE_OFFSET;
+	log_content(ctemp.content);
 
 	// advance scroll if y-axis border has been violated
 	float scr_cursor = cursor_y+tscroll;
@@ -458,8 +447,10 @@ void Conversation::jmp_successor()
 	bool multi_branch = false;
 	do {
 		if (ctemp.jmp_id) ctemp = rc_depthsearch(croot,ctemp.jmp_id);
-		else mv_decision(0);
-		multi_branch = ctemp.child_nodes.size()>1;
+		else {
+			ConversationNode swp = ctemp.child_nodes[0];
+			ctemp = swp;
+		} multi_branch = ctemp.child_nodes.size()>1;
 	}
 
 	// run until conversation tree head has valued content or branches
@@ -476,6 +467,41 @@ void Conversation::jmp_successor()
 */
 void Conversation::mv_decision(uint8_t i)
 {
+	// swap to chosen child node
 	ConversationNode swp = ctemp.child_nodes[i];
 	ctemp = swp;
+
+	// write choice to conversation log
+	log_speaker(protag_name,glm::vec4(1,.7f,0,1));
+	log_content(swp.content);
+}
+
+/*
+	TODO
+*/
+void Conversation::log_speaker(std::string name,glm::vec4 colour)
+{
+	// write name to spoken text output
+	Text proc = Text(&bgrfont);
+	proc.add((name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
+	proc.load(&cam2D);
+	tspoken_names.push_back(proc);
+
+	// newline & load speaker's colour
+	cursor_y -= CONVERSATION_CHOICE_OFFSET;
+	name_colour = colour;
+}
+
+/*
+	TODO
+*/
+void Conversation::log_content(std::string content)
+{
+	Text proc = Text(&bgrfont);
+	cursor_y = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
+			CONVERSATION_CHOICE_OFFSET).y;
+	proc.load(&cam2D);
+	tspoken.push_back(proc);
+	tcolour.push_back(name_colour);
+	cursor_y -= CONVERSATION_CHOICE_OFFSET;
 }

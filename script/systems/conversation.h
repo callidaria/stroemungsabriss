@@ -42,7 +42,7 @@ class Conversation
 public:
 
 	// construction
-	Conversation(CharacterManager* cm,const char* mm_path);
+	Conversation(CharacterManager* cm,const char* mm_path,std::string pname);
 	~Conversation() {  }
 
 	// interaction
@@ -68,6 +68,10 @@ private:
 	void jmp_successor();
 	void mv_decision(uint8_t i);
 
+	// write
+	void log_speaker(std::string name,glm::vec4 colour);
+	void log_content(std::string content);
+
 private:
 
 	// cascabel
@@ -82,6 +86,7 @@ private:
 	std::vector<Text> tspoken,tspoken_names;
 	std::vector<glm::vec4> tcolour;
 	glm::vec4 name_colour;
+	std::string protag_name;
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes

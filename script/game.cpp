@@ -41,7 +41,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
 
 	// conversation test
-	Conversation cnv_test = Conversation(&cmanager,"./dat/casino_coup.mm");
+	Conversation cnv_test = Conversation(&cmanager,"./dat/casino_coup.mm","04");
 	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// update until exit condition
