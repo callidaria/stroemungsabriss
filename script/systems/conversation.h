@@ -49,7 +49,7 @@ public:
 	~Conversation() {  }
 
 	// interaction
-	void engage(std::string tree_path);
+	void engage(std::string tree_path,std::vector<bool> cnd);
 	void input(bool cnf,bool up,bool down);
 
 	// draw
@@ -95,6 +95,8 @@ private:
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
+	std::vector<ConversationNode> choices;
+	std::vector<bool> cnd_list;
 
 	// input
 	uint16_t btn_rindex;

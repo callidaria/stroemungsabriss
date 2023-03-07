@@ -64,9 +64,10 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 /*
 	TODO
 */
-void Conversation::engage(std::string tree_path)
+void Conversation::engage(std::string tree_path,std::vector<bool> cnd)
 {
 	// setup
+	cnd_list = cnd;
 	std::string node_name = "";
 	ctemp = croot;
 
@@ -98,9 +99,9 @@ void Conversation::engage(std::string tree_path)
 */
 void Conversation::input(bool cnf,bool up,bool down)
 {
-	// interpret lmb as confirmation
+	// interpret lmb as confirmation & save current decision id to detect changes later
 	cnf = cnf||m_frame->mouse.mcl;
-	std::cout << m_frame->mouse.mxfr << ' ' << m_frame->mouse.myfr << ' ' << m_frame->mouse.mcl << '\n';
+	uint8_t lf_decision = decision_id;
 
 	// block input & complete filling when text not ready
 	bool t_chlfr = chlfr;
@@ -120,22 +121,17 @@ void Conversation::input(bool cnf,bool up,bool down)
 	}
 
 	// in case of choosing
-	else if ((up||down)&&!chlfr) {
-
-		// change decision based on input, respective to minimum & maximum
-		decision_id += down*(decision_id<(ctemp.child_nodes.size()-1))-up*(decision_id>0);
-
-		// recalculate random selector edge changes
-		for (uint8_t i=0;i<4;i++) sEdges[i] = rand()%15-10;
-	}
+	else if ((up||down)&&!chlfr)
+		decision_id += down*(decision_id<(choices.size()-1))-up*(decision_id>0);
 
 	// calculate by cursor selected decision
 	float cofs_y = (m_frame->mouse.myfr*720.0f)-CONVERSATION_CHOICE_ORIGIN_Y;
 	uint8_t t_decision = cofs_y/-CONVERSATION_CHOICE_OFFSET;
-	bool valid_selection = (t_decision<(ctemp.child_nodes.size()))&&(t_decision>=0);
+	bool valid_selection = (t_decision<(choices.size()))&&(t_decision>=0);
 	decision_id = t_decision*valid_selection+decision_id*!valid_selection;
 
-	// set input trigger
+	// recalculate random selector edge changes if decision changed & set input trigger
+	for (uint8_t i=0+4*(lf_decision==decision_id);i<4;i++) sEdges[i] = rand()%15-10;
 	chlfr = cnf||up||down;
 }
 
@@ -443,18 +439,25 @@ void Conversation::load_choice()
 {
 	// reset previous branch data
 	tdecide.clear();
+	choices.clear();
 	decision_id = 0;
 
-	// write conversation branching lines
+	// write conversation branching lines if condition is met
+	float c_ofs = 0;
 	for (uint16_t i=0;i<ctemp.child_nodes.size();i++) {
+		if (!ctemp.child_nodes[i].condition_id||cnd_list[ctemp.child_nodes[i].condition_id+1]) {
 
-		// write line
-		tdecide.add(ctemp.child_nodes[i].content.c_str(),
-				glm::vec2(CONVERSATION_CHOICE_ORIGIN_X,
-				CONVERSATION_CHOICE_ORIGIN_Y-i*CONVERSATION_CHOICE_OFFSET));
+			// write line
+			tdecide.add(ctemp.child_nodes[i].content.c_str(),
+					glm::vec2(CONVERSATION_CHOICE_ORIGIN_X,CONVERSATION_CHOICE_ORIGIN_Y+c_ofs));
 
-		// calculate decision letter capacity
-		dltr_count += ctemp.child_nodes[i].content.length();
+			// add choice to list & newline
+			choices.push_back(ctemp.child_nodes[i]);
+			c_ofs -= CONVERSATION_CHOICE_OFFSET;
+
+			// calculate decision letter capacity
+			dltr_count += count_instances(ctemp.child_nodes[i].content);
+		}
 	}
 
 	// load text instances & and reset letter count
@@ -491,7 +494,7 @@ void Conversation::jmp_successor()
 void Conversation::mv_decision(uint8_t i)
 {
 	// swap to chosen child node
-	ConversationNode swp = ctemp.child_nodes[i];
+	ConversationNode swp = choices[i];
 	ctemp = swp;
 
 	// write choice to conversation log

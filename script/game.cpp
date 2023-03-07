@@ -22,7 +22,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// conversation test
 	Conversation cnv_test = Conversation(m_frame,m_r2d,&cmanager,"./dat/casino_coup.mm","04");
-	cnv_test.engage("brother_spying/card_game_spike/");
+	std::vector<bool> cnv_condition = { true,true,true,true,true,true,true,true,true };
+	cnv_test.engage("brother_spying/card_game_spike/",cnv_condition);
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
