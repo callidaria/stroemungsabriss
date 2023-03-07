@@ -10,10 +10,11 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
-#include "../../ccb/mat/camera2d.h"
-
 #include "../../ccb/gfx/shader.h"
 #include "../../ccb/gfx/renderer2d.h"
+
+#include "../../ccb/frm/frame.h"
+#include "../../ccb/mat/camera2d.h"
 
 #include "character_manager.h"
 
@@ -43,7 +44,8 @@ class Conversation
 public:
 
 	// construction
-	Conversation(Renderer2D* r2D,CharacterManager* cm,const char* mm_path,std::string pname);
+	Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path,
+			std::string pname);
 	~Conversation() {  }
 
 	// interaction
@@ -78,6 +80,7 @@ private:
 	// cascabel
 	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),opps_buffer = Buffer();
 	Shader slct_shader = Shader(),bgr_shader = Shader(),opps_shader = Shader();
+	Frame* m_frame;
 	Renderer2D* m_r2D;
 	CharacterManager* charManager;
 
@@ -93,7 +96,7 @@ private:
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
 
-	// confirmation request
+	// input
 	uint16_t btn_rindex;
 	glm::vec2 btn_position;
 

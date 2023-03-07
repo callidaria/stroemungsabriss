@@ -172,7 +172,6 @@ void Frame::input(uint32_t &running,bool tinput)
 		running = m_fe.type!=SDL_QUIT; // exit the program when closing is requested
 
 		// read keyboard input
-		// ??are scancodes slower that sdlks
 		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
 		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
 		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
@@ -181,20 +180,20 @@ void Frame::input(uint32_t &running,bool tinput)
 
 		// read mouse input
 		SDL_GetMouseState(&mouse.mx,&mouse.my);
-		mouse.mxfr = ((float)mouse.mx/w_res)*1920.0f; // ??make those optional
-		mouse.myfr = ((float)(h_res-mouse.my)/h_res)*1080.0f;
+		mouse.mxfr = (float)mouse.mx/w_res; // ??make those optional
+		mouse.myfr = (float)(h_res-mouse.my)/h_res;
 		// !!fix on move cancellation && carry boolean when button released
-		/*if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
+		if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
 			mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT;
 			mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT;
 		} if (m_fe.type==SDL_MOUSEBUTTONUP) { // !!not the practical way
 			mouse.mcl = m_fe.button.button!=SDL_BUTTON_LEFT;
 			mouse.mcr = m_fe.button.button!=SDL_BUTTON_RIGHT;
-		}*/
-		mouse.mcl = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_LEFT)
+		}
+		/*mouse.mcl = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_LEFT)
 				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_LEFT);
 		mouse.mcr = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_RIGHT)
-				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_RIGHT);
+				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_RIGHT);*/
 		/*mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN;
 		mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN;*/
 		mouse.mw = m_fe.wheel.y;

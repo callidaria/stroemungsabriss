@@ -3,8 +3,9 @@
 /*
 	TODO
 */
-Conversation::Conversation(Renderer2D* r2D,CharacterManager* cm,const char* mm_path,std::string pname)
-	: m_r2D(r2D),charManager(cm),protag_name(pname)
+Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path,
+		std::string pname)
+	: m_frame(frame),m_r2D(r2D),charManager(cm),protag_name(pname)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -97,6 +98,10 @@ void Conversation::engage(std::string tree_path)
 */
 void Conversation::input(bool cnf,bool up,bool down)
 {
+	// interpret lmb as confirmation
+	cnf = cnf||m_frame->mouse.mcl;
+	std::cout << m_frame->mouse.mxfr << ' ' << m_frame->mouse.myfr << ' ' << m_frame->mouse.mcl << '\n';
+
 	// block input & complete filling when text not ready
 	bool t_chlfr = chlfr;
 	chlfr = (sltr_count<sltr_target)||chlfr;
@@ -123,6 +128,12 @@ void Conversation::input(bool cnf,bool up,bool down)
 		// recalculate random selector edge changes
 		for (uint8_t i=0;i<4;i++) sEdges[i] = rand()%15-10;
 	}
+
+	// calculate by cursor selected decision
+	float cofs_y = (m_frame->mouse.myfr*720.0f)-CONVERSATION_CHOICE_ORIGIN_Y;
+	uint8_t t_decision = cofs_y/-CONVERSATION_CHOICE_OFFSET;
+	bool valid_selection = (t_decision<(ctemp.child_nodes.size()))&&(t_decision>=0);
+	decision_id = t_decision*valid_selection+decision_id*!valid_selection;
 
 	// set input trigger
 	chlfr = cnf||up||down;

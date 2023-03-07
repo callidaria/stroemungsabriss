@@ -21,7 +21,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
 
 	// conversation test
-	Conversation cnv_test = Conversation(m_r2d,&cmanager,"./dat/casino_coup.mm","04");
+	Conversation cnv_test = Conversation(m_frame,m_r2d,&cmanager,"./dat/casino_coup.mm","04");
 	cnv_test.engage("brother_spying/card_game_spike/");
 
 	// vertex & texture load
