@@ -170,8 +170,9 @@ void Conversation::render()
 
 	// draw spoken text contents
 	for (uint16_t i=0;i<tspoken.size();i++) {
+		bool last_logged = (i!=tspoken.size()-1);
 		tspoken[i].prepare();
-		tspoken[i].render(sltr_count+1024*(i!=tspoken.size()-1),tcolour[i]);
+		tspoken[i].render(sltr_count+1024*last_logged,tcolour[i]-glm::vec4(0,0,0,.4f*last_logged));
 	}
 
 	// draw decision list text contents
