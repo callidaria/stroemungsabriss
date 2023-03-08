@@ -44,7 +44,10 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	charManager->load_spritesheets();
 
 	// background vertices
-	float tfield_verts[] = { 705,0,0, 705,720,1, 1105,720,2, 1105,720,2, 1105,0,3, 705,0,0, };
+	float tfield_verts[] = {
+		CNV_BGR_ORIGIN_X,0,0, CNV_BGR_ORIGIN_X,720,1, CNV_BGR_DESTINATION_X,720,2,
+		CNV_BGR_DESTINATION_X,720,2, CNV_BGR_DESTINATION_X,0,3, CNV_BGR_ORIGIN_X,0,0,
+	};
 	bgr_buffer.bind();
 	bgr_buffer.upload_vertices(tfield_verts,sizeof(tfield_verts));
 
@@ -67,6 +70,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 void Conversation::engage(std::string tree_path,std::vector<bool> cnd)
 {
 	// setup
+	input_blocked = false;
 	cnd_list = cnd;
 	std::string node_name = "";
 	ctemp = croot;
@@ -97,106 +101,130 @@ void Conversation::engage(std::string tree_path,std::vector<bool> cnd)
 /*
 	TODO
 */
+void Conversation::disengage()
+{
+	tspoken.clear();
+	tspoken_names.clear();
+	input_blocked = true;
+}
+
+/*
+	TODO
+*/
 void Conversation::input(bool cnf,bool up,bool down)
 {
-	// interpret lmb as confirmation & save current decision id to detect changes later
-	cnf = cnf||m_frame->mouse.mcl;
-	uint8_t lf_decision = decision_id;
+	if (!input_blocked) {
 
-	// block input & complete filling when text not ready
-	bool t_chlfr = chlfr;
-	chlfr = (sltr_count<sltr_target)||chlfr;
-	sltr_count += (sltr_target-sltr_count)*(cnf&&!t_chlfr);
+		// interpret lmb as confirmation & save current decision id to detect changes later
+		cnf = cnf||m_frame->mouse.mcl;
+		uint8_t lf_decision = decision_id;
 
-	// in case of branch decision
-	if (cnf&&!chlfr) {
+		// block input & complete filling when text not ready
+		bool t_chlfr = chlfr;
+		chlfr = (sltr_count<sltr_target)||chlfr;
+		sltr_count += (sltr_target-sltr_count)*(cnf&&!t_chlfr);
 
-		// load initial child from selected branch & reset
-		if (dltr_count) mv_decision(decision_id);
-		jmp_successor();
+		// in case of branch decision
+		if (cnf&&!chlfr) {
 
-		// refresh edge manipulation
-		bgr_shader.enable();
-		manipulate_background_edges();
+			// load initial child from selected branch & reset
+			if (dltr_count) mv_decision(decision_id);
+			jmp_successor();
+
+			// refresh edge manipulation
+			bgr_shader.enable();
+			manipulate_background_edges();
+		}
+
+		// in case of choosing
+		else if ((up||down)&&!chlfr)
+			decision_id += down*(decision_id<(choices.size()-1))-up*(decision_id>0);
+
+		// calculate by cursor selected decision
+		float cofs_y = (m_frame->mouse.myfr*720.0f)-CONVERSATION_CHOICE_ORIGIN_Y;
+		uint8_t t_decision = cofs_y/-CONVERSATION_CHOICE_OFFSET;
+		bool valid_selection = (t_decision<(choices.size()))&&(t_decision>=0);
+		decision_id = t_decision*valid_selection+decision_id*!valid_selection;
+
+		// recalculate random selector edge changes if decision changed & set input trigger
+		for (uint8_t i=0+4*(lf_decision==decision_id);i<4;i++) sEdges[i] = rand()%15-10;
+		chlfr = cnf||up||down;
 	}
-
-	// in case of choosing
-	else if ((up||down)&&!chlfr)
-		decision_id += down*(decision_id<(choices.size()-1))-up*(decision_id>0);
-
-	// calculate by cursor selected decision
-	float cofs_y = (m_frame->mouse.myfr*720.0f)-CONVERSATION_CHOICE_ORIGIN_Y;
-	uint8_t t_decision = cofs_y/-CONVERSATION_CHOICE_OFFSET;
-	bool valid_selection = (t_decision<(choices.size()))&&(t_decision>=0);
-	decision_id = t_decision*valid_selection+decision_id*!valid_selection;
-
-	// recalculate random selector edge changes if decision changed & set input trigger
-	for (uint8_t i=0+4*(lf_decision==decision_id);i<4;i++) sEdges[i] = rand()%15-10;
-	chlfr = cnf||up||down;
 }
+// FIXME: branch in main loop
 
 /*
 	TODO
 */
 void Conversation::render()
 {
-	// update letter count
-	bool filling = sltr_count<sltr_target;
-	sltr_count += filling;
+	if (dwait<CNV_DISENGAGE_WAIT_FRAMES) {
 
-	// upload selection splash modifications
-	uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
-	slct_shader.enable();
-	slct_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
-	slct_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
-	slct_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
-	slct_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
+		// update letter count
+		bool filling = sltr_count<sltr_target;
+		sltr_count += filling;
 
-	// draw selection indicator visuals
-	slct_buffer.bind();
-	glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!filling));
+		// upload selection splash modifications
+		uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
+		slct_shader.enable();
+		slct_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
+		slct_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
+		slct_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
+		slct_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
 
-	// draw opponent's mood visualization
-	opps_shader.enable();
-	opps_shader.upload_int("col_max",curr_cols);
-	opps_shader.upload_float("col_index",curr_mood);
-	opps_buffer.bind();
-	glBindTexture(GL_TEXTURE_2D,curr_ctex);
-	glDrawArrays(GL_TRIANGLES,0,6);
+		// draw selection indicator visuals
+		slct_buffer.bind();
+		glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!filling));
 
-	// draw background for spoken text
-	bgr_shader.enable();
-	bgr_buffer.bind();
-	glDrawArrays(GL_TRIANGLES,0,6);
+		// draw opponent's mood visualization
+		opps_shader.enable();
+		opps_shader.upload_int("col_max",curr_cols);
+		opps_shader.upload_float("col_index",curr_mood);
+		opps_buffer.bind();
+		glBindTexture(GL_TEXTURE_2D,curr_ctex);
+		glDrawArrays(GL_TRIANGLES,0,6);
 
-	// draw speaker labels
-	for (auto name : tspoken_names) {
-		name.prepare();
-		name.render(1024,glm::vec4(0,0,0,1));
+		// draw background for spoken text
+		bgr_shader.enable();
+		bgr_buffer.bind();
+		bgr_shader.upload_float("ctrans",1.0-(float)dwait/CNV_DISENGAGE_WAIT_FRAMES);
+		glDrawArrays(GL_TRIANGLES,0,6);
+
+		// draw speaker labels
+		for (auto name : tspoken_names) {
+			name.prepare();
+			name.render(1024,glm::vec4(0,0,0,1));
+		}
+
+		// draw spoken text contents
+		for (uint16_t i=0;i<tspoken.size();i++) {
+			bool last_logged = (i!=tspoken.size()-1);
+			tspoken[i].prepare();
+			tspoken[i].render(sltr_count+1024*last_logged,tcolour[i]
+					-glm::vec4(0,0,0,.4f*last_logged));
+		}
+
+		// draw decision list text contents
+		tdecide.prepare();
+		tdecide.render(dltr_count*!filling,glm::vec4(1,1,1,1));
+
+		// show conversing character's name
+		tname.prepare();
+		tname.render(1024,name_colour);
+
+		// animate continue request
+		m_r2D->prepare();
+		m_r2D->al[btn_rindex].model = glm::translate(glm::mat4(1.0f),
+				glm::vec3(btn_position.x+1280*(sltr_count<sltr_target||dltr_count||input_blocked),
+				btn_position.y+tscroll,0));
+		m_r2D->render_anim(btn_rindex);
+
+		// increase disengage wait frames when input is blocked
+		dwait += input_blocked;
 	}
-
-	// draw spoken text contents
-	for (uint16_t i=0;i<tspoken.size();i++) {
-		bool last_logged = (i!=tspoken.size()-1);
-		tspoken[i].prepare();
-		tspoken[i].render(sltr_count+1024*last_logged,tcolour[i]-glm::vec4(0,0,0,.4f*last_logged));
-	}
-
-	// draw decision list text contents
-	tdecide.prepare();
-	tdecide.render(dltr_count*!filling,glm::vec4(1,1,1,1));
-
-	// show conversing character's name
-	tname.prepare();
-	tname.render(1024,name_colour);
-
-	// animate continue request
-	m_r2D->prepare();
-	m_r2D->al[btn_rindex].model = glm::translate(glm::mat4(1.0f),
-			glm::vec3(btn_position.x+1280*(sltr_count<sltr_target||dltr_count),
-			btn_position.y+tscroll,0));
-	m_r2D->render_anim(btn_rindex);
 }
+// FIXME: branch in main loop
+// TODO: animation when disengaging, to not just plop away abruptly
 
 /*
 	TODO
@@ -244,6 +272,7 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 
 				// interpret bracket command
 				cnode.valueless = cnode.valueless||(bracket=="null");
+				cnode.end_node = cnode.end_node||(bracket=="end");
 
 				// reset bracket reader values
 				brc_mode = false;
@@ -430,6 +459,9 @@ void Conversation::load_text()
 	// advance target count
 	sltr_count = 0;
 	sltr_target = count_instances(ctemp.content);
+
+	// disengage if end node
+	if (ctemp.end_node) disengage();
 }
 
 /*

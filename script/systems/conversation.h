@@ -23,6 +23,12 @@ constexpr float CONVERSATION_SPOKEN_TEXT_X = 720;
 constexpr float CONVERSATION_CHOICE_ORIGIN_X = 50;
 constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
 constexpr float CONVERSATION_CHOICE_OFFSET = 25;
+constexpr float CNV_BGR_ORIGIN_X = 705;
+constexpr float CNV_BGR_WIDTH = 400;
+constexpr float CNV_BGR_DESTINATION_X = CNV_BGR_ORIGIN_X+CNV_BGR_WIDTH;
+
+// timing
+constexpr uint8_t CNV_DISENGAGE_WAIT_FRAMES = 24;
 
 // OHOHO it looks like academia wasn't completely for nothing and worthless...
 // i can actually maybe use some knowledge from university here? that's a first!
@@ -33,6 +39,7 @@ struct ConversationNode
 	std::vector<ConversationNode> child_nodes;
 	uint32_t jmp_id = 0;
 	bool valueless = false;
+	bool end_node = false;
 	uint16_t char_id = 0;
 	uint16_t mood_id = 0;
 	uint16_t condition_id = 0;
@@ -50,6 +57,7 @@ public:
 
 	// interaction
 	void engage(std::string tree_path,std::vector<bool> cnd);
+	void disengage();
 	void input(bool cnf,bool up,bool down);
 
 	// draw
@@ -101,15 +109,18 @@ private:
 	// input
 	uint16_t btn_rindex;
 	glm::vec2 btn_position;
+	bool input_blocked = false;
 
 	// animation
-	uint16_t sltr_count = 0,dltr_count = 0;		// count of displayed letters
-	uint16_t sltr_target = 0;					// target to count displayed letters towards
-	float tscroll = 0;							// defines scroll advancement of backlog
-	uint8_t decision_id = 0;					// index of selected decision
-	bool chlfr = false;							// conserve if input happened last frame
-	float sEdges[4] = { 0 };					// choice selection edge modification
-	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
+	uint16_t sltr_count = 0,dltr_count = 0;			// count of displayed letters
+	uint16_t sltr_target = 0;						// target to count displayed letters towards
+	float tscroll = 0;								// defines scroll advancement of backlog
+	uint8_t decision_id = 0;						// index of selected decision
+	bool chlfr = false;								// conserve if input happened last frame
+	float sEdges[4] = { 0 };						// choice selection edge modification
+	uint16_t curr_char,curr_cols,curr_mood;			// currently shown opposing character
 	float cursor_y = 655;
 	GLuint curr_ctex;
+	uint8_t dwait = 0;
 };
+// TODO: leave some frames after writing log has been finished before accepting input
