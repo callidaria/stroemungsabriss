@@ -242,6 +242,7 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 		cnode.char_id = prefix_value*(raw_content[1]=='c')+cnode.char_id;
 		cnode.mood_id = prefix_value*(raw_content[1]=='m')+cnode.mood_id;
 		cnode.condition_id = prefix_value*(raw_content[1]=='b')+cnode.condition_id;
+		cnode.condition_set = prefix_value*(raw_content[1]=='s')+cnode.condition_set;
 		raw_content.erase(0,4);
 	}
 
@@ -460,7 +461,8 @@ void Conversation::load_text()
 	sltr_count = 0;
 	sltr_target = count_instances(ctemp.content);
 
-	// disengage if end node
+	// disengage if end node & change conditions if requested
+	if (ctemp.condition_set) cnd_list[ctemp.condition_set-1] = !cnd_list[ctemp.condition_set-1];
 	if (ctemp.end_node) disengage();
 }
 
@@ -477,7 +479,7 @@ void Conversation::load_choice()
 	// write conversation branching lines if condition is met
 	float c_ofs = 0;
 	for (uint16_t i=0;i<ctemp.child_nodes.size();i++) {
-		if (!ctemp.child_nodes[i].condition_id||cnd_list[ctemp.child_nodes[i].condition_id+1]) {
+		if (!ctemp.child_nodes[i].condition_id||cnd_list[ctemp.child_nodes[i].condition_id-1]) {
 
 			// write line
 			tdecide.add(ctemp.child_nodes[i].content.c_str(),

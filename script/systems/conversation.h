@@ -43,6 +43,7 @@ struct ConversationNode
 	uint16_t char_id = 0;
 	uint16_t mood_id = 0;
 	uint16_t condition_id = 0;
+	uint16_t condition_set = 0;
 };
 
 // yes, the naming is very dramatic... it's on purpose.
