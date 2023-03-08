@@ -58,26 +58,29 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		lgt_menu.bind();
 
 		// stage
-		/*m_bgenv.update(rstate);
+		m_bgenv.update(rstate);
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
 		m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
-		m_bSys.render();*/
+		m_bSys.render();
 
 		// healthbar
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
 
-		// conversation test render
+		// conversation scene components & input
 		cnv_test.input(m_frame->kb.ka[SDL_SCANCODE_J],
 				m_frame->kb.ka[SDL_SCANCODE_UP],m_frame->kb.ka[SDL_SCANCODE_DOWN]);
-		cnv_test.render();
+		cnv_test.render_to_scene();
 
 		// action menu render
 		lgt_menu.render();
+
+		// conversation render
+		cnv_test.render(lgt_menu.get_scene_texture());
 
 		// swap
 		m_frame->update();

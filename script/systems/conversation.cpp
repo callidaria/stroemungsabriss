@@ -57,6 +57,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	bgr_shader.def_attributeF("position",2,0,3);
 	bgr_shader.def_attributeF("edge_id",1,2,3);
 	bgr_shader.upload_camera(cam2D);
+	bgr_shader.upload_int("scene_tex",0);
 	manipulate_background_edges();
 
 	// load continue button animation
@@ -156,25 +157,31 @@ void Conversation::input(bool cnf,bool up,bool down)
 /*
 	TODO
 */
-void Conversation::render()
+void Conversation::render_to_scene()
+{
+	// upload selection splash modifications
+	uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
+	slct_shader.enable();
+	slct_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
+	slct_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
+	slct_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
+	slct_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
+
+	// draw selection indicator visuals
+	slct_buffer.bind();
+	glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!(sltr_count<sltr_target)));
+}
+
+/*
+	TODO
+*/
+void Conversation::render(GLuint scene_tex)
 {
 	if (dwait<CNV_DISENGAGE_WAIT_FRAMES) {
 
 		// update letter count
 		bool filling = sltr_count<sltr_target;
 		sltr_count += filling;
-
-		// upload selection splash modifications
-		uint16_t strans = CONVERSATION_CHOICE_ORIGIN_Y-CONVERSATION_CHOICE_OFFSET*decision_id;
-		slct_shader.enable();
-		slct_shader.upload_vec2("idx_mod[0]",glm::vec2(0,strans+(rand()%10-5)-sEdges[0]));
-		slct_shader.upload_vec2("idx_mod[1]",glm::vec2(0,strans+(rand()%10-5)+sEdges[1]));
-		slct_shader.upload_vec2("idx_mod[2]",glm::vec2(0,strans+(rand()%10-5)+sEdges[2]));
-		slct_shader.upload_vec2("idx_mod[3]",glm::vec2(0,strans+(rand()%10-5)-sEdges[3]));
-
-		// draw selection indicator visuals
-		slct_buffer.bind();
-		glDrawArrays(GL_TRIANGLES,0,6*(dltr_count&&!filling));
 
 		// draw opponent's mood visualization
 		opps_shader.enable();
@@ -188,6 +195,7 @@ void Conversation::render()
 		bgr_shader.enable();
 		bgr_buffer.bind();
 		bgr_shader.upload_float("ctrans",1.0-(float)dwait/CNV_DISENGAGE_WAIT_FRAMES);
+		glBindTexture(GL_TEXTURE_2D,scene_tex);
 		glDrawArrays(GL_TRIANGLES,0,6);
 
 		// draw speaker labels
@@ -403,10 +411,20 @@ uint16_t Conversation::count_instances(std::string text)
 */
 void Conversation::manipulate_background_edges()
 {
-	bgr_shader.upload_int("edge_offset[0]",rand()%37-30);
-	bgr_shader.upload_int("edge_offset[1]",rand()%37-30);
-	bgr_shader.upload_int("edge_offset[2]",rand()%37-7);
-	bgr_shader.upload_int("edge_offset[3]",rand()%37-7);
+	// generate edge manipulation
+	int mEdges[4] = { rand()%37-30,rand()%37-30,rand()%37-7,rand()%37-7 };
+
+	// upload edge manipulation
+	bgr_shader.upload_int("edge_offset[0]",mEdges[0]);
+	bgr_shader.upload_int("edge_offset[1]",mEdges[1]);
+	bgr_shader.upload_int("edge_offset[2]",mEdges[2]);
+	bgr_shader.upload_int("edge_offset[3]",mEdges[3]);
+
+	// upload texture coordinates
+	bgr_shader.upload_vec2("tex_coords[0]",glm::vec2((CNV_BGR_ORIGIN_X+mEdges[0])/1280.0f,0));
+	bgr_shader.upload_vec2("tex_coords[1]",glm::vec2((CNV_BGR_ORIGIN_X+mEdges[1])/1280.0f,1));
+	bgr_shader.upload_vec2("tex_coords[2]",glm::vec2((CNV_BGR_DESTINATION_X+mEdges[2])/1280.0f,1));
+	bgr_shader.upload_vec2("tex_coords[3]",glm::vec2((CNV_BGR_DESTINATION_X+mEdges[3])/1280.0f,0));
 }
 
 /*

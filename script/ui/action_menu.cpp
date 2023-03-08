@@ -124,3 +124,9 @@ void ActionMenu::render()
 	mtext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
 	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(.6f,.0824f,.6f,1));	// menu text
 }
+
+/*
+	TODO
+*/
+GLuint ActionMenu::get_scene_texture()
+{ return game_fb.get_tex(); }

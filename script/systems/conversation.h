@@ -62,7 +62,8 @@ public:
 	void input(bool cnf,bool up,bool down);
 
 	// draw
-	void render();
+	void render_to_scene();
+	void render(GLuint scene_tex);
 
 private:
 
@@ -125,3 +126,4 @@ private:
 	uint8_t dwait = 0;
 };
 // TODO: leave some frames after writing log has been finished before accepting input
+// TODO: log background shader for stylish text background

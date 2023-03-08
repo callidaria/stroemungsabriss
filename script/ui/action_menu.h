@@ -39,6 +39,9 @@ public:
 	void bind();
 	void render();
 
+	// getter
+	GLuint get_scene_texture();
+
 private:
 
 	// cascabel
