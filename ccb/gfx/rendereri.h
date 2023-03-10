@@ -57,7 +57,7 @@ private:
 
 	// cascabel
 	Buffer buffer = Buffer();
-	Shader sI;
+	Shader sI = Shader();
 
 	// instance object lists
 	std::vector<Instance> il;

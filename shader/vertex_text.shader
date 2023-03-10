@@ -2,6 +2,7 @@
 
 in vec2 position;
 in vec2 texCoords;
+
 in vec2 offset;
 in vec2 texpos;
 in vec2 bounds;

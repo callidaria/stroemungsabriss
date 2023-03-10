@@ -11,6 +11,7 @@ constexpr uint32_t IANIMATION_MCAP = 4096;
 constexpr uint32_t IANIMATION_REPEAT = 6;
 constexpr uint32_t IANIMATION_VALUES = IANIMATION_MCAP*IANIMATION_REPEAT;
 // FIXME: all of this always has to be equal to their counterparts in instance.h! remove & replace
+// FIXME: 32 for REPEAT? really? what about uint8_t?
 
 class InstancedAnim
 {

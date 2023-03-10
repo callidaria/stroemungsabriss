@@ -57,10 +57,10 @@ void RendererI::load()
 	// compile classical instance shader program
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
-	sI.def_indexF(buffer.get_indices(),"offset",2,0,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"i_tex",2,4,INSTANCE_REPEAT);
+	sI.def_indexF(buffer.get_indices(),"offset",2,0,6);
+	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,6);
+	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,6);
+	sI.def_indexF(buffer.get_indices(),"i_tex",2,4,6);
 	// ??maybe find a different way of representing instanced rotation??
 	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
@@ -72,8 +72,7 @@ void RendererI::load()
 	sI.upload_int("tex",0);
 
 	// coordinate system
-	Camera2D cam2D = Camera2D(1280.0f,720.0f);
-	sI.upload_camera(cam2D);
+	sI.upload_camera(Camera2D(1280.0f,720.0f));
 }
 
 /*
@@ -89,8 +88,8 @@ void RendererI::prepare(float dtime)
 	glDisable(GL_CULL_FACE);
 
 	// prepare shader & buffer
-	sI.enable();
 	buffer.bind();
+	sI.enable();
 
 	// update instance animations
 	for (int i=0;i<ial.size();i++) ial[i].update(dtime);
@@ -120,7 +119,7 @@ void RendererI::render(uint16_t i,uint16_t amt)
 	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
- 
+
 /*
 	render(uint16_t,uint16_t,vec2) -> void
 	overloads: previous render()
@@ -215,8 +214,8 @@ void RendererI::set_rotation(uint16_t i,uint16_t j,float r)
 */
 void RendererI::set_aRotation(uint16_t i,uint16_t j,float r)
 {
-	ial[i].i[j*IANIMATION_REPEAT+2] = glm::sin(r);
-	ial[i].i[j*IANIMATION_REPEAT+3] = glm::cos(r);
+	ial[i].i[j*INSTANCE_REPEAT+2] = glm::sin(r);
+	ial[i].i[j*INSTANCE_REPEAT+3] = glm::cos(r);
 }
 
 /*
