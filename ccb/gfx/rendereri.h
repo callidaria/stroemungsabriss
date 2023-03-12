@@ -20,7 +20,7 @@ public:
 
 	// construction
 	RendererI();
-	~RendererI();
+	~RendererI() {  }
 
 	// adders
 	uint16_t add(glm::vec2 p,float w,float h,const char* t);
@@ -49,11 +49,15 @@ public:
 	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
 	void add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv);
 
+	// getters
+	uint16_t get_next_instindex();
+	uint16_t get_next_animindex();
+
 private:
 
 	// cascabel
 	Buffer buffer = Buffer();
-	Shader sI;
+	Shader sI = Shader();
 
 	// instance object lists
 	std::vector<Instance> il;

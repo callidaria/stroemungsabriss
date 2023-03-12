@@ -6,7 +6,6 @@
 */
 RendererI::RendererI()
 { buffer.add_buffer(); }
-RendererI::~RendererI() {  }
 
 /*
 	add(vec2,float,float,const char*) -> uint16_t
@@ -58,10 +57,10 @@ void RendererI::load()
 	// compile classical instance shader program
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
-	sI.def_indexF(buffer.get_indices(),"offset",2,0,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,INSTANCE_REPEAT);
-	sI.def_indexF(buffer.get_indices(),"i_tex",2,4,INSTANCE_REPEAT);
+	sI.def_indexF(buffer.get_indices(),"offset",2,0,6);
+	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,6);
+	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,6);
+	sI.def_indexF(buffer.get_indices(),"i_tex",2,4,6);
 	// ??maybe find a different way of representing instanced rotation??
 	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
@@ -70,10 +69,10 @@ void RendererI::load()
 	// texture
 	for (int i=0;i<il.size();i++) il[i].texture();
 	for (int i=0;i<ial.size();i++) ial[i].texture();
+	sI.upload_int("tex",0);
 
 	// coordinate system
-	Camera2D cam2D = Camera2D(1280,720);
-	sI.upload_camera(cam2D);
+	sI.upload_camera(Camera2D(1280.0f,720.0f));
 }
 
 /*
@@ -215,8 +214,8 @@ void RendererI::set_rotation(uint16_t i,uint16_t j,float r)
 */
 void RendererI::set_aRotation(uint16_t i,uint16_t j,float r)
 {
-	ial[i].i[j*IANIMATION_REPEAT+2] = glm::sin(r);
-	ial[i].i[j*IANIMATION_REPEAT+3] = glm::cos(r);
+	ial[i].i[j*INSTANCE_REPEAT+2] = glm::sin(r);
+	ial[i].i[j*INSTANCE_REPEAT+3] = glm::cos(r);
 }
 
 /*
@@ -240,3 +239,17 @@ void RendererI::add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv)
 	ial[i].i[j*INSTANCE_REPEAT] += dv.x;
 	ial[i].i[j*INSTANCE_REPEAT+1] += dv.y;
 }
+
+/*
+	get_next_instindex() -> uint16_t
+	returns: memory index of instance, that will be uploaded next
+*/
+uint16_t RendererI::get_next_instindex()
+{ return il.size(); }
+
+/*
+	get_next_animindex() -> uint16_t
+	returns: memory index of animated instance, that will be uploaded next
+*/
+uint16_t RendererI::get_next_animindex()
+{ return ial.size(); }

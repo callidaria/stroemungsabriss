@@ -78,6 +78,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: hitbox indicator over player character somehow gets covered by character model
 - FIXED: bullet system renders spawned bullets twice with a slight offset
 - FIXED: texture issues with opponent's flyfighter object
+- FIXED: lined & misplaced rendering of emitted projectiles
 
 <br>
 
@@ -143,6 +144,7 @@ Worktime: 120h
 	+ 43: 9h 17min
 	+ 114: 2min
 	+ 91: 16h 37min
-	+ 106: 64h 7min
+	+ 106: 64h 32min
 	+ 82: 20h 50min
+	+ 137: 14h 53min
 - Total Code Lines: 11.495

@@ -32,6 +32,7 @@ public:
 
 	// setup
 	void enable();
+	static void disable();
 
 	// upload
 	void upload_int(const char* loc,int i);
