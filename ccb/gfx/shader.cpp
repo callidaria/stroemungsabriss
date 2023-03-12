@@ -85,12 +85,6 @@ void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t o
 // FIXME: unsigned int usage
 
 /*
-	enable() -> void
-	purpose: enables the program, so that it can be used. deactivates all others!
-*/
-void Shader::enable() { glUseProgram(m_shaderProgram); }
-
-/*
 	upload_<X>(const char*,X x) -> void
 	loc: name of uniform variable as referred to in the shader code file
 	x: variable in desired datatype to upload to the shader as variable defined by location
