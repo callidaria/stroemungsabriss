@@ -55,9 +55,6 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 */
 void Renderer3D::load(Camera3D* cam3d)
 {
-	// compile shadow shader
-	shs.compile3d("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
-
 	// combine all mesh vertices to master vertex list & upload
 	std::vector<float> v;
 	for (uint16_t i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
@@ -95,6 +92,10 @@ void Renderer3D::load(Camera3D* cam3d)
 	is3d.upload_int("shadow_map",3);
 	is3d.upload_int("nmap",4);
 	is3d.upload_camera(*cam3d);
+
+	// compile shadow shader
+	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
+	shs.def_attributeF("position",3,0,3);
 }
 
 /*

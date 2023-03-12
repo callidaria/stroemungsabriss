@@ -30,8 +30,4 @@ void main()
 
 	// upload final position
 	gl_Position = proj*view*model*vec4(rpos+offset,0,1);
-	//gl_Position = proj*view*model*vec4(offset+texCoords*10,0,1);
-	gl_Position = vec4(texCoords-.5,0,1);
-
-	getgetgetgetgotgotgotgot shader got disabled fuck off
 }

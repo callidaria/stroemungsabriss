@@ -88,8 +88,8 @@ void RendererI::prepare(float dtime)
 	glDisable(GL_CULL_FACE);
 
 	// prepare shader & buffer
-	buffer.bind();
 	sI.enable();
+	buffer.bind();
 
 	// update instance animations
 	for (int i=0;i<ial.size();i++) ial[i].update(dtime);

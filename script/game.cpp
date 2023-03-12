@@ -43,11 +43,11 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 
 		// action menu update
-		/*lgt_menu.update(&m_player,running);
-		lgt_menu.bind();*/
+		lgt_menu.update(&m_player,running);
+		lgt_menu.bind();
 
 		// stage
-		//m_bgenv.update(rstate);
+		m_bgenv.update(rstate);
 		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
@@ -57,11 +57,11 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_bSys.render();
 
 		// healthbar
-		/*hbar.register_damage(fwd_treg[10]);
-		hbar.render();*/
+		hbar.register_damage(fwd_treg[10]);
+		hbar.render();
 
 		// action menu render
-		//lgt_menu.render();
+		lgt_menu.render();
 
 		// swap
 		m_frame->update();

@@ -54,7 +54,7 @@ void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 
 
 		// movement
 		ePos = glm::vec2(!treg[3])*glm::vec2(615+treg[0],650+treg[2]*20000/(treg[0]/2-100*treg[2])+50)
-			+glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
+			+ glm::vec2(treg[3])*glm::vec2(615+treg[0],650+treg[0]*treg[0]/2400-150); // B mv
 		bool ex_ovfl = treg[0]<-600||treg[0]>600;	// if B mv reached screen width cap
 		bool mult_swap = treg[0]*treg[2]>1;
 		treg[2] *= -1*mult_swap+1*!mult_swap;		// invert movement direction multiplier
