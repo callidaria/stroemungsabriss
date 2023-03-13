@@ -28,7 +28,8 @@ constexpr float CNV_BGR_WIDTH = 400;
 constexpr float CNV_BGR_DESTINATION_X = CNV_BGR_ORIGIN_X+CNV_BGR_WIDTH;
 
 // timing
-constexpr uint8_t CNV_DISENGAGE_WAIT_FRAMES = 24;
+constexpr float CNV_DISENGAGE_WAIT_FRAMES = 24;
+constexpr float CNV_CONFIRMATION_COOLDOWN = 120;
 
 // i can actually maybe use some knowledge from university here? that's a first!
 struct ConversationNode
@@ -113,17 +114,18 @@ private:
 	bool input_blocked = false;
 
 	// animation
-	uint16_t sltr_count = 0,dltr_count = 0;			// count of displayed letters
-	uint16_t sltr_target = 0;						// target to count displayed letters towards
-	float tscroll = 0;								// defines scroll advancement of backlog
-	uint8_t decision_id = 0;						// index of selected decision
-	bool chlfr = false;								// conserve if input happened last frame
-	float sEdges[4] = { 0 };						// choice selection edge modification
-	uint16_t curr_char,curr_cols,curr_mood;			// currently shown opposing character
-	float cursor_y = 655;
-	GLuint curr_ctex;
-	uint8_t dwait = 0;
+	uint16_t sltr_count = 0,dltr_count = 0;		// count of displayed letters
+	uint16_t sltr_target = 0;					// target to count displayed letters towards
+	float tscroll = 0;							// defines scroll advancement of backlog
+	uint8_t decision_id = 0;					// index of selected decision
+	bool chlfr = false;							// conserve if input happened last frame
+	float sEdges[4] = { 0 };					// choice selection edge modification
+	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
+	float cursor_y = 655;						// current cursor height
+	GLuint curr_ctex;							// current character mood visualization texture
+	uint8_t dwait = 0,iwait = 0;				// frame cooldown counter for disengage & input
 };
 // TODO: leave some frames after writing log has been finished before accepting input
 // TODO: only read multi branch after conditional exclusion
+// TODO: text colour picker for choices & speaker annotations
 // FIXME: positioning of confirmation prompt

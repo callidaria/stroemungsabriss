@@ -1,23 +1,16 @@
 #include "text.h"
 
 /*
-	constructor()
-	purpose: create an entity to later add text and characters to
-*/
-Text::Text()
-{
-	buffer.add_buffer();
-	glGenTextures(1,&ftexture);
-}
-
-/*
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
 */
 Text::Text(Font* f)
 	: m_font(f)
-{ Text(); }
+{
+	buffer.add_buffer();
+	glGenTextures(1,&ftexture);
+}
 
 /*
 	add(char,vec2) -> uint32_t
@@ -211,6 +204,16 @@ void Text::set_scroll(glm::vec2 scroll)
 */
 void Text::set_scroll(glm::mat4 model)
 { sT.upload_matrix("model",model); }
+
+/*
+	initialize() -> void
+	purpose: generate font texture & add instance buffer
+*/
+void Text::initialize()
+{
+	buffer.add_buffer();
+	glGenTextures(1,&ftexture);
+}
 
 /*
 	load_vertex() -> void (private)

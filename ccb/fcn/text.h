@@ -14,7 +14,7 @@ class Text
 public:
 
 	// construction
-	Text();
+	Text() {  }
 	Text(Font* f);
 	~Text() {  }
 
@@ -41,6 +41,7 @@ public:
 private:
 
 	// helper
+	void initialize();
 	void load_vertex();
 	uint8_t get_spritesheet_location(char c);
 

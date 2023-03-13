@@ -40,11 +40,8 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 			= Toolbox::create_sprite_canvas_triangled(glm::vec2(1100,0),180,720);
 	opps_buffer.bind();
 	opps_buffer.upload_vertices(oppconv_verts);
-	opps_shader.compile("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
-	opps_shader.def_attributeF("position",2,0,4);
-	opps_shader.def_attributeF("texCoords",2,2,4);
+	opps_shader.compile2d("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
 	opps_shader.upload_camera(cam2D);
-	// FIXME: isn't this compile2d() worthy?
 
 	// load character spritesheets
 	charManager->load_spritesheets();
@@ -136,7 +133,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 
 		// block input & complete filling when text not ready
 		bool t_chlfr = chlfr;
-		chlfr = (sltr_count<sltr_target)||chlfr;
+		chlfr = (sltr_count<sltr_target)||iwait||chlfr;
 		sltr_count += (sltr_target-sltr_count)*(cnf&&!t_chlfr);
 
 		// in case of branch decision
@@ -164,6 +161,10 @@ void Conversation::input(bool cnf,bool up,bool down)
 		// recalculate random selector edge changes if decision changed & set input trigger
 		for (uint8_t i=0+4*(lf_decision==decision_id);i<4;i++) sEdges[i] = rand()%15-10;
 		chlfr = cnf||up||down;
+
+		// reduce input cooldown or reset
+		iwait -= m_frame->get_time_delta()*!!iwait;
+		iwait += CNV_CONFIRMATION_COOLDOWN*(!iwait&&cnf);
 	}
 }
 // FIXME: branch in main loop
@@ -211,7 +212,7 @@ void Conversation::render(GLuint scene_tex)
 		// draw background for spoken text
 		bgr_shader.enable();
 		bgr_buffer.bind();
-		bgr_shader.upload_float("ctrans",1.0-(float)dwait/CNV_DISENGAGE_WAIT_FRAMES);
+		bgr_shader.upload_float("ctrans",1.0-dwait/CNV_DISENGAGE_WAIT_FRAMES);
 		glBindTexture(GL_TEXTURE_2D,scene_tex);
 		glDrawArrays(GL_TRIANGLES,0,6);
 
@@ -240,12 +241,13 @@ void Conversation::render(GLuint scene_tex)
 		// animate continue request
 		m_r2D->prepare();
 		m_r2D->al[btn_rindex].model = glm::translate(glm::mat4(1.0f),
-				glm::vec3(btn_position.x+1280*(sltr_count<sltr_target||dltr_count||input_blocked),
+				glm::vec3(btn_position.x+1280
+				* (sltr_count<sltr_target||dltr_count||input_blocked||iwait),
 				btn_position.y+tscroll,0));
 		m_r2D->render_anim(btn_rindex);
 
 		// increase disengage wait frames when input is blocked
-		dwait += input_blocked;
+		dwait += m_frame->get_time_delta()*input_blocked;
 	}
 }
 // FIXME: branch in main loop
