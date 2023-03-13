@@ -1,7 +1,8 @@
 #include "text.h"
 
 /*
-	TODO
+	constructor()
+	purpose: create an entity to later add text and characters to
 */
 Text::Text()
 {
@@ -13,21 +14,17 @@ Text::Text()
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
-	WARNING: the created objects always have to lead with this contructor, else font texture breaks
 */
 Text::Text(Font* f)
 	: m_font(f)
-{
-	buffer.add_buffer();
-	glGenTextures(1,&ftexture);
-}
+{ Text(); }
 
 /*
-	add(char,vec2) -> int32_t
+	add(char,vec2) -> uint32_t
 	c: character to add to the text entity
 	p: position to add the character at
-	returns: x-axis modification of cursor position after adding the given character
 	purpose: add a single character to the text entity
+	returns: x-axis modification of cursor position after adding the given character
 */
 uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
@@ -37,7 +34,11 @@ uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is ver
 }
 
 /*
-	TODO
+	add(uint8_t,vec2) -> uint32_t
+	i: id of character to add
+	p: cursor position
+	purpose: add a single character to the text entity identified by it's font id
+	returns: x-axis modification of cursor position after adding the given character
 */
 uint32_t Text::add(uint8_t i,glm::vec2 p)
 {
@@ -70,7 +71,13 @@ void Text::add(const char* s,glm::vec2 p)
 }
 
 /*
-	TODO
+	add(string,vec2,float,float) -> vec2
+	s: string of characters to write to text entity
+	p: origin position of cursor to specify writing position start
+	bwdt: width of text space until cursor reaches border & automatically inserts breakline
+	nline_offset: distance the cursor should travel on the y-axis for a breakline
+	purpose: add string of characters within borders, automatically inserting breaklines
+	returns: new cursor position after text writing is finished
 */
 glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 {
@@ -133,7 +140,8 @@ void Text::texture()
 { Toolbox::load_texture(ftexture,m_font->tp); }
 
 /*
-	TODO
+	enable_shader() -> void
+	purpose: enable text shader outside of text class
 */
 void Text::enable_shader()
 { sT.enable(); }
@@ -186,7 +194,9 @@ void Text::render(int32_t amnt,glm::vec4 col)
 }
 
 /*
-	TODO
+	set_scroll(vec2) -> void
+	scroll: distance and direction the text should scroll scroll towards
+	purpose: scroll the text entity
 */
 void Text::set_scroll(glm::vec2 scroll)
 {
@@ -213,7 +223,10 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 }
 
 /*
-	TODO
+	get_spritesheet_location(char) -> uint8_t
+	c: char to get spritesheet location id for
+	purpose: get spritesheet id for desired char, to reference char gfx in font
+	returns: spritesheet id of given char
 */
 uint8_t Text::get_spritesheet_location(char c)
 {
@@ -224,3 +237,4 @@ uint8_t Text::get_spritesheet_location(char c)
 	}
 	return i;
 }
+// FIXME: optimize please

@@ -30,7 +30,6 @@ constexpr float CNV_BGR_DESTINATION_X = CNV_BGR_ORIGIN_X+CNV_BGR_WIDTH;
 // timing
 constexpr uint8_t CNV_DISENGAGE_WAIT_FRAMES = 24;
 
-// OHOHO it looks like academia wasn't completely for nothing and worthless...
 // i can actually maybe use some knowledge from university here? that's a first!
 struct ConversationNode
 {
@@ -126,4 +125,5 @@ private:
 	uint8_t dwait = 0;
 };
 // TODO: leave some frames after writing log has been finished before accepting input
-// TODO: log background shader for stylish text background
+// TODO: only read multi branch after conditional exclusion
+// FIXME: positioning of confirmation prompt

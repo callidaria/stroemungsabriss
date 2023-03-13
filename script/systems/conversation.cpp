@@ -249,7 +249,6 @@ void Conversation::render(GLuint scene_tex)
 	}
 }
 // FIXME: branch in main loop
-// TODO: animation when disengaging, to not just plop away abruptly
 
 /*
 	rc_compile_node_data(vector<string>,uint32_t&) -> ConversationNode (private)
@@ -430,7 +429,7 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 }
 
 /*
-	count_instances(string) -> uint16_t
+	count_instances(string) -> uint16_t (private)
 	text: text content to count instances from
 	purpose: count actual amount of letters that have been written to text element
 	returns: amount of letters without spaces in given text as count of added instances to text
@@ -443,7 +442,7 @@ uint16_t Conversation::count_instances(std::string text)
 }
 
 /*
-	manipulate_background_edges() -> void
+	manipulate_background_edges() -> void (private)
 	purpose: regenerate randomized background edges & remap texture coordinates over backbuffer
 	NOTE: background shader has to be enabled beforehand
 */
@@ -466,7 +465,7 @@ void Conversation::manipulate_background_edges()
 }
 
 /*
-	load_text() -> void
+	load_text() -> void (private)
 	purpose: write conversation to output
 */
 void Conversation::load_text()
@@ -524,7 +523,7 @@ void Conversation::load_text()
 }
 
 /*
-	load_choice() -> void
+	load_choice() -> void (private)
 	purpose: write possible conversation choices and start waiting for input
 */
 void Conversation::load_choice()
@@ -557,7 +556,7 @@ void Conversation::load_choice()
 }
 
 /*
-	jmp_successor() -> void
+	jmp_successor() -> void (private)
 	purpose: jump to successor node or open choice if node has many children
 */
 void Conversation::jmp_successor()
@@ -580,10 +579,9 @@ void Conversation::jmp_successor()
 	if (multi_branch) load_choice();
 	else dltr_count = 0;
 }
-// TODO: only read multi branch after conditional exclusion
 
 /*
-	mv_decision(uint8_t) -> void
+	mv_decision(uint8_t) -> void (private)
 	i: index of chosen node
 	purpose: write choice to log & move the conversation ahead
 */
@@ -599,7 +597,7 @@ void Conversation::mv_decision(uint8_t i)
 }
 
 /*
-	log_speaker(string,vec4) -> void
+	log_speaker(string,vec4) -> void (private)
 	name: name of the character to log as speaker
 	colour: content text colour of the logged speaker
 	purpose: create text to log speaker to output
@@ -618,7 +616,7 @@ void Conversation::log_speaker(std::string name,glm::vec4 colour)
 }
 
 /*
-	log_content(string) -> void
+	log_content(string) -> void (private)
 	content: content to log to output
 	purpose: create text to log content to output
 */
