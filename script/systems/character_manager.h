@@ -24,7 +24,7 @@ class CharacterManager
 public:
 
 	// construction
-	CharacterManager();
+	CharacterManager() {  }
 	~CharacterManager() {  }
 
 	// creation

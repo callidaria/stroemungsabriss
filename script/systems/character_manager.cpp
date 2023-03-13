@@ -1,12 +1,14 @@
 #include "character_manager.h"
 
 /*
-	TODO
-*/
-CharacterManager::CharacterManager() {  }
-
-/*
-	TODO
+	add_character(uint16_t,const char*,const char*,uint8_t,vec4) -> void
+	id: id to refer to character by conversation & potentially other systems
+	name: readable display name of character
+	texpath: path to portrait spritesheet texture
+	cols: amount of columns on spritesheet
+	text_colour: rgba colour the spoken text of the character is written in
+	purpose: adds a character to character list, so systems can interact with it,
+		spritesheet holds a single row of portraits in 100x400 pixels, displaying different moods
 */
 void CharacterManager::add_character(uint16_t id,const char* name,const char* texpath,uint8_t cols,
 		glm::vec4 text_colour)
@@ -19,7 +21,8 @@ void CharacterManager::add_character(uint16_t id,const char* name,const char* te
 }
 
 /*
-	TODO
+	load_spritesheets() -> void
+	purpose: load spritesheets for all characters
 */
 void CharacterManager::load_spritesheets()
 {
@@ -28,7 +31,9 @@ void CharacterManager::load_spritesheets()
 }
 
 /*
-	TODO
+	get_character(uint16_t) -> CharacterData
+	id: character id as search reference
+	returns: character, related to the given id
 */
 CharacterData CharacterManager::get_character(uint16_t id)
 {

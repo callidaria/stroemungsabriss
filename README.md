@@ -66,7 +66,7 @@ make win
 ### features:
 - individual rotations of instanced objects
 - individual animations of instanced objects
-- communication system with conversation tree interpretation [DEV]
+- communication system with conversation tree interpretation
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
@@ -147,5 +147,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.3:
 	+ 43: 9h 17min
 	+ 114: 2min
-	+ 108: 39h 50min
+	+ 108: 41h 37min
 - Total Code Lines: 12.126

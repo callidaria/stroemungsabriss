@@ -1,7 +1,13 @@
 #include "conversation.h"
 
 /*
-	TODO
+	constructor(Frame*,Renderer2D*,CharacterManager*,const char*,string)
+	frame: pointer to frame, the conversation gets rendered to
+	r2D: pointer to 2D renderer, handling UI and sprites
+	cm: pointer to character manager holding character reference data
+	mm_path: path to mindmap file holding conversation branch
+	pname: name of the protagonist, to annotate players choices
+	purpose: creates conversation visuals & prepares interactive branching
 */
 Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path,
 		std::string pname)
@@ -66,7 +72,10 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 }
 
 /*
-	TODO
+	engage(string,vector<bool>) -> void
+	tree_path: node path to start conversation from
+	cnd: condition list to determine path openness with accordingly mapped list positioners
+	purpose: open conversation & start visualization
 */
 void Conversation::engage(std::string tree_path,std::vector<bool> cnd)
 {
@@ -100,7 +109,8 @@ void Conversation::engage(std::string tree_path,std::vector<bool> cnd)
 }
 
 /*
-	TODO
+	disengage() -> void
+	purpose: end conversation & start transition to end visualization
 */
 void Conversation::disengage()
 {
@@ -110,7 +120,11 @@ void Conversation::disengage()
 }
 
 /*
-	TODO
+	input(bool,bool,bool) -> void
+	cnf: information if confirmation button has been pressed
+	up: information if upwards choice movement is requested
+	down: information if downwards choice movement is requested
+	purpose: input processing
 */
 void Conversation::input(bool cnf,bool up,bool down)
 {
@@ -155,7 +169,8 @@ void Conversation::input(bool cnf,bool up,bool down)
 // FIXME: branch in main loop
 
 /*
-	TODO
+	render_to_scene() -> void
+	purpose: render conversation elements, that should be part of the scene
 */
 void Conversation::render_to_scene()
 {
@@ -173,7 +188,9 @@ void Conversation::render_to_scene()
 }
 
 /*
-	TODO
+	render(GLuint) -> void
+	scene_tex: backbuffer texture of prerendered scene for background shader
+	purpose: render UI elements for conversation visualization
 */
 void Conversation::render(GLuint scene_tex)
 {
@@ -235,7 +252,12 @@ void Conversation::render(GLuint scene_tex)
 // TODO: animation when disengaging, to not just plop away abruptly
 
 /*
-	TODO
+	rc_compile_node_data(vector<string>,uint32_t&) -> ConversationNode (private)
+	ls: list of raw content lines to interpret as conversation tree
+	si: current reading location within raw content list
+	purpose: recursively assemble conversation tree based on content list
+	returns: rootnode of conversation tree
+		recursively returns: rootnode of currently assembling subtree
 */
 ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,uint32_t &si)
 {
@@ -323,7 +345,11 @@ ConversationNode Conversation::rc_compile_node_data(std::vector<std::string> ls,
 }
 
 /*
-	TODO
+	grind_raw_node_by_key(string,string) -> string (private)
+	raw: raw node content
+	key: description key of content substring
+	purpose: extract content from raw node data annotated with given key
+	returns: substring of raw node data, annotated with desired key
 */
 std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 {
@@ -370,13 +396,21 @@ std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 }
 
 /*
-	TODO
+	convert_rawid(string) -> uint32_t (private)
+	rawid: node id filtered as substring from raw node data
+	purpose: convert raw node id string to usable node id integer
+	returns: given node id as integer
 */
 uint32_t Conversation::convert_rawid(std::string rawid)
 { return stoi(std::string(rawid,3)); }
 
 /*
-	TODO
+	rc_depthsearch(root,uint32_t) -> ConversationNode (private)
+	root: rootnode of tree to depthsearch
+	id: id that references target node of depthsearch
+	purpose: run a simple recursive depthsearch for given tree
+	returns: conversation node with the desired id
+		returns recursively: the desired node or an error node with easily identifiable data
 */
 ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 {
@@ -396,7 +430,10 @@ ConversationNode Conversation::rc_depthsearch(ConversationNode root,uint32_t id)
 }
 
 /*
-	TODO
+	count_instances(string) -> uint16_t
+	text: text content to count instances from
+	purpose: count actual amount of letters that have been written to text element
+	returns: amount of letters without spaces in given text as count of added instances to text
 */
 uint16_t Conversation::count_instances(std::string text)
 {
@@ -406,7 +443,8 @@ uint16_t Conversation::count_instances(std::string text)
 }
 
 /*
-	TODO
+	manipulate_background_edges() -> void
+	purpose: regenerate randomized background edges & remap texture coordinates over backbuffer
 	NOTE: background shader has to be enabled beforehand
 */
 void Conversation::manipulate_background_edges()
@@ -428,7 +466,8 @@ void Conversation::manipulate_background_edges()
 }
 
 /*
-	TODO
+	load_text() -> void
+	purpose: write conversation to output
 */
 void Conversation::load_text()
 {
@@ -485,7 +524,8 @@ void Conversation::load_text()
 }
 
 /*
-	TODO
+	load_choice() -> void
+	purpose: write possible conversation choices and start waiting for input
 */
 void Conversation::load_choice()
 {
@@ -517,7 +557,8 @@ void Conversation::load_choice()
 }
 
 /*
-	TODO
+	jmp_successor() -> void
+	purpose: jump to successor node or open choice if node has many children
 */
 void Conversation::jmp_successor()
 {
@@ -539,9 +580,12 @@ void Conversation::jmp_successor()
 	if (multi_branch) load_choice();
 	else dltr_count = 0;
 }
+// TODO: only read multi branch after conditional exclusion
 
 /*
-	TODO
+	mv_decision(uint8_t) -> void
+	i: index of chosen node
+	purpose: write choice to log & move the conversation ahead
 */
 void Conversation::mv_decision(uint8_t i)
 {
@@ -555,7 +599,10 @@ void Conversation::mv_decision(uint8_t i)
 }
 
 /*
-	TODO
+	log_speaker(string,vec4) -> void
+	name: name of the character to log as speaker
+	colour: content text colour of the logged speaker
+	purpose: create text to log speaker to output
 */
 void Conversation::log_speaker(std::string name,glm::vec4 colour)
 {
@@ -571,7 +618,9 @@ void Conversation::log_speaker(std::string name,glm::vec4 colour)
 }
 
 /*
-	TODO
+	log_content(string) -> void
+	content: content to log to output
+	purpose: create text to log content to output
 */
 void Conversation::log_content(std::string content)
 {
