@@ -25,10 +25,13 @@ constexpr float CONVERSATION_CHOICE_ORIGIN_Y = 600;
 constexpr float CONVERSATION_CHOICE_OFFSET = 25;
 constexpr float CNV_BGR_ORIGIN_X = 705;
 constexpr float CNV_BGR_WIDTH = 400;
+constexpr float CNV_BORDER_NEWLINE = 380;
 constexpr float CNV_BGR_DESTINATION_X = CNV_BGR_ORIGIN_X+CNV_BGR_WIDTH;
+constexpr float CNV_SELECTOR_HEIGHT = 20;
+constexpr float CNV_CREQUEST_WQUAD = 50;
 
 // timing
-constexpr float CNV_DISENGAGE_WAIT_FRAMES = 24;
+constexpr float CNV_DISENGAGE_WAIT_FRAMES = 45;
 constexpr float CNV_CONFIRMATION_COOLDOWN = 120;
 
 // i can actually maybe use some knowledge from university here? that's a first!
@@ -125,7 +128,6 @@ private:
 	GLuint curr_ctex;							// current character mood visualization texture
 	uint8_t dwait = 0,iwait = 0;				// frame cooldown counter for disengage & input
 };
-// TODO: leave some frames after writing log has been finished before accepting input
 // TODO: only read multi branch after conditional exclusion
 // TODO: text colour picker for choices & speaker annotations
 // FIXME: positioning of confirmation prompt

@@ -27,7 +27,10 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	croot = rc_compile_node_data(lines,lidx);
 
 	// selector vertices
-	float sfield_verts[] = { 0,-20,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-20,3, 0,-20,0, };
+	float sfield_verts[] = {
+		0,-CNV_SELECTOR_HEIGHT,0, 0,0,1, 1280,0,2,
+		1280,0,2, 1280,-CNV_SELECTOR_HEIGHT,3, 0,-CNV_SELECTOR_HEIGHT,0,
+	};
 	slct_buffer.bind();
 	slct_buffer.upload_vertices(sfield_verts,sizeof(sfield_verts));
 	slct_shader.compile("./shader/fbv_lselect.shader","./shader/fbf_lselect.shader");
@@ -64,8 +67,8 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	manipulate_background_edges();
 
 	// load continue button animation
-	btn_rindex = m_r2D->add(glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-50),50,50,
-			"./res/continue_dialogue.png",2,3,5,30);
+	btn_rindex = m_r2D->add(glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-CNV_CREQUEST_WQUAD),
+			CNV_CREQUEST_WQUAD,CNV_CREQUEST_WQUAD,"./res/continue_dialogue.png",2,3,5,30);
 }
 
 /*
@@ -168,6 +171,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 	}
 }
 // FIXME: branch in main loop
+// FIXME: iwait should reset not when confirmation has been pressed, but when choice load or filled
 
 /*
 	render_to_scene() -> void
@@ -626,13 +630,14 @@ void Conversation::log_content(std::string content)
 {
 	// write content to spoken text output
 	Text proc = Text(&bgrfont);
-	glm::vec2 cpos = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),380,
-			CONVERSATION_CHOICE_OFFSET);
+	glm::vec2 cpos = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),
+			CNV_BORDER_NEWLINE,CONVERSATION_CHOICE_OFFSET);
 	proc.load(&cam2D);
 	tspoken.push_back(proc);
 	tcolour.push_back(name_colour);
 
 	// update confirmation request & newline
-	btn_position = cpos;
+	bool brd_over = CNV_BORDER_NEWLINE<(cpos.x+CNV_CREQUEST_WQUAD);
+	btn_position = glm::vec2(cpos.x*!brd_over,cpos.y-CONVERSATION_CHOICE_OFFSET*brd_over);
 	cursor_y = cpos.y-CONVERSATION_CHOICE_OFFSET;
 }
