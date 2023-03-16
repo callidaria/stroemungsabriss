@@ -50,7 +50,7 @@
 </node>
 </node>
 <node CREATED="1669259414185" ID="ID_1995427143" MODIFIED="1672957301477" TEXT=":b5 I&apos;m feelin&apos; &quot;Clusterfuck&quot;">
-<node CREATED="1669342368292" FOLDED="true" ID="ID_1801214095" MODIFIED="1678294699035" TEXT=":c2 :m4 :s5 That is a game for drunkards, and I am not drunk. Have you played this game sober before? It is extremely dull.">
+<node CREATED="1669342368292" ID="ID_1801214095" MODIFIED="1678916279126" TEXT=":c2 :m4 :s5 That is a game for drunkards, and I am not drunk. Have you played this game sober before? It is extremely dull.">
 <node CREATED="1669342489084" ID="ID_357285392" MODIFIED="1672970116631" TEXT="[Lie] Yes I&apos;ve played it sober before, it is still a treat if you play with the right people!">
 <arrowlink DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="2335;0;" ID="Arrow_ID_226383619" STARTARROW="None" STARTINCLINATION="2752;0;"/>
 </node>
@@ -79,13 +79,16 @@
 </node>
 </node>
 <node CREATED="1669259622507" ID="ID_651024810" MODIFIED="1669345558142" TEXT="I&apos;ll let you choose.">
-<node CREATED="1669340650255" ID="ID_871260835" MODIFIED="1672969786889" TEXT=":c2 :m6 Great, I know exactly what we should play!">
+<node CREATED="1669340650255" ID="ID_871260835" MODIFIED="1678939341764" TEXT=":b8 :s8 :c2 :m6 Great, I know exactly what we should play!">
 <arrowlink COLOR="#7f7f7f" DESTINATION="ID_1894720523" ENDARROW="Default" ENDINCLINATION="-112;-106;" ID="Arrow_ID_849750416" STARTARROW="None" STARTINCLINATION="131;4;"/>
+</node>
+<node CREATED="1678900183071" ID="ID_1070881063" MODIFIED="1678900661839" TEXT=":c2 :m6 Ok, Let&apos;s GO!">
+<arrowlink DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="1288;131;" ID="Arrow_ID_1898066042" STARTARROW="None" STARTINCLINATION="1221;209;"/>
 </node>
 </node>
 <node CREATED="1669259651896" ID="ID_1785362382" MODIFIED="1670685222032" TEXT="I think that should be more your expertise...">
 <node CREATED="1669340489177" ID="ID_1540591579" MODIFIED="1672969842754" TEXT=":c2 :m2 That would be a misconception. My job is winning, not knowing how to play. Anyways, let me teach you what we play with special guests.">
-<node CREATED="1669340743183" ID="ID_1894720523" MODIFIED="1672969869060" TEXT=":c2 :m1 May I ask, do you know &quot;Spike&apos;s Gambit&quot; at all?">
+<node CREATED="1669340743183" ID="ID_1894720523" MODIFIED="1678939349250" TEXT=":c2 :m1 May I ask, do you know &quot;Spike&apos;s Gambit&quot; at all?">
 <linktarget COLOR="#7f7f7f" DESTINATION="ID_1894720523" ENDARROW="Default" ENDINCLINATION="-112;-106;" ID="Arrow_ID_849750416" SOURCE="ID_871260835" STARTARROW="None" STARTINCLINATION="131;4;"/>
 <node CREATED="1669340608568" ID="ID_877921045" MODIFIED="1669340891446" TEXT="No, never heard about that one, explain.">
 <node CREATED="1669340945637" ID="ID_1985633118" MODIFIED="1672970169389" TEXT=":c2 :m6 I&apos;ll explain while we play. Ready?">
@@ -96,7 +99,7 @@
 </node>
 </node>
 <node CREATED="1669340845028" ID="ID_1235798539" MODIFIED="1669340858776" TEXT="You Invented it I take it?">
-<node CREATED="1669341013743" ID="ID_1704678023" MODIFIED="1672970232183" TEXT=":c2 :m5 How did you figure that out? In truth you are mistaken though, It&apos;s called Spikes gambit, because back when it was first concepted, the slaves were playing against each other. Whoever lost was impaled by giant harpoons. They&apos;ve basically gambled with spikes. And an utterly exciting concept it was, additionally to the fitting naming concept. The game has survived until now. Do you want to hear the rules?">
+<node CREATED="1669341013743" ID="ID_1704678023" MODIFIED="1678900653550" TEXT=":c2 :m5 How did you figure that out? In truth you are mistaken though, It&apos;s called Spikes gambit, because back when it was first concepted, the slaves were playing against each other. Whoever lost was impaled by giant harpoons. They&apos;ve basically gambled with spikes. And an utterly exciting concept it was, additionally to the fitting naming concept. The game has survived until now. Do you want to hear the rules?">
 <node CREATED="1669341256603" ID="ID_115734548" MODIFIED="1669379442814" TEXT="Yes, please.">
 <arrowlink DESTINATION="ID_1985633118" ENDARROW="Default" ENDINCLINATION="192;-204;" ID="Arrow_ID_448175053" STARTARROW="None" STARTINCLINATION="151;-25;"/>
 </node>
@@ -114,7 +117,7 @@
 <node CREATED="1669341706242" ID="ID_554658123" MODIFIED="1672970355659" TEXT=":c2 :m1 Suit yourself...">
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_554658123" ENDARROW="Default" ENDINCLINATION="542;0;" ID="Arrow_ID_1927013336" SOURCE="ID_1632155397" STARTARROW="None" STARTINCLINATION="846;36;"/>
 </node>
-<node CREATED="1669341833774" ID="ID_843234065" MODIFIED="1678294414849" TEXT="&lt;null&gt;run spike&apos;s gambit without explanations">
+<node CREATED="1669341833774" ID="ID_843234065" MODIFIED="1678938376188" TEXT="&lt;null&gt;run spike&apos;s gambit without explanations">
 <arrowlink DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="2688;0;" ID="Arrow_ID_1279055392" STARTARROW="None" STARTINCLINATION="2583;0;"/>
 </node>
 </node>
@@ -150,13 +153,14 @@
 <arrowlink DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="597;0;" ID="Arrow_ID_1807842114" STARTARROW="None" STARTINCLINATION="597;0;"/>
 </node>
 </node>
-<node CREATED="1670456740882" ID="ID_1146896443" MODIFIED="1678294414851" POSITION="left" TEXT="&lt;end&gt; start game">
+<node CREATED="1670456740882" ID="ID_1146896443" MODIFIED="1678938376188" POSITION="left" TEXT="&lt;end&gt; start game">
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="-29;-662;" ID="Arrow_ID_1193758862" SOURCE="ID_1641949164" STARTARROW="None" STARTINCLINATION="-51;-130;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="615;-765;" ID="Arrow_ID_924874411" SOURCE="ID_1139167757" STARTARROW="None" STARTINCLINATION="1294;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="1894;0;" ID="Arrow_ID_1321423458" SOURCE="ID_320667501" STARTARROW="None" STARTINCLINATION="1836;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="2335;0;" ID="Arrow_ID_226383619" SOURCE="ID_357285392" STARTARROW="None" STARTINCLINATION="2752;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="2147;0;" ID="Arrow_ID_613780210" SOURCE="ID_601535306" STARTARROW="None" STARTINCLINATION="2147;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="1910;0;" ID="Arrow_ID_164821977" SOURCE="ID_77649445" STARTARROW="None" STARTINCLINATION="1910;0;"/>
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="1288;131;" ID="Arrow_ID_1898066042" SOURCE="ID_1070881063" STARTARROW="None" STARTINCLINATION="1221;209;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="3426;0;" ID="Arrow_ID_1948225276" SOURCE="ID_403919096" STARTARROW="None" STARTINCLINATION="2985;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="2688;0;" ID="Arrow_ID_1279055392" SOURCE="ID_843234065" STARTARROW="None" STARTINCLINATION="2583;0;"/>
 <linktarget COLOR="#b0b0b0" DESTINATION="ID_1146896443" ENDARROW="Default" ENDINCLINATION="466;0;" ID="Arrow_ID_311255792" SOURCE="ID_1068718207" STARTARROW="None" STARTINCLINATION="466;0;"/>

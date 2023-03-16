@@ -171,7 +171,6 @@ void Conversation::input(bool cnf,bool up,bool down)
 	}
 }
 // FIXME: branch in main loop
-// FIXME: iwait should reset not when confirmation has been pressed, but when choice load or filled
 
 /*
 	render_to_scene() -> void
@@ -572,7 +571,10 @@ void Conversation::jmp_successor()
 	do {
 		if (ctemp.jmp_id) ctemp = rc_depthsearch(croot,ctemp.jmp_id);
 		else {
-			ConversationNode swp = ctemp.child_nodes[0];
+			uint8_t i = 0;
+			while (!cnd_list[ctemp.child_nodes[i].condition_id-1]&&ctemp.child_nodes[i].condition_id)
+				i++;
+			ConversationNode swp = ctemp.child_nodes[i];
 			ctemp = swp;
 		} multi_branch = ctemp.child_nodes.size()>1;
 	}

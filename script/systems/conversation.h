@@ -130,4 +130,4 @@ private:
 };
 // TODO: only read multi branch after conditional exclusion
 // TODO: text colour picker for choices & speaker annotations
-// FIXME: positioning of confirmation prompt
+// FIXME: iwait maybe reset not when confirmation has been pressed, but when choice load or filled
