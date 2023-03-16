@@ -21,9 +21,9 @@ constexpr uint8_t TEXT_DISTANCE = 5;
 
 // menu position
 constexpr uint16_t TEXT_YPOSITION_SYS = 720/2-ACT_TEXT_SIZE/2+(SYS_OPTION_COUNT/2)*ACT_TEXT_SIZE
-		+SYS_OPTION_COUNT%2*(ACT_TEXT_SIZE/2);
+		+ SYS_OPTION_COUNT%2*(ACT_TEXT_SIZE/2);
 constexpr uint16_t TEXT_YPOSITION_INFO = 720/2-ACT_TEXT_SIZE/2+(INFO_OPTION_COUNT/2)*ACT_TEXT_SIZE
-		+INFO_OPTION_COUNT%2*(ACT_TEXT_SIZE/2);
+		+ INFO_OPTION_COUNT%2*(ACT_TEXT_SIZE/2);
 constexpr uint8_t TEXT_DRAW_SPACE = ACT_TEXT_SIZE-TEXT_DISTANCE;
 
 class ActionMenu
@@ -38,6 +38,9 @@ public:
 	void update(Player* player,uint32_t &run_state);
 	void bind();
 	void render();
+
+	// getter
+	GLuint get_scene_texture();
 
 private:
 

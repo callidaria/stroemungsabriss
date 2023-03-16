@@ -13,31 +13,37 @@ Text::Text()
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
-	WARNING: the created objects always have to lead with this contructor, else font texture breaks
 */
 Text::Text(Font f)
 	: font(f)
 {
 	buffer.add_buffer();
-	glGenTextures(1,&tex);
+	glGenTextures(1,&ftexture);
 }
 
 /*
-	add(char,vec2) -> int32_t
+	add(char,vec2) -> uint32_t
 	c: character to add to the text entity
 	p: position to add the character at
-	returns: x-axis modification of cursor position after adding the given character
 	purpose: add a single character to the text entity
+	returns: x-axis modification of cursor position after adding the given character
 */
-int32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
+uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
-	// identifying sprite sheet position
-	int i = 0;
-	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
-		if (font.id[i]==(int)c) break;
-		i++;
-	}
+	// identifying sprite sheet position & write
+	uint8_t i = get_spritesheet_location(c);
+	return add(i,p);
+}
 
+/*
+	add(uint8_t,vec2) -> uint32_t
+	i: id of character to add
+	p: cursor position
+	purpose: add a single character to the text entity identified by it's font id
+	returns: x-axis modification of cursor position after adding the given character
+*/
+uint32_t Text::add(uint8_t i,glm::vec2 p)
+{
 	// character information write
 	ibv.push_back(p.x);ibv.push_back(p.y);
 	ibv.push_back(font.x[i]);ibv.push_back(font.y[i]);
@@ -63,6 +69,59 @@ void Text::add(const char* s,glm::vec2 p)
 }
 
 /*
+	add(string,vec2,float,float) -> vec2
+	s: string of characters to write to text entity
+	p: origin position of cursor to specify writing position start
+	bwdt: width of text space until cursor reaches border & automatically inserts breakline
+	nline_offset: distance the cursor should travel on the y-axis for a breakline
+	purpose: add string of characters within borders, automatically inserting breaklines
+	returns: new cursor position after text writing is finished
+*/
+glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
+{
+	// pry apart words from given string
+	std::vector<std::string> wrds;
+	std::string crr_word = "";
+	for (auto c:s) {
+		if (c==' ') {
+			wrds.push_back(crr_word);
+			crr_word = "";
+		} else crr_word += c;
+	} wrds.push_back(crr_word);
+
+	// add found words without breaking border width
+	float crr_width = 0;
+	for (auto wrd:wrds) {
+
+		// calculate estimated word width
+		uint16_t estm_wwidth = 0;
+		std::vector<uint8_t> char_ids;
+		for (auto c:wrd) {
+			uint8_t ssloc = get_spritesheet_location(c);
+			estm_wwidth += m_font->xa[ssloc]*(m_font->mw/83.0f);	// ??outdated
+			char_ids.push_back(ssloc);
+		}
+
+		// break line if word violates border width
+		bool br_line = (crr_width+estm_wwidth)>bwdt;
+		p.x -= crr_width*br_line;p.y -= nline_offset*br_line;
+		crr_width *= !br_line;
+
+		// add characters to text entity
+		for (auto ic:char_ids) p.x += add(ic,p);
+
+		// add space after word & update current width
+		float wordspacing = 57.0f*(m_font->mw/83.0f);
+		p.x += wordspacing;
+		crr_width += estm_wwidth+wordspacing;
+		// FIXME: duplicate code!
+	}
+
+	// return cursor position
+	return glm::vec2(crr_width,p.y);
+}
+
+/*
 	clear() -> void
 	purpose: clear all character entries from text entity index buffer
 */
@@ -76,10 +135,17 @@ void Text::clear()
 		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
-{ Toolbox::load_texture(tex,font.tp); }
+{ Toolbox::load_texture(ftexture,m_font->tp); }
 
 /*
-	load() -> void
+	enable_shader() -> void
+	purpose: enable text shader outside of text class
+*/
+void Text::enable_shader()
+{ sT.enable(); }
+
+/*
+	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
 */
@@ -95,15 +161,10 @@ void Text::load()
 	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
 	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
 	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
-
-	// load texture
-	Toolbox::load_texture(tex,font.tp);
-
-	// uniform variable upload
-	Camera2D cam = Camera2D(1280.0f,720.0f);
-	sT.upload_int("tex",0);
-	sT.upload_float("wdt",font.mw);
-	sT.upload_camera(cam);
+	sT.upload_float("wdt",m_font->mw);
+	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
+	sT.upload_matrix("proj",c->proj2D);
+	texture();
 }
 
 /*
@@ -137,6 +198,17 @@ void Text::render(int32_t amnt,glm::vec4 col)
 }
 
 /*
+	set_scroll(vec2) -> void
+	scroll: distance and direction the text should scroll scroll towards
+	purpose: scroll the text entity
+*/
+void Text::set_scroll(glm::vec2 scroll)
+{
+	glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(scroll.x,scroll.y,0));
+	sT.upload_matrix("model",model);
+}
+
+/*
 	set_scroll(mat4) -> void
 	model: model matrix to upload to shader
 	purpose: emulate a free text scrolling effect by common model transformation of sprites
@@ -153,3 +225,20 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 	buffer.bind();
 	buffer.upload_vertices(font.v,sizeof(font.v));
 }
+
+/*
+	get_spritesheet_location(char) -> uint8_t
+	c: char to get spritesheet location id for
+	purpose: get spritesheet id for desired char, to reference char gfx in font
+	returns: spritesheet id of given char
+*/
+uint8_t Text::get_spritesheet_location(char c)
+{
+	int i = 0;
+	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
+		if (m_font->id[i]==(int)c) break;
+		i++;
+	}
+	return i;
+}
+// FIXME: optimize please

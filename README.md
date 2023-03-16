@@ -71,6 +71,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - individual rotations of instanced objects
 - individual animations of instanced objects
 - system for interactable playing card games
+- communication system with conversation tree interpretation
 
 ### fixes:
 - FIXED: despawned directed projectiles sometimes appear in view
@@ -147,4 +148,5 @@ Worktime: 120h
 	+ 106: 64h 32min
 	+ 82: 20h 50min
 	+ 137: 15h 13min
-- Total Code Lines: 11.495
+	+ 108: 47h 34min
+- Total Code Lines: 12.126

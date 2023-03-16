@@ -67,12 +67,9 @@ int main(int argc,char* argv[])
 		// setup component iterator
 		itr = 0;
 
-		// waiting to refresh after build
 		if (waiting) {
-			printf("end of output...\n");
-#ifdef __WIN32__
-			_getch();
-#endif
+			std::cout << "end of input...\n";
+			get_input_char();
 		} waiting = false;
 
 		// prepare write
@@ -121,35 +118,13 @@ int main(int argc,char* argv[])
 #endif
 
 		// read user input
-#ifdef __WIN32__
-		if (!update) inp = _getch();
-#else
-		if (!update) { system("stty raw");inp = getchar();system("stty cooked"); }
-#endif
+		if (!update) inp = get_input_char();
 		else update = false;
 
 		// kill when exit request
-		if (inp=='e') {
-#ifdef __WIN32__
-			system("cls");
-#else
-			system("clear");
-#endif
-			break;
-		} else if (inp=='r')
-#ifdef __WIN32__
-			system(".\\yomisensei.exe");
-#else
-			system("./yomisensei");
-#endif
-		else if (inp=='b') {
-#ifdef __WIN32__
-			system(("g++ main.cpp lib/* -o yomisensei.exe -L\""+path_mingw+"\" "+cmp_winlinker+' '+cmp_windef).c_str());
-#else
-			system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");
-#endif
-			waiting = true;
-		}
+		if (inp=='e') { system("clear");break; }
+		else if (inp=='r') { system("./yomisensei");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lSOIL -lopenal");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 

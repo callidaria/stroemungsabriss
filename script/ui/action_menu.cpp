@@ -92,7 +92,7 @@ void ActionMenu::bind()
 	purpose: render current menu state
 		ptrans ~= 1.0f: renders game normally as the game has not been stopped at this moment
 		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top
-	!! DISCLAIMER: has to be run after game board components, as well as all other ui !!
+	!! DISCLAIMER: has to be run after game board components, but before all other ui using bb !!
 */
 void ActionMenu::render()
 {
@@ -122,3 +122,11 @@ void ActionMenu::render()
 	mtext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
 	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(.6f,.0824f,.6f,1));	// menu text
 }
+
+/*
+	get_scene_texture() -> GLuint
+	purpose: returns scene framebuffer for extern usages & effects
+	returns: scene framebuffer
+*/
+GLuint ActionMenu::get_scene_texture()
+{ return game_fb.get_tex(); }
