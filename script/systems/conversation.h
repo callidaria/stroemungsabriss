@@ -56,8 +56,7 @@ class Conversation
 public:
 
 	// construction
-	Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path,
-			std::string pname);
+	Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path);
 	~Conversation() {  }
 
 	// interaction
@@ -92,8 +91,8 @@ private:
 private:
 
 	// cascabel
-	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),opps_buffer = Buffer();
-	Shader slct_shader = Shader(),bgr_shader = Shader(),opps_shader = Shader();
+	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),mood_buffer = Buffer();
+	Shader slct_shader = Shader(),bgr_shader = Shader(),mood_shader = Shader();
 	Frame* m_frame;
 	Renderer2D* m_r2D;
 	CharacterManager* charManager;
@@ -105,7 +104,7 @@ private:
 	std::vector<Text> tspoken,tspoken_names;
 	std::vector<glm::vec4> tcolour;
 	glm::vec4 name_colour;
-	std::string protag_name;
+	CharacterData protag;
 
 	// tree
 	ConversationNode croot,ctemp;	// root & head nodes
@@ -124,6 +123,7 @@ private:
 	uint8_t decision_id = 0;					// index of selected decision
 	bool chlfr = false;							// conserve if input happened last frame
 	float sEdges[4] = { 0 };					// choice selection edge modification
+	uint16_t chosen_mood = 0;					// protagonist's mood index
 	uint16_t curr_char,curr_cols,curr_mood;		// currently shown opposing character
 	float cursor_y = 655;						// current cursor height
 	GLuint curr_ctex;							// current character mood visualization texture

@@ -6,12 +6,10 @@
 	r2D: pointer to 2D renderer, handling UI and sprites
 	cm: pointer to character manager holding character reference data
 	mm_path: path to mindmap file holding conversation branch
-	pname: name of the protagonist, to annotate players choices
 	purpose: creates conversation visuals & prepares interactive branching
 */
-Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path,
-		std::string pname)
-	: m_frame(frame),m_r2D(r2D),charManager(cm),protag_name(pname)
+Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path)
+	: m_frame(frame),m_r2D(r2D),charManager(cm)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -38,16 +36,25 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	slct_shader.def_attributeF("index",1,2,3);
 	slct_shader.upload_camera(cam2D);
 
-	// conversation opponent visualizations
-	std::vector<float> oppconv_verts
+	// compile conversation visualization vertices
+	std::vector<float> protag_verts
+			= Toolbox::create_sprite_canvas_triangled(glm::vec2(0,50),100,400);
+	std::vector<float> opponent_verts
 			= Toolbox::create_sprite_canvas_triangled(glm::vec2(1100,0),180,720);
-	opps_buffer.bind();
-	opps_buffer.upload_vertices(oppconv_verts);
-	opps_shader.compile2d("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
-	opps_shader.upload_camera(cam2D);
+	std::vector<float> moodconv_verts;
+	moodconv_verts.insert(moodconv_verts.end(),protag_verts.begin(),protag_verts.end());
+	moodconv_verts.insert(moodconv_verts.end(),opponent_verts.begin(),opponent_verts.end());
+	// TODO: extend a feature to create multiple canvi at once in toolbox
 
-	// load character spritesheets
+	// conversation mood visualizations
+	mood_buffer.bind();
+	mood_buffer.upload_vertices(moodconv_verts);
+	mood_shader.compile2d("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
+	mood_shader.upload_camera(cam2D);
+
+	// load character spritesheets & define protag name
 	charManager->load_spritesheets();
+	protag = charManager->get_character(0);
 
 	// background vertices
 	float tfield_verts[] = {
@@ -162,8 +169,13 @@ void Conversation::input(bool cnf,bool up,bool down)
 		decision_id = t_decision*valid_selection+decision_id*!valid_selection;
 
 		// recalculate random selector edge changes if decision changed & set input trigger
-		for (uint8_t i=0+4*(lf_decision==decision_id);i<4;i++) sEdges[i] = rand()%15-10;
+		bool chselect = (lf_decision!=decision_id)&&dltr_count;
+		for (uint8_t i=0+4*!chselect;i<4;i++) sEdges[i] = rand()%15-10;
 		chlfr = cnf||up||down;
+
+		// load protagonist's mood index for currently chosen answer
+		if (ctemp.child_nodes.size()&&chselect)
+			chosen_mood = ctemp.child_nodes[decision_id].mood_id-1;
 
 		// reduce input cooldown or reset
 		bool filling = sltr_count<sltr_target;
@@ -205,13 +217,20 @@ void Conversation::render(GLuint scene_tex)
 		bool filling = sltr_count<sltr_target;
 		sltr_count += filling;
 
-		// draw opponent's mood visualization
-		opps_shader.enable();
-		opps_shader.upload_int("col_max",curr_cols);
-		opps_shader.upload_float("col_index",curr_mood);
-		opps_buffer.bind();
-		glBindTexture(GL_TEXTURE_2D,curr_ctex);
+		// draw protagonist's mood visualization
+		mood_shader.enable();
+		mood_shader.upload_int("col_max",protag.cols);
+		mood_shader.upload_float("col_index",chosen_mood);
+		mood_buffer.bind();
+		glBindTexture(GL_TEXTURE_2D,protag.tex_sheet);
 		glDrawArrays(GL_TRIANGLES,0,6);
+
+		// draw opponent's mood visualization
+		mood_shader.upload_int("col_max",curr_cols);
+		mood_shader.upload_float("col_index",curr_mood);
+		glBindTexture(GL_TEXTURE_2D,curr_ctex);
+		glDrawArrays(GL_TRIANGLES,6,12);
+		// FIXME: why the hell is col_index uploaded as float?!?!?!
 
 		// draw background for spoken text
 		bgr_shader.enable();
@@ -601,7 +620,7 @@ void Conversation::mv_decision(uint8_t i)
 	ctemp = swp;
 
 	// write choice to conversation log
-	log_speaker(protag_name,glm::vec4(1,.7f,0,1));
+	log_speaker(protag.name,protag.text_colour);
 	log_content(swp.content);
 }
 

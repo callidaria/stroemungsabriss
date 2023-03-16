@@ -16,12 +16,13 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// add spike to character list
 	CharacterManager cmanager = CharacterManager();
+	cmanager.add_character(0,"04","./res/mood/04.png",5,glm::vec4(1,.7f,0,1));
 	cmanager.add_character(2,"Spike, Master of Cards","./res/mood/spike.png",
 			6,glm::vec4(.4f,.7f,.2f,1));
 	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
 
 	// conversation test
-	Conversation cnv_test = Conversation(m_frame,m_r2d,&cmanager,"./dat/casino_coup.mm","04");
+	Conversation cnv_test = Conversation(m_frame,m_r2d,&cmanager,"./dat/casino_coup.mm");
 	std::vector<bool> cnv_condition = { true,true,true,true,true,true,true,true,true };
 	cnv_test.engage("brother_spying/card_game_spike/",cnv_condition);
 
