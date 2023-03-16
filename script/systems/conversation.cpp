@@ -506,7 +506,7 @@ void Conversation::load_text()
 		// update lower name display
 		tname.clear();
 		tname.add(speaker_name.c_str(),glm::vec2(905,33));
-		tname.load(&cam2D);
+		tname.load();
 	}
 
 	// write text content
@@ -577,7 +577,7 @@ void Conversation::load_choice()
 	}
 
 	// load text instances & and reset letter count
-	tdecide.load(&cam2D);
+	tdecide.load();
 }
 
 /*
@@ -633,9 +633,9 @@ void Conversation::mv_decision(uint8_t i)
 void Conversation::log_speaker(std::string name,glm::vec4 colour)
 {
 	// write name to spoken text output
-	Text proc = Text(&bgrfont);
+	Text proc = Text(bgrfont);
 	proc.add((name+':').c_str(),glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y));
-	proc.load(&cam2D);
+	proc.load();
 	tspoken_names.push_back(proc);
 
 	// newline & load speaker's colour
@@ -651,10 +651,10 @@ void Conversation::log_speaker(std::string name,glm::vec4 colour)
 void Conversation::log_content(std::string content)
 {
 	// write content to spoken text output
-	Text proc = Text(&bgrfont);
+	Text proc = Text(bgrfont);
 	glm::vec2 cpos = proc.add(content,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,cursor_y),
 			CNV_BORDER_NEWLINE,CONVERSATION_CHOICE_OFFSET);
-	proc.load(&cam2D);
+	proc.load();
 	tspoken.push_back(proc);
 	tcolour.push_back(name_colour);
 

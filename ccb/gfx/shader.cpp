@@ -85,46 +85,6 @@ void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t o
 // FIXME: unsigned int usage
 
 /*
-	upload_<X>(const char*,X x) -> void
-	loc: name of uniform variable as referred to in the shader code file
-	x: variable in desired datatype to upload to the shader as variable defined by location
-	purpose: definition of uniform variables in shader by program
-*/
-void Shader::upload_int(const char* loc,int i) { glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
-// FIXME: int usage
-
-void Shader::upload_float(const char* loc,float f) { glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
-
-void Shader::upload_vec2(const char* loc,glm::vec2 v)
-{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y); }
-
-void Shader::upload_vec3(const char* loc,glm::vec3 v)
-{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z); }
-
-void Shader::upload_vec4(const char* loc,glm::vec4 v)
-{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
-
-void Shader::upload_matrix(const char* loc,glm::mat4 m)
-{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
-
-/*
-	upload_camera(Camera2D||Camera3D) -> void
-	cam2d||cam3d: camera to upload as uniform to shader program
-	purpose: upload relevant camera matrices
-*/
-void Shader::upload_camera(Camera2D cam2d)
-{
-	upload_matrix("view",cam2d.view2D);
-	upload_matrix("proj",cam2d.proj2D);
-}
-
-void Shader::upload_camera(Camera3D cam3d)
-{
-	upload_matrix("view",cam3d.view3D);
-	upload_matrix("proj",cam3d.proj3D);
-}
-
-/*
 	enable() -> void
 	purpose: enables the program, so that it can be used. deactivates all others!
 */

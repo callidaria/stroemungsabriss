@@ -1,21 +1,12 @@
 #include "text.h"
 
 /*
-	TODO
-*/
-Text::Text()
-{
-	buffer.add_buffer();
-	glGenTextures(1,&tex);
-}
-
-/*
 	constructor(Font*)
 	f: pointer to font, holding the .fnt and texture that are going to be used when rendering text
 	purpose: create an entity to later add text and characters to
 */
 Text::Text(Font f)
-	: font(f)
+	:font(f)
 {
 	buffer.add_buffer();
 	glGenTextures(1,&ftexture);
@@ -98,7 +89,7 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 		std::vector<uint8_t> char_ids;
 		for (auto c:wrd) {
 			uint8_t ssloc = get_spritesheet_location(c);
-			estm_wwidth += m_font->xa[ssloc]*(m_font->mw/83.0f);	// ??outdated
+			estm_wwidth += font.xa[ssloc]*(font.mw/83.0f);	// ??outdated
 			char_ids.push_back(ssloc);
 		}
 
@@ -111,7 +102,7 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 		for (auto ic:char_ids) p.x += add(ic,p);
 
 		// add space after word & update current width
-		float wordspacing = 57.0f*(m_font->mw/83.0f);
+		float wordspacing = 57.0f*(font.mw/83.0f);
 		p.x += wordspacing;
 		crr_width += estm_wwidth+wordspacing;
 		// FIXME: duplicate code!
@@ -135,7 +126,7 @@ void Text::clear()
 		was the first construction usage. yeah don't ask me why i don't understand this shit either
 */
 void Text::texture()
-{ Toolbox::load_texture(ftexture,m_font->tp); }
+{ Toolbox::load_texture(ftexture,font.tp); }
 
 /*
 	enable_shader() -> void
@@ -161,11 +152,11 @@ void Text::load()
 	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
 	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
 	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
-	sT.upload_float("wdt",m_font->mw);
-	sT.upload_matrix("view",c->view2D); // !!please use a presetted camera matrix with static viewport for text
-	sT.upload_matrix("proj",c->proj2D);
+	sT.upload_float("wdt",font.mw);
+	sT.upload_camera(Camera2D(1280.0f,720.0f));
 	texture();
 }
+// FIXME: don't calculate a new camera every time you load a new text. it's always the same one!
 
 /*
 	prepare() -> void
@@ -193,7 +184,7 @@ void Text::render(int32_t amnt,glm::vec4 col)
 {
 	buffer.upload_indices(ibv);
 	sT.upload_vec4("colour",col); // ??shader uploads outside of prepare function
-	glBindTexture(GL_TEXTURE_2D,tex);
+	glBindTexture(GL_TEXTURE_2D,ftexture);
 	glDrawArraysInstanced(GL_TRIANGLES,0,6,amnt);
 }
 
@@ -236,7 +227,7 @@ uint8_t Text::get_spritesheet_location(char c)
 {
 	int i = 0;
 	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
-		if (m_font->id[i]==(int)c) break;
+		if (font.id[i]==(int)c) break;
 		i++;
 	}
 	return i;

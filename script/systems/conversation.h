@@ -100,7 +100,7 @@ private:
 	// text
 	Camera2D cam2D = Camera2D(1280,720);
 	Font bgrfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
-	Text tdecide = Text(&bgrfont),tname = Text(&bgrfont);
+	Text tdecide = Text(bgrfont),tname = Text(bgrfont);
 	std::vector<Text> tspoken,tspoken_names;
 	std::vector<glm::vec4> tcolour;
 	glm::vec4 name_colour;

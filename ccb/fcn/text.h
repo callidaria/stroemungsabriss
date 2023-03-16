@@ -18,7 +18,7 @@ public:
 
 	// construction
 	Text() {  }
-	Text(Font* f);
+	Text(Font f);
 	~Text() {  }
 
 	// write
@@ -31,7 +31,7 @@ public:
 	// preparation
 	void texture();
 	void enable_shader();
-	void load(Camera2D* c);
+	void load();
 	void prepare();
 
 	// draw
@@ -44,7 +44,6 @@ public:
 private:
 
 	// helper
-	void initialize();
 	void load_vertex();
 	uint8_t get_spritesheet_location(char c);
 
@@ -52,10 +51,10 @@ private:
 
 	// cascabel
 	Shader sT;
-	Font* m_font;
+	Font font;
 	Buffer buffer = Buffer();
 
 	// vertices & texturing
 	std::vector<float> ibv;
-	GLuint tex;
+	GLuint ftexture;
 };
