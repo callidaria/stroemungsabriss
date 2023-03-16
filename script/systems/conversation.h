@@ -32,7 +32,8 @@ constexpr float CNV_CREQUEST_WQUAD = 50;
 
 // timing
 constexpr float CNV_DISENGAGE_WAIT_FRAMES = 45;
-constexpr float CNV_CONFIRMATION_COOLDOWN = 120;
+constexpr float CNV_CONFIRMATION_COOLDOWN = 45;
+// TODO: find the sweetspot for input framedropping
 
 // i can actually maybe use some knowledge from university here? that's a first!
 struct ConversationNode
@@ -130,4 +131,4 @@ private:
 };
 // TODO: only read multi branch after conditional exclusion
 // TODO: text colour picker for choices & speaker annotations
-// FIXME: iwait maybe reset not when confirmation has been pressed, but when choice load or filled
+// TODO: protagonist portrait for chosen line mood visualization

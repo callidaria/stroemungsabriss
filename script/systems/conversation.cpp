@@ -166,8 +166,9 @@ void Conversation::input(bool cnf,bool up,bool down)
 		chlfr = cnf||up||down;
 
 		// reduce input cooldown or reset
+		bool filling = sltr_count<sltr_target;
 		iwait -= m_frame->get_time_delta()*!!iwait;
-		iwait += CNV_CONFIRMATION_COOLDOWN*(!iwait&&cnf);
+		iwait = iwait*!filling+CNV_CONFIRMATION_COOLDOWN*filling;
 	}
 }
 // FIXME: branch in main loop
