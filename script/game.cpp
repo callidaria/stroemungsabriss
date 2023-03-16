@@ -14,18 +14,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	glm::vec2 ePos = glm::vec2(615,600);
 	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
 
-	// add spike to character list
-	CharacterManager cmanager = CharacterManager();
-	cmanager.add_character(0,"04","./res/mood/04.png",5,glm::vec4(1,.7f,0,1));
-	cmanager.add_character(2,"Spike, Master of Cards","./res/mood/spike.png",
-			6,glm::vec4(.4f,.7f,.2f,1));
-	cmanager.add_character(3,"Curlhead Cross","./res/mood/cross.png",1,glm::vec4(.5f,0,0,1));
-
-	// conversation test
-	Conversation cnv_test = Conversation(m_frame,m_r2d,&cmanager,"./dat/casino_coup.mm");
-	std::vector<bool> cnv_condition = { true,true,true,true,true,true,true,true,true };
-	cnv_test.engage("brother_spying/card_game_spike/",cnv_condition);
-
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
 	m_r2d->load(m_cam2d);
@@ -72,16 +60,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.register_damage(fwd_treg[10]);
 		hbar.render();
 
-		// conversation scene components & input
-		cnv_test.input(m_frame->kb.ka[SDL_SCANCODE_J],
-				m_frame->kb.ka[SDL_SCANCODE_UP],m_frame->kb.ka[SDL_SCANCODE_DOWN]);
-		cnv_test.render_to_scene();
-
 		// action menu render
 		lgt_menu.render();
-
-		// conversation render
-		cnv_test.render(lgt_menu.get_scene_texture());
 
 		// swap
 		m_frame->update();
