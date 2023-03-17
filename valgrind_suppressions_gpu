@@ -1,0 +1,11 @@
+{
+ nvidia_515
+ Memcheck:Cond
+ obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+}
+
+{
+ nvidia_vmemcheck
+ Memcheck:Cond
+ obj:/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so
+}
