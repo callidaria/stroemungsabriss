@@ -104,22 +104,21 @@ private:
 
 	// animation
 	int32_t sbar[8] = { 0 };
-	uint32_t SELTRANS[16] = {
-		900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498
-	};
-	glm::mat4 pos_title,pos_entitle;
+	uint32_t SELTRANS[16]
+			= { 900,2500, 34,170, 221,380, 419,609, 644,810, 871,997, 1027,1258, 1212,1498 };
+	glm::mat4 pos_title = glm::mat4(1.0f),pos_entitle = glm::mat4(1.0f);
 	float ptrans = 0,dtrans = 0;
 	uint32_t msindex = 0;
 	uint8_t mselect = 7;
-	glm::vec2 mve,mvj;
-	float edge_mod;
+	glm::vec2 mve = glm::vec2(0),mvj = glm::vec2(0);
+	float edge_mod = 0;
 	bool edge_sel = false;
 	uint8_t md_disp = 0;
 	uint8_t hrz_title = 0,vrt_title = 3;
 	float dlgrot_val = 0,dlgrot_cnt = 0;
 
 	// menu title speedup animation
-	bool neg_vscl,neg_hscl,neg_vrot,neg_hrot;
+	bool neg_vscl = 0,neg_hscl = 0,neg_vrot = 0,neg_hrot = 0;
 	float val_vscl = 1,val_hscl = 1,val_vrot = 0,val_hrot = 0;
 
 	// dialogue
@@ -132,7 +131,7 @@ private:
 			pth_diff,150,450);
 	MenuDialogue md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",
 			pth_conf,75,75);
-	uint8_t dsi_diff,dsi_conf;
+	uint8_t dsi_diff = 0,dsi_conf = 0;
 
 	// game
 	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d);

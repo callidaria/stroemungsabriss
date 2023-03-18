@@ -88,7 +88,8 @@ void Shader::def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t o
 	enable() -> void
 	purpose: enables the program, so that it can be used. deactivates all others!
 */
-void Shader::enable() { glUseProgram(m_shaderProgram); }
+void Shader::enable()
+{ glUseProgram(m_shaderProgram); }
 
 /*
 	disable() -> void

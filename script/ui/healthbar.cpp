@@ -138,6 +138,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	hpswap.phname.add(boss_name,glm::vec2(pos.x+TEXT_MV,pos.y+TEXT_DV));
 	hpswap.phname.load();
 	hpswap.phcnt = Text(hbfont);
+	hpswap.phcnt.add("0/X",glm::vec2(0));
+	hpswap.phcnt.load();
 } Healthbar::~Healthbar() {  }
 
 /*
@@ -191,9 +193,7 @@ void Healthbar::render()
 	purpose: reducing health points by given value
 */
 void Healthbar::register_damage(uint16_t dmg)
-{
-	hpswap.dmg_threshold += dmg*(frdy==HBState::READY);
-}
+{ hpswap.dmg_threshold += dmg*(frdy==HBState::READY); }
 
 /*
 	floating_nanobars() -> void (private)
