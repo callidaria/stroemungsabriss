@@ -82,6 +82,7 @@ int main(int argc,char** argv)
 		system("./yomisensei &");
 #endif
 
+	ccbm.vanish();
 	f.vanish();
 	return 0;
 }

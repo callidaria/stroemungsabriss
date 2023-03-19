@@ -65,6 +65,11 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
+## v0.0.5 DEV
+
+### fixes:
+- FIXED: memory leaks
+
 ## v0.0.4 DEV [UNX]
 
 ### features:
@@ -149,4 +154,5 @@ Worktime: 120h
 	+ 82: 20h 50min
 	+ 137: 15h 13min
 	+ 108: 48h 4min
+	+ 97: 7h 2min
 - Total Code Lines: 12.126

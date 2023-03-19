@@ -23,6 +23,7 @@ public:
 	// interaction
 	uint16_t load_level();
 	void write_level();
+	void delete_level();
 
 private:
 

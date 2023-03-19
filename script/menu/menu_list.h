@@ -92,7 +92,7 @@ private:
 	std::vector<LEntity> rles;	// list to reset and compare to if changes given
 	int32_t lscroll = 515,dscroll = 600;	// defines the scrolling values of description and list
 	bool lf_open = false;		// saves if sublist was open last frame
-	uint8_t t_slID;				// temporarily saves the sublist selection, def by user input
+	uint8_t t_slID = 0;			// temporarily saves the sublist selection, def by user input
 	uint32_t diffRID = 0;		// ID of the difficulty spritesheet in renderer
 
 	// animation of estimated difficulty

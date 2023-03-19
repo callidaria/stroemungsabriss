@@ -16,37 +16,62 @@ CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,const char* path)
 */
 uint16_t CCBLInterpreter::load_level()
 {
+	// setup
 	int out = m_r2d->get_max_sprite();
 	std::ifstream lvfile(lvpath,std::ios::in);
-	while (!lvfile.eof()) {
-		char* lh = new char[32];
-		lvfile >> lh;
-		const char* rclh = reinterpret_cast<char*>(&lh[0]);
-		if (!strcmp(rclh,"sprite:")) {
+	std::vector<std::string> lines;
+	std::string tline;
+
+	// get raw level file information
+	while (getline(lvfile,tline)) lines.push_back(tline);
+
+	// interpret level file
+	for (auto line : lines) {
+		std::stringstream ssline(line);
+		std::vector<std::string> args;
+		std::string arg;
+		while (std::getline(ssline,arg,' ')) args.push_back(arg);
+
 		// pattern for spritedef: lh position_x position_y width height texpath
-			float x,y,w,h;
-			char* tpath = new char[128];
-			const char* rctpath = reinterpret_cast<char*>(&tpath[0]); // ??wat
-			lvfile >> x >> y >> w >> h >> tpath;
-			m_pos.push_back(glm::vec2(x,y));
-			m_width.push_back(w);m_height.push_back(h);
-			m_tex.push_back(rctpath);
-			m_r2d->add(glm::vec2(x,y),w,h,rctpath);
-		} else if (!strcmp(rclh,"anim:")) {
-		// pattern for animdef: lh position_x position_y width height texpath rows columns frames timesplit
-			float x,y,w,h,r,c,f,t;
-			char* tpath = new char[128];
-			const char* rctpath = reinterpret_cast<char*>(&tpath[0]);
-			lvfile >> x >> y >> w >> h >> tpath >> r >> c >> f >> t;
-			a_pos.push_back(glm::vec2(x,y));
-			a_width.push_back(w);a_height.push_back(h);
-			a_tex.push_back(rctpath);
+		if (args[0]=="sprite:") {
+
+			// extract values
+			glm::vec2 pos = glm::vec2(stoi(args[1]),stoi(args[2]));
+			float width = stoi(args[3]),height = stoi(args[4]);
+			char* tex_path = new char[args[5].length()+1];
+			strcpy(tex_path,args[5].c_str());
+
+			// save values & create sprite
+			m_pos.push_back(pos);
+			m_width.push_back(width);
+			m_height.push_back(height);
+			m_tex.push_back(tex_path);
+			m_r2d->add(pos,width,height,tex_path);
+		}
+
+		// pattern for animdef: lh position_x position_y width height texpath rows columns
+		//		frames timesplit
+		else if (args[0]=="anim:") {
+
+			// extract values
+			glm::vec2 pos = glm::vec2(stoi(args[1]),stoi(args[2]));
+			float width = stoi(args[3]),height = stoi(args[4]);
+			char* tex_path = new char[args[5].length()+1];
+			strcpy(tex_path,args[5].c_str());
+			uint8_t r = stoi(args[6]),c = stoi(args[7]),f = stoi(args[8]),t = stoi(args[9]);
+
+			// save values & create animation
+			a_pos.push_back(pos);
+			a_width.push_back(width);
+			a_height.push_back(height);
+			a_tex.push_back(tex_path);
 			a_row.push_back(r);a_column.push_back(c);
 			a_frames.push_back(f);a_ts.push_back(t);
-			m_r2d->add(glm::vec2(x,y),w,h,rctpath,r,c,f,t);
+			m_r2d->add(pos,width,height,tex_path,r,c,f,t);
 		}
 	} return out;
 }
+// FIXME: duplicate code
 
 /*
 	write_level() -> void
@@ -68,3 +93,14 @@ void CCBLInterpreter::write_level()
 		lvfile << lvbuff.str();
 	} lvfile.close();
 }
+
+/*
+	delete_level() -> void
+	purpose: manually remove all texture paths from allocated memory
+*/
+void CCBLInterpreter::delete_level()
+{
+	for (const char* tex : m_tex) delete[] tex;
+	for (const char* tex : a_tex) delete[] tex;
+}
+// TODO: completely unload all of the level from memory

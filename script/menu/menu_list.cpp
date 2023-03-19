@@ -11,7 +11,6 @@ MenuList::MenuList()
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
 	}; // FIXME: check if defaults actually important
 	les.push_back(proc);
-	esize = 0;
 }
 
 /*
@@ -167,9 +166,7 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	purpose: reset all changes of any list attribute entities
 */
 void MenuList::reset()
-{
-	les = rles;
-}
+{ les = rles; }
 
 /*
 	save(void)
@@ -288,9 +285,7 @@ void MenuList::render(float dtrans,float piscroll,uint16_t index,float &edge_mod
 	returns: globe rotation vector toward list entity preview destination
 */
 glm::vec2 MenuList::globe_rotation(uint16_t li)
-{
-	return glm::vec2(les[li].gRot[0],les[li].gRot[3]);
-}
+{ return glm::vec2(les[li].gRot[0],les[li].gRot[3]); }
 
 /*
 	write_tempID(uint8_t)
@@ -298,9 +293,7 @@ glm::vec2 MenuList::globe_rotation(uint16_t li)
 	purpose: writes the temporary selection id to the selected menu list entity id when called
 */
 void MenuList::write_tempID(uint8_t index)
-{
-	les[index].sID = t_slID;
-}
+{ les[index].sID = t_slID; }
 
 /*
 	breakgrind(std::string,uint32_t&)

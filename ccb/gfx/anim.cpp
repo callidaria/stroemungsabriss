@@ -24,9 +24,7 @@ Anim::Anim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,uin
 	purpose: upload texture data to shader program to be used as sampler2D
 */
 void Anim::texture()
-{
-	Toolbox::load_texture(tex,tp);
-}
+{ Toolbox::load_texture(tex,tp); }
 
 /*
 	setup() -> uint8_t
