@@ -76,6 +76,10 @@ private:
 			SDL_WindowFlags fs);
 	void get_screen(int8_t screen,SDL_Rect* dim_screen);
 
+	// controller management
+	void load_controllers();
+	void kill_controllers();
+
 public:
 
 	// properties
@@ -85,7 +89,9 @@ public:
 	// input
 	std::vector<SDL_GameController*> m_gc;
 	SDL_Event m_fe;
-	Keyboard kb; Mouse mouse; std::vector<XBox> xb;
+	Keyboard kb;
+	Mouse mouse;
+	std::vector<XBox> xb;
 	std::string tline = "";
 
 private:
