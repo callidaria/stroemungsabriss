@@ -43,7 +43,8 @@ uint16_t CCBLInterpreter::load_level()
 
 			// save values & create sprite
 			m_pos.push_back(pos);
-			m_width.push_back(width);m_height.push_back(height);
+			m_width.push_back(width);
+			m_height.push_back(height);
 			m_tex.push_back(tex_path);
 			m_r2d->add(pos,width,height,tex_path);
 		}
@@ -61,7 +62,8 @@ uint16_t CCBLInterpreter::load_level()
 
 			// save values & create animation
 			a_pos.push_back(pos);
-			a_width.push_back(width);a_height.push_back(height);
+			a_width.push_back(width);
+			a_height.push_back(height);
 			a_tex.push_back(tex_path);
 			a_row.push_back(r);a_column.push_back(c);
 			a_frames.push_back(f);a_ts.push_back(t);
@@ -90,4 +92,13 @@ void CCBLInterpreter::write_level()
 			<<a_row.at(i)<<' '<<a_column.at(i)<<' '<<a_frames.at(i)<<' '<<a_ts.at(i)<<'\n';
 		lvfile << lvbuff.str();
 	} lvfile.close();
+}
+
+/*
+	TODO
+*/
+void CCBLInterpreter::delete_level()
+{
+	for (const char* tex : m_tex) delete[] tex;
+	for (const char* tex : a_tex) delete[] tex;
 }

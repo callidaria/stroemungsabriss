@@ -2,11 +2,14 @@
 
 #include <iostream>
 #include <vector>
+
 #include "shader.h"
 #include "sprite.h"
 #include "anim.h"
+
 #include "../mat/camera2d.h"
 #include "../mat/toolbox.h"
+
 #include "../fcn/buffer.h"
 
 class Renderer2D
@@ -49,6 +52,7 @@ private:
 	void load_texture();
 
 public:
+
 	Buffer buffer = Buffer();
 	Shader s2d;
 	std::vector<Sprite> sl;

@@ -3,3 +3,78 @@
  Memcheck:Cond
  obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
 }
+
+{
+   nvidia_515_initexception
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:*
+   fun:call_init.part.0
+   fun:call_init
+   fun:_dl_init
+   fun:_dl_catch_exception
+}
+
+{
+   nvidia_515_possiblelk
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:*
+}
+
+{
+   nvidia_515_calloc_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:*
+   fun:call_init.part.0
+   fun:call_init
+   fun:_dl_init
+}
+
+{
+   nvidia_515_realloc_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libnvidia-glcore.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_nvidia.so.515.86.01
+   obj:*
+   fun:call_init.part.0
+   fun:call_init
+   fun:_dl_init
+   fun:_dl_catch_exception
+}

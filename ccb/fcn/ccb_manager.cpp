@@ -43,6 +43,18 @@ uint16_t CCBManager::add_lv(const char* path)
 }
 
 /*
+	TODO
+*/
+void CCBManager::rm_lv(uint16_t id)
+{ linpr[id].delete_level(); }
+
+/*
+	TODO
+*/
+void CCBManager::vanish()
+{ for (uint16_t i=0;i<linpr.size();i++) rm_lv(i); }
+
+/*
 	dev_console(uint32_t&,bool&) -> void
 	running: reference to runstate variable to possibly end program from console by setting it to 0
 	dactive: reference to boolean holding if developer console should be activated & shown
