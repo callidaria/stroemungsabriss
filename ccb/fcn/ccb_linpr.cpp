@@ -95,10 +95,12 @@ void CCBLInterpreter::write_level()
 }
 
 /*
-	TODO
+	delete_level() -> void
+	purpose: manually remove all texture paths from allocated memory
 */
 void CCBLInterpreter::delete_level()
 {
 	for (const char* tex : m_tex) delete[] tex;
 	for (const char* tex : a_tex) delete[] tex;
 }
+// TODO: completely unload all of the level from memory

@@ -43,13 +43,16 @@ uint16_t CCBManager::add_lv(const char* path)
 }
 
 /*
-	TODO
+	rm_lv(uint16_t) -> void
+	id: id of the level that shall be removed
+	purpose: remove a level from manager by id
 */
 void CCBManager::rm_lv(uint16_t id)
 { linpr[id].delete_level(); }
 
 /*
-	TODO
+	vanish() -> void
+	purpose: close ccb manager and clean memory
 */
 void CCBManager::vanish()
 { for (uint16_t i=0;i<linpr.size();i++) rm_lv(i); }
