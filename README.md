@@ -67,6 +67,10 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ## v0.0.5 DEV
 
+### optimizations:
+- hotplugging controllers
+- switching dynamically between input methods
+
 ### fixes:
 - FIXED: memory leaks
 
@@ -154,6 +158,7 @@ Worktime: 120h
 	+ 82: 20h 50min
 	+ 137: 15h 13min
 	+ 108: 48h 4min
+- Elapsed Worktime After v0.0.4:
 	+ 97: 7h 2min
-	+ 129: 7h 38min
+	+ 129: 8h 4min
 - Total Code Lines: 12.126

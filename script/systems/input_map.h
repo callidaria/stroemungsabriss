@@ -45,7 +45,7 @@ public:
 	bool request(uint8_t request_id);
 
 	// precalculate input
-	void precalculate(uint8_t calc_id);
+	void precalculate(uint8_t request_id);
 	void precalculate_vector();
 	void precalculate_dpad();
 	void precalculate_all();
@@ -73,4 +73,3 @@ private:
 	int32_t* cnt_udaxis,*cnt_lraxis;
 };
 // TODO: make the input map dynamic for button reallocation
-// TODO: precalculate and request values for certain inputs

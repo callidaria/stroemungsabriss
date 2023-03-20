@@ -294,7 +294,8 @@ void Frame::get_screen(int8_t screen,SDL_Rect* dim_screen)
 }
 
 /*
-	TODO
+	load_controllers() -> void
+	purpose: load all currently plugged-in controllers
 */
 void Frame::load_controllers()
 {
@@ -307,7 +308,8 @@ void Frame::load_controllers()
 }
 
 /*
-	TODO
+	kill_controllers() -> void
+	purpose: close all controllers & remove their input reference structures
 */
 void Frame::kill_controllers()
 {

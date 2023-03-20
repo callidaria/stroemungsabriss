@@ -1,7 +1,9 @@
 #include "input_map.h"
 
 /*
-	TODO
+	constructor(Frame*)
+	frame: reference to frame, which is enabled when the input happens
+	purpose: map keyboard & controller inputs
 */
 InputMap::InputMap(Frame* frame)
 	: m_frame(frame)
@@ -11,7 +13,8 @@ InputMap::InputMap(Frame* frame)
 }
 
 /*
-	TODO
+	map_keyboard() -> void
+	purpose: map all keyboard inputs to their desired functionality
 */
 void InputMap::map_keyboard()
 {
@@ -32,7 +35,8 @@ void InputMap::map_keyboard()
 }
 
 /*
-	TODO
+	map_controller() -> void
+	purpose: map all controller inputs to their desired functionality
 */
 void InputMap::map_controller()
 {
@@ -62,9 +66,11 @@ void InputMap::map_controller()
 		for (uint8_t i=0;i<14;i++) cnt_actions[i] = &rpl_bool;
 	}
 }
+// TODO: add option to change players controller when multiple are plugged in
 
 /*
-	TODO
+	update() -> void
+	purpose: check for controller hotplugging and update mapping, should it happen
 */
 void InputMap::update()
 {
@@ -76,7 +82,9 @@ void InputMap::update()
 // FIXME: constant (nested) branching. maybe worth it, but it can always be improved
 
 /*
-	TODO
+	req_vectorized_direction() -> vec2
+	purpose: calculate directional movement input, joining stick and 8-way directions
+	returns: normalized movement direction
 */
 glm::vec2 InputMap::req_vectorized_direction()
 {
@@ -94,25 +102,35 @@ glm::vec2 InputMap::req_vectorized_direction()
 }
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	request_id: holding id by constexpr to identify requested input
+*/
+
+/*
+	request(uint8_t) -> bool
+	purpose: calculate if requested input has been made with any possible peripheral
+	returns: if requested input has been made
 */
 bool InputMap::request(uint8_t request_id)
 { return *key_actions[request_id]||*cnt_actions[request_id]; }
 
 /*
-	TODO
+	precalculate(uint8_t) -> void
+	purpose: precalculate if requested input has been made and store result for repeated usage
 */
-void InputMap::precalculate(uint8_t calc_id)
-{ input_val[calc_id] = request(calc_id); }
+void InputMap::precalculate(uint8_t request_id)
+{ input_val[request_id] = request(request_id); }
 
 /*
-	TODO
+	precalculate_vector() -> void
+	purpose: precalculate movement direction and store result for repeated usage
 */
 void InputMap::precalculate_vector()
 { move_dir = req_vectorized_direction(); }
 
 /*
-	TODO
+	precalculate_dpad() -> void
+	purpose: precalculate all directional inputs that relate to dpad functionality
 */
 void InputMap::precalculate_dpad()
 {
@@ -121,7 +139,8 @@ void InputMap::precalculate_dpad()
 }
 
 /*
-	TODO
+	precalculate_all() -> void
+	purpose: precalculate inputs for all actions ans store results for repeated usage
 */
 void InputMap::precalculate_all()
 {
