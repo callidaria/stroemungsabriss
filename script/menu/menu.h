@@ -24,7 +24,9 @@
 
 #include "menu_list.h"
 #include "menu_dialogue.h"
+
 #include "../game.h"
+#include "../systems/input_map.h"
 
 #define NCOLOUR 1
 
@@ -68,7 +70,7 @@ public:
 
 	// construction
 	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d);
+		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map);
 	~Menu();
 
 	// draw
@@ -85,6 +87,7 @@ private:
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
 	Camera3D* m_cam3d;
+	InputMap* imap;
 	Material3D mat0;
 	Shader sshd = Shader();
 	FrameBuffer fb,globe_fb;
@@ -94,9 +97,9 @@ private:
 	MSAA msaa;
 
 	// input definition
-	bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
+	//bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
-	bool* cam_up,*cam_down,*cam_left,*cam_right;
+	//bool* cam_up,*cam_down,*cam_left,*cam_right;
 
 	// menu selection
 	MenuList mls[12];

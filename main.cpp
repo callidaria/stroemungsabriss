@@ -29,6 +29,7 @@
 #include "ccb/gfx/light3d.h"
 #include "ccb/gfx/material3d.h"
 
+#include "script/systems/input_map.h"
 #include "script/menu/menu.h"
 
 #define MVMT_SPEED 4
@@ -40,6 +41,7 @@ int main(int argc,char** argv)
 	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
 			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
 			(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
+	InputMap imap = InputMap(&f);
 
 	// AUDIO
 	Listener listener = Listener();
@@ -54,7 +56,7 @@ int main(int argc,char** argv)
 	bool dactive = false;
 
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d);
+	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&imap);
 
 	// CAMERAS
 	uint32_t run=1,pause=false;

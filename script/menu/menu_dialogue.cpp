@@ -89,14 +89,15 @@ void MenuDialogue::render(uint8_t &index)
 		1: close the dialogue, abort decision
 		2: close the dialogue, confirm last selected decision
 */
-uint8_t MenuDialogue::stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back)
+uint8_t MenuDialogue::stall_input(bool &conf,bool &back)
 {
-	uint8_t out = ((*back&&!*trg_stall[1])&&open)+2*((*conf&&!*trg_stall[0])&&open);  // check for decision
-	bool topen = open-open*((*conf&&!*trg_stall[0])||(*back&&!*trg_stall[1]));  // check if still open
-	for (int i=0;i<trg_stall.size()*open;i++) *trg_stall[i] = true;  // stall for all triggers, if open
+	uint8_t out = (back&&open)+2*(conf&&open);  // check for decision
+	bool topen = open-open*((conf)||(back));  // check if still open
+	conf = conf&&!open;back = back&&!open;
 	open = topen;  // set updated openness
 	return out;
-}	// FIXME: is it possible to achieve a 3 in decision, and what does it result in?
+}
+// FIXME: is it possible to achieve a 3 in decision, and what does it result in?
 
 /*
 	open_dialogue() -> void
