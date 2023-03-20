@@ -31,11 +31,11 @@ class ActionMenu
 public:
 
 	// construction
-	ActionMenu(Frame* frame);
+	ActionMenu(Frame* frame,InputMap* input_map);
 	~ActionMenu() {  }
 
 	// runtime interactions
-	void update(Player* player,uint32_t &run_state);
+	void update(uint32_t &run_state);
 	void bind();
 	void render();
 
@@ -52,6 +52,7 @@ private:
 	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
 	Text mtext = Text(tfont),stext = Text(tfont);
+	InputMap* imap;
 
 	// action menu trigger system
 	bool menu_trg = false;	// input trigger for last frame menu requests

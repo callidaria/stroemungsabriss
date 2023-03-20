@@ -78,9 +78,7 @@ void Frame::clear(float cr,float cg,float cb)
 	purpose: swaps frame information
 */
 void Frame::update()
-{
-	SDL_GL_SwapWindow(m_frame);
-}
+{ SDL_GL_SwapWindow(m_frame); }
 
 /*
 	print_fps() -> void
@@ -142,9 +140,7 @@ void Frame::calc_time_delta()
 	purpose: directly set the value of the time modificator to the given value
 */
 void Frame::set_tmod(float tmod)
-{
-	time_mod = tmod;
-}
+{ time_mod = tmod; }
 
 /*
 	change_tmod(float,float) -> void
@@ -153,9 +149,7 @@ void Frame::set_tmod(float tmod)
 	purpose: changing time modification to a set goal at a given rate
 */
 void Frame::change_tmod(float goal,float rate)
-{
-	time_mod += rate*(goal>time_mod)-rate*(goal<time_mod);
-}
+{ time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
 
 /*
 	input(uint32_t&,bool) -> void
@@ -198,6 +192,13 @@ void Frame::input(uint32_t &running)
 		mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN;*/
 		mouse.mw = m_fe.wheel.y;
 
+		// check for controller plug-in
+		if (m_fe.type==SDL_JOYDEVICEADDED||m_fe.type==SDL_JOYDEVICEREMOVED) {
+			kill_controllers();
+			load_controllers();
+			controller_remap = true;
+		}
+
 		// read controller input
 		for (int i=0;i<m_gc.size();i++) {
 			for (int j=0;j<6;j++)
@@ -217,9 +218,9 @@ void Frame::input(uint32_t &running)
 */
 void Frame::vanish()
 {
+	// breakline on out & close controllers
 	printf("\n");
-	// ??doing this with an array reference even cleaner when converted & test when valgrind isn't mad anymore
-	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i)); // closing controller reference
+	kill_controllers();
 
 	// closing audio context & device
 	alcMakeContextCurrent(NULL);
@@ -274,14 +275,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
-
-	// controller setup
-	int gcc = 0;
-	while (SDL_IsGameController(gcc)) {
-		m_gc.push_back(SDL_GameControllerOpen(gcc));
-		xb.push_back(XBox()); // !!negative points for style ...maybe stack usage instead???
-		gcc++;
-	} printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
 }
 
 /*
@@ -301,22 +294,42 @@ void Frame::get_screen(int8_t screen,SDL_Rect* dim_screen)
 }
 
 /*
+	load_controllers() -> void
+	purpose: load all currently plugged-in controllers
+*/
+void Frame::load_controllers()
+{
+	uint8_t gcc = 0;
+	while (SDL_IsGameController(gcc)) {
+		m_gc.push_back(SDL_GameControllerOpen(gcc));
+		xb.push_back(XBox());
+		gcc++;
+	} printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
+}
+
+/*
+	kill_controllers() -> void
+	purpose: close all controllers & remove their input reference structures
+*/
+void Frame::kill_controllers()
+{
+	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i));
+	m_gc.clear();
+}
+
+/*
 	input_start() -> void
 	purpose: activate text input mode
 */
 void Frame::input_start()
-{
-	SDL_StartTextInput();
-}
+{ SDL_StartTextInput(); }
 
 /*
 	input_stop() -> void
 	purpose: deactivate text input mode
 */
 void Frame::input_stop()
-{
-	SDL_StopTextInput();
-}
+{ SDL_StopTextInput(); }
 
 /*
 	time_delta() -> float
@@ -324,6 +337,4 @@ void Frame::input_stop()
 	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
 float Frame::get_time_delta()
-{
-	return time_delta*60;
-}
+{ return time_delta*60; }

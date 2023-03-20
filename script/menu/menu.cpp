@@ -12,8 +12,9 @@
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
 Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d)
+		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map)
+	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d),
+		imap(input_map)
 {
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -123,27 +124,6 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 	// minimize difficulty choice banners
 	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
-
-	// setup user input
-	if (f->m_gc.size()>0) {
-		cnt_b = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_B];
-		cnt_start = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_A];
-		cnt_lft = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_LEFT];
-		cnt_rgt = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_RIGHT];
-		cnt_dwn = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_DOWN];
-		cnt_up = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_DPAD_UP];
-	} else {
-		cnt_b = &f->kb.ka[SDL_SCANCODE_Q];
-		cnt_start = &f->kb.ka[SDL_SCANCODE_RETURN];
-		cnt_lft = &f->kb.ka[SDL_SCANCODE_LEFT];
-		cnt_rgt = &f->kb.ka[SDL_SCANCODE_RIGHT];
-		cnt_dwn = &f->kb.ka[SDL_SCANCODE_DOWN];
-		cnt_up = &f->kb.ka[SDL_SCANCODE_UP];
-		cam_up = &f->kb.ka[SDL_SCANCODE_I];
-		cam_down = &f->kb.ka[SDL_SCANCODE_K];
-		cam_left = &f->kb.ka[SDL_SCANCODE_J];
-		cam_right = &f->kb.ka[SDL_SCANCODE_L];
-	}  // TODO: include all axis and common intuitive input systems
 } Menu::~Menu() {  }
 
 /*
@@ -155,19 +135,24 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 void Menu::render(uint32_t &running,bool &reboot)
 {
 	// process input triggers
-	bool hit_a=*cnt_start&&!trg_start,hit_b=*cnt_b&&!trg_b;			// face buttons select & cancel
-	bool hit_lft=*cnt_lft&&!trg_lft,hit_rgt=*cnt_rgt&&!trg_rgt;		// dpad directions horizontal
+	imap->update();
+	imap->precalculate_dpad();
+	imap->precalculate(IMP_REQFOCUS);imap->precalculate(IMP_REQBOMB);
+	bool hit_a = imap->input_val[IMP_REQFOCUS]&&!trg_start,
+		hit_b = imap->input_val[IMP_REQBOMB]&&!trg_b;
+	bool hit_lft = imap->input_val[IMP_REQLEFT]&&!trg_lft,
+		hit_rgt = imap->input_val[IMP_REQRIGHT]&&!trg_rgt;
+	bool hit_up = imap->input_val[IMP_REQUP]&&!trg_up,
+		hit_down = imap->input_val[IMP_REQDOWN]&&!trg_dwn;
 
 	// process sublist selections
 	uint8_t i_ml = mselect-2+opt_index;						// calculate menu list index
 	if (edge_sel&&hit_a) mls[i_ml].write_tempID(lselect);	// write selected choice from sublist
 	uint8_t dlgmod = hit_rgt-hit_lft;						// calculate delta of dialogue selection
-	// FIXME: branch in this cluster
 
 	// stall user inputs when dialogue active
-	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
-	uint8_t diff_can = md_diff.stall_input(stall_trg,cnt_start,cnt_b);
-	uint8_t conf_can = md_conf.stall_input(stall_trg,cnt_start,cnt_b);
+	uint8_t diff_can = md_diff.stall_input(hit_a,hit_b);
+	uint8_t conf_can = md_conf.stall_input(hit_a,hit_b);
 
 	// read difficulty dialogue choice
 	if (diff_can==1) mm = MenuMode::MENU_LISTING;	// close dialogue
@@ -191,7 +176,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 		reboot = true;
 		running = 0;
 		return;
-	}  // FIXME: branch in main loop
+	}
 
 	// relevant variables for switch
 	bool is_shift,changed;
@@ -205,17 +190,17 @@ void Menu::render(uint32_t &running,bool &reboot)
 	case MenuMode::MENU_TITLE:
 
 		// waiting until start input
-		mm = (MenuMode)(MenuMode::MENU_SELECTION*(*cnt_start&&!trg_start));
+		mm = (MenuMode)(MenuMode::MENU_SELECTION*hit_a);
 		break;
 
 	case MenuMode::MENU_SELECTION:
 
 		// process state changes
 		tmm = 1;
-		tmm += 3*(*cnt_start&&!trg_start);					// j listing
-		tmm -= 2*(*cnt_start&&!trg_start&&mselect==7);		// j start
-		tmm = tmm*!(*cnt_b&&!trg_b);						// j title
-		running = !(*cnt_start&&!trg_start&&mselect==2);	// exit
+		tmm += 3*hit_a;						// jmp listing
+		tmm -= 2*(hit_a&&mselect==7);		// jmp start
+		tmm = tmm*!hit_b;					// jmp title
+		running = !(hit_a&&mselect==2);		// exit
 		mm = (MenuMode)tmm;
 
 		// reset list scrolling and selection
@@ -229,7 +214,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 		mvj = (glm::vec2(50,50)-m_r2d->sl[msindex+mselect*2-3].pos)*glm::vec2(is_shift);
 
 		// update horizontal menu selection marker
-		mv_dlta = *cnt_rgt*(mselect<8&&!trg_rgt)-*cnt_lft*(mselect>2&&!trg_lft);
+		mv_dlta = hit_rgt*(mselect<8)-hit_lft*(mselect>2);
 		mselect += mv_dlta;
 
 		// temporarily save title language index
@@ -248,7 +233,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 		// process state changes
 		tmm = 3;
 		tmm -= difflv>0;//*cnt_start&&!trg_start;
-		tmm += *cnt_b&&!trg_b;
+		tmm += hit_b;
 		mm = (MenuMode)tmm;
 
 		// open difficulty dialogue
@@ -259,21 +244,20 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 		// process state changes
 		tmm = 4;
-		tmm += *cnt_start&&!trg_start&&mselect==3;
-		tmm -= *cnt_start&&!trg_start&&mselect!=3;
+		tmm += hit_a&&mselect==3;
+		tmm -= hit_a&&mselect!=3;
 
 		// check for changes in settings and open confirm dialogue
 		changed = false;
 		for (int i=7;i<11;i++) changed = mls[i].was_changed()||changed;
-		if (*cnt_b&&!trg_b&&mselect==3&&changed) md_conf.open_dialogue();
-		else tmm -= 3*(*cnt_b&&!trg_b);
+		if (hit_b&&mselect==3&&changed) md_conf.open_dialogue();
+		else tmm -= 3*hit_b;
 		mm = (MenuMode)tmm;
 		// FIXME: maybe a little heavy
 
 		// update vertical menu list selection marker
 		opt_index = (6+lselect)*(tmm==5);
-		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2].esize-1))
-				-(*cnt_up&&!trg_up&&lselect>0);
+		lselect += (hit_down&&lselect<(mls[mselect-2].esize-1))-(hit_up&&lselect>0);
 		lselect *= tmm!=5;
 		break;
 
@@ -281,20 +265,21 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 		// process state changes
 		tmm = 5;
-		tmm -= *cnt_b&&!trg_b&&!edge_sel;
+		tmm -= hit_b&&!edge_sel;
 		mm = (MenuMode)tmm;
 
 		// stall inputs when sublist should exist
-		lselect += (*cnt_dwn&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-1)&&!edge_sel)
-			-(*cnt_up&&!trg_up&&lselect>0&&!edge_sel);
+		lselect += (hit_down&&lselect<(mls[mselect-2+opt_index].esize-1)&&!edge_sel)
+				- (hit_up&&lselect>0&&!edge_sel);
 		opt_index *= tmm==5;  // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;
 		// FIXME: reduce to one increment calculation
 
 		// calculate sublist selection
 		edge_sel = !edge_sel*(hit_a||(edge_sel&&hit_b))+edge_sel*(!hit_a&&!(edge_sel&&hit_b));
-		ml_delta = edge_sel*((*cnt_dwn&&!trg_dwn)-(*cnt_up&&!trg_up));
-		ml_delta = edge_sel*ml_delta+!edge_sel*(*cnt_rgt-*cnt_lft);
+		ml_delta = edge_sel*(hit_down-hit_up);
+		ml_delta = edge_sel*ml_delta+!edge_sel
+				* (imap->input_val[IMP_REQRIGHT]-imap->input_val[IMP_REQLEFT]);
 		break;
 
 	// run game at given position
@@ -307,8 +292,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// TODO: reduce menu list input to a movement process in menu list class with stalls
 
 	// set triggers
-	trg_start=*cnt_start;trg_b=*cnt_b;									// face button triggers
-	trg_lft=*cnt_lft;trg_rgt=*cnt_rgt;trg_dwn=*cnt_dwn;trg_up=*cnt_up;	// dpad direction triggers
+	trg_start = imap->input_val[IMP_REQFOCUS];trg_b = imap->input_val[IMP_REQBOMB];
+	trg_lft = imap->input_val[IMP_REQLEFT];trg_rgt = imap->input_val[IMP_REQRIGHT];
+	trg_dwn = imap->input_val[IMP_REQDOWN];trg_up = imap->input_val[IMP_REQUP];
 
 	// move non-used out of view
 	for (int i=1;i<8;i++) {  // FIXME: i will regret this tomorrow ...just a test
@@ -538,3 +524,4 @@ void Menu::render(uint32_t &running,bool &reboot)
 	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 }
+// FIXME: branching in main loop

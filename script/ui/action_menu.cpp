@@ -5,8 +5,8 @@
 	frame: pointer to frame the game is drawn onto
 	purpose: creates the lightweight in-action menu to pause and use while in-game
 */
-ActionMenu::ActionMenu(Frame* frame)
-	: m_frame(frame)
+ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
+	: m_frame(frame),imap(input_map)
 {
 	// sepia menu background framebuffer
 	game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
@@ -48,32 +48,34 @@ ActionMenu::ActionMenu(Frame* frame)
 	player: player controller holding custom input addresses for menu interaction
 	purpose: animation updates and user request interpretation regarding action menu
 */
-void ActionMenu::update(Player* player,uint32_t &run_state)
+void ActionMenu::update(uint32_t &run_state)
 {
 	// action menu open requests
-	bool req_sysmenu = *player->cnt.pause&&!menu_trg&&!menu_inf;
+	bool pause = imap->input_val[IMP_REQPAUSE],details = imap->input_val[IMP_REQDETAILS];
+	bool down = imap->input_val[IMP_REQDOWN],up = imap->input_val[IMP_REQUP];
+	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
 	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
-	bool req_infomenu = *player->cnt.rdetails&&!menu_trg&&!menu_sys;
+	bool req_infomenu = details&&!menu_trg&&!menu_sys;
 	menu_inf = menu_inf*!req_infomenu+!menu_inf*req_infomenu;
-	menu_trg = *player->cnt.pause||*player->cnt.rdetails;
+	menu_trg = pause||details;
 
 	// game time modification
 	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
 	m_frame->set_tmod(ptrans);
 
 	// process user selection
-	int8_t smod = ((*player->cnt.abs_down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
-			-(*player->cnt.abs_up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
+	int8_t smod = ((down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
+			-(up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
 			*(ptrans<.1f);
 	msel += smod*menu_sys;
 	isel += smod*menu_inf;
-	trg_smod = *player->cnt.abs_down||*player->cnt.abs_up;
+	trg_smod = down||up;
 
 	// get new edge values
 	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
 
 	// close when quit selected and hit
-	run_state *= !(*player->cnt.rng_focus&&msel==2&&menu_sys);
+	run_state *= !(imap->request(IMP_REQFOCUS)&&msel==2&&menu_sys);
 }
 
 /*

@@ -25,7 +25,7 @@ public:
 	void render(uint8_t &index);
 
 	// dialogue state modification
-	uint8_t stall_input(std::vector<bool*> trg_stall,bool* conf,bool* back);
+	uint8_t stall_input(bool &conf,bool &back);
 	void open_dialogue();
 
 private:
