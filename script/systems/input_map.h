@@ -64,3 +64,4 @@ private:
 	int32_t* cnt_udaxis,*cnt_lraxis;
 };
 // TODO: make the input map dynamic for button reallocation
+// TODO: precalculate and request values for certain inputs

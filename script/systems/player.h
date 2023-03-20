@@ -11,19 +11,10 @@
 
 #include "bullet_system.h"
 #include "../ui/healthbar.h"
+#include "../systems/input_map.h"
 
 constexpr uint8_t JET_BORDER_WIDTH = 42;
 constexpr uint8_t JET_BORDER_HEIGHT = 18;
-
-struct PlayerControls
-{
-	int* flt_ud,*flt_lr;							// floating directionals
-	int* prc_ud,*prc_lr;							// precision shot
-	bool* abs_up,*abs_down,*abs_left,*abs_right;	// absolute directionals
-	bool* cq_def,*cq_atk,*rng_wide,*rng_focus;		// attack and defense
-	bool* bomb,*change,*dash,*target;				// additional tools
-	bool* pause,*rdetails,*qrestart;				// non-diegesis related
-};
 
 class Player
 {
@@ -31,7 +22,8 @@ public:
 
 	// construction
 	Player() {  }
-	Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys);
+	Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSystem* bsys,
+			InputMap* input_map);
 	~Player();
 
 	// update
@@ -42,18 +34,11 @@ public:
 
 private:
 
-	// helper
-	void emulate_vectorized();
-
 	// ranged functions
 	static void jet_wait(BulletSystem* bsys,int32_t* treg);
 	static void jet_wide(BulletSystem* bsys,int32_t* treg);
 	static void jet_focus(BulletSystem* bsys,int32_t* treg);
 	static void jet_scientific(BulletSystem* bsys,int32_t* treg);
-
-public:
-
-	PlayerControls cnt;
 
 private:
 
@@ -63,6 +48,7 @@ private:
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	BulletSystem* m_bsys;
+	InputMap* imap;
 	//Healthbar hbar = Healthbar(glm::vec2(10,10),400,25,{ 1 },{ 1 });
 	uint16_t ridx,aidx;
 	int32_t treg[16] = { 0 };

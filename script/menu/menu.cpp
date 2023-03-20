@@ -144,7 +144,6 @@ void Menu::render(uint32_t &running,bool &reboot)
 	uint8_t dlgmod = hit_rgt-hit_lft;						// calculate delta of dialogue selection
 
 	// stall user inputs when dialogue active
-	std::vector<bool*> stall_trg = { &trg_start,&trg_b,&trg_up,&trg_dwn,&trg_lft,&trg_rgt };
 	uint8_t diff_can = md_diff.stall_input(hit_a,hit_b);
 	uint8_t conf_can = md_conf.stall_input(hit_a,hit_b);
 

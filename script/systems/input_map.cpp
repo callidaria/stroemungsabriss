@@ -54,18 +54,8 @@ void InputMap::map_controller()
 
 	// no controller input
 	else {
-		cnt_udaxis = &rpl_int;
-		cnt_lraxis = &rpl_int;
-		cnt_actions[IMP_REQWIDE] = &rpl_bool;
-		cnt_actions[IMP_REQFOCUS] = &rpl_bool;
-		cnt_actions[IMP_REQCQCDEF] = &rpl_bool;
-		cnt_actions[IMP_REQCQCATK] = &rpl_bool;
-		cnt_actions[IMP_REQBOMB] = &rpl_bool;
-		cnt_actions[IMP_REQCHANGE] = &rpl_bool;
-		cnt_actions[IMP_REQTARGET] = &rpl_bool;
-		cnt_actions[IMP_REQPAUSE] = &rpl_bool;
-		cnt_actions[IMP_REQDETAILS] = &rpl_bool;
-		cnt_actions[IMP_REQRESTART] = &rpl_bool;
+		cnt_udaxis = &rpl_int;cnt_lraxis = &rpl_int;
+		for (uint8_t i=0;i<10;i++) cnt_actions[i] = &rpl_bool;
 	}
 }
 
@@ -77,12 +67,12 @@ glm::vec2 InputMap::req_vectorized_direction()
 	// calculate input directions separately
 	glm::vec2 dir
 		= glm::vec2((float)*cnt_lraxis/IMP_CONTROLLERCAP,(float)*cnt_udaxis/IMP_CONTROLLERCAP);
-	glm::vec2 kdir = glm::vec2(key_actions[IMP_REQRIGHT]-key_actions[IMP_REQLEFT],
-		key_actions[IMP_REQUP]-key_actions[IMP_REQDOWN]);
+	glm::vec2 kdir = glm::vec2(*key_actions[IMP_REQRIGHT]-*key_actions[IMP_REQLEFT],
+		*key_actions[IMP_REQUP]-*key_actions[IMP_REQDOWN]);
 
 	// combine & unify direction speed
 	dir = glm::vec2(dir.x*!kdir.x+kdir.x*!!kdir.x,dir.y*!kdir.y+kdir.y*!!kdir.y);
-	dir = glm::normalize(dir);
+	dir = (dir.x||dir.y) ? glm::normalize(dir) : glm::vec2(0);
 	return dir;
 }
 

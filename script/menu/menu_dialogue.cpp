@@ -74,10 +74,7 @@ void MenuDialogue::render(uint8_t &index)
 }
 
 /*
-	stall_input(std::vector<bool*>,bool*,bool*) -> uint8_t
-	trg_stall: list of all input trigger pointers to stall while open
-		trg_stall[0]: must be trigger of confirmation button
-		trg_stall[1]: must be trigger of cancel button
+	stall_input(bool&,bool&) -> uint8_t
 	conf: confirmation button pointer to receive confirmation of players choice
 	back: closing button pointer to be able to close the dialogue and the stalling process
 	purpose: as long as the dialogue is open the input regarding the background has to be stalled.

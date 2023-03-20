@@ -97,9 +97,7 @@ private:
 	MSAA msaa;
 
 	// input definition
-	//bool* cnt_b,*cnt_start,*cnt_lft,*cnt_rgt,*cnt_dwn,*cnt_up;
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
-	//bool* cam_up,*cam_down,*cam_left,*cam_right;
 
 	// menu selection
 	MenuList mls[12];
@@ -137,7 +135,7 @@ private:
 	uint8_t dsi_diff = 0,dsi_conf = 0;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d);
+	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,imap);
 	uint8_t difflv = 0;
 
 	// globe preview

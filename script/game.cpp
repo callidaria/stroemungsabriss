@@ -1,7 +1,7 @@
 #include "game.h"
 
-Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d)
-	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d)
+Game::Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d,InputMap* input_map)
+	: m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),imap(input_map)
 { ccbf = { m_frame,m_r2d,m_r3d,m_rI,&m_bSys,&m_player }; }
 
 void Game::run(uint32_t &rstate,CCBManager* ccbm)
@@ -30,7 +30,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// lightweight action menu
-	ActionMenu lgt_menu = ActionMenu(m_frame);
+	ActionMenu lgt_menu = ActionMenu(m_frame,imap);
 
 	// update until exit condition
 	uint32_t running = rstate+1;
@@ -43,7 +43,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 
 		// action menu update
-		lgt_menu.update(&m_player,running);
+		lgt_menu.update(running);
 		lgt_menu.bind();
 
 		// stage

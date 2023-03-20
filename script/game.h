@@ -29,8 +29,7 @@ class Game
 public:
 
 	// construction
-	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-			Camera2D* cam2d);
+	Game(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,Camera2D* cam2d,InputMap* input_map);
 	~Game() {  }
 
 	// loop
@@ -44,11 +43,12 @@ private:
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
+	InputMap* imap;
 
 	// script
 	BGEnv m_bgenv = BGEnv(m_r2d);
 	BulletSystem m_bSys = BulletSystem(m_frame,m_rI);
-	Player m_player = Player(m_frame,m_r2d,m_r3d,m_rI,&m_bSys);
+	Player m_player = Player(m_frame,m_r2d,m_r3d,m_rI,&m_bSys,imap);
 	CascabelBaseFeature ccbf;
 
 	/*
