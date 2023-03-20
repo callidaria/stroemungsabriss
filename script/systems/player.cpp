@@ -50,8 +50,6 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 		cnt.pause = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_START];
 		cnt.rdetails = &f->xb.at(0).xbb[SDL_CONTROLLER_BUTTON_BACK];
 		cnt.qrestart = (bool*)&f->xb.at(0).xba[SDL_CONTROLLER_AXIS_TRIGGERLEFT];
-		// TODO: dynamic controller choosing
-		// TODO: dynamic controller and keyboard config
 	} else {
 		emulate_vectorized();
 		cnt.flt_ud = &emuflt_ud;
@@ -71,7 +69,6 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 		cnt.pause = &f->kb.ka[SDL_SCANCODE_ESCAPE];
 		cnt.rdetails = &f->kb.ka[SDL_SCANCODE_TAB];
 		cnt.qrestart = &f->kb.ka[SDL_SCANCODE_5];
-		// TODO: define in case of keyboard
 	}
 } Player::~Player() {  }
 
