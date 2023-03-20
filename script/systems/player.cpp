@@ -39,11 +39,12 @@ Player::Player(Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,BulletSyst
 void Player::update(uint32_t &rstate,int32_t pDmg)
 {
 	// movement speed and direction based on shot and focus mode
-	glm::vec2 mvdir = imap->req_vectorized_direction();
-	float mvspeed = !ddur*(4+(3*!(imap->request(IMP_REQFOCUS)||imap->request(IMP_REQCHANGE))));
+	glm::vec2 mvdir = imap->move_dir;
+	float mvspeed = !ddur*(4+(3*!(imap->input_val[IMP_REQFOCUS]||imap->input_val[IMP_REQCHANGE])));
 
 	// change position of player based on calculated movement direction
-	pos += glm::vec3(mvdir.x*mvspeed,mvdir.y*mvspeed,0)*glm::vec3(m_frame->get_time_delta());
+	pos += glm::vec3(imap->move_dir.x*mvspeed,imap->move_dir.y*mvspeed,0)
+			* glm::vec3(m_frame->get_time_delta());
 
 	// force player in-bounds
 	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
@@ -60,8 +61,8 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	m_bsys->delta_fDir(0);
 
 	// run requested shot type or idle
-	uint8_t sidx = ((imap->request(IMP_REQWIDE)&&!imap->request(IMP_REQFOCUS))+2
-			* imap->request(IMP_REQFOCUS))*(m_frame->get_time_delta()>.1f);
+	uint8_t sidx = ((imap->input_val[IMP_REQWIDE]&&!imap->input_val[IMP_REQFOCUS])+2
+			* imap->input_val[IMP_REQFOCUS])*(m_frame->get_time_delta()>.1f);
 	rng_flib.at(sidx)(m_bsys,treg);
 
 	// TODO: bombs

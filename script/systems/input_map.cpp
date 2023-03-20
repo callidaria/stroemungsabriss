@@ -93,3 +93,48 @@ bool InputMap::req_left()
 { return *key_actions[IMP_REQLEFT]||(*cnt_lraxis<-5000); }
 bool InputMap::req_right()
 { return *key_actions[IMP_REQRIGHT]||(*cnt_lraxis>5000); }
+
+/*
+	TODO
+*/
+void InputMap::precalculate(uint8_t calc_id)
+{ input_val[calc_id] = request(calc_id); }
+
+/*
+	TODO
+*/
+void InputMap::precalculate_vector()
+{ move_dir = req_vectorized_direction(); }
+
+/*
+	TODO
+*/
+void InputMap::precalculate_up()
+{ input_val[IMP_REQUP] = req_up(); }
+void InputMap::precalculate_down()
+{ input_val[IMP_REQDOWN] = req_down(); }
+void InputMap::precalculate_left()
+{ input_val[IMP_REQLEFT] = req_left(); }
+void InputMap::precalculate_right()
+{ input_val[IMP_REQRIGHT] = req_right(); }
+
+/*
+	TODO
+*/
+void InputMap::precalculate_dpad()
+{
+	precalculate_up();
+	precalculate_down();
+	precalculate_left();
+	precalculate_right();
+}
+
+/*
+	TODO
+*/
+void InputMap::precalculate_all()
+{
+	precalculate_vector();
+	precalculate_dpad();
+	for (uint8_t i=0;i<10;i++) precalculate(i);
+}

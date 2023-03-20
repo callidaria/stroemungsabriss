@@ -135,8 +135,14 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 void Menu::render(uint32_t &running,bool &reboot)
 {
 	// process input triggers
-	bool hit_a = imap->request(IMP_REQFOCUS)&&!trg_start,hit_b = imap->request(IMP_REQBOMB)&&!trg_b;
-	bool hit_lft = imap->req_left()&&!trg_lft,hit_rgt = imap->req_right()&&!trg_rgt;
+	imap->precalculate_dpad();
+	imap->precalculate(IMP_REQFOCUS);imap->precalculate(IMP_REQBOMB);
+	bool hit_a = imap->input_val[IMP_REQFOCUS]&&!trg_start,
+		hit_b = imap->input_val[IMP_REQBOMB]&&!trg_b;
+	bool hit_lft = imap->input_val[IMP_REQLEFT]&&!trg_lft,
+		hit_rgt = imap->input_val[IMP_REQRIGHT]&&!trg_rgt;
+	bool hit_up = imap->input_val[IMP_REQUP]&&!trg_up,
+		hit_down = imap->input_val[IMP_REQDOWN]&&!trg_dwn;
 
 	// process sublist selections
 	uint8_t i_ml = mselect-2+opt_index;						// calculate menu list index
@@ -250,8 +256,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 		// update vertical menu list selection marker
 		opt_index = (6+lselect)*(tmm==5);
-		lselect += (imap->req_down()&&!trg_dwn&&lselect<(mls[mselect-2].esize-1))
-				-(imap->req_up()&&!trg_up&&lselect>0);
+		lselect += (hit_down&&lselect<(mls[mselect-2].esize-1))-(hit_up&&lselect>0);
 		lselect *= tmm!=5;
 		break;
 
@@ -263,16 +268,17 @@ void Menu::render(uint32_t &running,bool &reboot)
 		mm = (MenuMode)tmm;
 
 		// stall inputs when sublist should exist
-		lselect += (imap->req_down()&&!trg_dwn&&lselect<(mls[mselect-2+opt_index].esize-1)&&!edge_sel)
-			-(imap->req_up()&&!trg_up&&lselect>0&&!edge_sel);
+		lselect += (hit_down&&lselect<(mls[mselect-2+opt_index].esize-1)&&!edge_sel)
+				- (hit_up&&lselect>0&&!edge_sel);
 		opt_index *= tmm==5;  // FIXME: doubled logical can be broken down in MENU_LISTING
 		lselect *= tmm!=4;
 		// FIXME: reduce to one increment calculation
 
 		// calculate sublist selection
 		edge_sel = !edge_sel*(hit_a||(edge_sel&&hit_b))+edge_sel*(!hit_a&&!(edge_sel&&hit_b));
-		ml_delta = edge_sel*((imap->req_down()&&!trg_dwn)-(imap->req_up()&&!trg_up));
-		ml_delta = edge_sel*ml_delta+!edge_sel*(imap->req_right()-imap->req_left());
+		ml_delta = edge_sel*(hit_down-hit_up);
+		ml_delta = edge_sel*ml_delta+!edge_sel
+				* (imap->input_val[IMP_REQRIGHT]-imap->input_val[IMP_REQLEFT]);
 		break;
 
 	// run game at given position
@@ -285,9 +291,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// TODO: reduce menu list input to a movement process in menu list class with stalls
 
 	// set triggers
-	trg_start = imap->request(IMP_REQFOCUS);trg_b = imap->request(IMP_REQBOMB);
-	trg_lft = imap->req_left();trg_rgt = imap->req_right();
-	trg_dwn = imap->req_down();trg_up = imap->req_up();
+	trg_start = imap->input_val[IMP_REQFOCUS];trg_b = imap->input_val[IMP_REQBOMB];
+	trg_lft = imap->input_val[IMP_REQLEFT];trg_rgt = imap->input_val[IMP_REQRIGHT];
+	trg_dwn = imap->input_val[IMP_REQDOWN];trg_up = imap->input_val[IMP_REQUP];
 
 	// move non-used out of view
 	for (int i=1;i<8;i++) {  // FIXME: i will regret this tomorrow ...just a test

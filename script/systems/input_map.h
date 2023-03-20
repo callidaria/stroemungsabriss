@@ -47,6 +47,22 @@ public:
 	bool req_left();
 	bool req_right();
 
+	// precalculate input
+	void precalculate(uint8_t calc_id);
+	void precalculate_vector();
+	void precalculate_up();
+	void precalculate_down();
+	void precalculate_left();
+	void precalculate_right();
+	void precalculate_dpad();
+	void precalculate_all();
+
+public:
+
+	// precalculate input values
+	bool input_val[14];
+	glm::vec2 move_dir;
+
 private:
 
 	// cascabel
