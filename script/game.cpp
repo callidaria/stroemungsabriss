@@ -40,6 +40,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->print_fps();
 		m_frame->calc_time_delta();
 		m_frame->input(running);
+		imap->update();
 		imap->precalculate_all();
 		m_frame->clear(.1f,.1f,.1f);
 

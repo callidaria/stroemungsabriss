@@ -196,6 +196,7 @@ void Frame::input(uint32_t &running)
 		if (m_fe.type==SDL_JOYDEVICEADDED||m_fe.type==SDL_JOYDEVICEREMOVED) {
 			kill_controllers();
 			load_controllers();
+			controller_remap = true;
 		}
 
 		// read controller input

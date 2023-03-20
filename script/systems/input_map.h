@@ -36,6 +36,7 @@ public:
 	// mapping
 	void map_keyboard();
 	void map_controller();
+	void update();
 
 	// action translation
 	glm::vec2 req_vectorized_direction();

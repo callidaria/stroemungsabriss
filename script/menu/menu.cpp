@@ -135,6 +135,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 void Menu::render(uint32_t &running,bool &reboot)
 {
 	// process input triggers
+	imap->update();
 	imap->precalculate_dpad();
 	imap->precalculate(IMP_REQFOCUS);imap->precalculate(IMP_REQBOMB);
 	bool hit_a = imap->input_val[IMP_REQFOCUS]&&!trg_start,

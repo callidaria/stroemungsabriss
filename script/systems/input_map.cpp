@@ -62,6 +62,18 @@ void InputMap::map_controller()
 /*
 	TODO
 */
+void InputMap::update()
+{
+	if (m_frame->controller_remap) {
+		map_controller();
+		m_frame->controller_remap = false;
+	}
+}
+// FIXME: constant (nested) branching. maybe worth it, but it can always be improved
+
+/*
+	TODO
+*/
 glm::vec2 InputMap::req_vectorized_direction()
 {
 	// calculate input directions separately
