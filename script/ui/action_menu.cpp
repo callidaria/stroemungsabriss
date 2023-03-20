@@ -51,8 +51,8 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 void ActionMenu::update(uint32_t &run_state)
 {
 	// action menu open requests
-	bool pause = imap->request(IMP_REQPAUSE),details = imap->request(IMP_REQDETAILS);
-	bool down = imap->req_down(),up = imap->req_up();
+	bool pause = imap->input_val[IMP_REQPAUSE],details = imap->input_val[IMP_REQDETAILS];
+	bool down = imap->input_val[IMP_REQDOWN],up = imap->input_val[IMP_REQUP];
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
 	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
 	bool req_infomenu = details&&!menu_trg&&!menu_sys;

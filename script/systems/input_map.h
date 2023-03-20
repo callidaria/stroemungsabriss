@@ -24,6 +24,8 @@ constexpr uint8_t IMP_REQRIGHT = 13;
 
 // values
 constexpr uint16_t IMP_CONTROLLERCAP = 32767;
+constexpr uint16_t IMP_CONTROLLER_DEADZONE = 12000;
+// TODO: change deadzone in options
 
 class InputMap
 {
@@ -42,19 +44,9 @@ public:
 	glm::vec2 req_vectorized_direction();
 	bool request(uint8_t request_id);
 
-	// directional request
-	bool req_up();
-	bool req_down();
-	bool req_left();
-	bool req_right();
-
 	// precalculate input
 	void precalculate(uint8_t calc_id);
 	void precalculate_vector();
-	void precalculate_up();
-	void precalculate_down();
-	void precalculate_left();
-	void precalculate_right();
 	void precalculate_dpad();
 	void precalculate_all();
 
@@ -75,7 +67,7 @@ private:
 
 	// references
 	bool* key_actions[14];
-	bool* cnt_actions[10];
+	bool* cnt_actions[14];
 
 	// axis references
 	int32_t* cnt_udaxis,*cnt_lraxis;

@@ -218,6 +218,7 @@ void Frame::input(uint32_t &running)
 */
 void Frame::vanish()
 {
+	// breakline on out & close controllers
 	printf("\n");
 	kill_controllers();
 
@@ -274,9 +275,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
-
-	// controller setup
-	load_controllers();
 }
 
 /*

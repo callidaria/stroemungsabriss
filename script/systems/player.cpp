@@ -70,7 +70,7 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 	// TODO: close quarters
 
 	// calculate player jet tilt
-	bool abs_right = imap->req_right(),abs_left = imap->req_left();
+	bool abs_right = imap->input_val[IMP_REQRIGHT],abs_left = imap->input_val[IMP_REQLEFT];
 	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*m_frame->get_time_delta();
 	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*m_frame->get_time_delta();
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
