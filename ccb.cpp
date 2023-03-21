@@ -310,7 +310,10 @@ std::string build_project_component(bool &comp_all)
 std::string build_full_order(bool &comp_engine,bool &comp_project)
 {
 	// get input
-	if (get_selected()) { comp_engine = true;comp_project = true;update = true;inp = 'x'; }
+	if (get_selected()) {
+		comp_engine = true;comp_project = true;update = true;inp = 'x';
+		system("rm ./lib/*");
+	}
 
 	// draw option
 	std::string out = "";
