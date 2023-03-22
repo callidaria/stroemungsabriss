@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -15,6 +16,9 @@
 // colour definitions
 #define RESET "\033[0m"
 #define SELECT "\033[1;32m"
+#define COLOUR_TODO "\033[1;35m"
+#define COLOUR_FIXME "\033[1;33m"
+#define COLOUR_DEPRECATED "\033[1;34m"
 
 #endif
 
@@ -35,13 +39,15 @@ bool get_selected();
 bool get_ftype(const char* file);
 std::string get_outfile(const char* file);
 char get_input_char();
+void grind_annotations(const char* path);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
-std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all);
+std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all,bool grind_tasks);
 std::string build_engine_component(bool &comp_all);
 std::string build_project_component(bool &comp_all);
 std::string build_full_order(bool &comp_engine,bool &comp_project);
+std::string show_annotated_tasks(bool &grind_tasks);
 std::string count_lines();
 
 // windows console colour setup
@@ -57,7 +63,7 @@ uint8_t itr,idx = 0;
 int main(int argc,char* argv[])
 {
 	// setup
-	bool comp_engine = false,comp_project = false;
+	bool comp_engine = false,comp_project = false,grind_tasks = false;
 	std::string out,edir = ENGINE_ROOT,pdir = PROJECT_ROOT;
 	uint8_t proj_idx;
 
@@ -67,6 +73,7 @@ int main(int argc,char* argv[])
 		// setup component iterator
 		itr = 0;
 
+		// wait until read confirmation
 		if (waiting) {
 			std::cout << "end of input...\n";
 			get_input_char();
@@ -83,7 +90,7 @@ int main(int argc,char* argv[])
 		// write engine contents
 		printf("\n\n\n\t\t\tENGINE\n");
 		offer_root(edir,ENGINE_ROOT);
-		out += read_components(edir,0,comp_engine);
+		out += read_components(edir,0,comp_engine,grind_tasks);
 		printf("\n");
 		out += build_engine_component(comp_engine);
 		proj_idx = itr;
@@ -96,13 +103,15 @@ int main(int argc,char* argv[])
 		printf("\n\n\n\t\t\t%sPROJECT\n",RESET);
 #endif
 		offer_root(pdir,PROJECT_ROOT);
-		out += read_components(pdir,proj_idx,comp_project);
+		out += read_components(pdir,proj_idx,comp_project,grind_tasks);
 		printf("\n");
 		out += build_project_component(comp_project);
+		grind_tasks = false;
 
 		// write additional features
 		printf("\n\n");
 		out += build_full_order(comp_engine,comp_project);
+		out += show_annotated_tasks(grind_tasks);
 		out += count_lines();
 
 		// write output message
@@ -153,9 +162,7 @@ void write_selection()
 }
 
 bool get_selected()
-{
-	return itr==idx&&inp==' ';
-}
+{ return itr==idx&&inp==' '; }
 
 bool get_ftype(const char* file)
 {
@@ -189,6 +196,47 @@ char get_input_char()
 	return out;
 }
 
+void grind_annotations(const char* path)
+{
+	// print currently grinding path
+	printf("annotation results for %s:\n",path);
+
+	// navigate through code files
+	std::ifstream gfile(path,std::ios::in);
+	std::string gline;
+	uint16_t line_number = 0;
+	while (getline(gfile,gline)) {
+
+		// recognize tasking comments
+		size_t f_todo = gline.find("TODO"),f_fixme = gline.find("FIXME"),f_deprecated = gline.find("DEPRECATED");
+
+		// process todo annotation
+		if (f_todo!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_todo);
+			printf("%sline %i => %s%s",COLOUR_TODO,line_number,gline.substr(0,4).c_str(),RESET);
+			printf("%s\n",gline.substr(4,gline.length()).c_str());
+		}
+
+		// recognize fixme annotation
+		else if (f_fixme!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_fixme);
+			printf("%sline %i => %s%s",COLOUR_FIXME,line_number,gline.substr(0,5).c_str(),RESET);
+			printf("%s\n",gline.substr(5,gline.length()).c_str());
+		}
+
+		// recognize deprecated annotation
+		else if (f_deprecated!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_deprecated);
+			printf("%sline %i => %s%s",COLOUR_DEPRECATED,line_number,gline.substr(0,10).c_str(),RESET);
+			printf("%s\n",gline.substr(10,gline.length()).c_str());
+		}
+
+		// increment line counter
+		line_number++;
+	} printf("END\n\n");
+}
+// FIXME: yeah i know, just try to stop me
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -209,7 +257,7 @@ void offer_root(std::string &dir_path,std::string rt_dir)
 	}
 }
 
-std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all)
+std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_all,bool grind_tasks)
 {
 	//open directory
 	std::string out = "";
@@ -241,8 +289,11 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 				out = "compiled "+out_file;
 			}
 
+			// grind sources at respective root
+			else if (!update&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
+
 			// compile all sources in directory on demand
-			else if ((get_selected()&&found->d_type==DT_DIR&&!update)||(!update&&comp_all&&found->d_type==DT_DIR)) {
+			else if ((get_selected()&&found->d_type==DT_DIR&&!update)||(!update&&comp_all&&found->d_type==DT_DIR)||!update&&grind_tasks&&found->d_type==DT_DIR) {
 
 				// open target directory
 				std::string compile_dir = dir_path+"/"+found->d_name;
@@ -250,7 +301,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 				struct dirent* cfound = readdir(cdir);
 
 				// grind through compile targets
-				while (cfound!=NULL) {
+				while (cfound!=NULL&&comp_all) {
 
 					// filter source components
 					if (cfound->d_name[0]!='.'&&get_ftype(cfound->d_name)) {
@@ -261,6 +312,12 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						// compile file
 						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c").c_str());
 					} cfound = readdir(cdir);
+				}
+
+				// grind to search annotated tasks
+				while (cfound!=NULL&&grind_tasks) {
+					if (cfound->d_name[0]!='.'&&get_ftype(cfound->d_name)) grind_annotations((compile_dir+"/"+cfound->d_name).c_str());
+					cfound = readdir(cdir);
 				}
 			}
 
@@ -280,6 +337,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 	closedir(dir);
 	return out;
 }
+// FIXME: lots of duplicate code & unsorted checks
 
 std::string build_engine_component(bool &comp_all)
 {
@@ -319,6 +377,19 @@ std::string build_full_order(bool &comp_engine,bool &comp_project)
 	std::string out = "";
 	write_selection();
 	printf(" BUILD ALL COMPONENTS\n");
+	itr++;
+	return out;
+}
+
+std::string show_annotated_tasks(bool &grind_tasks)
+{
+	// get input
+	if (get_selected()) { grind_tasks = true;update = true;inp = 'x'; }
+
+	// draw option
+	std::string out = "";
+	write_selection();
+	printf(" SHOW TASK ANNOTATIONS\n");
 	itr++;
 	return out;
 }
