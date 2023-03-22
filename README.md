@@ -67,6 +67,9 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ## v0.0.5 DEV
 
+### features:
+- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
+
 ### optimizations:
 - hotplugging controllers
 - switching dynamically between input methods
@@ -163,4 +166,5 @@ Worktime: 120h
 	+ 97: 7h 2min
 	+ 129: 8h 4min
 	+ 132: 7min
+	+ 64: 1h 37min
 - Total Code Lines: 12.126

@@ -24,6 +24,7 @@ uint16_t CCBLInterpreter::load_level()
 
 	// get raw level file information
 	while (getline(lvfile,tline)) lines.push_back(tline);
+	// FIXME: why do i do this again?
 
 	// interpret level file
 	for (auto line : lines) {
