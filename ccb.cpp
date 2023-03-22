@@ -16,6 +16,9 @@
 // colour definitions
 #define RESET "\033[0m"
 #define SELECT "\033[1;32m"
+#define COLOUR_TODO "\033[1;35m"
+#define COLOUR_FIXME "\033[1;33m"
+#define COLOUR_DEPRECATED "\033[1;34m"
 
 #endif
 
@@ -159,9 +162,7 @@ void write_selection()
 }
 
 bool get_selected()
-{
-	return itr==idx&&inp==' ';
-}
+{ return itr==idx&&inp==' '; }
 
 bool get_ftype(const char* file)
 {
@@ -207,13 +208,34 @@ void grind_annotations(const char* path)
 	while (getline(gfile,gline)) {
 
 		// recognize tasking comments
-		if (gline.find("TODO")!=std::string::npos||gline.find("FIXME")!=std::string::npos||gline.find("DEPRECATED")!=std::string::npos)
-			printf("line %i: %s\n",line_number,gline.c_str());
+		size_t f_todo = gline.find("TODO"),f_fixme = gline.find("FIXME"),f_deprecated = gline.find("DEPRECATED");
+
+		// process todo annotation
+		if (f_todo!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_todo);
+			printf("%sline %i => %s%s",COLOUR_TODO,line_number,gline.substr(0,4).c_str(),RESET);
+			printf("%s\n",gline.substr(4,gline.length()).c_str());
+		}
+
+		// recognize fixme annotation
+		else if (f_fixme!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_fixme);
+			printf("%sline %i => %s%s",COLOUR_FIXME,line_number,gline.substr(0,5).c_str(),RESET);
+			printf("%s\n",gline.substr(5,gline.length()).c_str());
+		}
+
+		// recognize deprecated annotation
+		else if (f_deprecated!=std::string::npos) {
+			gline.erase(gline.begin(),gline.begin()+f_deprecated);
+			printf("%sline %i => %s%s",COLOUR_DEPRECATED,line_number,gline.substr(0,10).c_str(),RESET);
+			printf("%s\n",gline.substr(10,gline.length()).c_str());
+		}
 
 		// increment line counter
 		line_number++;
 	} printf("END\n\n");
 }
+// FIXME: yeah i know, just try to stop me
 
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
