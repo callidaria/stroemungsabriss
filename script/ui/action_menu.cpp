@@ -8,10 +8,6 @@
 ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 	: m_frame(frame),imap(input_map)
 {
-	// sepia menu background framebuffer
-	game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
-
 	// vertices for selection splash
 	float sverts[] = { 0,-25,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-25,3, 0,-25,0, };
 	splash_buffer.bind();
@@ -44,11 +40,13 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 }
 
 /*
-	update(Player*) -> void
-	player: player controller holding custom input addresses for menu interaction
-	purpose: animation updates and user request interpretation regarding action menu
+	render() -> void
+	purpose: render current menu state
+		ptrans ~= 1.0f: renders game normally as the game has not been stopped at this moment
+		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top
+	!! DISCLAIMER: has to be run after game board components, but before all other ui using bb !!
 */
-void ActionMenu::update(uint32_t &run_state)
+void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 {
 	// action menu open requests
 	bool pause = imap->input_val[IMP_REQPAUSE],details = imap->input_val[IMP_REQDETAILS];
@@ -75,33 +73,11 @@ void ActionMenu::update(uint32_t &run_state)
 	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
 
 	// close when quit selected and hit
-	run_state *= !(imap->request(IMP_REQFOCUS)&&msel==2&&menu_sys);
-}
+	running *= !(imap->request(IMP_REQFOCUS)&&msel==2&&menu_sys);
 
-/*
-	bind() -> void
-	purpose: bind and clear game framebuffer so that it can serve as menu background
-	!! DISCLAIMER: has to be used right before all the game board components !!
-*/
-void ActionMenu::bind()
-{
-	game_fb.bind();
-	m_frame->clear();
-}
-
-/*
-	render() -> void
-	purpose: render current menu state
-		ptrans ~= 1.0f: renders game normally as the game has not been stopped at this moment
-		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top
-	!! DISCLAIMER: has to be run after game board components, but before all other ui using bb !!
-*/
-void ActionMenu::render()
-{
 	// sepia colourspace when paused
-	FrameBuffer::close();
 	m_frame->clear();
-	game_fb.render(ptrans);
+	game_fb->render(ptrans);
 
 	// selection splash modifications
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf

@@ -11,10 +11,10 @@
 	cam3d: camera to draw all objects of [r3d] in relation to
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
+Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
 		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d),
-		imap(input_map)
+	: m_world(world),m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),
+		m_cam3d(cam3d),imap(input_map)
 {
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -132,7 +132,7 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	reboot: will be rebooting with new settings after game closed?
 	purpose: render the main menu, calculate geometry and process interactions
 */
-void Menu::render(uint32_t &running,bool &reboot)
+void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 {
 	// process input triggers
 	imap->update();

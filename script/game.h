@@ -8,6 +8,7 @@
 #include "../ccb/gfx/light3d.h"
 
 #include "../ccb/frm/frame.h"
+#include "../ccb/frm/framebuffer.h"
 
 #include "../ccb/fcn/ccb_manager.h"
 #include "../ccb/mat/camera2d.h"
@@ -43,6 +44,7 @@ private:
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
+	FrameBuffer game_fb;
 	InputMap* imap;
 
 	// script

@@ -12,6 +12,7 @@
 #include "../../ccb/gfx/shader.h"
 
 #include "../systems/player.h"
+#include "ui.h"
 
 // constant
 constexpr uint8_t SYS_OPTION_COUNT = 3;
@@ -26,7 +27,7 @@ constexpr uint16_t TEXT_YPOSITION_INFO = 720/2-ACT_TEXT_SIZE/2+(INFO_OPTION_COUN
 		+ INFO_OPTION_COUNT%2*(ACT_TEXT_SIZE/2);
 constexpr uint8_t TEXT_DRAW_SPACE = ACT_TEXT_SIZE-TEXT_DISTANCE;
 
-class ActionMenu
+class ActionMenu : public UI
 {
 public:
 
@@ -35,9 +36,7 @@ public:
 	~ActionMenu() {  }
 
 	// runtime interactions
-	void update(uint32_t &run_state);
-	void bind();
-	void render();
+	void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
 
 	// getter
 	GLuint get_scene_texture();

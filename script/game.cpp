@@ -25,6 +25,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	l3d_ortho.set_amnt(1);
 	l3d_ortho.upload();
 
+	game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
+		"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+
 	// ui
 	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
@@ -34,6 +37,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 	// update until exit condition
 	uint32_t running = rstate+1;
+	bool reboot = false;
 	while (running) {  // ??maybe kill check if flush with static func ref
 
 		// frame
@@ -44,9 +48,9 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		imap->precalculate_all();
 		m_frame->clear(.1f,.1f,.1f);
 
-		// action menu update
-		lgt_menu.update(running);
-		lgt_menu.bind();
+		// backbuffer
+		m_frame->clear(.1f,.1f,.1f);
+		game_fb.bind();
 
 		// stage
 		m_bgenv.update(rstate);
@@ -63,7 +67,8 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		hbar.render();
 
 		// action menu render
-		lgt_menu.render();
+		game_fb.close();
+		lgt_menu.render(&game_fb,running,reboot);
 
 		// swap
 		m_frame->update();

@@ -32,6 +32,8 @@
 #include "script/systems/input_map.h"
 #include "script/menu/menu.h"
 
+#include "script/world.h"
+
 #define MVMT_SPEED 4
 #define BUILD_DEV_MODE 1
 
@@ -55,8 +57,14 @@ int main(int argc,char** argv)
 
 	bool dactive = false;
 
+	// LOADERS
+	EngineReference eref = { &f,&r2d,&r3d };
+	World world = World(eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&imap);
+	Menu menu = Menu(&world,&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&imap);
+
+	// WORLD LOADING
+	world.add_ui(&menu);
 
 	// CAMERAS
 	uint32_t run=1,pause=false;
@@ -67,13 +75,13 @@ int main(int argc,char** argv)
 		f.calc_time_delta();
 		f.input(run);
 
-		// INPUT
-		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
+		// render scene
+		world.render(run,reboot);
 
-		menu.render(run,reboot);
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
+
 		f.update();
 	}
 

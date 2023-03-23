@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
+- streamlined world loading without double main loop
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 
 ### optimizations:
@@ -167,4 +168,5 @@ Worktime: 120h
 	+ 129: 8h 4min
 	+ 132: 7min
 	+ 64: 2h 20min
+	+ 47: 2h 13min
 - Total Code Lines: 12.126
