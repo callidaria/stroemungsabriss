@@ -285,7 +285,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// run game at given position
 	default:
 		running = lselect;
-		game.run(running,m_ccbm);
+		m_world->add_ui(&action_menu);
+		m_world->active_menu = 1;
 	}
 	// FIXME: break branch with static function pointer list
 	// FIXME: a button naming as cnt_start reference is off and should be changed

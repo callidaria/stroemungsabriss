@@ -7,7 +7,7 @@ World::World(EngineReference eref)
 	: m_eref(eref)
 {
 	game_fb = FrameBuffer(m_eref.frame->w_res,m_eref.frame->h_res,
-		"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 }
 
 /*
@@ -27,6 +27,10 @@ void World::remove_ui(uint8_t ui_id)
 */
 void World::render(uint32_t &running,bool &reboot)
 {
+	// bind scene framebuffer
+	game_fb.bind();
+
 	// render ui
-	for (uint8_t i=0;i<ui_master.size();i++) ui_master[i]->render(&game_fb,running,reboot);
+	game_fb.close();
+	ui_master[active_menu]->render(&game_fb,running,reboot);
 }

@@ -12,7 +12,7 @@
 #include "../ccb/gfx/renderer3d.h"
 
 // scripts
-#include "ui/ui.h"
+#include "struct/world_structures.h"
 
 struct EngineReference
 {
@@ -37,6 +37,11 @@ public:
 
 	// draw
 	void render(uint32_t &running,bool &reboot);
+
+public:
+
+	// public indices
+	uint8_t active_menu = 0;
 
 private:
 

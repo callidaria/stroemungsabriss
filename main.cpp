@@ -66,25 +66,33 @@ int main(int argc,char** argv)
 	// WORLD LOADING
 	world.add_ui(&menu);
 
-	// CAMERAS
-	uint32_t run=1,pause=false;
+	// MAIN LOOP
+	uint32_t run=1;
 	bool reboot = false;
-	glm::mat4 model = glm::mat4(1.0f);
 	while (run) {
+
+		// timing & raw input
 		f.print_fps();
 		f.calc_time_delta();
 		f.input(run);
 
+		// input mapping
+		imap.update();
+		imap.precalculate_all();
+
 		// render scene
 		world.render(run,reboot);
 
+		// developer tools in debug mode
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
 
+		// flip
 		f.update();
 	}
 
+	// automatic reboot
 	if (reboot)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
@@ -92,6 +100,7 @@ int main(int argc,char** argv)
 		system("./yomisensei &");
 #endif
 
+	// close and remove
 	ccbm.vanish();
 	f.vanish();
 	return 0;

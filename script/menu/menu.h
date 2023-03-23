@@ -27,7 +27,7 @@
 
 #include "../game.h"
 #include "../systems/input_map.h"
-#include "../ui/ui.h"
+#include "../struct/world_structures.h"
 
 #include "../world.h"
 
@@ -139,7 +139,8 @@ private:
 	uint8_t dsi_diff = 0,dsi_conf = 0;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,imap);
+	//Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,imap);
+	ActionMenu action_menu = ActionMenu(m_frame,imap);
 	uint8_t difflv = 0;
 
 	// globe preview

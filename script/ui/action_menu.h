@@ -12,7 +12,7 @@
 #include "../../ccb/gfx/shader.h"
 
 #include "../systems/player.h"
-#include "ui.h"
+#include "../struct/world_structures.h"
 
 // constant
 constexpr uint8_t SYS_OPTION_COUNT = 3;
