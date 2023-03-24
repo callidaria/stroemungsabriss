@@ -295,7 +295,11 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 		m_world->add_boss(&dpilot);
 		ccbf.rI->load();
 		ccbf.r3d->load(Camera3D(1280.0f,720.0f));
+		Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
+		l3d_ortho.set_amnt(1);
+		l3d_ortho.upload();
 		m_world->active_menu = 1;
+		return;
 	}
 	// FIXME: break branch with static function pointer list
 	// FIXME: a button naming as cnt_start reference is off and should be changed
