@@ -18,7 +18,7 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
 	m_r2d->load(m_cam2d);
 	m_rI->load();
-	m_r3d->load(&cam3d);
+	m_r3d->load(cam3d);
 
 	// ortho 3D element lighting
 	Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
@@ -49,7 +49,6 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 		m_frame->clear(.1f,.1f,.1f);
 
 		// backbuffer
-		m_frame->clear(.1f,.1f,.1f);
 		game_fb.bind();
 
 		// stage

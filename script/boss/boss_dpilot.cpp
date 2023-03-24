@@ -3,14 +3,14 @@
 /*
 	REGISTER DEFINITIONS:
 	X 0 : ex var counting frames in present phase
-	 1 : cooldown frames left for flaredrop attack
+	X 1 : cooldown frames left for flaredrop attack
 	X 2 : movement direction multiplier
 	X 3 : movement stage counter
-	 4 : cooldown frames left for mine wall attack
+	X 4 : cooldown frames left for mine wall attack
 	X 5 : loopcount flarespray attack
 	 6 : cooldown frames left for whirlpool spawn
 	X 7 : cooldown frames left for directional spawn
-	 8 : bullet spray chunk counter directionals
+	X 8 : bullet spray chunk counter directionals
 	X 9 : bullet cluster index id
 	X 10 : negative boss health modifier
 	O 11 : negative player health modifier

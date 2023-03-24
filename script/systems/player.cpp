@@ -55,7 +55,7 @@ void Player::update(uint32_t &rstate,int32_t pDmg)
 			- (pos.y>y_full_cap)*(pos.y-y_full_cap),pos.z);
 
 	// write player position to register
-	treg[0] = pos.x;treg[1] = pos.y;
+	treg[0] = pos.x,treg[1] = pos.y;
 
 	// update bullet position by current direction
 	m_bsys->delta_fDir(0);

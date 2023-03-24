@@ -6,6 +6,7 @@
 World::World(EngineReference eref)
 	: m_eref(eref)
 {
+	player = Player(eref.frame,eref.r2d,eref.r3d,eref.rI,eref.bSys,eref.iMap);
 	game_fb = FrameBuffer(m_eref.frame->w_res,m_eref.frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 }
@@ -37,6 +38,12 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// handle bosses
 	for (auto boss : boss_master) boss->update(glm::vec2(100,100));
+
+	// player handling
+	player.update(running,0);
+
+	// bullets
+	m_eref.bSys->render();
 
 	// render ui
 	game_fb.close();

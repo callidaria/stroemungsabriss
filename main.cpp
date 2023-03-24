@@ -54,14 +54,15 @@ int main(int argc,char** argv)
 	RendererI ri = RendererI();
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
+	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	bool dactive = false;
 
 	// LOADERS
-	EngineReference eref = { &f,&r2d,&r3d };
+	EngineReference eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 	World world = World(eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&world,&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&imap);
+	Menu menu = Menu(&world,&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&bsys,&imap);
 
 	// WORLD LOADING
 	world.add_ui(&menu);

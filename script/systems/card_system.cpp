@@ -488,7 +488,7 @@ void CardSystem::update()
 void CardSystem::render()
 {
 	// render background
-	m_r3d->prepare(&cam3D);
+	m_r3d->prepare(cam3D);
 	l3d.set_ambient(.1f);
 	l3d.set_amnt(1);
 	l3d.upload();
@@ -497,7 +497,7 @@ void CardSystem::render()
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
-	m_r3d->prepare_inst(&cam3D);
+	m_r3d->prepare_inst(cam3D);
 	m_r3d->is3d.upload_float("ambient",.1f);
 	m_r3d->is3d.upload_int("amnt_light_sun",1);
 	l3d.upload_inst();

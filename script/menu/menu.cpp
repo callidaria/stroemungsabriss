@@ -12,14 +12,13 @@
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
 Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map)
+		Camera2D* cam2d,Camera3D* cam3d,BulletSystem* bSys,InputMap* input_map)
 	: m_world(world),m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),
 		m_cam3d(cam3d),imap(input_map)
 {
 	// compile base features
-	BulletSystem bSys = BulletSystem(m_frame,m_rI);
-	Player player = Player(m_frame,m_r2d,m_r3d,m_rI,&bSys,imap);
-	ccbf = { m_frame,m_r2d,m_r3d,m_rI,&bSys,&player };
+	Player player = Player(m_frame,m_r2d,m_r3d,m_rI,bSys,imap);
+	ccbf = { m_frame,m_r2d,m_r3d,m_rI,bSys,&player };
 
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -29,7 +28,7 @@ Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
 	m_r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
-	m_r3d->load(m_cam3d);
+	m_r3d->load(*m_cam3d);
 
 	// shader materials and light for globe map preview
 	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
@@ -294,7 +293,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 		dpilot = DPilot(&ccbf);
 		m_world->add_ui(&action_menu);
 		m_world->add_boss(&dpilot);
-		m_r3d->load(&m_orthocam);
+		ccbf.rI->load();
+		ccbf.r3d->load(Camera3D(1280.0f,720.0f));
 		m_world->active_menu = 1;
 	}
 	// FIXME: break branch with static function pointer list
@@ -467,7 +467,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_cam3d->front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
 	m_cam3d->front = glm::normalize(m_cam3d->front);
 	m_cam3d->update();
-	m_r3d->prepare(m_cam3d);
+	m_r3d->prepare(*m_cam3d);
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location

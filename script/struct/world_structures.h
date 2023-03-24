@@ -12,6 +12,12 @@ public:
 	virtual void render(FrameBuffer*,uint32_t&,bool&) {  }
 };
 
+class PlayerVisuals
+{
+public:
+	virtual void render() {  }
+};
+
 class Boss
 {
 public:

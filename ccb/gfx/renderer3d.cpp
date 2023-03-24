@@ -53,7 +53,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
 */
-void Renderer3D::load(Camera3D* cam3d)
+void Renderer3D::load(Camera3D cam3d)
 {
 	// combine all mesh vertices to master vertex list & upload
 	std::vector<float> v;
@@ -69,7 +69,7 @@ void Renderer3D::load(Camera3D* cam3d)
 	s3d.upload_int("emit",2);
 	s3d.upload_int("shadow_map",3);
 	s3d.upload_int("nmap",4);
-	s3d.upload_camera(*cam3d);
+	s3d.upload_camera(cam3d);
 
 	// combine all added instance vertices to master instance vertex list & upload
 	std::vector<float> iv;
@@ -91,7 +91,7 @@ void Renderer3D::load(Camera3D* cam3d)
 	is3d.upload_int("emit",2);
 	is3d.upload_int("shadow_map",3);
 	is3d.upload_int("nmap",4);
-	is3d.upload_camera(*cam3d);
+	is3d.upload_camera(cam3d);
 
 	// compile shadow shader
 	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
@@ -123,14 +123,14 @@ void Renderer3D::prepare()
 	overloads previous prepare()
 	purpose: additionally to the function of prepare, this method updates and uploads the camera
 */
-void Renderer3D::prepare(Camera3D* cam3d)
+void Renderer3D::prepare(Camera3D cam3d)
 {
 	// run normal preparations
 	prepare();
 
 	// update and upload camera & position for normal mapping
-	s3d.upload_camera(*cam3d);
-	s3d.upload_vec3("view_pos",cam3d->pos);
+	s3d.upload_camera(cam3d);
+	s3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -153,14 +153,14 @@ void Renderer3D::prepare_inst()
 	overloads previous prepare
 	purpose: not only prepare instanced rendering, but also upload camera
 */
-void Renderer3D::prepare_inst(Camera3D* cam3d)
+void Renderer3D::prepare_inst(Camera3D cam3d)
 {
 	//run normal preparations
 	prepare_inst();
 
 	// update camera
-	is3d.upload_camera(*cam3d);
-	is3d.upload_vec3("view_pos",cam3d->pos);
+	is3d.upload_camera(cam3d);
+	is3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*

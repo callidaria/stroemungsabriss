@@ -13,12 +13,16 @@
 
 // scripts
 #include "struct/world_structures.h"
+#include "systems/player.h"
 
 struct EngineReference
 {
 	Frame* frame;
 	Renderer2D* r2d;
 	Renderer3D* r3d;
+	RendererI* rI;
+	BulletSystem* bSys;
+	InputMap* iMap;
 };
 
 class World
@@ -54,4 +58,5 @@ private:
 	// scene components
 	std::vector<UI*> ui_master;
 	std::vector<Boss*> boss_master;
+	Player player;
 };

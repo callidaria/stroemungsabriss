@@ -74,7 +74,7 @@ public:
 
 	// construction
 	Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map);
+		Camera2D* cam2d,Camera3D* cam3d,BulletSystem* bSys,InputMap* input_map);
 	~Menu();
 
 	// draw
@@ -102,6 +102,8 @@ private:
 	CascabelBaseFeature ccbf;
 	DPilot dpilot;
 	World* m_world;
+	// TODO: remove all that exists in cascabel base feature
+	// join ccbbf and engine reference
 
 	// input definition
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
