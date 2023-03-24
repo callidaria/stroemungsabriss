@@ -25,9 +25,10 @@
 #include "menu_list.h"
 #include "menu_dialogue.h"
 
-#include "../game.h"
 #include "../systems/input_map.h"
 #include "../struct/world_structures.h"
+#include "../boss/dpilot.h"
+#include "../ui/action_menu.h"
 
 #include "../world.h"
 
@@ -89,7 +90,7 @@ private:
 	Renderer3D* m_r3d;
 	RendererI* m_rI;
 	Camera2D* m_cam2d;
-	Camera3D* m_cam3d;
+	Camera3D* m_cam3d,m_orthocam = Camera3D(1280.0f,720.0f);
 	InputMap* imap;
 	Material3D mat0;
 	Shader sshd = Shader();
@@ -98,6 +99,8 @@ private:
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
+	CascabelBaseFeature ccbf;
+	DPilot dpilot;
 	World* m_world;
 
 	// input definition

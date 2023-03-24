@@ -92,13 +92,13 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	splash_buffer.bind();
 	glDrawArrays(GL_TRIANGLES,0,6*(menu_sys||menu_inf));
 
-	// render menu text
+	// render menu text with text shadow
 	stext.prepare();
 	stext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
-	stext.render(1024*(menu_sys||menu_inf),glm::vec4(0,0,0,.4f));			// text shadow
+	stext.render(1024*(menu_sys||menu_inf),glm::vec4(0,0,0,.4f));
 	mtext.prepare();
 	mtext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
-	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(.6f,.0824f,.6f,1));	// menu text
+	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(0,.4f,0,1));
 }
 
 /*

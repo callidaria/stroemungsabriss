@@ -31,9 +31,11 @@ public:
 
 	// creation
 	void add_ui(UI* ui);
+	void add_boss(Boss* boss);
 
 	// destruction
 	void remove_ui(uint8_t ui_id);
+	void remove_boss(uint8_t boss_id);
 
 	// draw
 	void render(uint32_t &running,bool &reboot);
@@ -51,4 +53,5 @@ private:
 
 	// scene components
 	std::vector<UI*> ui_master;
+	std::vector<Boss*> boss_master;
 };

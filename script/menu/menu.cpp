@@ -16,6 +16,11 @@ Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3
 	: m_world(world),m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),
 		m_cam3d(cam3d),imap(input_map)
 {
+	// compile base features
+	BulletSystem bSys = BulletSystem(m_frame,m_rI);
+	Player player = Player(m_frame,m_r2d,m_r3d,m_rI,&bSys,imap);
+	ccbf = { m_frame,m_r2d,m_r3d,m_rI,&bSys,&player };
+
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
@@ -284,8 +289,12 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 	// run game at given position
 	default:
+
 		running = lselect;
+		dpilot = DPilot(&ccbf);
 		m_world->add_ui(&action_menu);
+		m_world->add_boss(&dpilot);
+		m_r3d->load(&m_orthocam);
 		m_world->active_menu = 1;
 	}
 	// FIXME: break branch with static function pointer list

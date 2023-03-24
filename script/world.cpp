@@ -15,12 +15,16 @@ World::World(EngineReference eref)
 */
 void World::add_ui(UI* ui)
 { ui_master.push_back(ui); }
+void World::add_boss(Boss* boss)
+{ boss_master.push_back(boss); }
 
 /*
 	TODO
 */
 void World::remove_ui(uint8_t ui_id)
 { ui_master.erase(ui_master.begin()+ui_id); }
+void World::remove_boss(uint8_t boss_id)
+{ boss_master.erase(boss_master.begin()+boss_id); }
 
 /*
 	TODO
@@ -29,6 +33,10 @@ void World::render(uint32_t &running,bool &reboot)
 {
 	// bind scene framebuffer
 	game_fb.bind();
+	m_eref.frame->clear(.1f,.1f,.1f);
+
+	// handle bosses
+	for (auto boss : boss_master) boss->update(glm::vec2(100,100));
 
 	// render ui
 	game_fb.close();

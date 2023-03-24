@@ -2,21 +2,21 @@
 
 /*
 	REGISTER DEFINITIONS:
-	 0 : ex var counting frames in present phase
+	X 0 : ex var counting frames in present phase
 	 1 : cooldown frames left for flaredrop attack
-	 2 : movement direction multiplier
-	 3 : movement stage counter
+	X 2 : movement direction multiplier
+	X 3 : movement stage counter
 	 4 : cooldown frames left for mine wall attack
-	 5 : loopcount flarespray attack
+	X 5 : loopcount flarespray attack
 	 6 : cooldown frames left for whirlpool spawn
-	 7 : cooldown frames left for directional spawn
+	X 7 : cooldown frames left for directional spawn
 	 8 : bullet spray chunk counter directionals
-	 9 : bullet cluster index id
-	10 : negative boss health modifier
-	11 : negative player health modifier
-	12 : player iframes
-	13 : player x
-	14 : player y
+	X 9 : bullet cluster index id
+	X 10 : negative boss health modifier
+	O 11 : negative player health modifier
+	X 12 : player iframes
+	X 13 : player x
+	X 14 : player y
 */
 
 /*
@@ -59,7 +59,7 @@ void BossDPilot::update(CascabelBaseFeature* ccbf,uint32_t &rnd_index,glm::vec2 
 		bool mult_swap = treg[0]*treg[2]>1;
 		treg[2] *= -1*mult_swap+1*!mult_swap;		// invert movement direction multiplier
 		treg[3] += ex_ovfl-mult_swap;
-		treg[0] += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
+		//ph_fcount += (!treg[3]*-4*treg[2]+treg[3]*8*treg[2])*!!treg[5];
 		treg[5] -= mult_swap;
 
 		// patterns

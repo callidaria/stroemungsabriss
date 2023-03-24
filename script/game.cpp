@@ -9,10 +9,10 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	m_bgenv.load(rstate,ccbm);
 
 	// TODO: reduce
-	uint32_t stg_idx2d;
-	int32_t fwd_treg[16] = { 0 };
-	glm::vec2 ePos = glm::vec2(615,600);
-	stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
+	//uint32_t stg_idx2d;
+	/*int32_t fwd_treg[16] = { 0 };
+	glm::vec2 ePos = glm::vec2(615,600);*/
+	//stg_ld.at(rstate)(&ccbf,stg_idx2d,fwd_treg);
 
 	// vertex & texture load
 	Camera3D cam3d = Camera3D(1280.0f,720.0f);
@@ -25,15 +25,15 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 	l3d_ortho.set_amnt(1);
 	l3d_ortho.upload();
 
-	game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
-		"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+	/*game_fb = FrameBuffer(m_frame->w_res,m_frame->h_res,
+		"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);*/
 
 	// ui
-	Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
-			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
+	/*Healthbar hbar = Healthbar(glm::vec2(440,690),790,15,{ 3,4 },
+			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");*/
 
 	// lightweight action menu
-	ActionMenu lgt_menu = ActionMenu(m_frame,imap);
+	//ActionMenu lgt_menu = ActionMenu(m_frame,imap);
 
 	// update until exit condition
 	uint32_t running = rstate+1;
@@ -54,21 +54,21 @@ void Game::run(uint32_t &rstate,CCBManager* ccbm)
 
 		// stage
 		m_bgenv.update(rstate);
-		stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
+		//stg_upd.at(rstate)(&ccbf,stg_idx2d,ePos,fwd_treg);
 
 		// player
-		m_player.update(rstate,fwd_treg[11]);
+		//m_player.update(rstate,fwd_treg[11]);
 
 		// bullet system
 		m_bSys.render();
 
 		// healthbar
-		hbar.register_damage(fwd_treg[10]);
-		hbar.render();
+		/*hbar.register_damage(fwd_treg[10]);
+		hbar.render();*/
 
 		// action menu render
-		game_fb.close();
-		lgt_menu.render(&game_fb,running,reboot);
+		/*game_fb.close();
+		lgt_menu.render(&game_fb,running,reboot);*/
 
 		// swap
 		m_frame->update();
