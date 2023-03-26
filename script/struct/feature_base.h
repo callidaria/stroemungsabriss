@@ -7,7 +7,7 @@
 #include "../../ccb/gfx/rendereri.h"
 
 #include "../systems/bullet_system.h"
-#include "../systems/player.h"
+#include "../systems/input_map.h"
 
 struct CascabelBaseFeature {
 	Frame* frame;
@@ -15,5 +15,5 @@ struct CascabelBaseFeature {
 	Renderer3D* r3d;
 	RendererI* rI;
 	BulletSystem* bSys;
-	Player* player;
+	InputMap* iMap;
 };

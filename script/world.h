@@ -12,33 +12,26 @@
 #include "../ccb/gfx/renderer3d.h"
 
 // scripts
+#include "struct/feature_base.h"
 #include "struct/world_structures.h"
 #include "systems/player.h"
-
-struct EngineReference
-{
-	Frame* frame;
-	Renderer2D* r2d;
-	Renderer3D* r3d;
-	RendererI* rI;
-	BulletSystem* bSys;
-	InputMap* iMap;
-};
 
 class World
 {
 public:
 
 	// construction
-	World(EngineReference eref);
+	World(CascabelBaseFeature* eref);
 	~World() {  }
 
 	// creation
 	void add_ui(UI* ui);
+	void add_scene(Scene* scene);
 	void add_boss(Boss* boss);
 
 	// destruction
 	void remove_ui(uint8_t ui_id);
+	void remove_scene(uint8_t scene_id);
 	void remove_boss(uint8_t boss_id);
 
 	// draw
@@ -47,16 +40,17 @@ public:
 public:
 
 	// public indices
-	uint8_t active_menu = 0;
+	uint8_t active_daui = 0;
 
 private:
 
 	// cascabel
-	EngineReference m_eref;
+	CascabelBaseFeature* m_eref;
 	FrameBuffer game_fb;
 
 	// scene components
 	std::vector<UI*> ui_master;
+	std::vector<Scene*> scene_master;
 	std::vector<Boss*> boss_master;
 	Player player;
 };

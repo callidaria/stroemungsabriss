@@ -17,8 +17,7 @@ Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3
 		m_cam3d(cam3d),imap(input_map)
 {
 	// compile base features
-	Player player = Player(m_frame,m_r2d,m_r3d,m_rI,bSys,imap);
-	ccbf = { m_frame,m_r2d,m_r3d,m_rI,bSys,&player };
+	ccbf = { m_frame,m_r2d,m_r3d,m_rI,bSys };
 
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -290,15 +289,18 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	default:
 
 		running = lselect;
+		nmw = NepalMountainWoods(m_ccbm,&ccbf);
 		dpilot = DPilot(&ccbf);
 		m_world->add_ui(&action_menu);
 		m_world->add_boss(&dpilot);
+		m_world->add_scene(&nmw);
+		ccbf.r2d->load(m_cam2d);
 		ccbf.rI->load();
 		ccbf.r3d->load(Camera3D(1280.0f,720.0f));
 		Light3D l3d_ortho = Light3D(m_r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
 		l3d_ortho.set_amnt(1);
 		l3d_ortho.upload();
-		m_world->active_menu = 1;
+		m_world->active_daui = 1;
 		return;
 	}
 	// FIXME: break branch with static function pointer list

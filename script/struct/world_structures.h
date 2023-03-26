@@ -13,9 +13,18 @@ public:
 	virtual void render(FrameBuffer*,uint32_t&,bool&) {  }
 };
 
+// describes all environments the player visits during playtime
+class Scene
+{
+public:
+	virtual void render() {  }
+};
+
 // describes any form of enemy, that can be considered significant and/or deserves a health bar
 class Boss
 {
 public:
 	virtual void update(glm::vec2) {  }
 };
+
+// TODO: split 2D and 3D render instructions to reduce amount of prepare calls

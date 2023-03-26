@@ -59,8 +59,8 @@ int main(int argc,char** argv)
 	bool dactive = false;
 
 	// LOADERS
-	EngineReference eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
-	World world = World(eref);
+	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
+	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	Menu menu = Menu(&world,&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&bsys,&imap);
 

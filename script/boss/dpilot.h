@@ -37,6 +37,9 @@ private:
 	void directional_sweep(glm::vec2 pPos);
 	void whirlpool();
 
+	// switching phase attacks
+	void bomb();
+
 public:
 
 	// positioning

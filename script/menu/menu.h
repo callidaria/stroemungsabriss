@@ -27,6 +27,7 @@
 
 #include "../systems/input_map.h"
 #include "../struct/world_structures.h"
+#include "../scenes/nepal_mountain_woods.h"
 #include "../boss/dpilot.h"
 #include "../ui/action_menu.h"
 
@@ -101,6 +102,7 @@ private:
 	MSAA msaa;
 	CascabelBaseFeature ccbf;
 	DPilot dpilot;
+	NepalMountainWoods nmw;
 	World* m_world;
 	// TODO: remove all that exists in cascabel base feature
 	// join ccbbf and engine reference
