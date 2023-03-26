@@ -1,7 +1,9 @@
 #include "world.h"
 
 /*
-	TODO
+	constructor(EngineReference)
+	eref: references to all relevant engine objects
+	purpose: create a world handling entity for a better loop structure
 */
 World::World(EngineReference eref)
 	: m_eref(eref)
@@ -12,7 +14,9 @@ World::World(EngineReference eref)
 }
 
 /*
-	TODO
+	add_<element>(<element>*) -> void
+	argument[0]: element to add to element list it belongs to
+	purpose: create an element in the world that will be handled according to the world's logic
 */
 void World::add_ui(UI* ui)
 { ui_master.push_back(ui); }
@@ -20,7 +24,9 @@ void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
 
 /*
-	TODO
+	remove_<element>(uint8_t) -> void
+	argument[0]: list index of element to remove from world
+	purpose: remove an element from the world by it's list id
 */
 void World::remove_ui(uint8_t ui_id)
 { ui_master.erase(ui_master.begin()+ui_id); }
@@ -28,7 +34,10 @@ void World::remove_boss(uint8_t boss_id)
 { boss_master.erase(boss_master.begin()+boss_id); }
 
 /*
-	TODO
+	render(uint32_t&,bool&) -> void
+	running: runstate of the program, used to store progression & if program is still running
+	reboot: holds if program should reboot after it has been closed
+	purpose: render & handle world entites
 */
 void World::render(uint32_t &running,bool &reboot)
 {
