@@ -8,7 +8,6 @@
 World::World(CascabelBaseFeature* eref)
 	: m_eref(eref)
 {
-	player = Player(eref->frame,eref->r2d,eref->r3d,eref->rI,eref->bSys,eref->iMap);
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 }
@@ -22,6 +21,8 @@ void World::add_ui(UI* ui)
 { ui_master.push_back(ui); }
 void World::add_scene(Scene* scene)
 { scene_master.push_back(scene); }
+void World::add_playable(Player* player)
+{ player_master.push_back(player); }
 void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
 
@@ -34,6 +35,8 @@ void World::remove_ui(uint8_t ui_id)
 { ui_master.erase(ui_master.begin()+ui_id); }
 void World::remove_scene(uint8_t scene_id)
 { scene_master.erase(scene_master.begin()+scene_id); }
+void World::remove_playable(uint8_t player_id)
+{ player_master.erase(player_master.begin()+player_id); }
 void World::remove_boss(uint8_t boss_id)
 { boss_master.erase(boss_master.begin()+boss_id); }
 
@@ -51,8 +54,8 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
-	for (auto boss : boss_master) boss->update(glm::vec2(100,100));
-	player.update(running,0);
+	for (auto boss : boss_master) boss->update(glm::vec2(100));
+	for (auto player : player_master) player->update();
 
 	// render bullets
 	m_eref->bSys->render();

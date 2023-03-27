@@ -289,8 +289,8 @@ void Frame::get_screen(int8_t screen,SDL_Rect* dim_screen)
 	else {
 		printf("\033[1;31mscreen could not be set: %s\n",SDL_GetError());
 		printf("\033[1;36m\t=> falling back to standard configuration\n");
-		dim_screen->x = 0; dim_screen->y = 0; dim_screen->w = 1280; dim_screen->h = 720;
-	}
+		dim_screen->x = 0,dim_screen->y = 0,dim_screen->w = 1280,dim_screen->h = 720;
+	} printf("\033[0m");
 }
 
 /*

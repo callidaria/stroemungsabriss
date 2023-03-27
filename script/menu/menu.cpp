@@ -17,7 +17,7 @@ Menu::Menu(World* world,CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3
 		m_cam3d(cam3d),imap(input_map)
 {
 	// compile base features
-	ccbf = { m_frame,m_r2d,m_r3d,m_rI,bSys };
+	ccbf = { m_frame,m_r2d,m_r3d,m_rI,bSys,imap };
 
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
@@ -290,10 +290,12 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 		running = lselect;
 		nmw = NepalMountainWoods(m_ccbm,&ccbf);
+		jj = JaegerJet(&ccbf);
 		dpilot = DPilot(&ccbf);
 		m_world->add_ui(&action_menu);
-		m_world->add_boss(&dpilot);
 		m_world->add_scene(&nmw);
+		m_world->add_playable(&jj);
+		m_world->add_boss(&dpilot);
 		ccbf.r2d->load(m_cam2d);
 		ccbf.rI->load();
 		ccbf.r3d->load(Camera3D(1280.0f,720.0f));

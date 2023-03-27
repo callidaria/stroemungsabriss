@@ -14,7 +14,6 @@
 // scripts
 #include "struct/feature_base.h"
 #include "struct/world_structures.h"
-#include "systems/player.h"
 
 class World
 {
@@ -27,11 +26,13 @@ public:
 	// creation
 	void add_ui(UI* ui);
 	void add_scene(Scene* scene);
+	void add_playable(Player* player);
 	void add_boss(Boss* boss);
 
 	// destruction
 	void remove_ui(uint8_t ui_id);
 	void remove_scene(uint8_t scene_id);
+	void remove_playable(uint8_t player_id);
 	void remove_boss(uint8_t boss_id);
 
 	// draw
@@ -51,6 +52,6 @@ private:
 	// scene components
 	std::vector<UI*> ui_master;
 	std::vector<Scene*> scene_master;
+	std::vector<Player*> player_master;
 	std::vector<Boss*> boss_master;
-	Player player;
 };

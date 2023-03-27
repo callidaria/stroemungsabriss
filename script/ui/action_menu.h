@@ -11,8 +11,8 @@
 
 #include "../../ccb/gfx/shader.h"
 
-#include "../systems/player.h"
 #include "../struct/world_structures.h"
+#include "../systems/input_map.h"
 
 // constant
 constexpr uint8_t SYS_OPTION_COUNT = 3;

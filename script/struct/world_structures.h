@@ -20,6 +20,16 @@ public:
 	virtual void render() {  }
 };
 
+// describes all objects/character, that can be controlled by the player
+class Player
+{
+public:
+	virtual void update() {  }
+
+public:
+	glm::vec3 position = glm::vec3(0);
+};
+
 // describes any form of enemy, that can be considered significant and/or deserves a health bar
 class Boss
 {

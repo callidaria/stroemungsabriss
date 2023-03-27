@@ -25,6 +25,7 @@
 #include "menu_list.h"
 #include "menu_dialogue.h"
 
+#include "../pcs/jaeger_jet.h"
 #include "../systems/input_map.h"
 #include "../struct/world_structures.h"
 #include "../scenes/nepal_mountain_woods.h"
@@ -101,6 +102,7 @@ private:
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
 	CascabelBaseFeature ccbf;
+	JaegerJet jj;
 	DPilot dpilot;
 	NepalMountainWoods nmw;
 	World* m_world;
