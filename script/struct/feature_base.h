@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "../../ccb/frm/frame.h"
 
 #include "../../ccb/gfx/renderer2d.h"
@@ -9,6 +11,16 @@
 #include "../systems/bullet_system.h"
 #include "../systems/input_map.h"
 
+// enumeration of load instructions definitions, to add more instructions and dynamically scale
+enum LoadInstruction
+{
+	LOAD_START,
+	LOAD_MENU,
+	LOAD_AIRFIELD,
+	LOAD_DPILOT
+};
+
+// refers to all basic cascabel tools and features
 struct CascabelBaseFeature {
 	Frame* frame;
 	Renderer2D* r2d;
@@ -16,4 +28,5 @@ struct CascabelBaseFeature {
 	RendererI* rI;
 	BulletSystem* bSys;
 	InputMap* iMap;
+	std::queue<LoadInstruction> ld;
 };

@@ -24,10 +24,10 @@ public:
 	~World() {  }
 
 	// creation
-	void add_ui(UI* ui);
-	void add_scene(Scene* scene);
-	void add_playable(Player* player);
-	void add_boss(Boss* boss);
+	void add_ui(UI ui);
+	void add_scene(Scene scene);
+	void add_playable(Player player);
+	void add_boss(Boss boss);
 
 	// destruction
 	void remove_ui(uint8_t ui_id);
@@ -50,8 +50,8 @@ private:
 	FrameBuffer game_fb;
 
 	// scene components
-	std::vector<UI*> ui_master;
-	std::vector<Scene*> scene_master;
-	std::vector<Player*> player_master;
-	std::vector<Boss*> boss_master;
+	std::vector<UI> ui_master;
+	std::vector<Scene> scene_master;
+	std::vector<Player> player_master;
+	std::vector<Boss> boss_master;
 };

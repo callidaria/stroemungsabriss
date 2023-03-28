@@ -17,6 +17,7 @@ class MenuDialogue
 public:
 
 	// construction
+	MenuDialogue() {  }
 	MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2d,Camera2D* cam2d,
 		const char* head,std::vector<const char*> paths,float ewidth,float eheight);
 	~MenuDialogue();

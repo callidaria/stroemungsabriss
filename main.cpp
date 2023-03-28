@@ -30,6 +30,8 @@
 #include "ccb/gfx/material3d.h"
 
 #include "script/systems/input_map.h"
+#include "script/systems/worldbuilder.h"
+
 #include "script/menu/menu.h"
 
 #include "script/world.h"
@@ -53,7 +55,6 @@ int main(int argc,char** argv)
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
-	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	bool dactive = false;
@@ -62,15 +63,20 @@ int main(int argc,char** argv)
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&world,&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&bsys,&imap);
+	// Menu menu = Menu(&world,&ccbm,&eref);
 
 	// WORLD LOADING
-	world.add_ui(&menu);
+	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
+	eref.ld.push(LOAD_START);
+	// world.add_ui(menu);
 
 	// MAIN LOOP
 	uint32_t run=1;
 	bool reboot = false;
 	while (run) {
+
+		// process loading requests
+		wb.load();
 
 		// timing & raw input
 		f.print_fps();

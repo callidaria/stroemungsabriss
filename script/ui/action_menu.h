@@ -32,6 +32,7 @@ class ActionMenu : public UI
 public:
 
 	// construction
+	ActionMenu() {  }
 	ActionMenu(Frame* frame,InputMap* input_map);
 	~ActionMenu() {  }
 
