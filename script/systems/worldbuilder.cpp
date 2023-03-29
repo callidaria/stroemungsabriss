@@ -5,7 +5,9 @@
 */
 Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
 	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world)
-{  }
+{
+
+}
 
 /*
 	TODO
@@ -45,9 +47,8 @@ void Worldbuilder::load_titles()
 */
 void Worldbuilder::load_menu()
 {
-	std::cout << "loading: main menu\n";
-	Menu menu = Menu(m_world,m_ccbm,m_ccbf);
-	m_world->add_ui(menu);
+	menu = Menu(m_world,m_ccbm,m_ccbf);
+	m_world->add_ui(&menu);
 }
 
 /*
@@ -63,7 +64,14 @@ void Worldbuilder::load_airfield()
 */
 void Worldbuilder::load_dpilot()
 {
-	std::cout << "loading: dpilot boss\n";
+	action_menu = ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	nmw = NepalMountainWoods(m_ccbm,m_ccbf);
+	jj = JaegerJet(m_ccbf);
+	dpilot = DPilot(m_ccbf);
+	m_world->add_ui(&action_menu);
+	m_world->add_scene(&nmw);
+	m_world->add_playable(&jj);
+	m_world->add_boss(&dpilot);
 }
 
 /*

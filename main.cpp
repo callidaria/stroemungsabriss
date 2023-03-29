@@ -63,12 +63,10 @@ int main(int argc,char** argv)
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	// Menu menu = Menu(&world,&ccbm,&eref);
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
 	eref.ld.push(LOAD_START);
-	// world.add_ui(menu);
 
 	// MAIN LOOP
 	uint32_t run=1;

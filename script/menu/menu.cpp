@@ -142,9 +142,6 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 {
 	// process input triggers
-	/*m_ccbf->iMap->update();
-	m_ccbf->iMap->precalculate_dpad();
-	m_ccbf->iMap->precalculate(IMP_REQFOCUS);m_ccbf->iMap->precalculate(IMP_REQBOMB);*/
 	bool hit_a = m_ccbf->iMap->input_val[IMP_REQFOCUS]&&!trg_start,
 		hit_b = m_ccbf->iMap->input_val[IMP_REQBOMB]&&!trg_b;
 	bool hit_lft = m_ccbf->iMap->input_val[IMP_REQLEFT]&&!trg_lft,
@@ -293,21 +290,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	default:
 
 		running = lselect;
-		nmw = NepalMountainWoods(m_ccbm,m_ccbf);
-		jj = JaegerJet(m_ccbf);
-		dpilot = DPilot(m_ccbf);
-		m_world->add_ui(action_menu);
-		m_world->add_scene(nmw);
-		m_world->add_playable(jj);
-		m_world->add_boss(dpilot);
-		m_ccbf->r2d->load(&cam2d);
-		m_ccbf->rI->load();
-		m_ccbf->r3d->load(Camera3D(1280.0f,720.0f));
-		Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
-		l3d_ortho.set_amnt(1);
-		l3d_ortho.upload();
-		m_world->active_daui = 1;
 		m_ccbf->ld.push(LOAD_DPILOT);
+		m_world->active_daui = 1;
 		return;
 	}
 	// FIXME: break branch with static function pointer list

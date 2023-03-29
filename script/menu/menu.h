@@ -75,6 +75,7 @@ class Menu : public UI
 public:
 
 	// construction
+	Menu() {  }
 	Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf);
 	~Menu();
 

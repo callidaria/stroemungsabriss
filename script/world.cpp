@@ -17,13 +17,13 @@ World::World(CascabelBaseFeature* eref)
 	argument[0]: element to add to element list it belongs to
 	purpose: create an element in the world that will be handled according to the world's logic
 */
-void World::add_ui(UI ui)
+void World::add_ui(UI* ui)
 { ui_master.push_back(ui); }
-void World::add_scene(Scene scene)
+void World::add_scene(Scene* scene)
 { scene_master.push_back(scene); }
-void World::add_playable(Player player)
+void World::add_playable(Player* player)
 { player_master.push_back(player); }
-void World::add_boss(Boss boss)
+void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
 
 /*
@@ -53,14 +53,14 @@ void World::render(uint32_t &running,bool &reboot)
 	m_eref->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
-	for (auto scene : scene_master) scene.render();
-	for (auto boss : boss_master) boss.update(glm::vec2(100));
-	for (auto player : player_master) player.update();
+	for (auto scene : scene_master) scene->render();
+	for (auto boss : boss_master) boss->update(glm::vec2(100));
+	for (auto player : player_master) player->update();
 
 	// render bullets
 	m_eref->bSys->render();
 
 	// render ui
 	game_fb.close();
-	ui_master[active_daui].render(&game_fb,running,reboot);
+	ui_master[active_daui]->render(&game_fb,running,reboot);
 }
