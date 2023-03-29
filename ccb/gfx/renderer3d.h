@@ -25,13 +25,13 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap);
 
 	// loaders
-	void load(Camera3D* cam3d);
+	void load(Camera3D cam3d);
 
 	// preparations
 	void prepare();
-	void prepare(Camera3D* cam3d);
+	void prepare(Camera3D cam3d);
 	void prepare_inst();
-	void prepare_inst(Camera3D* cam3d);
+	void prepare_inst(Camera3D cam3d);
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);

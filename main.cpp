@@ -30,7 +30,11 @@
 #include "ccb/gfx/material3d.h"
 
 #include "script/systems/input_map.h"
+#include "script/systems/worldbuilder.h"
+
 #include "script/menu/menu.h"
+
+#include "script/world.h"
 
 #define MVMT_SPEED 4
 #define BUILD_DEV_MODE 1
@@ -51,32 +55,54 @@ int main(int argc,char** argv)
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
-	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
+	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	bool dactive = false;
 
+	// LOADERS
+	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
+	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	Menu menu = Menu(&ccbm,&f,&r2d,&r3d,&ri,&cam2d,&cam3d,&imap);
 
-	// CAMERAS
-	uint32_t run=1,pause=false;
+	// BUILD SET
+	world.add_camera(cam2d);
+	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
+	world.add_camera(Camera3D(1280.0f,720.0f));
+
+	// WORLD LOADING
+	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
+	eref.ld.push(LOAD_START);
+
+	// MAIN LOOP
+	uint32_t run=1;
 	bool reboot = false;
-	glm::mat4 model = glm::mat4(1.0f);
 	while (run) {
+
+		// process loading requests
+		wb.load();
+
+		// timing & raw input
 		f.print_fps();
 		f.calc_time_delta();
 		f.input(run);
 
-		// INPUT
-		if (f.kb.ka[SDL_SCANCODE_ESCAPE]) break;
+		// input mapping
+		imap.update();
+		imap.precalculate_all();
 
-		menu.render(run,reboot);
+		// render scene
+		world.render(run,reboot);
+
+		// developer tools in debug mode
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);
 #endif
+
+		// flip
 		f.update();
 	}
 
+	// TRIGGER REBOOT
 	if (reboot)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
@@ -84,6 +110,8 @@ int main(int argc,char** argv)
 		system("./yomisensei &");
 #endif
 
+	// CLOSING
+	world.free_memory();
 	ccbm.vanish();
 	f.vanish();
 	return 0;

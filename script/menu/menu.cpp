@@ -11,26 +11,26 @@
 	cam3d: camera to draw all objects of [r3d] in relation to
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
-Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map)
-	: m_ccbm(ccbm),m_frame(f),m_r2d(r2d),m_r3d(r3d),m_rI(rI),m_cam2d(cam2d),m_cam3d(cam3d),
-		imap(input_map)
+Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
+	: m_world(world),m_ccbm(ccbm),m_ccbf(ccbf)
 {
+	// constructions
+	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_ccbf->r2d,&cam2d,"confirm changes?",pth_conf,
+			75,75);
+	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_ccbf->r2d,&cam2d,"select difficulty",pth_diff,
+			150,450);
+
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	// add globe and pointer object
-	ridx_terra = m_r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
+	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
-	m_r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png","./res/dnormal.png",
-			"./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
-	m_r3d->load(m_cam3d);
+	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
 
 	// shader materials and light for globe map preview
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
-	l3d.upload();
-	l3d.set_amnt(1);
-	mat0 = Material3D(r3d,1,8,16);
+	mat0 = Material3D(m_ccbf->r3d,1,8,16);
 
 	// setup dare message on idle screen
 	tft = Text(fnt);
@@ -49,17 +49,17 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 
 	// submenu lists to interact with and choose from
 	mls[0] = MenuList();
-	mls[1] = MenuList(r2d,cam2d,"lvload/ml_mopt");
-	mls[2] = MenuList(r2d,cam2d,"lvload/ml_stages");
-	mls[3] = MenuList(r2d,cam2d,"lvload/ml_arcades");
+	mls[1] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_mopt");
+	mls[2] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_stages");
+	mls[3] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_arcades");
 	mls[4] = MenuList();
 	mls[5] = MenuList();
 	mls[6] = MenuList();
-	mls[7] = MenuList(r2d,cam2d,"lvload/ml_optfrm");
-	mls[8] = MenuList(r2d,cam2d,"lvload/ml_optaud");
-	mls[9] = MenuList(r2d,cam2d,"lvload/ml_optgfx");
-	mls[10] = MenuList(r2d,cam2d,"lvload/ml_optgm");
-	mls[11] = MenuList(r2d,cam2d,"lvload/ml_optext");
+	mls[7] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optfrm");
+	mls[8] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optaud");
+	mls[9] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgfx");
+	mls[10] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgm");
+	mls[11] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optext");
 	// FIXME: mess
 
 	/*
@@ -112,18 +112,20 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	sshd.def_attributeF("dposition",2,2,8);
 	sshd.def_attributeF("colour",3,4,8);
 	sshd.def_attributeF("idx",1,7,8);
-	sshd.upload_camera(*cam2d);
+	sshd.upload_camera(cam2d);
 
 	// framebuffer creation
-	fb = FrameBuffer(f->w_res,f->h_res,"shader/fbv_menu.shader","shader/fbf_menu.shader",false);
-	globe_fb = FrameBuffer(f->w_res,f->h_res,f->w_res/4,f->h_res/4,"shader/fbv_standard.shader",
-			"shader/fbf_standard.shader",false);
+	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
+			"shader/fbf_menu.shader",false);
+	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,m_ccbf->frame->w_res/4,
+			m_ccbf->frame->h_res/4,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	// create msaa effect for selection splash
-	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",f->w_res,f->h_res,8);
+	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",m_ccbf->frame->w_res,
+			m_ccbf->frame->h_res,8);
 
 	// minimize difficulty choice banners
-	for (int i=0;i<4;i++) m_r2d->sl.at(msindex+14+i).scale_arbit(1,0);
+	for (int i=0;i<4;i++) m_ccbf->r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 } Menu::~Menu() {  }
 
 /*
@@ -132,18 +134,15 @@ Menu::Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* 
 	reboot: will be rebooting with new settings after game closed?
 	purpose: render the main menu, calculate geometry and process interactions
 */
-void Menu::render(uint32_t &running,bool &reboot)
+void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 {
 	// process input triggers
-	imap->update();
-	imap->precalculate_dpad();
-	imap->precalculate(IMP_REQFOCUS);imap->precalculate(IMP_REQBOMB);
-	bool hit_a = imap->input_val[IMP_REQFOCUS]&&!trg_start,
-		hit_b = imap->input_val[IMP_REQBOMB]&&!trg_b;
-	bool hit_lft = imap->input_val[IMP_REQLEFT]&&!trg_lft,
-		hit_rgt = imap->input_val[IMP_REQRIGHT]&&!trg_rgt;
-	bool hit_up = imap->input_val[IMP_REQUP]&&!trg_up,
-		hit_down = imap->input_val[IMP_REQDOWN]&&!trg_dwn;
+	bool hit_a = m_ccbf->iMap->input_val[IMP_REQFOCUS]&&!trg_start,
+		hit_b = m_ccbf->iMap->input_val[IMP_REQBOMB]&&!trg_b;
+	bool hit_lft = m_ccbf->iMap->input_val[IMP_REQLEFT]&&!trg_lft,
+		hit_rgt = m_ccbf->iMap->input_val[IMP_REQRIGHT]&&!trg_rgt;
+	bool hit_up = m_ccbf->iMap->input_val[IMP_REQUP]&&!trg_up,
+		hit_down = m_ccbf->iMap->input_val[IMP_REQDOWN]&&!trg_dwn;
 
 	// process sublist selections
 	uint8_t i_ml = mselect-2+opt_index;						// calculate menu list index
@@ -209,9 +208,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 		// calculate title destinations if shifting
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f);
-		mve = (glm::vec2(360-(m_r2d->sl[msindex+mselect*2-4].sclx/2),650)
-			-m_r2d->sl[msindex+mselect*2-4].pos)*glm::vec2(is_shift);
-		mvj = (glm::vec2(50,50)-m_r2d->sl[msindex+mselect*2-3].pos)*glm::vec2(is_shift);
+		mve = (glm::vec2(360-(m_ccbf->r2d->sl[msindex+mselect*2-4].sclx/2),650)
+			- m_ccbf->r2d->sl[msindex+mselect*2-4].pos)*glm::vec2(is_shift);
+		mvj = (glm::vec2(50,50)-m_ccbf->r2d->sl[msindex+mselect*2-3].pos)*glm::vec2(is_shift);
 
 		// update horizontal menu selection marker
 		mv_dlta = hit_rgt*(mselect<8)-hit_lft*(mselect>2);
@@ -278,31 +277,33 @@ void Menu::render(uint32_t &running,bool &reboot)
 		// calculate sublist selection
 		edge_sel = !edge_sel*(hit_a||(edge_sel&&hit_b))+edge_sel*(!hit_a&&!(edge_sel&&hit_b));
 		ml_delta = edge_sel*(hit_down-hit_up);
-		ml_delta = edge_sel*ml_delta+!edge_sel
-				* (imap->input_val[IMP_REQRIGHT]-imap->input_val[IMP_REQLEFT]);
+		ml_delta = edge_sel*ml_delta+!edge_sel*(m_ccbf->iMap->input_val[IMP_REQRIGHT]
+				- m_ccbf->iMap->input_val[IMP_REQLEFT]);
 		break;
 
 	// run game at given position
 	default:
+
 		running = lselect;
-		game.run(running,m_ccbm);
+		m_ccbf->ld.push(LOAD_DPILOT);
+		return;
 	}
 	// FIXME: break branch with static function pointer list
 	// FIXME: a button naming as cnt_start reference is off and should be changed
 	// TODO: reduce menu list input to a movement process in menu list class with stalls
 
 	// set triggers
-	trg_start = imap->input_val[IMP_REQFOCUS];trg_b = imap->input_val[IMP_REQBOMB];
-	trg_lft = imap->input_val[IMP_REQLEFT];trg_rgt = imap->input_val[IMP_REQRIGHT];
-	trg_dwn = imap->input_val[IMP_REQDOWN];trg_up = imap->input_val[IMP_REQUP];
+	trg_start = m_ccbf->iMap->input_val[IMP_REQFOCUS];trg_b = m_ccbf->iMap->input_val[IMP_REQBOMB];
+	trg_lft = m_ccbf->iMap->input_val[IMP_REQLEFT];trg_rgt = m_ccbf->iMap->input_val[IMP_REQRIGHT];
+	trg_dwn = m_ccbf->iMap->input_val[IMP_REQDOWN];trg_up = m_ccbf->iMap->input_val[IMP_REQUP];
 
 	// move non-used out of view
 	for (int i=1;i<8;i++) {  // FIXME: i will regret this tomorrow ...just a test
-		float tval = m_r2d->sl.at(msindex+i*2-1).pos.x+250;
-		m_r2d->sl.at(msindex+i*2-1).model
+		float tval = m_ccbf->r2d->sl.at(msindex+i*2-1).pos.x+250;
+		m_ccbf->r2d->sl.at(msindex+i*2-1).model
 				= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
-		tval = m_r2d->sl.at(msindex+i*2-2).pos.x+250;
-		m_r2d->sl.at(msindex+i*2-2).model
+		tval = m_ccbf->r2d->sl.at(msindex+i*2-2).pos.x+250;
+		m_ccbf->r2d->sl.at(msindex+i*2-2).model
 				= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(-tval,0,0));
 	}
 
@@ -311,9 +312,9 @@ void Menu::render(uint32_t &running,bool &reboot)
 	ptrans -= .1f*(mm==0&&ptrans>.01f); // !!use an epsilon, pretty please
 	dtrans += .1f*(mm>2&&dtrans<1);
 	dtrans -= .1f*(mm<2&&dtrans>.01f); // FIXME: reduce this
-	m_r2d->sl.at(msindex+mselect*2-4).model
+	m_ccbf->r2d->sl.at(msindex+mselect*2-4).model
 			= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
-	m_r2d->sl.at(msindex+mselect*2-3).model
+	m_ccbf->r2d->sl.at(msindex+mselect*2-3).model
 			= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
 	pos_title = glm::translate(glm::mat4(1.0f),
 			TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
@@ -341,7 +342,7 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// start splash msaa
 	msaa.bind();
-	m_frame->clear(0,0,0);
+	m_ccbf->frame->clear(0,0,0);
 
 	// render title splash to framebuffer
 	glDrawArrays(GL_TRIANGLES,0,6);
@@ -405,23 +406,23 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// render menu
 	fb.bind();
-	m_frame->clear(0,0,0);
-	m_r2d->prepare();
-	m_r2d->s2d.upload_float("ptrans",ptrans);
+	m_ccbf->frame->clear(0,0,0);
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->s2d.upload_float("ptrans",ptrans);
 
 	// transform vertical titles
 	glm::mat4 tr_model = glm::scale(pos_title,glm::vec3(val_vscl,val_vscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_vrot),glm::vec3(0,0,1));
-	m_r2d->al[0].model = tr_model;
+	m_ccbf->r2d->al[0].model = tr_model;
 
 	// transform horizontal title
 	tr_model = glm::scale(pos_entitle,glm::vec3(val_hscl,val_hscl,0));
 	tr_model = glm::rotate(tr_model,glm::radians(val_hrot),glm::vec3(0,0,1));
-	m_r2d->al[1].model = tr_model;
+	m_ccbf->r2d->al[1].model = tr_model;
 
 	// render titles
-	m_r2d->render_state(0,glm::vec2(vrt_title,0));	// vertical
-	m_r2d->render_state(1,glm::vec2(0,hrz_title));	// horizontal
+	m_ccbf->r2d->render_state(0,glm::vec2(vrt_title,0));	// vertical
+	m_ccbf->r2d->render_state(1,glm::vec2(0,hrz_title));	// horizontal
 
 	// animate title speedup effect
 	neg_vscl += (val_vscl>1.1f&&!neg_vscl)-(val_vscl<.9f&&neg_vscl);
@@ -435,8 +436,8 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// FIXME: breakdown the rhythm
 
 	// draw horizontal menu options
-	m_r2d->reset_shader();
-	m_r2d->render_sprite(msindex,msindex+14*(mm>0));
+	m_ccbf->r2d->reset_shader();
+	m_ccbf->r2d->render_sprite(msindex,msindex+14*(mm>0));
 
 	// write dare message
 	tft.prepare();
@@ -449,32 +450,32 @@ void Menu::render(uint32_t &running,bool &reboot)
 
 	// prepare globe preview draw
 	globe_fb.bind();
-	m_frame->clear(.1f,.1f,.1f);
+	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// rotate camera towards globe
-	m_cam3d->front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
-	m_cam3d->front.y = sin(glm::radians(pitch));
-	m_cam3d->front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
-	m_cam3d->front = glm::normalize(m_cam3d->front);
-	m_cam3d->update();
-	m_r3d->prepare(m_cam3d);
+	cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
+	cam3d.front.y = sin(glm::radians(pitch));
+	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
+	cam3d.front = glm::normalize(cam3d.front);
+	cam3d.update();
+	m_ccbf->r3d->prepare(cam3d);
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location
 	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
 	model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
-	m_r3d->s3d.upload_matrix("model",model);
+	m_ccbf->r3d->s3d.upload_matrix("model",model);
 
 	// render globe preview to framebuffer
 	mat0.upload();
-	m_r3d->render_mesh(ridx_terra,ridx_terra+1);
-	m_r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_r3d->render_mesh(ridx_terra+1,ridx_terra+2);
+	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
+	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
+	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);
 	globe_fb.close();
 
 	// render combined splash overlay
-	m_frame->clear(0,0,0);
+	m_ccbf->frame->clear(0,0,0);
 	fb.render(ptrans);
 
 	// anti aliasing for selection splashes
@@ -484,15 +485,15 @@ void Menu::render(uint32_t &running,bool &reboot)
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
 
 	// animate globe location preview screen
-	m_r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
-	m_r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
+	m_ccbf->r2d->sl.at(msindex+20).scale_arbit(1,dtrans);
+	m_ccbf->r2d->sl.at(msindex+20).translate(glm::vec2(0,90*(1.0f-dtrans)+450*(lcscroll>180)));
 
 	// render globe location preview framebuffer
-	m_r2d->prepare();
-	m_r2d->s2d.upload_float("vFlip",1.0f);
-	m_r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
-	m_r2d->s2d.upload_float("vFlip",0);
-	m_r2d->render_sprite(0,0);
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->s2d.upload_float("vFlip",1.0f);
+	m_ccbf->r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
+	m_ccbf->r2d->s2d.upload_float("vFlip",0);
+	m_ccbf->r2d->render_sprite(0,0);
 
 	// animate and move dialogue selector to dialogue choice
 	bool dopen = dsi_diff||dsi_conf;
@@ -501,10 +502,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
 	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp+glm::vec3(-5,15,0));
 	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_cnt),glm::vec3(0,0,1));
-	m_r2d->sl[msindex+18].model = disptrans*disprot;
+	m_ccbf->r2d->sl[msindex+18].model = disptrans*disprot;
 
 	// render menu dialogue base selector behind dialogue elements
-	m_r2d->render_sprite(msindex+18,msindex+19*dopen);
+	m_ccbf->r2d->render_sprite(msindex+18,msindex+19*dopen);
 	dlgrot_cnt -= 7-(dlgrot_cnt<-360)*360;
 
 	// apply dialog selection changes
@@ -518,10 +519,10 @@ void Menu::render(uint32_t &running,bool &reboot)
 	// animate and move menu dialogue focused selector
 	disptrans = glm::translate(glm::mat4(1.0f),disp);
 	disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_val),glm::vec3(0,0,1));
-	m_r2d->sl[msindex+19].model = disptrans*disprot;
+	m_ccbf->r2d->sl[msindex+19].model = disptrans*disprot;
 
 	// render menu dialogue focused selector atop dialogue elements
-	m_r2d->render_sprite(msindex+19,msindex+20*dopen);
+	m_ccbf->r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 }
 // FIXME: branching in main loop

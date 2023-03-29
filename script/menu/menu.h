@@ -25,14 +25,15 @@
 #include "menu_list.h"
 #include "menu_dialogue.h"
 
-#include "../game.h"
-#include "../systems/input_map.h"
+#include "../struct/world_structures.h"
+
+#include "../world.h"
 
 #define NCOLOUR 1
 
 constexpr uint8_t GVERSION_RELEASE = 0;
 constexpr uint8_t GVERSION_SUBRELEASE = 0;
-constexpr uint8_t GVERSION_DEVSTEP = 4;
+constexpr uint8_t GVERSION_DEVSTEP = 5;
 constexpr char GVERSION_SUFFIX = 'd';
 
 enum MenuMode
@@ -64,30 +65,26 @@ constexpr glm::vec3 h_rgb = glm::vec3(.75f,.4125f,0);
 constexpr glm::vec3 l_rgb = glm::vec3(1,0,0);
 constexpr glm::vec3 r_rgb = glm::vec3(0,0,1);
 
-class Menu
+class Menu : public UI
 {
 public:
 
 	// construction
-	Menu(CCBManager* ccbm,Frame* f,Renderer2D* r2d,Renderer3D* r3d,RendererI* rI,
-		Camera2D* cam2d,Camera3D* cam3d,InputMap* input_map);
+	Menu() {  }
+	Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf);
 	~Menu();
 
 	// draw
-	void render(uint32_t &running,bool &reboot);
+	virtual void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
 
 private:
 
 	// engine components
 	CCBManager* m_ccbm;
 	Buffer buffer = Buffer();
-	Frame* m_frame;
-	Renderer2D* m_r2d;
-	Renderer3D* m_r3d;
-	RendererI* m_rI;
-	Camera2D* m_cam2d;
-	Camera3D* m_cam3d;
-	InputMap* imap;
+	Camera2D cam2d = Camera2D(1280.0f,720.0f);
+	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f),
+			orthocam = Camera3D(1280.0f,720.0f);
 	Material3D mat0;
 	Shader sshd = Shader();
 	FrameBuffer fb,globe_fb;
@@ -95,6 +92,8 @@ private:
 	Text tft,vtft;
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
+	CascabelBaseFeature* m_ccbf;
+	World* m_world;
 
 	// input definition
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
@@ -128,14 +127,10 @@ private:
 		"res/diffs/gmaster_diff.png","res/diffs/rhack_diff.png"
 	};
 	std::vector<const char*> pth_conf = { "res/ok.png","res/no.png" };
-	MenuDialogue md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_r2d,m_cam2d,"select difficulty",
-			pth_diff,150,450);
-	MenuDialogue md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_r2d,m_cam2d,"confirm changes?",
-			pth_conf,75,75);
+	MenuDialogue md_diff,md_conf;
 	uint8_t dsi_diff = 0,dsi_conf = 0;
 
 	// game
-	Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,imap);
 	uint8_t difflv = 0;
 
 	// globe preview
