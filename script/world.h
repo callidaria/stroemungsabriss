@@ -30,6 +30,7 @@ public:
 	void add_boss(Boss* boss);
 
 	// destruction
+	void free_memory();
 	void remove_ui(uint8_t ui_id);
 	void remove_scene(uint8_t scene_id);
 	void remove_playable(uint8_t player_id);

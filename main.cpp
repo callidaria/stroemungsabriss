@@ -106,6 +106,7 @@ int main(int argc,char** argv)
 #endif
 
 	// close and remove
+	world.free_memory();
 	ccbm.vanish();
 	f.vanish();
 	return 0;

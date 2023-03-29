@@ -10,6 +10,7 @@
 class UI
 {
 public:
+	virtual ~UI() {  }
 	virtual void render(FrameBuffer*,uint32_t&,bool&) {  }
 };
 
@@ -17,6 +18,7 @@ public:
 class Scene
 {
 public:
+	virtual ~Scene() {  }
 	virtual void render() {  }
 };
 
@@ -24,6 +26,7 @@ public:
 class Player
 {
 public:
+	virtual ~Player() {  }
 	virtual void update() {  }
 
 public:
@@ -34,6 +37,7 @@ public:
 class Boss
 {
 public:
+	virtual ~Boss() {  }
 	virtual void update(glm::vec2) {  }
 };
 

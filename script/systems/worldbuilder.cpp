@@ -47,8 +47,8 @@ void Worldbuilder::load_titles()
 */
 void Worldbuilder::load_menu()
 {
-	menu = Menu(m_world,m_ccbm,m_ccbf);
-	m_world->add_ui(&menu);
+	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf);
+	m_world->add_ui(menu);
 }
 
 /*
@@ -64,14 +64,14 @@ void Worldbuilder::load_airfield()
 */
 void Worldbuilder::load_dpilot()
 {
-	action_menu = ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	nmw = NepalMountainWoods(m_ccbm,m_ccbf);
-	jj = JaegerJet(m_ccbf);
-	dpilot = DPilot(m_ccbf);
-	m_world->add_ui(&action_menu);
-	m_world->add_scene(&nmw);
-	m_world->add_playable(&jj);
-	m_world->add_boss(&dpilot);
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
+	JaegerJet* jj = new JaegerJet(m_ccbf);
+	DPilot* dpilot = new DPilot(m_ccbf);
+	m_world->add_ui(action_menu);
+	m_world->add_scene(nmw);
+	m_world->add_playable(jj);
+	m_world->add_boss(dpilot);
 }
 
 /*

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <queue>
+#include <memory>
 
 #include "../../ccb/fcn/ccb_manager.h"
 
@@ -40,12 +41,4 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	CCBManager* m_ccbm;
 	World* m_world;
-
-	// objects
-	Menu menu;
-	ActionMenu action_menu;
-	NepalMountainWoods nmw;
-	JaegerJet jj;
-	DPilot dpilot;
 };
-// TODO: preload objects by cluster to not pre-allocate all objects
