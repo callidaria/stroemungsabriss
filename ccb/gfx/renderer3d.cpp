@@ -119,7 +119,7 @@ void Renderer3D::prepare()
 */
 
 /*
-	prepare(Camera3D*) -> void
+	prepare(Camera3D) -> void
 	overloads previous prepare()
 	purpose: additionally to the function of prepare, this method updates and uploads the camera
 */
@@ -149,7 +149,7 @@ void Renderer3D::prepare_inst()
 }
 
 /*
-	prepare_inst(Camera3D*) -> void
+	prepare_inst(Camera3D) -> void
 	overloads previous prepare
 	purpose: not only prepare instanced rendering, but also upload camera
 */

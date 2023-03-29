@@ -85,7 +85,7 @@ void JaegerJet::update()
 }
 
 /*
-	jet_wait(BulletSystem*,int32_t*) -> void (static)
+	jet_wait(BulletSystem*,int32_t*) -> void (private,static)
 	conforming to: rng_flib
 	purpose: handle the jet flight movement idle state
 */
@@ -95,7 +95,7 @@ void JaegerJet::jet_wait(BulletSystem* bsys,int32_t* treg)
 }
 
 /*
-	jet_wide(BulletSystem*,int32_t*) -> void (static)
+	jet_wide(BulletSystem*,int32_t*) -> void (private,static)
 	conforming to: rng_flib
 	purpose: handle wideshot for fighter jet
 */
@@ -110,7 +110,7 @@ void JaegerJet::jet_wide(BulletSystem* bsys,int32_t* treg)
 }
 
 /*
-	jet_focus(BulletSystem*,int32_t*) -> void (static)
+	jet_focus(BulletSystem*,int32_t*) -> void (private,static)
 	conforming to: rng_flib
 	purpose: handle focus shot for fighter jet
 */
@@ -121,7 +121,7 @@ void JaegerJet::jet_focus(BulletSystem* bsys,int32_t* treg)
 }
 
 /*
-	jet_scientific(BulletSystem*,int32_t*) -> void (static)
+	jet_scientific(BulletSystem*,int32_t*) -> void (private,static)
 	conforming to: rng_flib
 	purpose: handle chosen secondary shot for fighter jet
 */

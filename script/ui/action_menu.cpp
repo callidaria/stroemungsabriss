@@ -1,8 +1,9 @@
 #include "action_menu.h"
 
 /*
-	construction(Frame*)
+	construction(Frame*,InputMap*)
 	frame: pointer to frame the game is drawn onto
+	input_map: input map to use prehandled controller/keyboard/stick input
 	purpose: creates the lightweight in-action menu to pause and use while in-game
 */
 ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
@@ -40,7 +41,8 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 }
 
 /*
-	render() -> void
+	render(FrameBuffer*,uint32_t&,bool&) -> void (virtual)
+	conforming to: UI::render
 	purpose: render current menu state
 		ptrans ~= 1.0f: renders game normally as the game has not been stopped at this moment
 		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top

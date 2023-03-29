@@ -12,7 +12,6 @@ class NepalMountainWoods : public Scene
 public:
 
 	// construction
-	NepalMountainWoods() {  }
 	NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeature* ccbf);
 	~NepalMountainWoods() {  }
 

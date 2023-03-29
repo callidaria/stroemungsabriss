@@ -16,7 +16,6 @@ class JaegerJet : public Player
 public:
 
 	// contruction
-	JaegerJet() {  }
 	JaegerJet(CascabelBaseFeature* ccbf);
 	~JaegerJet() {  }
 

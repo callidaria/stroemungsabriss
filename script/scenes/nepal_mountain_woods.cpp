@@ -1,14 +1,18 @@
 #include "nepal_mountain_woods.h"
 
 /*
-	TODO
+	constructor(CCBManager*,CascabelBaseFeature*)
+	ccb_manager: cascabel manager to load mountain woods level file
+	ccbf: structure holding all most important cascabel tools & features
+	purpose: load the nepal mountain scene, representing the backdrop for dpilot fight
 */
 NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
 { index_r2D = ccb_manager->add_lv("lvload/dpilot.ccb"); }
 
 /*
-	TODO
+	render() -> void (virtual)
+	purpose: draw the loaded scene
 */
 void NepalMountainWoods::render()
 {

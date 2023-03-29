@@ -25,12 +25,7 @@
 #include "menu_list.h"
 #include "menu_dialogue.h"
 
-#include "../pcs/jaeger_jet.h"
-#include "../systems/input_map.h"
 #include "../struct/world_structures.h"
-#include "../scenes/nepal_mountain_woods.h"
-#include "../boss/dpilot.h"
-#include "../ui/action_menu.h"
 
 #include "../world.h"
 
@@ -98,12 +93,7 @@ private:
 	MenuMode mm = MenuMode::MENU_TITLE;
 	MSAA msaa;
 	CascabelBaseFeature* m_ccbf;
-	JaegerJet jj;
-	DPilot dpilot;
-	NepalMountainWoods nmw;
 	World* m_world;
-	// TODO: remove all that exists in cascabel base feature
-	// join ccbbf and engine reference
 
 	// input definition
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
@@ -141,8 +131,6 @@ private:
 	uint8_t dsi_diff = 0,dsi_conf = 0;
 
 	// game
-	//Game game = Game(m_frame,m_r2d,m_r3d,m_rI,m_cam2d,imap);
-	ActionMenu action_menu;
 	uint8_t difflv = 0;
 
 	// globe preview

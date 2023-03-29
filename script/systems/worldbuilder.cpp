@@ -1,13 +1,18 @@
 #include "worldbuilder.h"
 
 /*
-	TODO
+	construction(CascabelBaseFeature*,CCBManager*,World*)
+	ccbf: all common cascabel tools & features
+	ccbm: cascabel manager to load level files with
+	world: world to load objects & logic for
+	purpose: create a worldbuilder to process world loading logic
 */
 Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
 	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
 
 /*
-	TODO
+	load() -> void
+	purpose: process load instruction queue & load world based on said instructions
 */
 void Worldbuilder::load()
 {
@@ -30,7 +35,8 @@ void Worldbuilder::load()
 }
 
 /*
-	TODO
+	load_<scene>() -> void (private)
+	purpose: load logic of different scenes throughout the game
 */
 void Worldbuilder::load_titles()
 { std::cout << "loading: title display\n"; }

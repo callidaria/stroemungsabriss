@@ -27,7 +27,9 @@ void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
 
 /*
-	TODO
+	add_camera(Camera2D||Camera3D) -> void
+	argument[0]: camera to upload to list of cameras
+	purpose: create a camera, that can be switched to as graphical receptor
 */
 void World::add_camera(Camera2D cam2D)
 { cam2D_master.push_back(cam2D); }
@@ -35,7 +37,8 @@ void World::add_camera(Camera3D cam3D)
 { cam3D_master.push_back(cam3D); }
 
 /*
-	TODO
+	free_memory() -> void
+	purpose: clear memory of all dynamically created objects that still exist
 */
 void World::free_memory()
 {
@@ -72,7 +75,8 @@ void World::remove_boss(uint8_t boss_id)
 }
 
 /*
-	TODO
+	load_geometry() -> void
+	purpose: upload 2D and 3D geometry of added objects based on the active cameras
 */
 void World::load_geometry()
 {

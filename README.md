@@ -68,15 +68,17 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
-- streamlined world loading without double main loop
+- dynamic world loading
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 
 ### optimizations:
+- system to remove world objects should they have been deemed obsolete
 - hotplugging controllers
 - switching dynamically between input methods
 - autoremoving all libraries when the whole project gets rebuilt
 
 ### fixes:
+- FIXED: double main loop
 - FIXED: memory leaks
 
 ## v0.0.4 DEV [UNX]
@@ -168,5 +170,5 @@ Worktime: 120h
 	+ 129: 8h 4min
 	+ 132: 7min
 	+ 64: 2h 20min
-	+ 47: 19h 57min
+	+ 47: 20h 57min
 - Total Code Lines: 12.126

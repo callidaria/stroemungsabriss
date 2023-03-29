@@ -15,7 +15,6 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	: m_world(world),m_ccbm(ccbm),m_ccbf(ccbf)
 {
 	// constructions
-	action_menu = ActionMenu(m_ccbf->frame,m_ccbf->iMap);
 	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_ccbf->r2d,&cam2d,"confirm changes?",pth_conf,
 			75,75);
 	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_ccbf->r2d,&cam2d,"select difficulty",pth_diff,
@@ -210,7 +209,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 		// calculate title destinations if shifting
 		is_shift = (tmm<5&&tmm>2)||(dtrans>.01f);
 		mve = (glm::vec2(360-(m_ccbf->r2d->sl[msindex+mselect*2-4].sclx/2),650)
-			-m_ccbf->r2d->sl[msindex+mselect*2-4].pos)*glm::vec2(is_shift);
+			- m_ccbf->r2d->sl[msindex+mselect*2-4].pos)*glm::vec2(is_shift);
 		mvj = (glm::vec2(50,50)-m_ccbf->r2d->sl[msindex+mselect*2-3].pos)*glm::vec2(is_shift);
 
 		// update horizontal menu selection marker

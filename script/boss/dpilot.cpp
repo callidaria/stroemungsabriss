@@ -1,7 +1,7 @@
 #include "dpilot.h"
 
 /*
-	construction(CascabelBaseFeature*,uint32_t&,int32_t*)
+	construction(CascabelBaseFeature*)
 	conforming to: Boss::Boss()
 	purpose: load the essentials for the dancing pilot fight and set initial register values
 */
@@ -20,7 +20,7 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 }
 
 /*
-	update(vec2) -> void
+	update(vec2) -> void (virtual)
 	conforming to: Boss::update()
 	purpose: update boss fight circumstances and patterns for the dancing pilot fight
 */
@@ -67,7 +67,7 @@ void DPilot::update(glm::vec2 pPos)
 }
 
 /*
-	flaredrop() -> void
+	flaredrop() -> void (private)
 	purpose: spawns doubled flares behind the jet, falling down parallel to y axis
 		also flares spread by moving down in different speeds to take up more
 		movable space and thus create a higher threat and reduce dodgability
@@ -98,7 +98,7 @@ void DPilot::flaredrop()
 }
 
 /*
-	mines() -> void
+	mines() -> void (private)
 	purpose: spawns mines right behind the boss, slowly moving down.
 		used to build horizontal walls to force the player character to minimize sideways movement.
 	FIXME: i don't really know why, but i know i don't like the current usage
@@ -118,7 +118,7 @@ void DPilot::mines()
 }
 
 /*
-	directional_sweep() -> void
+	directional_sweep() -> void (private)
 	pPos: current player position
 	purpose: spawns a spread of five bullets, where the middle is aimed at current player position.
 		this pretty standard pattern reduces the save range of player movability due to encasing.
@@ -151,7 +151,7 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 }
 
 /*
-	whirlpool() -> void
+	whirlpool() -> void (private)
 	purpose: this is supposed to spread in the opposite direction of enemy movement,
 		then it should circle back and a sideways movement of the player is required to dodge
 			1st: the walling created by the mines pattern
