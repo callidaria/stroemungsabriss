@@ -32,9 +32,6 @@ private:
 	void load_airfield();
 	void load_dpilot();
 
-	// helper
-	void load_geometry();
-
 private:
 
 	// system

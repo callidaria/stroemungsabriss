@@ -49,7 +49,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	load(Camera3D*) -> void
+	load(Camera3D) -> void
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
 */

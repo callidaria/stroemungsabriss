@@ -29,12 +29,8 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
 	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
-	m_ccbf->r3d->load(cam3d);
 
 	// shader materials and light for globe map preview
-	Light3D l3d = Light3D(m_ccbf->r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
-	l3d.upload();
-	l3d.set_amnt(1);
 	mat0 = Material3D(m_ccbf->r3d,1,8,16);
 
 	// setup dare message on idle screen
@@ -291,7 +287,6 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 		running = lselect;
 		m_ccbf->ld.push(LOAD_DPILOT);
-		m_world->active_daui = 1;
 		return;
 	}
 	// FIXME: break branch with static function pointer list

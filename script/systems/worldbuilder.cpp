@@ -4,10 +4,7 @@
 	TODO
 */
 Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
-	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world)
-{
-
-}
+	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
 
 /*
 	TODO
@@ -20,13 +17,11 @@ void Worldbuilder::load()
 		// start
 		case LOAD_START: load_titles();
 		case LOAD_MENU: load_menu();
-			load_geometry();
 			break;
 
 		// nepal
 		case LOAD_AIRFIELD: load_airfield();
 		case LOAD_DPILOT: load_dpilot();
-			load_geometry();
 			break;
 
 		default: return;
@@ -38,30 +33,18 @@ void Worldbuilder::load()
 	TODO
 */
 void Worldbuilder::load_titles()
-{
-	std::cout << "loading: title display\n";
-}
-
-/*
-	TODO
-*/
+{ std::cout << "loading: title display\n"; }
 void Worldbuilder::load_menu()
 {
 	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf);
 	m_world->add_ui(menu);
+	m_world->load_geometry();
+	Light3D l3d = Light3D(m_ccbf->r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
+	l3d.upload();
+	l3d.set_amnt(1);
 }
-
-/*
-	TODO
-*/
 void Worldbuilder::load_airfield()
-{
-	std::cout << "loading: airfield scene\n";
-}
-
-/*
-	TODO
-*/
+{ std::cout << "loading: airfield scene\n"; }
 void Worldbuilder::load_dpilot()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
@@ -72,16 +55,10 @@ void Worldbuilder::load_dpilot()
 	m_world->add_scene(nmw);
 	m_world->add_playable(jj);
 	m_world->add_boss(dpilot);
-}
-
-/*
-	TODO
-*/
-void Worldbuilder::load_geometry()
-{
-	Camera2D cam2D = Camera2D(1280.0f,720.0f);
-	Camera3D cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
-	m_ccbf->r2d->load(&cam2D);
-	m_ccbf->r3d->load(cam3D);
-	m_ccbf->rI->load();
+	m_world->active_daui = 1;
+	m_world->active_cam3D = 1;
+	m_world->load_geometry();
+	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
+	l3d_ortho.set_amnt(1);
+	l3d_ortho.upload();
 }

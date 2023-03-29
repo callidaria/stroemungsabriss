@@ -64,6 +64,11 @@ int main(int argc,char** argv)
 	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 
+	// BUILD SET
+	world.add_camera(cam2d);
+	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
+	world.add_camera(Camera3D(1280.0f,720.0f));
+
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
 	eref.ld.push(LOAD_START);
@@ -97,7 +102,7 @@ int main(int argc,char** argv)
 		f.update();
 	}
 
-	// automatic reboot
+	// TRIGGER REBOOT
 	if (reboot)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
@@ -105,7 +110,7 @@ int main(int argc,char** argv)
 		system("./yomisensei &");
 #endif
 
-	// close and remove
+	// CLOSING
 	world.free_memory();
 	ccbm.vanish();
 	f.vanish();

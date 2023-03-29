@@ -6,7 +6,7 @@
 	purpose: create a world handling entity for a better loop structure
 */
 World::World(CascabelBaseFeature* eref)
-	: m_eref(eref)
+	: m_ccbf(eref)
 {
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
@@ -25,6 +25,14 @@ void World::add_playable(Player* player)
 { player_master.push_back(player); }
 void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
+
+/*
+	TODO
+*/
+void World::add_camera(Camera2D cam2D)
+{ cam2D_master.push_back(cam2D); }
+void World::add_camera(Camera3D cam3D)
+{ cam3D_master.push_back(cam3D); }
 
 /*
 	TODO
@@ -64,6 +72,16 @@ void World::remove_boss(uint8_t boss_id)
 }
 
 /*
+	TODO
+*/
+void World::load_geometry()
+{
+	m_ccbf->r2d->load(&cam2D_master[active_cam2D]);
+	m_ccbf->rI->load();
+	m_ccbf->r3d->load(cam3D_master[active_cam3D]);
+}
+
+/*
 	render(uint32_t&,bool&) -> void
 	running: runstate of the program, used to store progression & if program is still running
 	reboot: holds if program should reboot after it has been closed
@@ -73,7 +91,7 @@ void World::render(uint32_t &running,bool &reboot)
 {
 	// bind scene framebuffer
 	game_fb.bind();
-	m_eref->frame->clear(.1f,.1f,.1f);
+	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
@@ -81,7 +99,7 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto player : player_master) player->update();
 
 	// render bullets
-	m_eref->bSys->render();
+	m_ccbf->bSys->render();
 
 	// render ui
 	game_fb.close();
