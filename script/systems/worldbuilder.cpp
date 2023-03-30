@@ -24,12 +24,16 @@ void Worldbuilder::load()
 		case LOAD_MENU: load_menu();
 			break;
 
+		// casino
+		case LOAD_CASINO: load_casino();
+			break;
+
 		// nepal
 		case LOAD_AIRFIELD: load_airfield();
 		case LOAD_DPILOT: load_dpilot();
 			break;
 
-		default: return;
+		default: printf("load instruction has no logic\n");
 		} m_ccbf->ld.pop();
 	}
 }
@@ -48,6 +52,18 @@ void Worldbuilder::load_menu()
 	Light3D l3d = Light3D(m_ccbf->r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
 	l3d.upload();
 	l3d.set_amnt(1);
+}
+void Worldbuilder::load_casino()
+{
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf);
+	m_world->add_ui(action_menu);
+	m_world->add_scene(cspike);
+	m_world->active_cam3D = 2;
+	m_world->load_geometry();
+	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(640,360,100),glm::vec3(1,1,1),1);
+	l3d_ortho.set_amnt(1);
+	l3d_ortho.upload();
 }
 void Worldbuilder::load_airfield()
 { std::cout << "loading: airfield scene\n"; }

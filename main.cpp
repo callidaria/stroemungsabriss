@@ -41,6 +41,7 @@
 
 int main(int argc,char** argv)
 {
+	// INIT
 	Init init = Init("config.ini");
 	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
 			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
@@ -68,10 +69,11 @@ int main(int argc,char** argv)
 	world.add_camera(cam2d);
 	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
 	world.add_camera(Camera3D(1280.0f,720.0f));
+	world.add_camera(Camera3D(glm::vec3(5,5,5),1280.0f,720.0f,45.0f));
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
-	eref.ld.push(LOAD_START);
+	eref.ld.push(LOAD_CASINO);
 
 	// MAIN LOOP
 	uint32_t run=1;

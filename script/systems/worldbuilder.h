@@ -5,10 +5,12 @@
 
 #include "../../ccb/fcn/ccb_manager.h"
 
+#include "../scenes/nepal_mountain_woods.h"
+#include "../scenes/casino_spike.h"
+
 #include "../menu/menu.h"
 #include "../ui/action_menu.h"
 #include "../struct/feature_base.h"
-#include "../scenes/nepal_mountain_woods.h"
 #include "../pcs/jaeger_jet.h"
 #include "../boss/dpilot.h"
 #include "../world.h"
@@ -29,6 +31,7 @@ private:
 	// load
 	void load_titles();
 	void load_menu();
+	void load_casino();
 	void load_airfield();
 	void load_dpilot();
 
