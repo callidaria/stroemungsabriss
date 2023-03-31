@@ -50,8 +50,8 @@ void Worldbuilder::load_menu()
 	m_world->add_ui(menu);
 	m_world->load_geometry();
 	Light3D l3d = Light3D(m_ccbf->r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
-	l3d.upload();
 	l3d.set_amnt(1);
+	l3d.upload();
 }
 void Worldbuilder::load_casino()
 {
@@ -59,9 +59,8 @@ void Worldbuilder::load_casino()
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
-	m_world->active_cam3D = 2;
 	m_world->load_geometry();
-	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(640,360,100),glm::vec3(1,1,1),1);
+	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(200,600,100),glm::vec3(1,1,1),1);
 	l3d_ortho.set_amnt(1);
 	l3d_ortho.upload();
 }

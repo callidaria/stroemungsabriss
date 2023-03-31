@@ -58,8 +58,6 @@ int main(int argc,char** argv)
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
-	bool dactive = false;
-
 	// LOADERS
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 	World world = World(&eref);
@@ -69,11 +67,14 @@ int main(int argc,char** argv)
 	world.add_camera(cam2d);
 	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
 	world.add_camera(Camera3D(1280.0f,720.0f));
-	world.add_camera(Camera3D(glm::vec3(5,5,5),1280.0f,720.0f,45.0f));
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
 	eref.ld.push(LOAD_CASINO);
+
+#if BUILD_DEV_MODE
+	bool dactive = false;
+#endif
 
 	// MAIN LOOP
 	uint32_t run=1;

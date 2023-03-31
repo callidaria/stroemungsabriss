@@ -19,4 +19,9 @@ private:
 	// render information
 	CascabelBaseFeature* m_ccbf;
 	uint16_t index_r3D;
+	glm::vec3 mv_pos = glm::vec3(1,0,-2);
+
+	// camera
+	glm::vec3 cp_pos = glm::vec3(0,5,-5),cp_dir = glm::vec3(0,-.05f,.05f);
+	float pitch = 0,yaw = 45.0f;
 };
