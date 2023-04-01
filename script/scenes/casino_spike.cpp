@@ -1,7 +1,9 @@
 #include "casino_spike.h"
 
 /*
-	TODO
+	constructor(CascabelBaseFeature*)
+	ccbf: all of cascabel's most prized features
+	purpose: create dilapidated casino scene
 */
 CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
@@ -25,11 +27,12 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 
 	// material definitions
 	m0 = Material3D(m_ccbf->r3d,2.5f,8,.25f);
-	m1 = Material3D(m_ccbf->r3d,1,64,2);
+	m1 = Material3D(m_ccbf->r3d,1.5f,64,2);
 }
 
 /*
-	TODO
+	render() -> void (virtual)
+	purpose: render casino scene
 */
 void CasinoSpike::render()
 {
@@ -52,12 +55,13 @@ void CasinoSpike::render()
 	cp_pos.y += m_ccbf->frame->kb.ka[SDL_SCANCODE_R]*.05f;
 	cp_pos.y -= m_ccbf->frame->kb.ka[SDL_SCANCODE_F]*.05f;
 
-	// render
+	// render flooring
 	m_ccbf->r3d->prepare(Camera3D(cp_pos,cp_pos+cp_dir,1280.0f,720.0f,45.0f));
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
-	//m_ccbf->r3d->s3d.upload_float("tex_repeat",2.5f);
 	m0.upload();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);
+
+	// render wordly objects
 	m1.upload();
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+4);
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1),mv_pos));

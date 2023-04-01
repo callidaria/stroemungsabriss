@@ -100,7 +100,7 @@ vec4 lumen_sun(vec4 o,light_sun l)
 	vec3 cdiff = diff*l.col;
 
 	vec3 spec_dir = reflect(-light_dir,norm);
-	float spec = pow(max(dot(view_dir,spec_dir),0.0),32)*1.0*pow(fresnel,0.25);
+	float spec = pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int*pow(fresnel,0.25);
 	vec3 cspec = spec*l.col;
 
 	vec3 specmap = vec3(texture(sm,TexCoords));
