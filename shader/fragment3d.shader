@@ -89,63 +89,63 @@ void main()
 
 vec4 lumen_sun(vec4 o,light_sun l)
 {
-	vec3 norm=texture(nmap,TexCoords).rgb;
-	norm=normalize(norm*2.0-1.0);
-	vec3 light_dir=normalize(TanLightPos-TanPosition);
+	vec3 norm = texture(nmap,TexCoords).rgb;
+	norm = normalize(norm*2.0-1.0);
+	vec3 light_dir = normalize(TanLightPos-TanPosition);
 
-	vec3 view_dir=normalize(TanViewPos-TanPosition);
-	float fresnel=max(1-dot(view_dir,norm),0.1);
+	vec3 view_dir = normalize(TanViewPos-TanPosition);
+	float fresnel = max(1-dot(view_dir,norm),0.1);
 
-	float diff=max(dot(light_dir,norm),0.0);
-	vec3 cdiff=diff*l.col;
+	float diff = max(dot(light_dir,norm),0.0);
+	vec3 cdiff = diff*l.col;
 
-	vec3 spec_dir=reflect(-light_dir,norm);
-	float spec=pow(max(dot(view_dir,spec_dir),0.0),32)*1.0*pow(fresnel,0.25);
-	vec3 cspec=spec*l.col;
+	vec3 spec_dir = reflect(-light_dir,norm);
+	float spec = pow(max(dot(view_dir,spec_dir),0.0),32)*1.0*pow(fresnel,0.25);
+	vec3 cspec = spec*l.col;
 
-	vec3 specmap=vec3(texture(sm,TexCoords));
-	vec3 emitmap=vec3(texture(emit,TexCoords));
-	vec3 out_diff=o.rgb*cdiff;
-	vec3 out_spec=(cspec+diff*0.4);
+	vec3 specmap = vec3(texture(sm,TexCoords));
+	vec3 emitmap = vec3(texture(emit,TexCoords));
+	vec3 out_diff = o.rgb*cdiff;
+	vec3 out_spec = (cspec+diff*0.4);
 	return vec4(mix(out_diff,vec3(diff*0.4),specmap*pow(fresnel,4))+cspec*specmap,o.a);
 }
 
 vec4 lumen_point(vec4 o,light_point l)
 {
-	vec3 norm=normalize(Normals.xyz);
-	vec3 diff_dir=normalize(l.pos-Position.xyz);
-	float diff=max(dot(norm,diff_dir),0.0);
-	vec3 cdiff=diff*l.col;
-	vec3 view_dir=normalize(view_pos-Position.xyz);
-	vec3 spec_dir=reflect(-diff_dir,norm);
-	float spec=pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int;
-	vec3 cspec=spec*l.col;
+	vec3 norm = normalize(Normals.xyz);
+	vec3 diff_dir = normalize(l.pos-Position.xyz);
+	float diff = max(dot(norm,diff_dir),0.0);
+	vec3 cdiff = diff*l.col;
+	vec3 view_dir = normalize(view_pos-Position.xyz);
+	vec3 spec_dir = reflect(-diff_dir,norm);
+	float spec = pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int;
+	vec3 cspec = spec*l.col;
 
-	float dist=length(l.pos-Position.xyz);
-	float atten=1.0/(l.lconst+l.lin*dist+l.quad*(dist*dist));
-	vec3 specmap=vec3(texture(sm,TexCoords));
-	vec3 out_spec=o.rgb*cspec*specmap*atten;
-	vec3 out_diff=o.rgb*cdiff*atten;
+	float dist = length(l.pos-Position.xyz);
+	float atten = 1.0/(l.lconst+l.lin*dist+l.quad*(dist*dist));
+	vec3 specmap = vec3(texture(sm,TexCoords));
+	vec3 out_spec = o.rgb*cspec*specmap*atten;
+	vec3 out_diff = o.rgb*cdiff*atten;
 	return vec4(out_spec+out_diff,o.a);
 }
 
 vec4 lumen_spot(vec4 o,light_spot l)
 {
-	vec3 norm=normalize(Normals.xyz);
-	vec3 diff_dir=normalize(l.pos-Position.xyz);
-	float diff=max(dot(norm,diff_dir),0.0);
-	vec3 cdiff=diff*l.col;
-	vec3 view_dir=normalize(view_pos-Position.xyz);
-	vec3 spec_dir=reflect(-diff_dir,norm);
-	float spec=pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int;
-	vec3 cspec=spec*l.col;
+	vec3 norm = normalize(Normals.xyz);
+	vec3 diff_dir = normalize(l.pos-Position.xyz);
+	float diff = max(dot(norm,diff_dir),0.0);
+	vec3 cdiff = diff*l.col;
+	vec3 view_dir = normalize(view_pos-Position.xyz);
+	vec3 spec_dir = reflect(-diff_dir,norm);
+	float spec = pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int;
+	vec3 cspec = spec*l.col;
 
-	float theta=dot(diff_dir,normalize(-l.dir));
-	float epsilon=l.cut_in-l.cut_out;
-	float ins=clamp((theta-l.cut_out)/epsilon,0.0,1.0);
-	vec3 specmap=vec3(texture(sm,TexCoords));
-	vec3 out_spec=o.rgb*cspec*specmap*ins;
-	vec3 out_diff=o.rgb*cdiff*ins;
+	float theta = dot(diff_dir,normalize(-l.dir));
+	float epsilon = l.cut_in-l.cut_out;
+	float ins = clamp((theta-l.cut_out)/epsilon,0.0,1.0);
+	vec3 specmap = vec3(texture(sm,TexCoords));
+	vec3 out_spec = o.rgb*cspec*specmap*ins;
+	vec3 out_diff = o.rgb*cdiff*ins;
 	return vec4(out_spec+out_diff,o.a);
 }
 

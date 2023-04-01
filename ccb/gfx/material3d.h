@@ -15,7 +15,7 @@ public:
 
 	void upload()
 	{
-		r3d->s3d.upload_int("tex_repeat",rep);
+		r3d->s3d.upload_float("tex_repeat",rep);
 		r3d->s3d.upload_int("specular",spec);
 		r3d->s3d.upload_float("spec_int",intense);
 	}
@@ -23,6 +23,6 @@ public:
 private:
 
 	Renderer3D* r3d;
-	int rep,spec;
-	float intense;
+	int spec;
+	float rep,intense;
 };
