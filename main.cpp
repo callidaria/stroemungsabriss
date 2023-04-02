@@ -41,6 +41,7 @@
 
 int main(int argc,char** argv)
 {
+	// INIT
 	Init init = Init("config.ini");
 	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
 			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
@@ -57,8 +58,6 @@ int main(int argc,char** argv)
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
-	bool dactive = false;
-
 	// LOADERS
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 	World world = World(&eref);
@@ -71,7 +70,11 @@ int main(int argc,char** argv)
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
-	eref.ld.push(LOAD_START);
+	eref.ld.push(LOAD_CASINO);
+
+#if BUILD_DEV_MODE
+	bool dactive = false;
+#endif
 
 	// MAIN LOOP
 	uint32_t run=1;

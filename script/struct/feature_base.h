@@ -16,6 +16,7 @@ enum LoadInstruction
 {
 	LOAD_START,
 	LOAD_MENU,
+	LOAD_CASINO,
 	LOAD_AIRFIELD,
 	LOAD_DPILOT
 };
