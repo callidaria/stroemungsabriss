@@ -29,7 +29,7 @@ Camera3D::Camera3D(glm::vec3 cp,float w_res,float h_res,float fov)
 	view3D = glm::lookAt(pos,pos+front,up);
 	proj3D = glm::perspective(glm::radians(fov),w_res/h_res,0.1f,10000.0f);
 }
-// FIXME: completely nonsensical constructor implementation
+// FIXME: completely nonsensical constructor definition
 
 /*
 	constructor(vec3,vec3,float,float,float)
