@@ -147,6 +147,25 @@ void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 }
 
 /*
+	set_texture_parameter_linear_mipmap() -> void (private,static)
+	purpose: define texture as mipmappable
+*/
+void Toolbox::set_texture_parameter_linear_mipmap()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	TODO
+*/
+void Toolbox::set_texture_parameter_nearest_unfiltered()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+}
+
+/*
 	set_texture_parameter_clamp_to_edge() -> void (private,static)
 	purpose: define texture as to be stretched out towards the borders
 */
@@ -164,16 +183,6 @@ void Toolbox::set_texture_parameter_texture_repeat()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-}
-
-/*
-	set_texture_parameter_linear_mipmap() -> void (private,static)
-	purpose: define texture as mipmappable
-*/
-void Toolbox::set_texture_parameter_linear_mipmap()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
 /*

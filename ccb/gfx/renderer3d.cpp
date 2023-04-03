@@ -62,7 +62,8 @@ void Renderer3D::load(Camera3D cam3d)
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
-	s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
+	//s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
+	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
 	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);

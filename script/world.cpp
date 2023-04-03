@@ -9,7 +9,8 @@ World::World(CascabelBaseFeature* eref)
 	: m_ccbf(eref)
 {
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			//"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
 }
 
 /*
@@ -94,18 +95,23 @@ void World::load_geometry()
 void World::render(uint32_t &running,bool &reboot)
 {
 	// bind scene framebuffer
-	game_fb.bind();
+	//game_fb.bind();
+	glDisable(GL_BLEND);
+	gbuffer.bind();
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	// render bullets
 	m_ccbf->bSys->render();
 
 	// render ui
-	game_fb.close();
-	ui_master[active_daui]->render(&game_fb,running,reboot);
+	game_fb.overwrite_texture(gbuffer.get_normals());
+	game_fb.render();
+	/*game_fb.close();
+	ui_master[active_daui]->render(&game_fb,running,reboot);*/
 }

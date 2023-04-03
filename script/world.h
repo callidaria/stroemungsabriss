@@ -7,6 +7,7 @@
 // engine
 #include "../ccb/frm/frame.h"
 #include "../ccb/frm/framebuffer.h"
+#include "../ccb/frm/gbuffer.h"
 
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
@@ -57,6 +58,7 @@ private:
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
 	FrameBuffer game_fb;
+	GBuffer gbuffer = GBuffer(1600.0f,900.0f);
 
 	// scene components
 	std::vector<UI*> ui_master;
