@@ -80,10 +80,9 @@ void FrameBuffer::bind()
 { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
 
 /*
-	render() -> void
-	purpose: draw buffer in combination with given shader manipulations
+	TODO
 */
-void FrameBuffer::render()
+void FrameBuffer::prepare()
 {
 	// gl setup
 	glActiveTexture(GL_TEXTURE0);
@@ -91,10 +90,25 @@ void FrameBuffer::render()
 	// buffer & shader
 	s.enable();
 	buffer.bind();
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::draw()
+{ glDrawArrays(GL_TRIANGLES,0,6); }
+
+/*
+	render() -> void
+	purpose: draw buffer in combination with given shader manipulations
+*/
+void FrameBuffer::render()
+{
+	prepare();
 
 	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
-	glDrawArrays(GL_TRIANGLES,0,6);
+	draw();
 }
 
 /*

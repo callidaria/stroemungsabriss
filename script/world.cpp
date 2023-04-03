@@ -10,7 +10,10 @@ World::World(CascabelBaseFeature* eref)
 {
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			//"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
+			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
+	game_fb.s.upload_int("gbuffer_colour",0);
+	game_fb.s.upload_int("gbuffer_position",1);
+	game_fb.s.upload_int("gbuffer_normals",2);
 }
 
 /*
@@ -110,8 +113,17 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->bSys->render();
 
 	// render ui
-	game_fb.overwrite_texture(gbuffer.get_normals());
-	game_fb.render();
+	//game_fb.overwrite_texture(gbuffer.get_normals());
+	game_fb.prepare();
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+	game_fb.s.upload_vec3("sunlight.position",glm::vec3(500,750,100));
+	game_fb.s.upload_vec3("sunlight.colour",glm::vec3(1));
+	game_fb.s.upload_float("sunlight.intensity",1);
+	game_fb.draw();
 	/*game_fb.close();
 	ui_master[active_daui]->render(&game_fb,running,reboot);*/
 }

@@ -90,24 +90,24 @@ void main()
 vec4 lumen_sun(vec4 o,light_sun l)
 {
 	vec3 norm = texture(nmap,TexCoords).rgb;
-	norm = normalize(norm*2.0-1.0);
+	norm = normalize(norm*2.0-1);
 	vec3 light_dir = normalize(TanLightPos-TanPosition);
 
 	vec3 view_dir = normalize(TanViewPos-TanPosition);
-	float fresnel = max(1-dot(view_dir,norm),0.1);
+	float fresnel = max(1-dot(view_dir,norm),.1);
 
-	float diff = max(dot(light_dir,norm),0.0);
+	float diff = max(dot(light_dir,norm),0);
 	vec3 cdiff = diff*l.col;
 
 	vec3 spec_dir = reflect(-light_dir,norm);
-	float spec = pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int*pow(fresnel,0.25);
+	float spec = pow(max(dot(view_dir,spec_dir),0.0),specular)*spec_int*pow(fresnel,.25);
 	vec3 cspec = spec*l.col;
 
 	vec3 specmap = vec3(texture(sm,TexCoords));
 	vec3 emitmap = vec3(texture(emit,TexCoords));
 	vec3 out_diff = o.rgb*cdiff;
-	vec3 out_spec = (cspec+diff*0.4);
-	return vec4(mix(out_diff,vec3(diff*0.4),specmap*pow(fresnel,4))+cspec*specmap,o.a);
+	vec3 out_spec = (cspec+diff*.4);
+	return vec4(mix(out_diff,vec3(diff*.4),specmap*pow(fresnel,4))+cspec*specmap,o.a);
 }
 
 vec4 lumen_point(vec4 o,light_point l)
