@@ -104,7 +104,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
-	for (auto scene : scene_master) scene->render();
+	for (auto scene : scene_master) scene->render(cam3D_master[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -123,6 +123,7 @@ void World::render(uint32_t &running,bool &reboot)
 	game_fb.s.upload_vec3("sunlight.position",glm::vec3(500,750,100));
 	game_fb.s.upload_vec3("sunlight.colour",glm::vec3(1));
 	game_fb.s.upload_float("sunlight.intensity",1);
+	game_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
 	game_fb.draw();
 	/*game_fb.close();
 	ui_master[active_daui]->render(&game_fb,running,reboot);*/

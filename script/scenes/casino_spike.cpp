@@ -34,7 +34,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 	render() -> void (virtual)
 	purpose: render casino scene
 */
-void CasinoSpike::render()
+void CasinoSpike::render(Camera3D &cam3D)
 {
 	// camera front handling
 	pitch += m_ccbf->frame->kb.ka[SDL_SCANCODE_I];
@@ -55,8 +55,12 @@ void CasinoSpike::render()
 	cp_pos.y += m_ccbf->frame->kb.ka[SDL_SCANCODE_R]*.05f;
 	cp_pos.y -= m_ccbf->frame->kb.ka[SDL_SCANCODE_F]*.05f;
 
+	// camera update
+	cam3D.pos = cp_pos,cam3D.front = cp_dir;
+	cam3D.update();
+
 	// render flooring
-	m_ccbf->r3d->prepare(Camera3D(cp_pos,cp_pos+cp_dir,1280.0f,720.0f,45.0f));
+	m_ccbf->r3d->prepare(cam3D);
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
 	m0.upload();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);

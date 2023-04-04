@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/frm/framebuffer.h"
+#include "../../ccb/mat/camera3d.h"
 
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI
@@ -19,7 +20,7 @@ class Scene
 {
 public:
 	virtual ~Scene() {  }
-	virtual void render() {  }
+	virtual void render(Camera3D&) {  }
 };
 
 // describes all objects/character, that can be controlled by the player
