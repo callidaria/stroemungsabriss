@@ -2,7 +2,7 @@
 
 in vec4 Position;
 in vec2 TexCoords;
-in vec3 Normals;
+in mat3 TBN;
 
 out vec4 gbuffer_colour;
 out vec3 gbuffer_position;
@@ -24,5 +24,6 @@ void main()
 	gbuffer_position = Position.rgb;
 
 	// translate normals
-	gbuffer_normals = normalize(Normals);
+	vec3 normals = normalize(texture(nmap,TexCoords).rgb*2-1);
+	gbuffer_normals = normalize(TBN*normals);
 }

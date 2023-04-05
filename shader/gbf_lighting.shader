@@ -41,7 +41,7 @@ void main()
 	c_colours = c_colours+lumen_sun(colour,position,normals,speculars,sunlight);
 
 	// return colour composition
-	outColour = vec4(c_colours*colour,1);
+	outColour = vec4(c_colours,1);
 }
 
 // sunlight processing
@@ -50,16 +50,17 @@ vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_s
 	// precalculations
 	vec3 light_dir = normalize(sl.position-position);
 	vec3 camera_dir = normalize(view_pos-position);
+	float fresnel = max(1-dot(camera_dir,normals),.1);
 
 	// diffusion
 	float diff = max(dot(light_dir,normals),0);
-	vec3 diffusion = diff*sl.colour;
+	vec3 diffusion = diff*sl.colour*colour;
 
 	// specular
 	vec3 spec_dir = reflect(-light_dir,normals);
-	float spec = pow(max(dot(camera_dir,spec_dir),0),spec_exponent)*spec_intensity;
-	vec3 specular = spec*in_speculars*sl.colour;
+	float spec = pow(max(dot(camera_dir,spec_dir),0),spec_exponent)*spec_intensity*pow(fresnel,.25);
+	vec3 specular = spec*sl.colour*in_speculars;
 
 	// combine sunlight shading components
-	return diffusion+specular;
+	return mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular;
 }

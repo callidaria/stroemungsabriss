@@ -8,15 +8,17 @@ in vec3 bitangent;
 
 out vec4 Position;
 out vec2 TexCoords;
-out vec3 Normals;
+out mat3 TBN;
 
 // camera & world transformation
 uniform mat4 model = mat4(1.0);
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 
-// texture modification
+// modifications
 uniform float tex_repeat = 1.0;
+uniform vec3 light_pos;
+uniform vec3 view_pos;
 
 void main()
 {
@@ -27,7 +29,10 @@ void main()
 	// calculate texture coordinates
 	TexCoords = texCoords*tex_repeat;
 
-	// calculate normals
-	mat3 norm_mat = transpose(inverse(mat3(model)));
-	Normals = normalize(norm_mat*normals);
+	// precalculate TBN-matrix for normal manipulation
+	TBN = mat3(
+		normalize((model*vec4(tangent,0)).xyz),
+		normalize((model*vec4(bitangent,0)).xyz),
+		normalize((model*vec4(normals,0)).xyz)
+	);
 }

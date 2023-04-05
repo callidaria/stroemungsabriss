@@ -106,7 +106,7 @@ vec4 lumen_sun(vec4 o,light_sun l)
 	vec3 specmap = vec3(texture(sm,TexCoords));
 	vec3 emitmap = vec3(texture(emit,TexCoords));
 	vec3 out_diff = o.rgb*cdiff;
-	vec3 out_spec = (cspec+diff*.4);
+	vec3 out_spec = cspec+diff*.4;
 	return vec4(mix(out_diff,vec3(diff*.4),specmap*pow(fresnel,4))+cspec*specmap,o.a);
 }
 
