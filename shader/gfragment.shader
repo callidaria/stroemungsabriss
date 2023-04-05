@@ -24,6 +24,6 @@ void main()
 	gbuffer_position = Position.rgb;
 
 	// translate normals
-	vec3 normals = normalize(texture(nmap,TexCoords).rgb*2-1);
+	vec3 normals = texture(nmap,TexCoords).rgb*2-1;
 	gbuffer_normals = normalize(TBN*normals);
 }

@@ -9,11 +9,12 @@ World::World(CascabelBaseFeature* eref)
 	: m_ccbf(eref)
 {
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			//"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+	deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
-	game_fb.s.upload_int("gbuffer_colour",0);
-	game_fb.s.upload_int("gbuffer_position",1);
-	game_fb.s.upload_int("gbuffer_normals",2);
+	deferred_fb.s.upload_int("gbuffer_colour",0);
+	deferred_fb.s.upload_int("gbuffer_position",1);
+	deferred_fb.s.upload_int("gbuffer_normals",2);
 }
 
 /*
@@ -97,8 +98,7 @@ void World::load_geometry()
 */
 void World::render(uint32_t &running,bool &reboot)
 {
-	// bind scene framebuffer
-	//game_fb.bind();
+	// start geometry pass deferred scene
 	glDisable(GL_BLEND);
 	gbuffer.bind();
 	m_ccbf->frame->clear(.1f,.1f,.1f);
@@ -107,24 +107,29 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto scene : scene_master) scene->render(cam3D_master[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
+
+	// end geometry pass deferred scene
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glEnable(GL_BLEND);
 
 	// render bullets
 	m_ccbf->bSys->render();
 
-	// render ui
-	//game_fb.overwrite_texture(gbuffer.get_normals());
-	game_fb.prepare();
+	// deferred light shading
+	game_fb.bind();
+	deferred_fb.prepare();
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
-	game_fb.s.upload_vec3("sunlight.position",glm::vec3(500,750,100));
-	game_fb.s.upload_vec3("sunlight.colour",glm::vec3(1));
-	game_fb.s.upload_float("sunlight.intensity",1);
-	game_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
-	game_fb.draw();
-	/*game_fb.close();
-	ui_master[active_daui]->render(&game_fb,running,reboot);*/
+	deferred_fb.s.upload_vec3("sunlight.position",glm::vec3(500,750,100));
+	deferred_fb.s.upload_vec3("sunlight.colour",glm::vec3(1));
+	deferred_fb.s.upload_float("sunlight.intensity",1);
+	deferred_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
+	deferred_fb.draw();
+
+	// render ui
+	game_fb.close();
+	ui_master[active_daui]->render(&game_fb,running,reboot);
 }
