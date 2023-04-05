@@ -70,4 +70,6 @@ private:
 	std::vector<Camera2D> cam2D_master;
 	std::vector<Camera3D> cam3D_master;
 	std::vector<Light3D> light_master;
+	bool mvup[4] = { false,false,false,false };
+	float lraise[4] = { .5f,2,1.5f,1 };
 };
