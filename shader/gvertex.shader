@@ -29,10 +29,9 @@ void main()
 	// calculate texture coordinates
 	TexCoords = texCoords*tex_repeat;
 
-	// precalculate TBN-matrix for normal manipulation
-	TBN = mat3(
-		normalize((model*vec4(tangent,0)).xyz),
-		normalize((model*vec4(bitangent,0)).xyz),
-		normalize((model*vec4(normals,0)).xyz)
-	);
+	// reorthogonalize TBN-matrix per-vertex according to gram-schmidt
+	vec3 T = normalize((model*vec4(tangent,0)).xyz);
+	vec3 N = normalize((model*vec4(normals,0)).xyz);
+	T = normalize(T-dot(T,N)*N);
+	TBN = mat3(T,cross(N,T),N);
 }

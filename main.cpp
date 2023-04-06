@@ -87,6 +87,7 @@ int main(int argc,char** argv)
 
 		// timing & raw input
 		f.print_fps();
+		f.vsync(60);
 		f.calc_time_delta();
 		f.input(run);
 

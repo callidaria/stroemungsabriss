@@ -126,6 +126,7 @@ void World::render(uint32_t &running,bool &reboot)
 
 	deferred_fb.s.upload_int("sunlight_count",0);
 	deferred_fb.s.upload_int("pointlight_count",9);
+	deferred_fb.s.upload_int("spotlight_count",0);
 	deferred_fb.s.upload_vec3("sunlight[0].position",glm::vec3(500,750,100));
 	deferred_fb.s.upload_vec3("sunlight[0].colour",glm::vec3(1));
 	deferred_fb.s.upload_float("sunlight[0].intensity",1);
@@ -174,6 +175,12 @@ void World::render(uint32_t &running,bool &reboot)
 	deferred_fb.s.upload_float("pointlight[8].linear",1);
 	deferred_fb.s.upload_float("pointlight[8].quadratic",.05f);
 	deferred_fb.s.upload_float("pointlight[8].intensity",1.3f);
+
+	deferred_fb.s.upload_vec3("spotlight[0].position",glm::vec3(0,2,0));
+	deferred_fb.s.upload_vec3("spotlight[0].colour",glm::vec3(1));
+	deferred_fb.s.upload_vec3("spotlight[0].direction",glm::vec3(0,-1,0));
+	deferred_fb.s.upload_float("spotlight[0].cut_in",.5f);
+	deferred_fb.s.upload_float("spotlight[0].cut_out",.2f);
 
 	deferred_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
 	deferred_fb.draw();
