@@ -31,6 +31,14 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 }
 
 /*
+	TODO
+*/
+void CasinoSpike::shadow()
+{
+	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
+}
+
+/*
 	render() -> void (virtual)
 	purpose: render casino scene
 */

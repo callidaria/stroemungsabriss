@@ -59,10 +59,12 @@ vec3 camera_dir;
 void main()
 {
 	// read g-buffer information
-	vec4 colour_spec = texture(gbuffer_colour,TexCoords);
-	vec3 colour = colour_spec.rgb;
-	float speculars = colour_spec.a;
-	vec3 position = texture(gbuffer_position,TexCoords).rgb;
+	vec4 colourxspec = texture(gbuffer_colour,TexCoords);
+	vec4 positionxshadow = texture(gbuffer_position,TexCoords);
+	vec3 colour = colourxspec.rgb;
+	float speculars = colourxspec.a;
+	vec3 position = positionxshadow.rgb;
+	float shadow = positionxshadow.a;
 	vec3 normals = texture(gbuffer_normals,TexCoords).rgb;
 
 	// precalculations
@@ -76,6 +78,9 @@ void main()
 		lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
 	for (int k=0;k<spotlight_count;k++)
 		lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
+
+	// process shadows
+	lgt_colours *= (1-shadow);
 
 	// return colour composition
 	outColour = vec4(lgt_colours,1);

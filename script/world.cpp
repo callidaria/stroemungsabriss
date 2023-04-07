@@ -15,6 +15,8 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
+	light_master.push_back(Light3D(m_ccbf->r3d,0,glm::vec3(100,200,150),glm::vec3(1),1));
+	light_master[0].create_shadow(glm::vec3(0),50,50,5,4096);
 }
 
 /*
@@ -98,12 +100,23 @@ void World::load_geometry()
 */
 void World::render(uint32_t &running,bool &reboot)
 {
+	// shadow processing
+	light_master[0].prepare_shadow();
+	m_ccbf->frame->clear();
+	m_ccbf->r3d->prepare();
+	m_ccbf->r3d->s3d.upload_matrix("view",light_master[0].view);
+	m_ccbf->r3d->s3d.upload_matrix("proj",light_master[0].proj);
+	for (auto scene : scene_master) scene->shadow();
+	light_master[0].close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+
 	// start geometry pass deferred scene
 	glDisable(GL_BLEND);
 	gbuffer.bind();
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
+	m_ccbf->r3d->prepare();
+	light_master[0].upload_shadow();
 	for (auto scene : scene_master) scene->render(cam3D_master[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
@@ -124,8 +137,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 
-	deferred_fb.s.upload_int("sunlight_count",0);
-	deferred_fb.s.upload_int("pointlight_count",9);
+	deferred_fb.s.upload_int("sunlight_count",1);
+	deferred_fb.s.upload_int("pointlight_count",0);
 	deferred_fb.s.upload_int("spotlight_count",0);
 	deferred_fb.s.upload_vec3("sunlight[0].position",glm::vec3(500,750,100));
 	deferred_fb.s.upload_vec3("sunlight[0].colour",glm::vec3(1));
