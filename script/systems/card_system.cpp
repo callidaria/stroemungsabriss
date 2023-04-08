@@ -483,7 +483,7 @@ void CardSystem::update()
 
 /*
 	render() -> void
-	purpose: the render queue can be compiled and all visuals can be drawn
+	purpose: card system visuals are drawn
 */
 void CardSystem::render()
 {

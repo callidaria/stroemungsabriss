@@ -39,5 +39,5 @@ void main()
 
 	// calculate light position and transform to screen space
 	vec4 rltp = light_trans*Position;
-	ltp = (rltp.xyz/rltp.w).xyz*.5+.5;
+	ltp = (rltp.xyz/rltp.w)*.5+.5;
 }

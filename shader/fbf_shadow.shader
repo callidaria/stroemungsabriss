@@ -2,5 +2,5 @@
 
 void main()
 {
-	//no colors needed
+	// no colours needed
 }

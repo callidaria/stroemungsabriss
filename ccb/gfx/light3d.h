@@ -64,8 +64,9 @@ public:
 		glDrawBuffer(GL_NONE);glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER,0);
 
-		proj = glm::ortho(-width/2,width/2,-height/2,height/2,0.1f,100.0f);
+		float hwidth = width/2.0f,hheight = height/2.0f;
 		view = glm::lookAt(pos/f+to,to,glm::vec3(0,1,0));
+		proj = glm::ortho(-hwidth,hwidth,-hheight,hheight,0.1f,100.0f);
 		shadow_mat = proj*view;
 	}
 
@@ -97,7 +98,8 @@ public:
 
 	void upload_shadow_terra()
 	{
-		glActiveTexture(GL_TEXTURE1);glBindTexture(GL_TEXTURE_2D,dtex);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D,dtex);
 	}
 
 public:

@@ -34,6 +34,7 @@ struct light_spot {
 uniform sampler2D gbuffer_colour;
 uniform sampler2D gbuffer_position;
 uniform sampler2D gbuffer_normals;
+uniform sampler2D shadow_tex;
 
 // camera information
 uniform vec3 view_pos;
@@ -80,10 +81,11 @@ void main()
 		lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
 	// process shadows
-	lgt_colours *= (1-shadow);
+	lgt_colours *= shadow;
 
 	// return colour composition
 	outColour = vec4(lgt_colours,1);
+	//outColour = texture(shadow_tex,TexCoords);
 }
 // FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
 // FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?
