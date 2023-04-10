@@ -9,6 +9,7 @@ out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
 out vec3 gbuffer_normals;
 
+// object material textures
 uniform sampler2D tex;
 uniform sampler2D sm;
 uniform sampler2D emit;
@@ -37,13 +38,11 @@ void main()
 // dynamic shadow map generation
 float calculate_shadow()
 {
+	// depth extractions
 	float curr_depth = ltp.z;
-	vec2 texel = 1.0/textureSize(shadow_map,0);
-	float out_shadow = 0;
-	for (int x=-1;x<=1;x++) {
-		for(int y=-1;y<=1;y++) {
-			float pcf_depth = texture(shadow_map,ltp.xy+vec2(x,y)*texel).r;
-			out_shadow += float(curr_depth-0.0002>pcf_depth);
-		}
-	} return 1-out_shadow/9.0;
+	float pcf_depth = texture(shadow_map,ltp.xy).r;
+
+	// project shadow
+	vec2 raster = 1.0/textureSize(shadow_map,0);
+	return float(curr_depth>pcf_depth);
 }

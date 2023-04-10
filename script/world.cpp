@@ -16,8 +16,8 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	light_master.push_back(Light3D(m_ccbf->r3d,0,glm::vec3(10,20,15),glm::vec3(1),1));
-	light_master[0].create_shadow(glm::vec3(0),50,50,5,4096);
+	light_master.push_back(Light3D(m_ccbf->r3d,0,glm::vec3(100,200,150),glm::vec3(1),1));
+	light_master[0].create_shadow(glm::vec3(0),25,25,5,4096);
 }
 
 /*

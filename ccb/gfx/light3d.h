@@ -74,7 +74,7 @@ public:
 	{
 		glViewport(0,0,sh_res,sh_res);
 		glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
-		glEnable(GL_CULL_FACE);glEnable(GL_DEPTH_TEST);glCullFace(GL_FRONT);
+		glDisable(GL_CULL_FACE);glEnable(GL_DEPTH_TEST);glCullFace(GL_FRONT);
 		glClearColor(0,0,0,1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		r3d->prepare();
@@ -86,6 +86,7 @@ public:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER,0);
 		glViewport(0,0,w_res,h_res);
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 	}
 

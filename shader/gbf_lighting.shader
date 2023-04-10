@@ -81,11 +81,11 @@ void main()
 		lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
 	// process shadows
-	lgt_colours *= shadow;
+	vec3 light_dir = normalize(sunlight[0].position-position);
+	lgt_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
 
 	// return colour composition
 	outColour = vec4(lgt_colours,1);
-	//outColour = texture(shadow_tex,TexCoords);
 }
 // FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
 // FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?
