@@ -18,6 +18,16 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("shadow_tex",3);
 	light_master.push_back(Light3D(m_ccbf->r3d,0,glm::vec3(100,200,150),glm::vec3(1),1));
 	light_master[0].create_shadow(glm::vec3(0),25,25,5,4096);
+	lighting.add_sunlight({ glm::vec3(500,750,100),glm::vec3(1),.2f });
+	lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
+	lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
+	for (uint8_t i=0;i<4;i++)
+		lighting.add_pointlight({ glm::vec3(7,lraise[i],-7+(i*4)),glm::vec3(1),1,1,.1f,1 });
+	lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
+	lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
+	lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
+	lighting.upload(&deferred_fb.s);
+	//lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
 
 /*
@@ -137,64 +147,6 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,light_master[0].dtex);
-
-	deferred_fb.s.upload_int("sunlight_count",1);
-	deferred_fb.s.upload_int("pointlight_count",0);
-	deferred_fb.s.upload_int("spotlight_count",0);
-	deferred_fb.s.upload_vec3("sunlight[0].position",glm::vec3(500,750,100));
-	deferred_fb.s.upload_vec3("sunlight[0].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("sunlight[0].intensity",1);
-
-	deferred_fb.s.upload_vec3("pointlight[0].position",glm::vec3(0,2,0));
-	deferred_fb.s.upload_vec3("pointlight[0].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("pointlight[0].constant",1);
-	deferred_fb.s.upload_float("pointlight[0].linear",1);
-	deferred_fb.s.upload_float("pointlight[0].quadratic",.1f);
-	deferred_fb.s.upload_float("pointlight[0].intensity",1);
-
-	deferred_fb.s.upload_vec3("pointlight[1].position",glm::vec3(3,2,-3));
-	deferred_fb.s.upload_vec3("pointlight[1].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("pointlight[1].constant",1);
-	deferred_fb.s.upload_float("pointlight[1].linear",1);
-	deferred_fb.s.upload_float("pointlight[1].quadratic",.1f);
-	deferred_fb.s.upload_float("pointlight[1].intensity",1);
-
-	for (uint8_t i=0;i<4;i++) {
-		std::string ci = std::to_string(i+2);
-		deferred_fb.s.upload_vec3(("pointlight["+ci+"].position").c_str(),glm::vec3(7,lraise[i],-7+(i*4)));
-		deferred_fb.s.upload_vec3(("pointlight["+ci+"].colour").c_str(),glm::vec3(1));
-		deferred_fb.s.upload_float(("pointlight["+ci+"].constant").c_str(),1);
-		deferred_fb.s.upload_float(("pointlight["+ci+"].linear").c_str(),1);
-		deferred_fb.s.upload_float(("pointlight["+ci+"].quadratic").c_str(),.1f);
-		deferred_fb.s.upload_float(("pointlight["+ci+"].intensity").c_str(),1);
-	}
-
-	deferred_fb.s.upload_vec3("pointlight[6].position",glm::vec3(-4.5f,1,4));
-	deferred_fb.s.upload_vec3("pointlight[6].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("pointlight[6].constant",1);
-	deferred_fb.s.upload_float("pointlight[6].linear",1);
-	deferred_fb.s.upload_float("pointlight[6].quadratic",.1f);
-	deferred_fb.s.upload_float("pointlight[6].intensity",1);
-
-	deferred_fb.s.upload_vec3("pointlight[7].position",glm::vec3(-2.5f,4,-2));
-	deferred_fb.s.upload_vec3("pointlight[7].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("pointlight[7].constant",1);
-	deferred_fb.s.upload_float("pointlight[7].linear",1);
-	deferred_fb.s.upload_float("pointlight[7].quadratic",.1f);
-	deferred_fb.s.upload_float("pointlight[7].intensity",1);
-
-	deferred_fb.s.upload_vec3("pointlight[8].position",glm::vec3(-2.3f,5,-1.3f));
-	deferred_fb.s.upload_vec3("pointlight[8].colour",glm::vec3(1));
-	deferred_fb.s.upload_float("pointlight[8].constant",1.5f);
-	deferred_fb.s.upload_float("pointlight[8].linear",1);
-	deferred_fb.s.upload_float("pointlight[8].quadratic",.05f);
-	deferred_fb.s.upload_float("pointlight[8].intensity",1.3f);
-
-	deferred_fb.s.upload_vec3("spotlight[0].position",glm::vec3(0,2,0));
-	deferred_fb.s.upload_vec3("spotlight[0].colour",glm::vec3(1));
-	deferred_fb.s.upload_vec3("spotlight[0].direction",glm::vec3(0,-1,0));
-	deferred_fb.s.upload_float("spotlight[0].cut_in",.5f);
-	deferred_fb.s.upload_float("spotlight[0].cut_out",.2f);
 
 	deferred_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
 	deferred_fb.draw();

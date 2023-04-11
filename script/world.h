@@ -13,6 +13,8 @@
 #include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/light3d.h"
 
+#include "../ccb/mat/lighting.h"
+
 // scripts
 #include "struct/feature_base.h"
 #include "struct/world_structures.h"
@@ -70,6 +72,7 @@ private:
 	std::vector<Camera2D> cam2D_master;
 	std::vector<Camera3D> cam3D_master;
 	std::vector<Light3D> light_master;
+	Lighting lighting = Lighting();
 	bool mvup[4] = { false,false,false,false };
 	float lraise[4] = { .5f,2,1.5f,1 };
 };

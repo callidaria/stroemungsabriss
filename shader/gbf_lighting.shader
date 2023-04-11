@@ -72,9 +72,10 @@ void main()
 	camera_dir = normalize(view_pos-position);
 
 	// process light sources
-	vec3 lgt_colours = vec3(0);
+	vec3 sdw_colours = vec3(0);
 	for (int i=0;i<sunlight_count;i++)
-		lgt_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
+		sdw_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
+	vec3 lgt_colours = vec3(0);
 	for (int j=0;j<pointlight_count;j++)
 		lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
 	for (int k=0;k<spotlight_count;k++)
@@ -82,10 +83,10 @@ void main()
 
 	// process shadows
 	vec3 light_dir = normalize(sunlight[0].position-position);
-	lgt_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
+	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
 
 	// return colour composition
-	outColour = vec4(lgt_colours,1);
+	outColour = vec4(lgt_colours+sdw_colours,1);
 }
 // FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
 // FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?
@@ -111,7 +112,7 @@ vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_s
 	vec3 specular = process_specular(colour,sl.colour,in_speculars,spec_dir,fresnel);
 
 	// combine sunlight shading components
-	return mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular;
+	return (mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular)*sl.intensity;
 }
 
 // pointlight processing
@@ -130,7 +131,7 @@ vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light
 	// calculate pointlight influence
 	float distance = length(pl.position-position);
 	float attenuation = 1/(pl.constant+pl.linear*distance+pl.quadratic*(distance*distance));
-	return (diffusion+specular)*attenuation;
+	return (diffusion+specular)*attenuation*pl.intensity;
 }
 
 // spotlight processing
