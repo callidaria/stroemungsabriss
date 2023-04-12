@@ -62,11 +62,15 @@ void main()
 	// read g-buffer information
 	vec4 colourxspec = texture(gbuffer_colour,TexCoords);
 	vec4 positionxshadow = texture(gbuffer_position,TexCoords);
+	vec4 normalsxemission = texture(gbuffer_normals,TexCoords);
+
+	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
 	float speculars = colourxspec.a;
 	vec3 position = positionxshadow.rgb;
 	float shadow = positionxshadow.a;
-	vec3 normals = texture(gbuffer_normals,TexCoords).rgb;
+	vec3 normals = normalsxemission.rgb;
+	float lemission = normalsxemission.a;
 
 	// precalculations
 	camera_dir = normalize(view_pos-position);
@@ -84,9 +88,15 @@ void main()
 	// process shadows
 	vec3 light_dir = normalize(sunlight[0].position-position);
 	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
+	vec3 cmb_colours = lgt_colours+sdw_colours;
+
+	// process emission
+	vec3 emit_colours = colour*lemission;
+	cmb_colours = max(cmb_colours,emit_colours);
+	// TODO: figure out if space over time is the best call in this case
 
 	// return colour composition
-	outColour = vec4(lgt_colours+sdw_colours,1);
+	outColour = vec4(cmb_colours,1);
 }
 // FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
 // FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?

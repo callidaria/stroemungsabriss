@@ -7,7 +7,7 @@ in vec3 ltp;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
-out vec3 gbuffer_normals;
+out vec4 gbuffer_normals;
 
 // object material textures
 uniform sampler2D tex;
@@ -24,16 +24,16 @@ void main()
 	gbuffer_colour = texture(tex,TexCoords);
 	gbuffer_colour.a = texture(sm,TexCoords).r;
 
-	// translate position
+	// translate position & shadow
 	gbuffer_position.rgb = Position.rgb;
-
-	// translate normals
-	vec3 normals = texture(nmap,TexCoords).rgb*2-1;
-	gbuffer_normals = normalize(TBN*normals);
-
-	// translate shadow
 	gbuffer_position.a = calculate_shadow();
+
+	// translate normals & emission
+	vec3 normals = texture(nmap,TexCoords).rgb*2-1;
+	gbuffer_normals.rgb = normalize(TBN*normals);
+	gbuffer_normals.a = texture(emit,TexCoords).r;
 }
+// FIXME: specular & emission map only use one colour channel, merge them?
 
 // dynamic shadow map generation
 float calculate_shadow()

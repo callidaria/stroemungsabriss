@@ -16,7 +16,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 			"./res/casino/entrance_spec.png","./res/casino/entrance_normal.png","./res/none.png",
 			glm::vec3(),1,glm::vec3());
 	m_ccbf->r3d->add("./res/casino/test_table.obj","./res/casino/table_colour.png",
-			"./res/casino/table_spec.png","./res/casino/table_normal.png","res/none.png",
+			"./res/casino/table_spec.png","./res/casino/table_normal.png","./res/none.png",
 			glm::vec3(-2,0,-1),1,glm::vec3());
 	m_ccbf->r3d->add("./res/casino/tobject.obj","./res/casino/tobj1_colour.png",
 			"./res/casino/tobj1_spec.png","./res/casino/tobj1_normal.png","./res/none.png",
