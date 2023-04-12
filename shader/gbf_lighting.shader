@@ -34,7 +34,6 @@ struct light_spot {
 uniform sampler2D gbuffer_colour;
 uniform sampler2D gbuffer_position;
 uniform sampler2D gbuffer_normals;
-uniform sampler2D shadow_tex;
 
 // camera information
 uniform vec3 view_pos;
@@ -77,17 +76,18 @@ void main()
 
 	// process light sources
 	vec3 sdw_colours = vec3(0);
+	vec3 lgt_colours = vec3(0);
 	for (int i=0;i<sunlight_count;i++)
 		sdw_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
-	vec3 lgt_colours = vec3(0);
 	for (int j=0;j<pointlight_count;j++)
 		lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
 	for (int k=0;k<spotlight_count;k++)
 		lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
 	// process shadows
-	vec3 light_dir = normalize(sunlight[0].position-position);
-	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
+	//vec3 light_dir = normalize(sunlight[0].position-position);
+	//sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
+	sdw_colours *= 1-shadow;
 	vec3 cmb_colours = lgt_colours+sdw_colours;
 
 	// process emission

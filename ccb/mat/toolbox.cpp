@@ -176,6 +176,15 @@ void Toolbox::set_texture_parameter_clamp_to_edge()
 }
 
 /*
+	TODO
+*/
+void Toolbox::set_texture_parameter_clamp_to_border()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
+}
+
+/*
 	set_texture_parameter_texture_repeat() -> void (private,static)
 	purpose: define texture as repeatable
 */

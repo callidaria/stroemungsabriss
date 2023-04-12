@@ -78,7 +78,7 @@ int main(int argc,char** argv)
 #endif
 
 	// MAIN LOOP
-	uint32_t run=1;
+	uint32_t run = 1;
 	bool reboot = false;
 	while (run) {
 
@@ -86,7 +86,6 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.print_fps();
 		f.vsync(60);
 		f.calc_time_delta();
 		f.input(run);

@@ -16,18 +16,17 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	light_master.push_back(Light3D(m_ccbf->r3d,0,glm::vec3(100,200,150),glm::vec3(1),1));
-	light_master[0].create_shadow(glm::vec3(0),25,25,5,4096);
-	lighting.add_sunlight({ glm::vec3(500,750,100),glm::vec3(1),.2f });
-	lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
+	m_ccbf->r3d->create_shadow(glm::vec3(100,200,150),glm::vec3(0),25,25,5,4096);
+	lighting.add_sunlight({ glm::vec3(100,200,150),glm::vec3(1),1 });
+	/*lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
 	for (uint8_t i=0;i<4;i++)
 		lighting.add_pointlight({ glm::vec3(7,lraise[i],-7+(i*4)),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
+	lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });*/
 	lighting.upload(&deferred_fb.s);
-	//lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
 
 /*
@@ -112,11 +111,9 @@ void World::load_geometry()
 void World::render(uint32_t &running,bool &reboot)
 {
 	// shadow processing
-	light_master[0].prepare_shadow();
-	m_ccbf->frame->clear();
-	m_ccbf->r3d->prepare();
-	for (auto scene : scene_master) scene->shadow();
-	light_master[0].close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+	m_ccbf->r3d->prepare_shadow();
+	m_ccbf->r3d->render_mesh_shadow();
+	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
 	glDisable(GL_BLEND);
@@ -125,7 +122,7 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// handle environments, bosses & player
 	m_ccbf->r3d->prepare(cam3D_master[active_cam3D]);
-	light_master[0].upload_shadow();
+	m_ccbf->r3d->upload_shadow();
 	for (auto scene : scene_master) scene->render(cam3D_master[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
@@ -145,8 +142,6 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,light_master[0].dtex);
 
 	deferred_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
 	deferred_fb.draw();

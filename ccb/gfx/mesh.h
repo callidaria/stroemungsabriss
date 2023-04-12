@@ -36,6 +36,7 @@ public:
 	GLuint tex,specmap,normap,emitmap;
 
 	// transformation
+	glm::mat4 model = glm::mat4(1);
 	glm::vec3 pos,rot;
 	float scl;
 

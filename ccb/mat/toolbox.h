@@ -41,10 +41,13 @@ public:
 	static void set_texture_parameter_linear_mipmap();
 	static void set_texture_parameter_nearest_unfiltered();
 
+	// pattern handling
+	static void set_texture_parameter_clamp_to_edge();
+	static void set_texture_parameter_clamp_to_border();
+	static void set_texture_parameter_texture_repeat();
+
 private:
 
 	// helpers
-	static void set_texture_parameter_clamp_to_edge();
-	static void set_texture_parameter_texture_repeat();
 	static void load_texture_function_head(GLuint tex,const char* path);
 };

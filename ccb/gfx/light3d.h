@@ -92,7 +92,7 @@ public:
 
 	void upload_shadow()
 	{
-		r3d->upload_shadow(shadow_mat);
+		//r3d->upload_shadow();
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D,dtex);
 	}

@@ -11,19 +11,20 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 	// object loading
 	index_r3D = m_ccbf->r3d->add("./res/casino/test_floor.obj","./res/casino/paquet_colour.png",
 			"./res/casino/paquet_spec.png","./res/casino/paquet_normal.png","./res/none.png",
-			glm::vec3(),1,glm::vec3());
+			glm::vec3(),1,glm::vec3(),false);
 	m_ccbf->r3d->add("./res/casino/test_entrance.obj","./res/casino/entrance_colour.png",
 			"./res/casino/entrance_spec.png","./res/casino/entrance_normal.png","./res/none.png",
-			glm::vec3(),1,glm::vec3());
+			glm::vec3(),1,glm::vec3(),false);
 	m_ccbf->r3d->add("./res/casino/test_table.obj","./res/casino/table_colour.png",
 			"./res/casino/table_spec.png","./res/casino/table_normal.png","./res/none.png",
-			glm::vec3(-2,0,-1),1,glm::vec3());
+			glm::vec3(-2,0,-1),1,glm::vec3(),true);
 	m_ccbf->r3d->add("./res/casino/tobject.obj","./res/casino/tobj1_colour.png",
 			"./res/casino/tobj1_spec.png","./res/casino/tobj1_normal.png","./res/none.png",
-			glm::vec3(2,0,1),1,glm::vec3());
+			glm::vec3(2,0,1),1,glm::vec3(),true);
 	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/rolling_colour.png",
 			"./res/casino/rolling_spec.png","./res/casino/rolling_normal.png","./res/none.png",
-			glm::vec3(0,.5f,0),.5f,glm::vec3());
+			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
+	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
 
 	// material definitions
 	m0 = Material3D(m_ccbf->r3d,2.5f,8,.25f);
@@ -72,13 +73,13 @@ void CasinoSpike::render(Camera3D &cam3D)
 
 	// render flooring
 	// m_ccbf->r3d->prepare(cam3D);
-	m0.upload();
+	//m0.upload();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);
 
 	// render wordly objects
-	m1.upload();
+	//m1.upload();
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+4);
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1),mv_pos));
+	//m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1),mv_pos));
 	m_ccbf->r3d->render_mesh(index_r3D+4,index_r3D+5);
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
+	//m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
 }

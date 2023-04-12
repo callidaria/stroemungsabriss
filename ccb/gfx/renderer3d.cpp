@@ -17,14 +17,20 @@ Renderer3D::Renderer3D()
 	p: origin position of the mesh
 	s: initial mesh scaling
 	r: initial mesh rotation
+	cast_shadow (default false): true if object should cast a shadow
 	purpose: add mesh object to renderer
 	returns: memory index to refer to the created mesh object by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-		glm::vec3 p,float s,glm::vec3 r)
+		glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
 {
+	// load mesh
+	uint16_t mesh_id = ml.size();
 	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&mofs));
-	return ml.size()-1;
+
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
+	return mesh_id;
 }
 
 /*
@@ -36,17 +42,58 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	returns: memory index to refer to the created instanced object by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,
-		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap)
+		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow)
 {
+	// load mesh
+	uint16_t mesh_id = iml.size();
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
+
+	// create related index upload pattern
 	std::vector<float> cmesh_index;
 	for (uint16_t i=0;i<dcap;i++) {
 		cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),
 		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
 		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
 	} mesh_indices.push_back(cmesh_index);
-	return iml.size()-1;
+
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
+	return mesh_id;
 }
+
+/*
+	TODO
+*/
+void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
+		float fdiv,uint16_t res)
+{
+	// save shadow resolution
+	shadow_res = res;
+
+	// setup shadow map texture
+	glGenTextures(1,&shadow_map);
+	float border_colour[4] = { 1 };
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,res,res,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+	Toolbox::set_texture_parameter_nearest_unfiltered();
+	Toolbox::set_texture_parameter_clamp_to_border();
+	glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR,border_colour);
+
+	// setup depth sensitive framebuffer object
+	glGenFramebuffers(1,&depth_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,shadow_map,0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+	// calculate shadow projection
+	float hwidth = mwidth/2,hheight = mheight/2;
+	shadow_view = glm::lookAt(pos/fdiv+center,center,glm::vec3(0,1,0));
+	shadow_proj = glm::ortho(-hwidth,hwidth,-hheight,hheight,.1f,100.0f);
+	scam_projection = shadow_proj*shadow_view;
+}
+// FIXME: i know of the commutative properties of matrix multiplication, maybe generally precalc cam?
 
 /*
 	load(Camera3D) -> void
@@ -165,6 +212,55 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 }
 
 /*
+	TODO
+*/
+void Renderer3D::prepare_shadow()
+{
+	// set front face culling to avoid peter panning
+	glCullFace(GL_FRONT);
+
+	// prepare shadow framebuffer
+	glViewport(0,0,shadow_res,shadow_res);
+	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
+	Frame::clear();
+}
+
+/*
+	TODO
+*/
+void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glViewport(0,0,w_res,h_res);
+	glCullFace(GL_BACK);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_mesh_shadow()
+{
+	// prepare mesh buffer & shader to render shadow map
+	prepare();
+	s3d.upload_matrix("view",shadow_view);
+	s3d.upload_matrix("proj",shadow_proj);
+
+	// project casting objects to shadow map
+	for (auto id : scast_mesh_ids) {
+		s3d.upload_matrix("model",ml[id].model);
+		glDrawArrays(GL_TRIANGLES,ml[id].ofs,ml[id].size);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_instance_shadow()
+{
+	// TODO
+}
+
+/*
 	render_mesh(uint16_t,uint16_t) -> void
 	b: starting index of mesh that is to be drawn
 	e: index to stop rendering at (excluding this index)
@@ -181,9 +277,11 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].emitmap);
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
+		s3d.upload_matrix("model",ml[i].model);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	} glActiveTexture(GL_TEXTURE0);
 }
+// FIXME: please finally choose if TEXTURE0 should be set at the beginning or reset after drawing
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
@@ -210,8 +308,15 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 	upload_shadow(mat4) -> void
 	DEPRECATED: this will be removed after completing #135
 */
-void Renderer3D::upload_shadow(glm::mat4 shadow_matrix)
-{ s3d.upload_matrix("light_trans",shadow_matrix); }
+void Renderer3D::upload_shadow()
+{
+	// upload camera projection
+	s3d.upload_matrix("light_trans",scam_projection);
+
+	// upload shadow map
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+}
 
 /*
 	PARAMETER DEFINITIONS:
