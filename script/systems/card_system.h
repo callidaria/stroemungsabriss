@@ -8,6 +8,7 @@
 #include "../../ccb/frm/frame.h"
 
 #include "../../ccb/mat/camera3d.h"
+#include "../../ccb/mat/lighting.h"
 #include "../../ccb/mat/toolbox.h"
 
 #include "../../ccb/gfx/shader.h"
@@ -15,7 +16,7 @@
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/light3d.h"
 
-#include "../ui/cursor.h"
+//#include "../ui/cursor.h"
 
 // upload capacity
 constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 9;
@@ -86,6 +87,7 @@ class CardSystem
 public:
 
 	// construction
+	CardSystem() {  }
 	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path);
 	~CardSystem() {  };
 
@@ -181,7 +183,7 @@ private:
 	float crr_dtime = 0;
 
 	// controls
-	Cursor cursor = Cursor(m_frame,m_r2d);
+	//Cursor cursor = Cursor(m_frame,m_r2d);
 	bool lfI = false,kinput = true;
 	int32_t tmx = 0;
 	float cstart = 0;

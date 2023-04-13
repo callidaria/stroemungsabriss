@@ -20,7 +20,6 @@ class Scene
 {
 public:
 	virtual ~Scene() {  }
-	virtual void shadow() {  }
 	virtual void render(Camera3D&) {  }
 };
 

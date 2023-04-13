@@ -96,7 +96,7 @@ void main()
 	// TODO: figure out if space over time is the best call in this case
 
 	// return colour composition
-	outColour = vec4(cmb_colours,1);
+	outColour = vec4(colour,1);
 }
 // FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
 // FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?

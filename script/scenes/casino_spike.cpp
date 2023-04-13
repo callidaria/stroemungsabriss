@@ -32,17 +32,6 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 }
 
 /*
-	TODO
-*/
-void CasinoSpike::shadow()
-{
-	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+4);
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1),mv_pos));
-	m_ccbf->r3d->render_mesh(index_r3D+4,index_r3D+5);
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
-}
-
-/*
 	render() -> void (virtual)
 	purpose: render casino scene
 */

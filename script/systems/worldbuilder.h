@@ -7,6 +7,7 @@
 
 #include "../scenes/nepal_mountain_woods.h"
 #include "../scenes/casino_spike.h"
+#include "../scenes/casino_table.h"
 
 #include "../menu/menu.h"
 #include "../ui/action_menu.h"
@@ -32,6 +33,7 @@ private:
 	void load_titles();
 	void load_menu();
 	void load_casino();
+	void load_cards();
 	void load_airfield();
 	void load_dpilot();
 

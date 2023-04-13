@@ -529,7 +529,7 @@ void CardSystem::render()
 	glDisable(GL_CULL_FACE);
 
 	// render cursor
-	cursor.render();
+	//cursor.render();
 }
 // TODO: OPTIMIZE!
 // TODO: minimize when light manager is fixed, ! especially the shadow cast & receive !

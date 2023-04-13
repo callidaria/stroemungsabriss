@@ -14,8 +14,7 @@ public:
 	~CasinoSpike() {  }
 
 	// draw
-	virtual void shadow();
-	virtual void render(Camera3D&cam3D);
+	virtual void render(Camera3D &cam3D);
 
 private:
 

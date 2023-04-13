@@ -98,7 +98,6 @@
 
 - [Shader](engine/shader.md)
 - [Material](engine/material.md)
-- [3D Lighting](engine/light3d.md)
 - [3D Point Light](engine/light_point3d.md)
 - [3D Spotlight](engine/light_spot3d.md)
 

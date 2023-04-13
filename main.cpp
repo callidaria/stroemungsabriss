@@ -26,7 +26,6 @@
 
 #include "ccb/fcn/ccb_manager.h"
 
-#include "ccb/gfx/light3d.h"
 #include "ccb/gfx/material3d.h"
 
 #include "script/systems/input_map.h"
@@ -71,7 +70,7 @@ int main(int argc,char** argv)
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
-	eref.ld.push(LOAD_CASINO);
+	eref.ld.push(LOAD_CARDTABLE);
 
 #if BUILD_DEV_MODE
 	bool dactive = false;
