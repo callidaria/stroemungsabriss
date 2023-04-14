@@ -16,9 +16,9 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf)
 	card_system = CardSystem(ccbf->frame,ccbf->r2d,ccbf->r3d,curr_path);
 
 	// create card game players
-	card_system.create_player(glm::vec2(0,-10),180,100);
-	card_system.create_player(glm::vec2(-10,0),-90,100);
-	card_system.create_player(glm::vec2(10,0),90,100);
+	card_system.create_player(glm::vec2(0,-10),180,20);
+	card_system.create_player(glm::vec2(-10,0),-90,20);
+	card_system.create_player(glm::vec2(10,0),90,20);
 
 	// create playing field
 	card_system.create_pile(glm::vec2(0));

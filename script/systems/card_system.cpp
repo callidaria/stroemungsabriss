@@ -456,29 +456,29 @@ void CardSystem::update()
 		// modify selected card to stand out compared to the others
 		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
 		float selected_mod = (i==choice)*.5f;
-		icpos[idx] += selected_mod;icpos[idx+1] -= selected_mod;
+		icpos[idx] += selected_mod,icpos[idx+1] -= selected_mod;
 
 		// queue card & revert modification
 		card_to_queue(hand[i]);
-		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
+		icpos[idx] -= selected_mod,icpos[idx+1] += selected_mod;
 	}
 
 	// render shadow projection of shown currency
-	l3d.prepare_shadow();
+	/*l3d.prepare_shadow();
 	m_r3d->prepare_inst();
 	m_r3d->is3d.upload_matrix("view",l3d.view);
 	m_r3d->is3d.upload_matrix("proj",l3d.proj);
-	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
+	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);*/
 
 	// render shadow projection of playing cards
-	glDisable(GL_CULL_FACE);
+	/*glDisable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
 	sdr.upload_matrix("view",l3d.view);
 	sdr.upload_matrix("proj",l3d.proj);
 	bfr.upload_indices(render_queue);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
+	l3d.close_shadow(m_frame->w_res,m_frame->h_res);*/
 }
 
 /*
@@ -493,20 +493,17 @@ void CardSystem::render()
 	l3d.set_amnt(1);
 	l3d.upload();
 	l3d.upload_shadow();
-	m_r3d->s3d.upload_int("tex_repeat",10);
+	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
 	m_r3d->prepare_inst(cam3D);
-	m_r3d->is3d.upload_float("ambient",.1f);
-	m_r3d->is3d.upload_int("amnt_light_sun",1);
-	l3d.upload_inst();
-	m_r3d->is3d.upload_matrix("light_trans",l3d.shadow_mat);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
+	/*glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
 	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
 
 	// setup cards
+	glEnable(GL_BLEND);
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(render_queue);
@@ -518,15 +515,16 @@ void CardSystem::render()
 	sdr.upload_camera(cam3D);
 
 	// draw cards
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
+	/*glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
+	glDisable(GL_BLEND);
 
 	// gl reset features
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	/*glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);*/
 
 	// render cursor
 	//cursor.render();

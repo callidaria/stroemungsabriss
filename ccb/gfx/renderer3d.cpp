@@ -126,7 +126,7 @@ void Renderer3D::load(Camera3D cam3d)
 	ibuffer.upload_vertices(iv);
 
 	// compile instance shader
-	is3d.compile3d("shader/vertexi3d.shader","shader/fragmenti3d.shader");
+	is3d.compile3d("shader/givertex.shader","shader/gfragment.shader");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
@@ -142,6 +142,7 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_camera(cam3d);
 
 	// compile shadow shader
+	Buffer::unbind();
 	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
@@ -259,6 +260,7 @@ void Renderer3D::render_instance_shadow()
 {
 	// TODO
 }
+// TODO: allow independent geometry upload for shadow handling
 
 /*
 	render_mesh(uint16_t,uint16_t) -> void

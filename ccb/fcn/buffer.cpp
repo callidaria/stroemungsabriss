@@ -32,6 +32,15 @@ void Buffer::bind_index()
 { glBindBuffer(GL_ARRAY_BUFFER,iebo); }
 
 /*
+	TODO
+*/
+void Buffer::unbind()
+{
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+}
+
+/*
 	upload_vertices(float*,size_t) -> void
 	vertices: array of vertices to upload
 	vsize: size of array to upload (by sizeof return)
