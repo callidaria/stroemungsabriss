@@ -196,6 +196,7 @@ void Renderer3D::prepare_inst()
 	is3d.enable();
 	ibuffer.bind();
 }
+// FIXME: detach gl settings from basic preparations
 
 /*
 	prepare_inst(Camera3D) -> void
@@ -258,7 +259,17 @@ void Renderer3D::render_mesh_shadow()
 */
 void Renderer3D::render_instance_shadow()
 {
-	// TODO
+	// prepare instance buffer & shader to render shadow map
+	prepare_inst();
+	is3d.upload_matrix("view",shadow_view);
+	is3d.upload_matrix("proj",shadow_proj);
+
+	// project casting instanced objects to shadow map
+	for (auto id : scast_instance_ids) {
+		ibuffer.upload_indices(mesh_indices[id]);
+		is3d.upload_matrix("model",iml[id].model);
+		glDrawArrays(GL_TRIANGLES,iml[id].ofs,iml[id].size);
+	}
 }
 // TODO: allow independent geometry upload for shadow handling
 
@@ -302,6 +313,7 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 	glBindTexture(GL_TEXTURE_2D,iml[i].emitmap);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
+	is3d.upload_matrix("model",iml[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,c);
 	glActiveTexture(GL_TEXTURE0);
 }

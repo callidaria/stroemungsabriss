@@ -14,6 +14,8 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	// background objects
 	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
 			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
+	m_r3d->add(curr_path[0].object,curr_path[0].texture,curr_path[0].specular,curr_path[0].normals,
+			curr_path[0].emission,glm::vec3(0),4,glm::vec3(0),true);
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -58,7 +60,8 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	for (uint8_t i=0;i<40;i++) create_card(glm::vec2(i%10,(uint8_t)(i/10)),i>19);
 	for (uint8_t i=0;i<36;i++) {
 		glm::vec2 tex_id = glm::vec2(i%9,4+(uint8_t)(i/9));
-		create_card(tex_id,0);create_card(tex_id,1);
+		create_card(tex_id,0);
+		create_card(tex_id,1);
 	}
 
 	// shuffle deck & place
@@ -69,7 +72,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	ir3d_index = m_r3d->iml.size();
 	for (auto cstage:curr_path) {
 		m_r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
-				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP);
+				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,true);
 		currency_value.push_back(cstage.value);
 		currency_spawn.push_back(0);
 		cstack.stacks.push_back({});
@@ -489,12 +492,14 @@ void CardSystem::render()
 {
 	// render background
 	m_r3d->prepare(cam3D);
-	l3d.set_ambient(.1f);
+	/*l3d.set_ambient(.1f);
 	l3d.set_amnt(1);
 	l3d.upload();
-	l3d.upload_shadow();
+	l3d.upload_shadow();*/
 	m_r3d->s3d.upload_float("tex_repeat",10);
 	m_r3d->render_mesh(r3d_index,r3d_index+1);
+	m_r3d->s3d.upload_float("tex_repeat",1);
+	m_r3d->render_mesh(r3d_index+1,r3d_index+2);
 
 	// render currency
 	m_r3d->prepare_inst(cam3D);

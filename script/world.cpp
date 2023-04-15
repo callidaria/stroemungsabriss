@@ -16,8 +16,8 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	m_ccbf->r3d->create_shadow(glm::vec3(100,200,150),glm::vec3(0),25,25,5,4096);
-	lighting.add_sunlight({ glm::vec3(100,200,150),glm::vec3(1),1 });
+	m_ccbf->r3d->create_shadow(glm::vec3(100,150,-150),glm::vec3(0),25,25,5,4096);
+	lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),1 });
 	/*lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
 	for (uint8_t i=0;i<4;i++)
@@ -113,6 +113,7 @@ void World::render(uint32_t &running,bool &reboot)
 	// shadow processing
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
+	m_ccbf->r3d->render_instance_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
