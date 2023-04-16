@@ -3,8 +3,8 @@
 /*
 	TODO
 */
-CasinoTable::CasinoTable(CascabelBaseFeature* ccbf)
-	: m_ccbf(ccbf)
+CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
+	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// setup card system
 	std::vector<Currency> curr_path = {
@@ -13,7 +13,7 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf)
 		{ "./res/coin.obj","./res/coin_tex.png","./res/none.png","./res/dnormal.png",
 			"./res/none.png",5 }
 	};
-	card_system = CardSystem(ccbf->frame,ccbf->r2d,ccbf->r3d,curr_path);
+	card_system = CardSystem(ccbf,m_setRigs,curr_path);
 
 	// create card game players
 	card_system.create_player(glm::vec2(0,-10),180,100);

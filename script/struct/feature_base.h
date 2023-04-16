@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <queue>
 
 #include "../../ccb/frm/frame.h"
@@ -7,6 +8,9 @@
 #include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
+
+#include "../../ccb/mat/camera3d.h"
+#include "../../ccb/mat/lighting.h"
 
 #include "../systems/bullet_system.h"
 #include "../systems/input_map.h"
@@ -31,4 +35,11 @@ struct CascabelBaseFeature {
 	BulletSystem* bSys;
 	InputMap* iMap;
 	std::queue<LoadInstruction> ld;
+};
+
+// refers to all set utility used to visualize the scene
+struct StageSetup {
+	std::vector<Camera2D> cam2D;
+	std::vector<Camera3D> cam3D;
+	Lighting lighting;
 };

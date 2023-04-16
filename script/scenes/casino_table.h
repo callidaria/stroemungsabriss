@@ -10,7 +10,7 @@ class CasinoTable : public Scene
 public:
 
 	// construction
-	CasinoTable(CascabelBaseFeature* ccbf);
+	CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs);
 	~CasinoTable() {  }
 
 	// draw
@@ -20,5 +20,6 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 	CardSystem card_system;
 };

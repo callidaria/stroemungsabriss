@@ -58,11 +58,11 @@ int main(int argc,char** argv)
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	// LOADERS
-	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
-	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
+	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
 
 	// BUILD SET
+	World world = World(&eref);
 	world.add_camera(cam2d);
 	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
 	world.add_camera(Camera3D(1280.0f,720.0f));

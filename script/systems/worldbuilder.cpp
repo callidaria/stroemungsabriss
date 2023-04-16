@@ -66,7 +66,7 @@ void Worldbuilder::load_casino()
 void Worldbuilder::load_cards()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoTable* ctable = new CasinoTable(m_ccbf);
+	CasinoTable* ctable = new CasinoTable(m_ccbf,&m_world->set_rigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
 	m_world->load_geometry();

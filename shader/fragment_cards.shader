@@ -3,7 +3,7 @@
 in vec3 Position;
 in vec2 TexCoords;
 in vec3 Normals;
-in vec4 shadow_origin;
+in vec3 ltp;
 
 out vec4 outColour;
 
@@ -17,7 +17,7 @@ struct light_sun {
 };
 uniform light_sun al[1];
 
-float calc_shadow(vec4 tlp);
+float calculate_shadow();
 
 void main()
 {
@@ -30,25 +30,22 @@ void main()
 	vec3 mix_lmult = diffusion*al[0].col;
 
 	// receive shadows
-	float shadow = calc_shadow(shadow_origin);
+	float shadow = calculate_shadow();
 	mix_lmult *= (1-shadow);
 
 	// return colour mix
 	outColour = vec4(mix_lmult*mix.rgb,mix.a);
 }
 
-float calc_shadow(vec4 ltp)
+// dynamic shadow map generation
+float calculate_shadow()
 {
-	vec3 pc = ltp.xyz/ltp.w;
-	pc = pc*.5+.5;
-	float curr_depth = pc.z;
-	float out_shadow = 0;
-	vec2 texel = 1.0/textureSize(shadow_map,0);
-	for (int x=-1;x<=1;x++) {
-		for (int y=-1;y<=1;y++) {
-			float pcf_depth = texture(shadow_map,pc.xy+vec2(x,y)*texel).r;
-			out_shadow += float(curr_depth-0.0005>pcf_depth);
-		}
-	} out_shadow /= 9.0;
-	return out_shadow;
+	// depth extractions
+	float curr_depth = ltp.z;
+	float pcf_depth = texture(shadow_map,ltp.xy).r;
+
+	// project shadow
+	vec2 raster = 1.0/textureSize(shadow_map,0);
+	return float(curr_depth>pcf_depth);
 }
+// TODO: code repetition

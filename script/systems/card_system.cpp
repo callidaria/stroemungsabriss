@@ -2,20 +2,19 @@
 
 /*
 	constructor(Frame*,Renderer3D*,std::vector<Currency>)
-	f: pointer to cascabel frame for timing and input
-	r2d: pointer to genera 2D renderer to show cursor & icons
-	r3d: pointer to general 3D renderer to add certain background elements
+	TODO
 	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path)
-	: m_frame(f),m_r2d(r2d),m_r3d(r3d)
+CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
+		std::vector<Currency> curr_path)
+	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// background objects
-	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
-			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
-	m_r3d->add(curr_path[0].object,curr_path[0].texture,curr_path[0].specular,curr_path[0].normals,
-			curr_path[0].emission,glm::vec3(0),4,glm::vec3(0),true);
+	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
+	m_ccbf->r3d->add(curr_path[0].object,curr_path[0].texture,curr_path[0].specular,
+			curr_path[0].normals,curr_path[0].emission,glm::vec3(0),4,glm::vec3(0),true);
 
 	// card visualization setup
 	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
@@ -69,9 +68,9 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_r3d->iml.size();
+	ir3d_index = m_ccbf->r3d->iml.size();
 	for (auto cstage:curr_path) {
-		m_r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
+		m_ccbf->r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
 				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,true);
 		currency_value.push_back(cstage.value);
 		currency_spawn.push_back(0);
@@ -80,7 +79,7 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
-	l3d.create_shadow(glm::vec3(0),50,50,5,4096);
+	//l3d.create_shadow(glm::vec3(0),50,50,5,4096);
 }
 // TODO: sort currency by value
 
@@ -216,9 +215,9 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 {
 	// move currency representation towards players side
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size(),cstack.position.y));
-		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & stack counts
@@ -235,10 +234,10 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
 	// move currency representation towards opponents side
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(ops[oid].capital.position.x,ops[oid].capital.stacks[cid].size()*.2f,
 					ops[oid].capital.position.y)+ops[oid].capital.direction*glm::vec3(cid*2));
-		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & respective opponent stack count
@@ -256,7 +255,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t sid,uint16_t count)
 {
 	// move players currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
+		m_ccbf->r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -274,7 +273,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count
 {
 	// move opponents currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
+		m_ccbf->r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -342,23 +341,24 @@ void CardSystem::create_currency_stack(glm::vec2 pos,float rot)
 void CardSystem::process_input()
 {
 	// keyboard input
-	choice += (m_frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
-			- m_frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
-	lfI = m_frame->kb.ka[SDL_SCANCODE_RIGHT]||m_frame->kb.ka[SDL_SCANCODE_LEFT];
+	choice += (m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
+			- m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
+	lfI = m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]||m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
 	// transform from clip space & compare screen spaces with cursor position for choice
 	bool mouse_input
-			= (m_frame->mouse.mxfr!=tmx)&&(m_frame->mouse.myfr<.35f)&&(m_frame->mouse.mxfr<.5f);
+			= (m_ccbf->frame->mouse.mxfr!=tmx)&&(m_ccbf->frame->mouse.myfr<.35f)
+				&&(m_ccbf->frame->mouse.mxfr<.5f);
 	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
 		float end = (get_card_screen_space(hand.back()).x+1)/2;
-		float stapled_pos = m_frame->mouse.mxfr-start;
+		float stapled_pos = m_ccbf->frame->mouse.mxfr-start;
 		float single_card = (end-start)/(hand.size()-1);
 		choice = stapled_pos/single_card;
 		bool overselected = choice>=hand.size();
 		choice = overselected*(hand.size()-1)+!overselected*choice;
-	} tmx = m_frame->mouse.mxfr;
+	} tmx = m_ccbf->frame->mouse.mxfr;
 }
 
 /*
@@ -422,7 +422,7 @@ void CardSystem::update()
 		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
 
 	// update deal stall time
-	crr_dtime += m_frame->get_time_delta();
+	crr_dtime += m_ccbf->frame->get_time_delta();
 
 	// animate
 	i = 0;
@@ -491,21 +491,22 @@ void CardSystem::update()
 void CardSystem::render()
 {
 	// render background
-	m_r3d->prepare(cam3D);
+	m_ccbf->r3d->prepare(cam3D);
 	/*l3d.set_ambient(.1f);
 	l3d.set_amnt(1);
 	l3d.upload();
 	l3d.upload_shadow();*/
-	m_r3d->s3d.upload_float("tex_repeat",10);
-	m_r3d->render_mesh(r3d_index,r3d_index+1);
-	m_r3d->s3d.upload_float("tex_repeat",1);
-	m_r3d->render_mesh(r3d_index+1,r3d_index+2);
+	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
+	m_ccbf->r3d->s3d.upload_float("tex_repeat",1);
+	m_ccbf->r3d->render_mesh(r3d_index+1,r3d_index+2);
 
 	// render currency
-	m_r3d->prepare_inst(cam3D);
+	m_ccbf->r3d->prepare_inst(cam3D);
 	/*glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
-	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
+	for (uint8_t i=0;i<currency_spawn.size();i++)
+		m_ccbf->r3d->render_inst(ir3d_index+i,currency_spawn[i]);
 
 	// setup cards
 	glEnable(GL_BLEND);
@@ -513,10 +514,10 @@ void CardSystem::render()
 	bfr.bind();
 	bfr.upload_indices(render_queue);
 	std::string base="al[0].";
-	sdr.upload_vec3((base+"pos").c_str(),l3d.pos);
-	sdr.upload_vec3((base+"col").c_str(),l3d.col);
-	sdr.upload_float((base+"ins").c_str(),l3d.ins);
-	sdr.upload_matrix("light_trans",l3d.shadow_mat);
+	sdr.upload_vec3((base+"pos").c_str(),m_setRigs->lighting.sunlights[0].position);
+	sdr.upload_vec3((base+"col").c_str(),m_setRigs->lighting.sunlights[0].colour);
+	sdr.upload_float((base+"ins").c_str(),m_setRigs->lighting.sunlights[0].intensity);
+	sdr.upload_matrix("light_trans",m_ccbf->r3d->scam_projection);
 	sdr.upload_camera(cam3D);
 
 	// draw cards

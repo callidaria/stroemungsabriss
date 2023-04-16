@@ -16,6 +16,7 @@
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/light3d.h"
 
+#include "../struct/feature_base.h"
 //#include "../ui/cursor.h"
 
 // upload capacity
@@ -88,7 +89,7 @@ public:
 
 	// construction
 	CardSystem() {  }
-	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path);
+	CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,std::vector<Currency> curr_path);
 	~CardSystem() {  };
 
 	// interaction
@@ -150,10 +151,9 @@ private:
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
 	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
-	Frame* m_frame;
-	Renderer2D* m_r2d;
-	Renderer3D* m_r3d;
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(100,200,150),glm::vec3(1,1,1),1);
+	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
+	//Light3D l3d = Light3D(m_r3d,0,glm::vec3(100,200,150),glm::vec3(1,1,1),1);
 
 	// render
 	GLuint tex;

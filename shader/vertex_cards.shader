@@ -17,7 +17,7 @@ in float deckID;
 out vec3 Position;
 out vec2 TexCoords;
 out vec3 Normals;
-out vec4 shadow_origin;
+out vec3 ltp;
 
 // camera matrices
 uniform mat4 view = mat4(1.0);
@@ -55,5 +55,6 @@ void main()
 	TexCoords = vec2(texCoords.x/10+tidx.x/10,texCoords.y/8+tidx.y/8);
 
 	// precalculate shadow translation for fragment
-	shadow_origin = light_trans*vec4(Position,1);
+	vec4 rltp = light_trans*vec4(Position,1);
+	ltp = (rltp.xyz/rltp.w)*.5+.5;
 }

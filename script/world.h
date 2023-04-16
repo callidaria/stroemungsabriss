@@ -53,6 +53,7 @@ public:
 
 	// public indices
 	uint8_t active_daui = 0,active_cam2D = 0,active_cam3D = 0;
+	StageSetup set_rigs = { std::vector<Camera2D>(),std::vector<Camera3D>(),Lighting() };
 
 private:
 
@@ -68,9 +69,5 @@ private:
 	std::vector<Boss*> boss_master;
 
 	// set components
-	std::vector<Camera2D> cam2D_master;
-	std::vector<Camera3D> cam3D_master;
-	Lighting lighting = Lighting();
-	bool mvup[4] = { false,false,false,false };
 	float lraise[4] = { .5f,2,1.5f,1 };
 };

@@ -42,7 +42,7 @@ public:
 	// upload
 	void upload(Shader* shader);
 
-private:
+public:
 
 	// lights
 	std::vector<LightSun> sunlights;

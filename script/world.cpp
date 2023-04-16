@@ -16,8 +16,8 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	m_ccbf->r3d->create_shadow(glm::vec3(100,150,-150),glm::vec3(0),25,25,5,4096);
-	lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),1 });
+	m_ccbf->r3d->create_shadow(glm::vec3(100,150,-150),glm::vec3(0),25,25,10,4096);
+	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),1 });
 	/*lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
 	for (uint8_t i=0;i<4;i++)
@@ -26,7 +26,7 @@ World::World(CascabelBaseFeature* eref)
 	lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
 	lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });*/
-	lighting.upload(&deferred_fb.s);
+	set_rigs.lighting.upload(&deferred_fb.s);
 }
 
 /*
@@ -49,9 +49,9 @@ void World::add_boss(Boss* boss)
 	purpose: create a camera, that can be switched to as graphical receptor
 */
 void World::add_camera(Camera2D cam2D)
-{ cam2D_master.push_back(cam2D); }
+{ set_rigs.cam2D.push_back(cam2D); }
 void World::add_camera(Camera3D cam3D)
-{ cam3D_master.push_back(cam3D); }
+{ set_rigs.cam3D.push_back(cam3D); }
 
 /*
 	free_memory() -> void
@@ -97,9 +97,9 @@ void World::remove_boss(uint8_t boss_id)
 */
 void World::load_geometry()
 {
-	m_ccbf->r2d->load(&cam2D_master[active_cam2D]);
+	m_ccbf->r2d->load(&set_rigs.cam2D[active_cam2D]);
 	m_ccbf->rI->load();
-	m_ccbf->r3d->load(cam3D_master[active_cam3D]);
+	m_ccbf->r3d->load(set_rigs.cam3D[active_cam3D]);
 }
 
 /*
@@ -122,9 +122,9 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
-	m_ccbf->r3d->prepare(cam3D_master[active_cam3D]);
+	m_ccbf->r3d->prepare(set_rigs.cam3D[active_cam3D]);
 	m_ccbf->r3d->upload_shadow();
-	for (auto scene : scene_master) scene->render(cam3D_master[active_cam3D]);
+	for (auto scene : scene_master) scene->render(set_rigs.cam3D[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
 
@@ -144,7 +144,7 @@ void World::render(uint32_t &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 
-	deferred_fb.s.upload_vec3("view_pos",cam3D_master[active_cam3D].pos);
+	deferred_fb.s.upload_vec3("view_pos",set_rigs.cam3D[active_cam3D].pos);
 	deferred_fb.draw();
 
 	// render ui
