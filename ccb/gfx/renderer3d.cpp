@@ -230,6 +230,12 @@ void Renderer3D::prepare_shadow()
 /*
 	TODO
 */
+void Renderer3D::register_geometry(ShadowGeometry* geometry)
+{ shadow_geometry.push_back(geometry); }
+
+/*
+	TODO
+*/
 void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -269,9 +275,18 @@ void Renderer3D::render_instance_shadow()
 		ibuffer.upload_indices(mesh_indices[id]);
 		is3d.upload_matrix("model",iml[id].model);
 		glDrawArrays(GL_TRIANGLES,iml[id].ofs,iml[id].size);
+		// TODO: make this a gldrawarraysinstanced with fixed count
 	}
 }
-// TODO: allow independent geometry upload for shadow handling
+
+/*
+	TODO
+*/
+void Renderer3D::render_geometry_shadow()
+{
+	for (auto geometry : shadow_geometry)
+		geometry->render_shadow();
+}
 
 /*
 	render_mesh(uint16_t,uint16_t) -> void

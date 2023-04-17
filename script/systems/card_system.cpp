@@ -13,12 +13,9 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	// background objects
 	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
-	m_ccbf->r3d->add(curr_path[0].object,curr_path[0].texture,curr_path[0].specular,
-			curr_path[0].normals,curr_path[0].emission,glm::vec3(0),4,glm::vec3(0),true);
 
 	// card visualization setup
-	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
-	float cverts[] = {
+	/*float cverts[] = {
 
 		// card front
 		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,0,
@@ -38,10 +35,10 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texID",1,8,CARDSYSTEM_UPLOAD_REPEAT);
 	cam3D.view3D = glm::rotate(cam3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
-	sdr.upload_camera(cam3D);
+	sdr.upload_camera(cam3D);*/
 
 	// load card game texture
-	glGenTextures(1,&tex);
+	/*glGenTextures(1,&tex);
 	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f);
 	sdr.upload_int("tex",0);
 	sdr.upload_int("shadow_map",3);
@@ -53,7 +50,11 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	sdr.def_indexF(bfr.get_indices(),"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);*/
+	set_rigs->cam3D[3].view3D
+		= glm::rotate(set_rigs->cam3D[0].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
+	pcards = new PlayingCards(ccbf,set_rigs);
+	ccbf->r3d->register_geometry(pcards);
 
 	// spawn cards into space
 	for (uint8_t i=0;i<40;i++) create_card(glm::vec2(i%10,(uint8_t)(i/10)),i>19);
@@ -445,7 +446,7 @@ void CardSystem::update()
 	}
 
 	// building the render queue for correct transparency
-	render_queue.clear();
+	pcards->render_queue.clear();
 	for (auto deck:dpiles) {								// queue pile cards
 		for (auto card:deck.cards) card_to_queue(card);
 	} for (auto opp:ops) {									// queue cards held by opponent
@@ -491,25 +492,23 @@ void CardSystem::update()
 void CardSystem::render()
 {
 	// render background
-	m_ccbf->r3d->prepare(cam3D);
+	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
 	/*l3d.set_ambient(.1f);
 	l3d.set_amnt(1);
 	l3d.upload();
 	l3d.upload_shadow();*/
 	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
 	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
-	m_ccbf->r3d->s3d.upload_float("tex_repeat",1);
-	m_ccbf->r3d->render_mesh(r3d_index+1,r3d_index+2);
 
 	// render currency
-	m_ccbf->r3d->prepare_inst(cam3D);
+	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
 	/*glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
 	for (uint8_t i=0;i<currency_spawn.size();i++)
 		m_ccbf->r3d->render_inst(ir3d_index+i,currency_spawn[i]);
 
 	// setup cards
-	glEnable(GL_BLEND);
+	/*glEnable(GL_BLEND);
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(render_queue);
@@ -518,15 +517,16 @@ void CardSystem::render()
 	sdr.upload_vec3((base+"col").c_str(),m_setRigs->lighting.sunlights[0].colour);
 	sdr.upload_float((base+"ins").c_str(),m_setRigs->lighting.sunlights[0].intensity);
 	sdr.upload_matrix("light_trans",m_ccbf->r3d->scam_projection);
-	sdr.upload_camera(cam3D);
+	sdr.upload_camera(cam3D);*/
 
 	// draw cards
 	/*glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
-	glActiveTexture(GL_TEXTURE0);
+	/*glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-	glDisable(GL_BLEND);
+	glDisable(GL_BLEND);*/
+	pcards->render();
 
 	// gl reset features
 	/*glDisable(GL_DEPTH_TEST);
@@ -638,7 +638,7 @@ void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 void CardSystem::card_to_queue(uint8_t id)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
+	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) pcards->render_queue.push_back(icpos[rid+i]);
 }
 
 /*
@@ -649,7 +649,8 @@ void CardSystem::card_to_queue(uint8_t id)
 glm::vec3 CardSystem::get_card_screen_space(uint8_t id)
 {
 	glm::vec3 card_pos = get_position(id)-glm::vec3(CARD_HWIDTH,0,0);
-	glm::vec4 clip_space = cam3D.proj3D*cam3D.view3D*glm::vec4(card_pos,1);
+	glm::vec4 clip_space = m_setRigs->cam3D[3].proj3D
+			* m_setRigs->cam3D[3].view3D*glm::vec4(card_pos,1);
 	return glm::vec3(clip_space)/glm::vec3(clip_space.w);
 }
 

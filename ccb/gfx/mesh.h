@@ -9,6 +9,14 @@
 
 #include "../mat/toolbox.h"
 
+// viruals for a geometry class, capable of casting shadows
+class ShadowGeometry
+{
+public:
+	virtual ~ShadowGeometry() {  }
+	virtual void render_shadow() {  }
+};
+
 class Mesh
 {
 public:

@@ -16,16 +16,16 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	m_ccbf->r3d->create_shadow(glm::vec3(100,150,-150),glm::vec3(0),25,25,10,4096);
-	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),1 });
-	/*lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
-	lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
+	m_ccbf->r3d->create_shadow(glm::vec3(100,50,-150),glm::vec3(0),100,100,20,4096);
+	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),.1f });
+	set_rigs.lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
 	for (uint8_t i=0;i<4;i++)
-		lighting.add_pointlight({ glm::vec3(7,lraise[i],-7+(i*4)),glm::vec3(1),1,1,.1f,1 });
-	lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
-	lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
-	lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
-	lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });*/
+		set_rigs.lighting.add_pointlight({ glm::vec3(7,lraise[i],-7+(i*4)),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 	set_rigs.lighting.upload(&deferred_fb.s);
 }
 
@@ -114,6 +114,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene

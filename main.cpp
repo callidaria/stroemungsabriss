@@ -67,6 +67,7 @@ int main(int argc,char** argv)
 	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
 	world.add_camera(Camera3D(1280.0f,720.0f));
 	world.add_camera(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));
+	world.add_camera(Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f));
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);

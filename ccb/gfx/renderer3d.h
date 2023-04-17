@@ -13,8 +13,6 @@
 
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
 
-const std::string shadow_matrix_location = "light_trans";
-
 class Renderer3D
 {
 public:
@@ -40,6 +38,7 @@ public:
 	void prepare_inst();
 	void prepare_inst(Camera3D cam3d);
 	void prepare_shadow();
+	void register_geometry(ShadowGeometry* geometry);
 
 	// close process
 	void close_shadow(uint16_t w_res,uint16_t h_res);
@@ -47,6 +46,7 @@ public:
 	// shadow
 	void render_mesh_shadow();
 	void render_instance_shadow();
+	void render_geometry_shadow();
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);
@@ -77,6 +77,7 @@ public:
 	uint16_t shadow_res;
 	std::vector<uint16_t> scast_mesh_ids;
 	std::vector<uint16_t> scast_instance_ids;
+	std::vector<ShadowGeometry*> shadow_geometry;
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
 };
