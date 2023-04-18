@@ -82,7 +82,7 @@ public:
 	// construction
 	CardSystem() {  }
 	CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,std::vector<Currency> curr_path);
-	~CardSystem() {  };
+	~CardSystem() {  }
 
 	// interaction
 	void shuffle_all();

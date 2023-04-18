@@ -246,6 +246,15 @@ void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
 /*
 	TODO
 */
+void Renderer3D::clear_memory()
+{
+	for (auto geometry : shadow_geometry)
+		delete geometry;
+}
+
+/*
+	TODO
+*/
 void Renderer3D::render_mesh_shadow()
 {
 	// prepare mesh buffer & shader to render shadow map
@@ -274,8 +283,7 @@ void Renderer3D::render_instance_shadow()
 	for (auto id : scast_instance_ids) {
 		ibuffer.upload_indices(mesh_indices[id]);
 		is3d.upload_matrix("model",iml[id].model);
-		glDrawArrays(GL_TRIANGLES,iml[id].ofs,iml[id].size);
-		// TODO: make this a gldrawarraysinstanced with fixed count
+		glDrawArraysInstanced(GL_TRIANGLES,iml[id].ofs,iml[id].size,iml[id].inst_count);
 	}
 }
 
@@ -317,7 +325,7 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 	c: amount of duplicates, in order of instance buffer upload, to be drawn
 	purpose: render given amount of desired instance's duplicates
 */
-void Renderer3D::render_inst(uint16_t i,uint16_t c)
+void Renderer3D::render_inst(uint16_t i)
 {
 	ibuffer.upload_indices(mesh_indices[i]);
 	glActiveTexture(GL_TEXTURE0);
@@ -329,7 +337,7 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
 	is3d.upload_matrix("model",iml[i].model);
-	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,c);
+	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,iml[i].inst_count);
 	glActiveTexture(GL_TEXTURE0);
 }
 

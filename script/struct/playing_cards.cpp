@@ -50,12 +50,14 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 void PlayingCards::render_shadow()
 {
 	// draw card shadow
+	//glDisable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(render_queue);
 	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
 	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
 	//glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
+	//glEnable(GL_CULL_FACE);
 }
 
 /*

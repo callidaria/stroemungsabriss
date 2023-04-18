@@ -52,7 +52,7 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
 	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);*/
 	set_rigs->cam3D[3].view3D
-		= glm::rotate(set_rigs->cam3D[0].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
+		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
 	pcards = new PlayingCards(ccbf,set_rigs);
 	ccbf->r3d->register_geometry(pcards);
 
@@ -493,6 +493,7 @@ void CardSystem::render()
 {
 	// render background
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
+	//m_ccbf->r3d->prepare(cam3D);
 	/*l3d.set_ambient(.1f);
 	l3d.set_amnt(1);
 	l3d.upload();
@@ -502,10 +503,13 @@ void CardSystem::render()
 
 	// render currency
 	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
+	//m_ccbf->r3d->prepare_inst(cam3D);
 	/*glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,l3d.dtex);*/
-	for (uint8_t i=0;i<currency_spawn.size();i++)
-		m_ccbf->r3d->render_inst(ir3d_index+i,currency_spawn[i]);
+	for (uint8_t i=0;i<currency_spawn.size();i++) {
+		m_ccbf->r3d->iml[ir3d_index+i].inst_count = currency_spawn[i];
+		m_ccbf->r3d->render_inst(ir3d_index+i);
+	}
 
 	// setup cards
 	/*glEnable(GL_BLEND);

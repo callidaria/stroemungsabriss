@@ -42,6 +42,7 @@ public:
 
 	// close process
 	void close_shadow(uint16_t w_res,uint16_t h_res);
+	void clear_memory();
 
 	// shadow
 	void render_mesh_shadow();
@@ -50,7 +51,7 @@ public:
 
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);
-	void render_inst(uint16_t i,uint16_t c);
+	void render_inst(uint16_t i);
 
 	// uploads
 	void upload_shadow();

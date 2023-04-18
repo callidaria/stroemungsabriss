@@ -49,10 +49,11 @@ public:
 	float scl;
 
 	// information
-	unsigned int ofs,size;
+	uint16_t ofs,size,inst_count = 0;
 
 private:
 
 	// information
 	const char* texpath,*smpath,*nmpath,*empath;
 };
+// TODO: ??maybe separate single draw call mesh from instanced mesh

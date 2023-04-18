@@ -16,8 +16,8 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-	m_ccbf->r3d->create_shadow(glm::vec3(100,50,-150),glm::vec3(0),100,100,20,4096);
-	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),.1f });
+	m_ccbf->r3d->create_shadow(glm::vec3(100,50,-150),glm::vec3(0),100,100,10,4096);
+	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,-150),glm::vec3(1),.2f });
 	set_rigs.lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
 	set_rigs.lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
 	for (uint8_t i=0;i<4;i++)

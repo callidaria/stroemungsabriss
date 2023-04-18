@@ -69,6 +69,7 @@ void Worldbuilder::load_cards()
 	CasinoTable* ctable = new CasinoTable(m_ccbf,&m_world->set_rigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
+	m_world->active_cam3D = 3;
 	m_world->load_geometry();
 }
 void Worldbuilder::load_airfield()
