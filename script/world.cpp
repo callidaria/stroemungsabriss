@@ -111,6 +111,7 @@ void World::load_geometry()
 void World::render(uint32_t &running,bool &reboot)
 {
 	// shadow processing
+	glDisable(GL_BLEND);
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
@@ -118,13 +119,12 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
-	glDisable(GL_BLEND);
 	gbuffer.bind();
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
-	m_ccbf->r3d->prepare(set_rigs.cam3D[active_cam3D]);
-	m_ccbf->r3d->upload_shadow();
+	//m_ccbf->r3d->prepare(set_rigs.cam3D[active_cam3D]);
+	//m_ccbf->r3d->upload_shadow();
 	for (auto scene : scene_master) scene->render(set_rigs.cam3D[active_cam3D]);
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();

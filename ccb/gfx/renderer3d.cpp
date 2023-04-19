@@ -356,6 +356,20 @@ void Renderer3D::upload_shadow()
 }
 
 /*
+	TODO
+*/
+void Renderer3D::upload_shadow_inst()
+{
+	// upload camera projection
+	is3d.upload_matrix("light_trans",scam_projection);
+
+	// upload shadow map
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+}
+// FIXME: duplicate code
+
+/*
 	PARAMETER DEFINITIONS:
 	id: index of instanced object the duplicate to transform is from
 	mid: index of duplicate to transform

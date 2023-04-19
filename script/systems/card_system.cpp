@@ -13,6 +13,8 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	// background objects
 	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
+	m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(-5.2f,0,-4.4f),1,glm::vec3(0,0,180),true);
 
 	set_rigs->cam3D[3].view3D
 		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
@@ -28,7 +30,7 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	}
 
 	// shuffle deck & place
-	create_pile(glm::vec2(2.5f,0));
+	create_pile(glm::vec2(0,0));
 	shuffle_all();
 
 	// create payment visualization
@@ -463,11 +465,13 @@ void CardSystem::render()
 {
 	// render background
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->upload_shadow();
 	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+2);
 
 	// render currency
 	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->upload_shadow_inst();
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
 		m_ccbf->r3d->iml[ir3d_index+i].inst_count = currency_spawn[i];
 		m_ccbf->r3d->render_inst(ir3d_index+i);

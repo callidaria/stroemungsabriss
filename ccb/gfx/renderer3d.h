@@ -55,6 +55,7 @@ public:
 
 	// uploads
 	void upload_shadow();
+	void upload_shadow_inst();
 
 	// setters
 	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);
