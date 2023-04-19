@@ -122,7 +122,7 @@ private:
 
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
-	void card_to_queue(uint8_t id);
+	//void card_to_queue(uint8_t id);
 	glm::vec3 get_card_screen_space(uint8_t id);
 
 	// update
@@ -150,7 +150,7 @@ private:
 
 	// card information
 	PlayingCards* pcards;
-	std::vector<float> icpos;
+	//std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
 	uint8_t choice = 0;

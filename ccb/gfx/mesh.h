@@ -34,8 +34,8 @@ public:
 private:
 
 	// helpers
-	void transform(glm::vec3 &o,glm::vec3 p,float s,glm::vec3 r);
-	void rotate(glm::vec3 &o,glm::vec3 r);
+	/*void transform(glm::vec3 &o,glm::vec3 p,float s,glm::vec3 r);
+	void rotate(glm::vec3 &o,glm::vec3 r);*/
 
 public:
 

@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #ifdef __WIN32__
 #ifndef STBI_INCLUDE_STB_IMAGE_H
@@ -22,8 +23,14 @@ class Toolbox
 {
 public:
 
+	// loader
+	static void load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+			float scl,glm::vec3 rot);
+
 	// math helper
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
+	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
+	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
 
 	// vertex setup
 	static std::vector<float> create_sprite_canvas();

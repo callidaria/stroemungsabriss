@@ -33,7 +33,9 @@ public:
 
 public:
 
-	std::vector<float> render_queue;
+	// render
+	std::vector<float> rqueue;
+	uint16_t vertex_count;
 
 private:
 
