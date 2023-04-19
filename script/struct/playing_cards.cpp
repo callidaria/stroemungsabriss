@@ -25,7 +25,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	Toolbox::load_object("./res/card.obj",overts,glm::vec3(0),1,glm::vec3(0));
 	for (uint32_t i=0;i<overts.size();i+=14) {
 		cverts.push_back(overts[i]);cverts.push_back(overts[i+1]);cverts.push_back(overts[i+2]);
-		cverts.push_back(overts[i+3]);cverts.push_back(overts[i+4]);
+		cverts.push_back(overts[i+3]);cverts.push_back(-overts[i+4]);
 		cverts.push_back(overts[i+5]);cverts.push_back(overts[i+6]);cverts.push_back(overts[i+7]);
 		cverts.push_back(0);
 		vertex_count++;

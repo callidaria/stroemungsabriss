@@ -341,6 +341,8 @@ void CardSystem::update()
 		int16_t idx = get_animation_id(deal[i]);
 		if (!(idx+1)) {
 			hand.push_back(deal[i]);
+			glm::vec3 deal_pos = get_position(deal[i]);
+			hand_mod.push_back(deal_pos.y),hand_mod.push_back(deal_pos.z);
 			deal.erase(deal.begin()+i,deal.begin()+i+1);
 			arrival = true;
 		} else i++;
@@ -405,6 +407,21 @@ void CardSystem::update()
 		}
 	}
 
+	// reset & modify selected cards
+	for (uint8_t i=0;i<hand.size();i++) {
+
+		// prepare indices
+		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
+		uint16_t hidx = i*2;
+
+		// calculate card modification
+		hand_mod[hidx] += .5f*(i==choice),hand_mod[hidx+1] -= .5f*(i==choice);
+
+		// realize and reset card modifications
+		pcards->rqueue[idx] = hand_mod[hidx],pcards->rqueue[idx+1] = hand_mod[hidx+1];
+		hand_mod[hidx] -= .5f*(i==choice),hand_mod[hidx+1] += .5f*(i==choice);
+	}
+
 	// building the render queue for correct transparency
 	/*pcards->render_queue.clear();
 	for (auto deck:dpiles) {								// queue pile cards
@@ -420,11 +437,11 @@ void CardSystem::update()
 		// modify selected card to stand out compared to the others
 		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
 		float selected_mod = (i==choice)*.5f;
-		icpos[idx] += selected_mod,icpos[idx+1] -= selected_mod;
+		pcards->rqueue[idx] += selected_mod,pcards->rqueue[idx+1] -= selected_mod;
 
-		// queue card & revert modification
-		card_to_queue(hand[i]);
-		icpos[idx] -= selected_mod,icpos[idx+1] += selected_mod;
+		// revert modification
+		//card_to_queue(hand[i]);
+		pcards->rqueue[idx] -= selected_mod,pcards->rqueue[idx+1] += selected_mod;
 	}*/
 
 	// render shadow projection of playing cards

@@ -153,6 +153,7 @@ private:
 	//std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
+	std::vector<float> hand_mod;
 	uint8_t choice = 0;
 
 	// currency information
