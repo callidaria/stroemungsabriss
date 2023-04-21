@@ -57,7 +57,7 @@ void Worldbuilder::load_menu()
 void Worldbuilder::load_casino()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf,&m_world->set_rigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
 	m_world->active_cam3D = 2;

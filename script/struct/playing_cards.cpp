@@ -1,7 +1,10 @@
 #include "playing_cards.h"
 
 /*
-	TODO
+	constructor(CascabelBaseFeature*,StageSetup*)
+	ccbf: most basic cascabel features
+	set_rigs: stage setup
+	purpose: create aunt susann's kopfüber playing cards
 */
 PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
@@ -64,7 +67,8 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 // TODO: compare performance between card object and cutouts with render queue
 
 /*
-	TODO
+	render_shadow() -> void (virtual)
+	purpose: handling of geometry shadow by 3D renderer
 */
 void PlayingCards::render_shadow()
 {
@@ -80,12 +84,12 @@ void PlayingCards::render_shadow()
 }
 
 /*
-	TODO
+	render() -> void
+	purpose: draw instanced playing cards
 */
 void PlayingCards::render()
 {
 	// setup cards
-	//glEnable(GL_BLEND);
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(rqueue);
@@ -100,5 +104,4 @@ void PlayingCards::render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-	//glDisable(GL_BLEND);
 }

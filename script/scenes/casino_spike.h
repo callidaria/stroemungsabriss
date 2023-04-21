@@ -10,16 +10,17 @@ class CasinoSpike : public Scene
 public:
 
 	// construction
-	CasinoSpike(CascabelBaseFeature* ccbf);
+	CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs);
 	~CasinoSpike() {  }
 
 	// draw
-	virtual void render(Camera3D &cam3D);
+	virtual void render();
 
 private:
 
 	// render information
 	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 	uint16_t index_r3D;
 	glm::vec3 mv_pos = glm::vec3(1,0,-2);
 	Material3D m0,m1;

@@ -1,7 +1,9 @@
 #include "lighting.h"
 
 /*
-	TODO
+	add_<lighttype>(LightSun|LightPoint|LightSpot) -> void
+	args[0]: new light to add to scene
+	purpose: add a new light to the scene
 */
 void Lighting::add_sunlight(LightSun sunlight)
 { sunlights.push_back(sunlight); }
@@ -11,7 +13,9 @@ void Lighting::add_spotlight(LightSpot spotlight)
 { spotlights.push_back(spotlight); }
 
 /*
-	TODO
+	upload(Shader*) -> void
+	shader: deferred lighting shader
+	purpose: upload complex lighting system to the simplified deferred lighting shader
 	NOTE: parameterized shader has to be enabled before running this method
 */
 void Lighting::upload(Shader* shader)

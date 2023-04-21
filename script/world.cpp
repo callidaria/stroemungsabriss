@@ -20,8 +20,10 @@ World::World(CascabelBaseFeature* eref)
 	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
 	set_rigs.lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
 	set_rigs.lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
-	for (uint8_t i=0;i<4;i++)
-		set_rigs.lighting.add_pointlight({ glm::vec3(7,lraise[i],-7+(i*4)),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(7,.5f,-7),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(7,2,-3),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(7,1.5f,1),glm::vec3(1),1,1,.1f,1 });
+	set_rigs.lighting.add_pointlight({ glm::vec3(7,1,5),glm::vec3(1),1,1,.1f,1 });
 	set_rigs.lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
 	set_rigs.lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
 	set_rigs.lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
@@ -123,9 +125,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
-	//m_ccbf->r3d->prepare(set_rigs.cam3D[active_cam3D]);
-	//m_ccbf->r3d->upload_shadow();
-	for (auto scene : scene_master) scene->render(set_rigs.cam3D[active_cam3D]);
+	for (auto scene : scene_master) scene->render();
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
 
@@ -136,7 +136,7 @@ void World::render(uint32_t &running,bool &reboot)
 	// render bullets
 	m_ccbf->bSys->render();
 
-	// deferred light shading
+	// upload g-buffer components to deferred light shader
 	game_fb.bind();
 	deferred_fb.prepare();
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
@@ -145,8 +145,9 @@ void World::render(uint32_t &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 
+	// deferred light shading 
 	deferred_fb.s.upload_vec3("view_pos",set_rigs.cam3D[active_cam3D].pos);
-	deferred_fb.draw();
+	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui
 	game_fb.close();

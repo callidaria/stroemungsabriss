@@ -62,7 +62,14 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	TODO
+	create_shadow(vec3,vec3,float,float,float,uint16_t) -> void
+	pos: position of light, which is supposed to project the shadow map
+	center: central look-at point for projected shadow map
+	mwidth: width of orthogonal camera space
+	mheight: height of orthogonal camera space
+	fdiv: breakdown divisor of real light position towards a more managable value
+	res: squared resolution of shadow map
+	purpose: create shadow map to later project scene objects onto
 */
 void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 		float fdiv,uint16_t res)
@@ -109,7 +116,6 @@ void Renderer3D::load(Camera3D cam3d)
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
-	//s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
 	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
 	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
 	s3d.upload_int("tex",0);
@@ -214,7 +220,8 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 }
 
 /*
-	TODO
+	prepare_shadow() -> void
+	purpose: prepare shadow map projection render
 */
 void Renderer3D::prepare_shadow()
 {
@@ -228,13 +235,18 @@ void Renderer3D::prepare_shadow()
 }
 
 /*
-	TODO
+	register_geometry(ShadowGeometry*) -> void
+	geometry: geometry which is capable of casting shadows
+	purpose: add shadow casting geometry to shadow projection routine
 */
 void Renderer3D::register_geometry(ShadowGeometry* geometry)
 { shadow_geometry.push_back(geometry); }
 
 /*
-	TODO
+	close_shadow(uint16_t,uint16_t) -> void
+	w_res: x-axis resolution reset
+	h_res: y-axis resolution reset
+	purpose: end shadow map projection render
 */
 void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
 {
@@ -244,7 +256,8 @@ void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
 }
 
 /*
-	TODO
+	clear_memory() -> void
+	purpose: removes all extern shadow geometry from memory
 */
 void Renderer3D::clear_memory()
 {
@@ -253,7 +266,9 @@ void Renderer3D::clear_memory()
 }
 
 /*
-	TODO
+	render_mesh_shadow() -> void
+	purpose: project mesh shadow onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
 */
 void Renderer3D::render_mesh_shadow()
 {
@@ -270,7 +285,9 @@ void Renderer3D::render_mesh_shadow()
 }
 
 /*
-	TODO
+	render_instance_shadow() -> void
+	purpose: project shadow of instanced meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
 */
 void Renderer3D::render_instance_shadow()
 {
@@ -288,7 +305,9 @@ void Renderer3D::render_instance_shadow()
 }
 
 /*
-	TODO
+	render_geometry_shadow() -> void
+	purpose: project shadows, originating from additional geometry onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
 */
 void Renderer3D::render_geometry_shadow()
 {
@@ -322,7 +341,6 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 /*
 	render_inst(uint16_t i,uint16_t) -> void
 	i: memory index of instanced object that is to be drawn
-	c: amount of duplicates, in order of instance buffer upload, to be drawn
 	purpose: render given amount of desired instance's duplicates
 */
 void Renderer3D::render_inst(uint16_t i)
@@ -342,8 +360,8 @@ void Renderer3D::render_inst(uint16_t i)
 }
 
 /*
-	upload_shadow(mat4) -> void
-	DEPRECATED: this will be removed after completing #135
+	upload_shadow() -> void
+	purpose: upload shadow projection to mesh geometry pass shader
 */
 void Renderer3D::upload_shadow()
 {
@@ -356,7 +374,8 @@ void Renderer3D::upload_shadow()
 }
 
 /*
-	TODO
+	upload_shadow_inst() -> void
+	purpose: upload shadow projection to instanced mesh geometry pass shader
 */
 void Renderer3D::upload_shadow_inst()
 {

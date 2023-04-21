@@ -1,7 +1,13 @@
 #include "toolbox.h"
 
 /*
-	TODO
+	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static)
+	path: path to .obj file
+	ov: vertices, extracted from given .obj file
+	pos: direct modification of vertex positions
+	scl: direct modification of object scaling
+	rot: direct modification of vertex rotation around the object's origin point
+	purpose: load object from file
 */
 void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
@@ -106,12 +112,19 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 	returns: angle between vectors in radians
 */
 float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
-{
-	return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b)));
-}
+{ return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
 
 /*
-	TODO
+	PARAMETER DEFINITIONS:
+	ov: vector to be transformed
+	rot: rotation of vector, without directional reset
+*/
+
+/*
+	transform_vector(vec3&,vec3,float,vec3) -> void (static)
+	pos: additive modification of vector direction & endpoint
+	scl: multiplicative modification of vector length
+	purpose: full vector transformation
 */
 void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
 {
@@ -121,7 +134,8 @@ void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 r
 }
 
 /*
-	TODO
+	rotate_vector(vec3&,vec3) -> void (static)
+	purpose: 3D vector rotation
 */
 void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 {
@@ -131,7 +145,7 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 }
 
 /*
-	create_sprite_canvas() -> std::vector<float>
+	create_sprite_canvas() -> std::vector<float> (static)
 	returns: primitive canvas vertices without camera ready coordinate system and element draw
 */
 std::vector<float> Toolbox::create_sprite_canvas()
@@ -266,7 +280,7 @@ void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 }
 
 /*
-	set_texture_parameter_linear_mipmap() -> void (private,static)
+	set_texture_parameter_linear_mipmap() -> void (static)
 	purpose: define texture as mipmappable
 */
 void Toolbox::set_texture_parameter_linear_mipmap()
@@ -276,7 +290,8 @@ void Toolbox::set_texture_parameter_linear_mipmap()
 }
 
 /*
-	TODO
+	set_texture_parameter_nearest_unfiltered() -> void (static)
+	purpose: define texture as unfiltered
 */
 void Toolbox::set_texture_parameter_nearest_unfiltered()
 {
@@ -285,8 +300,8 @@ void Toolbox::set_texture_parameter_nearest_unfiltered()
 }
 
 /*
-	set_texture_parameter_clamp_to_edge() -> void (private,static)
-	purpose: define texture as to be stretched out towards the borders
+	set_texture_parameter_clamp_to_edge() -> void (static)
+	purpose: define texture as to be stretched out towards the edge
 */
 void Toolbox::set_texture_parameter_clamp_to_edge()
 {
@@ -295,7 +310,8 @@ void Toolbox::set_texture_parameter_clamp_to_edge()
 }
 
 /*
-	TODO
+	set_texture_parameter_clamp_to_border() -> void (static)
+	purpose: define texture as to be scaled up towards custom borders, to avoid ratio manipulation
 */
 void Toolbox::set_texture_parameter_clamp_to_border()
 {

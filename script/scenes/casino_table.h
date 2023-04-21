@@ -14,7 +14,7 @@ public:
 	~CasinoTable() {  }
 
 	// draw
-	virtual void render(Camera3D &cam3D);
+	virtual void render();
 
 private:
 

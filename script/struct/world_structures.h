@@ -20,7 +20,7 @@ class Scene
 {
 public:
 	virtual ~Scene() {  }
-	virtual void render(Camera3D&) {  }
+	virtual void render() {  }
 };
 
 // describes all objects/character, that can be controlled by the player

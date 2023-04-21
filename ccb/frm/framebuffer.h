@@ -24,7 +24,6 @@ public:
 
 	// details
 	void prepare();
-	void draw();
 
 	// write
 	void render();

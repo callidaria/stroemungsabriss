@@ -140,17 +140,14 @@ private:
 private:
 
 	// cascabel
-	//Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
-	//Light3D l3d = Light3D(m_r3d,0,glm::vec3(100,200,150),glm::vec3(1,1,1),1);
 
 	// render
 	uint16_t r3d_index,ir3d_index;
 
 	// card information
 	PlayingCards* pcards;
-	//std::vector<float> icpos;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
 	std::vector<float> hand_mod;

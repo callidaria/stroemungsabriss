@@ -1,8 +1,9 @@
 #include "card_system.h"
 
 /*
-	constructor(Frame*,Renderer3D*,std::vector<Currency>)
-	TODO
+	constructor(CascabelBaseFeature*,StageSetup*,std::vector<Currency>)
+	ccbf: most basic cascabel features
+	set_rigs: scene setup
 	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
@@ -13,8 +14,6 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	// background objects
 	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
-	m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(-5.2f,0,-4.4f),1,glm::vec3(0,0,180),true);
 
 	set_rigs->cam3D[3].view3D
 		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
@@ -445,16 +444,6 @@ void CardSystem::update()
 		//card_to_queue(hand[i]);
 		pcards->rqueue[idx] -= selected_mod,pcards->rqueue[idx+1] += selected_mod;
 	}*/
-
-	// render shadow projection of playing cards
-	/*glDisable(GL_CULL_FACE);
-	sdr.enable();
-	bfr.bind();
-	sdr.upload_matrix("view",l3d.view);
-	sdr.upload_matrix("proj",l3d.proj);
-	bfr.upload_indices(render_queue);
-	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-	l3d.close_shadow(m_frame->w_res,m_frame->h_res);*/
 }
 
 /*
@@ -467,7 +456,7 @@ void CardSystem::render()
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
 	m_ccbf->r3d->upload_shadow();
 	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+2);
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
 	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
@@ -677,6 +666,7 @@ void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 	glm::vec3 rot = get_rotation(id);
 	c_anims.push_back({ id,get_position(id),rot,pos,rot,0,etime });
 }
+// FIXME: search for possible usages to improve animation creation performance
 
 /*
 	force_create_animation(uint8_t,vec3,vec3,uint16_t) -> void (private)

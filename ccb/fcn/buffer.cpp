@@ -32,7 +32,8 @@ void Buffer::bind_index()
 { glBindBuffer(GL_ARRAY_BUFFER,iebo); }
 
 /*
-	TODO
+	unbind() -> void (static)
+	purpose: unbind any bound array buffer
 */
 void Buffer::unbind()
 {

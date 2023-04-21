@@ -1,7 +1,10 @@
 #include "casino_table.h"
 
 /*
-	TODO
+	constructor(CascabelBaseFeature*,StageSetup*)
+	ccbf: all basic cascabel features
+	set_rigs: scene lighting and cameras
+	purpose: load & setup table scene
 */
 CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
@@ -12,8 +15,7 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/none.png",10 },
 		{ "./res/coin.obj","./res/coin_tex.png","./res/none.png","./res/dnormal.png",
 			"./res/none.png",5 }
-	};
-	card_system = CardSystem(ccbf,m_setRigs,curr_path);
+	}; card_system = CardSystem(ccbf,m_setRigs,curr_path);
 
 	// create card game players
 	card_system.create_player(glm::vec2(0,-10),180,100);
@@ -34,9 +36,10 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 }
 
 /*
-	TODO
+	render() -> void (virtual)
+	purpose: draw casino table test scene
 */
-void CasinoTable::render(Camera3D &cam3D)
+void CasinoTable::render()
 {
 	card_system.process_input();
 	card_system.update();

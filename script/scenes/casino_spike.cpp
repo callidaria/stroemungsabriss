@@ -1,12 +1,13 @@
 #include "casino_spike.h"
 
 /*
-	constructor(CascabelBaseFeature*)
+	constructor(CascabelBaseFeature*,StageSetup*)
 	ccbf: all of cascabel's most prized features
+	set_rigs: stage utility setup
 	purpose: create dilapidated casino scene
 */
-CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
-	: m_ccbf(ccbf)
+CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
+	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// object loading
 	index_r3D = m_ccbf->r3d->add("./res/casino/test_floor.obj","./res/casino/paquet_colour.png",
@@ -35,13 +36,11 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf)
 	render() -> void (virtual)
 	purpose: render casino scene
 */
-void CasinoSpike::render(Camera3D &cam3D)
+void CasinoSpike::render()
 {
 	// camera front handling
-	pitch += m_ccbf->frame->kb.ka[SDL_SCANCODE_I];
-	pitch -= m_ccbf->frame->kb.ka[SDL_SCANCODE_K];
-	yaw += m_ccbf->frame->kb.ka[SDL_SCANCODE_L];
-	yaw -= m_ccbf->frame->kb.ka[SDL_SCANCODE_J];
+	pitch += m_ccbf->frame->kb.ka[SDL_SCANCODE_I],pitch -= m_ccbf->frame->kb.ka[SDL_SCANCODE_K];
+	yaw += m_ccbf->frame->kb.ka[SDL_SCANCODE_L],yaw -= m_ccbf->frame->kb.ka[SDL_SCANCODE_J];
 	cp_dir.x = glm::cos(glm::radians(pitch))*glm::cos(glm::radians(yaw));
 	cp_dir.y = glm::sin(glm::radians(pitch));
 	cp_dir.z = glm::cos(glm::radians(pitch))*glm::sin(glm::radians(yaw));
@@ -57,18 +56,13 @@ void CasinoSpike::render(Camera3D &cam3D)
 	cp_pos.y -= m_ccbf->frame->kb.ka[SDL_SCANCODE_F]*.05f;
 
 	// camera update
-	cam3D.pos = cp_pos,cam3D.front = cp_dir;
-	cam3D.update();
+	m_setRigs->cam3D[0].pos = cp_pos,m_setRigs->cam3D[0].front = cp_dir;
+	m_setRigs->cam3D[0].update();
 
 	// render flooring
-	// m_ccbf->r3d->prepare(cam3D);
-	//m0.upload();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);
 
 	// render wordly objects
-	//m1.upload();
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+4);
-	//m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1),mv_pos));
 	m_ccbf->r3d->render_mesh(index_r3D+4,index_r3D+5);
-	//m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1));
 }

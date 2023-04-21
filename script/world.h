@@ -67,7 +67,4 @@ private:
 	std::vector<Scene*> scene_master;
 	std::vector<Player*> player_master;
 	std::vector<Boss*> boss_master;
-
-	// set components
-	float lraise[4] = { .5f,2,1.5f,1 };
 };

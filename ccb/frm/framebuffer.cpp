@@ -80,7 +80,8 @@ void FrameBuffer::bind()
 { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
 
 /*
-	TODO
+	prepare() -> void
+	purpose: prepare framebuffer's shader and buffer for any purpose
 */
 void FrameBuffer::prepare()
 {
@@ -93,12 +94,6 @@ void FrameBuffer::prepare()
 }
 
 /*
-	TODO
-*/
-void FrameBuffer::draw()
-{ glDrawArrays(GL_TRIANGLES,0,6); }
-
-/*
 	render() -> void
 	purpose: draw buffer in combination with given shader manipulations
 */
@@ -108,7 +103,7 @@ void FrameBuffer::render()
 
 	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
-	draw();
+	glDrawArrays(GL_TRIANGLES,0,6);
 }
 
 /*
