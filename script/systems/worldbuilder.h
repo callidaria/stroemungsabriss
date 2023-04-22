@@ -7,6 +7,7 @@
 
 #include "../scenes/nepal_mountain_woods.h"
 #include "../scenes/casino_spike.h"
+#include "../scenes/casino_table.h"
 
 #include "../menu/menu.h"
 #include "../ui/action_menu.h"
@@ -20,7 +21,7 @@ class Worldbuilder
 public:
 
 	// construction
-	Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world);
+	Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBManager* ccbm,World* world);
 	~Worldbuilder() {  }
 
 	// load
@@ -32,6 +33,7 @@ private:
 	void load_titles();
 	void load_menu();
 	void load_casino();
+	void load_cards();
 	void load_airfield();
 	void load_dpilot();
 
@@ -39,6 +41,7 @@ private:
 
 	// system
 	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 	CCBManager* m_ccbm;
 	World* m_world;
 };

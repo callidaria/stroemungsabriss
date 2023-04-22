@@ -60,7 +60,7 @@ Frame::Frame(const char* title,int8_t screen,int16_t width,int16_t height,SDL_Wi
 }
 
 /*
-	clear(float,float,float) -> void
+	clear(float,float,float) -> void (static)
 	cr (0): red value of clear colour
 	cg (0): green value of clear colour
 	cb (0): blue value of clear colour
@@ -245,7 +245,7 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
 	SDL_StopTextInput();
-	SDL_ShowCursor(SDL_DISABLE);
+	//SDL_ShowCursor(SDL_DISABLE);
 }
 
 /*

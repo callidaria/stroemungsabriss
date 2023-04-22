@@ -1,18 +1,151 @@
 #include "toolbox.h"
 
 /*
+	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static)
+	path: path to .obj file
+	ov: vertices, extracted from given .obj file
+	pos: direct modification of vertex positions
+	scl: direct modification of object scaling
+	rot: direct modification of vertex rotation around the object's origin point
+	purpose: load object from file
+*/
+void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+		float scl,glm::vec3 rot)
+{
+	// setup vertex information lists
+	std::vector<uint32_t> ovi,oui,oni;	// raw reads from source: vertex,uv,normals
+	std::vector<glm::vec3> verts,norm;	// position vertices & normals
+	std::vector<glm::vec2> uv;			// texture coordinates
+
+	// read source file
+	FILE* file = fopen(path,"r");
+	while(true) {
+
+		// read next line if exists
+		char lh[128];
+		int res = fscanf(file,"%s",lh);
+		if (res==EOF) break;
+		else {
+
+			// check value prefix
+			if (strcmp(lh,"v")==0) {			// vertex prefix
+				glm::vec3 p;
+				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
+				verts.push_back(p);
+			} else if (strcmp(lh,"vt")==0) {	// texture coordinate prefix
+				glm::vec2 p;
+				fscanf(file,"%f %f\n",&p.x,&p.y);
+				uv.push_back(p);
+			} else if (strcmp(lh,"vn")==0) {	// normals prefix
+				glm::vec3 p;
+				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
+				norm.push_back(p);
+			} else if(strcmp(lh,"f")==0) {		// element index prefix
+
+				// read element node for current triangle
+				unsigned int vi[3],ui[3],ni[3];
+				fscanf(file,"%d/%d/%d %d/%d/%d %d/%d/%d\n",
+						&vi[0],&ui[0],&ni[0],&vi[1],&ui[1],&ni[1],&vi[2],&ui[2],&ni[2]);
+				glm::vec3 pproc = glm::vec3(vi[0],vi[1],vi[2]);
+				glm::vec3 nproc = glm::vec3(ni[0],ni[1],ni[2]);
+
+				// translate triangle
+				transform_vector(pproc,pos,scl,rot);
+				rotate_vector(nproc,rot);
+
+				// save values position vertices
+				ovi.push_back(vi[0]);ovi.push_back(vi[1]);ovi.push_back(vi[2]);		// position
+				oui.push_back(ui[0]);oui.push_back(ui[1]);oui.push_back(ui[2]);		// tex coords
+				oni.push_back(ni[0]);oni.push_back(ni[1]);oni.push_back(ni[2]);		// normals
+			}
+		}
+	}
+
+	// translate vertex data to object vertices
+	glm::vec3 tg(1.0f),btg(1.0f);
+	for(int i=0;i<ovi.size();i++) {
+
+		// precalculations for normal mapping
+		if (i%3==0&&ovi.size()) {
+			glm::vec3 e1 = verts[ovi[i+1]-1]-verts[ovi[i]-1];
+			glm::vec3 e2 = verts[ovi[i+2]-1]-verts[ovi[i]-1];
+			glm::vec2 duv1 = uv[oui[i+1]-1]-uv[oui[i]-1];
+			glm::vec2 duv2 = uv[oui[i+2]-1]-uv[oui[i]-1];
+
+			// calculate tangent
+			float ff = 1.0f/(duv1.x*duv2.y-duv2.x*duv1.y);
+			tg.x = ff*(duv2.y*e1.x-duv1.y*e2.x);
+			tg.y = ff*(duv2.y*e1.y-duv1.y*e2.y);
+			tg.z = ff*(duv2.y*e1.z-duv1.y*e2.z);
+			tg = glm::normalize(tg);
+
+			// calculate bitangent
+			btg.x = ff*(-duv2.x*e1.x+duv1.x*e2.x);
+			btg.y = ff*(-duv2.x*e1.y+duv1.x*e2.y);
+			btg.z = ff*(-duv2.x*e1.z+duv1.x*e2.z);
+			btg = glm::normalize(btg);
+			// FIXME: using a matrix calculation might be significantly faster
+		}  // FIXME: remove branch from multiupload
+
+		// get read vertices to process and save
+		unsigned int tvi = ovi[i],tui = oui[i],tni = oni[i];
+		glm::vec3 tv = verts[tvi-1],tn = norm[tni-1];
+		glm::vec2 tu = uv[tui-1];
+
+		// translate vertices & normals
+		transform_vector(tv,pos,scl,rot);
+		rotate_vector(tn,rot);
+
+		// save data to buffer vector
+		ov.push_back(tv.x);ov.push_back(tv.y);ov.push_back(tv.z);		// vertex positions
+		ov.push_back(tu.x);ov.push_back(tu.y);							// texture coordinates
+		ov.push_back(tn.x);ov.push_back(tn.y);ov.push_back(tn.z);		// normals
+		ov.push_back(tg.x);ov.push_back(tg.y);ov.push_back(tg.z);		// tangents
+		ov.push_back(btg.x);ov.push_back(btg.y);ov.push_back(btg.z);	// bitangents
+	}
+}
+
+/*
 	calculate_vecangle(vec2,vec2) -> float (static)
 	a: first vector, 0 degrees towards the origin
 	b: second vector, returned degrees from first vector
 	returns: angle between vectors in radians
 */
 float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
+{ return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
+
+/*
+	PARAMETER DEFINITIONS:
+	ov: vector to be transformed
+	rot: rotation of vector, without directional reset
+*/
+
+/*
+	transform_vector(vec3&,vec3,float,vec3) -> void (static)
+	pos: additive modification of vector direction & endpoint
+	scl: multiplicative modification of vector length
+	purpose: full vector transformation
+*/
+void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
 {
-	return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b)));
+	rotate_vector(ov,rot);
+	ov *= scl;
+	ov += pos;
 }
 
 /*
-	create_sprite_canvas() -> std::vector<float>
+	rotate_vector(vec3&,vec3) -> void (static)
+	purpose: 3D vector rotation
+*/
+void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
+{
+	ov = glm::rotate(ov,glm::radians(rot.x),glm::vec3(1,0,0));
+	ov = glm::rotate(ov,glm::radians(rot.y),glm::vec3(0,1,0));
+	ov = glm::rotate(ov,glm::radians(rot.z),glm::vec3(0,0,1));
+}
+
+/*
+	create_sprite_canvas() -> std::vector<float> (static)
 	returns: primitive canvas vertices without camera ready coordinate system and element draw
 */
 std::vector<float> Toolbox::create_sprite_canvas()
@@ -147,13 +280,43 @@ void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 }
 
 /*
-	set_texture_parameter_clamp_to_edge() -> void (private,static)
-	purpose: define texture as to be stretched out towards the borders
+	set_texture_parameter_linear_mipmap() -> void (static)
+	purpose: define texture as mipmappable
+*/
+void Toolbox::set_texture_parameter_linear_mipmap()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	set_texture_parameter_nearest_unfiltered() -> void (static)
+	purpose: define texture as unfiltered
+*/
+void Toolbox::set_texture_parameter_nearest_unfiltered()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+}
+
+/*
+	set_texture_parameter_clamp_to_edge() -> void (static)
+	purpose: define texture as to be stretched out towards the edge
 */
 void Toolbox::set_texture_parameter_clamp_to_edge()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+}
+
+/*
+	set_texture_parameter_clamp_to_border() -> void (static)
+	purpose: define texture as to be scaled up towards custom borders, to avoid ratio manipulation
+*/
+void Toolbox::set_texture_parameter_clamp_to_border()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
 }
 
 /*
@@ -164,16 +327,6 @@ void Toolbox::set_texture_parameter_texture_repeat()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-}
-
-/*
-	set_texture_parameter_linear_mipmap() -> void (private,static)
-	purpose: define texture as mipmappable
-*/
-void Toolbox::set_texture_parameter_linear_mipmap()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
 /*

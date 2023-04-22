@@ -1,75 +1,42 @@
 #include "card_system.h"
 
 /*
-	constructor(Frame*,Renderer3D*,std::vector<Currency>)
-	f: pointer to cascabel frame for timing and input
-	r2d: pointer to genera 2D renderer to show cursor & icons
-	r3d: pointer to general 3D renderer to add certain background elements
+	constructor(CascabelBaseFeature*,StageSetup*,std::vector<Currency>)
+	ccbf: most basic cascabel features
+	set_rigs: scene setup
 	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path)
-	: m_frame(f),m_r2d(r2d),m_r3d(r3d)
+CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
+		std::vector<Currency> curr_path)
+	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// background objects
-	r3d_index = m_r3d->add("./res/table.obj","./res/table.jpg","./res/none.png","./res/dnormal.png",
-			"./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
+	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
 
-	// card visualization setup
-	const float hwdt = CARDSYSTEM_CARD_WIDTH/2,hhgt = CARDSYSTEM_CARD_HEIGHT/2;
-	float cverts[] = {
-
-		// card front
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,0,
-		CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0, CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0,
-		CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,0, -CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0,
-
-		// card back
-		CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1, CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,1,
-		-CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1, -CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1,
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,1, CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1,
-	};
-	bfr.bind();
-	bfr.upload_vertices(cverts,sizeof(cverts));
-	sdr.compile("./shader/vertex_cards.shader","./shader/fragment_cards.shader");
-	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("texID",1,8,CARDSYSTEM_UPLOAD_REPEAT);
-	cam3D.view3D = glm::rotate(cam3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
-	sdr.upload_camera(cam3D);
-
-	// load card game texture
-	glGenTextures(1,&tex);
-	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f);
-	sdr.upload_int("tex",0);
-	sdr.upload_int("shadow_map",3);
-
-	// card instancing: single draw call for all playing cards
-	bfr.add_buffer();
-	bfr.bind_index();
-	sdr.def_indexF(bfr.get_indices(),"tofs",3,0,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
+	set_rigs->cam3D[3].view3D
+		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
+	pcards = new PlayingCards(ccbf,set_rigs);
+	ccbf->r3d->register_geometry(pcards);
 
 	// spawn cards into space
 	for (uint8_t i=0;i<40;i++) create_card(glm::vec2(i%10,(uint8_t)(i/10)),i>19);
 	for (uint8_t i=0;i<36;i++) {
 		glm::vec2 tex_id = glm::vec2(i%9,4+(uint8_t)(i/9));
-		create_card(tex_id,0);create_card(tex_id,1);
+		create_card(tex_id,0);
+		create_card(tex_id,1);
 	}
 
 	// shuffle deck & place
-	create_pile(glm::vec2(2.5f,0));
+	create_pile(glm::vec2(0,0));
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_r3d->iml.size();
+	ir3d_index = m_ccbf->r3d->iml.size();
 	for (auto cstage:curr_path) {
-		m_r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
-				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP);
+		m_ccbf->r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
+				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,true);
 		currency_value.push_back(cstage.value);
 		currency_spawn.push_back(0);
 		cstack.stacks.push_back({});
@@ -77,7 +44,6 @@ CardSystem::CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Curr
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
-	l3d.create_shadow(glm::vec3(0),50,50,5,4096);
 }
 // TODO: sort currency by value
 
@@ -213,9 +179,9 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 {
 	// move currency representation towards players side
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size(),cstack.position.y));
-		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & stack counts
@@ -232,10 +198,10 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
 	// move currency representation towards opponents side
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(ops[oid].capital.position.x,ops[oid].capital.stacks[cid].size()*.2f,
 					ops[oid].capital.position.y)+ops[oid].capital.direction*glm::vec3(cid*2));
-		m_r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
+		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_spawn[cid],
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & respective opponent stack count
@@ -253,7 +219,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t sid,uint16_t count)
 {
 	// move players currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
+		m_ccbf->r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -271,7 +237,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count
 {
 	// move opponents currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
+		m_ccbf->r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -339,23 +305,24 @@ void CardSystem::create_currency_stack(glm::vec2 pos,float rot)
 void CardSystem::process_input()
 {
 	// keyboard input
-	choice += (m_frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
-			- m_frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
-	lfI = m_frame->kb.ka[SDL_SCANCODE_RIGHT]||m_frame->kb.ka[SDL_SCANCODE_LEFT];
+	choice += (m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
+			- m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
+	lfI = m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]||m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
 	// transform from clip space & compare screen spaces with cursor position for choice
 	bool mouse_input
-			= (m_frame->mouse.mxfr!=tmx)&&(m_frame->mouse.myfr<.35f)&&(m_frame->mouse.mxfr<.5f);
+			= (m_ccbf->frame->mouse.mxfr!=tmx)&&(m_ccbf->frame->mouse.myfr<.35f)
+				&&(m_ccbf->frame->mouse.mxfr<.5f);
 	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
 		float end = (get_card_screen_space(hand.back()).x+1)/2;
-		float stapled_pos = m_frame->mouse.mxfr-start;
+		float stapled_pos = m_ccbf->frame->mouse.mxfr-start;
 		float single_card = (end-start)/(hand.size()-1);
 		choice = stapled_pos/single_card;
 		bool overselected = choice>=hand.size();
 		choice = overselected*(hand.size()-1)+!overselected*choice;
-	} tmx = m_frame->mouse.mxfr;
+	} tmx = m_ccbf->frame->mouse.mxfr;
 }
 
 /*
@@ -375,6 +342,8 @@ void CardSystem::update()
 		int16_t idx = get_animation_id(deal[i]);
 		if (!(idx+1)) {
 			hand.push_back(deal[i]);
+			glm::vec3 deal_pos = get_position(deal[i]);
+			hand_mod.push_back(deal_pos.y),hand_mod.push_back(deal_pos.z);
 			deal.erase(deal.begin()+i,deal.begin()+i+1);
 			arrival = true;
 		} else i++;
@@ -414,12 +383,10 @@ void CardSystem::update()
 		crr_deal++;
 	}
 
-	// remove if deal is completed
+	// remove if deal is completed & update deal stall time
 	else if (!auto_deals[crr_deal].amount&&!stall)
 		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
-
-	// update deal stall time
-	crr_dtime += m_frame->get_time_delta();
+	crr_dtime += m_ccbf->frame->get_time_delta();
 
 	// animate
 	i = 0;
@@ -441,98 +408,71 @@ void CardSystem::update()
 		}
 	}
 
+	// reset & modify selected cards
+	for (uint8_t i=0;i<hand.size();i++) {
+
+		// prepare indices
+		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
+		uint16_t hidx = i*2;
+
+		// calculate card modification
+		hand_mod[hidx] += .5f*(i==choice),hand_mod[hidx+1] -= .5f*(i==choice);
+
+		// realize and reset card modifications
+		pcards->rqueue[idx] = hand_mod[hidx],pcards->rqueue[idx+1] = hand_mod[hidx+1];
+		hand_mod[hidx] -= .5f*(i==choice),hand_mod[hidx+1] += .5f*(i==choice);
+	}
+
 	// building the render queue for correct transparency
-	render_queue.clear();
+	/*pcards->render_queue.clear();
 	for (auto deck:dpiles) {								// queue pile cards
 		for (auto card:deck.cards) card_to_queue(card);
 	} for (auto opp:ops) {									// queue cards held by opponent
 		for (auto card:opp.deal) card_to_queue(card);		// first queue cards still arriving
 		for (auto card:opp.cards) card_to_queue(card);		// then queue cards held by opponent
-	} for (auto card:deal) card_to_queue(card);				// TODO: FILO instead of FIFO
+	} for (auto card:deal) card_to_queue(card);*/				// TODO: FILO instead of FIFO
 
 	// queue cards held by player
-	for (uint8_t i=0;i<hand.size();i++) {
+	/*for (uint8_t i=0;i<hand.size();i++) {
 
 		// modify selected card to stand out compared to the others
 		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
 		float selected_mod = (i==choice)*.5f;
-		icpos[idx] += selected_mod;icpos[idx+1] -= selected_mod;
+		pcards->rqueue[idx] += selected_mod,pcards->rqueue[idx+1] -= selected_mod;
 
-		// queue card & revert modification
-		card_to_queue(hand[i]);
-		icpos[idx] -= selected_mod;icpos[idx+1] += selected_mod;
-	}
-
-	// render shadow projection of shown currency
-	l3d.prepare_shadow();
-	m_r3d->prepare_inst();
-	m_r3d->is3d.upload_matrix("view",l3d.view);
-	m_r3d->is3d.upload_matrix("proj",l3d.proj);
-	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
-
-	// render shadow projection of playing cards
-	glDisable(GL_CULL_FACE);
-	sdr.enable();
-	bfr.bind();
-	sdr.upload_matrix("view",l3d.view);
-	sdr.upload_matrix("proj",l3d.proj);
-	bfr.upload_indices(render_queue);
-	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-	l3d.close_shadow(m_frame->w_res,m_frame->h_res);
+		// revert modification
+		//card_to_queue(hand[i]);
+		pcards->rqueue[idx] -= selected_mod,pcards->rqueue[idx+1] += selected_mod;
+	}*/
 }
 
 /*
 	render() -> void
-	purpose: the render queue can be compiled and all visuals can be drawn
+	purpose: card system visuals are drawn
 */
 void CardSystem::render()
 {
 	// render background
-	m_r3d->prepare(cam3D);
-	l3d.set_ambient(.1f);
-	l3d.set_amnt(1);
-	l3d.upload();
-	l3d.upload_shadow();
-	m_r3d->s3d.upload_int("tex_repeat",10);
-	m_r3d->render_mesh(r3d_index,r3d_index+1);
+	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->upload_shadow();
+	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
-	m_r3d->prepare_inst(cam3D);
-	m_r3d->is3d.upload_float("ambient",.1f);
-	m_r3d->is3d.upload_int("amnt_light_sun",1);
-	l3d.upload_inst();
-	m_r3d->is3d.upload_matrix("light_trans",l3d.shadow_mat);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
-	for (uint8_t i=0;i<currency_spawn.size();i++) m_r3d->render_inst(ir3d_index+i,currency_spawn[i]);
-
-	// setup cards
-	sdr.enable();
-	bfr.bind();
-	bfr.upload_indices(render_queue);
-	std::string base="al[0].";
-	sdr.upload_vec3((base+"pos").c_str(),l3d.pos);
-	sdr.upload_vec3((base+"col").c_str(),l3d.col);
-	sdr.upload_float((base+"ins").c_str(),l3d.ins);
-	sdr.upload_matrix("light_trans",l3d.shadow_mat);
-	sdr.upload_camera(cam3D);
+	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->upload_shadow_inst();
+	for (uint8_t i=0;i<currency_spawn.size();i++) {
+		m_ccbf->r3d->iml[ir3d_index+i].inst_count = currency_spawn[i];
+		m_ccbf->r3d->render_inst(ir3d_index+i);
+	}
 
 	// draw cards
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,l3d.dtex);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,tex);
-	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
-
-	// gl reset features
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	pcards->render();
 
 	// render cursor
-	cursor.render();
+	//cursor.render();
 }
 // TODO: OPTIMIZE!
-// TODO: minimize when light manager is fixed, ! especially the shadow cast & receive !
 
 /*
 	PARAMETER DEFINITION:
@@ -547,7 +487,7 @@ void CardSystem::render()
 void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	icpos[rid] = pos.x,icpos[rid+1] = pos.y,icpos[rid+2] = pos.z;
+	pcards->rqueue[rid] = pos.x,pcards->rqueue[rid+1] = pos.y,pcards->rqueue[rid+2] = pos.z;
 }
 
 /*
@@ -561,8 +501,10 @@ void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
-	icpos[rid+5] = glm::sin(rot.x),icpos[rid+6] = glm::sin(rot.y),icpos[rid+7] = glm::sin(rot.z),
-	icpos[rid+8] = glm::cos(rot.x),icpos[rid+9] = glm::cos(rot.y),icpos[rid+10] = glm::cos(rot.z);
+	pcards->rqueue[rid+5] = glm::sin(rot.x),pcards->rqueue[rid+6] = glm::sin(rot.y),
+	pcards->rqueue[rid+7] = glm::sin(rot.z),
+	pcards->rqueue[rid+8] = glm::cos(rot.x),pcards->rqueue[rid+9] = glm::cos(rot.y),
+	pcards->rqueue[rid+10] = glm::cos(rot.z);
 }
 // FIXME: duplicate of mesh instance setting in renderer3d
 
@@ -577,8 +519,8 @@ void CardSystem::reset_rotation(uint8_t id)
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
-	icpos[rid+5] = 0,icpos[rid+6] = 0,icpos[rid+7] = 0,
-	icpos[rid+8] = 1,icpos[rid+9] = 1,icpos[rid+10] = 1;
+	pcards->rqueue[rid+5] = 0,pcards->rqueue[rid+6] = 0,pcards->rqueue[rid+7] = 0,
+	pcards->rqueue[rid+8] = 1,pcards->rqueue[rid+9] = 1,pcards->rqueue[rid+10] = 1;
 }
 
 /*
@@ -588,7 +530,7 @@ void CardSystem::reset_rotation(uint8_t id)
 glm::vec3 CardSystem::get_position(uint8_t id)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	return glm::vec3(icpos[rid],icpos[rid+1],icpos[rid+2]);
+	return glm::vec3(pcards->rqueue[rid],pcards->rqueue[rid+1],pcards->rqueue[rid+2]);
 }
 
 /*
@@ -600,10 +542,10 @@ glm::vec3 CardSystem::get_rotation(uint8_t id)
 {
 	// get sine & cosine rotations
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	glm::vec3 srot =
-			glm::vec3(glm::asin(icpos[rid+5]),glm::asin(icpos[rid+6]),glm::asin(icpos[rid+7]));
-	glm::vec3 crot =
-			glm::vec3(glm::acos(icpos[rid+8]),glm::acos(icpos[rid+9]),glm::acos(icpos[rid+10]));
+	glm::vec3 srot = glm::vec3(glm::asin(pcards->rqueue[rid+5]),glm::asin(pcards->rqueue[rid+6]),
+			glm::asin(pcards->rqueue[rid+7]));
+	glm::vec3 crot = glm::vec3(glm::acos(pcards->rqueue[rid+8]),glm::acos(pcards->rqueue[rid+9]),
+			glm::acos(pcards->rqueue[rid+10]));
 
 	// join rotation vectors to eliminate negative null rotations masquerading as actual null
 	return glm::vec3(srot.x+(crot.x-srot.x)*(glm::abs(srot.x)<0.0001f),
@@ -621,21 +563,21 @@ glm::vec3 CardSystem::get_rotation(uint8_t id)
 */
 void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 {
-	icpos.push_back(0);icpos.push_back(0);icpos.push_back(0);	// position modification
-	icpos.push_back(tex_id.x);icpos.push_back(tex_id.y);		// texture atlas index
-	icpos.insert(icpos.end(),{ 0,0,0,1,1,1 });					// rotation sine & cosine
-	icpos.push_back(deck_id);									// deck identification
+	pcards->rqueue.push_back(0);pcards->rqueue.push_back(0);pcards->rqueue.push_back(0);
+	pcards->rqueue.push_back(tex_id.x);pcards->rqueue.push_back(tex_id.y);
+	pcards->rqueue.insert(pcards->rqueue.end(),{ 0,0,0,1,1,1 });
+	pcards->rqueue.push_back(deck_id);
 }
 
 /*
 	card_to_queue(uint8_t) -> void (private)
 	purpose: insert all index upload floats belonging to the given card as next in render queue
 */
-void CardSystem::card_to_queue(uint8_t id)
+/*void CardSystem::card_to_queue(uint8_t id)
 {
 	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) render_queue.push_back(icpos[rid+i]);
-}
+	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) pcards->render_queue.push_back(icpos[rid+i]);
+}*/
 
 /*
 	get_card_screen_space(uint8_t) -> vec3
@@ -645,7 +587,8 @@ void CardSystem::card_to_queue(uint8_t id)
 glm::vec3 CardSystem::get_card_screen_space(uint8_t id)
 {
 	glm::vec3 card_pos = get_position(id)-glm::vec3(CARD_HWIDTH,0,0);
-	glm::vec4 clip_space = cam3D.proj3D*cam3D.view3D*glm::vec4(card_pos,1);
+	glm::vec4 clip_space = m_setRigs->cam3D[3].proj3D
+			* m_setRigs->cam3D[3].view3D*glm::vec4(card_pos,1);
 	return glm::vec3(clip_space)/glm::vec3(clip_space.w);
 }
 
@@ -723,6 +666,7 @@ void CardSystem::force_create_animation(uint8_t id,glm::vec3 pos,uint16_t etime)
 	glm::vec3 rot = get_rotation(id);
 	c_anims.push_back({ id,get_position(id),rot,pos,rot,0,etime });
 }
+// FIXME: search for possible usages to improve animation creation performance
 
 /*
 	force_create_animation(uint8_t,vec3,vec3,uint16_t) -> void (private)

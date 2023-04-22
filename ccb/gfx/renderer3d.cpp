@@ -17,14 +17,20 @@ Renderer3D::Renderer3D()
 	p: origin position of the mesh
 	s: initial mesh scaling
 	r: initial mesh rotation
+	cast_shadow (default false): true if object should cast a shadow
 	purpose: add mesh object to renderer
 	returns: memory index to refer to the created mesh object by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-		glm::vec3 p,float s,glm::vec3 r)
+		glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
 {
+	// load mesh
+	uint16_t mesh_id = ml.size();
 	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&mofs));
-	return ml.size()-1;
+
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
+	return mesh_id;
 }
 
 /*
@@ -36,17 +42,65 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	returns: memory index to refer to the created instanced object by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* nm,
-		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap)
+		const char* em,glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow)
 {
+	// load mesh
+	uint16_t mesh_id = iml.size();
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
+
+	// create related index upload pattern
 	std::vector<float> cmesh_index;
 	for (uint16_t i=0;i<dcap;i++) {
 		cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),
 		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
 		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
 	} mesh_indices.push_back(cmesh_index);
-	return iml.size()-1;
+
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
+	return mesh_id;
 }
+
+/*
+	create_shadow(vec3,vec3,float,float,float,uint16_t) -> void
+	pos: position of light, which is supposed to project the shadow map
+	center: central look-at point for projected shadow map
+	mwidth: width of orthogonal camera space
+	mheight: height of orthogonal camera space
+	fdiv: breakdown divisor of real light position towards a more managable value
+	res: squared resolution of shadow map
+	purpose: create shadow map to later project scene objects onto
+*/
+void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
+		float fdiv,uint16_t res)
+{
+	// save shadow resolution
+	shadow_res = res;
+
+	// setup shadow map texture
+	glGenTextures(1,&shadow_map);
+	float border_colour[4] = { 1 };
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,res,res,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+	Toolbox::set_texture_parameter_nearest_unfiltered();
+	Toolbox::set_texture_parameter_clamp_to_border();
+	glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR,border_colour);
+
+	// setup depth sensitive framebuffer object
+	glGenFramebuffers(1,&depth_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,shadow_map,0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+	// calculate shadow projection
+	float hwidth = mwidth/2,hheight = mheight/2;
+	shadow_view = glm::lookAt(pos/fdiv+center,center,glm::vec3(0,1,0));
+	shadow_proj = glm::ortho(-hwidth,hwidth,-hheight,hheight,.1f,100.0f);
+	scam_projection = shadow_proj*shadow_view;
+}
+// FIXME: i know of the commutative properties of matrix multiplication, maybe generally precalc cam?
 
 /*
 	load(Camera3D) -> void
@@ -62,7 +116,7 @@ void Renderer3D::load(Camera3D cam3d)
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
-	s3d.compile3d("shader/vertex3d.shader","shader/fragment3d.shader");
+	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
 	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
@@ -78,7 +132,7 @@ void Renderer3D::load(Camera3D cam3d)
 	ibuffer.upload_vertices(iv);
 
 	// compile instance shader
-	is3d.compile3d("shader/vertexi3d.shader","shader/fragmenti3d.shader");
+	is3d.compile3d("shader/givertex.shader","shader/gfragment.shader");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
@@ -94,6 +148,7 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_camera(cam3d);
 
 	// compile shadow shader
+	Buffer::unbind();
 	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
@@ -147,6 +202,7 @@ void Renderer3D::prepare_inst()
 	is3d.enable();
 	ibuffer.bind();
 }
+// FIXME: detach gl settings from basic preparations
 
 /*
 	prepare_inst(Camera3D) -> void
@@ -161,6 +217,102 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 	// update camera
 	is3d.upload_camera(cam3d);
 	is3d.upload_vec3("view_pos",cam3d.pos);
+}
+
+/*
+	prepare_shadow() -> void
+	purpose: prepare shadow map projection render
+*/
+void Renderer3D::prepare_shadow()
+{
+	// set front face culling to avoid peter panning
+	glCullFace(GL_FRONT);
+
+	// prepare shadow framebuffer
+	glViewport(0,0,shadow_res,shadow_res);
+	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
+	Frame::clear();
+}
+
+/*
+	register_geometry(ShadowGeometry*) -> void
+	geometry: geometry which is capable of casting shadows
+	purpose: add shadow casting geometry to shadow projection routine
+*/
+void Renderer3D::register_geometry(ShadowGeometry* geometry)
+{ shadow_geometry.push_back(geometry); }
+
+/*
+	close_shadow(uint16_t,uint16_t) -> void
+	w_res: x-axis resolution reset
+	h_res: y-axis resolution reset
+	purpose: end shadow map projection render
+*/
+void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glViewport(0,0,w_res,h_res);
+	glCullFace(GL_BACK);
+}
+
+/*
+	clear_memory() -> void
+	purpose: removes all extern shadow geometry from memory
+*/
+void Renderer3D::clear_memory()
+{
+	for (auto geometry : shadow_geometry)
+		delete geometry;
+}
+
+/*
+	render_mesh_shadow() -> void
+	purpose: project mesh shadow onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
+*/
+void Renderer3D::render_mesh_shadow()
+{
+	// prepare mesh buffer & shader to render shadow map
+	prepare();
+	s3d.upload_matrix("view",shadow_view);
+	s3d.upload_matrix("proj",shadow_proj);
+
+	// project casting objects to shadow map
+	for (auto id : scast_mesh_ids) {
+		s3d.upload_matrix("model",ml[id].model);
+		glDrawArrays(GL_TRIANGLES,ml[id].ofs,ml[id].size);
+	}
+}
+
+/*
+	render_instance_shadow() -> void
+	purpose: project shadow of instanced meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
+*/
+void Renderer3D::render_instance_shadow()
+{
+	// prepare instance buffer & shader to render shadow map
+	prepare_inst();
+	is3d.upload_matrix("view",shadow_view);
+	is3d.upload_matrix("proj",shadow_proj);
+
+	// project casting instanced objects to shadow map
+	for (auto id : scast_instance_ids) {
+		ibuffer.upload_indices(mesh_indices[id]);
+		is3d.upload_matrix("model",iml[id].model);
+		glDrawArraysInstanced(GL_TRIANGLES,iml[id].ofs,iml[id].size,iml[id].inst_count);
+	}
+}
+
+/*
+	render_geometry_shadow() -> void
+	purpose: project shadows, originating from additional geometry onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
+*/
+void Renderer3D::render_geometry_shadow()
+{
+	for (auto geometry : shadow_geometry)
+		geometry->render_shadow();
 }
 
 /*
@@ -180,17 +332,18 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].emitmap);
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
+		s3d.upload_matrix("model",ml[i].model);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	} glActiveTexture(GL_TEXTURE0);
 }
+// FIXME: please finally choose if TEXTURE0 should be set at the beginning or reset after drawing
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
 	i: memory index of instanced object that is to be drawn
-	c: amount of duplicates, in order of instance buffer upload, to be drawn
 	purpose: render given amount of desired instance's duplicates
 */
-void Renderer3D::render_inst(uint16_t i,uint16_t c)
+void Renderer3D::render_inst(uint16_t i)
 {
 	ibuffer.upload_indices(mesh_indices[i]);
 	glActiveTexture(GL_TEXTURE0);
@@ -201,16 +354,39 @@ void Renderer3D::render_inst(uint16_t i,uint16_t c)
 	glBindTexture(GL_TEXTURE_2D,iml[i].emitmap);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
-	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,c);
+	is3d.upload_matrix("model",iml[i].model);
+	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,iml[i].inst_count);
 	glActiveTexture(GL_TEXTURE0);
 }
 
 /*
-	upload_shadow(mat4) -> void
-	DEPRECATED: this will be removed after completing #135
+	upload_shadow() -> void
+	purpose: upload shadow projection to mesh geometry pass shader
 */
-void Renderer3D::upload_shadow(glm::mat4 shadow_matrix)
-{ s3d.upload_matrix("light_trans",shadow_matrix); }
+void Renderer3D::upload_shadow()
+{
+	// upload camera projection
+	s3d.upload_matrix("light_trans",scam_projection);
+
+	// upload shadow map
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+}
+
+/*
+	upload_shadow_inst() -> void
+	purpose: upload shadow projection to instanced mesh geometry pass shader
+*/
+void Renderer3D::upload_shadow_inst()
+{
+	// upload camera projection
+	is3d.upload_matrix("light_trans",scam_projection);
+
+	// upload shadow map
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+}
+// FIXME: duplicate code
 
 /*
 	PARAMETER DEFINITIONS:

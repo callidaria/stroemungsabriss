@@ -8,25 +8,18 @@
 #include "../../ccb/frm/frame.h"
 
 #include "../../ccb/mat/camera3d.h"
+#include "../../ccb/mat/lighting.h"
 #include "../../ccb/mat/toolbox.h"
 
 #include "../../ccb/gfx/shader.h"
 #include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
-#include "../../ccb/gfx/light3d.h"
 
-#include "../ui/cursor.h"
+#include "../struct/feature_base.h"
+#include "../struct/playing_cards.h"
+//#include "../ui/cursor.h"
 
-// upload capacity
-constexpr uint8_t CARDSYSTEM_UPLOAD_REPEAT = 9;
-constexpr uint8_t CARDSYSTEM_INDEX_REPEAT = 12;
 constexpr uint16_t CSYS_CURRENCY_CAP = 1024;
-
-// positioning
-constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
-constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
-constexpr float CARD_HWIDTH = CARDSYSTEM_CARD_WIDTH/2;
-constexpr float CARD_HHEIGHT = CARDSYSTEM_CARD_HEIGHT/2;
 
 // TIMING
 constexpr float CARDSYSTEM_DEAL_WAIT = 15;
@@ -86,8 +79,9 @@ class CardSystem
 public:
 
 	// construction
-	CardSystem(Frame* f,Renderer2D* r2d,Renderer3D* r3d,std::vector<Currency> curr_path);
-	~CardSystem() {  };
+	CardSystem() {  }
+	CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,std::vector<Currency> curr_path);
+	~CardSystem() {  }
 
 	// interaction
 	void shuffle_all();
@@ -127,7 +121,7 @@ private:
 
 	// helpers
 	void create_card(glm::vec2 tex_id,bool deck_id);
-	void card_to_queue(uint8_t id);
+	//void card_to_queue(uint8_t id);
 	glm::vec3 get_card_screen_space(uint8_t id);
 
 	// update
@@ -145,22 +139,17 @@ private:
 private:
 
 	// cascabel
-	Buffer bfr = Buffer();
-	Shader sdr = Shader();
-	Camera3D cam3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
-	Frame* m_frame;
-	Renderer2D* m_r2d;
-	Renderer3D* m_r3d;
-	Light3D l3d = Light3D(m_r3d,0,glm::vec3(100,200,150),glm::vec3(1,1,1),1);
+	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 
 	// render
-	GLuint tex;
 	uint16_t r3d_index,ir3d_index;
 
 	// card information
-	std::vector<float> icpos;
+	PlayingCards* pcards;
 	std::vector<DeckPile> dpiles;
 	std::vector<uint8_t> deal,hand;
+	std::vector<float> hand_mod;
 	uint8_t choice = 0;
 
 	// currency information
@@ -175,13 +164,12 @@ private:
 
 	// system
 	std::vector<CardAnimation> c_anims;
-	std::vector<float> render_queue;
 	std::vector<DealProcess> auto_deals;
 	uint8_t crr_deal = 0;
 	float crr_dtime = 0;
 
 	// controls
-	Cursor cursor = Cursor(m_frame,m_r2d);
+	//Cursor cursor = Cursor(m_frame,m_r2d);
 	bool lfI = false,kinput = true;
 	int32_t tmx = 0;
 	float cstart = 0;

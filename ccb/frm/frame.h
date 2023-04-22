@@ -44,7 +44,7 @@ public:
 	~Frame() {  }
 
 	// modification
-	void clear(float cr=0,float cg=0,float cb=0);
+	static void clear(float cr=0,float cg=0,float cb=0);
 	void update();
 
 	// fps

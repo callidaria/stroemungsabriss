@@ -26,7 +26,6 @@
 
 #include "ccb/fcn/ccb_manager.h"
 
-#include "ccb/gfx/light3d.h"
 #include "ccb/gfx/material3d.h"
 
 #include "script/systems/input_map.h"
@@ -59,17 +58,20 @@ int main(int argc,char** argv)
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	// LOADERS
-	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
-	World world = World(&eref);
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
+	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
+	StageSetup set_rigs = { {  },{  },Lighting() };
 
 	// BUILD SET
-	world.add_camera(cam2d);
-	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
-	world.add_camera(Camera3D(1280.0f,720.0f));
+	World world = World(&eref,&set_rigs);
+	set_rigs.cam2D.push_back(cam2d);
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
+	set_rigs.cam3D.push_back(Camera3D(1280.0f,720.0f));
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f));
 
 	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
+	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
 	eref.ld.push(LOAD_CASINO);
 
 #if BUILD_DEV_MODE
@@ -77,7 +79,7 @@ int main(int argc,char** argv)
 #endif
 
 	// MAIN LOOP
-	uint32_t run=1;
+	uint32_t run = 1;
 	bool reboot = false;
 	while (run) {
 
@@ -85,7 +87,7 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.print_fps();
+		f.vsync(60);
 		f.calc_time_delta();
 		f.input(run);
 
@@ -115,6 +117,7 @@ int main(int argc,char** argv)
 
 	// CLOSING
 	world.free_memory();
+	r3d.clear_memory();
 	ccbm.vanish();
 	f.vanish();
 	return 0;

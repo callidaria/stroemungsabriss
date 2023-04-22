@@ -21,6 +21,7 @@ public:
 	void add_buffer();	// create element array buffer additionally
     void bind();		// bind the vertex array object
 	void bind_index();	// bind index or element buffer
+	static void unbind();
 
 	// upload
 	void upload_vertices(float* vertices,size_t vsize);			// upload vertex array

@@ -138,6 +138,9 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 
 	return out;
 }
+// TODO: squared hitboxes
+// TODO: maybe compare hitboxes by chunk, disable, when player is in different chunk? performance?
+// TODO: disable check for bullets outside of the frame
 
 /*
 	render() -> void

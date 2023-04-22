@@ -1,15 +1,26 @@
 #include "world.h"
 
 /*
-	constructor(EngineReference)
+	constructor(CascabelBaseFeature*,StageSetup*)
 	eref: references to all relevant engine objects
+	set_rigs: stage setup
 	purpose: create a world handling entity for a better loop structure
 */
-World::World(CascabelBaseFeature* eref)
-	: m_ccbf(eref)
+World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
+	: m_ccbf(eref),m_setRigs(set_rigs)
 {
+	// g-buffer setup
+	gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
+
+	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+	deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
+	deferred_fb.s.upload_int("gbuffer_colour",0);
+	deferred_fb.s.upload_int("gbuffer_position",1);
+	deferred_fb.s.upload_int("gbuffer_normals",2);
+	deferred_fb.s.upload_int("shadow_tex",3);
 }
 
 /*
@@ -25,16 +36,6 @@ void World::add_playable(Player* player)
 { player_master.push_back(player); }
 void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
-
-/*
-	add_camera(Camera2D||Camera3D) -> void
-	argument[0]: camera to upload to list of cameras
-	purpose: create a camera, that can be switched to as graphical receptor
-*/
-void World::add_camera(Camera2D cam2D)
-{ cam2D_master.push_back(cam2D); }
-void World::add_camera(Camera3D cam3D)
-{ cam3D_master.push_back(cam3D); }
 
 /*
 	free_memory() -> void
@@ -80,9 +81,19 @@ void World::remove_boss(uint8_t boss_id)
 */
 void World::load_geometry()
 {
-	m_ccbf->r2d->load(&cam2D_master[active_cam2D]);
+	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D]);
 	m_ccbf->rI->load();
-	m_ccbf->r3d->load(cam3D_master[active_cam3D]);
+	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D]);
+}
+
+/*
+	upload_lighting() -> void
+	purpose: upload lighting to deferred shader
+*/
+void World::upload_lighting()
+{
+	deferred_fb.s.enable();
+	m_setRigs->lighting.upload(&deferred_fb.s);
 }
 
 /*
@@ -93,8 +104,16 @@ void World::load_geometry()
 */
 void World::render(uint32_t &running,bool &reboot)
 {
-	// bind scene framebuffer
-	game_fb.bind();
+	// shadow processing
+	glDisable(GL_BLEND);
+	m_ccbf->r3d->prepare_shadow();
+	m_ccbf->r3d->render_mesh_shadow();
+	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_geometry_shadow();
+	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+
+	// start geometry pass deferred scene
+	gbuffer.bind();
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
@@ -102,8 +121,25 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
 
+	// end geometry pass deferred scene
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glEnable(GL_BLEND);
+
 	// render bullets
 	m_ccbf->bSys->render();
+
+	// upload g-buffer components to deferred light shader
+	game_fb.bind();
+	deferred_fb.prepare();
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+
+	// deferred light shading 
+	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
+	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui
 	game_fb.close();

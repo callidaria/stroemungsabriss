@@ -7,10 +7,12 @@
 // engine
 #include "../ccb/frm/frame.h"
 #include "../ccb/frm/framebuffer.h"
+#include "../ccb/frm/gbuffer.h"
 
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
-#include "../ccb/gfx/light3d.h"
+
+#include "../ccb/mat/lighting.h"
 
 // scripts
 #include "struct/feature_base.h"
@@ -21,7 +23,7 @@ class World
 public:
 
 	// construction
-	World(CascabelBaseFeature* eref);
+	World(CascabelBaseFeature* eref,StageSetup* set_rigs);
 	~World() {  }
 
 	// creation
@@ -29,10 +31,6 @@ public:
 	void add_scene(Scene* scene);
 	void add_playable(Player* player);
 	void add_boss(Boss* boss);
-
-	// set creation
-	void add_camera(Camera2D cam2D);
-	void add_camera(Camera3D cam3D);
 
 	// destruction
 	void free_memory();
@@ -43,6 +41,7 @@ public:
 
 	// load
 	void load_geometry();
+	void upload_lighting();
 
 	// draw
 	void render(uint32_t &running,bool &reboot);
@@ -56,16 +55,13 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	FrameBuffer game_fb;
+	StageSetup* m_setRigs;
+	FrameBuffer deferred_fb,game_fb;
+	GBuffer gbuffer;
 
 	// scene components
 	std::vector<UI*> ui_master;
 	std::vector<Scene*> scene_master;
 	std::vector<Player*> player_master;
 	std::vector<Boss*> boss_master;
-
-	// set components
-	std::vector<Camera2D> cam2D_master;
-	std::vector<Camera3D> cam3D_master;
-	std::vector<Light3D> light_master;
 };

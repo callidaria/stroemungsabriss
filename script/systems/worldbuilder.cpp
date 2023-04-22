@@ -3,12 +3,14 @@
 /*
 	construction(CascabelBaseFeature*,CCBManager*,World*)
 	ccbf: all common cascabel tools & features
+	set_rigs: stage setup
 	ccbm: cascabel manager to load level files with
 	world: world to load objects & logic for
 	purpose: create a worldbuilder to process world loading logic
 */
-Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
-	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
+Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBManager* ccbm,
+		World* world)
+	: m_ccbf(ccbf),m_setRigs(set_rigs),m_ccbm(ccbm),m_world(world) {  }
 
 /*
 	load() -> void
@@ -26,6 +28,10 @@ void Worldbuilder::load()
 
 		// casino
 		case LOAD_CASINO: load_casino();
+			break;
+
+		// cardtable testing
+		case LOAD_CARDTABLE: load_cards();
 			break;
 
 		// nepal
@@ -49,20 +55,26 @@ void Worldbuilder::load_menu()
 	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf);
 	m_world->add_ui(menu);
 	m_world->load_geometry();
-	Light3D l3d = Light3D(m_ccbf->r3d,0,glm::vec3(-500,750,100),glm::vec3(1,1,1),1);
-	l3d.set_amnt(1);
-	l3d.upload();
 }
 void Worldbuilder::load_casino()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
+	m_world->active_cam3D = 0;
 	m_world->load_geometry();
-	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(200,100,100),glm::vec3(1,1,1),1);
-	l3d_ortho.set_amnt(1);
-	l3d_ortho.upload();
+	m_world->upload_lighting();
+}
+void Worldbuilder::load_cards()
+{
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs);
+	m_world->add_ui(action_menu);
+	m_world->add_scene(ctable);
+	m_world->active_cam3D = 3;
+	m_world->load_geometry();
+	m_world->upload_lighting();
 }
 void Worldbuilder::load_airfield()
 { std::cout << "loading: airfield scene\n"; }
@@ -79,7 +91,4 @@ void Worldbuilder::load_dpilot()
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 1;
 	m_world->load_geometry();
-	Light3D l3d_ortho = Light3D(m_ccbf->r3d,0,glm::vec3(640,360,10000),glm::vec3(1,1,1),1);
-	l3d_ortho.set_amnt(1);
-	l3d_ortho.upload();
 }

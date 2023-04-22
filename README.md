@@ -69,6 +69,7 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### features:
 - dynamic world loading
+- deferred rendering for a much more complex lighting system
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 
 ### optimizations:
@@ -172,4 +173,5 @@ Worktime: 120h
 	+ 64: 2h 20min
 	+ 47: 20h 57min
 	+ 164: 9h 27min
+	+ 147: 50h 53min
 - Total Code Lines: 12.126
