@@ -26,10 +26,6 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/casino/rolling_spec.png","./res/casino/rolling_normal.png","./res/none.png",
 			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
-
-	// material definitions
-	m0 = Material3D(m_ccbf->r3d,2.5f,8,.25f);
-	m1 = Material3D(m_ccbf->r3d,1.5f,64,2);
 }
 
 /*
@@ -60,9 +56,10 @@ void CasinoSpike::render()
 	m_setRigs->cam3D[0].update();
 
 	// render flooring
+	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->upload_shadow();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);
 
 	// render wordly objects
-	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+4);
-	m_ccbf->r3d->render_mesh(index_r3D+4,index_r3D+5);
+	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
 }

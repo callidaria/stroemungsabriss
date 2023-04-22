@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/frm/framebuffer.h"
-#include "../../ccb/mat/camera3d.h"
 
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI

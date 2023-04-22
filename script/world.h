@@ -60,7 +60,7 @@ private:
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
 	FrameBuffer deferred_fb,game_fb;
-	GBuffer gbuffer = GBuffer(1600.0f,900.0f);
+	GBuffer gbuffer;
 
 	// scene components
 	std::vector<UI*> ui_master;

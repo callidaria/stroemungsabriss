@@ -14,7 +14,6 @@
 #include "../../ccb/gfx/shader.h"
 #include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
-#include "../../ccb/gfx/light3d.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/playing_cards.h"

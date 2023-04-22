@@ -60,7 +60,7 @@ void Worldbuilder::load_casino()
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,&m_world->set_rigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
-	m_world->active_cam3D = 2;
+	m_world->active_cam3D = 0;
 	m_world->load_geometry();
 }
 void Worldbuilder::load_cards()

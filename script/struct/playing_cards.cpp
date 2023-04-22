@@ -93,10 +93,6 @@ void PlayingCards::render()
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(rqueue);
-	std::string base="al[0].";
-	sdr.upload_vec3((base+"pos").c_str(),m_setRigs->lighting.sunlights[0].position);
-	sdr.upload_vec3((base+"col").c_str(),m_setRigs->lighting.sunlights[0].colour);
-	sdr.upload_float((base+"ins").c_str(),m_setRigs->lighting.sunlights[0].intensity);
 	sdr.upload_matrix("light_trans",m_ccbf->r3d->scam_projection);
 	sdr.upload_camera(m_setRigs->cam3D[3]);
 

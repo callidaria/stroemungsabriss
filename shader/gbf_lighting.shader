@@ -98,8 +98,6 @@ void main()
 	// return colour composition
 	outColour = vec4(cmb_colours,1);
 }
-// FIXME: at higher resolutions there can be a raster-esque pattern when moving the camera
-// FIXME: also ?MORE? texture flickering at ???HIGHER??? resolutions?!?
 
 // specular processing
 vec3 process_specular(vec3 colour,vec3 lgt_colour,float in_speculars,vec3 spec_dir,float fresnel)
