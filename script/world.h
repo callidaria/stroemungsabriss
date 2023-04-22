@@ -23,7 +23,7 @@ class World
 public:
 
 	// construction
-	World(CascabelBaseFeature* eref);
+	World(CascabelBaseFeature* eref,StageSetup* set_rigs);
 	~World() {  }
 
 	// creation
@@ -31,10 +31,6 @@ public:
 	void add_scene(Scene* scene);
 	void add_playable(Player* player);
 	void add_boss(Boss* boss);
-
-	// set creation
-	void add_camera(Camera2D cam2D);
-	void add_camera(Camera3D cam3D);
 
 	// destruction
 	void free_memory();
@@ -45,6 +41,7 @@ public:
 
 	// load
 	void load_geometry();
+	void upload_lighting();
 
 	// draw
 	void render(uint32_t &running,bool &reboot);
@@ -53,12 +50,12 @@ public:
 
 	// public indices
 	uint8_t active_daui = 0,active_cam2D = 0,active_cam3D = 0;
-	StageSetup set_rigs = { std::vector<Camera2D>(),std::vector<Camera3D>(),Lighting() };
 
 private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 	FrameBuffer deferred_fb,game_fb;
 	GBuffer gbuffer;
 

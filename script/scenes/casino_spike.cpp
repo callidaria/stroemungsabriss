@@ -26,6 +26,20 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/casino/rolling_spec.png","./res/casino/rolling_normal.png","./res/none.png",
 			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
+
+	// lighting
+	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
+	set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
+	set_rigs->lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(7,.5f,-7),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(7,2,-3),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(7,1.5f,1),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(7,1,5),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
+	set_rigs->lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
+	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
 
 /*

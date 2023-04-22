@@ -1,12 +1,13 @@
 #include "world.h"
 
 /*
-	constructor(EngineReference)
+	constructor(CascabelBaseFeature*,StageSetup*)
 	eref: references to all relevant engine objects
+	set_rigs: stage setup
 	purpose: create a world handling entity for a better loop structure
 */
-World::World(CascabelBaseFeature* eref)
-	: m_ccbf(eref)
+World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
+	: m_ccbf(eref),m_setRigs(set_rigs)
 {
 	// g-buffer setup
 	gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
@@ -20,21 +21,6 @@ World::World(CascabelBaseFeature* eref)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("shadow_tex",3);
-
-	// lighting setup
-	m_ccbf->r3d->create_shadow(glm::vec3(100,50,150),glm::vec3(0),25,25,10,4096);
-	set_rigs.lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
-	set_rigs.lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(7,.5f,-7),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(7,2,-3),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(7,1.5f,1),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(7,1,5),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
-	set_rigs.lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
-	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
-	set_rigs.lighting.upload(&deferred_fb.s);
 }
 
 /*
@@ -50,16 +36,6 @@ void World::add_playable(Player* player)
 { player_master.push_back(player); }
 void World::add_boss(Boss* boss)
 { boss_master.push_back(boss); }
-
-/*
-	add_camera(Camera2D||Camera3D) -> void
-	argument[0]: camera to upload to list of cameras
-	purpose: create a camera, that can be switched to as graphical receptor
-*/
-void World::add_camera(Camera2D cam2D)
-{ set_rigs.cam2D.push_back(cam2D); }
-void World::add_camera(Camera3D cam3D)
-{ set_rigs.cam3D.push_back(cam3D); }
 
 /*
 	free_memory() -> void
@@ -105,9 +81,19 @@ void World::remove_boss(uint8_t boss_id)
 */
 void World::load_geometry()
 {
-	m_ccbf->r2d->load(&set_rigs.cam2D[active_cam2D]);
+	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D]);
 	m_ccbf->rI->load();
-	m_ccbf->r3d->load(set_rigs.cam3D[active_cam3D]);
+	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D]);
+}
+
+/*
+	upload_lighting() -> void
+	purpose: upload lighting to deferred shader
+*/
+void World::upload_lighting()
+{
+	deferred_fb.s.enable();
+	m_setRigs->lighting.upload(&deferred_fb.s);
 }
 
 /*
@@ -152,7 +138,7 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 
 	// deferred light shading 
-	deferred_fb.s.upload_vec3("view_pos",set_rigs.cam3D[active_cam3D].pos);
+	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui

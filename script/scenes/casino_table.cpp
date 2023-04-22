@@ -33,6 +33,10 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	card_system.register_auto_deal(0,1,7);
 	card_system.register_auto_deal(0,2,7);
 	card_system.register_auto_deal(0,3,7);
+
+	// lighting
+	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),100,100,10,4096);
+	set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.7f });
 }
 
 /*

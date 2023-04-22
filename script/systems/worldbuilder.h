@@ -21,7 +21,7 @@ class Worldbuilder
 public:
 
 	// construction
-	Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world);
+	Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBManager* ccbm,World* world);
 	~Worldbuilder() {  }
 
 	// load
@@ -41,6 +41,7 @@ private:
 
 	// system
 	CascabelBaseFeature* m_ccbf;
+	StageSetup* m_setRigs;
 	CCBManager* m_ccbm;
 	World* m_world;
 };

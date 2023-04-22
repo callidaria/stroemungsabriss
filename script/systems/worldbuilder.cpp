@@ -3,12 +3,14 @@
 /*
 	construction(CascabelBaseFeature*,CCBManager*,World*)
 	ccbf: all common cascabel tools & features
+	set_rigs: stage setup
 	ccbm: cascabel manager to load level files with
 	world: world to load objects & logic for
 	purpose: create a worldbuilder to process world loading logic
 */
-Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
-	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
+Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBManager* ccbm,
+		World* world)
+	: m_ccbf(ccbf),m_setRigs(set_rigs),m_ccbm(ccbm),m_world(world) {  }
 
 /*
 	load() -> void
@@ -57,20 +59,22 @@ void Worldbuilder::load_menu()
 void Worldbuilder::load_casino()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf,&m_world->set_rigs);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
 	m_world->active_cam3D = 0;
 	m_world->load_geometry();
+	m_world->upload_lighting();
 }
 void Worldbuilder::load_cards()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoTable* ctable = new CasinoTable(m_ccbf,&m_world->set_rigs);
+	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
 	m_world->active_cam3D = 3;
 	m_world->load_geometry();
+	m_world->upload_lighting();
 }
 void Worldbuilder::load_airfield()
 { std::cout << "loading: airfield scene\n"; }

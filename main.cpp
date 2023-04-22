@@ -60,17 +60,18 @@ int main(int argc,char** argv)
 	// LOADERS
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
+	StageSetup set_rigs = { {  },{  },Lighting() };
 
 	// BUILD SET
-	World world = World(&eref);
-	world.add_camera(cam2d);
-	world.add_camera(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
-	world.add_camera(Camera3D(1280.0f,720.0f));
-	world.add_camera(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));
-	world.add_camera(Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f));
+	World world = World(&eref,&set_rigs);
+	set_rigs.cam2D.push_back(cam2d);
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
+	set_rigs.cam3D.push_back(Camera3D(1280.0f,720.0f));
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));
+	set_rigs.cam3D.push_back(Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f));
 
 	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
+	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
 	eref.ld.push(LOAD_CASINO);
 
 #if BUILD_DEV_MODE
