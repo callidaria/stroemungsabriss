@@ -95,6 +95,10 @@ void main()
 	cmb_colours = max(cmb_colours,emit_colours);
 	// TODO: figure out if space over time is the best call in this case
 
+	// colour corrections: high dynamic exposure & gamma correction
+	cmb_colours = vec3(1.0)-exp(-cmb_colours*.7);
+	cmb_colours = pow(cmb_colours,vec3(1.0/2.2));
+
 	// return colour composition
 	outColour = vec4(cmb_colours,1);
 }
@@ -102,7 +106,7 @@ void main()
 // specular processing
 vec3 process_specular(vec3 colour,vec3 lgt_colour,float in_speculars,vec3 spec_dir,float fresnel)
 {
-	float spec = pow(max(dot(camera_dir,spec_dir),0),spec_exponent)*spec_intensity*pow(fresnel,.25);
+	float spec = pow(max(dot(camera_dir,spec_dir),0),spec_exponent)*spec_intensity;//*pow(fresnel,.25);
 	return spec*lgt_colour*in_speculars;
 }
 
@@ -120,7 +124,8 @@ vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_s
 	vec3 specular = process_specular(colour,sl.colour,in_speculars,spec_dir,fresnel);
 
 	// combine sunlight shading components
-	return (mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular)*sl.intensity;
+	//return (mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular)*sl.intensity;
+	return diffusion+specular*sl.intensity;
 }
 
 // pointlight processing

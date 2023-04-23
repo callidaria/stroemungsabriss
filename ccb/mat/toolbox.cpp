@@ -204,13 +204,14 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 */
 
 /*
-	load_texture(GLuint,const char*) -> void (static)
+	load_texture(uint32_t,const char*) -> void (static)
+	TODO
 	purpose: load texture value, generate mipmap and associate it with given texture reference
 */
-void Toolbox::load_texture(GLuint tex,const char* path)
+void Toolbox::load_texture(uint32_t tex,const char* path,bool corrected)
 {
 	// bind and load texture data
-	load_texture_function_head(tex,path);
+	load_texture_function_head(tex,path,corrected);
 
 	// texture parameters & mipmap
 	set_texture_parameter_clamp_to_edge();
@@ -219,15 +220,15 @@ void Toolbox::load_texture(GLuint tex,const char* path)
 }
 
 /*
-	load_texture(GLuint,const char*,float) -> void (static)
+	load_texture(uint32_t,const char*,float) -> void (static)
 	overloads previous load_texture()
 	bias: mipmapping level-of-detail bias
 	purpose: load mipmapped texture with modified lod bias
 */
-void Toolbox::load_texture(GLuint tex,const char* path,float bias)
+void Toolbox::load_texture(uint32_t tex,const char* path,float bias,bool corrected)
 {
 	// bind and load texture data
-	load_texture_function_head(tex,path);
+	load_texture_function_head(tex,path,corrected);
 
 	// texture parameters & mipmap
 	set_texture_parameter_clamp_to_edge();
@@ -237,13 +238,13 @@ void Toolbox::load_texture(GLuint tex,const char* path,float bias)
 }
 
 /*
-	load_texture_unfiltered(GLuint,const char*) -> void (static)
+	load_texture_unfiltered(uint32_t,const char*) -> void (static)
 	purpose: load texture without mipmapping
 */
-void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
+void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool corrected)
 {
 	// bind and load texture data
-	load_texture_function_head(tex,path);
+	load_texture_function_head(tex,path,corrected);
 
 	// texture paramteres without mipmap
 	set_texture_parameter_clamp_to_edge();
@@ -252,13 +253,13 @@ void Toolbox::load_texture_unfiltered(GLuint tex,const char* path)
 }
 
 /*
-	load_texture_repeat(GLuint,const char*) -> void (static)
+	load_texture_repeat(uint32_t,const char*) -> void (static)
 	purpose: load repeating mipmapped texture
 */
-void Toolbox::load_texture_repeat(GLuint tex,const char* path)
+void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 {
 	// bind and load texture data
-	load_texture_function_head(tex,path);
+	load_texture_function_head(tex,path,corrected);
 
 	// texture parameters repeating
 	set_texture_parameter_texture_repeat();
@@ -330,14 +331,15 @@ void Toolbox::set_texture_parameter_texture_repeat()
 }
 
 /*
-	load_texture_function_head(GLuint tex,const char* path) -> void (private,static)
+	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static)
 	purpose: load texture value from given file
 */
-void Toolbox::load_texture_function_head(GLuint tex,const char* path)
+void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corrected)
 {
 	// setup
 	int width,height;
 	glBindTexture(GL_TEXTURE_2D,tex);
+	int32_t format = corrected ? GL_SRGB : GL_RGBA;
 
 	// load texture data from source
 #ifdef __WIN32__
@@ -349,7 +351,7 @@ void Toolbox::load_texture_function_head(GLuint tex,const char* path)
 #else
 
 	unsigned char* image = SOIL_load_image(path,&width,&height,0,SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
+	glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
 	SOIL_free_image_data(image);
 
 #endif

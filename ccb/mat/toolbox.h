@@ -38,10 +38,10 @@ public:
 	static std::vector<float> create_sprite_canvas_triangled(glm::vec2 pos,float width,float height);
 
 	// graphical setup
-	static void load_texture(GLuint tex,const char* path);
-	static void load_texture(GLuint tex,const char* path,float bias);
-	static void load_texture_unfiltered(GLuint tex,const char* path);
-	static void load_texture_repeat(GLuint tex,const char* path);
+	static void load_texture(uint32_t tex,const char* path,bool corrected=false);
+	static void load_texture(uint32_t tex,const char* path,float bias,bool corrected=false);
+	static void load_texture_unfiltered(uint32_t tex,const char* path,bool corrected=false);
+	static void load_texture_repeat(uint32_t tex,const char* path,bool corrected=false);
 	static void generate_elements(uint16_t i,std::vector<unsigned int> &ls);
 
 	// filter settings
@@ -56,5 +56,5 @@ public:
 private:
 
 	// helpers
-	static void load_texture_function_head(GLuint tex,const char* path);
+	static void load_texture_function_head(uint32_t tex,const char* path,bool corrected);
 };
