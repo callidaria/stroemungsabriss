@@ -14,6 +14,13 @@ MenuList::MenuList()
 }
 
 /*
+	TODO
+*/
+MenuList::MenuList(Renderer2D* r2d)
+	: m_r2d(r2d)
+{  }
+
+/*
 	Constructor(Camera2D*,const char*)
 	cam2d: text will be rendered according to the camera parameter's perspective and view
 	path: path to menu list configuration file in updated cmli2 language format
@@ -34,7 +41,6 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	// setting up textures for 2D renderer
 	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
 	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->load(cam2d);  // FIXME: sprite always in split, use different spritesheets
 
 	// setting up the different texts for menu features
 	Text t_sle = Text(lfnt),t_desc = Text(dfnt);
@@ -160,6 +166,25 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	} rles = les;
 	// FIXME: text with annotated \n in written file format -> is it \n or \\n?
 } // TODO: write interpreter fault instead of letting the mem take the fall
+
+/*
+	TODO
+*/
+void MenuList::add_entity(const char* title,const char* location,const char* difficulty)
+{
+	// load save description
+	Text ttext = Text(lfnt),dtext = Text(dfnt);
+	ttext.add(title,glm::vec2(250,lscroll));
+	ttext.load();
+	dtext.add(location,glm::vec2(920,dscroll));
+	dtext.add(difficulty,glm::vec2(920,dscroll-20));
+	dtext.load();
+	lscroll -= 45;
+	les.push_back( { ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
+		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
+	});
+	esize++;
+}
 
 /*
 	reset() -> void

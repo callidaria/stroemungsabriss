@@ -52,7 +52,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	mls[1] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_mopt");
 	mls[2] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_stages");
 	mls[3] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_arcades");
-	mls[4] = MenuList();
+	mls[4] = MenuList(m_ccbf->r2d);
 	mls[5] = MenuList();
 	mls[6] = MenuList();
 	mls[7] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optfrm");
@@ -61,6 +61,10 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	mls[10] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgm");
 	mls[11] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optext");
 	// FIXME: mess
+
+	// load savestates
+	mls[4].add_entity("callidaria test save","Spike's Casino","MASTER");
+	mls[4].add_entity("dante diabolo's crazy quest","Library Aurora Minerva","GRANDMASTER");
 
 	/*
 		setup splash vertices by origin position, target position and colour:

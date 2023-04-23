@@ -47,8 +47,12 @@ public:
 
 	// construction
 	MenuList();
+	MenuList(Renderer2D* r2d);
 	MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path);
 	~MenuList() {  }
+
+	// creation
+	void add_entity(const char* title,const char* desc,const char* difficulty);
 
 	// modification
 	void reset();
