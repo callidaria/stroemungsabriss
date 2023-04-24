@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -53,6 +54,7 @@ public:
 
 	// creation
 	void add_entity(const char* title,const char* desc,const char* difficulty);
+	void add_save(std::string path);
 
 	// modification
 	void reset();

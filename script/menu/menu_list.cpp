@@ -180,10 +180,46 @@ void MenuList::add_entity(const char* title,const char* location,const char* dif
 	dtext.add(difficulty,glm::vec2(920,dscroll-20));
 	dtext.load();
 	lscroll -= 45;
-	les.push_back( { ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
+	les.push_back({
+		ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
 		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
-	});
-	esize++;
+	}); esize++;
+}
+
+/*
+	TODO
+*/
+void MenuList::add_save(std::string path)
+{
+	// data setup
+	std::ifstream file(path);
+	std::string datastring;
+	std::getline(file,datastring);
+	std::istringstream data(datastring);
+
+	// grind save data
+	std::string curr_data;
+	std::vector<std::string> raw_savedata;
+	while (std::getline(data,curr_data,';')) raw_savedata.push_back(curr_data);
+
+	// interpret save title
+	Text ttext = Text(lfnt),dtext = Text(dfnt);
+	ttext.add(raw_savedata[0].c_str(),glm::vec2(250,lscroll));
+	ttext.load();
+	lscroll -= 45;
+
+	// interpret save description
+	dtext.add(raw_savedata[1].c_str(),glm::vec2(920,dscroll));
+
+	// interpret difficulty
+	dtext.add(raw_savedata[2].c_str(),glm::vec2(920,dscroll-20));
+	dtext.load();
+
+	// compile save entry
+	les.push_back({
+		ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
+		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
+	}); esize++;
 }
 
 /*

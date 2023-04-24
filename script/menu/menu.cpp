@@ -63,8 +63,8 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	// FIXME: mess
 
 	// load savestates
-	mls[4].add_entity("callidaria test save","Spike's Casino","MASTER");
-	mls[4].add_entity("dante diabolo's crazy quest","Library Aurora Minerva","GRANDMASTER");
+	for (auto entry : std::filesystem::directory_iterator("./save"))
+		mls[4].add_save(entry.path().string());
 
 	/*
 		setup splash vertices by origin position, target position and colour:
