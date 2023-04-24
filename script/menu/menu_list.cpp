@@ -170,28 +170,10 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 /*
 	TODO
 */
-void MenuList::add_entity(const char* title,const char* location,const char* difficulty)
-{
-	// load save description
-	Text ttext = Text(lfnt),dtext = Text(dfnt);
-	ttext.add(title,glm::vec2(250,lscroll));
-	ttext.load();
-	dtext.add(location,glm::vec2(920,dscroll));
-	dtext.add(difficulty,glm::vec2(920,dscroll-20));
-	dtext.load();
-	lscroll -= 45;
-	les.push_back({
-		ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
-		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
-	}); esize++;
-}
-
-/*
-	TODO
-*/
-void MenuList::add_save(std::string path)
+SaveState MenuList::add_save(std::string path)
 {
 	// data setup
+	SaveState out_diff = {  };
 	std::ifstream file(path);
 	std::string datastring;
 	std::getline(file,datastring);
@@ -202,24 +184,31 @@ void MenuList::add_save(std::string path)
 	std::vector<std::string> raw_savedata;
 	while (std::getline(data,curr_data,';')) raw_savedata.push_back(curr_data);
 
-	// interpret save title
+	// interpret save file
+	out_diff.title = raw_savedata[0].c_str();
+	out_diff.description = raw_savedata[1].c_str();
+	out_diff.diff = std::stoi(raw_savedata[2]);
+	out_diff.skill = std::stoi(raw_savedata[3]);
+
+	// write save title
 	Text ttext = Text(lfnt),dtext = Text(dfnt);
-	ttext.add(raw_savedata[0].c_str(),glm::vec2(250,lscroll));
+	ttext.add(out_diff.title,glm::vec2(250,lscroll));
 	ttext.load();
 	lscroll -= 45;
 
-	// interpret save description
-	dtext.add(raw_savedata[1].c_str(),glm::vec2(920,dscroll));
+	// write save description
+	dtext.add(out_diff.description,glm::vec2(920,dscroll));
 
-	// interpret difficulty
-	dtext.add(raw_savedata[2].c_str(),glm::vec2(920,dscroll-20));
+	// write difficulty
+	dtext.add(NAMING_DIFFICULTY[out_diff.diff],glm::vec2(920,dscroll-20));
 	dtext.load();
 
 	// compile save entry
 	les.push_back({
 		ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
-		false,0,0,0,0,0,{ 0,0,0,0,0,0 },0,""
+		false,0,0,0,0,out_diff.skill,{ 0,0,0,0,0,0 },0,""
 	}); esize++;
+	return out_diff;
 }
 
 /*

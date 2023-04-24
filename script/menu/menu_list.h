@@ -13,6 +13,8 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
+#include "../struct/savestate.h"
+
 // to identify how to interpret the values
 enum ReadMode
 {
@@ -53,8 +55,7 @@ public:
 	~MenuList() {  }
 
 	// creation
-	void add_entity(const char* title,const char* desc,const char* difficulty);
-	void add_save(std::string path);
+	SaveState add_save(std::string path);
 
 	// modification
 	void reset();
@@ -104,4 +105,7 @@ private:
 	// animation of estimated difficulty
 	bool neg_scl = false,neg_rot = false;	// true if transformation of estimated difficulty is negative
 	float val_scl = 1,val_rot = 0;			// values of description transformation
+
+	// naming correlation of difficulty ids
+	std::vector<const char*> NAMING_DIFFICULTY { "NORMAL","MASTER","GRANDMASTER","HEADMASTER" };
 };
