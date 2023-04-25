@@ -51,7 +51,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// load card game texture
 	glGenTextures(1,&tex);
-	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f);
+	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f,true);
 	sdr.upload_int("tex",0);
 	sdr.upload_int("shadow_map",3);
 

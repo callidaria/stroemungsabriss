@@ -77,6 +77,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - hotplugging controllers
 - switching dynamically between input methods
 - autoremoving all libraries when the whole project gets rebuilt
+- colour correction: high dynamic range
+- colour correction: gamma correction
 
 ### fixes:
 - FIXED: double main loop
@@ -174,5 +176,5 @@ Worktime: 120h
 	+ 47: 20h 57min
 	+ 164: 9h 27min
 	+ 147: 50h 53min
-	+ 169: 1h 32min
+	+ 169: 2h 1min
 - Total Code Lines: 12.126

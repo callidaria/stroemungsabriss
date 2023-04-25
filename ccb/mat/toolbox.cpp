@@ -201,10 +201,11 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 	PARAMETER DEFINITIONS:
 	tex: reference to be associated with texture value when bound
 	path: path to file holding texture value
+	corrected: defines colour format as corrected sRGB (true) or uncorrected RGBA (false)
 */
 
 /*
-	load_texture(uint32_t,const char*) -> void (static)
+	load_texture(uint32_t,const char*,bool) -> void (static)
 	TODO
 	purpose: load texture value, generate mipmap and associate it with given texture reference
 */
@@ -220,7 +221,7 @@ void Toolbox::load_texture(uint32_t tex,const char* path,bool corrected)
 }
 
 /*
-	load_texture(uint32_t,const char*,float) -> void (static)
+	load_texture(uint32_t,const char*,float,bool) -> void (static)
 	overloads previous load_texture()
 	bias: mipmapping level-of-detail bias
 	purpose: load mipmapped texture with modified lod bias
@@ -238,7 +239,7 @@ void Toolbox::load_texture(uint32_t tex,const char* path,float bias,bool correct
 }
 
 /*
-	load_texture_unfiltered(uint32_t,const char*) -> void (static)
+	load_texture_unfiltered(uint32_t,const char*,bool) -> void (static)
 	purpose: load texture without mipmapping
 */
 void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool corrected)
@@ -253,7 +254,7 @@ void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool correct
 }
 
 /*
-	load_texture_repeat(uint32_t,const char*) -> void (static)
+	load_texture_repeat(uint32_t,const char*,bool) -> void (static)
 	purpose: load repeating mipmapped texture
 */
 void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
