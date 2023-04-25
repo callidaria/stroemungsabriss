@@ -38,8 +38,8 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 */
 void Mesh::texture()
 {
-	Toolbox::load_texture_repeat(tex,texpath);
-	Toolbox::load_texture_repeat(specmap,smpath);
+	Toolbox::load_texture_repeat(tex,texpath,true);
+	Toolbox::load_texture_repeat(specmap,smpath,true);
 	Toolbox::load_texture_repeat(normap,nmpath);
-	Toolbox::load_texture_repeat(emitmap,empath);
+	Toolbox::load_texture_repeat(emitmap,empath,true);
 }
