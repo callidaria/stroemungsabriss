@@ -40,6 +40,10 @@ uniform vec3 view_pos;
 uniform int spec_exponent = 16;
 uniform float spec_intensity = 1.0;
 
+// post-processing
+uniform float lens_exposure = 1.0;
+uniform float gamma = 2.2;
+
 // lights
 uniform int sunlight_count = 0;
 uniform int pointlight_count = 0;
@@ -96,8 +100,8 @@ void main()
 	// TODO: figure out if space over time is the best call in this case
 
 	// colour corrections: high dynamic exposure & gamma correction
-	cmb_colours = vec3(1.0)-exp(-cmb_colours*.7);
-	cmb_colours = pow(cmb_colours,vec3(1.0/2.2));
+	cmb_colours = vec3(1.0)-exp(-cmb_colours*lens_exposure);
+	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1);
