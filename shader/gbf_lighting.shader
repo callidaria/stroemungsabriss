@@ -34,6 +34,7 @@ struct light_spot {
 uniform sampler2D gbuffer_colour;
 uniform sampler2D gbuffer_position;
 uniform sampler2D gbuffer_normals;
+uniform sampler2D gbuffer_materials;
 
 // camera information
 uniform vec3 view_pos;
@@ -66,6 +67,7 @@ void main()
 	vec4 colourxspec = texture(gbuffer_colour,TexCoords);
 	vec4 positionxshadow = texture(gbuffer_position,TexCoords);
 	vec4 normalsxemission = texture(gbuffer_normals,TexCoords);
+	vec4 materials = texture(gbuffer_materials,TexCoords);
 
 	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
@@ -74,6 +76,9 @@ void main()
 	float shadow = positionxshadow.a;
 	vec3 normals = normalsxemission.rgb;
 	float lemission = normalsxemission.a;
+	float metallic = materials.r;
+	float roughness = materials.g;
+	float ambient_occlusion = materials.b;
 
 	// precalculations
 	camera_dir = normalize(view_pos-position);
@@ -104,7 +109,8 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	outColour = vec4(cmb_colours,1);
+	//outColour = vec4(cmb_colours,1.0);
+	outColour = vec4(texture(gbuffer_materials,TexCoords).rgb,1.0);
 }
 
 // specular processing

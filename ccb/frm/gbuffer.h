@@ -24,10 +24,11 @@ public:
 	uint32_t get_colour();
 	uint32_t get_position();
 	uint32_t get_normals();
+	uint32_t get_materials();
 
 private:
 
 	// content
 	uint32_t buffer;
-	uint32_t t_col,t_pos,t_norm,t_shadow,rb_depth;
+	uint32_t t_col,t_pos,t_norm,t_pbm,rb_depth;
 };

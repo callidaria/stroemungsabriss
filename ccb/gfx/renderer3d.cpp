@@ -26,7 +26,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = ml.size();
-	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&mofs));
+	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,mofs));
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
@@ -46,7 +46,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = iml.size();
-	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
+	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,imofs));
 
 	// create related index upload pattern
 	std::vector<float> cmesh_index;
@@ -60,6 +60,21 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
 	return mesh_id;
 }
+
+/*
+	TODO
+*/
+uint16_t Renderer3D::add(const char* m,const char* t,const char* nm,const char* mm,const char* rm,
+		const char* ao,glm::vec3 p,float s,glm::vec3 r)
+{
+	// load mesh
+	uint16_t mesh_id = pml.size();
+	pml.push_back(PhysicalMesh(m,t,nm,mm,rm,ao,p,s,r,pmofs));
+
+	// output mesh id
+	return mesh_id;
+}
+// TODO: add emission and shadow casing options
 
 /*
 	create_shadow(vec3,vec3,float,float,float,uint16_t) -> void
@@ -121,8 +136,8 @@ void Renderer3D::load(Camera3D cam3d)
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
-	s3d.upload_int("shadow_map",3);
-	s3d.upload_int("nmap",4);
+	s3d.upload_int("nmap",3);
+	s3d.upload_int("shadow_map",4);
 	s3d.upload_camera(cam3d);
 
 	// combine all added instance vertices to master instance vertex list & upload
@@ -143,15 +158,33 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
-	is3d.upload_int("shadow_map",3);
-	is3d.upload_int("nmap",4);
+	is3d.upload_int("nmap",3);
+	is3d.upload_int("shadow_map",4);
 	is3d.upload_camera(cam3d);
+
+	// combine physical mesh vertices to master vertex list & upload
+	std::vector<float> pv;
+	for (uint16_t i=0;i<pml.size();i++) pv.insert(iv.end(),pml[i].verts.begin(),pml[i].verts.end());
+	pbuffer.bind();
+	pbuffer.upload_vertices(pv);
+
+	// compile physical mesh shader & load textures
+	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
+	for (uint16_t i=0;i<pml.size();i++) pml[i].texture();
+	pbms.upload_int("colour_map",0);
+	pbms.upload_int("normal_map",1);
+	pbms.upload_int("metal_map",2);
+	pbms.upload_int("roughness_map",3);
+	pbms.upload_int("amocc_map",4);
+	pbms.upload_int("shadow_map",5);
+	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
 	Buffer::unbind();
 	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
+// TODO: check validity of this loading approach. processing vertex lists ?twice
 
 /*
 	prepare() -> void
@@ -211,12 +244,39 @@ void Renderer3D::prepare_inst()
 */
 void Renderer3D::prepare_inst(Camera3D cam3d)
 {
-	//run normal preparations
+	// run normal preparations
 	prepare_inst();
 
 	// update camera
 	is3d.upload_camera(cam3d);
 	is3d.upload_vec3("view_pos",cam3d.pos);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_pmesh()
+{
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// prepare shader & buffer
+	pbms.enable();
+	pbuffer.bind();
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_pmesh(Camera3D cam3d)
+{
+	// run normal preparations
+	prepare_pmesh();
+
+	// update camera
+	pbms.upload_camera(cam3d);
+	pbms.upload_vec3("camera_pos",cam3d.pos);
 }
 
 /*
@@ -330,13 +390,14 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].specmap);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D,ml[i].emitmap);
-		glActiveTexture(GL_TEXTURE4);
+		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
 		s3d.upload_matrix("model",ml[i].model);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	} glActiveTexture(GL_TEXTURE0);
 }
 // FIXME: please finally choose if TEXTURE0 should be set at the beginning or reset after drawing
+// FIXME: try to remove loop from this
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
@@ -352,10 +413,30 @@ void Renderer3D::render_inst(uint16_t i)
 	glBindTexture(GL_TEXTURE_2D,iml[i].specmap);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,iml[i].emitmap);
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
 	is3d.upload_matrix("model",iml[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,iml[i].inst_count);
+	glActiveTexture(GL_TEXTURE0);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_pmsh(uint16_t i)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_colour);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_normal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_metal);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_rough);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_amocc);
+	pbms.upload_matrix("model",pml[i].model);
+	glDrawArrays(GL_TRIANGLES,pml[i].offset,pml[i].size);
 	glActiveTexture(GL_TEXTURE0);
 }
 
@@ -369,7 +450,7 @@ void Renderer3D::upload_shadow()
 	s3d.upload_matrix("light_trans",scam_projection);
 
 	// upload shadow map
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D,shadow_map);
 }
 
@@ -383,10 +464,23 @@ void Renderer3D::upload_shadow_inst()
 	is3d.upload_matrix("light_trans",scam_projection);
 
 	// upload shadow map
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D,shadow_map);
 }
 // FIXME: duplicate code
+
+/*
+	TODO
+*/
+void Renderer3D::upload_shadow_pmsh()
+{
+	// upload camera projection
+	pbms.upload_matrix("light_trans",scam_projection);
+
+	// upload shadow map
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+}
 
 /*
 	PARAMETER DEFINITIONS:

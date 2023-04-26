@@ -20,7 +20,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
-	deferred_fb.s.upload_int("shadow_tex",3);
+	deferred_fb.s.upload_int("gbuffer_materials",3);
 }
 
 /*
@@ -136,6 +136,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
 
 	// deferred light shading 
 	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
