@@ -109,8 +109,8 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	//outColour = vec4(cmb_colours,1.0);
-	outColour = vec4(texture(gbuffer_materials,TexCoords).rgb,1.0);
+	outColour = vec4(cmb_colours,1.0);
+	//outColour = vec4(roughness,0,0,1.0);
 }
 
 // specular processing

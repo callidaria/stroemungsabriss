@@ -65,13 +65,14 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	TODO
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* nm,const char* mm,const char* rm,
-		const char* ao,glm::vec3 p,float s,glm::vec3 r)
+		const char* ao,glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
 {
 	// load mesh
 	uint16_t mesh_id = pml.size();
 	pml.push_back(PhysicalMesh(m,t,nm,mm,rm,ao,p,s,r,pmofs));
 
-	// output mesh id
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_physical_ids.push_back(mesh_id);
 	return mesh_id;
 }
 // TODO: add emission and shadow casing options
@@ -361,6 +362,23 @@ void Renderer3D::render_instance_shadow()
 		ibuffer.upload_indices(mesh_indices[id]);
 		is3d.upload_matrix("model",iml[id].model);
 		glDrawArraysInstanced(GL_TRIANGLES,iml[id].ofs,iml[id].size,iml[id].inst_count);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_physical_shadow()
+{
+	// prepare physical mesh buffer & shader to render shadow map
+	prepare_pmesh();
+	pbms.upload_matrix("view",shadow_view);
+	pbms.upload_matrix("proj",shadow_proj);
+
+	// project casting physical meshes to shadow map
+	for (auto id : scast_physical_ids) {
+		pbms.upload_matrix("model",pml[id].model);
+		glDrawArrays(GL_TRIANGLES,pml[id].offset,pml[id].size);
 	}
 }
 

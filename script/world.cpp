@@ -109,6 +109,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_physical_shadow();
 	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
@@ -122,7 +123,7 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto player : player_master) player->update();
 
 	// end geometry pass deferred scene
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	FrameBuffer::close();
 	glEnable(GL_BLEND);
 
 	// render bullets

@@ -21,7 +21,7 @@ private:
 	// render information
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
-	uint16_t index_r3D;
+	uint16_t index_r3D,index_p3D;
 	glm::vec3 mv_pos = glm::vec3(1,0,-2);
 
 	// camera

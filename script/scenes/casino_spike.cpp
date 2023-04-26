@@ -26,6 +26,10 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/casino/rolling_spec.png","./res/casino/rolling_normal.png","./res/none.png",
 			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
+	index_p3D = m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
+			"./res/casino/pbr/normals.png","./res/casino/pbr/metalness.png",
+			"./res/casino/pbr/roughness.png","./res/casino/pbr/displacement.png",
+			glm::vec3(2,.5f,-3),.5f,glm::vec3(),true);
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
@@ -76,4 +80,9 @@ void CasinoSpike::render()
 
 	// render wordly objects
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
+
+	// render physical based objects
+	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->upload_shadow_pmsh();
+	m_ccbf->r3d->render_pmsh(index_p3D);
 }

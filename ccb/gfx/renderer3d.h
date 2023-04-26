@@ -28,7 +28,7 @@ public:
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow=false);
 	uint16_t add(const char* m,const char* t,const char* nm,const char* mm,const char* rm,
-			const char* ao,glm::vec3 p,float s,glm::vec3 r);
+			const char* ao,glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 			float fdiv,uint16_t res);
 
@@ -52,6 +52,7 @@ public:
 	// shadow
 	void render_mesh_shadow();
 	void render_instance_shadow();
+	void render_physical_shadow();
 	void render_geometry_shadow();
 
 	// draw
@@ -85,8 +86,7 @@ public:
 
 	// shadow
 	uint16_t shadow_res;
-	std::vector<uint16_t> scast_mesh_ids;
-	std::vector<uint16_t> scast_instance_ids;
+	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_physical_ids;
 	std::vector<ShadowGeometry*> shadow_geometry;
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
