@@ -187,8 +187,9 @@ SaveState MenuList::add_save(std::string path)
 	// interpret save file
 	out_diff.title = raw_savedata[0].c_str();
 	out_diff.description = raw_savedata[1].c_str();
-	out_diff.diff = std::stoi(raw_savedata[2]);
-	out_diff.skill = std::stoi(raw_savedata[3]);
+	out_diff.ld_inst = (LoadInstruction)std::stoi(raw_savedata[2]);
+	out_diff.diff = std::stoi(raw_savedata[3]);
+	out_diff.skill = std::stoi(raw_savedata[4]);
 
 	// write save title
 	Text ttext = Text(lfnt),dtext = Text(dfnt);

@@ -95,6 +95,10 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
 
+	// loading
+	std::vector<SaveState> saves;
+	LoadInstruction curr_linstruction = LOAD_START;
+
 	// input definition
 	bool trg_start=false,trg_b=false,trg_lft=false,trg_rgt=false,trg_dwn=false,trg_up=false;
 
