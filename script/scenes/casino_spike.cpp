@@ -10,39 +10,42 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// object loading
-	index_r3D = m_ccbf->r3d->add("./res/casino/test_floor.obj","./res/casino/paquet_colour.png",
-			"./res/casino/paquet_spec.png","./res/casino/paquet_normal.png","./res/none.png",
-			glm::vec3(),1,glm::vec3(),false);
+	index_p3D = m_ccbf->r3d->add("./res/casino/test_floor.obj","./res/casino/paquet_colour.png",
+			"./res/casino/paquet_normal.png","./res/none.png","./res/casino/paquet_roughness.png",
+			"./res/casino/paquet_ao.png",glm::vec3(),1,glm::vec3(),false);
+	texture_repeat.push_back(1);
 	m_ccbf->r3d->add("./res/casino/test_entrance.obj","./res/casino/entrance_colour.png",
-			"./res/casino/entrance_spec.png","./res/casino/entrance_normal.png","./res/none.png",
-			glm::vec3(),1,glm::vec3(),false);
+			"./res/casino/entrance_normal.png","./res/none.png","./res/casino/entrance_roughness.png",
+			"./res/casino/entrance_ao.png",glm::vec3(),1,glm::vec3(),false);
+	texture_repeat.push_back(1);
 	m_ccbf->r3d->add("./res/casino/test_table.obj","./res/casino/table_colour.png",
-			"./res/casino/table_spec.png","./res/casino/table_normal.png","./res/none.png",
-			glm::vec3(-2,0,-1),1,glm::vec3(),true);
-	m_ccbf->r3d->add("./res/casino/tobject.obj","./res/casino/tobj1_colour.png",
-			"./res/casino/tobj1_spec.png","./res/casino/tobj1_normal.png","./res/none.png",
-			glm::vec3(2,0,1),1,glm::vec3(),true);
-	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/rolling_colour.png",
-			"./res/casino/rolling_spec.png","./res/casino/rolling_normal.png","./res/none.png",
-			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
-	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
-	index_p3D = m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
+			"./res/casino/table_normal.png","./res/none.png","./res/casino/table_roughness.png",
+			"./res/none.png",glm::vec3(-2,0,-1),1,glm::vec3(),true);
+	texture_repeat.push_back(10);
+	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/tobj1_colour.png",
+			"./res/casino/tobj1_normal.png","./res/none.png","./res/casino/tobj1_roughness.png",
+			"./res/none.png",glm::vec3(2,1,1),1,glm::vec3(),true);
+	texture_repeat.push_back(1);
+	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
 			"./res/casino/pbr/normals.png","./res/casino/pbr/metalness.png",
-			"./res/casino/pbr/roughness.png","./res/casino/pbr/displacement.png",
-			glm::vec3(2,.5f,-3),.5f,glm::vec3(),true);
+			"./res/casino/pbr/roughness.png","./res/none.png",glm::vec3(2,.5f,-3),.5f,
+			glm::vec3(),true);
+	texture_repeat.push_back(1);
+
+	// lighting
+	glm::vec3 light_pos[] = {
+		glm::vec3(0,2,0),glm::vec3(3,2,-3),glm::vec3(7,.5f,-7),glm::vec3(7,2,-3),glm::vec3(7,1.5f,1),
+		glm::vec3(7,1,5),glm::vec3(-4.5f,1,4),glm::vec3(-2.5f,4,-2),glm::vec3(-2.3f,5,-1.3f)
+	}; index_r3D = m_ccbf->r3d->ml.size();
+	for (uint8_t i=0;i<9;i++) {
+		m_ccbf->r3d->add("./res/casino/rolling.obj","./res/all.png","./res/none.png",
+			"./res/dnormal.png","./res/all.png",light_pos[i],.25f,glm::vec3(),false);
+		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
+	}
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
 	//set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
-	set_rigs->lighting.add_pointlight({ glm::vec3(0,2,0),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(3,2,-3),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(7,.5f,-7),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(7,2,-3),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(7,1.5f,1),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(7,1,5),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(-4.5f,1,4),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(-2.5f,4,-2),glm::vec3(1),1,1,.1f,1 });
-	set_rigs->lighting.add_pointlight({ glm::vec3(-2.3f,5,-1.3f),glm::vec3(1),1,1,.1f,1 });
 	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
 
@@ -75,14 +78,17 @@ void CasinoSpike::render()
 
 	// render flooring
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
-	m_ccbf->r3d->upload_shadow();
-	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+2);
+	//m_ccbf->r3d->upload_shadow();
+	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+9);
 
 	// render wordly objects
-	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
+	//m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
 
 	// render physical based objects
 	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
 	m_ccbf->r3d->upload_shadow_pmsh();
-	m_ccbf->r3d->render_pmsh(index_p3D);
+	for (uint8_t i=0;i<5;i++) {
+		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
+		m_ccbf->r3d->render_pmsh(index_p3D+i);
+	}
 }

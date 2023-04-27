@@ -165,7 +165,7 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// combine physical mesh vertices to master vertex list & upload
 	std::vector<float> pv;
-	for (uint16_t i=0;i<pml.size();i++) pv.insert(iv.end(),pml[i].verts.begin(),pml[i].verts.end());
+	for (uint16_t i=0;i<pml.size();i++) pv.insert(pv.end(),pml[i].verts.begin(),pml[i].verts.end());
 	pbuffer.bind();
 	pbuffer.upload_vertices(pv);
 

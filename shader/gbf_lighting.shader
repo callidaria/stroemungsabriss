@@ -102,9 +102,6 @@ void main()
 	//for (int k=0;k<spotlight_count;k++)
 	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
-	// physical based shading test
-
-
 	// process shadows
 	//vec3 light_dir = normalize(sunlight[0].position-position);
 	//sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
@@ -196,7 +193,7 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	float smith = schlick_beckmann_approx(dlgt_out,roughness)
 			* schlick_beckmann_approx(dlgt_in,roughness);
 
-	// combine cook-torrance specular & affect surface
+	// calculate cook-torrance specular & affect surface
 	vec3 brdf_specular = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
 	return ((vec3(1.0)-fresnel)*colour/PI+brdf_specular)*influence*dlgt_in;
 }
