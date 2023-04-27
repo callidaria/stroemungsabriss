@@ -56,7 +56,15 @@ uniform light_spot spotlight[32];
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
 vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_point pl);
+vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_point pl);
 vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl);
+
+// math
+float schlick_beckmann_approx(float dlgt_rel,float roughness);
+
+// constant
+const float PI = 3.141592653;
 
 // global
 vec3 camera_dir;
@@ -86,12 +94,16 @@ void main()
 	// process light sources
 	vec3 sdw_colours = vec3(0);
 	vec3 lgt_colours = vec3(0);
-	for (int i=0;i<sunlight_count;i++)
-		sdw_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
+	//for (int i=0;i<sunlight_count;i++)
+	//	sdw_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
 	for (int j=0;j<pointlight_count;j++)
-		lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
-	for (int k=0;k<spotlight_count;k++)
-		lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
+		lgt_colours += lumen_point_pbs(colour,position,normals,metallic,roughness,pointlight[j]);
+		//lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
+	//for (int k=0;k<spotlight_count;k++)
+	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
+
+	// physical based shading test
+
 
 	// process shadows
 	//vec3 light_dir = normalize(sunlight[0].position-position);
@@ -157,6 +169,38 @@ vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light
 	return (diffusion+specular)*attenuation*pl.intensity;
 }
 
+// physical based pointlight processing
+vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_point pl)
+{
+	// precalculations
+	vec3 light_dir = normalize(pl.position-position);
+	vec3 halfway = normalize(camera_dir+light_dir);
+
+	// calculate pointlight influence
+	float distance = length(pl.position-position);
+	float attenuation = 1/(pl.constant+pl.linear*distance+pl.quadratic*(distance*distance));
+	vec3 influence = pl.colour*attenuation;
+
+	// distribution component
+	float asq = pow(pow(roughness,2),2);
+	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2)*(asq-1)+1,2));
+
+	// fresnel component through approximation
+	vec3 fresnel = mix(vec3(.04),colour,metallic);
+	fresnel = fresnel+(1.0-fresnel)*pow(1.0-max(dot(halfway,camera_dir),0.0),5.0);
+
+	// geometry component
+	float dlgt_in = max(dot(normals,light_dir),0.0);
+	float dlgt_out = max(dot(normals,camera_dir),0.0);
+	float smith = schlick_beckmann_approx(dlgt_out,roughness)
+			* schlick_beckmann_approx(dlgt_in,roughness);
+
+	// combine cook-torrance specular & affect surface
+	vec3 brdf_specular = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
+	return ((vec3(1.0)-fresnel)*colour/PI+brdf_specular)*influence*dlgt_in;
+}
+
 // spotlight processing
 vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl)
 {
@@ -175,4 +219,11 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_
 	float epsilon = sl.cut_in-sl.cut_out;
 	float intensity = clamp((theta-sl.cut_out)/epsilon,0,1);
 	return (diffusion+specular)*intensity;
+}
+
+// function to approximate physical based lighting geometry
+float schlick_beckmann_approx(float dlgt_rel,float roughness)
+{
+	float direct_lgt = pow(roughness+1.0,2)/8.0;
+	return dlgt_rel/(dlgt_rel*(1-direct_lgt)+direct_lgt);
 }
