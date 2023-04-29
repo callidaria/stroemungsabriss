@@ -119,7 +119,6 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	//outColour = vec4(roughness,0,0,1.0);
 }
 
 // specular processing
@@ -186,6 +185,7 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	// fresnel component through approximation
 	vec3 fresnel = mix(vec3(.04),colour,metallic);
 	fresnel = fresnel+(1.0-fresnel)*pow(1.0-max(dot(halfway,camera_dir),0.0),5.0);
+	// fresnel does weird shit to metallic surfaces. something aint right
 
 	// geometry component
 	float dlgt_in = max(dot(normals,light_dir),0.0);

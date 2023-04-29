@@ -1,29 +1,50 @@
 #pragma once
 
 #include <iostream>
-#ifdef __WIN32__
-#ifndef STBI_INCLUDE_STB_IMAGE_H
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#endif
-#else
-#include <SOIL/SOIL.h>
-#endif
-#include "shader.h"
+
+#include <glm/glm.hpp>
+
 #include "../mat/camera3d.h"
+#include "../mat/toolbox.h"
+
 #include "../fcn/buffer.h"
+#include "shader.h"
 
 class Cubemap
 {
 public:
+
+	// construction
+	Cubemap(const char* path);
 	Cubemap(std::vector<const char*> tp);
+	~Cubemap() {  }
+
+	// preprocess
+	void render_irradiance_to_cubemap();
+
+	// setup
 	void prepare();
+	void prepare_irradiance();
 	void prepare_wcam(Camera3D* c); // !!collapse prepare methods
-	void set_cubemap();
+	void prepare_irradiance_wcam(Camera3D cam3D);
+
+	// draw
 	void render();
+	void render_irradiance();
+
 private:
-	Buffer buffer;
-	unsigned int tex;
+
+	// helper
+	void init_buffer();
+
 public:
-	Shader s;
+
+	// cascabel
+	Shader s,irrs;
+
+private:
+
+	// graphics
+	Buffer buffer = Buffer();
+	uint32_t tex,irr_tex;
 };

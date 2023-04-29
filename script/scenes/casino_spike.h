@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../ccb/gfx/material3d.h"
+#include "../../ccb/gfx/cubemap.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
@@ -21,6 +21,7 @@ private:
 	// render information
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
+	Cubemap irradiance_map = Cubemap("./res/irradiance_map.hdr");
 	uint16_t index_r3D,index_p3D;
 	std::vector<uint8_t> texture_repeat;
 

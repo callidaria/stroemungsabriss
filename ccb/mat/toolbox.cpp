@@ -249,8 +249,7 @@ void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool correct
 
 	// texture paramteres without mipmap
 	set_texture_parameter_clamp_to_edge();
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	set_texture_parameter_linear_unfiltered();
 }
 
 /*
@@ -288,6 +287,15 @@ void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 void Toolbox::set_texture_parameter_linear_mipmap()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	TODO
+*/
+void Toolbox::set_texture_parameter_linear_unfiltered()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
@@ -343,17 +351,7 @@ void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corr
 	int32_t format = corrected ? GL_SRGB : GL_RGBA;
 
 	// load texture data from source
-#ifdef __WIN32__
-
 	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	unsigned char* image = SOIL_load_image(path,&width,&height,0,SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
+	stbi_image_free(image);
 }

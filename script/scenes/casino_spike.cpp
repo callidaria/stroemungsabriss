@@ -25,7 +25,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/tobj1_colour.png",
 			"./res/casino/tobj1_normal.png","./res/none.png","./res/casino/tobj1_roughness.png",
 			"./res/none.png",glm::vec3(2,1,1),1,glm::vec3(),true);
-	texture_repeat.push_back(1);
+	texture_repeat.push_back(4);
 	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
 			"./res/casino/pbr/normals.png","./res/casino/pbr/metalness.png",
 			"./res/casino/pbr/roughness.png","./res/none.png",glm::vec3(2,.5f,-3),.5f,
@@ -45,6 +45,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
+	irradiance_map.render_irradiance_to_cubemap();
 	//set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
 	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
@@ -75,6 +76,10 @@ void CasinoSpike::render()
 	// camera update
 	m_setRigs->cam3D[0].pos = cp_pos,m_setRigs->cam3D[0].front = cp_dir;
 	m_setRigs->cam3D[0].update();
+
+	// render irradiance
+	irradiance_map.prepare_wcam(&m_setRigs->cam3D[0]);
+	irradiance_map.render();
 
 	// render flooring
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
