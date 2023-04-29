@@ -184,8 +184,7 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 
 	// fresnel component through approximation
 	vec3 fresnel = mix(vec3(.04),colour,metallic);
-	fresnel = fresnel+(1.0-fresnel)*pow(1.0-max(dot(halfway,camera_dir),0.0),5.0);
-	// fresnel does weird shit to metallic surfaces. something aint right
+	fresnel = fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(halfway,camera_dir),0.0),0.0,1.0),5.0);
 
 	// geometry component
 	float dlgt_in = max(dot(normals,light_dir),0.0);
@@ -195,7 +194,7 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 
 	// calculate cook-torrance specular & affect surface
 	vec3 brdf_specular = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
-	return ((vec3(1.0)-fresnel)*colour/PI+brdf_specular)*influence*dlgt_in;
+	return ((vec3(1.0)-fresnel)*(1.0-metallic)*colour/PI+brdf_specular)*influence*dlgt_in;
 }
 
 // spotlight processing
