@@ -34,14 +34,15 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// lighting
 	glm::vec3 light_pos[] = {
-		glm::vec3(0,2,0),glm::vec3(3,2,-3),glm::vec3(7,.5f,-7),glm::vec3(7,2,-3),glm::vec3(7,1.5f,1),
-		glm::vec3(7,1,5),glm::vec3(-4.5f,1,4),glm::vec3(-2.5f,4,-2),glm::vec3(-2.3f,5,-1.3f)
+		glm::vec3(0,2,0),glm::vec3(3,2,-3),glm::vec3(7,.25f,-7),glm::vec3(7,.25f,-3),
+		glm::vec3(7,.25f,1),glm::vec3(7,.25f,5),glm::vec3(-4.5f,1,4),glm::vec3(-2.5f,4,-2),
+		glm::vec3(-2.3f,5,-1.3f)
 	}; index_r3D = m_ccbf->r3d->ml.size();
 	for (uint8_t i=0;i<9;i++) {
 		m_ccbf->r3d->add("./res/casino/rolling.obj","./res/all.png","./res/none.png",
 			"./res/dnormal.png","./res/all.png",light_pos[i],.25f,glm::vec3(),false);
 		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
-	}
+	} oheights[0] = .5f,oheights[1] = 2,oheights[2] = 1.5f,oheights[3] = 1;
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
@@ -80,6 +81,16 @@ void CasinoSpike::render()
 	// render irradiance
 	irradiance_map.prepare_wcam(&m_setRigs->cam3D[0]);
 	irradiance_map.render();
+
+	// update physics
+	for (uint8_t i=0;i<4;i++) {
+		m_ccbf->r3d->ml[index_r3D+2+i].model
+				= glm::translate(glm::mat4(1),glm::vec3(0,oheights[i],0));
+		m_setRigs->lighting.pointlights[2+i].position.y = oheights[i]+.25f;
+		ospeed[i] *= 1-2*(oheights[i]<0);
+		oheights[i] += ospeed[i];
+		ospeed[i] -= .0009f;
+	}
 
 	// render flooring
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);

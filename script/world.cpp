@@ -140,7 +140,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
 
-	// deferred light shading 
+	// deferred light shading
+	m_setRigs->lighting.upload(&deferred_fb.s);
 	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
 	glDrawArrays(GL_TRIANGLES,0,6);
 

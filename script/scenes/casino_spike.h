@@ -25,6 +25,9 @@ private:
 	uint16_t index_r3D,index_p3D;
 	std::vector<uint8_t> texture_repeat;
 
+	// physics
+	float oheights[4] = { 0 },ospeed[4] = { 0 };
+
 	// camera
 	glm::vec3 cp_pos = glm::vec3(0,5,-5),cp_dir = glm::vec3(0,-.05f,.05f);
 	float pitch = 0,yaw = 45.0f;
