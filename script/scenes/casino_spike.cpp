@@ -46,7 +46,8 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
-	irradiance_map.render_irradiance_to_cubemap();
+	irradiance_map.render_irradiance_to_cubemap(1024);
+	irradiance_map.approximate_reflectance_integral(64);
 	//set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
 	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
@@ -78,10 +79,6 @@ void CasinoSpike::render()
 	m_setRigs->cam3D[0].pos = cp_pos,m_setRigs->cam3D[0].front = cp_dir;
 	m_setRigs->cam3D[0].update();
 
-	// render irradiance
-	irradiance_map.prepare_wcam(&m_setRigs->cam3D[0]);
-	irradiance_map.render();
-
 	// update physics
 	for (uint8_t i=0;i<4;i++) {
 		m_ccbf->r3d->ml[index_r3D+2+i].model
@@ -107,4 +104,8 @@ void CasinoSpike::render()
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
 	}
+
+	// render irradiance
+	irradiance_map.prepare(m_setRigs->cam3D[0]);
+	irradiance_map.render_irradiance();
 }

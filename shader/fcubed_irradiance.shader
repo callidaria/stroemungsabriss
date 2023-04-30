@@ -2,7 +2,6 @@
 
 in vec3 TexCoords;
 
-// out vec4 outColour;
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
 out vec4 gbuffer_normals;
