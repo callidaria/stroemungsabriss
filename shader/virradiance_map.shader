@@ -9,6 +9,6 @@ uniform mat4 proj = mat4(1.0);
 
 void main()
 {
-	Position = normalize(position);
+	Position = position;
 	gl_Position = proj*view*vec4(position,1.0);
 }
