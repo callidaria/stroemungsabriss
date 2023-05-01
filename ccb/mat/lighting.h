@@ -41,6 +41,7 @@ public:
 
 	// upload
 	void upload(Shader* shader);
+	void upload_irradiance_map();
 
 public:
 
@@ -48,4 +49,7 @@ public:
 	std::vector<LightSun> sunlights;
 	std::vector<LightPoint> pointlights;
 	std::vector<LightSpot> spotlights;
+
+	// mapping
+	uint32_t irradiance_map;
 };

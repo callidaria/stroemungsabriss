@@ -52,6 +52,7 @@ uniform int spotlight_count = 0;
 uniform light_sun sunlight[5];
 uniform light_point pointlight[128];
 uniform light_spot spotlight[32];
+uniform samplerCube irradiance_map;
 
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
@@ -62,6 +63,7 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_
 
 // math
 float schlick_beckmann_approx(float dlgt_rel,float roughness);
+vec3 calculate_fresnel(vec3 colour,vec3 normals,float metalness);
 
 // constant
 const float PI = 3.141592653;
@@ -91,6 +93,10 @@ void main()
 	// precalculations
 	camera_dir = normalize(view_pos-position);
 
+	// light emission from irradiance map
+	vec3 glb_colours = texture(irradiance_map,normals).rgb*colour
+			* (vec3(1.0)-calculate_fresnel(colour,normals,metallic))*(1.0-metallic);
+
 	// process light sources
 	vec3 sdw_colours = vec3(0);
 	vec3 lgt_colours = vec3(0);
@@ -106,7 +112,7 @@ void main()
 	//vec3 light_dir = normalize(sunlight[0].position-position);
 	//sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
 	sdw_colours *= 1-shadow;
-	vec3 cmb_colours = lgt_colours+sdw_colours;
+	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -183,8 +189,7 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2)*(asq-1)+1,2));
 
 	// fresnel component through approximation
-	vec3 fresnel = mix(vec3(.04),colour,metallic);
-	fresnel = fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(halfway,camera_dir),0.0),0.0,1.0),5.0);
+	vec3 fresnel = calculate_fresnel(colour,halfway,metallic);
 
 	// geometry component
 	float dlgt_in = max(dot(normals,light_dir),0.0);
@@ -222,4 +227,11 @@ float schlick_beckmann_approx(float dlgt_rel,float roughness)
 {
 	float direct_lgt = pow(roughness+1.0,2)/8.0;
 	return dlgt_rel/(dlgt_rel*(1-direct_lgt)+direct_lgt);
+}
+
+// my favourite effect
+vec3 calculate_fresnel(vec3 colour,vec3 normals,float metalness)
+{
+	vec3 fresnel = mix(vec3(.04),colour,metalness);
+	return fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
 }

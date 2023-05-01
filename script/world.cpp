@@ -21,6 +21,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
 	deferred_fb.s.upload_int("gbuffer_materials",3);
+	deferred_fb.s.upload_int("irradiance_map",4);
 }
 
 /*
@@ -139,6 +140,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
+	glActiveTexture(GL_TEXTURE4);
+	m_setRigs->lighting.upload_irradiance_map();
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);

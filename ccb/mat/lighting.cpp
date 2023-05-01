@@ -52,3 +52,9 @@ void Lighting::upload(Shader* shader)
 		shader->upload_float((arr_location+"cut_out").c_str(),spotlights[i].cut_out);
 	} shader->upload_int("spotlight_count",spotlight_count);
 }
+
+/*
+	TODO
+*/
+void Lighting::upload_irradiance_map()
+{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map); }

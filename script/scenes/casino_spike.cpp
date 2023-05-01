@@ -80,14 +80,14 @@ void CasinoSpike::render()
 	m_setRigs->cam3D[0].update();
 
 	// update physics
-	for (uint8_t i=0;i<4;i++) {
+	/*for (uint8_t i=0;i<4;i++) {
 		m_ccbf->r3d->ml[index_r3D+2+i].model
 				= glm::translate(glm::mat4(1),glm::vec3(0,oheights[i],0));
 		m_setRigs->lighting.pointlights[2+i].position.y = oheights[i]+.25f;
 		ospeed[i] *= 1-2*(oheights[i]<0);
 		oheights[i] += ospeed[i];
 		ospeed[i] -= .0009f;
-	}
+	}*/
 
 	// render flooring
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
@@ -108,4 +108,5 @@ void CasinoSpike::render()
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);
 	irradiance_map.render_irradiance();
+	m_setRigs->lighting.irradiance_map = irradiance_map.get_approximation();
 }
