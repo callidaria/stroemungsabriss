@@ -9,10 +9,12 @@ Cubemap::Cubemap(const char* path)
 	init_buffer();
 	glGenTextures(1,&irr_tex);
 	glGenTextures(1,&imap);
+	glGenTextures(1,&smap);
 
 	// shader compile
 	approx_irr.compile("./shader/vapprox_irradiance.shader","./shader/fapprox_irradiance.shader");
 	approx_irr.def_attributeF("position",3,0,3);
+	approx_ref.compile("./shader/vcubed_irradiance.shader","./shader/fspec_montecarlo.shader");
 	irrs.compile("./shader/virradiance_map.shader","./shader/firradiance_map.shader");
 	irrs.def_attributeF("position",3,0,3);
 	s.compile("./shader/vcubed_irradiance.shader","./shader/fcubed_irradiance.shader");
@@ -69,6 +71,7 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 	glBindRenderbuffer(GL_RENDERBUFFER,cmrbo);
 	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,resolution,resolution);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,cmrbo);
+	source_res = resolution;
 
 	// setup cubemap texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
@@ -78,7 +81,7 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
 	// prepare cubemap render & camera projection
@@ -112,21 +115,22 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 /*
 	TODO
 */
-void Cubemap::approximate_reflectance_integral(int32_t resolution)
+void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_count,
+		uint16_t sample_count)
 {
-	// prepare approximation framebuffer
+	// prepare diffusion approximation
 	uint32_t cmfbo,cmrbo;
 	glGenFramebuffers(1,&cmfbo);
 	glGenRenderbuffers(1,&cmrbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
 	glBindRenderbuffer(GL_RENDERBUFFER,cmrbo);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,resolution,resolution);
+	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,ri_res,ri_res);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,cmrbo);
 
 	// setup irradiance map texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
 	for (uint8_t i=0;i<6;i++)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,resolution,resolution,0,GL_RGB,
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,ri_res,ri_res,0,GL_RGB,
 				GL_FLOAT,nullptr);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
@@ -151,15 +155,53 @@ void Cubemap::approximate_reflectance_integral(int32_t resolution)
 	};
 
 	// draw precise to convoluted
-	glDepthFunc(GL_LEQUAL);
-	glViewport(0,0,resolution,resolution);
+	glViewport(0,0,ri_res,ri_res);
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	for (uint8_t i=0;i<6;i++) {
 		approx_irr.upload_matrix("view",cam_attrib[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,
 				imap,0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES,0,36);
+	} glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+	// setup specular approximation
+	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	for (uint8_t i=0;i<6;i++)
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,re_res,re_res,0,GL_RGB,
+				GL_FLOAT,nullptr);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	// filter multidetailed
+	approx_ref.enable();
+	approx_ref.upload_int("source_resolution",source_res);
+	approx_ref.upload_int("sample_count",sample_count);
+	approx_ref.upload_matrix("proj",proj);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
+	for (uint8_t j=0;j<lod_count;j++) {
+
+		// scale towards current level of detail
+		uint16_t lod_resolution = re_res*glm::pow(.5f,j);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,lod_resolution,lod_resolution);
+		glViewport(0,0,lod_resolution,lod_resolution);
+
+		// draw filter for current level of detail & roughness
+		float roughness = (float)j/(lod_count-1);
+		approx_ref.upload_float("roughness",roughness);
+		for (uint8_t i=0;i<6;i++) {
+			approx_ref.upload_matrix("view",cam_attrib[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,smap,j);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glDrawArrays(GL_TRIANGLES,0,36);
+		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 // FIXME: code repetitions
@@ -171,8 +213,6 @@ void Cubemap::approximate_reflectance_integral(int32_t resolution)
 void Cubemap::prepare()
 {
 	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_CULL_FACE);
-	glDepthFunc(GL_LEQUAL);
 	s.enable();
 	buffer.bind();
 }
@@ -194,17 +234,16 @@ void Cubemap::render_irradiance()
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
 	glDrawArrays(GL_TRIANGLES,0,36);
-	glEnable(GL_CULL_FACE);
 }
-
-/*
-	TODO
-*/
-void Cubemap::render_approximated()
+void Cubemap::render_diffusion_approximated()
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
 	glDrawArrays(GL_TRIANGLES,0,36);
-	glEnable(GL_CULL_FACE);
+}
+void Cubemap::render_specular_approximated()
+{
+	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	glDrawArrays(GL_TRIANGLES,0,36);
 }
 
 /*
@@ -212,8 +251,10 @@ void Cubemap::render_approximated()
 */
 uint32_t Cubemap::get_irradiance_map()
 { return tex; }
-uint32_t Cubemap::get_approximation()
+uint32_t Cubemap::get_diffusion_approximation()
 { return imap; }
+uint32_t Cubemap::get_specular_approximation()
+{ return smap; }
 
 /*
 	TODO

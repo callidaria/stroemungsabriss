@@ -13,6 +13,15 @@ void Lighting::add_spotlight(LightSpot spotlight)
 { spotlights.push_back(spotlight); }
 
 /*
+	TODO
+*/
+void Lighting::load_irradiance_maps(Cubemap imap)
+{
+	irradiance_map.diff_component = imap.get_diffusion_approximation();
+	irradiance_map.spec_component = imap.get_specular_approximation();
+}
+
+/*
 	upload(Shader*) -> void
 	shader: deferred lighting shader
 	purpose: upload complex lighting system to the simplified deferred lighting shader
@@ -56,5 +65,7 @@ void Lighting::upload(Shader* shader)
 /*
 	TODO
 */
-void Lighting::upload_irradiance_map()
-{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map); }
+void Lighting::upload_diffusion_map()
+{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.diff_component); }
+void Lighting::upload_specular_map()
+{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.spec_component); }

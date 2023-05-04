@@ -52,7 +52,10 @@ uniform int spotlight_count = 0;
 uniform light_sun sunlight[5];
 uniform light_point pointlight[128];
 uniform light_spot spotlight[32];
+
+// light maps
 uniform samplerCube irradiance_map;
+uniform samplerCube specular_map;
 
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
@@ -185,8 +188,8 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	vec3 influence = pl.colour*attenuation;
 
 	// distribution component
-	float asq = pow(pow(roughness,2),2);
-	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2)*(asq-1)+1,2));
+	float asq = pow(roughness,4.0);
+	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2.0)*(asq-1.0)+1.0,2.0));
 
 	// fresnel component through approximation
 	vec3 fresnel = calculate_fresnel(colour,halfway,metallic);

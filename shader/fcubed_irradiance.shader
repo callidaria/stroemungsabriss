@@ -12,7 +12,7 @@ uniform samplerCube irradiance_map;
 
 void main()
 {
-	gbuffer_colour = vec4(texture(irradiance_map,TexCoords).rgb,1.0);
+	gbuffer_colour = vec4(texture(irradiance_map,TexCoords).rgb,0.0);
 	gbuffer_position = vec4(0);
 	gbuffer_normals = vec4(0,0,0,1);
 	gbuffer_materials = vec4(0);
