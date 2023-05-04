@@ -19,6 +19,7 @@ void Lighting::load_irradiance_maps(Cubemap imap)
 {
 	irradiance_map.diff_component = imap.get_diffusion_approximation();
 	irradiance_map.spec_component = imap.get_specular_approximation();
+	irradiance_map.brdf_component = imap.get_specular_brdf();
 }
 
 /*
@@ -69,3 +70,5 @@ void Lighting::upload_diffusion_map()
 { glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.diff_component); }
 void Lighting::upload_specular_map()
 { glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.spec_component); }
+void Lighting::upload_specular_brdf()
+{ glBindTexture(GL_TEXTURE_2D,irradiance_map.brdf_component); }

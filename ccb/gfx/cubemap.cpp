@@ -10,16 +10,24 @@ Cubemap::Cubemap(const char* path)
 	glGenTextures(1,&irr_tex);
 	glGenTextures(1,&imap);
 	glGenTextures(1,&smap);
+	glGenTextures(1,&pcsmap);
 
 	// shader compile
 	approx_irr.compile("./shader/vapprox_irradiance.shader","./shader/fapprox_irradiance.shader");
 	approx_irr.def_attributeF("position",3,0,3);
 	approx_ref.compile("./shader/vcubed_irradiance.shader","./shader/fspec_montecarlo.shader");
+	approx_ref.def_attributeF("position",3,0,3);
 	irrs.compile("./shader/virradiance_map.shader","./shader/firradiance_map.shader");
 	irrs.def_attributeF("position",3,0,3);
 	s.compile("./shader/vcubed_irradiance.shader","./shader/fcubed_irradiance.shader");
 	s.def_attributeF("position",3,0,3);
 	s.upload_int("irradiance_map",0);
+
+	// setup specular canvas
+	std::vector<float> vcanvas = Toolbox::create_sprite_canvas();
+	cnv_buffer.bind();
+	cnv_buffer.upload_vertices(vcanvas);
+	pc_specular.compile2d("./shader/vib_specular.shader","./shader/fib_specular.shader");
 
 	// load hdr irradiance map
 	int32_t width,height;
@@ -203,6 +211,22 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 			glDrawArrays(GL_TRIANGLES,0,36);
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+	// setup brdf specular pre-processing
+	glBindTexture(GL_TEXTURE_2D,pcsmap);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,source_res,source_res,0,GL_RGBA,GL_FLOAT,0);
+	Toolbox::set_texture_parameter_clamp_to_edge();
+	Toolbox::set_texture_parameter_linear_unfiltered();
+
+	// execute brdf pre-processing
+	glViewport(0,0,source_res,source_res);
+	pc_specular.enable();
+	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
+	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,source_res,source_res);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,pcsmap,0);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES,0,6);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 // FIXME: code repetitions
 // FIXME: structurize depth function setting
@@ -255,6 +279,8 @@ uint32_t Cubemap::get_diffusion_approximation()
 { return imap; }
 uint32_t Cubemap::get_specular_approximation()
 { return smap; }
+uint32_t Cubemap::get_specular_brdf()
+{ return pcsmap; }
 
 /*
 	TODO

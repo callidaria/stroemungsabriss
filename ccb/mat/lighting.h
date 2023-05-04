@@ -31,6 +31,7 @@ struct LightSpot {
 struct LightIrradianceMap {
 	uint32_t diff_component;
 	uint32_t spec_component;
+	uint32_t brdf_component;
 };
 
 class Lighting
@@ -53,6 +54,7 @@ public:
 	void upload(Shader* shader);
 	void upload_diffusion_map();
 	void upload_specular_map();
+	void upload_specular_brdf();
 
 public:
 

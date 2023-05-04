@@ -37,6 +37,7 @@ public:
 	uint32_t get_irradiance_map();
 	uint32_t get_diffusion_approximation();
 	uint32_t get_specular_approximation();
+	uint32_t get_specular_brdf();
 
 private:
 
@@ -46,12 +47,12 @@ private:
 public:
 
 	// cascabel
-	Shader s,approx_irr,approx_ref,irrs;
+	Shader s,approx_irr,approx_ref,pc_specular,irrs;
 
 private:
 
 	// graphics
-	Buffer buffer = Buffer();
-	uint32_t tex,irr_tex,imap,smap;
+	Buffer buffer = Buffer(),cnv_buffer = Buffer();
+	uint32_t tex,irr_tex,imap,smap,pcsmap;
 	uint16_t source_res;
 };

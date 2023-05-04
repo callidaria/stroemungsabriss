@@ -56,6 +56,7 @@ uniform light_spot spotlight[32];
 // light maps
 uniform samplerCube irradiance_map;
 uniform samplerCube specular_map;
+uniform sampler2D specular_brdf;
 
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
@@ -127,7 +128,8 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	outColour = vec4(cmb_colours,1.0);
+	// outColour = vec4(cmb_colours,1.0);
+	outColour = vec4(texture(specular_brdf,TexCoords).rgb,1.0);
 }
 
 // specular processing
