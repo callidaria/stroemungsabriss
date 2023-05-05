@@ -23,11 +23,13 @@ Cubemap::Cubemap(const char* path)
 	s.def_attributeF("position",3,0,3);
 	s.upload_int("irradiance_map",0);
 
-	// setup specular canvas
-	std::vector<float> vcanvas = Toolbox::create_sprite_canvas();
+	// setup specular brdf integral precalculation
+	glBindTexture(GL_TEXTURE_2D,pcsmap);
+	Toolbox::load_texture_unfiltered(pcsmap,"./res/brdf_pcintegral.png");
+	/*std::vector<float> vcanvas = Toolbox::create_sprite_canvas();
 	cnv_buffer.bind();
 	cnv_buffer.upload_vertices(vcanvas);
-	pc_specular.compile2d("./shader/vib_specular.shader","./shader/fib_specular.shader");
+	pc_specular.compile2d("./shader/vib_specular.shader","./shader/fib_specular.shader");*/
 
 	// load hdr irradiance map
 	int32_t width,height;
@@ -213,7 +215,7 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	// setup brdf specular pre-processing
-	glBindTexture(GL_TEXTURE_2D,pcsmap);
+	/*glBindTexture(GL_TEXTURE_2D,pcsmap);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,source_res,source_res,0,GL_RGBA,GL_FLOAT,0);
 	Toolbox::set_texture_parameter_clamp_to_edge();
 	Toolbox::set_texture_parameter_linear_unfiltered();
@@ -221,12 +223,13 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	// execute brdf pre-processing
 	glViewport(0,0,source_res,source_res);
 	pc_specular.enable();
+	pc_specular.upload_int("sample_count",sample_count);
 	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
 	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,source_res,source_res);
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,pcsmap,0);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glDrawArrays(GL_TRIANGLES,0,6);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);*/
 }
 // FIXME: code repetitions
 // FIXME: structurize depth function setting

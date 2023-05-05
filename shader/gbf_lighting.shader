@@ -67,7 +67,6 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_
 
 // math
 float schlick_beckmann_approx(float dlgt_rel,float roughness);
-vec3 calculate_fresnel(vec3 colour,vec3 normals,float metalness);
 
 // constant
 const float PI = 3.141592653;
@@ -98,8 +97,14 @@ void main()
 	camera_dir = normalize(view_pos-position);
 
 	// light emission from irradiance map
-	vec3 glb_colours = texture(irradiance_map,normals).rgb*colour
-			* (vec3(1.0)-calculate_fresnel(colour,normals,metallic))*(1.0-metallic);
+	vec3 fresnel = mix(vec3(.04),colour,metallic);
+	fresnel = fresnel+(max(vec3(1.0-roughness),fresnel)-fresnel)
+			* pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
+	vec3 ibdiff = texture(irradiance_map,normals).rgb*colour*(vec3(1.0)-fresnel)*(1.0-metallic);
+	vec2 pcbrdf = texture(specular_brdf,vec2(max(dot(normals,camera_dir),0.0),roughness)).rg;
+	vec3 ibspec = textureLod(specular_map,reflect(-camera_dir,normals),roughness*2.0).rgb
+			* (fresnel*pcbrdf.x+pcbrdf.y);
+	vec3 glb_colours = ibspec;
 
 	// process light sources
 	vec3 sdw_colours = vec3(0);
@@ -128,8 +133,8 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	// outColour = vec4(cmb_colours,1.0);
-	outColour = vec4(texture(specular_brdf,TexCoords).rgb,1.0);
+	outColour = vec4(cmb_colours,1.0);
+	//outColour = vec4(texture(specular_brdf,TexCoords).rgb,1.0);
 }
 
 // specular processing
@@ -194,7 +199,8 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2.0)*(asq-1.0)+1.0,2.0));
 
 	// fresnel component through approximation
-	vec3 fresnel = calculate_fresnel(colour,halfway,metallic);
+	vec3 fresnel = mix(vec3(.04),colour,metallic);
+	fresnel = fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
 
 	// geometry component
 	float dlgt_in = max(dot(normals,light_dir),0.0);
@@ -202,9 +208,9 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	float smith = schlick_beckmann_approx(dlgt_out,roughness)
 			* schlick_beckmann_approx(dlgt_in,roughness);
 
-	// calculate cook-torrance specular & affect surface
-	vec3 brdf_specular = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
-	return ((vec3(1.0)-fresnel)*(1.0-metallic)*colour/PI+brdf_specular)*influence*dlgt_in;
+	// calculate specular brdf
+	vec3 cook_torrance = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
+	return ((vec3(1.0)-fresnel)*(1.0-metallic)*colour/PI+cook_torrance)*influence*dlgt_in;
 }
 
 // spotlight processing
@@ -232,11 +238,4 @@ float schlick_beckmann_approx(float dlgt_rel,float roughness)
 {
 	float direct_lgt = pow(roughness+1.0,2)/8.0;
 	return dlgt_rel/(dlgt_rel*(1-direct_lgt)+direct_lgt);
-}
-
-// my favourite effect
-vec3 calculate_fresnel(vec3 colour,vec3 normals,float metalness)
-{
-	vec3 fresnel = mix(vec3(.04),colour,metalness);
-	return fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
 }
