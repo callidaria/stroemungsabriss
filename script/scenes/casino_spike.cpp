@@ -107,6 +107,6 @@ void CasinoSpike::render()
 
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);
-	irradiance_map.render_irradiance();
+	irradiance_map.render_specular_approximated();
 	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
 }

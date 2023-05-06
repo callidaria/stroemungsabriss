@@ -102,7 +102,7 @@ void main()
 			* pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
 	vec3 ibdiff = texture(irradiance_map,normals).rgb*colour*(vec3(1.0)-fresnel)*(1.0-metallic);
 	vec2 pcbrdf = texture(specular_brdf,vec2(max(dot(normals,camera_dir),0.0),roughness)).rg;
-	vec3 ibspec = textureLod(specular_map,reflect(-camera_dir,normals),roughness*2.0).rgb
+	vec3 ibspec = textureLod(specular_map,reflect(-camera_dir,normals),roughness*4.0).rgb
 			* (fresnel*pcbrdf.x+pcbrdf.y);
 	vec3 glb_colours = ibspec;
 
@@ -121,7 +121,7 @@ void main()
 	//vec3 light_dir = normalize(sunlight[0].position-position);
 	//sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
 	sdw_colours *= 1-shadow;
-	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission);
+	vec3 cmb_colours = lgt_colours+sdw_colours;//+glb_colours*(1.0-lemission);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -134,7 +134,6 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	//outColour = vec4(texture(specular_brdf,TexCoords).rgb,1.0);
 }
 
 // specular processing

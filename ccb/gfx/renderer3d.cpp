@@ -62,7 +62,14 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	TODO
+	add(const char*,const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,
+			bool) -> uint16_t
+	purpose: create mesh, which can be used for physical based rendering
+	.overloads previous add
+	\param mm: path to the information about surfaces metalness
+	\param rm: path to the information about surfaces roughness
+	\param ao: path to the information about the objects self-inflicted ambient occlusion
+	\returns memory index to refer to the created physical based mesh by when drawing
 */
 uint16_t Renderer3D::add(const char* m,const char* t,const char* nm,const char* mm,const char* rm,
 		const char* ao,glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
@@ -240,7 +247,7 @@ void Renderer3D::prepare_inst()
 
 /*
 	prepare_inst(Camera3D) -> void
-	overloads previous prepare
+	overloads previous prepare_inst()
 	purpose: not only prepare instanced rendering, but also upload camera
 */
 void Renderer3D::prepare_inst(Camera3D cam3d)
@@ -254,7 +261,8 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 }
 
 /*
-	TODO
+	prepare_pmesh() -> void
+	purpose: prepare shader & buffer for physical based rendering
 */
 void Renderer3D::prepare_pmesh()
 {
@@ -268,7 +276,9 @@ void Renderer3D::prepare_pmesh()
 }
 
 /*
-	TODO
+	prepare_pmesh(Camera3D) -> void
+	purpose: not only prepare physical based rendering, but also upload camera
+	.overloads previous prepare_pmesh()
 */
 void Renderer3D::prepare_pmesh(Camera3D cam3d)
 {
@@ -366,7 +376,9 @@ void Renderer3D::render_instance_shadow()
 }
 
 /*
-	TODO
+	render_physical_shadow() -> void
+	purpose: project shadow of physical based meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
 */
 void Renderer3D::render_physical_shadow()
 {
@@ -418,6 +430,11 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 // FIXME: try to remove loop from this
 
 /*
+	PARAMETER DEFINITIONS:
+	i: memory index of object that is to be drawn
+*/
+
+/*
 	render_inst(uint16_t i,uint16_t) -> void
 	i: memory index of instanced object that is to be drawn
 	purpose: render given amount of desired instance's duplicates
@@ -439,7 +456,8 @@ void Renderer3D::render_inst(uint16_t i)
 }
 
 /*
-	TODO
+	render_pmsh(uint16_t) -> void
+	purpose: render desired physical based mesh
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {
@@ -488,7 +506,8 @@ void Renderer3D::upload_shadow_inst()
 // FIXME: duplicate code
 
 /*
-	TODO
+	upload_shadow_pmsh() -> void
+	purpose: upload shadow projection to physical based mesh geometry pass shader
 */
 void Renderer3D::upload_shadow_pmsh()
 {

@@ -1,7 +1,19 @@
 #include "physical_mesh.h"
 
 /*
-	TODO
+	constructor(const char*,const char*,const char*,const char*,const char*,const char*,vec3,float,
+			vec3,uint32_t&)
+	purpose: construct a mesh, holding information for physical based rendering
+	\param obj_path: path to .obj file, holding geometric informations of meshes vertices
+	\param itex_path: path to objects texture
+	\param inorm_path: path to the normal map
+	\param imtl_path: path to the information about surfaces metalness
+	\param irgh_path: path to the information about surfaces roughness
+	\param iamo_path: path to the information about the objects self-inflicted ambient occlusion
+	\param position: objects origin position
+	\param scale: the objects initial scale multiplier
+	\param rotation: standard rotation of the object after load
+	\param mofs: tbc value of current vertex counting head
 */
 PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char* inorm_path,
 		const char* imtl_path,const char* irgh_path,const char* iamo_path,glm::vec3 position,
@@ -24,9 +36,11 @@ PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char
 	size = verts.size()/14;
 	mofs += size;
 }
+// TODO: join material, roughness & ambient occlusion/displacement into one texture
 
 /*
-	TODO
+	texture() -> void
+	purpose: load textures & maps for this mesh
 */
 void PhysicalMesh::texture()
 {

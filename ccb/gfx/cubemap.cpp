@@ -1,7 +1,9 @@
 #include "cubemap.h"
 
 /*
-	TODO
+	constructor(const char*)
+	purpose: construct a cubemap from .hdr file, that can be used as irradiance map
+	\param path: path to irradiance map in .hdr format
 */
 Cubemap::Cubemap(const char* path)
 {
@@ -25,11 +27,7 @@ Cubemap::Cubemap(const char* path)
 
 	// setup specular brdf integral precalculation
 	glBindTexture(GL_TEXTURE_2D,pcsmap);
-	Toolbox::load_texture_unfiltered(pcsmap,"./res/brdf_pcintegral.png");
-	/*std::vector<float> vcanvas = Toolbox::create_sprite_canvas();
-	cnv_buffer.bind();
-	cnv_buffer.upload_vertices(vcanvas);
-	pc_specular.compile2d("./shader/vib_specular.shader","./shader/fib_specular.shader");*/
+	Toolbox::load_texture_unfiltered(pcsmap,"./res/brdf_pcintegral.png",false);
 
 	// load hdr irradiance map
 	int32_t width,height;
@@ -42,7 +40,10 @@ Cubemap::Cubemap(const char* path)
 }
 
 /*
-	TODO
+	constructor(std::vector<const char*>)
+	purpose: construct a simple skybox without irradiance capabilities
+	\param tp: vector holding all six directories to the six skybox textures for different angles
+	TODO: allow skyboxes to also be used for irradiance mapping
 */
 Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 {
@@ -69,7 +70,9 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 }
 
 /*
-	TODO
+	render_irradiance_to_cubemap(int32_t) -> void
+	purpose: project .hdr irradiance onto a cube, which can be used as skybox
+	\param resolution: resolution of each cubemap view
 */
 void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 {
@@ -123,7 +126,12 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 }
 
 /*
-	TODO
+	approximate_irradiance(int32_t,uint32_t,uint8_t,uint16_t) -> void
+	purpose: precalculate diffusion convolution and specular reflection integral irradiance maps
+	\param ri_res: diffusion map resolution, per cubemap view
+	\param re_res: specular map resolution, per cubemap view
+	\param lod_count: amount of level of detail stages for irradiance-map-mipmap
+	\param sample_count: amount of samples to use for specular irradiance map precalculation
 */
 void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_count,
 		uint16_t sample_count)
@@ -213,29 +221,13 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 			glDrawArrays(GL_TRIANGLES,0,36);
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
-
-	// setup brdf specular pre-processing
-	/*glBindTexture(GL_TEXTURE_2D,pcsmap);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,source_res,source_res,0,GL_RGBA,GL_FLOAT,0);
-	Toolbox::set_texture_parameter_clamp_to_edge();
-	Toolbox::set_texture_parameter_linear_unfiltered();
-
-	// execute brdf pre-processing
-	glViewport(0,0,source_res,source_res);
-	pc_specular.enable();
-	pc_specular.upload_int("sample_count",sample_count);
-	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,source_res,source_res);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,pcsmap,0);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	glDrawArrays(GL_TRIANGLES,0,6);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);*/
 }
 // FIXME: code repetitions
 // FIXME: structurize depth function setting
 
 /*
-	TODO
+	prepare() -> void
+	purpose: prepare cubemap visual representation as skybox
 */
 void Cubemap::prepare()
 {
@@ -245,7 +237,9 @@ void Cubemap::prepare()
 }
 
 /*
-	TODO
+	prepare(Camera3D) -> void
+	purpose: prepare cubemap visual representation as skybox and update camera position
+	\param cam3D: 3D camera, that should record the rendered skybox in relation to itself
 */
 void Cubemap::prepare(Camera3D cam3D)
 {
@@ -255,7 +249,8 @@ void Cubemap::prepare(Camera3D cam3D)
 }
 
 /*
-	TODO
+	render_<skybox_version>() -> void
+	purpose: render skybox representation of requested cubemap version
 */
 void Cubemap::render_irradiance()
 {
@@ -274,7 +269,8 @@ void Cubemap::render_specular_approximated()
 }
 
 /*
-	TODO
+	get_<irradiance_map_component>() -> uint32_t
+	\returns requested component of irradiance map
 */
 uint32_t Cubemap::get_irradiance_map()
 { return tex; }
@@ -286,7 +282,8 @@ uint32_t Cubemap::get_specular_brdf()
 { return pcsmap; }
 
 /*
-	TODO
+	init_buffer() -> void (private)
+	purpose: standard initialization of cubemap buffer & generation of base texture
 */
 void Cubemap::init_buffer()
 {

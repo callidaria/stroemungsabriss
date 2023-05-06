@@ -13,7 +13,9 @@ void Lighting::add_spotlight(LightSpot spotlight)
 { spotlights.push_back(spotlight); }
 
 /*
-	TODO
+	load_irradiance_maps(Cubemap) -> void
+	purpose: get all irradiance map components from the given skybox
+	\param imap: cubemap holding the desired irradiance map components
 */
 void Lighting::load_irradiance_maps(Cubemap imap)
 {
@@ -64,7 +66,10 @@ void Lighting::upload(Shader* shader)
 }
 
 /*
-	TODO
+	upload_<irradiance_component>() -> void
+	purpose: uploads the desired irradiance component the the lighting shader
+	NOTE: deferred lighting shader has to be enabled before running the upload
+	NOTE: the appropriate texture index has to be activated before running the upload
 */
 void Lighting::upload_diffusion_map()
 { glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.diff_component); }

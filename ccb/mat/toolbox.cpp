@@ -291,7 +291,8 @@ void Toolbox::set_texture_parameter_linear_mipmap()
 }
 
 /*
-	TODO
+	set_texture_parameter_linear_unfiltered() -> void
+	purpose: define texture as simply linearly filtered
 */
 void Toolbox::set_texture_parameter_linear_unfiltered()
 {
