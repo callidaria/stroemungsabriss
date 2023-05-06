@@ -31,6 +31,11 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/casino/pbr/roughness.png","./res/none.png",glm::vec3(2,.5f,-3),.5f,
 			glm::vec3(),true);
 	texture_repeat.push_back(1);
+	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/fabric_colour.png",
+			"./res/casino/fabric_normals.png","./res/casino/fabric_metalness.png",
+			"./res/casino/fabric_roughness.png","./res/none.png",glm::vec3(2.5f,.5f,-1.5f),.5f,
+			glm::vec3(),true);
+	texture_repeat.push_back(1);
 
 	// lighting
 	glm::vec3 light_pos[] = {
@@ -100,13 +105,13 @@ void CasinoSpike::render()
 	// render physical based objects
 	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
 	m_ccbf->r3d->upload_shadow_pmsh();
-	for (uint8_t i=0;i<5;i++) {
+	for (uint8_t i=0;i<6;i++) {
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
 	}
 
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);
-	irradiance_map.render_specular_approximated();
+	irradiance_map.render_irradiance();
 	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
 }

@@ -94,7 +94,7 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
 	// prepare cubemap render & camera projection
@@ -175,7 +175,6 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	// draw precise to convoluted
 	glViewport(0,0,ri_res,ri_res);
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	for (uint8_t i=0;i<6;i++) {
 		approx_irr.upload_matrix("view",cam_attrib[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,
