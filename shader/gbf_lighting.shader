@@ -60,10 +60,14 @@ uniform sampler2D specular_brdf;
 
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
+vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_sun sl);
 vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_point pl);
 vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
 		light_point pl);
 vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl);
+vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
+		float metallic,float roughness);
 
 // math
 float schlick_beckmann_approx(float dlgt_rel,float roughness);
@@ -73,6 +77,10 @@ const float PI = 3.141592653;
 
 // global
 vec3 camera_dir;
+vec3 bfresnel;
+float asq;
+float dlgt_out;
+float schlick_out;
 
 void main()
 {
@@ -95,6 +103,10 @@ void main()
 
 	// precalculations
 	camera_dir = normalize(view_pos-position);
+	bfresnel = mix(vec3(.04),colour,metallic);
+	asq = pow(roughness,4.0);
+	dlgt_out = max(dot(normals,camera_dir),0.0);
+	schlick_out = schlick_beckmann_approx(dlgt_out,roughness);
 
 	// light emission from irradiance map
 	vec3 fresnel = mix(vec3(.04),colour,metallic);
@@ -104,13 +116,13 @@ void main()
 	vec2 pcbrdf = texture(specular_brdf,vec2(max(dot(normals,camera_dir),0.0),roughness)).rg;
 	vec3 ibspec = textureLod(specular_map,reflect(-camera_dir,normals),roughness*4.0).rgb
 			* (fresnel*pcbrdf.x+pcbrdf.y);
-	vec3 glb_colours = ibdiff+ibspec;
+	vec3 glb_colours = (ibdiff+ibspec)*ambient_occlusion;
 
 	// process light sources
 	vec3 sdw_colours = vec3(0);
 	vec3 lgt_colours = vec3(0);
-	//for (int i=0;i<sunlight_count;i++)
-	//	sdw_colours += lumen_sun(colour,position,normals,speculars,sunlight[i]);
+	for (int i=0;i<sunlight_count;i++)
+		sdw_colours += lumen_sun_pbs(colour,position,normals,metallic,roughness,sunlight[i]);
 	for (int j=0;j<pointlight_count;j++)
 		lgt_colours += lumen_point_pbs(colour,position,normals,metallic,roughness,pointlight[j]);
 		//lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
@@ -118,10 +130,10 @@ void main()
 	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
 	// process shadows
-	//vec3 light_dir = normalize(sunlight[0].position-position);
-	//sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
-	sdw_colours *= 1-shadow;
-	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission);
+	vec3 light_dir = normalize(sunlight[0].position-position);
+	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
+	sdw_colours *= 1.0-shadow;
+	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.75);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -161,6 +173,19 @@ vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_s
 	return diffusion+specular*sl.intensity;
 }
 
+// physical based sunlight processing
+vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_sun sl)
+{
+	// precalculations
+	vec3 light_dir = normalize(sl.position-position);
+	vec3 halfway = normalize(camera_dir+light_dir);
+	vec3 influence = sl.colour*sl.intensity;
+
+	// return sunlight colours
+	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
+}
+
 // pointlight processing
 vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_point pl)
 {
@@ -193,23 +218,8 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	float attenuation = 1/(pl.constant+pl.linear*distance+pl.quadratic*(distance*distance));
 	vec3 influence = pl.colour*attenuation;
 
-	// distribution component
-	float asq = pow(roughness,4.0);
-	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2.0)*(asq-1.0)+1.0,2.0));
-
-	// fresnel component through approximation
-	vec3 fresnel = mix(vec3(.04),colour,metallic);
-	fresnel = fresnel+(1.0-fresnel)*pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
-
-	// geometry component
-	float dlgt_in = max(dot(normals,light_dir),0.0);
-	float dlgt_out = max(dot(normals,camera_dir),0.0);
-	float smith = schlick_beckmann_approx(dlgt_out,roughness)
-			* schlick_beckmann_approx(dlgt_in,roughness);
-
-	// calculate specular brdf
-	vec3 cook_torrance = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
-	return ((vec3(1.0)-fresnel)*(1.0-metallic)*colour/PI+cook_torrance)*influence*dlgt_in;
+	// return pointlight colours
+	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
 }
 
 // spotlight processing
@@ -230,6 +240,26 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_
 	float epsilon = sl.cut_in-sl.cut_out;
 	float intensity = clamp((theta-sl.cut_out)/epsilon,0,1);
 	return (diffusion+specular)*intensity;
+}
+
+// physical based light processing
+vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
+		float metallic,float roughness)
+{
+	// distribution component
+	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2.0)*(asq-1.0)+1.0,2.0));
+
+	// fresnel component through approximation
+	vec3 fresnel = bfresnel+(1.0-bfresnel)
+			* pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
+
+	// geometry component
+	float dlgt_in = max(dot(normals,light_dir),0.0);
+	float smith = schlick_beckmann_approx(dlgt_in,roughness)*schlick_out;
+
+	// calculate specular brdf
+	vec3 cook_torrance = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);
+	return ((vec3(1.0)-fresnel)*(1.0-metallic)*colour/PI+cook_torrance)*influence*dlgt_in;
 }
 
 // function to approximate physical based lighting geometry

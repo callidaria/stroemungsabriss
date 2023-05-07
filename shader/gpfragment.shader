@@ -45,5 +45,5 @@ float calculate_shadow()
 
 	// project shadow
 	vec2 raster = 1.0/textureSize(shadow_map,0);
-	return float(curr_depth>pcf_depth);
+	return float(curr_depth>pcf_depth+.0005);
 }

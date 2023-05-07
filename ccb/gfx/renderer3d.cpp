@@ -292,6 +292,7 @@ void Renderer3D::prepare_pmesh(Camera3D cam3d)
 void Renderer3D::prepare_shadow()
 {
 	// set front face culling to avoid peter panning
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
 	// prepare shadow framebuffer
