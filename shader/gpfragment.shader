@@ -13,9 +13,7 @@ out vec4 gbuffer_materials;
 // object component maps
 uniform sampler2D colour_map;
 uniform sampler2D normal_map;
-uniform sampler2D metal_map;
-uniform sampler2D roughness_map;
-uniform sampler2D amocc_map;
+uniform sampler2D material_map;
 uniform sampler2D shadow_map;
 
 float calculate_shadow();
@@ -34,12 +32,7 @@ void main()
 	gbuffer_normals = vec4(normalize(TBN*normals),0.0);
 
 	// extract surface materials
-	gbuffer_materials = vec4(
-			texture(metal_map,TexCoords).r,
-			texture(roughness_map,TexCoords).r,
-			texture(amocc_map,TexCoords).r,
-			0.0
-	);
+	gbuffer_materials = vec4(texture(material_map,TexCoords).rgb,0.0);
 }
 // TODO: merge metal, roughness and ambient occlusion mapping into one texture to reduce load time
 
