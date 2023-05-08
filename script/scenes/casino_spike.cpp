@@ -45,7 +45,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 		m_ccbf->r3d->add("./res/casino/rolling.obj","./res/all.png","./res/none.png",
 			"./res/dnormal.png","./res/all.png",light_pos[i],.25f,glm::vec3(),true);
 		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
-	} oheights[0] = .5f,oheights[1] = 2,oheights[2] = 1.5f,oheights[3] = 1;
+	} oheights[0] = 5.5f,oheights[1] = 7,oheights[2] = 6.5f,oheights[3] = 6;
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);

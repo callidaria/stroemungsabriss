@@ -85,6 +85,7 @@ public:
 	std::vector<std::vector<float>> mesh_indices;
 
 	// shadow
+	glm::vec3 slight_pos;
 	uint16_t shadow_res;
 	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_physical_ids;
 	std::vector<ShadowGeometry*> shadow_geometry;

@@ -8,6 +8,7 @@ in vec3 bitangent;
 
 out vec4 Position;
 out vec2 TexCoords;
+out vec3 Normals;
 out mat3 TBN;
 out vec3 ltp;
 
@@ -31,9 +32,9 @@ void main()
 
 	// reorthogonalize TBN-matrix per-vertex according to gram-schmidt
 	vec3 T = normalize((model*vec4(tangent,0)).xyz);
-	vec3 N = normalize((model*vec4(normals,0)).xyz);
-	T = normalize(T-dot(T,N)*N);
-	TBN = mat3(T,cross(N,T),N);
+	Normals = normalize((model*vec4(normals,0)).xyz);
+	T = normalize(T-dot(T,Normals)*Normals);
+	TBN = mat3(T,cross(Normals,T),Normals);
 
 	// calculate light position and transform to screen space
 	vec4 rltp = light_trans*Position;

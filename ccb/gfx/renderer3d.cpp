@@ -115,6 +115,7 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	// calculate shadow projection
+	slight_pos = pos;
 	float hwidth = mwidth/2,hheight = mheight/2;
 	shadow_view = glm::lookAt(pos/fdiv+center,center,glm::vec3(0,1,0));
 	shadow_proj = glm::ortho(-hwidth,hwidth,-hheight,hheight,.1f,100.0f);
@@ -504,6 +505,7 @@ void Renderer3D::upload_shadow_inst()
 void Renderer3D::upload_shadow_pmsh()
 {
 	// upload camera projection
+	pbms.upload_vec3("light_position",slight_pos);
 	pbms.upload_matrix("light_trans",scam_projection);
 
 	// upload shadow map

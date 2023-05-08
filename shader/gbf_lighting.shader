@@ -130,9 +130,9 @@ void main()
 	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
 	// process shadows
-	vec3 light_dir = normalize(sunlight[0].position-position);
+	/*vec3 light_dir = normalize(sunlight[0].position-position);
 	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
-	sdw_colours *= 1.0-shadow;
+	sdw_colours *= 1.0-shadow;*/
 	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.75);
 
 	// process emission
@@ -145,7 +145,7 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	outColour = vec4(cmb_colours,1.0);
+	outColour = vec4(vec3(shadow,shadow,shadow),1.0);
 }
 
 // specular processing
