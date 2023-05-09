@@ -143,7 +143,6 @@ void Renderer3D::load(Camera3D cam3d)
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
 	s3d.upload_int("nmap",3);
-	s3d.upload_int("shadow_map",4);
 	s3d.upload_camera(cam3d);
 
 	// combine all added instance vertices to master instance vertex list & upload
@@ -165,7 +164,6 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
 	is3d.upload_int("nmap",3);
-	is3d.upload_int("shadow_map",4);
 	is3d.upload_camera(cam3d);
 
 	// combine physical mesh vertices to master vertex list & upload
@@ -180,7 +178,6 @@ void Renderer3D::load(Camera3D cam3d)
 	pbms.upload_int("colour_map",0);
 	pbms.upload_int("normal_map",1);
 	pbms.upload_int("material_map",2);
-	pbms.upload_int("shadow_map",3);
 	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
@@ -467,50 +464,6 @@ void Renderer3D::render_pmsh(uint16_t i)
 	pbms.upload_matrix("model",pml[i].model);
 	glDrawArrays(GL_TRIANGLES,pml[i].offset,pml[i].size);
 	glActiveTexture(GL_TEXTURE0);
-}
-
-/*
-	upload_shadow() -> void
-	purpose: upload shadow projection to mesh geometry pass shader
-*/
-void Renderer3D::upload_shadow()
-{
-	// upload camera projection
-	s3d.upload_matrix("light_trans",scam_projection);
-
-	// upload shadow map
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D,shadow_map);
-}
-
-/*
-	upload_shadow_inst() -> void
-	purpose: upload shadow projection to instanced mesh geometry pass shader
-*/
-void Renderer3D::upload_shadow_inst()
-{
-	// upload camera projection
-	is3d.upload_matrix("light_trans",scam_projection);
-
-	// upload shadow map
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D,shadow_map);
-}
-// FIXME: duplicate code
-
-/*
-	upload_shadow_pmsh() -> void
-	purpose: upload shadow projection to physical based mesh geometry pass shader
-*/
-void Renderer3D::upload_shadow_pmsh()
-{
-	// upload camera projection
-	pbms.upload_vec3("light_position",slight_pos);
-	pbms.upload_matrix("light_trans",scam_projection);
-
-	// upload shadow map
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,shadow_map);
 }
 
 /*

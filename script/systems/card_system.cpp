@@ -454,13 +454,11 @@ void CardSystem::render()
 {
 	// render background
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
-	m_ccbf->r3d->upload_shadow();
 	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
 	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
 	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
-	m_ccbf->r3d->upload_shadow_inst();
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
 		m_ccbf->r3d->iml[ir3d_index+i].inst_count = currency_spawn[i];
 		m_ccbf->r3d->render_inst(ir3d_index+i);

@@ -102,7 +102,7 @@ void CasinoSpike::render()
 
 	// render physical based objects
 	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
-	m_ccbf->r3d->upload_shadow_pmsh();
+	//m_ccbf->r3d->upload_shadow_pmsh();
 	for (uint8_t i=0;i<6;i++) {
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);

@@ -24,6 +24,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("irradiance_map",4);
 	deferred_fb.s.upload_int("specular_map",5);
 	deferred_fb.s.upload_int("specular_brdf",6);
+	deferred_fb.s.upload_int("shadow_map",7);
 }
 
 /*
@@ -148,11 +149,15 @@ void World::render(uint32_t &running,bool &reboot)
 	m_setRigs->lighting.upload_specular_map();
 	glActiveTexture(GL_TEXTURE6);
 	m_setRigs->lighting.upload_specular_brdf();
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
 	// FIXME: last two uploads can be done outside of the loop
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);
 	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
+	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
+	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui

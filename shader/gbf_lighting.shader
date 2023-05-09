@@ -58,6 +58,11 @@ uniform samplerCube irradiance_map;
 uniform samplerCube specular_map;
 uniform sampler2D specular_brdf;
 
+// shadows
+uniform sampler2D shadow_map;
+uniform vec3 light_position;
+uniform mat4 shadow_matrix;
+
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
 vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
@@ -86,15 +91,14 @@ void main()
 {
 	// read g-buffer information
 	vec4 colourxspec = texture(gbuffer_colour,TexCoords);
-	vec4 positionxshadow = texture(gbuffer_position,TexCoords);
+	vec4 positionxnull = texture(gbuffer_position,TexCoords);
 	vec4 normalsxemission = texture(gbuffer_normals,TexCoords);
 	vec4 materials = texture(gbuffer_materials,TexCoords);
 
 	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
 	float speculars = colourxspec.a;
-	vec3 position = positionxshadow.rgb;
-	float shadow = positionxshadow.a;
+	vec3 position = positionxnull.rgb;
 	vec3 normals = normalsxemission.rgb;
 	float lemission = normalsxemission.a;
 	float metallic = materials.r;
@@ -129,10 +133,15 @@ void main()
 	//for (int k=0;k<spotlight_count;k++)
 	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
 
-	// process shadows
-	/*vec3 light_dir = normalize(sunlight[0].position-position);
-	sdw_colours *= (1+int(max(dot(light_dir,normals),0)<.52)*shadow)-shadow;
-	sdw_colours *= 1.0-shadow;*/
+	// process shadows with dynamic bias for sloped surfaces
+	vec4 rltp = shadow_matrix*vec4(position,1.0);
+	vec3 ltp = (rltp.xyz/rltp.w)*.5+.5;
+	float obj_depth = ltp.z;
+	float fcol_depth = texture(shadow_map,ltp.xy).r;
+	float bias = max((1.0-dot(normals,light_position))*.05,.005);
+	float shadow = float(obj_depth>fcol_depth+bias);
+
+	// combine lighting stages
 	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.75);
 
 	// process emission
@@ -145,7 +154,8 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// return colour composition
-	outColour = vec4(vec3(shadow,shadow,shadow),1.0);
+	outColour = vec4(cmb_colours,1.0);
+	//outColour = vec4(vec3(shadow,shadow,shadow),1.0);
 }
 
 // specular processing

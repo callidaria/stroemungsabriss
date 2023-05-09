@@ -60,11 +60,6 @@ public:
 	void render_inst(uint16_t i);
 	void render_pmsh(uint16_t i);
 
-	// uploads
-	void upload_shadow();
-	void upload_shadow_inst();
-	void upload_shadow_pmsh();
-
 	// setters
 	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);
 	void inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot);
