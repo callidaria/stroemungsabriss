@@ -170,46 +170,52 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 /*
 	TODO
 */
-SaveState MenuList::add_save(std::string path)
+std::vector<SaveState> MenuList::load_saves(std::string path)
 {
-	// data setup
-	SaveState out_diff = {  };
+	// process each save
+	std::vector<SaveState> out;
 	std::ifstream file(path);
 	std::string datastring;
-	std::getline(file,datastring);
-	std::istringstream data(datastring);
+	while (std::getline(file,datastring)) {
 
-	// grind save data
-	std::string curr_data;
-	std::vector<std::string> raw_savedata;
-	while (std::getline(data,curr_data,';')) raw_savedata.push_back(curr_data);
+		// data setup
+		SaveState out_diff = {  };
+		std::istringstream data(datastring);
 
-	// interpret save file
-	out_diff.title = raw_savedata[0].c_str();
-	out_diff.description = raw_savedata[1].c_str();
-	out_diff.ld_inst = (LoadInstruction)std::stoi(raw_savedata[2]);
-	out_diff.diff = std::stoi(raw_savedata[3]);
-	out_diff.skill = std::stoi(raw_savedata[4]);
+		// grind save data
+		std::string curr_data;
+		std::vector<std::string> raw_savedata;
+		while (std::getline(data,curr_data,';')) raw_savedata.push_back(curr_data);
 
-	// write save title
-	Text ttext = Text(lfnt),dtext = Text(dfnt);
-	ttext.add(out_diff.title,glm::vec2(250,lscroll));
-	ttext.load();
-	lscroll -= 45;
+		// interpret save file
+		out_diff.title = raw_savedata[0].c_str();
+		out_diff.description = raw_savedata[1].c_str();
+		out_diff.ld_inst = (LoadInstruction)std::stoi(raw_savedata[2]);
+		out_diff.diff = std::stoi(raw_savedata[3]);
+		out_diff.skill = std::stoi(raw_savedata[4]);
 
-	// write save description
-	dtext.add(out_diff.description,glm::vec2(920,dscroll));
+		// write save title
+		Text ttext = Text(lfnt),dtext = Text(dfnt);
+		ttext.add(out_diff.title,glm::vec2(250,lscroll));
+		ttext.load();
+		lscroll -= 45;
 
-	// write difficulty
-	dtext.add(NAMING_DIFFICULTY[out_diff.diff],glm::vec2(920,dscroll-20));
-	dtext.load();
+		// write save description
+		dtext.add(out_diff.description,glm::vec2(920,dscroll));
 
-	// compile save entry
-	les.push_back({
-		ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
-		false,0,0,0,0,out_diff.skill,{ 0,0,0,0,0,0 },0,""
-	}); esize++;
-	return out_diff;
+		// write difficulty
+		dtext.add(NAMING_DIFFICULTY[out_diff.diff],glm::vec2(920,dscroll-20));
+		dtext.load();
+
+		// compile save entry
+		les.push_back({
+			ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
+			false,0,0,0,0,out_diff.skill,{ 0,0,0,0,0,0 },0,""
+		}); esize++;
+
+		// output save data
+		out.push_back(out_diff);
+	} return out;
 }
 
 /*

@@ -55,7 +55,7 @@ public:
 	~MenuList() {  }
 
 	// creation
-	SaveState add_save(std::string path);
+	std::vector<SaveState> load_saves(std::string path);
 
 	// modification
 	void reset();

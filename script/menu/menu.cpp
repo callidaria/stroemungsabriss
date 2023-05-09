@@ -63,8 +63,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	// FIXME: mess
 
 	// load savestates
-	for (auto entry : std::filesystem::directory_iterator("./save"))
-		saves.push_back(mls[4].add_save(entry.path().string()));
+	saves = mls[4].load_saves("./dat/saves");
 
 	/*
 		setup splash vertices by origin position, target position and colour:
