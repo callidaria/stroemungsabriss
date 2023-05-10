@@ -63,7 +63,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	// FIXME: mess
 
 	// load savestates
-	saves = mls[4].load_saves("./dat/saves");
+	mls[4].load_saves(savestates);
 
 	/*
 		setup splash vertices by origin position, target position and colour:
@@ -181,7 +181,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	}
 
 	// set load instructions
-	if (mm==MENU_LISTING&&mselect==6) curr_linstruction = saves[lselect].ld_inst;
+	if (mm==MENU_LISTING&&mselect==6) curr_linstruction = savestates.saves[lselect].ld_inst;
+	else if (mm==MENU_LISTING&&mselect==4) curr_linstruction = practice_loadlist[lselect];
 
 	// relevant variables for switch
 	bool is_shift,changed;

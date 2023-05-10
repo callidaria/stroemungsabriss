@@ -13,7 +13,7 @@
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
 
-#include "../struct/savestate.h"
+#include "../systems/savestates.h"
 
 // to identify how to interpret the values
 enum ReadMode
@@ -55,7 +55,7 @@ public:
 	~MenuList() {  }
 
 	// creation
-	std::vector<SaveState> load_saves(std::string path);
+	void load_saves(SaveStates states);
 
 	// modification
 	void reset();
