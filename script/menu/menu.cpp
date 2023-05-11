@@ -64,9 +64,6 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 
 	// load savestates
 	mls[4].load_saves(savestates);
-	savestates.saves.push_back({ "test title","test description",LOAD_DPILOT,2,3 });
-	savestates.saves.push_back({ "testing title 2","test desc 2",LOAD_AIRFIELD,3,4 });
-	savestates.write_savefile();
 
 	/*
 		setup splash vertices by origin position, target position and colour:

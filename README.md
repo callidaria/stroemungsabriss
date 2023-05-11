@@ -71,6 +71,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - dynamic world loading
 - deferred rendering for a much more complex lighting system
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
+- store "macro" savestate pattern
 
 ### optimizations:
 - system to remove world objects should they have been deemed obsolete
@@ -174,5 +175,5 @@ Worktime: 120h
 	+ 47: 20h 57min
 	+ 164: 9h 27min
 	+ 147: 50h 53min
-	+ 124: 7h 39min
+	+ 124: 8h 3min
 - Total Code Lines: 12.126

@@ -1,13 +1,15 @@
 #include "savestates.h"
 
 /*
-	TODO
+	constructor()
+	purpose: savestate information loading and setup for interaction
 */
 SaveStates::SaveStates()
 { read_savefile(); }
 
 /*
-	TODO
+	read_savefile() -> void
+	purpose: reads save file and refills save data information list
 */
 void SaveStates::read_savefile()
 {
@@ -42,11 +44,12 @@ void SaveStates::read_savefile()
 }
 
 /*
-	TODO
+	write_savefile() -> void
+	purpose: write current save data information to save file
 */
 void SaveStates::write_savefile()
 {
-	std::ofstream file("./dat/saves",std::ios::binary);
+	std::ofstream file("./dat/saves");
 	for (auto save : saves) {
 		file << save.title << ';';
 		file << save.description << ';';
@@ -56,7 +59,12 @@ void SaveStates::write_savefile()
 }
 
 /*
-	TODO
+	read_bitrange(bitset<64>,uint8_t,uint8_t) -> uint64_t
+	purpose: read save data within bitrange, 64 being the leftmost, 0 being the rightmost bit
+	\param data: save data bit sequence, which is to be processed
+	\param start: start of bitrange, for start>end => start is left of end
+	\param end: end of bitrange, for end<start => end is right of start
+	\returns interpreted value from data bit sequence within bitrange
 */
 uint64_t SaveStates::read_bitrange(std::bitset<64> data,uint8_t start,uint8_t end)
 {
