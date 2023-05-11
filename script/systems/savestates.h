@@ -30,10 +30,6 @@ public:
 	void read_savefile();
 	void write_savefile();
 
-private:
-
-	uint64_t read_bitrange(std::bitset<64> data,uint8_t start,uint8_t end);
-
 public:
 
 	// saves

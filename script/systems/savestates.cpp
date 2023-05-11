@@ -29,14 +29,14 @@ void SaveStates::read_savefile()
 		while (std::getline(data,curr_data,';')) raw_savedata.push_back(curr_data);
 
 		// interpret save file
-		save.title = raw_savedata[0].c_str();
-		save.description = raw_savedata[1].c_str();
+		save.title = raw_savedata[0];
+		save.description = raw_savedata[1];
+		std::string sdata = raw_savedata[2];
 
-		// bitwise interpretations
-		std::bitset<64> bwsdata(std::stoi(raw_savedata[2]));
-		save.ld_inst = (LoadInstruction)read_bitrange(bwsdata,32,16);
-		save.diff = read_bitrange(bwsdata,16,8);
-		save.skill = read_bitrange(bwsdata,8,0);
+		// bitwise data interpretation
+		save.ld_inst = (LoadInstruction)sdata[0];
+		save.diff = sdata[1];
+		save.skill = sdata[2];
 
 		// list save data
 		saves.push_back(save);
@@ -49,27 +49,15 @@ void SaveStates::read_savefile()
 */
 void SaveStates::write_savefile()
 {
+	// open save file to write
 	std::ofstream file("./dat/saves");
 	for (auto save : saves) {
-		file << save.title << ';';
-		file << save.description << ';';
-		std::bitset<64> bwsdata(save.ld_inst<<16|save.diff<<8|save.skill);
-		file << bwsdata.to_ulong() << '\n';
-	} file.close();
-}
 
-/*
-	read_bitrange(bitset<64>,uint8_t,uint8_t) -> uint64_t
-	purpose: read save data within bitrange, 64 being the leftmost, 0 being the rightmost bit
-	\param data: save data bit sequence, which is to be processed
-	\param start: start of bitrange, for start>end => start is left of end
-	\param end: end of bitrange, for end<start => end is right of start
-	\returns interpreted value from data bit sequence within bitrange
-*/
-uint64_t SaveStates::read_bitrange(std::bitset<64> data,uint8_t start,uint8_t end)
-{
-	std::bitset<64> out;
-	for (uint8_t i=end;i<start;i++) out[i] = data[i];
-	out >>= end;
-	return out.to_ulong();
+		// write save data title & description
+		file << save.title << ';' << save.description << ';';
+
+		// write general savestate information
+		unsigned char ldi = save.ld_inst,wdiff = save.diff,wskill = save.skill;
+		file << ldi << wdiff << wskill << '\n';
+	} file.close();
 }

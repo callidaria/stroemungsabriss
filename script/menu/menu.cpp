@@ -64,6 +64,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 
 	// load savestates
 	mls[4].load_saves(savestates);
+	savestates.write_savefile();
 
 	/*
 		setup splash vertices by origin position, target position and colour:
