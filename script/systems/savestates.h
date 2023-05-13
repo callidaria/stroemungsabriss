@@ -42,9 +42,13 @@ public:
 
 private:
 
-	static unsigned char booleans_to_byte(bool* xs,unsigned char out=0x00,uint8_t range=8,
+	// bitwise helper
+	static unsigned char booleans_to_byte(bool* xs,unsigned char obyte=0x00,uint8_t range=8,
 			uint8_t sstart=7,uint8_t lstart=0);
+	static unsigned char to_byte_list_overflow(bool* xs,bool* ys,uint8_t xstart,size_t xrange);
 	static void byte_to_booleans(unsigned char byte,bool out[8]);
+	static void boolean_list_byte_overflow(bool byte0[8],bool byte1[8],uint8_t bstart,bool* ls,
+			size_t range);
 
 public:
 
