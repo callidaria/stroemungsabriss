@@ -44,6 +44,7 @@ private:
 
 	static unsigned char booleans_to_byte(bool* xs,unsigned char out=0x00,uint8_t range=8,
 			uint8_t sstart=7,uint8_t lstart=0);
+	static void byte_to_booleans(unsigned char byte,bool out[8]);
 
 public:
 

@@ -33,10 +33,38 @@ void SaveStates::read_savefile()
 		save.description = raw_savedata[1];
 		std::string sdata = raw_savedata[2];
 
-		// bitwise data interpretation
+		// information interpretation
 		save.ld_inst = (LoadInstruction)sdata[0];
 		save.diff = sdata[1];
 		save.skill = sdata[2];
+
+		// bitwise collectibles
+		bool clp[6][8];
+		for (uint8_t i=0;i<6;i++) byte_to_booleans(sdata[3+i],clp[i]);
+		save.tiles_numbers[0] = clp[0][0],save.tiles_numbers[1] = clp[0][1],
+		save.tiles_numbers[2] = clp[0][2],save.tiles_numbers[3] = clp[0][3],
+		save.tiles_numbers[4] = clp[0][4],save.tiles_numbers[5] = clp[0][5],
+		save.tiles_numbers[6] = clp[0][6],save.tiles_numbers[7] = clp[0][7],
+		save.tiles_numbers[8] = clp[1][0];
+		save.tiles_circles[0] = clp[1][1],save.tiles_circles[1] = clp[1][2],
+		save.tiles_circles[2] = clp[1][3],save.tiles_circles[3] = clp[1][4],
+		save.tiles_circles[4] = clp[1][5],save.tiles_circles[5] = clp[1][6],
+		save.tiles_circles[6] = clp[1][7],save.tiles_circles[7] = clp[2][0],
+		save.tiles_circles[8] = clp[2][1];
+		save.tiles_bamboo[0] = clp[2][2],save.tiles_bamboo[1] = clp[2][3],
+		save.tiles_bamboo[2] = clp[2][4],save.tiles_bamboo[3] = clp[2][5],
+		save.tiles_bamboo[4] = clp[2][6],save.tiles_bamboo[5] = clp[2][7],
+		save.tiles_bamboo[6] = clp[3][0],save.tiles_bamboo[7] = clp[3][1],
+		save.tiles_bamboo[8] = clp[3][2];
+		save.tiles_winddragon[0] = clp[3][3],save.tiles_winddragon[1] = clp[3][4],
+		save.tiles_winddragon[2] = clp[3][5],save.tiles_winddragon[3] = clp[3][6],
+		save.tiles_winddragon[4] = clp[3][7],save.tiles_winddragon[5] = clp[4][0],
+		save.tiles_winddragon[6] = clp[4][1];
+		save.tiles_flowerseason[0] = clp[4][2],save.tiles_flowerseason[1] = clp[4][3],
+		save.tiles_flowerseason[2] = clp[4][4],save.tiles_flowerseason[3] = clp[4][5],
+		save.tiles_flowerseason[4] = clp[4][6],save.tiles_flowerseason[5] = clp[4][7],
+		save.tiles_flowerseason[6] = clp[5][0],save.tiles_flowerseason[7] = clp[5][1];
+		byte_to_booleans(sdata[9],save.pcbkey);
 
 		// list save data
 		saves.push_back(save);
@@ -61,18 +89,6 @@ void SaveStates::write_savefile()
 		file << ldi << wdiff << wskill;
 
 		// write collectible flags
-		save.tiles_numbers[7] = true;
-		save.tiles_numbers[8] = true;
-		save.tiles_circles[0] = true;
-		save.tiles_circles[8] = true;
-		save.tiles_bamboo[4] = true;
-		save.tiles_bamboo[6] = true;
-		save.tiles_winddragon[0] = true;
-		save.tiles_winddragon[5] = true;
-		save.tiles_flowerseason[0] = true;
-		save.tiles_flowerseason[6] = true;
-		save.pcbkey[0] = false;
-		save.pcbkey[1] = true;
 		unsigned char ncb = booleans_to_byte(save.tiles_numbers,0x00,1,7,8);
 		ncb = booleans_to_byte(save.tiles_circles,ncb,7,6);
 		unsigned char cbb = booleans_to_byte(save.tiles_circles,0x00,2,7,7);
@@ -99,3 +115,9 @@ unsigned char SaveStates::booleans_to_byte(bool* xs,unsigned char out,uint8_t ra
 	for (uint8_t i=0;i<range;i++) out |= xs[lstart+i]<<(sstart-i);
 	return out;
 }
+
+/*
+	TODO
+*/
+void SaveStates::byte_to_booleans(unsigned char byte,bool out[8])
+{ for (uint8_t i=0;i<8;i++) out[7-i] = byte&(0x01<<i); }
