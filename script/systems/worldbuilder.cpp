@@ -62,6 +62,7 @@ void Worldbuilder::load_casino()
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
+	m_world->active_daui = 1;
 	m_world->active_cam3D = 0;
 	m_world->load_geometry();
 	m_world->upload_lighting();
@@ -72,6 +73,7 @@ void Worldbuilder::load_cards()
 	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
+	m_world->active_daui = 1;
 	m_world->active_cam3D = 3;
 	m_world->load_geometry();
 	m_world->upload_lighting();

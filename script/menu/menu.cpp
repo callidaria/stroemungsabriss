@@ -52,7 +52,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	mls[1] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_mopt");
 	mls[2] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_stages");
 	mls[3] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_arcades");
-	mls[4] = MenuList();
+	mls[4] = MenuList(m_ccbf->r2d);
 	mls[5] = MenuList();
 	mls[6] = MenuList();
 	mls[7] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optfrm");
@@ -61,6 +61,10 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	mls[10] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgm");
 	mls[11] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optext");
 	// FIXME: mess
+
+	// load savestates
+	mls[4].load_saves(savestates);
+	savestates.write_savefile();
 
 	/*
 		setup splash vertices by origin position, target position and colour:
@@ -177,6 +181,10 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 		return;
 	}
 
+	// set load instructions
+	if (mm==MENU_LISTING&&mselect==6) curr_linstruction = savestates.saves[lselect].ld_inst;
+	else if (mm==MENU_LISTING&&mselect==4) curr_linstruction = practice_loadlist[lselect];
+
 	// relevant variables for switch
 	bool is_shift,changed;
 	uint8_t tmm;
@@ -245,6 +253,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 		tmm = 4;
 		tmm += hit_a&&mselect==3;
 		tmm -= hit_a&&mselect!=3;
+		tmm -= hit_a&&mselect==6;
 
 		// check for changes in settings and open confirm dialogue
 		changed = false;
@@ -284,8 +293,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// run game at given position
 	default:
 
-		running = lselect;
-		m_ccbf->ld.push(LOAD_DPILOT);
+		m_ccbf->ld.push(curr_linstruction);
+		mm = MENU_SELECTION;
 		return;
 	}
 	// FIXME: break branch with static function pointer list
@@ -293,9 +302,9 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// TODO: reduce menu list input to a movement process in menu list class with stalls
 
 	// set triggers
-	trg_start = m_ccbf->iMap->input_val[IMP_REQFOCUS];trg_b = m_ccbf->iMap->input_val[IMP_REQBOMB];
-	trg_lft = m_ccbf->iMap->input_val[IMP_REQLEFT];trg_rgt = m_ccbf->iMap->input_val[IMP_REQRIGHT];
-	trg_dwn = m_ccbf->iMap->input_val[IMP_REQDOWN];trg_up = m_ccbf->iMap->input_val[IMP_REQUP];
+	trg_start = m_ccbf->iMap->input_val[IMP_REQFOCUS],trg_b = m_ccbf->iMap->input_val[IMP_REQBOMB],
+	trg_lft = m_ccbf->iMap->input_val[IMP_REQLEFT],trg_rgt = m_ccbf->iMap->input_val[IMP_REQRIGHT],
+	trg_dwn = m_ccbf->iMap->input_val[IMP_REQDOWN],trg_up = m_ccbf->iMap->input_val[IMP_REQUP];
 
 	// move non-used out of view
 	for (int i=1;i<8;i++) {  // FIXME: i will regret this tomorrow ...just a test

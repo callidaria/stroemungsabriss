@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -11,6 +12,8 @@
 
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
+
+#include "../systems/savestates.h"
 
 // to identify how to interpret the values
 enum ReadMode
@@ -47,8 +50,12 @@ public:
 
 	// construction
 	MenuList();
+	MenuList(Renderer2D* r2d);
 	MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path);
 	~MenuList() {  }
+
+	// creation
+	void load_saves(SaveStates states);
 
 	// modification
 	void reset();
@@ -98,4 +105,7 @@ private:
 	// animation of estimated difficulty
 	bool neg_scl = false,neg_rot = false;	// true if transformation of estimated difficulty is negative
 	float val_scl = 1,val_rot = 0;			// values of description transformation
+
+	// naming correlation of difficulty ids
+	std::vector<const char*> NAMING_DIFFICULTY { "NORMAL","MASTER","GRANDMASTER","HEADMASTER" };
 };

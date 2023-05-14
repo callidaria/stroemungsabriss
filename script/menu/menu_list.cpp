@@ -1,7 +1,7 @@
 #include "menu_list.h"
 
 /*
-	Constructor()
+	constructor()
 	purpose: constructor, that sets up an empty menu list, to fill with lines later. no interpretations.
 */
 MenuList::MenuList()
@@ -14,7 +14,16 @@ MenuList::MenuList()
 }
 
 /*
-	Constructor(Camera2D*,const char*)
+	constructor(Renderer2D*)
+	purpose: creates a menu list placeholder with renderer to later add list elements to
+	\param r2d: 2D renderer, that will be used to visualize list elements in menu
+*/
+MenuList::MenuList(Renderer2D* r2d)
+	: m_r2d(r2d)
+{  }
+
+/*
+	constructor(Camera2D*,const char*)
 	cam2d: text will be rendered according to the camera parameter's perspective and view
 	path: path to menu list configuration file in updated cmli2 language format
 	purpose: constructor, that interprets single cmli2 file and sets up the menu list accordingly
@@ -34,7 +43,6 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	// setting up textures for 2D renderer
 	diffRID = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
 	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->load(cam2d);  // FIXME: sprite always in split, use different spritesheets
 
 	// setting up the different texts for menu features
 	Text t_sle = Text(lfnt),t_desc = Text(dfnt);
@@ -160,6 +168,37 @@ MenuList::MenuList(Renderer2D* r2d,Camera2D* cam2d,const char* path)
 	} rles = les;
 	// FIXME: text with annotated \n in written file format -> is it \n or \\n?
 } // TODO: write interpreter fault instead of letting the mem take the fall
+
+/*
+	load_saves(SaveStates) -> void
+	purpose: upload player save states as list elements to menu list
+	\param states: stavestates object, that contains the loaded player save states
+*/
+void MenuList::load_saves(SaveStates states)
+{
+	// process each save
+	for (auto state : states.saves) {
+
+		// write save title
+		Text ttext = Text(lfnt),dtext = Text(dfnt);
+		ttext.add(state.title.c_str(),glm::vec2(250,lscroll));
+		ttext.load();
+		lscroll -= 45;
+
+		// write save description
+		dtext.add(state.description.c_str(),glm::vec2(920,dscroll));
+
+		// write difficulty
+		dtext.add(NAMING_DIFFICULTY[state.diff],glm::vec2(920,dscroll-20));
+		dtext.load();
+
+		// compile save entry
+		les.push_back({
+			ttext,dtext,std::vector<Text>(),std::vector<std::string>(),
+			false,0,0,0,0,state.skill,{ 0,0,0,0,0,0 },0,""
+		}); esize++;
+	}
+}
 
 /*
 	reset() -> void
