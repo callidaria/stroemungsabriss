@@ -85,7 +85,13 @@ void SaveStates::write_savefile()
 }
 
 /*
-	TODO
+	booleans_to_byte(bool*,unsigned char,uint8_t,uint8_t,uint8_t) -> unsigned char (private,static)
+	\param xs: boolean list to compress into byte
+	\param obyte: origin byte to bitwise shift booleans from list into
+	\param range: list copy range
+	\param sstart: starting bit to shift first list value to
+	\param lstart: starting list element to crunch into byte
+	\returns byte holding crunched boolean values
 */
 unsigned char SaveStates::booleans_to_byte(bool* xs,unsigned char obyte,uint8_t range,uint8_t sstart,
 		uint8_t lstart)
@@ -95,7 +101,12 @@ unsigned char SaveStates::booleans_to_byte(bool* xs,unsigned char obyte,uint8_t 
 }
 
 /*
-	// TODO
+	to_byte_list_overflow(bool*,bool*,uint8_t,size_t) -> unsigned char (private,static)
+	\param xs: boolean list, that is guaranteed to overflow within byte range
+	\param ys: boolean list, that will overtake bytecrunching process after first list overflow
+	\param xstart: starting array index for first boolean list
+	\param xrange: array size of the first boolean list
+	\returns fully crunched byte, as result from two lists in sequence order
 */
 unsigned char SaveStates::to_byte_list_overflow(bool* xs,bool* ys,uint8_t xstart,size_t xrange)
 {
@@ -105,13 +116,22 @@ unsigned char SaveStates::to_byte_list_overflow(bool* xs,bool* ys,uint8_t xstart
 }
 
 /*
-	TODO
+	byte_to_booleans(unsigned char,bool[8]) -> void (private,static)
+	purpose: copies all bitstates from given byte to a size 8 array, 0 being the leftmost bit
+	\param byte: byte to bitwise convert to boolean list of size 8
+	\param out: output array to copy bitwise values from byte to
 */
 void SaveStates::byte_to_booleans(unsigned char byte,bool out[8])
 { for (uint8_t i=0;i<8;i++) out[7-i] = byte&(0x01<<i); }
 
 /*
-	TODO
+	boolean_list_byte_overflow(bool[8],bool[8],uint8_t,bool*,size_t) -> void (private,static)
+	purpose: map booleanized bytes to an array, expecting list overflow
+	\param byte0: boolean list, expecting to overflow, while copying
+	\param byte1: boolean list to continue copy process from after overflow
+	\param bstart: starting list index for first boolean list
+	\param ls: list to copy the boolean values to
+	\param ls_range: range of bits (here listed booleans) to copy to given list array ls
 */
 void SaveStates::boolean_list_byte_overflow(bool byte0[8],bool byte1[8],uint8_t bstart,bool* ls,
 		size_t ls_range)
