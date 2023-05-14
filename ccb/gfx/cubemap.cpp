@@ -113,6 +113,10 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 		glm::lookAt(glm::vec3(0),glm::vec3(0,0,-1),glm::vec3(0,-1,0))
 	};
 
+	// setup image write buffer
+	uint32_t bffsize = 3*resolution*resolution;
+	unsigned char buffer_data[bffsize];
+
 	// draw equirectangular to cubed
 	glViewport(0,0,resolution,resolution);
 	glBindTexture(GL_TEXTURE_2D,irr_tex);
@@ -122,6 +126,12 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 				tex,0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES,0,36);
+
+		// store prerendered maps in file
+		glPixelStorei(GL_PACK_ALIGNMENT,1);
+		glReadPixels(0,0,resolution,resolution,GL_RGB,GL_UNSIGNED_BYTE,buffer_data);
+		stbi_write_png(("./dat/precalc/irradiance"+std::to_string(i)+".png").c_str(),
+				resolution,resolution,3,buffer_data,3*resolution);
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
@@ -172,6 +182,10 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 		glm::lookAt(glm::vec3(0),glm::vec3(0,0,-1),glm::vec3(0,-1,0))
 	};
 
+	// setup image write buffers
+	uint32_t ibffsize = 3*ri_res*ri_res,ebffsize = 3*re_res*re_res;
+	unsigned char ibuffer_data[ibffsize],ebuffer_data[ebffsize];
+
 	// draw precise to convoluted
 	glViewport(0,0,ri_res,ri_res);
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
@@ -181,6 +195,12 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 				imap,0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES,0,36);
+
+		// store prerendered convolution in file
+		glPixelStorei(GL_PACK_ALIGNMENT,1);
+		glReadPixels(0,0,ri_res,ri_res,GL_RGB,GL_UNSIGNED_BYTE,ibuffer_data);
+		stbi_write_png(("./dat/precalc/convolution"+std::to_string(i)+".png").c_str(),ri_res,ri_res,
+				3,ibuffer_data,3*ri_res);
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	// setup specular approximation
@@ -218,6 +238,12 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 					GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,smap,j);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			glDrawArrays(GL_TRIANGLES,0,36);
+
+			// store prerendered specular multidetailed
+			glPixelStorei(GL_PACK_ALIGNMENT,1);
+			glReadPixels(0,0,re_res,re_res,GL_RGB,GL_UNSIGNED_BYTE,ebuffer_data);
+			stbi_write_png(("./dat/precalc/specular"+std::to_string(i)+"_lod"+std::to_string(j))
+					.c_str(),re_res,re_res,3,ebuffer_data,3*re_res);
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }

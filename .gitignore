@@ -3,4 +3,5 @@
 lib/
 include/
 ccb/include/
+dat/precalc/*
 .vscode/
