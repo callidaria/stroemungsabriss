@@ -49,8 +49,14 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);
+
+#ifdef PRERENDER_IRRADIANCE_MAPPING
 	irradiance_map.render_irradiance_to_cubemap(1024);
 	irradiance_map.approximate_irradiance(32,128,7,2048);
+#else
+	irradiance_map.load_irradiance_cube();
+	irradiance_map.load_irradiance_maps(7);
+#endif
 	//set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),1.0f });
 	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }

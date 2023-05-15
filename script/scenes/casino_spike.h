@@ -5,6 +5,8 @@
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 
+// #define PRERENDER_IRRADIANCE_MAPPING
+
 class CasinoSpike : public Scene
 {
 public:

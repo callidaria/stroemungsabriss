@@ -61,13 +61,9 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 		unsigned char* image = stbi_load(tp.at(i),&width,&height,0,STBI_rgb); // ??alpha needed
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,image);
 		stbi_image_free(image);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	} Toolbox::set_cubemap_texture_parameters();
 }
+// TODO: untested after recent changes. it remains a question if this is the way things work
 
 /*
 	render_irradiance_to_cubemap(int32_t) -> void
@@ -91,11 +87,7 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 	for (uint8_t i=0;i<6;i++)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,resolution,resolution,0,GL_RGB,
 				GL_FLOAT,nullptr);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	Toolbox::set_cubemap_texture_parameters();
 
 	// prepare cubemap render & camera projection
 	glm::mat4 proj = glm::perspective(glm::radians(90.0f),1.0f,1.0f,3.0f);
@@ -160,11 +152,7 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	for (uint8_t i=0;i<6;i++)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,ri_res,ri_res,0,GL_RGB,
 				GL_FLOAT,nullptr);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	Toolbox::set_cubemap_texture_parameters();
 
 	// prepare irradiance approximation map render & camera projection
 	glm::mat4 proj = glm::perspective(glm::radians(90.0f),1.0f,1.0f,3.0f);
@@ -208,12 +196,7 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	for (uint8_t i=0;i<6;i++)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,re_res,re_res,0,GL_RGB,
 				GL_FLOAT,nullptr);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	Toolbox::set_cubemap_texture_parameters_mipmap();
 
 	// filter multidetailed
 	approx_ref.enable();
@@ -249,6 +232,54 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 }
 // FIXME: code repetitions
 // FIXME: structurize depth function setting
+
+/*
+	TODO
+*/
+void Cubemap::load_irradiance_cube()
+{
+	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	int32_t width,height;
+	for (uint8_t i=0;i<6;i++) {
+		unsigned char* image = stbi_load(("./dat/precalc/irradiance"+std::to_string(i)+".png")
+				.c_str(),&width,&height,0,STBI_rgb);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB,width,height,0,GL_RGB,
+				GL_UNSIGNED_BYTE,image);
+		stbi_image_free(image);
+	} Toolbox::set_cubemap_texture_parameters();
+}
+
+/*
+	TODO
+*/
+void Cubemap::load_irradiance_maps(uint8_t lod_count)
+{
+	// load convoluted diffusion map
+	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
+	int32_t width,height;
+	for (uint8_t i=0;i<6;i++) {
+		unsigned char* image = stbi_load(("./dat/precalc/convolution"+std::to_string(i)+".png")
+				.c_str(),&width,&height,0,STBI_rgb);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB,width,height,0,GL_RGB,
+				GL_UNSIGNED_BYTE,image);
+		stbi_image_free(image);
+	} Toolbox::set_cubemap_texture_parameters();
+
+	// load multidetailed specular irradiance map
+	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	for (uint8_t i=0;i<6;i++) {
+		for (uint8_t lod=0;lod<lod_count;lod++) {
+			unsigned char* image = stbi_load(("./dat/precalc/specular"+std::to_string(i)+"_lod"
+					+std::to_string(lod)).c_str(),&width,&height,0,STBI_rgb);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,lod,GL_RGB,width,height,0,GL_RGB,
+					GL_UNSIGNED_BYTE,image);
+			stbi_image_free(image);
+		}
+	} //glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,lod_count-1);
+	Toolbox::set_cubemap_texture_parameters_mipmap();
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,0);
+}
+// FIXME: does loading RGB16F format improve visuals?
 
 /*
 	prepare() -> void

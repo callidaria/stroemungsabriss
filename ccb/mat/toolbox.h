@@ -50,6 +50,8 @@ public:
 	static void set_texture_parameter_linear_mipmap();
 	static void set_texture_parameter_linear_unfiltered();
 	static void set_texture_parameter_nearest_unfiltered();
+	static void set_cubemap_texture_parameters();
+	static void set_cubemap_texture_parameters_mipmap();
 
 	// pattern handling
 	static void set_texture_parameter_clamp_to_edge();

@@ -24,6 +24,10 @@ public:
 	void approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_count,
 			uint16_t sample_count);
 
+	// load preprocess
+	void load_irradiance_cube();
+	void load_irradiance_maps(uint8_t lod_count);
+
 	// setup
 	void prepare();
 	void prepare(Camera3D cam3D);
