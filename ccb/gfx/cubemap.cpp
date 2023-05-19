@@ -172,7 +172,7 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 
 	// setup image write buffers
 	uint32_t ibffsize = 3*ri_res*ri_res,ebffsize = 3*re_res*re_res;
-	unsigned char ibuffer_data[ibffsize],ebuffer_data[ebffsize];
+	float ibuffer_data[ibffsize],ebuffer_data[ebffsize];
 
 	// draw precise to convoluted
 	glViewport(0,0,ri_res,ri_res);
@@ -224,9 +224,9 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 
 			// store prerendered specular multidetailed
 			glPixelStorei(GL_PACK_ALIGNMENT,1);
-			glReadPixels(0,0,re_res,re_res,GL_RGB,GL_UNSIGNED_BYTE,ebuffer_data);
-			stbi_write_png(("./dat/precalc/specular"+std::to_string(i)+"_lod"+std::to_string(j))
-					.c_str(),re_res,re_res,3,ebuffer_data,3*re_res);
+			glReadPixels(0,0,lod_resolution,lod_resolution,GL_RGB,GL_UNSIGNED_BYTE,ebuffer_data);
+			stbi_write_png(("./dat/precalc/specular"+std::to_string(i)+"_lod"+std::to_string(j)
+					+".png").c_str(),lod_resolution,lod_resolution,3,ebuffer_data,3*lod_resolution);
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
@@ -270,14 +270,14 @@ void Cubemap::load_irradiance_maps(uint8_t lod_count)
 	for (uint8_t i=0;i<6;i++) {
 		for (uint8_t lod=0;lod<lod_count;lod++) {
 			unsigned char* image = stbi_load(("./dat/precalc/specular"+std::to_string(i)+"_lod"
-					+std::to_string(lod)).c_str(),&width,&height,0,STBI_rgb);
+					+std::to_string(lod)+".hdr").c_str(),&width,&height,0,STBI_rgb);
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,lod,GL_RGB,width,height,0,GL_RGB,
 					GL_UNSIGNED_BYTE,image);
 			stbi_image_free(image);
 		}
-	} //glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,lod_count-1);
+	} glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,lod_count-1);
 	Toolbox::set_cubemap_texture_parameters_mipmap();
-	// glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,0);
 }
 // FIXME: does loading RGB16F format improve visuals?
 
