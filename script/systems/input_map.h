@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_INPUT_MAP
+#define SCR_SYSTEMS_INPUT_MAP
 
 #include <iostream>
 
@@ -72,4 +73,7 @@ private:
 	// axis references
 	int32_t* cnt_udaxis,*cnt_lraxis;
 };
+
+#endif
+
 // TODO: make the input map dynamic for button reallocation

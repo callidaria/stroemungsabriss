@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_TEXTFIELD
+#define CCB_FEATURE_TEXTFIELD
 
 #include <iostream>
 #include <string>
@@ -10,10 +11,17 @@
 
 class TextField
 {
+
 public:
+
+	// construction
 	TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* tp,glm::vec2 bpos,float width,float height);
+
+	// draw
 	void render(Frame* frame,Camera2D* cam2d,glm::vec4 col);
+
 private:
+
 	Text txt;
 	Renderer2D* m_r2d;
 	std::string cnt;
@@ -23,3 +31,5 @@ private:
 	int char_amount = 0;int rinst;
 	bool input_active = false;
 };
+
+#endif

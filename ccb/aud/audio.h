@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_AUDIO_SELFTITLED
+#define CCB_AUDIO_SELFTITLED
 
 #include <iostream>
 
@@ -37,3 +38,5 @@ private:
 	unsigned int m_buffer,m_audio;	// buffer and audio members
 
 };
+
+#endif

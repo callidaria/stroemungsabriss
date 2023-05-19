@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_CCBMANAGER
+#define CCB_FEATURE_CCBMANAGER
 
 #include <iostream>
 #include <string>
@@ -53,3 +54,5 @@ private:
 	Font cf = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",20,20);
 	Text ct = Text(cf),cl = Text(cf);
 };
+
+#endif

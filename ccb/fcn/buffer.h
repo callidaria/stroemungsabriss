@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_BUFFER
+#define CCB_FEATURE_BUFFER
 
 #include <iostream>
 #include <vector>
@@ -38,3 +39,5 @@ private:
 
 	GLuint vao,vbo,iebo;
 };
+
+#endif

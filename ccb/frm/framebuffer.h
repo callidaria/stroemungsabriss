@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FRAME_FRAMEBUFFER
+#define CCB_FRAME_FRAMEBUFFER
 
 #include <iostream>
 #include <vector>
@@ -58,3 +59,5 @@ private:
 	GLuint fbo;
 	uint32_t frw,frh;
 };
+
+#endif

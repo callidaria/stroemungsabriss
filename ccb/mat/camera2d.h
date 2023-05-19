@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_MATHEMATICS_CAMERA2D
+#define CCB_MATHEMATICS_CAMERA2D
 
 #include <iostream>
 #include <glm/glm.hpp>
@@ -14,3 +15,5 @@ public:
 
 	glm::mat4 view2D,proj2D;
 };
+
+#endif

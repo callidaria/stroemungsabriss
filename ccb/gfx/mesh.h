@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_MESH
+#define CCB_GRAPHICS_MESH
 
 #include <iostream>
 #include <cstring>
@@ -47,4 +48,7 @@ private:
 	// information
 	const char* texpath,*smpath,*nmpath,*empath;
 };
+
+#endif
+
 // TODO: ??maybe separate single draw call mesh from instanced mesh

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_POINTLIGHT
+#define CCB_GRAPHICS_POINTLIGHT
 
 #include <iostream>
 #include <string>
@@ -31,3 +32,5 @@ private:
 	glm::vec3 pos,col;
 	float lconst,lin,quad,ins;
 };
+
+#endif

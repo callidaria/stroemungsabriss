@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_BOSS_DANCING_PILOT
+#define CCB_BOSS_DANCING_PILOT
 
 #include <iostream>
 
@@ -64,3 +65,5 @@ private:
 	int8_t dir_mult = 1,mv_stage = 0;
 	uint8_t cd_flare = rand()%3+4,cd_direction = rand()%2+3,cd_flares = 0,cd_mines = 0;
 };
+
+#endif

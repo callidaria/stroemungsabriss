@@ -1,11 +1,10 @@
-#pragma once
+#ifndef CCB_FEATURE_TERRAIN
+#define CCB_FEATURE_TERRAIN
 
 #include <glm/glm.hpp>
 #include "../gfx/shader.h"
 #include "../mat/camera3d.h"
 #include "../mat/toolbox.h"
-
-
 
 /*
  *		!!!ATTENTION!!!
@@ -96,3 +95,5 @@ private:
 	unsigned int tex,hmap;
 	std::vector<int> e;
 };
+
+#endif

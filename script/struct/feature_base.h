@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_STRUCTURES_FEATURE_BASE
+#define SCR_STRUCTURES_FEATURE_BASE
 
 #include <vector>
 #include <queue>
@@ -43,3 +44,5 @@ struct StageSetup {
 	std::vector<Camera3D> cam3D;
 	Lighting lighting;
 };
+
+#endif

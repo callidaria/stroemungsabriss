@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_NETWORK_CONNECTION_UDP
+#define CCB_NETWORK_CONNECTION_UDP
 
 #include <iostream>
 #include <cstring>
@@ -14,3 +15,5 @@ private:
 	/*UDPsocket m_socket;
 	UDPpacket* m_packet;*/
 };
+
+#endif

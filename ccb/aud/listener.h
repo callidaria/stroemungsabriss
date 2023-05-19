@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_AUDIO_LISTENER
+#define CCB_AUDIO_LISTENER
 
 #include <iostream>
 
@@ -20,3 +21,5 @@ public:
 	void set_orientation(glm::vec3 ori);
 
 };
+
+#endif

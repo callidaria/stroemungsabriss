@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_INSTANCED_RENDERER
+#define CCB_GRAPHICS_INSTANCED_RENDERER
 
 #include <iostream>
 #include <vector>
@@ -63,3 +64,5 @@ private:
 	std::vector<Instance> il;
 	std::vector<InstancedAnim> ial;
 };
+
+#endif

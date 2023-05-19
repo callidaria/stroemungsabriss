@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_MATHEMATICS_TOOLBOX
+#define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
 #include <vector>
@@ -58,3 +59,5 @@ private:
 	// helpers
 	static void load_texture_function_head(uint32_t tex,const char* path,bool corrected);
 };
+
+#endif

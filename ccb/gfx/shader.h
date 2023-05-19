@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_SHADER
+#define CCB_GRAPHICS_SHADER
 
 #include <iostream>
 #include <fstream>
@@ -53,3 +54,5 @@ private:
 
 	unsigned int m_shaderProgram;
 };
+
+#endif

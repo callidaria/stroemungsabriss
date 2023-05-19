@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_FONT
+#define CCB_FEATURE_FONT
 
 #include <iostream>
 #include <cstring>
@@ -23,3 +24,5 @@ public:
 	int id[96],x[96],y[96],wdt[96],hgt[96],xo[96],yo[96],xa[96]; // !!trim down according to text.h
 	const char* tp;
 };
+
+#endif

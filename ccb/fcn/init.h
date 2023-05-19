@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_INITIALIZATION
+#define CCB_FEATURE_INITIALIZATION
 
 #include <iostream>
 #include <fstream>
@@ -42,3 +43,5 @@ private:
 	uint32_t iConfig[INTEGER_KEY_LENGTH];
 
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_INSTANCE
+#define CCB_GRAPHICS_INSTANCE
 
 #include <iostream>
 #include <vector>
@@ -36,5 +37,7 @@ private:
 
 	const char* tp;
 };
+
+#endif
 
 // FIXME: fix private/public as well as includes

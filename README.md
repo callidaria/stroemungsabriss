@@ -80,6 +80,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - autoremoving all libraries when the whole project gets rebuilt
 - colour correction: high dynamic range
 - colour correction: gamma correction
+- improving code quality/portability by substituting pragma once usage
 
 ### fixes:
 - FIXED: double main loop
@@ -179,4 +180,5 @@ Worktime: 120h
 	+ 147: 50h 53min
 	+ 169: 2h 1min
 	+ 124: 15h 14min
+	+ 125: 44min
 - Total Code Lines: 12.126

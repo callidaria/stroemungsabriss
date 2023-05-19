@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_LEVELINTERPRETER
+#define CCB_FEATURE_LEVELINTERPRETER
 
 #include <iostream>
 #include <fstream>
@@ -41,3 +42,5 @@ public:
 	std::vector<const char*> m_tex,a_tex;
 	int spritesCount;
 };
+
+#endif

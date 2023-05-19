@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_CHARACTER_MANAGER
+#define SCR_SYSTEMS_CHARACTER_MANAGER
 
 #include <iostream>
 #include <vector>
@@ -40,3 +41,5 @@ private:
 	// character list
 	std::vector<CharacterData> char_list;
 };
+
+#endif

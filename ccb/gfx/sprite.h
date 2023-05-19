@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_SPRITE
+#define CCB_GRAPHICS_SPRITE
 
 #include <iostream>
 #include <vector>
@@ -46,3 +47,5 @@ private:
 
 	const char* texpath;
 };
+
+#endif

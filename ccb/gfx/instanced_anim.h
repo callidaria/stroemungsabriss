@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_ANIMATED_INSTANCE
+#define CCB_GRAPHICS_ANIMATED_INSTANCE
 
 #include <iostream>
 #include <vector>
@@ -45,3 +46,5 @@ private:
 	std::vector<float> ticks = std::vector<float>(IANIMATION_MCAP,0);
 	uint8_t row,col,st_count,tick_cap,tps;
 };
+
+#endif

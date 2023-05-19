@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_STRUCTURES_PLAYING_CARDS
+#define SCR_STRUCTURES_PLAYING_CARDS
 
 #include "../../ccb/gfx/shader.h"
 #include "../../ccb/gfx/mesh.h"
@@ -48,3 +49,5 @@ private:
 	// render
 	GLuint tex;
 };
+
+#endif

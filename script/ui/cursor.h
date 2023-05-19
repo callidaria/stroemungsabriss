@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_INTERFACE_CURSOR
+#define SCR_INTERFACE_CURSOR
 
 #include <iostream>
 
@@ -32,3 +33,5 @@ private:
 	// animation
 	float bgr_crot = 0,front_crot = 0;
 };
+
+#endif

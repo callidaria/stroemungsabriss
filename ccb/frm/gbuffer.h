@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FRAME_GBUFFER
+#define CCB_FRAME_GBUFFER
 
 #include <iostream>
 
@@ -31,3 +32,5 @@ private:
 	uint32_t buffer;
 	uint32_t t_col,t_pos,t_norm,t_shadow,rb_depth;
 };
+
+#endif

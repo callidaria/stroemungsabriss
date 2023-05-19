@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_CONVERSATION
+#define SCR_SYSTEMS_CONVERSATION
 
 #include <iostream>
 #include <fstream>
@@ -129,6 +130,9 @@ private:
 	GLuint curr_ctex;							// current character mood visualization texture
 	uint8_t dwait = 0,iwait = 0;				// frame cooldown counter for disengage & input
 };
+
+#endif
+
 // TODO: only read multi branch after conditional exclusion
 // TODO: text colour picker for choices & speaker annotations
 // TODO: protagonist portrait for chosen line mood visualization

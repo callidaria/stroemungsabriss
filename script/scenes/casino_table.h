@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SCENES_CASINO_TABLE
+#define SCR_SCENES_CASINO_TABLE
 
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
@@ -23,3 +24,5 @@ private:
 	StageSetup* m_setRigs;
 	CardSystem card_system;
 };
+
+#endif
