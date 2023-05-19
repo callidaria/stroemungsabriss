@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_MATHEMATICS_LIGHTING
+#define CCB_MATHEMATICS_LIGHTING
 
 #include <iostream>
 #include <string>
@@ -49,3 +50,5 @@ public:
 	std::vector<LightPoint> pointlights;
 	std::vector<LightSpot> spotlights;
 };
+
+#endif

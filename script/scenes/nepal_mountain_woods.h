@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SCENES_NEPAL_MOUNTAIN_WOODS
+#define SCR_SCENES_NEPAL_MOUNTAIN_WOODS
 
 #include <iostream>
 
@@ -24,3 +25,5 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	uint16_t index_r2D;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_PCHARS_JAEGER_JET
+#define SCR_PCHARS_JAEGER_JET
 
 #include <iostream>
 
@@ -52,3 +53,5 @@ private:
 	*/
 	std::vector<void(*)(BulletSystem*,int32_t*)> rng_flib;
 };
+
+#endif

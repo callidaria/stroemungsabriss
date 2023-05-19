@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_ROOT_WORLD
+#define SCR_ROOT_WORLD
 
 // essentials
 #include <iostream>
@@ -65,3 +66,5 @@ private:
 	std::vector<Player*> player_master;
 	std::vector<Boss*> boss_master;
 };
+
+#endif

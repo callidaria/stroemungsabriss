@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_MENU_SELFTITLED
+#define SCR_MENU_SELFTITLED
 
 #include <iostream>
 
@@ -142,3 +143,5 @@ private:
 	float pitch = 15;
 	float yaw = -110;
 };
+
+#endif

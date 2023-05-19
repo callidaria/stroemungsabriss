@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FRAME_SELFTITLED
+#define CCB_FRAME_SELFTITLED
 
 #include <iostream>
 #include <string>
@@ -110,3 +111,5 @@ private:
 	float time_mod = 1.0f,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 };
+
+#endif

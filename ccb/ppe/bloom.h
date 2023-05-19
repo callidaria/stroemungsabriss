@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_POSTPROCESSING_BLOOM
+#define CCB_POSTPROCESSING_BLOOM
 
 #include <iostream>
 #include "../frm/frame.h"
@@ -54,3 +55,5 @@ private:
 	Blur blr; FrameBuffer fb,blm;
 	Buffer buffer;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_WORLDBUILDER
+#define SCR_SYSTEMS_WORLDBUILDER
 
 #include <iostream>
 #include <queue>
@@ -45,3 +46,5 @@ private:
 	CCBManager* m_ccbm;
 	World* m_world;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_MENU_MENULIST
+#define SCR_MENU_MENULIST
 
 #include <iostream>
 #include <fstream>
@@ -109,3 +110,5 @@ private:
 	// naming correlation of difficulty ids
 	std::vector<const char*> NAMING_DIFFICULTY { "NORMAL","MASTER","GRANDMASTER","HEADMASTER" };
 };
+
+#endif

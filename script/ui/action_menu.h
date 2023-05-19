@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_INTERFACE_ACTION_MENU
+#define SCR_INTERFACE_ACTION_MENU
 
 #include <iostream>
 
@@ -66,3 +67,5 @@ private:
 	uint8_t msel = 0,isel = 0;
 	bool trg_smod = false;
 };
+
+#endif

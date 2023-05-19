@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_RENDERER2D
+#define CCB_GRAPHICS_RENDERER2D
 
 #include <iostream>
 #include <vector>
@@ -58,3 +59,5 @@ public:
 	std::vector<Sprite> sl;
 	std::vector<Anim> al;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_POSTPROCESSING_BLUR
+#define CCB_POSTPROCESSING_BLUR
 
 #include <iostream>
 #include "../frm/frame.h"
@@ -31,3 +32,5 @@ private:
 	Frame* f;
 	FrameBuffer b0,b1;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_STRUCTURES_WORLD_STRUCTURES
+#define SCR_STRUCTURES_WORLD_STRUCTURES
 
 #include <iostream>
 
@@ -40,5 +41,7 @@ public:
 	virtual ~Boss() {  }
 	virtual void update(glm::vec2) {  }
 };
+
+#endif
 
 // TODO: split 2D and 3D render instructions to reduce amount of prepare calls

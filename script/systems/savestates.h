@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_SAVESTATES
+#define SCR_SYSTEMS_SAVESTATES
 
 #include <iostream>
 #include <string>
@@ -55,3 +56,5 @@ public:
 	// saves
 	std::vector<SaveData> saves;
 };
+
+#endif

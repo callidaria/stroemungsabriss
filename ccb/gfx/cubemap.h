@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_CUBEMAP
+#define CCB_GRAPHICS_CUBEMAP
 
 #include <iostream>
 #ifdef __WIN32__
@@ -27,3 +28,5 @@ private:
 public:
 	Shader s;
 };
+
+#endif

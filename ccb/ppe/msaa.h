@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_POSTPROCESSING_MSAA
+#define CCB_POSTPROCESSING_MSAA
 
 #include <iostream>
 
@@ -40,3 +41,5 @@ private:
 	Buffer buffer = Buffer();
 	GLuint rfbo,wfbo,rbo,colbuffer,scrbuffer;
 };
+
+#endif

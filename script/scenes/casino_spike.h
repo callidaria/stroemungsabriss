@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SCENES_CASINO_SPIKE
+#define SCR_SCENES_CASINO_SPIKE
 
 #include "../../ccb/gfx/material3d.h"
 
@@ -28,3 +29,5 @@ private:
 	glm::vec3 cp_pos = glm::vec3(0,5,-5),cp_dir = glm::vec3(0,-.05f,.05f);
 	float pitch = 0,yaw = 45.0f;
 };
+
+#endif

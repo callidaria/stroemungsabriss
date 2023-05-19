@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_INTERFACE_HEALTHBAR
+#define SCR_INTERFACE_HEALTHBAR
 
 #include <iostream>
 #include <vector>
@@ -121,3 +122,5 @@ private:
 	HPBarSwap hpswap;
 	HBState frdy = HBState::FILLING;
 };
+
+#endif

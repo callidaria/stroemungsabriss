@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_CARD_SYSTEM
+#define SCR_SYSTEMS_CARD_SYSTEM
 
 #include <iostream>
 
@@ -174,3 +175,5 @@ private:
 	int32_t tmx = 0;
 	float cstart = 0;
 };
+
+#endif

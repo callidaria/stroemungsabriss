@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_ANIMATION
+#define CCB_GRAPHICS_ANIMATION
 
 #include <iostream>
 #include <vector>
@@ -46,3 +47,5 @@ private:
 	const char* tp;
 	float tn,fl,ft = 0;
 };
+
+#endif

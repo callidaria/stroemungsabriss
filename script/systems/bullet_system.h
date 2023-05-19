@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCR_SYSTEMS_BULLET_SYSTEM
+#define SCR_SYSTEMS_BULLET_SYSTEM
 
 #include <iostream>
 #include <vector>
@@ -57,3 +58,5 @@ private:
 	std::vector<std::vector<glm::vec2>> dirs;	// lists of all bullet directions
 	std::vector<std::vector<int32_t>> ts;		// tick counter list
 };
+
+#endif

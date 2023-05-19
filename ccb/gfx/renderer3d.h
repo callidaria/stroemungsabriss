@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_RENDERER3D
+#define CCB_GRAPHICS_RENDERER3D
 
 #include <iostream>
 
@@ -83,3 +84,5 @@ public:
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
 };
+
+#endif

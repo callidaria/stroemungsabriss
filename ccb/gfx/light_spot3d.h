@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_SPOTLIGHT
+#define CCB_GRAPHICS_SPOTLIGHT
 
 #include <iostream>
 #include <string>
@@ -32,3 +33,5 @@ private:
 	glm::vec3 pos,col,dir;
 	float cutIn,cutOut;
 };
+
+#endif

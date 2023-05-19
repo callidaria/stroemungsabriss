@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_MATERIAL
+#define CCB_GRAPHICS_MATERIAL
 
 #include <iostream>
 #include "renderer3d.h"
@@ -26,3 +27,5 @@ private:
 	int spec;
 	float rep,intense;
 };
+
+#endif

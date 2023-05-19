@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_FEATURE_TEXT
+#define CCB_FEATURE_TEXT
 
 #include <iostream>
 #include <string>
@@ -58,3 +59,5 @@ private:
 	std::vector<float> ibv;
 	GLuint ftexture;
 };
+
+#endif
