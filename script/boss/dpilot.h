@@ -1,5 +1,5 @@
-#ifndef CCB_BOSS_DANCING_PILOT
-#define CCB_BOSS_DANCING_PILOT
+#ifndef SCR_BOSS_DANCING_PILOT
+#define SCR_BOSS_DANCING_PILOT
 
 #include <iostream>
 
