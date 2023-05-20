@@ -62,6 +62,16 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
+	TODO
+*/
+uint16_t Renderer3D::add(const char* a)
+{
+	uint16_t animation_id = mal.size();
+	mal.push_back(MeshAnimation(a,amofs));
+	return animation_id;
+}
+
+/*
 	create_shadow(vec3,vec3,float,float,float,uint16_t) -> void
 	pos: position of light, which is supposed to project the shadow map
 	center: central look-at point for projected shadow map
@@ -116,7 +126,7 @@ void Renderer3D::load(Camera3D cam3d)
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
-	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
+	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
 	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
@@ -132,7 +142,7 @@ void Renderer3D::load(Camera3D cam3d)
 	ibuffer.upload_vertices(iv);
 
 	// compile instance shader
-	is3d.compile3d("shader/givertex.shader","shader/gfragment.shader");
+	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
@@ -147,9 +157,22 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_int("nmap",4);
 	is3d.upload_camera(cam3d);
 
+	// combine animated meshes into instance vertex list & upload
+	std::vector<float> av;
+	for (uint16_t i=0;i<mal.size();i++) av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
+	abuffer.bind();
+	abuffer.upload_vertices(av);
+
+	// compile animation shader
+	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
+	as3d.def_attributeF("position",3,0,8);
+	as3d.def_attributeF("texCoords",2,3,8);
+	as3d.def_attributeF("normals",3,5,8);
+	as3d.upload_camera(cam3d);
+
 	// compile shadow shader
 	Buffer::unbind();
-	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
+	shs.compile("./shader/fbv_shadow.shader","./shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
 
@@ -211,12 +234,39 @@ void Renderer3D::prepare_inst()
 */
 void Renderer3D::prepare_inst(Camera3D cam3d)
 {
-	//run normal preparations
+	// run normal preparations
 	prepare_inst();
 
 	// update camera
 	is3d.upload_camera(cam3d);
 	is3d.upload_vec3("view_pos",cam3d.pos);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_anim()
+{
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// prepare shader & buffer
+	as3d.enable();
+	abuffer.bind();
+}
+
+/*
+	TODO
+*/
+void Renderer3D::prepare_anim(Camera3D cam3d)
+{
+	// basic preparations
+	prepare_anim();
+
+	// update camera
+	as3d.upload_camera(cam3d);
+	as3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -357,6 +407,14 @@ void Renderer3D::render_inst(uint16_t i)
 	is3d.upload_matrix("model",iml[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,iml[i].inst_count);
 	glActiveTexture(GL_TEXTURE0);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_anim(uint16_t i)
+{
+	glDrawArrays(GL_TRIANGLES,mal[i].ofs,mal[i].size);
 }
 
 /*

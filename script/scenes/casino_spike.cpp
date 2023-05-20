@@ -27,6 +27,9 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			glm::vec3(0,.5f,0),.5f,glm::vec3(),true);
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
 
+	// animation test
+	m_ccbf->r3d->add("./res/test_anim.dae");
+
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
 	set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.2f });
@@ -76,4 +79,8 @@ void CasinoSpike::render()
 
 	// render wordly objects
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
+
+	// animation render
+	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->render_anim(0);
 }

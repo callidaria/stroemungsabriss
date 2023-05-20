@@ -5,6 +5,7 @@
 
 #include "shader.h"
 #include "mesh.h"
+#include "mesh_anim.h"
 
 #include "../mat/toolbox.h"
 #include "../mat/camera3d.h"
@@ -27,6 +28,7 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow=false);
+	uint16_t add(const char* a);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 			float fdiv,uint16_t res);
 
@@ -38,6 +40,8 @@ public:
 	void prepare(Camera3D cam3d);
 	void prepare_inst();
 	void prepare_inst(Camera3D cam3d);
+	void prepare_anim();
+	void prepare_anim(Camera3D cam3d);
 	void prepare_shadow();
 	void register_geometry(ShadowGeometry* geometry);
 
@@ -53,6 +57,7 @@ public:
 	// draw
 	void render_mesh(uint16_t b,uint16_t e);
 	void render_inst(uint16_t i);
+	void render_anim(uint16_t i);
 
 	// uploads
 	void upload_shadow();
@@ -64,16 +69,17 @@ public:
 
 private:
 
-	uint32_t mofs = 0,imofs = 0;
+	uint32_t mofs = 0,imofs = 0,amofs = 0;
 
 public:
 
 	// cascabel
-	Buffer buffer,ibuffer;
-	Shader s3d,shs,is3d;
+	Buffer buffer,ibuffer,abuffer;
+	Shader s3d,is3d,as3d,shs;
 
 	// object information upload lists
 	std::vector<Mesh> ml,iml;
+	std::vector<MeshAnimation> mal;
 	std::vector<std::vector<float>> mesh_indices;
 
 	// shadow

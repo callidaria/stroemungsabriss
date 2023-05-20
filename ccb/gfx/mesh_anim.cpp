@@ -3,7 +3,7 @@
 /*
 	TODO
 */
-MeshAnimation::MeshAnimation(const char* path)
+MeshAnimation::MeshAnimation(const char* path,uint32_t &mofs)
 {
 	// iterate collada file
 	std::vector<std::vector<float>> farrs;
@@ -46,16 +46,21 @@ MeshAnimation::MeshAnimation(const char* path)
 			// filter first & last value, also write to vertex element data
 			raw_data[0] = raw_data[0].substr(2);
 			raw_data.back() = raw_data.back().substr(0,raw_data.back().find('<'));
-			for (auto rdata : raw_data) elements.push_back(atof(rdata.c_str()));
+			for (auto rdata : raw_data) vaddress.push_back(atof(rdata.c_str()));
 		}
 	} file.close();
 
 	// insert float array information into vertex array
-	for (uint32_t i=0;i<elements.size();i+=8) {
-		verts.push_back(farrs[0][elements[i]]),verts.push_back(farrs[0][elements[i+1]]),
-			verts.push_back(farrs[0][elements[i+2]]);
-		verts.push_back(farrs[2][elements[i+6]]),verts.push_back(farrs[2][elements[i+7]]);
-		verts.push_back(farrs[1][elements[i+3]]),verts.push_back(farrs[1][elements[i+4]]),
-			verts.push_back(farrs[1][elements[i+5]]);
+	for (uint32_t i=0;i<vaddress.size();i+=8) {
+		verts.push_back(farrs[0][vaddress[i]]),verts.push_back(farrs[0][vaddress[i+1]]),
+			verts.push_back(farrs[0][vaddress[i+2]]);
+		verts.push_back(farrs[2][vaddress[i+6]]),verts.push_back(farrs[2][vaddress[i+7]]);
+		verts.push_back(farrs[1][vaddress[i+3]]),verts.push_back(farrs[1][vaddress[i+4]]),
+			verts.push_back(farrs[1][vaddress[i+5]]);
+		size++;
 	}
+
+	// vertex size & offset
+	ofs = mofs;
+	mofs += size;
 }
