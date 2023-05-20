@@ -70,6 +70,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ### features:
 - dynamic world loading
 - deferred rendering for a much more complex lighting system
+- import & interpolate mesh animations
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - store "macro" savestate pattern
 
@@ -85,6 +86,8 @@ To see the full documentation of engine go [here](doc/index.md)
 ### fixes:
 - FIXED: double main loop
 - FIXED: memory leaks
+
+<br>
 
 ## v0.0.4 DEV [UNX]
 
@@ -181,4 +184,5 @@ Worktime: 120h
 	+ 169: 2h 1min
 	+ 124: 15h 14min
 	+ 125: 1h
+	+ 176: 2h 11min
 - Total Code Lines: 12.126

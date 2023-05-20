@@ -26,7 +26,7 @@
 
 #include "ccb/fcn/ccb_manager.h"
 
-#include "ccb/gfx/material3d.h"
+#include "ccb/gfx/mesh_anim.h"
 
 #include "script/systems/input_map.h"
 #include "script/systems/worldbuilder.h"
@@ -73,6 +73,8 @@ int main(int argc,char** argv)
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
 	eref.ld.push(LOAD_START);
+
+	MeshAnimation proc = MeshAnimation("./res/test_anim.dae");
 
 #if BUILD_DEV_MODE
 	bool dactive = false;
