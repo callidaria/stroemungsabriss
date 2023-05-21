@@ -28,7 +28,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
 
 	// animation test
-	m_ccbf->r3d->add("./res/test_anim.dae");
+	m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png");
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);

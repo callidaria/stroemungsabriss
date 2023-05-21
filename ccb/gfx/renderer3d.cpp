@@ -64,10 +64,10 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 /*
 	TODO
 */
-uint16_t Renderer3D::add(const char* a)
+uint16_t Renderer3D::add(const char* a,const char* t)
 {
 	uint16_t animation_id = mal.size();
-	mal.push_back(MeshAnimation(a,amofs));
+	mal.push_back(MeshAnimation(a,t,amofs));
 	return animation_id;
 }
 
@@ -148,8 +148,8 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
 
-	// load textures
-	for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
+	// load textures & camera
+	for (uint16_t i=0;i<iml.size();i++) iml[i].texture();
 	is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
@@ -163,11 +163,13 @@ void Renderer3D::load(Camera3D cam3d)
 	abuffer.bind();
 	abuffer.upload_vertices(av);
 
-	// compile animation shader
+	// compile animation shader & upload textures
 	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
 	as3d.def_attributeF("position",3,0,8);
 	as3d.def_attributeF("texCoords",2,3,8);
 	as3d.def_attributeF("normals",3,5,8);
+	for (uint16_t i=0;i<mal.size();i++) mal[i].texture();
+	as3d.upload_int("tex",0);
 	as3d.upload_camera(cam3d);
 
 	// compile shadow shader
@@ -414,6 +416,8 @@ void Renderer3D::render_inst(uint16_t i)
 */
 void Renderer3D::render_anim(uint16_t i)
 {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
 	glDrawArrays(GL_TRIANGLES,mal[i].ofs,mal[i].size);
 }
 
