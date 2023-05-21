@@ -51,12 +51,13 @@ MeshAnimation::MeshAnimation(const char* path,uint32_t &mofs)
 	} file.close();
 
 	// insert float array information into vertex array
-	for (uint32_t i=0;i<vaddress.size();i+=8) {
-		verts.push_back(farrs[0][vaddress[i]]),verts.push_back(farrs[0][vaddress[i+1]]),
-			verts.push_back(farrs[0][vaddress[i+2]]);
-		verts.push_back(farrs[2][vaddress[i+6]]),verts.push_back(farrs[2][vaddress[i+7]]);
-		verts.push_back(farrs[1][vaddress[i+3]]),verts.push_back(farrs[1][vaddress[i+4]]),
-			verts.push_back(farrs[1][vaddress[i+5]]);
+	uint8_t stride = 4;
+	for (uint32_t i=0;i<vaddress.size();i+=stride) {
+		verts.push_back(farrs[0][vaddress[i]*3]),verts.push_back(farrs[0][vaddress[i]*3+1]),
+			verts.push_back(farrs[0][vaddress[i]*3+2]);
+		verts.push_back(farrs[2][vaddress[i+2]*2]),verts.push_back(farrs[2][vaddress[i+2]*2+1]);
+		verts.push_back(farrs[1][vaddress[i+1]*3]),verts.push_back(farrs[1][vaddress[i+1]*3+1]),
+			verts.push_back(farrs[1][vaddress[i+1]*3+2]);
 		size++;
 	}
 
@@ -64,3 +65,4 @@ MeshAnimation::MeshAnimation(const char* path,uint32_t &mofs)
 	ofs = mofs;
 	mofs += size;
 }
+// TODO: dynamically determine element stride repeater
