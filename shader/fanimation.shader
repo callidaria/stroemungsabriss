@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 Position;
+in vec4 Position;
 in vec2 TexCoords;
 in vec3 Normals;
 
@@ -17,7 +17,7 @@ void main()
 	gbuffer_colour.a = .0;
 
 	// translate position & shadow
-	gbuffer_position.rgb = Position;
+	gbuffer_position.rgb = Position.xyz;
 	gbuffer_position.a = .0;
 
 	// translate normals & emission

@@ -418,6 +418,7 @@ void Renderer3D::render_anim(uint16_t i)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
+	as3d.upload_matrix("model",mal[i].model);
 	glDrawArrays(GL_TRIANGLES,mal[i].ofs,mal[i].size);
 }
 

@@ -17,37 +17,15 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	bool stride_increment = false;
 	while(std::getline(file,line)) {
 
-		// split lines attribute
-		uint8_t lstart = line.find('<')+1;
-		std::stringstream pline(line.substr(lstart,line.length()-lstart));
-		std::vector<std::string> raw_data;
-		std::string rdata;
-		while (std::getline(pline,rdata,' ')) raw_data.push_back(rdata);
-
-		// accumulate stride value
+		// split lines attribute & accumulate stride value
+		std::vector<std::string> raw_data = parameters_from_line(line);
 		stride += stride_increment;
 
-		// check bracket type information for float array
-		if (raw_data[0]=="float_array") {
+		// read node definitions
+		if (raw_data[0]=="visual_scene") jroot.children.push_back(assemble_joint_hierarchy(file));
 
-			// extract & filter first value
-			bool nfound = true;
-			int8_t vstart = -1;
-			size_t findex;
-			while (nfound) {
-				vstart++;
-				findex = raw_data[vstart].find('>');
-				nfound = findex==std::string::npos;
-			} raw_data[vstart] = raw_data[vstart].substr(findex+1);
-
-			// filter last value
-			raw_data.back() = raw_data.back().substr(0,raw_data.back().find('<'));
-
-			// write values to list
-			std::vector<float> carr;
-			for (uint16_t i=vstart;i<raw_data.size();i++) carr.push_back(atof(raw_data[i].c_str()));
-			farrs.push_back(carr);
-		}
+		// check bracket type information for float array & save its data
+		else if (raw_data[0]=="float_array") farrs.push_back(extract_array_data(raw_data));
 
 		// check for vertex element list
 		else if (raw_data[0][0]=='p'&&raw_data[0][1]=='>') {
@@ -86,3 +64,76 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 */
 void MeshAnimation::texture()
 { Toolbox::load_texture_repeat(tex,tex_path,true); }
+
+/*
+	TODO
+*/
+std::vector<float> MeshAnimation::extract_array_data(std::vector<std::string> raw_data)
+{
+	// extract & filter first value
+	bool nfound = true;
+	int8_t vstart = -1;
+	size_t findex;
+	while (nfound) {
+		vstart++;
+		findex = raw_data[vstart].find('>');
+		nfound = findex==std::string::npos;
+	} raw_data[vstart] = raw_data[vstart].substr(findex+1);
+
+	// filter last value
+	raw_data.back() = raw_data.back().substr(0,raw_data.back().find('<'));
+
+	// write values to list
+	std::vector<float> out;
+	for (uint16_t i=vstart;i<raw_data.size();i++) out.push_back(atof(raw_data[i].c_str()));
+	return out;
+}
+
+/*
+	TODO
+*/
+std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
+{
+	uint8_t lstart = line.find('<')+1;
+	std::stringstream pline(line.substr(lstart,line.length()-lstart));
+	std::vector<std::string> out;
+	std::string rdata;
+	while (std::getline(pline,rdata,' ')) out.push_back(rdata);
+	return out;
+}
+
+/*
+	TODO
+*/
+ColladaJoint MeshAnimation::assemble_joint_hierarchy(std::ifstream &file)
+{
+	// extract node information from file
+	ColladaJoint out;
+	std::string line;
+	while (std::getline(file,line)) {
+		std::vector<std::string> raw_data = parameters_from_line(line);
+
+		// check for information end bracket
+		if (raw_data[0]=="/node>"||raw_data[0]=="/visual_scene>") break;
+
+		// get translation matrix
+		else if (raw_data[0]=="matrix") {
+			std::vector<float> mvalues = extract_array_data(raw_data);
+			for (uint8_t y=0;y<4;y++) {
+				for (uint8_t x=0;x<4;x++)
+					out.trans[x][y] = mvalues[y*4+x];
+			}
+		}
+
+		// recursive children accumulation
+		else if (raw_data[0]=="node") {
+
+			// add child recursively
+			uint16_t i = out.children.size();
+			out.children.push_back(assemble_joint_hierarchy(file));
+
+			// add node information
+			out.children[i].id = raw_data[1].substr(4,raw_data[1].length()-5);
+		}
+	} return out;
+}
