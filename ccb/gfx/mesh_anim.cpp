@@ -22,7 +22,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		stride += stride_increment;
 
 		// read node definitions
-		if (raw_data[0]=="visual_scene") jroot.children.push_back(assemble_joint_hierarchy(file));
+		if (raw_data[0]=="visual_scene") jroot.children.push_back(rc_assemble_joint_hierarchy(file));
 
 		// check bracket type information for float array & save its data
 		else if (raw_data[0]=="float_array") farrs.push_back(extract_array_data(raw_data));
@@ -68,6 +68,19 @@ void MeshAnimation::texture()
 /*
 	TODO
 */
+std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
+{
+	os << "---------------------< MeshAnimation >-----------------------\n";
+	os << "vertex array size: " << obj.verts.size() << '\n';
+	os << "vertex drawcall count: " << obj.size << "    drawcall offset: " << obj.ofs << '\n';
+	os << "joint tree:\n";
+	MeshAnimation::rc_print_joint_tree(os,obj.jroot,0);
+	return os;
+}
+
+/*
+	TODO
+*/
 std::vector<float> MeshAnimation::extract_array_data(std::vector<std::string> raw_data)
 {
 	// extract & filter first value
@@ -105,7 +118,7 @@ std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
 /*
 	TODO
 */
-ColladaJoint MeshAnimation::assemble_joint_hierarchy(std::ifstream &file)
+ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 {
 	// extract node information from file
 	ColladaJoint out;
@@ -130,10 +143,22 @@ ColladaJoint MeshAnimation::assemble_joint_hierarchy(std::ifstream &file)
 
 			// add child recursively
 			uint16_t i = out.children.size();
-			out.children.push_back(assemble_joint_hierarchy(file));
+			out.children.push_back(rc_assemble_joint_hierarchy(file));
 
 			// add node information
 			out.children[i].id = raw_data[1].substr(4,raw_data[1].length()-5);
 		}
 	} return out;
+}
+
+/*
+	TODO
+*/
+void MeshAnimation::rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth)
+{
+	for (auto joint : cjoint.children) {
+		for (uint8_t i=0;i<depth;i++) os << "--";
+		os << "> " << joint.id << '\n';
+		rc_print_joint_tree(os,joint,depth+1);
+	}
 }

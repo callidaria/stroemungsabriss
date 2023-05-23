@@ -30,6 +30,9 @@ public:
 	// load
 	void texture();
 
+	// system
+	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
+
 private:
 
 	// read helpers
@@ -37,7 +40,10 @@ private:
 	std::vector<std::string> parameters_from_line(std::string line);
 
 	// interpretation
-	ColladaJoint assemble_joint_hierarchy(std::ifstream &file);
+	ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
+
+	// system
+	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
 
 public:
 

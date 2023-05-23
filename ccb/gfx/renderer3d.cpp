@@ -67,7 +67,9 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 uint16_t Renderer3D::add(const char* a,const char* t)
 {
 	uint16_t animation_id = mal.size();
-	mal.push_back(MeshAnimation(a,t,amofs));
+	MeshAnimation proc = MeshAnimation(a,t,amofs);
+	std::cout << proc << '\n';
+	mal.push_back(proc);
 	return animation_id;
 }
 
