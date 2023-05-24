@@ -176,9 +176,11 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// compile animation shader & upload textures
 	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
-	as3d.def_attributeF("position",3,0,8);
-	as3d.def_attributeF("texCoords",2,3,8);
-	as3d.def_attributeF("normals",3,5,8);
+	as3d.def_attributeF("position",3,0,16);
+	as3d.def_attributeF("texCoords",2,3,16);
+	as3d.def_attributeF("normals",3,5,16);
+	as3d.def_attributeF("boneIndex",4,8,16);
+	as3d.def_attributeF("boneWeight",4,12,16);
 	for (uint16_t i=0;i<mal.size();i++) mal[i].texture();
 	as3d.upload_int("tex",0);
 	as3d.upload_camera(cam3d);

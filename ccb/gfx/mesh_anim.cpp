@@ -92,12 +92,36 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	Assimp::Importer importer;
 	const aiScene* dae_scene = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
 			|aiProcess_JoinIdenticalVertices|aiProcess_SortByPType);
+	aiMesh* cmesh = dae_scene->mMeshes[0];
 
 	// extract animation nodes
 	jroot = rc_assemble_joint_hierarchy(dae_scene->mRootNode);
 
+	// assemble bone influence weights
+	uint8_t veindex[cmesh->mNumVertices] = { 0 };
+	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE];
+	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE];
+	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
+		aiBone* cbone = cmesh->mBones[i];
+
+		// map bone weights onto vertices
+		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
+			aiVertexWeight cweight = cbone->mWeights[j];
+			uint8_t cindex = veindex[cweight.mVertexId]++;
+			vbindex[cweight.mVertexId][cindex] = i;
+			vweight[cweight.mVertexId][cindex] = cweight.mWeight;
+
+			// handle weight overflow
+			if (veindex[cweight.mVertexId]>BONE_INFLUENCE_STACK_RANGE) {
+				// TODO: write automatic exchange of higher weights with the lowest weight:
+				// 	just insert a check for the lowest weight here,
+				//	then set index towards that weight.
+				// 	then write weight everytime it is higher than the currently pointed at weight.
+			}
+		}
+	}
+
 	// assemble vertex array
-	aiMesh* cmesh = dae_scene->mMeshes[0];
 	for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
 
 		// extract vertex positions
@@ -111,6 +135,16 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		// extract normals
 		aiVector3D normals = cmesh->mNormals[i];
 		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
+
+		// correct weight array after simplification
+		glm::vec4 vrip_weight = glm::make_vec4(vweight[i]);
+		glm::normalize(vrip_weight);
+
+		// insert influencing bone indices & relating weights
+		verts.push_back(vbindex[i][0]),verts.push_back(vbindex[i][1]),
+				verts.push_back(vbindex[i][2]),verts.push_back(vbindex[i][3]);
+		verts.push_back(vrip_weight.x),verts.push_back(vrip_weight.y),
+				verts.push_back(vrip_weight.z),verts.push_back(vrip_weight.w);
 	}
 
 	// assemble element array
@@ -236,10 +270,10 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	// translation matrices
 	aiMatrix4x4 rt = joint->mTransformation;
 	float arr_trans[16] = {
-		rt.a1,rt.a2,rt.a3,rt.a4,
-		rt.b1,rt.b2,rt.b3,rt.b4,
-		rt.c1,rt.c2,rt.c3,rt.c4,
-		rt.d1,rt.d2,rt.d3,rt.d4,
+		rt.a1,rt.b1,rt.c1,rt.d1,
+		rt.a2,rt.b2,rt.c2,rt.d2,
+		rt.a3,rt.b3,rt.c3,rt.d3,
+		rt.a4,rt.b4,rt.c4,rt.d4,
 	}; out.trans = glm::make_mat4(arr_trans);
 	out.inv_trans = glm::inverse(out.trans);
 

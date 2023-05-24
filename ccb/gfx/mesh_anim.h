@@ -16,6 +16,8 @@
 
 #include "../mat/toolbox.h"
 
+constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
+
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;

@@ -3,6 +3,7 @@
 in vec4 Position;
 in vec2 TexCoords;
 in vec3 Normals;
+in vec3 BoneWeight;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
@@ -14,6 +15,7 @@ void main()
 {
 	// extract colour & specular
 	gbuffer_colour = texture(tex,TexCoords);
+	gbuffer_colour = vec4(BoneWeight.rgb,1.0);
 	gbuffer_colour.a = .0;
 
 	// translate position & shadow
