@@ -8,6 +8,9 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "../mat/toolbox.h"
 
@@ -49,8 +52,9 @@ public:
 
 	// vertex data
 	std::vector<float> verts;
+	std::vector<uint32_t> elems;
 	uint32_t tex;
-	uint16_t ofs,size = 0;
+	uint32_t ofs,size = 0;
 
 	// rigging data
 	ColladaJoint jroot = { "ROOT",glm::mat4(1.0f),{  } };

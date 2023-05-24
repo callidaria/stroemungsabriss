@@ -5,7 +5,10 @@
 	purpose: create renderer object to subsequently add 3D objects to and draw them
 */
 Renderer3D::Renderer3D()
-{ ibuffer.add_buffer(); }
+{
+	ibuffer.add_buffer();
+	abuffer.add_buffer();
+}
 
 /*
 	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> uint16_t
@@ -161,9 +164,15 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// combine animated meshes into instance vertex list & upload
 	std::vector<float> av;
-	for (uint16_t i=0;i<mal.size();i++) av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
-	abuffer.bind();
+	std::vector<uint32_t> ae;
+	uint32_t eoffset = 0;
+	for (uint16_t i=0;i<mal.size();i++) {
+		av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
+		for (auto elem : mal[i].elems) ae.push_back(elem+eoffset);
+		eoffset += mal[i].elems.size();
+	} abuffer.bind();
 	abuffer.upload_vertices(av);
+	abuffer.upload_elements(ae);
 
 	// compile animation shader & upload textures
 	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
@@ -421,7 +430,7 @@ void Renderer3D::render_anim(uint16_t i)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
 	as3d.upload_matrix("model",mal[i].model);
-	glDrawArrays(GL_TRIANGLES,mal[i].ofs,mal[i].size);
+	glDrawElements(GL_TRIANGLES,mal[i].size,GL_UNSIGNED_INT,(void*)(mal[i].ofs*sizeof(uint32_t)));
 }
 
 /*

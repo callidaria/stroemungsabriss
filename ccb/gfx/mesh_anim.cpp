@@ -6,14 +6,19 @@
 MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mofs)
 	: tex_path(itex_path)
 {
+
 	// texture generation
 	glGenTextures(1,&tex);
 
+#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
+
 	// iterate collada file
 	std::vector<std::vector<float>> farrs;
+	std::vector<float> weight_count,weight_elements;
 	std::ifstream file(path);
 	std::string line;
 	uint8_t stride = 0;
+	uint8_t farri_weights;
 	bool stride_increment = false;
 	while(std::getline(file,line)) {
 
@@ -29,34 +34,94 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 		// check for vertex element list
 		else if (raw_data[0][0]=='p'&&raw_data[0][1]=='>') {
-
-			// filter first & last value, also write to vertex element data
-			raw_data[0] = raw_data[0].substr(2);
-			raw_data.back() = raw_data.back().substr(0,raw_data.back().find('<'));
-			for (auto rdata : raw_data) vaddress.push_back(atof(rdata.c_str()));
+			vaddress = extract_array_data(raw_data);
 
 			// switch increment & correct stride value
 			stride_increment = false;
 			stride--;
 		}
 
+		// extract weight linking information
+		else if (raw_data[0][0]=='v'&&raw_data[0][1]=='c')
+			weight_count = extract_array_data(raw_data);
+		else if (raw_data[0][0]=='v'&&raw_data[0][1]=='>')
+			weight_elements = extract_array_data(raw_data);
+
 		// check for triangle element input definition start
 		else if (raw_data[0]=="triangles") stride_increment = true;
+
+		// saving float array indices
+		else if (raw_data[0]=="library_controllers>") farri_weights = farrs.size();
 	} file.close();
 
 	// insert float array information into vertex array
+	uint32_t eprog = 0;
+	std::cout << vaddress.size() << "    " << weight_count.size() << '\n';
 	for (uint32_t i=0;i<vaddress.size();i+=stride) {
+
+		// basic geometry information
 		verts.push_back(farrs[0][vaddress[i]*3]),verts.push_back(farrs[0][vaddress[i]*3+1]),
 			verts.push_back(farrs[0][vaddress[i]*3+2]);
 		verts.push_back(farrs[2][vaddress[i+2]*2]),verts.push_back(farrs[2][vaddress[i+2]*2+1]);
 		verts.push_back(farrs[1][vaddress[i+1]*3]),verts.push_back(farrs[1][vaddress[i+1]*3+1]),
 			verts.push_back(farrs[1][vaddress[i+1]*3+2]);
+
+		// joint weights colouring
+		const uint32_t joint_count = weight_count[size];
+		uint16_t wjoint[joint_count];
+		float jweight[joint_count];
+		for (uint16_t i=0;i<joint_count;i++) {
+
+			// write joint index & get weight value from element index, also increment progression
+			/*wjoint[i] = weight_elements[eprog*2];
+			jweight[i] = farrs[farri_weights+1][weight_elements[eprog*2+1]];*/
+			eprog++;
+		} std::cout << eprog << '\n';
+
+		// increment vertex size
 		size++;
 	}
 
 	// vertex size & offset
 	ofs = mofs;
 	mofs += size;
+
+#else
+
+	// load collada file
+	Assimp::Importer importer;
+	const aiScene* dae_scene = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
+			|aiProcess_JoinIdenticalVertices|aiProcess_SortByPType);
+
+	// assemble vertex array
+	for (uint32_t i=0;i<dae_scene->mMeshes[0]->mNumVertices;i++) {
+
+		// extract vertex positions
+		aiVector3D position = dae_scene->mMeshes[0]->mVertices[i];
+		verts.push_back(position.x),verts.push_back(position.y),verts.push_back(position.z);
+
+		// extract texture coordinates
+		aiVector3D tex_coords = dae_scene->mMeshes[0]->mTextureCoords[0][i];
+		verts.push_back(tex_coords.x),verts.push_back(tex_coords.y);
+
+		// extract normals
+		aiVector3D normals = dae_scene->mMeshes[0]->mNormals[i];
+		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
+	}
+
+	// assemble element array
+	for (uint32_t i=0;i<dae_scene->mMeshes[0]->mNumFaces;i++) {
+		aiFace face = dae_scene->mMeshes[0]->mFaces[i];
+		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
+	}
+
+	// vertex size & offset
+	size = elems.size();
+	ofs = mofs;
+	mofs += size;
+
+#endif
+
 }
 
 /*
