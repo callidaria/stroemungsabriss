@@ -8,6 +8,8 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -17,7 +19,7 @@
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans;
+	glm::mat4 trans,inv_trans;
 	std::vector<ColladaJoint> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -43,7 +45,11 @@ private:
 	std::vector<std::string> parameters_from_line(std::string line);
 
 	// interpretation
-	ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
+#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
+	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
+#else
+	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
+#endif
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
@@ -57,7 +63,7 @@ public:
 	uint32_t ofs,size = 0;
 
 	// rigging data
-	ColladaJoint jroot = { "ROOT",glm::mat4(1.0f),{  } };
+	ColladaJoint jroot;
 
 	// transformation
 	glm::mat4 model = glm::mat4(1.0f);

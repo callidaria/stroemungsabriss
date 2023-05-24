@@ -93,25 +93,29 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	const aiScene* dae_scene = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
 			|aiProcess_JoinIdenticalVertices|aiProcess_SortByPType);
 
+	// extract animation nodes
+	jroot = rc_assemble_joint_hierarchy(dae_scene->mRootNode);
+
 	// assemble vertex array
-	for (uint32_t i=0;i<dae_scene->mMeshes[0]->mNumVertices;i++) {
+	aiMesh* cmesh = dae_scene->mMeshes[0];
+	for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
 
 		// extract vertex positions
-		aiVector3D position = dae_scene->mMeshes[0]->mVertices[i];
+		aiVector3D position = cmesh->mVertices[i];
 		verts.push_back(position.x),verts.push_back(position.y),verts.push_back(position.z);
 
 		// extract texture coordinates
-		aiVector3D tex_coords = dae_scene->mMeshes[0]->mTextureCoords[0][i];
+		aiVector3D tex_coords = cmesh->mTextureCoords[0][i];
 		verts.push_back(tex_coords.x),verts.push_back(tex_coords.y);
 
 		// extract normals
-		aiVector3D normals = dae_scene->mMeshes[0]->mNormals[i];
+		aiVector3D normals = cmesh->mNormals[i];
 		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
 	}
 
 	// assemble element array
-	for (uint32_t i=0;i<dae_scene->mMeshes[0]->mNumFaces;i++) {
-		aiFace face = dae_scene->mMeshes[0]->mFaces[i];
+	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
+		aiFace face = cmesh->mFaces[i];
 		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
 	}
 
@@ -180,6 +184,8 @@ std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
 	return out;
 }
 
+#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
+
 /*
 	TODO
 */
@@ -215,6 +221,37 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 		}
 	} return out;
 }
+
+#else
+
+/*
+	TODO
+*/
+ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
+{
+	// get joint name
+	ColladaJoint out;
+	out.id = joint->mName.C_Str();
+
+	// translation matrices
+	aiMatrix4x4 rt = joint->mTransformation;
+	float arr_trans[16] = {
+		rt.a1,rt.a2,rt.a3,rt.a4,
+		rt.b1,rt.b2,rt.b3,rt.b4,
+		rt.c1,rt.c2,rt.c3,rt.c4,
+		rt.d1,rt.d2,rt.d3,rt.d4,
+	}; out.trans = glm::make_mat4(arr_trans);
+	out.inv_trans = glm::inverse(out.trans);
+
+	// recursively process children joints
+	for (uint16_t i=0;i<joint->mNumChildren;i++)
+		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
+
+	// output results
+	return out;
+}
+
+#endif
 
 /*
 	TODO
