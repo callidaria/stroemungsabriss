@@ -26,6 +26,20 @@ struct ColladaJoint {
 };
 // TODO: correlate string ids with equivalent integers after read
 
+// structure of keys throughout animations
+struct JointKeys {
+	uint16_t joint_id;
+	std::vector<double> dur_positions,dur_scales,dur_rotations;
+	std::vector<glm::vec3> key_positions,key_scales;
+	std::vector<glm::quat> key_rotations;
+};
+
+// structure of animation data
+struct ColladaAnimationData {
+	double delta_ticks;
+	std::vector<JointKeys> joints;
+};
+
 class MeshAnimation
 {
 public:
@@ -51,7 +65,12 @@ private:
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
 	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
+	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 #endif
+
+	// conversion
+	static glm::vec3 glmify_animvec3(aiVector3D ivec3);
+	static glm::quat glmify_animquat(aiQuaternion iquat);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
@@ -66,6 +85,7 @@ public:
 
 	// rigging data
 	ColladaJoint jroot;
+	std::vector<ColladaAnimationData> anims;
 
 	// transformation
 	glm::mat4 model = glm::mat4(1.0f);

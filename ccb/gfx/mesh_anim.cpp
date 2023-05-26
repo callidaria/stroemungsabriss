@@ -90,12 +90,12 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// load collada file
 	Assimp::Importer importer;
-	const aiScene* dae_scene = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
+	const aiScene* dae_file = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
 			|aiProcess_JoinIdenticalVertices|aiProcess_SortByPType);
-	aiMesh* cmesh = dae_scene->mMeshes[0];
+	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
-	jroot = rc_assemble_joint_hierarchy(dae_scene->mRootNode);
+	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -151,6 +151,38 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
 		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
+	}
+
+	// extract animations
+	for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
+		aiAnimation* canim = dae_file->mAnimations[i];
+		ColladaAnimationData proc;
+		proc.delta_ticks = canim->mTicksPerSecond;
+
+		// process all related bone keys
+		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
+			aiNodeAnim* cnanim = canim->mChannels[j];
+			JointKeys cjkey;
+
+			// correlate bone string id with tree location
+			bool found = false;
+			//cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
+
+			// add key information
+			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
+				cjkey.dur_positions.push_back(cnanim->mPositionKeys[k].mTime);
+				cjkey.key_positions.push_back(glmify_animvec3(cnanim->mPositionKeys[k].mValue));
+			} for (uint32_t k=0;k<cnanim->mNumScalingKeys;k++) {
+				cjkey.dur_scales.push_back(cnanim->mScalingKeys[k].mTime);
+				cjkey.key_scales.push_back(glmify_animvec3(cnanim->mScalingKeys[k].mValue));
+			} for (uint32_t k=0;k<cnanim->mNumRotationKeys;k++) {
+				cjkey.dur_rotations.push_back(cnanim->mRotationKeys[k].mTime);
+				cjkey.key_rotations.push_back(glmify_animquat(cnanim->mRotationKeys[k].mValue));
+			}
+
+			// add joint to animation & add animation to list
+			proc.joints.push_back(cjkey);
+		} anims.push_back(proc);
 	}
 
 	// vertex size & offset
@@ -285,7 +317,32 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	return out;
 }
 
+/*
+	TODO
+*/
+uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found)
+{
+	// check id equivalence
+	uint16_t out = 0;
+	found = jname==cjoint.id||found;
+	out += !found;
+
+	// recursively check children nodes
+	for (auto child : cjoint.children) {
+		if (found) break;
+		out += rc_get_joint_id(jname,child,found);
+	} return out;
+}
+
 #endif
+
+/*
+	TODO
+*/
+glm::vec3 MeshAnimation::glmify_animvec3(aiVector3D ivec3)
+{ return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
+glm::quat MeshAnimation::glmify_animquat(aiQuaternion iquat)
+{ return glm::quat(iquat.x,iquat.y,iquat.z,iquat.w); }
 
 /*
 	TODO
