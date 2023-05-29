@@ -166,7 +166,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// correlate bone string id with tree location
 			bool found = false;
-			//cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
+			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found)-1;
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -199,6 +199,34 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 */
 void MeshAnimation::texture()
 { Toolbox::load_texture_repeat(tex,tex_path,true); }
+
+/*
+	TODO
+*/
+void MeshAnimation::set_animation(uint16_t anim_id)
+{
+	current_anim = anim_id;
+	anim_progression = 0;
+}
+
+/*
+	TODO
+*/
+void MeshAnimation::interpolate(Shader* shader)
+{
+	// iterate all joints for local transformations
+	std::cout << anims[current_anim].joints.size() << '\n';
+	for (auto joint : anims[current_anim].joints) {
+		uint16_t iteration_id;
+		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
+		std::cout << joint.joint_id << ',' << iteration_id << '\n';
+		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
+		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
+				rel_joint->gtrans);
+	}
+
+	// TODO: recursively iterate joints for translated transformation
+}
 
 /*
 	TODO
@@ -335,6 +363,30 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 }
 
 #endif
+
+/*
+	TODO
+*/
+ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,
+		uint16_t &curr_id)
+{
+	ColladaJoint* out;
+	uint8_t child_id = 0;
+	while (curr_id<anim_id) {
+		if (child_id>=cjoint->children.size()) return nullptr;
+		curr_id++;
+		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,curr_id);
+		child_id++;
+	} return out;
+}
+
+/*
+	TODO
+*/
+void MeshAnimation::rc_upload_joint(Shader* shader,ColladaJoint cjoint,uint16_t id)
+{
+	// TODO
+}
 
 /*
 	TODO

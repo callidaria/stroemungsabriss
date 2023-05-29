@@ -15,13 +15,16 @@
 #include <assimp/postprocess.h>
 
 #include "../mat/toolbox.h"
+#include "shader.h"
+
+// #define LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
 constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans,inv_trans;
+	glm::mat4 trans,inv_trans,gtrans;
 	std::vector<ColladaJoint> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -51,6 +54,10 @@ public:
 	// load
 	void texture();
 
+	// update
+	void set_animation(uint16_t anim_id);
+	void interpolate(Shader* shader);
+
 	// system
 	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
 
@@ -60,12 +67,14 @@ private:
 	std::vector<float> extract_array_data(std::vector<std::string> raw_data);
 	std::vector<std::string> parameters_from_line(std::string line);
 
-	// interpretation
+	// recursion
 #ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
 	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
 	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
+	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
+	static void rc_upload_joint(Shader* shader,ColladaJoint cjoint,uint16_t id);
 #endif
 
 	// conversion
@@ -83,10 +92,6 @@ public:
 	uint32_t tex;
 	uint32_t ofs,size = 0;
 
-	// rigging data
-	ColladaJoint jroot;
-	std::vector<ColladaAnimationData> anims;
-
 	// transformation
 	glm::mat4 model = glm::mat4(1.0f);
 
@@ -95,6 +100,12 @@ private:
 	// vertex information
 	const char* tex_path;
 	std::vector<float> vaddress;
+
+	// rigging data
+	ColladaJoint jroot;
+	std::vector<ColladaAnimationData> anims;
+	uint16_t current_anim;
+	float anim_progression = 0;
 };
 
 #endif
