@@ -119,10 +119,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 				// 	then write weight everytime it is higher than the currently pointed at weight.
 			}
 		}
-	}
 
 	// assemble vertex array
-	for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
+	} for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
@@ -145,16 +144,14 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 				verts.push_back(vbindex[i][2]),verts.push_back(vbindex[i][3]);
 		verts.push_back(vrip_weight.x),verts.push_back(vrip_weight.y),
 				verts.push_back(vrip_weight.z),verts.push_back(vrip_weight.w);
-	}
 
 	// assemble element array
-	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
+	} for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
 		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
-	}
 
 	// extract animations
-	for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
+	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
 		proc.delta_ticks = canim->mTicksPerSecond;
@@ -373,7 +370,7 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 	ColladaJoint* out;
 	uint8_t child_id = 0;
 	while (curr_id<anim_id) {
-		if (child_id>=cjoint->children.size()) return nullptr;
+		if (child_id>=cjoint->children.size()) { std::cout << "bruh, " << cjoint->id.c_str(); return nullptr; }
 		curr_id++;
 		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,curr_id);
 		child_id++;
