@@ -5,7 +5,8 @@
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 
-#define PRERENDER_IRRADIANCE_MAPPING
+// #define PRERENDER_IRRADIANCE_MAPPING
+// TODO: define when precalculations are not generated yet
 
 class CasinoSpike : public Scene
 {
