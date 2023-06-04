@@ -136,10 +136,10 @@ void main()
 	// process shadows with dynamic bias for sloped surfaces
 	vec4 rltp = shadow_matrix*vec4(position,1.0);
 	vec3 ltp = (rltp.xyz/rltp.w)*.5+.5;
+	vec3 slight_position = normalize(light_position-position);
 	float obj_depth = ltp.z;
-	float fcol_depth = texture(shadow_map,ltp.xy).r;
-	float bias = max((1.0-dot(normals,light_position))*.05,.005);
-	float shadow = float(obj_depth>fcol_depth+bias);
+	float bias = max((1.0-dot(normals,slight_position))*.0001,.0);
+	float shadow = float(texture(shadow_map,ltp.xy).r<(obj_depth+bias));
 
 	// combine lighting stages
 	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.75);
@@ -155,7 +155,7 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	//outColour = vec4(vec3(shadow,shadow,shadow),1.0);
+	//outColour = vec4(vec3(bias,bias,bias),1.0);
 }
 
 // specular processing
