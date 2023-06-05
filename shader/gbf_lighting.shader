@@ -138,11 +138,13 @@ void main()
 	vec3 ltp = (rltp.xyz/rltp.w)*.5+.5;
 	vec3 slight_position = normalize(light_position-position);
 	float obj_depth = ltp.z;
-	float bias = max((1.0-dot(normals,slight_position))*.0001,.0);
-	float shadow = float(texture(shadow_map,ltp.xy).r<(obj_depth+bias));
+	float bias = tan(acos(dot(normals,slight_position)))*.00001;
+	float gshadow = min(1.0-dot(normals,slight_position),1.0);
+	//float shadow = mix(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),.0,gshadow);
+	float shadow = max(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),gshadow);
 
 	// combine lighting stages
-	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.75);
+	vec3 cmb_colours = lgt_colours+sdw_colours+glb_colours*(1.0-lemission)*(1.0-shadow*.66);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -155,7 +157,7 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	//outColour = vec4(vec3(bias,bias,bias),1.0);
+	//outColour = vec4(vec3(gshadow,gshadow-1.0,0),1.0);
 }
 
 // specular processing
