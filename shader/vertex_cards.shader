@@ -17,14 +17,10 @@ in float deckID;
 out vec3 Position;
 out vec2 TexCoords;
 out vec3 Normals;
-out vec3 ltp;
 
 // camera matrices
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
-
-// shadow matrix
-uniform mat4 light_trans;
 
 void main()
 {
@@ -53,8 +49,4 @@ void main()
 	// calculate texture coordinate manipulation on card game atlas
 	vec2 tidx = i_tex*(1-texID)+vec2(9,4+deckID)*texID;
 	TexCoords = vec2(texCoords.x/10+tidx.x/10,texCoords.y/8+tidx.y/8);
-
-	// precalculate shadow translation for fragment
-	vec4 rltp = light_trans*vec4(Position,1);
-	ltp = (rltp.xyz/rltp.w)*.5+.5;
 }

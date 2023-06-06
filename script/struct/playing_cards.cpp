@@ -81,6 +81,7 @@ void PlayingCards::render_shadow()
 	glDrawArraysInstanced(GL_TRIANGLES,0,vertex_count,112);
 	glEnable(GL_CULL_FACE);
 }
+// TODO: shadow geometry for playing cards by passing light direction in constructor and offsetting
 
 /*
 	render() -> void

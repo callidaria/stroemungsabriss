@@ -3,11 +3,11 @@
 in vec3 Position;
 in vec2 TexCoords;
 in vec3 Normals;
-in vec3 ltp;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
 out vec4 gbuffer_normals;
+out vec4 gbuffer_materials;
 
 uniform sampler2D tex;
 
@@ -26,4 +26,7 @@ void main()
 	// export normals & light emission
 	gbuffer_normals.rgb = abs(Normals);
 	gbuffer_normals.a = 0;
+
+	// overwrite surface materials
+	gbuffer_materials = vec4(0);
 }

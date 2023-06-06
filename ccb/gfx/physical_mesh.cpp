@@ -28,7 +28,6 @@ PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char
 	size = verts.size()/14;
 	mofs += size;
 }
-// TODO: join material, roughness & ambient occlusion/displacement into one texture
 
 /*
 	texture() -> void

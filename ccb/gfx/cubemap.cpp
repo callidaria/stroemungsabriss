@@ -231,7 +231,6 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 // FIXME: code repetitions
-// FIXME: structurize depth function setting
 
 /*
 	TODO
@@ -279,7 +278,6 @@ void Cubemap::load_irradiance_maps(uint8_t lod_count)
 	Toolbox::set_cubemap_texture_parameters_mipmap();
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,0);
 }
-// FIXME: does loading RGB16F format improve visuals?
 
 /*
 	prepare() -> void
