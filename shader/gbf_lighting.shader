@@ -144,7 +144,7 @@ void main()
 	float shadow = max(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),gshadow);
 
 	// combine lighting stages
-	vec3 cmb_colours = (lgt_colours+sdw_colours+glb_colours)*(1.0-lemission)*(1.0-shadow*.75);
+	vec3 cmb_colours = (lgt_colours+sdw_colours+glb_colours)*(1.0-lemission)*(1.0-shadow*.66);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -157,7 +157,6 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	outColour = vec4(vec3(dlgt_out),1.0);
 }
 
 // specular processing
@@ -263,12 +262,11 @@ vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,ve
 
 	// fresnel component through approximation
 	vec3 fresnel = bfresnel+(1.0-bfresnel)
-			* pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
+			* pow(clamp(1.0-max(dot(halfway,camera_dir),0.0),0.0,1.0),5.0);
 
 	// geometry component
 	float dlgt_in = max(dot(normals,light_dir),0.0);
 	float smith = schlick_beckmann_approx(dlgt_in,roughness)*schlick_out;
-	//return vec3(smith);
 
 	// calculate specular brdf
 	vec3 cook_torrance = (throwbridge_reitz*fresnel*smith)/(4.0*dlgt_in*dlgt_out+.0001);

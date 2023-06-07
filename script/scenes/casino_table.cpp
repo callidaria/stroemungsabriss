@@ -23,7 +23,6 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	card_system.create_player(glm::vec2(10,0),90,100);
 
 	// create playing field
-	card_system.create_pile(glm::vec2(0));
 	card_system.create_currency_stack(glm::vec2(4,3),0);
 	card_system.create_currency_stack(glm::vec2(1,-3),180);
 	card_system.create_currency_stack(glm::vec2(-3,0),90);

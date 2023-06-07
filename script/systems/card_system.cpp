@@ -29,7 +29,7 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	}
 
 	// shuffle deck & place
-	create_pile(glm::vec2(0,0));
+	create_pile(glm::vec2(0));
 	shuffle_all();
 
 	// create payment visualization
