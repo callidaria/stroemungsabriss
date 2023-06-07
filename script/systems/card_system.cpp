@@ -17,7 +17,7 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 
 	set_rigs->cam3D[3].view3D
 		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
-	pcards = new PlayingCards(ccbf,set_rigs);
+	pcards = new PlayingCards(ccbf,set_rigs,set_rigs->lighting.sunlights[0].position);
 	ccbf->r3d->register_geometry(pcards);
 
 	// spawn cards into space

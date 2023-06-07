@@ -22,6 +22,9 @@ out vec3 Normals;
 uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 
+// shadow geometry offset
+uniform vec3 shadow_dir = vec3(.0);
+
 void main()
 {
 	// rotate individual cards by precalculated sine & cosine values
@@ -40,7 +43,8 @@ void main()
 		rotation_sin.z,	rotation_cos.z,		0,
 		0,				0,					1
 	);
-	Position = (zrot*yrot*xrot*position)+tofs;
+	Position = zrot*yrot*xrot*position+tofs;
+	Position += shadow_dir*.04;
 	Normals = normalize(zrot*yrot*xrot*normals);
 
 	// calculate final vertex position

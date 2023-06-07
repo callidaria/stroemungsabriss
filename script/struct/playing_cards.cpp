@@ -5,9 +5,10 @@
 	ccbf: most basic cascabel features
 	set_rigs: stage setup
 	purpose: create aunt susann's kopfüber playing cards
+	TODO
 */
-PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
-	: m_ccbf(ccbf),m_setRigs(set_rigs)
+PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sorg)
+	: m_ccbf(ccbf),m_setRigs(set_rigs),shadow_dir(-glm::normalize(sorg))
 {
 	// card visualization setup
 	/*float cverts[] = {
@@ -78,7 +79,9 @@ void PlayingCards::render_shadow()
 	bfr.upload_indices(rqueue);
 	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
 	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
+	sdr.upload_vec3("shadow_dir",shadow_dir);
 	glDrawArraysInstanced(GL_TRIANGLES,0,vertex_count,112);
+	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 	glEnable(GL_CULL_FACE);
 }
 // TODO: shadow geometry for playing cards by passing light direction in constructor and offsetting
