@@ -4,7 +4,6 @@ in vec4 Position;
 in vec2 TexCoords;
 in vec3 Normals;
 in mat3 TBN;
-in vec3 ltp;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
@@ -15,9 +14,6 @@ out vec4 gbuffer_materials;
 uniform sampler2D colour_map;
 uniform sampler2D normal_map;
 uniform sampler2D material_map;
-
-// light attributes
-uniform vec3 light_position;
 
 void main()
 {

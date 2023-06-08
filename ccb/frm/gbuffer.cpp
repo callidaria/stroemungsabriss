@@ -29,7 +29,7 @@ GBuffer::GBuffer(float w_res,float h_res)
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,w_res,h_res,0,GL_RGBA,GL_FLOAT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,t_pos,0);
-	// data pattern: vec4(position.x,position.y,position.z,shadow_map.rgb)
+	// data pattern: vec4(position.x,position.y,position.z,null)
 
 	// define normal component
 	glBindTexture(GL_TEXTURE_2D,t_norm);

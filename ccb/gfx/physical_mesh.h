@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CCB_GRAPHICS_PHYSICAL_MESH
+#define CCB_GRAPHICS_PHYSICAL_MESH
 
 #include "../mat/toolbox.h"
 
@@ -27,3 +28,5 @@ private:
 	// information
 	const char* tex_path,*norm_path,*mtl_path;
 };
+
+#endif

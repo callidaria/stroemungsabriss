@@ -84,7 +84,6 @@ void PlayingCards::render_shadow()
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 	glEnable(GL_CULL_FACE);
 }
-// TODO: shadow geometry for playing cards by passing light direction in constructor and offsetting
 
 /*
 	render() -> void

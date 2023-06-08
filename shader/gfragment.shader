@@ -3,7 +3,6 @@
 in vec4 Position;
 in vec2 TexCoords;
 in mat3 TBN;
-in vec3 ltp;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;

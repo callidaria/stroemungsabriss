@@ -1,9 +1,6 @@
 #version 330 core
 
 in vec3 Position;
-//in vec3 Normals;
-//in vec3 Right;
-//in vec3 Up;
 
 out vec4 outColour;
 

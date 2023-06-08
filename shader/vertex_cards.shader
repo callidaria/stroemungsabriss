@@ -43,8 +43,7 @@ void main()
 		rotation_sin.z,	rotation_cos.z,		0,
 		0,				0,					1
 	);
-	Position = zrot*yrot*xrot*position+tofs;
-	Position += shadow_dir*.04;
+	Position = zrot*yrot*xrot*position+tofs+shadow_dir*.04;
 	Normals = normalize(zrot*yrot*xrot*normals);
 
 	// calculate final vertex position
