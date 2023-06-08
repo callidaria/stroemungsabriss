@@ -43,7 +43,6 @@ Cubemap::Cubemap(const char* path)
 	constructor(std::vector<const char*>)
 	purpose: construct a simple skybox without irradiance capabilities
 	\param tp: vector holding all six directories to the six skybox textures for different angles
-	TODO: allow skyboxes to also be used for irradiance mapping
 */
 Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 {
@@ -233,7 +232,8 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 // FIXME: code repetitions
 
 /*
-	TODO
+	load_irradiance_cube() -> void
+	purpose: load prerendered cubemap from data folder for visualization
 */
 void Cubemap::load_irradiance_cube()
 {
@@ -249,7 +249,9 @@ void Cubemap::load_irradiance_cube()
 }
 
 /*
-	TODO
+	load_irradiance_maps(uint8_t) -> void
+	purpose: load precalculated image based global illumination data from data folder
+	\param lod_count: number of mip levels for specular precalculation based on roughness
 */
 void Cubemap::load_irradiance_maps(uint8_t lod_count)
 {

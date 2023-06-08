@@ -206,7 +206,6 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 
 /*
 	load_texture(uint32_t,const char*,bool) -> void (static)
-	TODO
 	purpose: load texture value, generate mipmap and associate it with given texture reference
 */
 void Toolbox::load_texture(uint32_t tex,const char* path,bool corrected)
@@ -311,7 +310,8 @@ void Toolbox::set_texture_parameter_nearest_unfiltered()
 }
 
 /*
-	TODO
+	set_cubemap_texture_parameters() -> void
+	purpose: define filtered cubemap texture
 */
 void Toolbox::set_cubemap_texture_parameters()
 {
@@ -323,7 +323,8 @@ void Toolbox::set_cubemap_texture_parameters()
 }
 
 /*
-	TODO
+	set_cubemap_texture_parameters_mipmap() -> void
+	purpose: define filtered cubemap with multiple levels of detail
 */
 void Toolbox::set_cubemap_texture_parameters_mipmap()
 {
