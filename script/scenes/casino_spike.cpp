@@ -57,6 +57,8 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	irradiance_map.load_irradiance_cube();
 	irradiance_map.load_irradiance_maps(7);
 #endif
+
+	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
 	//set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),1.0f });
 	//set_rigs.lighting.add_spotlight({ glm::vec3(0,2,0),glm::vec3(1),glm::vec3(0,-1,0),.5f,.2f });
 }
@@ -100,7 +102,6 @@ void CasinoSpike::render()
 
 	// render flooring
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
-	//m_ccbf->r3d->upload_shadow();
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+9);
 
 	// render wordly objects
@@ -108,7 +109,6 @@ void CasinoSpike::render()
 
 	// render physical based objects
 	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
-	//m_ccbf->r3d->upload_shadow_pmsh();
 	for (uint8_t i=0;i<6;i++) {
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
@@ -117,5 +117,4 @@ void CasinoSpike::render()
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);
 	irradiance_map.render_irradiance();
-	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
 }

@@ -14,6 +14,10 @@ Cubemap::Cubemap(const char* path)
 	glGenTextures(1,&smap);
 	glGenTextures(1,&pcsmap);
 
+	// framebuffer setup
+	glGenFramebuffers(1,&cmfbo);
+	glGenRenderbuffers(1,&cmrbo);
+
 	// shader compile
 	approx_irr.compile("./shader/vapprox_irradiance.shader","./shader/fapprox_irradiance.shader");
 	approx_irr.def_attributeF("position",3,0,3);
@@ -37,6 +41,14 @@ Cubemap::Cubemap(const char* path)
 	stbi_image_free(data);
 	Toolbox::set_texture_parameter_clamp_to_edge();
 	Toolbox::set_texture_parameter_linear_unfiltered();
+
+	// precalculate cubemap perspectives
+	cam_attrib[0] = glm::lookAt(glm::vec3(0),glm::vec3(1,0,0),glm::vec3(0,-1,0));
+	cam_attrib[1] = glm::lookAt(glm::vec3(0),glm::vec3(-1,0,0),glm::vec3(0,-1,0));
+	cam_attrib[2] = glm::lookAt(glm::vec3(0),glm::vec3(0,1,0),glm::vec3(0,0,1));
+	cam_attrib[3] = glm::lookAt(glm::vec3(0),glm::vec3(0,-1,0),glm::vec3(0,0,-1));
+	cam_attrib[4] = glm::lookAt(glm::vec3(0),glm::vec3(0,0,1),glm::vec3(0,-1,0));
+	cam_attrib[5] = glm::lookAt(glm::vec3(0),glm::vec3(0,0,-1),glm::vec3(0,-1,0));
 }
 
 /*
@@ -72,9 +84,6 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 {
 	// prepare pre-render framebuffer
-	uint32_t cmfbo,cmrbo;
-	glGenFramebuffers(1,&cmfbo);
-	glGenRenderbuffers(1,&cmrbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
 	glBindRenderbuffer(GL_RENDERBUFFER,cmrbo);
 	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,resolution,resolution);
@@ -83,30 +92,17 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 
 	// setup cubemap texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
-	for (uint8_t i=0;i<6;i++)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,resolution,resolution,0,GL_RGB,
-				GL_FLOAT,nullptr);
+	init_cubemap_texture(resolution);
 	Toolbox::set_cubemap_texture_parameters();
 
 	// prepare cubemap render & camera projection
-	glm::mat4 proj = glm::perspective(glm::radians(90.0f),1.0f,1.0f,3.0f);
 	irrs.enable();
 	buffer.bind();
-	irrs.upload_matrix("proj",proj);
-
-	// setup camera's worldly attributes
-	glm::mat4 cam_attrib[] = {
-		glm::lookAt(glm::vec3(0),glm::vec3(1,0,0),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(-1,0,0),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,1,0),glm::vec3(0,0,1)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,-1,0),glm::vec3(0,0,-1)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,0,1),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,0,-1),glm::vec3(0,-1,0))
-	};
+	irrs.upload_matrix("proj",cam_proj);
 
 	// setup image write buffer
-	uint32_t bffsize = 3*resolution*resolution;
-	unsigned char buffer_data[bffsize];
+	uint32_t bffstride = 3*resolution;
+	unsigned char buffer_data[bffstride*resolution];
 
 	// draw equirectangular to cubed
 	glViewport(0,0,resolution,resolution);
@@ -122,7 +118,7 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 		glPixelStorei(GL_PACK_ALIGNMENT,1);
 		glReadPixels(0,0,resolution,resolution,GL_RGB,GL_UNSIGNED_BYTE,buffer_data);
 		stbi_write_png(("./dat/precalc/irradiance"+std::to_string(i)+".png").c_str(),
-				resolution,resolution,3,buffer_data,3*resolution);
+				resolution,resolution,3,buffer_data,bffstride);
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
@@ -138,9 +134,6 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 		uint16_t sample_count)
 {
 	// prepare diffusion approximation
-	uint32_t cmfbo,cmrbo;
-	glGenFramebuffers(1,&cmfbo);
-	glGenRenderbuffers(1,&cmrbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
 	glBindRenderbuffer(GL_RENDERBUFFER,cmrbo);
 	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,ri_res,ri_res);
@@ -148,30 +141,18 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 
 	// setup irradiance map texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
-	for (uint8_t i=0;i<6;i++)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,ri_res,ri_res,0,GL_RGB,
-				GL_FLOAT,nullptr);
+	init_cubemap_texture(ri_res);
 	Toolbox::set_cubemap_texture_parameters();
 
 	// prepare irradiance approximation map render & camera projection
-	glm::mat4 proj = glm::perspective(glm::radians(90.0f),1.0f,1.0f,3.0f);
 	approx_irr.enable();
 	buffer.bind();
-	approx_irr.upload_matrix("proj",proj);
-
-	// setup camera's worldly attributes
-	glm::mat4 cam_attrib[] = {
-		glm::lookAt(glm::vec3(0),glm::vec3(1,0,0),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(-1,0,0),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,1,0),glm::vec3(0,0,1)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,-1,0),glm::vec3(0,0,-1)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,0,1),glm::vec3(0,-1,0)),
-		glm::lookAt(glm::vec3(0),glm::vec3(0,0,-1),glm::vec3(0,-1,0))
-	};
+	approx_irr.upload_matrix("proj",cam_proj);
 
 	// setup image write buffers
-	uint32_t ibffsize = 3*ri_res*ri_res,ebffsize = 4*re_res*re_res;
-	float ibuffer_data[ibffsize],ebuffer_data[ebffsize];
+	uint32_t ibffstride = 3*ri_res;
+	unsigned char ibuffer_data[ibffstride*ri_res];
+	float ebuffer_data[4*re_res*re_res];
 
 	// draw precise to convoluted
 	glViewport(0,0,ri_res,ri_res);
@@ -187,23 +168,20 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 		glPixelStorei(GL_PACK_ALIGNMENT,1);
 		glReadPixels(0,0,ri_res,ri_res,GL_RGB,GL_UNSIGNED_BYTE,ibuffer_data);
 		stbi_write_png(("./dat/precalc/convolution"+std::to_string(i)+".png").c_str(),ri_res,ri_res,
-				3,ibuffer_data,3*ri_res);
-	} glBindFramebuffer(GL_FRAMEBUFFER,0);
+				3,ibuffer_data,ibffstride);
+	}
 
 	// setup specular approximation
 	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
-	for (uint8_t i=0;i<6;i++)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA16F,re_res,re_res,0,GL_RGBA,
-				GL_FLOAT,nullptr);
+	init_cubemap_texture(re_res);
 	Toolbox::set_cubemap_texture_parameters_mipmap();
 
 	// filter multidetailed
 	approx_ref.enable();
 	approx_ref.upload_int("source_resolution",source_res);
 	approx_ref.upload_int("sample_count",sample_count);
-	approx_ref.upload_matrix("proj",proj);
+	approx_ref.upload_matrix("proj",cam_proj);
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
-	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
 	for (uint8_t j=0;j<lod_count;j++) {
 
 		// scale towards current level of detail
@@ -229,7 +207,6 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
-// FIXME: code repetitions
 
 /*
 	load_irradiance_cube() -> void
@@ -356,4 +333,15 @@ void Cubemap::init_buffer()
 		-1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,-1.0f,
 		-1.0f,-1.0f,-1.0f,-1.0f,-1.0f,1.0f,1.0f,-1.0f,-1.0f,1.0f,-1.0f,-1.0f,-1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f
 	}; buffer.upload_vertices(verts,sizeof(verts));
+}
+
+/*
+	init_cubemap_texture(uint16_t) -> void (private)
+	purpose: reserve float range memory for cubemap texture
+	\param res: per-projection cubemap resolution
+*/
+void Cubemap::init_cubemap_texture(uint16_t res)
+{
+	for (uint8_t i=0;i<6;i++)
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,res,res,0,GL_RGB,GL_FLOAT,nullptr);
 }

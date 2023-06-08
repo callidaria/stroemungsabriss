@@ -96,8 +96,17 @@ void World::load_geometry()
 */
 void World::upload_lighting()
 {
+	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
+
+	// upload irradiance maps
+	glActiveTexture(GL_TEXTURE4);
+	m_setRigs->lighting.upload_diffusion_map();
+	glActiveTexture(GL_TEXTURE5);
+	m_setRigs->lighting.upload_specular_map();
+	glActiveTexture(GL_TEXTURE6);
+	m_setRigs->lighting.upload_specular_brdf();
 }
 
 /*
@@ -143,15 +152,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
-	glActiveTexture(GL_TEXTURE4);
-	m_setRigs->lighting.upload_diffusion_map();
-	glActiveTexture(GL_TEXTURE5);
-	m_setRigs->lighting.upload_specular_map();
-	glActiveTexture(GL_TEXTURE6);
-	m_setRigs->lighting.upload_specular_brdf();
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
-	// FIXME: last two uploads can be done outside of the loop
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);

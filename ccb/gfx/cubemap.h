@@ -47,6 +47,7 @@ private:
 
 	// helper
 	void init_buffer();
+	void init_cubemap_texture(uint16_t res);
 
 public:
 
@@ -57,6 +58,11 @@ private:
 
 	// graphics
 	Buffer buffer = Buffer(),cnv_buffer = Buffer();
+	uint32_t cmfbo,cmrbo;
 	uint32_t tex,irr_tex,imap,smap,pcsmap;
 	uint16_t source_res;
+
+	// math
+	glm::mat4 cam_attrib[6];
+	glm::mat4 cam_proj = glm::perspective(glm::radians(90.0f),1.0f,1.0f,3.0f);
 };
