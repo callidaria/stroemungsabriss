@@ -20,7 +20,11 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
-	deferred_fb.s.upload_int("shadow_tex",3);
+	deferred_fb.s.upload_int("gbuffer_materials",3);
+	deferred_fb.s.upload_int("irradiance_map",4);
+	deferred_fb.s.upload_int("specular_map",5);
+	deferred_fb.s.upload_int("specular_brdf",6);
+	deferred_fb.s.upload_int("shadow_map",7);
 }
 
 /*
@@ -92,8 +96,17 @@ void World::load_geometry()
 */
 void World::upload_lighting()
 {
+	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
+
+	// upload irradiance maps
+	glActiveTexture(GL_TEXTURE4);
+	m_setRigs->lighting.upload_diffusion_map();
+	glActiveTexture(GL_TEXTURE5);
+	m_setRigs->lighting.upload_specular_map();
+	glActiveTexture(GL_TEXTURE6);
+	m_setRigs->lighting.upload_specular_brdf();
 }
 
 /*
@@ -109,6 +122,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_physical_shadow();
 	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
@@ -122,7 +136,7 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto player : player_master) player->update();
 
 	// end geometry pass deferred scene
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	FrameBuffer::close();
 	glEnable(GL_BLEND);
 
 	// render bullets
@@ -136,9 +150,16 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
 
-	// deferred light shading 
+	// deferred light shading
+	m_setRigs->lighting.upload(&deferred_fb.s);
 	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
+	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
+	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui

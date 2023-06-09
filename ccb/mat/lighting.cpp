@@ -13,6 +13,18 @@ void Lighting::add_spotlight(LightSpot spotlight)
 { spotlights.push_back(spotlight); }
 
 /*
+	load_irradiance_maps(Cubemap) -> void
+	purpose: get all irradiance map components from the given skybox
+	\param imap: cubemap holding the desired irradiance map components
+*/
+void Lighting::load_irradiance_maps(Cubemap imap)
+{
+	irradiance_map.diff_component = imap.get_diffusion_approximation();
+	irradiance_map.spec_component = imap.get_specular_approximation();
+	irradiance_map.brdf_component = imap.get_specular_brdf();
+}
+
+/*
 	upload(Shader*) -> void
 	shader: deferred lighting shader
 	purpose: upload complex lighting system to the simplified deferred lighting shader
@@ -52,3 +64,16 @@ void Lighting::upload(Shader* shader)
 		shader->upload_float((arr_location+"cut_out").c_str(),spotlights[i].cut_out);
 	} shader->upload_int("spotlight_count",spotlight_count);
 }
+
+/*
+	upload_<irradiance_component>() -> void
+	purpose: uploads the desired irradiance component the the lighting shader
+	NOTE: deferred lighting shader has to be enabled before running the upload
+	NOTE: the appropriate texture index has to be activated before running the upload
+*/
+void Lighting::upload_diffusion_map()
+{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.diff_component); }
+void Lighting::upload_specular_map()
+{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.spec_component); }
+void Lighting::upload_specular_brdf()
+{ glBindTexture(GL_TEXTURE_2D,irradiance_map.brdf_component); }

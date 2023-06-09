@@ -12,6 +12,7 @@
 
 #include "../ccb/gfx/renderer2d.h"
 #include "../ccb/gfx/renderer3d.h"
+#include "../ccb/gfx/cubemap.h"
 
 #include "../ccb/mat/lighting.h"
 

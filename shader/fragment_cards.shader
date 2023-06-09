@@ -3,16 +3,13 @@
 in vec3 Position;
 in vec2 TexCoords;
 in vec3 Normals;
-in vec3 ltp;
 
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
 out vec4 gbuffer_normals;
+out vec4 gbuffer_materials;
 
 uniform sampler2D tex;
-uniform sampler2D shadow_map;
-
-float calculate_shadow();
 
 void main()
 {
@@ -24,23 +21,12 @@ void main()
 	gbuffer_colour.a = 0;
 
 	// export position & shadow map
-	gbuffer_position.rgb = Position;
-	gbuffer_position.a = calculate_shadow();
+	gbuffer_position = vec4(Position,0.0);
 
 	// export normals & light emission
 	gbuffer_normals.rgb = abs(Normals);
 	gbuffer_normals.a = 0;
-}
 
-// dynamic shadow map generation
-float calculate_shadow()
-{
-	// depth extractions
-	float curr_depth = ltp.z;
-	float pcf_depth = texture(shadow_map,ltp.xy).r;
-
-	// project shadow
-	vec2 raster = 1.0/textureSize(shadow_map,0);
-	return float(curr_depth-.005>pcf_depth);
+	// overwrite surface materials
+	gbuffer_materials = vec4(0);
 }
-// TODO: code repetition

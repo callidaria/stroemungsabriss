@@ -15,8 +15,8 @@
 	purpose: create components, read vertex data from source file and calculate normals
 */
 Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-		glm::vec3 ip,float is,glm::vec3 ir,unsigned int* mofs)
-	: texpath(t),smpath(sm),nmpath(nm),empath(em),pos(ip),scl(is),rot(ir),ofs(*mofs)
+		glm::vec3 ip,float is,glm::vec3 ir,uint32_t &mofs)
+	: texpath(t),smpath(sm),nmpath(nm),empath(em),pos(ip),scl(is),rot(ir),ofs(mofs)
 {
 	// generate textures
 	glGenTextures(1,&tex);		// object texture
@@ -29,8 +29,8 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 
 	// save and increase offset for mesh render index
 	size = v.size()/14;
-	*mofs += size;
-} Mesh::~Mesh() {  }
+	mofs += size;
+}
 
 /*
 	texture() -> void

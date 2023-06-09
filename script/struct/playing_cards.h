@@ -25,7 +25,7 @@ public:
 
 	// construction
 	PlayingCards() {  }
-	PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs);
+	PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sdir);
 	~PlayingCards() {  }
 
 	// draw
@@ -48,6 +48,9 @@ private:
 
 	// render
 	GLuint tex;
+
+	// math
+	glm::vec3 shadow_dir;
 };
 
 #endif

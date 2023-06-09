@@ -13,7 +13,6 @@ in vec3 rotation_cos;
 out vec4 Position;
 out vec2 TexCoords;
 out mat3 TBN;
-out vec3 ltp;
 
 // camera & world transformation
 uniform mat4 model = mat4(1.0);
@@ -22,7 +21,6 @@ uniform mat4 proj = mat4(1.0);
 
 // modifications
 uniform float tex_repeat = 1.0;
-uniform mat4 light_trans;
 
 void main()
 {
@@ -57,8 +55,4 @@ void main()
 	vec3 N = normalize((model*vec4(Normals,0)).xyz);
 	T = normalize(T-dot(T,N)*N);
 	TBN = mat3(T,cross(N,T),N);
-
-	// calculate light position and transform to screen space
-	vec4 rltp = light_trans*Position;
-	ltp = (rltp.xyz/rltp.w)*.5+.5;
 }

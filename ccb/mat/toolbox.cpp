@@ -206,7 +206,6 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 
 /*
 	load_texture(uint32_t,const char*,bool) -> void (static)
-	TODO
 	purpose: load texture value, generate mipmap and associate it with given texture reference
 */
 void Toolbox::load_texture(uint32_t tex,const char* path,bool corrected)
@@ -249,8 +248,7 @@ void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool correct
 
 	// texture paramteres without mipmap
 	set_texture_parameter_clamp_to_edge();
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	set_texture_parameter_linear_unfiltered();
 }
 
 /*
@@ -292,6 +290,16 @@ void Toolbox::set_texture_parameter_linear_mipmap()
 }
 
 /*
+	set_texture_parameter_linear_unfiltered() -> void
+	purpose: define texture as simply linearly filtered
+*/
+void Toolbox::set_texture_parameter_linear_unfiltered()
+{
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
 	set_texture_parameter_nearest_unfiltered() -> void (static)
 	purpose: define texture as unfiltered
 */
@@ -299,6 +307,33 @@ void Toolbox::set_texture_parameter_nearest_unfiltered()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+}
+
+/*
+	set_cubemap_texture_parameters() -> void
+	purpose: define filtered cubemap texture
+*/
+void Toolbox::set_cubemap_texture_parameters()
+{
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+}
+
+/*
+	set_cubemap_texture_parameters_mipmap() -> void
+	purpose: define filtered cubemap with multiple levels of detail
+*/
+void Toolbox::set_cubemap_texture_parameters_mipmap()
+{
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
 /*
@@ -343,17 +378,7 @@ void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corr
 	int32_t format = corrected ? GL_SRGB : GL_RGBA;
 
 	// load texture data from source
-#ifdef __WIN32__
-
 	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-
-#else
-
-	unsigned char* image = SOIL_load_image(path,&width,&height,0,SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	SOIL_free_image_data(image);
-
-#endif
+	stbi_image_free(image);
 }

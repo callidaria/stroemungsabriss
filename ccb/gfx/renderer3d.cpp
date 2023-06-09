@@ -26,7 +26,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = ml.size();
-	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&mofs));
+	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,mofs));
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
@@ -46,7 +46,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = iml.size();
-	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,&imofs));
+	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,imofs));
 
 	// create related index upload pattern
 	std::vector<float> cmesh_index;
@@ -58,6 +58,24 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
+	return mesh_id;
+}
+
+/*
+	add(const char*,const char*,const char*,const char*,vec3,float,vec3,bool) -> uint16_t
+	purpose: create mesh, which can be used for physical based rendering
+	\param mm: path to the information about surface materials
+	\returns memory index to refer to the created physical based mesh by when drawing
+*/
+uint16_t Renderer3D::add_physical(const char* m,const char* t,const char* nm,const char* mm,
+		const char* em,glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
+{
+	// load mesh
+	uint16_t mesh_id = pml.size();
+	pml.push_back(PhysicalMesh(m,t,nm,mm,em,p,s,r,pmofs));
+
+	// check shadow cast request & output mesh id
+	if (cast_shadow) scast_physical_ids.push_back(mesh_id);
 	return mesh_id;
 }
 
@@ -95,6 +113,7 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	// calculate shadow projection
+	slight_pos = pos;
 	float hwidth = mwidth/2,hheight = mheight/2;
 	shadow_view = glm::lookAt(pos/fdiv+center,center,glm::vec3(0,1,0));
 	shadow_proj = glm::ortho(-hwidth,hwidth,-hheight,hheight,.1f,100.0f);
@@ -121,8 +140,7 @@ void Renderer3D::load(Camera3D cam3d)
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
-	s3d.upload_int("shadow_map",3);
-	s3d.upload_int("nmap",4);
+	s3d.upload_int("nmap",3);
 	s3d.upload_camera(cam3d);
 
 	// combine all added instance vertices to master instance vertex list & upload
@@ -143,15 +161,30 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
-	is3d.upload_int("shadow_map",3);
-	is3d.upload_int("nmap",4);
+	is3d.upload_int("nmap",3);
 	is3d.upload_camera(cam3d);
+
+	// combine physical mesh vertices to master vertex list & upload
+	std::vector<float> pv;
+	for (uint16_t i=0;i<pml.size();i++) pv.insert(pv.end(),pml[i].verts.begin(),pml[i].verts.end());
+	pbuffer.bind();
+	pbuffer.upload_vertices(pv);
+
+	// compile physical mesh shader & load textures
+	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
+	for (uint16_t i=0;i<pml.size();i++) pml[i].texture();
+	pbms.upload_int("colour_map",0);
+	pbms.upload_int("normal_map",1);
+	pbms.upload_int("material_map",2);
+	pbms.upload_int("emission_map",3);
+	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
 	Buffer::unbind();
 	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
+// TODO: check validity of this loading approach. processing vertex lists ?twice
 
 /*
 	prepare() -> void
@@ -206,17 +239,47 @@ void Renderer3D::prepare_inst()
 
 /*
 	prepare_inst(Camera3D) -> void
-	overloads previous prepare
+	overloads previous prepare_inst()
 	purpose: not only prepare instanced rendering, but also upload camera
 */
 void Renderer3D::prepare_inst(Camera3D cam3d)
 {
-	//run normal preparations
+	// run normal preparations
 	prepare_inst();
 
 	// update camera
 	is3d.upload_camera(cam3d);
 	is3d.upload_vec3("view_pos",cam3d.pos);
+}
+
+/*
+	prepare_pmesh() -> void
+	purpose: prepare shader & buffer for physical based rendering
+*/
+void Renderer3D::prepare_pmesh()
+{
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// prepare shader & buffer
+	pbms.enable();
+	pbuffer.bind();
+}
+
+/*
+	prepare_pmesh(Camera3D) -> void
+	purpose: not only prepare physical based rendering, but also upload camera
+	.overloads previous prepare_pmesh()
+*/
+void Renderer3D::prepare_pmesh(Camera3D cam3d)
+{
+	// run normal preparations
+	prepare_pmesh();
+
+	// update camera
+	pbms.upload_camera(cam3d);
+	pbms.upload_vec3("camera_pos",cam3d.pos);
 }
 
 /*
@@ -226,6 +289,7 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 void Renderer3D::prepare_shadow()
 {
 	// set front face culling to avoid peter panning
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
 	// prepare shadow framebuffer
@@ -305,6 +369,25 @@ void Renderer3D::render_instance_shadow()
 }
 
 /*
+	render_physical_shadow() -> void
+	purpose: project shadow of physical based meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
+*/
+void Renderer3D::render_physical_shadow()
+{
+	// prepare physical mesh buffer & shader to render shadow map
+	prepare_pmesh();
+	pbms.upload_matrix("view",shadow_view);
+	pbms.upload_matrix("proj",shadow_proj);
+
+	// project casting physical meshes to shadow map
+	for (auto id : scast_physical_ids) {
+		pbms.upload_matrix("model",pml[id].model);
+		glDrawArrays(GL_TRIANGLES,pml[id].offset,pml[id].size);
+	}
+}
+
+/*
 	render_geometry_shadow() -> void
 	purpose: project shadows, originating from additional geometry onto shadow map
 	NOTE: call in-between of prepare_shadow() & close_shadow()
@@ -330,13 +413,19 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].specmap);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D,ml[i].emitmap);
-		glActiveTexture(GL_TEXTURE4);
+		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
 		s3d.upload_matrix("model",ml[i].model);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
 	} glActiveTexture(GL_TEXTURE0);
 }
 // FIXME: please finally choose if TEXTURE0 should be set at the beginning or reset after drawing
+// FIXME: try to remove loop from this
+
+/*
+	PARAMETER DEFINITIONS:
+	i: memory index of object that is to be drawn
+*/
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
@@ -352,7 +441,7 @@ void Renderer3D::render_inst(uint16_t i)
 	glBindTexture(GL_TEXTURE_2D,iml[i].specmap);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,iml[i].emitmap);
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,iml[i].normap);
 	is3d.upload_matrix("model",iml[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,iml[i].ofs,iml[i].size,iml[i].inst_count);
@@ -360,33 +449,23 @@ void Renderer3D::render_inst(uint16_t i)
 }
 
 /*
-	upload_shadow() -> void
-	purpose: upload shadow projection to mesh geometry pass shader
+	render_pmsh(uint16_t) -> void
+	purpose: render desired physical based mesh
 */
-void Renderer3D::upload_shadow()
+void Renderer3D::render_pmsh(uint16_t i)
 {
-	// upload camera projection
-	s3d.upload_matrix("light_trans",scam_projection);
-
-	// upload shadow map
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_colour);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_normal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_material);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,shadow_map);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_emission);
+	pbms.upload_matrix("model",pml[i].model);
+	glDrawArrays(GL_TRIANGLES,pml[i].offset,pml[i].size);
+	glActiveTexture(GL_TEXTURE0);
 }
-
-/*
-	upload_shadow_inst() -> void
-	purpose: upload shadow projection to instanced mesh geometry pass shader
-*/
-void Renderer3D::upload_shadow_inst()
-{
-	// upload camera projection
-	is3d.upload_matrix("light_trans",scam_projection);
-
-	// upload shadow map
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,shadow_map);
-}
-// FIXME: duplicate code
 
 /*
 	PARAMETER DEFINITIONS:

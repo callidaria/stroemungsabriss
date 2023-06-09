@@ -2,12 +2,13 @@
 
 /*
 	constructor(CascabelBaseFeature*,StageSetup*)
-	ccbf: most basic cascabel features
-	set_rigs: stage setup
 	purpose: create aunt susann's kopfüber playing cards
+	\param ccbf: most basic cascabel features
+	\param set_rigs: stage setup
+	\param sorg: light origin position, from where the shadow is projected
 */
-PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
-	: m_ccbf(ccbf),m_setRigs(set_rigs)
+PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sorg)
+	: m_ccbf(ccbf),m_setRigs(set_rigs),shadow_dir(-glm::normalize(sorg))
 {
 	// card visualization setup
 	/*float cverts[] = {
@@ -53,7 +54,6 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	glGenTextures(1,&tex);
 	Toolbox::load_texture(tex,"./res/kopfuber_atlas.png",-1.2f,true);
 	sdr.upload_int("tex",0);
-	sdr.upload_int("shadow_map",3);
 
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
@@ -79,7 +79,9 @@ void PlayingCards::render_shadow()
 	bfr.upload_indices(rqueue);
 	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
 	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
+	sdr.upload_vec3("shadow_dir",shadow_dir);
 	glDrawArraysInstanced(GL_TRIANGLES,0,vertex_count,112);
+	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 	glEnable(GL_CULL_FACE);
 }
 

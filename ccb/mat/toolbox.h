@@ -10,14 +10,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-#ifdef __WIN32__
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#define STB_IMAGE_STATIC
+#include "../include/stb_image.h"
 #endif
 
-#else
-#include <SOIL/SOIL.h>
+#ifndef INCLUDE_STB_IMAGE_WRITE_H
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC
+#include "../include/stb_image_write.h"
 #endif
 
 class Toolbox
@@ -47,7 +49,10 @@ public:
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
+	static void set_texture_parameter_linear_unfiltered();
 	static void set_texture_parameter_nearest_unfiltered();
+	static void set_cubemap_texture_parameters();
+	static void set_cubemap_texture_parameters_mipmap();
 
 	// pattern handling
 	static void set_texture_parameter_clamp_to_edge();

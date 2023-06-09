@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "../gfx/shader.h"
+#include "../gfx/cubemap.h"
 
 // structure parallel to sunlight in deferred shader
 struct LightSun {
@@ -27,6 +28,13 @@ struct LightSpot {
 	float cut_in,cut_out;
 };
 
+// structure holding globally mapped lighting precalculations
+struct LightIrradianceMap {
+	uint32_t diff_component;
+	uint32_t spec_component;
+	uint32_t brdf_component;
+};
+
 class Lighting
 {
 public:
@@ -40,8 +48,14 @@ public:
 	void add_pointlight(LightPoint pointlight);
 	void add_spotlight(LightSpot spotlight);
 
+	// extraction
+	void load_irradiance_maps(Cubemap imap);
+
 	// upload
 	void upload(Shader* shader);
+	void upload_diffusion_map();
+	void upload_specular_map();
+	void upload_specular_brdf();
 
 public:
 
@@ -49,6 +63,9 @@ public:
 	std::vector<LightSun> sunlights;
 	std::vector<LightPoint> pointlights;
 	std::vector<LightSpot> spotlights;
+
+	// mapping
+	LightIrradianceMap irradiance_map;
 };
 
 #endif
