@@ -188,11 +188,11 @@ std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float w
 {
 	std::vector<float> out = {
 		pos.x,pos.y+height,0.0f,0.0f,
+		pos.x+width,pos.y,1.0f,1.0f,
 		pos.x+width,pos.y+height,1.0f,0.0f,
 		pos.x+width,pos.y,1.0f,1.0f,
-		pos.x+width,pos.y,1.0f,1.0f,
-		pos.x,pos.y,0.0f,1.0f,
 		pos.x,pos.y+height,0.0f,0.0f,
+		pos.x,pos.y,0.0f,1.0f,
 	};
 	return out;
 }
@@ -275,8 +275,8 @@ void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 */
 void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
 {
-	ls.push_back(i*4);ls.push_back(i*4+1);ls.push_back(i*4+2);		// map first triangle
-	ls.push_back(i*4+2);ls.push_back(i*4+3);ls.push_back(i*4+0);	// map second triangle
+	ls.push_back(i*4);ls.push_back(i*4+2);ls.push_back(i*4+1);	// map first triangle
+	ls.push_back(i*4+2);ls.push_back(i*4);ls.push_back(i*4+3);	// map second triangle
 }
 
 /*

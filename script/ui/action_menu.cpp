@@ -10,7 +10,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 	: m_frame(frame),imap(input_map)
 {
 	// vertices for selection splash
-	float sverts[] = { 0,-25,0, 0,0,1, 1280,0,2, 1280,0,2, 1280,-25,3, 0,-25,0, };
+	float sverts[] = { 0,-25,0, 1280,0,2, 0,0,1, 1280,0,2, 0,-25,0, 1280,-25,3, };
 	splash_buffer.bind();
 	splash_buffer.upload_vertices(sverts,sizeof(sverts));
 	splash_shader.compile("shader/fbv_lselect.shader","shader/fbf_lselect.shader");
