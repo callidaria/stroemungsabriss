@@ -14,6 +14,7 @@ out vec4 gbuffer_materials;
 uniform sampler2D colour_map;
 uniform sampler2D normal_map;
 uniform sampler2D material_map;
+uniform sampler2D emission_map;
 
 void main()
 {
@@ -25,7 +26,7 @@ void main()
 
 	// translate normals & emission
 	vec3 normals = texture(normal_map,TexCoords).rgb*2-1;
-	gbuffer_normals = vec4(normalize(TBN*normals),0.0);
+	gbuffer_normals = vec4(normalize(TBN*normals),texture(emission_map,TexCoords).r);
 
 	// extract surface materials
 	gbuffer_materials = vec4(texture(material_map,TexCoords).rgb,0.0);

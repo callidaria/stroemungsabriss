@@ -10,28 +10,28 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// object loading
-	index_p3D = m_ccbf->r3d->add("./res/casino/test_floor.obj","./res/casino/paquet_colour.png",
-			"./res/casino/paquet_normal.png","./res/casino/paquet_material.png",glm::vec3(),
-			1,glm::vec3(),false);
+	index_p3D = m_ccbf->r3d->add_physical("./res/casino/test_floor.obj",
+			"./res/casino/paquet_colour.png","./res/casino/paquet_normal.png",
+			"./res/casino/paquet_material.png","./res/none.png",glm::vec3(),1,glm::vec3(),false);
 	texture_repeat.push_back(1);
-	m_ccbf->r3d->add("./res/casino/test_entrance.obj","./res/casino/entrance_colour.png",
-			"./res/casino/entrance_normal.png","./res/casino/entrance_material.png",glm::vec3(),
-			1,glm::vec3(),false);
+	m_ccbf->r3d->add_physical("./res/casino/test_entrance.obj","./res/casino/entrance_colour.png",
+			"./res/casino/entrance_normal.png","./res/casino/entrance_material.png",
+			"./res/none.png",glm::vec3(),1,glm::vec3(),false);
 	texture_repeat.push_back(1);
-	m_ccbf->r3d->add("./res/casino/test_table.obj","./res/casino/table_colour.png",
-			"./res/casino/table_normal.png","./res/casino/table_material.png",glm::vec3(-2,0,-1),
-			1,glm::vec3(),true);
+	m_ccbf->r3d->add_physical("./res/casino/test_table.obj","./res/casino/table_colour.png",
+			"./res/casino/table_normal.png","./res/casino/table_material.png","./res/none.png",
+			glm::vec3(-2,0,-1),1,glm::vec3(),true);
 	texture_repeat.push_back(10);
-	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/tobj1_colour.png",
-			"./res/casino/tobj1_normal.png","./res/casino/tobj1_material.png",glm::vec3(2,1,1),
-			1,glm::vec3(),true);
+	m_ccbf->r3d->add_physical("./res/casino/rolling.obj","./res/casino/tobj1_colour.png",
+			"./res/casino/tobj1_normal.png","./res/casino/tobj1_material.png","./res/none.png",
+			glm::vec3(2,1,1),1,glm::vec3(),true);
 	texture_repeat.push_back(4);
-	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
-			"./res/casino/pbr/normals.png","./res/casino/pbr/material.png",glm::vec3(2,.5f,-3),.5f,
-			glm::vec3(),true);
+	m_ccbf->r3d->add_physical("./res/casino/rolling.obj","./res/casino/pbr/colour.png",
+			"./res/casino/pbr/normals.png","./res/casino/pbr/material.png","./res/none.png",
+			glm::vec3(2,.5f,-3),.5f,glm::vec3(),true);
 	texture_repeat.push_back(1);
-	m_ccbf->r3d->add("./res/casino/rolling.obj","./res/casino/fabric_colour.png",
-			"./res/casino/fabric_normals.png","./res/casino/fabric_material.png",
+	m_ccbf->r3d->add_physical("./res/casino/rolling.obj","./res/casino/fabric_colour.png",
+			"./res/casino/fabric_normals.png","./res/casino/fabric_material.png","./res/none.png",
 			glm::vec3(2.5f,.5f,-1.5f),.5f,glm::vec3(),true);
 	texture_repeat.push_back(1);
 

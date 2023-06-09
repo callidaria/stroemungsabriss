@@ -64,22 +64,20 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 /*
 	add(const char*,const char*,const char*,const char*,vec3,float,vec3,bool) -> uint16_t
 	purpose: create mesh, which can be used for physical based rendering
-	.overloads previous add
 	\param mm: path to the information about surface materials
 	\returns memory index to refer to the created physical based mesh by when drawing
 */
-uint16_t Renderer3D::add(const char* m,const char* t,const char* nm,const char* mm,glm::vec3 p,
-		float s,glm::vec3 r,bool cast_shadow)
+uint16_t Renderer3D::add_physical(const char* m,const char* t,const char* nm,const char* mm,
+		const char* em,glm::vec3 p,float s,glm::vec3 r,bool cast_shadow)
 {
 	// load mesh
 	uint16_t mesh_id = pml.size();
-	pml.push_back(PhysicalMesh(m,t,nm,mm,p,s,r,pmofs));
+	pml.push_back(PhysicalMesh(m,t,nm,mm,em,p,s,r,pmofs));
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_physical_ids.push_back(mesh_id);
 	return mesh_id;
 }
-// TODO: add emission and shadow casing options
 
 /*
 	create_shadow(vec3,vec3,float,float,float,uint16_t) -> void
@@ -178,6 +176,7 @@ void Renderer3D::load(Camera3D cam3d)
 	pbms.upload_int("colour_map",0);
 	pbms.upload_int("normal_map",1);
 	pbms.upload_int("material_map",2);
+	pbms.upload_int("emission_map",3);
 	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
@@ -461,6 +460,8 @@ void Renderer3D::render_pmsh(uint16_t i)
 	glBindTexture(GL_TEXTURE_2D,pml[i].tex_normal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,pml[i].tex_material);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,pml[i].tex_emission);
 	pbms.upload_matrix("model",pml[i].model);
 	glDrawArrays(GL_TRIANGLES,pml[i].offset,pml[i].size);
 	glActiveTexture(GL_TEXTURE0);
