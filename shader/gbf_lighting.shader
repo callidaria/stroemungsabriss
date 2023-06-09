@@ -71,6 +71,8 @@ vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light
 vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
 		light_point pl);
 vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl);
+vec3 lumen_spot_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_spot sl);
 vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
 		float metallic,float roughness);
 
@@ -129,9 +131,8 @@ void main()
 		sdw_colours += lumen_sun_pbs(colour,position,normals,metallic,roughness,sunlight[i]);
 	for (int j=0;j<pointlight_count;j++)
 		lgt_colours += lumen_point_pbs(colour,position,normals,metallic,roughness,pointlight[j]);
-		//lgt_colours += lumen_point(colour,position,normals,speculars,pointlight[j]);
-	//for (int k=0;k<spotlight_count;k++)
-	//	lgt_colours += lumen_spot(colour,position,normals,speculars,spotlight[k]);
+	for (int k=0;k<spotlight_count;k++)
+		lgt_colours += lumen_spot_pbs(colour,position,normals,metallic,roughness,spotlight[k]);
 
 	// process shadows with dynamic bias for sloped surfaces
 	vec4 rltp = shadow_matrix*vec4(position,1.0);
@@ -149,7 +150,6 @@ void main()
 	// process emission
 	vec3 emit_colours = colour*lemission;
 	cmb_colours = max(cmb_colours,emit_colours);
-	// TODO: figure out if space over time is the best call in this case
 
 	// colour corrections: high dynamic exposure & gamma correction
 	cmb_colours = vec3(1.0)-exp(-cmb_colours*lens_exposure);
@@ -251,6 +251,24 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_
 	float epsilon = sl.cut_in-sl.cut_out;
 	float intensity = clamp((theta-sl.cut_out)/epsilon,0,1);
 	return (diffusion+specular)*intensity;
+}
+
+// physical based spotlight processing
+vec3 lumen_spot_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+		light_spot sl)
+{
+	// precalculations
+	vec3 light_dir = normalize(sl.position-position);
+	vec3 halfway = normalize(camera_dir+light_dir);
+
+	// calculate spotlight influence
+	float theta = dot(light_dir,normalize(sl.direction));
+	float epsilon = sl.cut_in-sl.cut_out;
+	float intensity = clamp((theta-sl.cut_out)/epsilon,.0,1.0);
+	vec3 influence = sl.colour*intensity;
+
+	// return spotlight colours
+	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
 }
 
 // physical based light processing
