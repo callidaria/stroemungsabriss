@@ -84,6 +84,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ### fixes:
 - FIXED: double main loop
 - FIXED: memory leaks
+- FIXED: shadow transition acne on heavily sloped surfaces
 
 ## v0.0.4 DEV [UNX]
 
@@ -178,5 +179,5 @@ Worktime: 120h
 	+ 164: 9h 27min
 	+ 147: 50h 53min
 	+ 169: 2h 1min
-	+ 153: 73h 21min
+	+ 153: 74h 20min
 - Total Code Lines: 12.126

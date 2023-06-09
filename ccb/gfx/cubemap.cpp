@@ -77,11 +77,12 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 // TODO: untested after recent changes. it remains a question if this is the way things work
 
 /*
-	render_irradiance_to_cubemap(int32_t) -> void
+	render_irradiance_to_cubemap(std::string,int32_t) -> void
 	purpose: project .hdr irradiance onto a cube, which can be used as skybox
+	\param id: naming identification string of the irradiance cube
 	\param resolution: resolution of each cubemap view
 */
-void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
+void Cubemap::render_irradiance_to_cubemap(std::string id,int32_t resolution)
 {
 	// prepare pre-render framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER,cmfbo);
@@ -117,20 +118,21 @@ void Cubemap::render_irradiance_to_cubemap(int32_t resolution)
 		// store prerendered maps in file
 		glPixelStorei(GL_PACK_ALIGNMENT,1);
 		glReadPixels(0,0,resolution,resolution,GL_RGB,GL_UNSIGNED_BYTE,buffer_data);
-		stbi_write_png(("./dat/precalc/irradiance"+std::to_string(i)+".png").c_str(),
+		stbi_write_png(("./dat/precalc/"+id+"/irradiance"+std::to_string(i)+".png").c_str(),
 				resolution,resolution,3,buffer_data,bffstride);
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 /*
-	approximate_irradiance(int32_t,uint32_t,uint8_t,uint16_t) -> void
+	approximate_irradiance(std::string,int32_t,uint32_t,uint8_t,uint16_t) -> void
 	purpose: precalculate diffusion convolution and specular reflection integral irradiance maps
+	\param id: naming identification string of the irradiance cube
 	\param ri_res: diffusion map resolution, per cubemap view
 	\param re_res: specular map resolution, per cubemap view
 	\param lod_count: amount of level of detail stages for irradiance-map-mipmap
 	\param sample_count: amount of samples to use for specular irradiance map precalculation
 */
-void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_count,
+void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_res,uint8_t lod_count,
 		uint16_t sample_count)
 {
 	// prepare diffusion approximation
@@ -167,8 +169,8 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 		// store prerendered convolution in file
 		glPixelStorei(GL_PACK_ALIGNMENT,1);
 		glReadPixels(0,0,ri_res,ri_res,GL_RGB,GL_UNSIGNED_BYTE,ibuffer_data);
-		stbi_write_png(("./dat/precalc/convolution"+std::to_string(i)+".png").c_str(),ri_res,ri_res,
-				3,ibuffer_data,ibffstride);
+		stbi_write_png(("./dat/precalc/"+id+"/convolution"+std::to_string(i)+".png").c_str(),
+				ri_res,ri_res,3,ibuffer_data,ibffstride);
 	}
 
 	// setup specular approximation
@@ -202,22 +204,23 @@ void Cubemap::approximate_irradiance(int32_t ri_res,uint32_t re_res,uint8_t lod_
 			// store prerendered specular multidetailed
 			glPixelStorei(GL_PACK_ALIGNMENT,1);
 			glReadPixels(0,0,lod_resolution,lod_resolution,GL_RGBA,GL_FLOAT,ebuffer_data);
-			stbi_write_hdr(("./dat/precalc/specular"+std::to_string(i)+"_lod"+std::to_string(j)
+			stbi_write_hdr(("./dat/precalc/"+id+"/specular"+std::to_string(i)+"_lod"+std::to_string(j)
 					+".hdr").c_str(),lod_resolution,lod_resolution,4,ebuffer_data);
 		}
 	} glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 /*
-	load_irradiance_cube() -> void
+	load_irradiance_cube(std::string) -> void
 	purpose: load prerendered cubemap from data folder for visualization
+	\param id: naming identification string of the irradiance cube
 */
-void Cubemap::load_irradiance_cube()
+void Cubemap::load_irradiance_cube(std::string id)
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
 	int32_t width,height;
 	for (uint8_t i=0;i<6;i++) {
-		unsigned char* image = stbi_load(("./dat/precalc/irradiance"+std::to_string(i)+".png")
+		unsigned char* image = stbi_load(("./dat/precalc/"+id+"/irradiance"+std::to_string(i)+".png")
 				.c_str(),&width,&height,0,STBI_rgb);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB,width,height,0,GL_RGB,
 				GL_UNSIGNED_BYTE,image);
@@ -226,17 +229,18 @@ void Cubemap::load_irradiance_cube()
 }
 
 /*
-	load_irradiance_maps(uint8_t) -> void
+	load_irradiance_maps(std::string,uint8_t) -> void
 	purpose: load precalculated image based global illumination data from data folder
+	\param id: naming identification string of the irradiance cube
 	\param lod_count: number of mip levels for specular precalculation based on roughness
 */
-void Cubemap::load_irradiance_maps(uint8_t lod_count)
+void Cubemap::load_irradiance_maps(std::string id,uint8_t lod_count)
 {
 	// load convoluted diffusion map
 	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
 	int32_t width,height;
 	for (uint8_t i=0;i<6;i++) {
-		unsigned char* image = stbi_load(("./dat/precalc/convolution"+std::to_string(i)+".png")
+		unsigned char* image = stbi_load(("./dat/precalc/"+id+"/convolution"+std::to_string(i)+".png")
 				.c_str(),&width,&height,0,STBI_rgb);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB,width,height,0,GL_RGB,
 				GL_UNSIGNED_BYTE,image);
@@ -247,7 +251,7 @@ void Cubemap::load_irradiance_maps(uint8_t lod_count)
 	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
 	for (uint8_t i=0;i<6;i++) {
 		for (uint8_t lod=0;lod<lod_count;lod++) {
-			float* image = stbi_loadf(("./dat/precalc/specular"+std::to_string(i)+"_lod"
+			float* image = stbi_loadf(("./dat/precalc/"+id+"/specular"+std::to_string(i)+"_lod"
 					+std::to_string(lod)+".hdr").c_str(),&width,&height,0,STBI_rgb);
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,lod,GL_RGB16F,width,height,0,GL_RGB,
 					GL_FLOAT,image);
@@ -256,6 +260,35 @@ void Cubemap::load_irradiance_maps(uint8_t lod_count)
 	} glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,lod_count-1);
 	Toolbox::set_cubemap_texture_parameters_mipmap();
 	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_BASE_LEVEL,0);
+}
+
+/*
+	dynamic_precalculate_load_switch(std::string,int32_t,int32_t,uint32_t,uint8_t,uint16_t) -> void
+	purpose: precalculate irradiance maps and store them, but switch to load if calculated before
+	\param id: naming identification string of the irradiance cube
+	\param resolution: resolution of each cubemap view
+	\param ri_res: diffusion map resolution, per cubemap view
+	\param re_res: specular map resolution, per cubemap view
+	\param lod_count: number of mip levels for specular precalculation based on roughness
+	\param sample_count: amount of samples to use for specular irradiance map precalculation
+*/
+void Cubemap::dynamic_precalculation_load_switch(std::string id,int32_t resolution,
+		int32_t ri_res,uint32_t re_res,uint8_t lod_count,uint16_t sample_count)
+{
+	// setup directory & informations
+	std::string path = "./dat/precalc/"+id;
+	std::filesystem::create_directories(path.c_str());
+	size_t cmap = std::distance(std::filesystem::directory_iterator{ path },
+			std::filesystem::directory_iterator{  });
+
+	// switch precalculation to loading should data aleady exist
+	if (cmap<(2+lod_count)*6) {
+		render_irradiance_to_cubemap(id,resolution);
+		approximate_irradiance(id,ri_res,re_res,lod_count,sample_count);
+	} else {
+		load_irradiance_cube(id);
+		load_irradiance_maps(id,lod_count);
+	}
 }
 
 /*

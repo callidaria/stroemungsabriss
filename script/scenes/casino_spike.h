@@ -5,10 +5,6 @@
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 
-// #define PRERENDER_IRRADIANCE_MAPPING
-// TODO: define when precalculations are not generated yet
-// TODO: find out if there are changes in quality, loading from texture seems to be darker?
-
 class CasinoSpike : public Scene
 {
 public:
