@@ -23,8 +23,8 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// vertices hpbar
 	float hpverts[] = {
-		pos.x,pos.y,0, pos.x,pos.y+height,1, pos.x,pos.y+height,3,
-		pos.x,pos.y+height,3, pos.x,pos.y,2, pos.x,pos.y,0,
+		pos.x,pos.y,0, pos.x,pos.y+height,3, pos.x,pos.y+height,1,
+		pos.x,pos.y+height,3, pos.x,pos.y,0, pos.x,pos.y,2,
 	};
 	hpbuffer.bind();
 	hpbuffer.upload_vertices(hpverts,sizeof(hpverts));
@@ -155,7 +155,6 @@ void Healthbar::render()
 	floating_nanobars();
 
 	// setup & draw hpbar
-	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	shp.enable();
 	hpbuffer.bind();

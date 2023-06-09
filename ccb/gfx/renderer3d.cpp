@@ -194,7 +194,6 @@ void Renderer3D::prepare()
 {
 	// gl settings
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	// prepare shader & buffer
 	s3d.enable();
@@ -229,7 +228,6 @@ void Renderer3D::prepare_inst()
 {
 	// gl settings
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	// prepare shader & buffer
 	is3d.enable();
@@ -260,7 +258,6 @@ void Renderer3D::prepare_pmesh()
 {
 	// gl settings
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	// prepare shader & buffer
 	pbms.enable();
@@ -289,7 +286,6 @@ void Renderer3D::prepare_pmesh(Camera3D cam3d)
 void Renderer3D::prepare_shadow()
 {
 	// set front face culling to avoid peter panning
-	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
 	// prepare shadow framebuffer

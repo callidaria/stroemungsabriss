@@ -73,7 +73,6 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 void PlayingCards::render_shadow()
 {
 	// draw card shadow
-	glDisable(GL_CULL_FACE);
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(rqueue);
@@ -82,7 +81,6 @@ void PlayingCards::render_shadow()
 	sdr.upload_vec3("shadow_dir",shadow_dir);
 	glDrawArraysInstanced(GL_TRIANGLES,0,vertex_count,112);
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
-	glEnable(GL_CULL_FACE);
 }
 
 /*

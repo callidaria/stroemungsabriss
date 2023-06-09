@@ -74,35 +74,35 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	float sverts[] = {
 
 		// title splash
-		-25,0,25,0,.5f,0,0,0, 420,720,-25,720,.5f,0,0,1, 600,720,25,720,.5f,0,0,2,
-		600,720,25,720,.5f,0,0,2, 50,0,160,0,.5f,0,0,3, -25,0,25,0,.5f,0,0,0,
+		-25,0,25,0,.5f,0,0,0, 600,720,25,720,.5f,0,0,2, 420,720,-25,720,.5f,0,0,1,
+		600,720,25,720,.5f,0,0,2, -25,0,25,0,.5f,0,0,0, 50,0,160,0,.5f,0,0,3,
 
 		// head splash
-		0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 0,500,0,550,h_rgb.x,h_rgb.y,h_rgb.z,1,
-		0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2, 0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2,
-		0,500,1280,470,h_rgb.x,h_rgb.y,h_rgb.z,3, 0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0,
+		0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		0,500,0,550,h_rgb.x,h_rgb.y,h_rgb.z,1, 0,500,1280,600,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		0,500,0,500,h_rgb.x,h_rgb.y,h_rgb.z,0, 0,500,1280,470,h_rgb.x,h_rgb.y,h_rgb.z,3,
 
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,5,
-		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6,
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,7, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,6,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,7,
 
 		// select splash
-		630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0, 630,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,1,
-		650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2, 650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2,
-		650,0,650,0,s_rgb.x,s_rgb.y,s_rgb.z,3, 630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0,
+		630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0, 650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2,
+		630,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,1, 650,0,0,720,s_rgb.x,s_rgb.y,s_rgb.z,2,
+		630,0,630,0,s_rgb.x,s_rgb.y,s_rgb.z,0, 650,0,650,0,s_rgb.x,s_rgb.y,s_rgb.z,3,
 
 		// crossselect splash
-		1280,500,1280,500,l_rgb.x,l_rgb.y,l_rgb.z,0, 1280,500,1280,550,l_rgb.x,l_rgb.y,l_rgb.z,1,
-		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,500,l_rgb.x,l_rgb.y,l_rgb.z,0,
+		1280,500,1280,500,l_rgb.x,l_rgb.y,l_rgb.z,0, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		1280,500,1280,550,l_rgb.x,l_rgb.y,l_rgb.z,1, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
+		1280,500,1280,500,l_rgb.x,l_rgb.y,l_rgb.z,0, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3,
 
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2,
-		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,2, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,3, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5,
 
-		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4,
-		1280,500,1280,550,r_rgb.x,r_rgb.y,r_rgb.z,6, 1280,500,1280,550,r_rgb.x,r_rgb.y,r_rgb.z,6,
-		1280,500,1280,500,r_rgb.x,r_rgb.y,r_rgb.z,7, 1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,550,r_rgb.x,r_rgb.y,r_rgb.z,6,
+		1280,500,1280,550,h_rgb.x,h_rgb.y,h_rgb.z,4, 1280,500,1280,550,r_rgb.x,r_rgb.y,r_rgb.z,6,
+		1280,500,1280,500,h_rgb.x,h_rgb.y,h_rgb.z,5, 1280,500,1280,500,r_rgb.x,r_rgb.y,r_rgb.z,7,
 	};
 	buffer.bind();
 	buffer.upload_vertices(sverts,sizeof(sverts));

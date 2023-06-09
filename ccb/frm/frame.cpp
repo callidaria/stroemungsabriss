@@ -269,6 +269,8 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	glViewport(0,0,width,height);
