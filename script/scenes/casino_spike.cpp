@@ -9,6 +9,13 @@
 CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
+#ifndef SWITCH_RELEASE_COMPILE
+
+	DebugLogData dld;
+	Toolbox::start_debug_logging(dld,"Scene: Loading Casino Spike");
+
+#endif
+
 	// object loading
 	index_p3D = m_ccbf->r3d->add_physical("./res/casino/test_floor.obj",
 			"./res/casino/paquet_colour.png","./res/casino/paquet_normal.png",
@@ -35,7 +42,11 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			glm::vec3(2.5f,.5f,-1.5f),.5f,glm::vec3(),true);
 	texture_repeat.push_back(1);
 
-	// lighting
+#ifndef SWITCH_RELEASE_COMPILE
+	Toolbox::add_timekey(dld,"asset loading");
+#endif
+
+	// simulated lighting
 	glm::vec3 light_pos[] = {
 		glm::vec3(0,2,0),glm::vec3(3,2,-3),glm::vec3(7,.25f,-7),glm::vec3(7,.25f,-3),
 		glm::vec3(7,.25f,1),glm::vec3(7,.25f,5),glm::vec3(-4.5f,1,4),glm::vec3(-2.5f,4,-2),
@@ -47,10 +58,23 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
 	} oheights[0] = 5.5f,oheights[1] = 7,oheights[2] = 6.5f,oheights[3] = 6;
 
-	// lighting
+#ifndef SWITCH_RELEASE_COMPILE
+	Toolbox::add_timekey(dld,"simulated lighting setup");
+#endif
+
+	// lighting maps
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);
-	irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
+	//irradiance_map.render_irradiance_to_cubemap("tcasino",1024);
+	//irradiance_map.approximate_irradiance("tcasino",32,128,7,2048);
+	irradiance_map.load_irradiance_cube("tcasino");
+	irradiance_map.load_irradiance_maps("tcasino",7);
+	//irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
 	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
+
+#ifndef SWITCH_RELEASE_COMPILE
+	Toolbox::add_timekey(dld,"light mapping");
+	Toolbox::flush_debug_logging(dld);
+#endif
 }
 
 /*

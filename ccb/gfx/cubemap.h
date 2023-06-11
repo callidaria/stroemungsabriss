@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../definition_settings.h"
+
 #include "../mat/camera3d.h"
 #include "../mat/toolbox.h"
 
@@ -29,8 +31,8 @@ public:
 	// load preprocess
 	void load_irradiance_cube(std::string id);
 	void load_irradiance_maps(std::string id,uint8_t lod_count);
-	void dynamic_precalculation_load_switch(std::string id,int32_t resolution,
-			int32_t ri_res,uint32_t re_res,uint8_t lod_count,uint16_t sample_count);
+	/*void dynamic_precalculation_load_switch(std::string id,int32_t resolution,
+			int32_t ri_res,uint32_t re_res,uint8_t lod_count,uint16_t sample_count);*/
 
 	// setup
 	void prepare();

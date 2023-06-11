@@ -115,6 +115,48 @@ float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 { return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
 
 /*
+	TODO
+*/
+void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
+{
+	dld.task_name = tname;
+	dld.last_ticks = SDL_GetTicks();
+	dld.key_list = {  };
+	printf("processing -> %s",tname);
+}
+
+/*
+	TODO
+*/
+void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
+{
+	DebugLogKey nkey;
+	nkey.key_name = kname;
+	nkey.delta_ticks = SDL_GetTicks()-dld.last_ticks;
+	dld.key_list.push_back(nkey);
+	dld.last_ticks = SDL_GetTicks();
+	printf("...");
+}
+
+/*
+	TODO
+*/
+void Toolbox::flush_debug_logging(DebugLogData dld)
+{
+	printf("\n----------------------------------------\n");
+	printf("| %s\n",dld.task_name);
+	printf("----------------------------------------\n");
+	uint32_t total_time = 0;
+	for(auto key : dld.key_list) {
+		printf("| %s: %i\n",key.key_name,key.delta_ticks);
+		total_time += key.delta_ticks;
+	}printf("----------------------------------------\n");
+	printf("| total time: %i\n",total_time);
+	printf("----------------------------------------\n");
+
+}
+
+/*
 	PARAMETER DEFINITIONS:
 	ov: vector to be transformed
 	rot: rotation of vector, without directional reset

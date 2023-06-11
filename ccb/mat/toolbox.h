@@ -22,6 +22,21 @@
 #include "../include/stb_image_write.h"
 #endif
 
+// debug timing keys to record individual loadtimes for task sequences
+struct DebugLogKey
+{
+	const char* key_name;
+	uint32_t delta_ticks;
+};
+
+// structure to hold all timing debug data for a single method
+struct DebugLogData
+{
+	const char* task_name;
+	std::vector<DebugLogKey> key_list;
+	uint32_t last_ticks;
+};
+
 class Toolbox
 {
 public:
@@ -34,6 +49,11 @@ public:
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
 	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
+
+	// timing debug
+	static void start_debug_logging(DebugLogData &dld,const char* tname);
+	static void add_timekey(DebugLogData &dld,const char* kname);
+	static void flush_debug_logging(DebugLogData dld);
 
 	// vertex setup
 	static std::vector<float> create_sprite_canvas();
