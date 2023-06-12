@@ -58,6 +58,8 @@ void Worldbuilder::load_menu()
 }
 void Worldbuilder::load_casino()
 {
+	bool loading = true;
+	std::thread loading_screen(show_load_progression,&loading,m_ccbf);
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
@@ -66,6 +68,8 @@ void Worldbuilder::load_casino()
 	m_world->active_cam3D = 0;
 	m_world->load_geometry();
 	m_world->upload_lighting();
+	loading = false;
+	loading_screen.join();
 }
 void Worldbuilder::load_cards()
 {
@@ -93,4 +97,38 @@ void Worldbuilder::load_dpilot()
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 1;
 	m_world->load_geometry();
+}
+
+// test
+void Worldbuilder::background_ticks(bool* loading,uint32_t* tick)
+{
+	while (*loading) {
+		printf("tick progression: %i\n",*tick);
+		(*tick)++;
+	}
+}
+
+/*
+	TODO
+*/
+void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf)
+{
+	// setup loading visualization
+	SDL_GLContext context = ccbf->frame->get_new_context();
+	uint16_t getgot = ccbf->r2d->add(glm::vec2(100,100),200,200,"./res/flyfighter_tex.png");
+	Camera2D cam2D = Camera2D(1280.0f,720.0f);
+	ccbf->r2d->load(&cam2D);
+	while (*loading) {
+
+		// clear loading screen
+		ccbf->frame->clear(.4f,0,.4f);
+		ccbf->frame->vsync(60);
+
+		// test render
+		ccbf->r2d->prepare();
+		ccbf->r2d->render_sprite(getgot,getgot+1);
+
+		// update loading screen
+		ccbf->frame->update();
+	} SDL_GL_DeleteContext(context);
 }

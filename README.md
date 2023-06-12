@@ -68,11 +68,12 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
-- dynamic world loading
 - deferred rendering for a much more complex lighting system
 - new physical based shading system
-- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
+- loading feedback screen
+- dynamic world loading
 - store "macro" savestate pattern
+- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 
 ### optimizations:
 - system to remove world objects should they have been deemed obsolete
@@ -88,6 +89,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: double main loop
 - FIXED: memory leaks
 - FIXED: shadow transition acne on heavily sloped surfaces
+
+<br>
 
 ## v0.0.4 DEV [UNX]
 
@@ -186,4 +189,5 @@ Worktime: 120h
 	+ 125: 1h
 	+ 153: 74h 20min
 	+ 112: 57min
+	+ 90: 1h 4min
 - Total Code Lines: 12.126
