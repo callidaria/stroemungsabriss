@@ -44,6 +44,7 @@ public:
 	// load
 	void load_geometry();
 	void upload_lighting();
+	void upload_lightmap();
 
 	// draw
 	void render(uint32_t &running,bool &reboot);

@@ -68,6 +68,7 @@ void Worldbuilder::load_casino()
 	m_world->active_cam3D = 0;
 	m_world->load_geometry();
 	m_world->upload_lighting();
+	m_world->upload_lightmap();
 	loading = false;
 	loading_screen.join();
 }

@@ -102,7 +102,13 @@ void World::upload_lighting()
 	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
+}
 
+/*
+	TODO
+*/
+void World::upload_lightmap()
+{
 	// upload irradiance maps
 	glActiveTexture(GL_TEXTURE4);
 	m_setRigs->lighting.upload_diffusion_map();
@@ -123,9 +129,9 @@ void World::render(uint32_t &running,bool &reboot)
 	// shadow processing
 	glDisable(GL_BLEND);
 	m_ccbf->r3d->prepare_shadow();
-	//m_ccbf->r3d->render_mesh_shadow();
-	//m_ccbf->r3d->render_instance_shadow();
-	//m_ccbf->r3d->render_physical_shadow();
+	m_ccbf->r3d->render_mesh_shadow();
+	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_physical_shadow();
 	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 

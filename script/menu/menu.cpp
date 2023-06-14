@@ -26,7 +26,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	// add globe and pointer object
 	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
-	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png",
+	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
 
 	// setup dare message on idle screen
@@ -464,7 +464,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
 	cam3d.front = glm::normalize(cam3d.front);
 	cam3d.update();
-	/*m_ccbf->r3d->prepare(cam3d);
+	m_ccbf->r3d->prepare(cam3d);
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location
@@ -476,7 +476,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// render globe preview to framebuffer
 	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);*/
+	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);
 	globe_fb.close();
 
 	// render combined splash overlay

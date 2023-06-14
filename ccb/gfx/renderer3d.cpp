@@ -136,7 +136,7 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// compile shader & load textures
 	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
-	//for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
+	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
 	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
