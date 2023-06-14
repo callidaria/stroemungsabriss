@@ -10,7 +10,6 @@
 #include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
-#include "../../ccb/gfx/material3d.h"
 
 #include "../../ccb/mat/camera2d.h"
 #include "../../ccb/mat/camera3d.h"
@@ -85,7 +84,6 @@ private:
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	Camera3D cam3d = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f),
 			orthocam = Camera3D(1280.0f,720.0f);
-	Material3D mat0;
 	Shader sshd = Shader();
 	FrameBuffer fb,globe_fb;
 	Font fnt = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25);

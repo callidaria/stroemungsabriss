@@ -115,18 +115,23 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 {
 	// setup loading visualization
 	SDL_GLContext context = ccbf->frame->get_new_context();
-	uint16_t getgot = ccbf->r2d->add(glm::vec2(100,100),200,200,"./res/flyfighter_tex.png");
-	Camera2D cam2D = Camera2D(1280.0f,720.0f);
-	ccbf->r2d->load(&cam2D);
+	std::vector<float> ld_canvas = Toolbox::create_sprite_canvas_triangled(glm::vec2(100,100),200,200);
+	Buffer ld_buffer = Buffer();
+	ld_buffer.bind();
+	ld_buffer.upload_vertices(ld_canvas);
+	Shader ld_shader = Shader();
+	ld_shader.compile2d("shader/vloadfdb.shader","shader/floadfdb.shader");
 	while (*loading) {
 
 		// clear loading screen
-		ccbf->frame->clear(.4f,0,.4f);
+		ccbf->frame->clear(0,.4f,0);
 		ccbf->frame->vsync(60);
 
-		// test render
-		ccbf->r2d->prepare();
-		ccbf->r2d->render_sprite(getgot,getgot+1);
+		// canvas render
+		glDisable(GL_DEPTH_TEST);
+		ld_shader.enable();
+		ld_buffer.bind();
+		glDrawArrays(GL_TRIANGLES,0,6);
 
 		// update loading screen
 		ccbf->frame->update();

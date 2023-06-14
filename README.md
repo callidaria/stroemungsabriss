@@ -89,6 +89,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: double main loop
 - FIXED: memory leaks
 - FIXED: shadow transition acne on heavily sloped surfaces
+- FIXED: memory issues with 3D renderer
 
 <br>
 
@@ -189,5 +190,5 @@ Worktime: 120h
 	+ 125: 1h
 	+ 153: 74h 20min
 	+ 112: 57min
-	+ 90: 1h 4min
+	+ 90: 3h 9min
 - Total Code Lines: 12.126

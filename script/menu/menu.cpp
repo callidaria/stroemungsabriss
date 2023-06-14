@@ -29,9 +29,6 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
 
-	// shader materials and light for globe map preview
-	mat0 = Material3D(m_ccbf->r3d,1,8,16);
-
 	// setup dare message on idle screen
 	tft = Text(fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
@@ -467,7 +464,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
 	cam3d.front = glm::normalize(cam3d.front);
 	cam3d.update();
-	m_ccbf->r3d->prepare(cam3d);
+	/*m_ccbf->r3d->prepare(cam3d);
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location
@@ -477,10 +474,9 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_ccbf->r3d->s3d.upload_matrix("model",model);
 
 	// render globe preview to framebuffer
-	mat0.upload();
 	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);
+	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);*/
 	globe_fb.close();
 
 	// render combined splash overlay

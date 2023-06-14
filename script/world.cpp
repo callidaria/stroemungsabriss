@@ -12,6 +12,9 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	// g-buffer setup
 	gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
 
+	// memfail avoidance shadow setup
+	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
+
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
@@ -120,9 +123,9 @@ void World::render(uint32_t &running,bool &reboot)
 	// shadow processing
 	glDisable(GL_BLEND);
 	m_ccbf->r3d->prepare_shadow();
-	m_ccbf->r3d->render_mesh_shadow();
-	m_ccbf->r3d->render_instance_shadow();
-	m_ccbf->r3d->render_physical_shadow();
+	//m_ccbf->r3d->render_mesh_shadow();
+	//m_ccbf->r3d->render_instance_shadow();
+	//m_ccbf->r3d->render_physical_shadow();
 	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
