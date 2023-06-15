@@ -19,6 +19,14 @@ Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBMan
 void Worldbuilder::load()
 {
 	while (!m_ccbf->ld.empty()) {
+
+		// loading feedback creation
+		if (!ldfb_showing) {
+			ldfb_showing = true;
+			load_fdb = new std::thread(show_load_progression,&ldfb_showing,m_ccbf);
+		}
+
+		// switch load instructions
 		switch (m_ccbf->ld.front()) {
 
 		// start
@@ -41,6 +49,12 @@ void Worldbuilder::load()
 
 		default: printf("load instruction has no logic\n");
 		} m_ccbf->ld.pop();
+
+		// check loading feedback conclusion
+		if (m_ccbf->ld.empty()) {
+			ldfb_showing = false;
+			load_fdb->join();
+		}
 	}
 }
 
@@ -58,8 +72,6 @@ void Worldbuilder::load_menu()
 }
 void Worldbuilder::load_casino()
 {
-	bool loading = true;
-	std::thread loading_screen(show_load_progression,&loading,m_ccbf);
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
 	m_world->add_ui(action_menu);
@@ -69,8 +81,6 @@ void Worldbuilder::load_casino()
 	m_world->load_geometry();
 	m_world->upload_lighting();
 	m_world->upload_lightmap();
-	loading = false;
-	loading_screen.join();
 }
 void Worldbuilder::load_cards()
 {

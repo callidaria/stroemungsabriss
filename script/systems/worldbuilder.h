@@ -49,7 +49,8 @@ private:
 	StageSetup* m_setRigs;
 	CCBManager* m_ccbm;
 	World* m_world;
-	uint32_t bgr_ticks = 0;
+	std::thread* load_fdb;
+	bool ldfb_showing = false;
 };
 
 #endif
