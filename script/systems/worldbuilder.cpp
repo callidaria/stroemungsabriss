@@ -100,28 +100,27 @@ void Worldbuilder::load_dpilot()
 	m_world->load_geometry();
 }
 
-// test
-void Worldbuilder::background_ticks(bool* loading,uint32_t* tick)
-{
-	while (*loading) {
-		printf("tick progression: %i\n",*tick);
-		(*tick)++;
-	}
-}
-
 /*
 	TODO
 */
 void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf)
 {
 	// setup loading visualization
-	SDL_GLContext context = ccbf->frame->get_new_context();
-	std::vector<float> ld_canvas = Toolbox::create_sprite_canvas_triangled(glm::vec2(100,100),200,200);
+	SDL_GLContext context = ccbf->frame->create_new_context();
+	glDisable(GL_DEPTH_TEST);
+	std::vector<float> ld_canvas
+			= Toolbox::create_sprite_canvas_triangled(glm::vec2(-100,-100),200,200);
+
+	// data setup
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);
 	Shader ld_shader = Shader();
 	ld_shader.compile2d("shader/vloadfdb.shader","shader/floadfdb.shader");
+	ld_shader.upload_camera(Camera2D(1280.0f,720.0f));
+
+	// render loop
+	float ldrot = .0f;
 	while (*loading) {
 
 		// clear loading screen
@@ -129,12 +128,15 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 		ccbf->frame->vsync(60);
 
 		// canvas render
-		glDisable(GL_DEPTH_TEST);
 		ld_shader.enable();
 		ld_buffer.bind();
+		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(200,200,0));
+		rmodel = glm::rotate(rmodel,glm::radians(ldrot),glm::vec3(0,0,1));
+		ld_shader.upload_matrix("model",rmodel);
 		glDrawArrays(GL_TRIANGLES,0,6);
 
 		// update loading screen
 		ccbf->frame->update();
+		ldrot++;
 	} SDL_GL_DeleteContext(context);
 }

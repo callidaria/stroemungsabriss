@@ -69,7 +69,7 @@ public:
 
 	// getter
 	float get_time_delta();
-	SDL_GLContext get_new_context();
+	SDL_GLContext create_new_context();
 
 private:
 

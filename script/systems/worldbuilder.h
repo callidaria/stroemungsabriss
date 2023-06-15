@@ -40,7 +40,6 @@ private:
 	void load_dpilot();
 
 	// loading progression feedback
-	static void background_ticks(bool* loading,uint32_t* tick);
 	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf);
 
 private:

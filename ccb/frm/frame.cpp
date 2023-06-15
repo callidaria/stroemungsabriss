@@ -260,7 +260,7 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
-	m_context = get_new_context();
+	m_context = create_new_context();
 
 	// opengl setup
 	glewInit();
@@ -342,5 +342,9 @@ void Frame::input_stop()
 */
 float Frame::get_time_delta()
 { return time_delta*60; }
-SDL_GLContext Frame::get_new_context()
+
+/*
+	TODO
+*/
+SDL_GLContext Frame::create_new_context()
 { return SDL_GL_CreateContext(m_frame); }
