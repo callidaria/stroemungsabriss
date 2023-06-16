@@ -83,6 +83,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - colour correction: gamma correction
 - improving code quality/portability by substituting pragma once usage
 - constant face culling, no more disable/enable calls
+- dynamic directory/file finder for line counter
 
 ### fixes:
 - FIXED: double main loop
@@ -186,4 +187,5 @@ Worktime: 120h
 	+ 125: 1h
 	+ 153: 74h 20min
 	+ 112: 57min
+	+ 159: 51min
 - Total Code Lines: 12.126

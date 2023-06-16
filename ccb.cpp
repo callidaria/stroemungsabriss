@@ -40,6 +40,7 @@ bool get_ftype(const char* file);
 std::string get_outfile(const char* file);
 char get_input_char();
 void grind_annotations(const char* path);
+void grind_packages(std::string path,std::vector<std::string> &packages);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -237,6 +238,20 @@ void grind_annotations(const char* path)
 }
 // FIXME: yeah i know, just try to stop me
 
+void grind_packages(std::string path,std::vector<std::string> &packages)
+{
+	// setup directory grind
+	packages.push_back(path);
+	DIR* dir = opendir(path.c_str());
+	struct dirent* found = readdir(dir);
+
+	// read all packages and files from given root
+	while (found!=NULL) {
+		if (found->d_type==DT_DIR&&found->d_name[0]!='.') packages.push_back(path+found->d_name+'/');
+		found = readdir(dir);
+	}
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -402,13 +417,23 @@ std::string count_lines()
 	printf(" COUNT LINES\n");
 
 	// run in chosen
-	if (get_selected())
+	if (get_selected()) {
 #ifdef __WIN32__
 		system("echo feature not available on windows");
 #else
-		system("find ccb/aud/ ccb/fcn/ ccb/frm/ ccb/gfx/ ccb/mat/ ccb/net/ ccb/ppe/ script/ script/boss/ script/menu/ script/struct/ script/systems script/ui/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
+		/*std::string command = "find ";
+		std::vector<std::string> package_paths;
+		grind_packages("ccb/",package_paths);
+		grind_packages("script/",package_paths);
+		grind_packages("shader/",package_paths);
+		for (auto package : package_paths) {
+			std::cout << package << "\n->";
+			system(("find "+package+" -type f | xargs wc -l | tail -n 1").c_str());
+			command += package+' ';
+		}*/
+		system("find ccb/ script/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
 #endif
-	// TODO: auto find component directories
+	}
 
 	// prepare next
 	itr++;
