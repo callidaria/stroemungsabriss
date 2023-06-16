@@ -40,7 +40,7 @@ private:
 	void load_dpilot();
 
 	// loading progression feedback
-	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf);
+	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress);
 
 private:
 
@@ -49,8 +49,8 @@ private:
 	StageSetup* m_setRigs;
 	CCBManager* m_ccbm;
 	World* m_world;
-	std::thread* load_fdb;
 	bool ldfb_showing = false;
+	float progress;
 };
 
 #endif

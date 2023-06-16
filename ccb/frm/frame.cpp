@@ -322,15 +322,10 @@ void Frame::kill_controllers()
 
 /*
 	input_start() -> void
-	purpose: activate text input mode
+	purpose: activate/deactivate text input mode
 */
 void Frame::input_start()
 { SDL_StartTextInput(); }
-
-/*
-	input_stop() -> void
-	purpose: deactivate text input mode
-*/
 void Frame::input_stop()
 { SDL_StopTextInput(); }
 

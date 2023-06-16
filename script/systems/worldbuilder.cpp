@@ -22,8 +22,10 @@ void Worldbuilder::load()
 
 		// loading feedback creation
 		if (!ldfb_showing) {
+			progress = .0f;
 			ldfb_showing = true;
-			load_fdb = new std::thread(show_load_progression,&ldfb_showing,m_ccbf);
+			std::thread load_fdb(show_load_progression,&ldfb_showing,m_ccbf,&progress);
+			load_fdb.detach();
 		}
 
 		// switch load instructions
@@ -51,10 +53,7 @@ void Worldbuilder::load()
 		} m_ccbf->ld.pop();
 
 		// check loading feedback conclusion
-		if (m_ccbf->ld.empty()) {
-			ldfb_showing = false;
-			load_fdb->join();
-		}
+		ldfb_showing = !m_ccbf->ld.empty();
 	}
 }
 
@@ -67,20 +66,28 @@ void Worldbuilder::load_titles()
 void Worldbuilder::load_menu()
 {
 	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf);
+	progress = .33f;
 	m_world->add_ui(menu);
+	progress = .66f;
 	m_world->load_geometry();
+	progress = 1.0f;
 }
 void Worldbuilder::load_casino()
 {
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	progress = .2f;
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
+	progress = .4f;
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
+	progress = .6f;
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 0;
 	m_world->load_geometry();
+	progress = .8f;
 	m_world->upload_lighting();
 	m_world->upload_lightmap();
+	progress = 1.0f;
 }
 void Worldbuilder::load_cards()
 {
@@ -113,40 +120,63 @@ void Worldbuilder::load_dpilot()
 /*
 	TODO
 */
-void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf)
+void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress)
 {
-	// setup loading visualization
+	// visualization setup
 	SDL_GLContext context = ccbf->frame->create_new_context();
-	glDisable(GL_DEPTH_TEST);
-	std::vector<float> ld_canvas
-			= Toolbox::create_sprite_canvas_triangled(glm::vec2(-100,-100),200,200);
+	Camera2D cam2D = Camera2D(1280.0f,720.0f);
 
-	// data setup
+	// loading bar setup
+	std::vector<float> ld_canvas
+			= Toolbox::create_sprite_canvas_triangled(glm::vec2(0),700,25);
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);
 	Shader ld_shader = Shader();
-	ld_shader.compile2d("shader/vloadfdb.shader","shader/floadfdb.shader");
-	ld_shader.upload_camera(Camera2D(1280.0f,720.0f));
+	ld_shader.compile2d("./shader/vloadfdb.shader","./shader/floadfdb.shader");
+	ld_shader.upload_camera(cam2D);
+
+	// bar borders setup
+	float x_lft = 520.0f,x_rgt = 1240.0f,y_dwn = 40.0f,y_up = 85.0f;
+	std::vector<float> ld_bar = {
+		x_lft,y_up, x_lft+12,y_up, x_lft,y_up, x_lft,y_up-12,
+		x_rgt,y_up, x_rgt-12,y_up, x_rgt,y_up, x_rgt,y_up-12,
+		x_lft,y_dwn, x_lft+12,y_dwn, x_lft,y_dwn, x_lft,y_dwn+12,
+		x_rgt,y_dwn, x_rgt-12,y_dwn, x_rgt,y_dwn, x_rgt,y_dwn+12,
+	};
+	Buffer brd_buffer = Buffer();
+	brd_buffer.bind();
+	brd_buffer.upload_vertices(ld_bar);
+	Shader brd_shader = Shader();
+	brd_shader.compile("./shader/vloadborder.shader","./shader/floadborder.shader");
+	brd_shader.def_attributeF("position",2,0,2);
+	brd_shader.upload_camera(cam2D);
 
 	// render loop
-	float ldrot = .0f;
 	while (*loading) {
 
 		// clear loading screen
-		ccbf->frame->clear(0,.4f,0);
+		ccbf->frame->clear(.1f,.1f,.1f);
 		ccbf->frame->vsync(60);
 
-		// canvas render
+		// prepare bar
 		ld_shader.enable();
 		ld_buffer.bind();
-		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(200,200,0));
-		rmodel = glm::rotate(rmodel,glm::radians(ldrot),glm::vec3(0,0,1));
+
+		// translate bar
+		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(530,50,0));
+		rmodel = glm::scale(rmodel,glm::vec3(*progress,1,1));
 		ld_shader.upload_matrix("model",rmodel);
+
+		// render bar
 		glDrawArrays(GL_TRIANGLES,0,6);
+
+		// border rendering
+		brd_shader.enable();
+		brd_buffer.bind();
+		glDrawArrays(GL_LINES,0,16);
 
 		// update loading screen
 		ccbf->frame->update();
-		ldrot++;
 	} SDL_GL_DeleteContext(context);
 }
