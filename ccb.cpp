@@ -41,6 +41,7 @@ std::string get_outfile(const char* file);
 char get_input_char();
 void grind_annotations(const char* path);
 void grind_packages(std::string path,std::vector<std::string> &packages);
+std::vector<std::string> grind_includes(std::string file);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -252,6 +253,11 @@ void grind_packages(std::string path,std::vector<std::string> &packages)
 	}
 }
 
+std::vector<std::string> grind_includes(std::string file)
+{
+	// TODO: write this method
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -298,14 +304,16 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			}
 
 			// compile source on demand
-			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&comp_all&&found->d_type!=DT_DIR)) {
+			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
+				std::vector<std::string> ifiles = grind_includes(found->d_name);
+				for (auto ifile : ifiles) std::cout << ifile << '\n';
 				out = "compiled "+out_file;
 			}
 
 			// grind sources at respective root
-			else if (!update&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
+			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
 
 			// compile all sources in directory on demand
 			else if ((get_selected()&&found->d_type==DT_DIR&&!update)||(!update&&comp_all&&found->d_type==DT_DIR)||!update&&grind_tasks&&found->d_type==DT_DIR) {
