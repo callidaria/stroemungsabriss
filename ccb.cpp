@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <stdio.h>
 #include <dirent.h>
@@ -37,11 +38,11 @@ const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STA
 void write_selection();
 bool get_selected();
 bool get_ftype(const char* file);
-std::string get_outfile(const char* file);
+std::string get_outfile(const char* file,uint8_t offs=3);
 char get_input_char();
 void grind_annotations(const char* path);
 void grind_packages(std::string path,std::vector<std::string> &packages);
-std::vector<std::string> grind_includes(std::string file);
+void grind_includes(std::string file,std::vector<std::string> &out);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -183,10 +184,10 @@ bool get_ftype(const char* file)
 	return fext=="cpp"||!reached_ext;
 }
 
-std::string get_outfile(const char* file)
+std::string get_outfile(const char* file,uint8_t offs)
 {
 	std::string out = std::string(file);
-	out = out.substr(0,out.length()-3)+'o';
+	out = out.substr(0,out.length()-offs)+'o';
 	return out;
 }
 
@@ -250,12 +251,39 @@ void grind_packages(std::string path,std::vector<std::string> &packages)
 	while (found!=NULL) {
 		if (found->d_type==DT_DIR&&found->d_name[0]!='.') packages.push_back(path+found->d_name+'/');
 		found = readdir(dir);
-	}
+	} closedir(dir);
 }
 
-std::vector<std::string> grind_includes(std::string file)
+void grind_includes(std::string file,std::vector<std::string> &out)
 {
-	// TODO: write this method
+	// setup package grind
+	file = file.substr(0,file.length()-3)+'h';
+	std::vector<std::string> packages;
+	grind_packages("ccb/",packages);
+	grind_packages("script/",packages);
+	for (auto package : packages) {
+
+		// grind direcories for code files
+		DIR* dir = opendir(package.c_str());
+		struct dirent* found = readdir(dir);
+		while (found!=NULL) {
+			std::string cname(found->d_name);
+			if (found->d_type!=DT_DIR&&cname.substr(cname.length()-3,cname.length())!="cpp"&&std::find(out.begin(),out.end(),package+found->d_name)==out.end()) {
+
+				// navigate through code files
+				std::ifstream gfile(package+found->d_name,std::ios::in);
+				std::string gline;
+				while (getline(gfile,gline)) {
+
+					// looking for includes and compare
+					if (gline.find(file)!=std::string::npos) {
+						out.push_back(package+found->d_name);
+						break;
+					}
+				}
+			} found = readdir(dir);
+		} closedir(dir);
+	}
 }
 
 void offer_root(std::string &dir_path,std::string rt_dir)
@@ -307,10 +335,30 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
-				std::vector<std::string> ifiles = grind_includes(found->d_name);
-				for (auto ifile : ifiles) std::cout << ifile << '\n';
-				out = "compiled "+out_file;
-			}
+
+				// get subsequent classes related to recompiled object
+				uint16_t ifile = 0;
+				std::vector<std::string> ifiles;
+				grind_includes(found->d_name,ifiles);
+
+				// process related files in tree
+				while (true) {
+
+					if (ifile>=ifiles.size()) break;
+
+					// process tree information
+					std::string sout = get_outfile(ifiles[ifile].substr(ifiles[ifile].find_last_of('/')+1,ifiles[ifile].length()).c_str(),1);
+					printf("subsequently compiling %s towards %s\n",ifiles[ifile].c_str(),sout.c_str());
+
+					// get related files to subsequently recompiled module (god help me)
+					grind_includes(sout.substr(0,sout.length())+".h",ifiles);
+
+					// compile current file related to main compile target
+					system(("g++ "+ifiles[ifile]+" -o lib/"+sout+" -c").c_str());
+
+					ifile++;
+				} out = "compiled "+out_file;
+			} // FIXME: world.h falls back towards this case. stop world.h from grinding subsequent sources when collectively compiled
 
 			// grind sources at respective root
 			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
