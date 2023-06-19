@@ -478,16 +478,6 @@ std::string count_lines()
 #ifdef __WIN32__
 		system("echo feature not available on windows");
 #else
-		/*std::string command = "find ";
-		std::vector<std::string> package_paths;
-		grind_packages("ccb/",package_paths);
-		grind_packages("script/",package_paths);
-		grind_packages("shader/",package_paths);
-		for (auto package : package_paths) {
-			std::cout << package << "\n->";
-			system(("find "+package+" -type f | xargs wc -l | tail -n 1").c_str());
-			command += package+' ';
-		}*/
 		system("find ccb/ script/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
 #endif
 	}

@@ -73,6 +73,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - new physical based shading system
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - store "macro" savestate pattern
+- automatic compilation of all files using the originally updated source
 
 ### optimizations:
 - system to remove world objects should they have been deemed obsolete
@@ -187,5 +188,5 @@ Worktime: 120h
 	+ 125: 1h
 	+ 153: 74h 20min
 	+ 112: 57min
-	+ 159: 5h 26min
+	+ 159: 5h 32min
 - Total Code Lines: 14.314
