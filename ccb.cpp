@@ -257,7 +257,6 @@ void grind_packages(std::string path,std::vector<std::string> &packages)
 void grind_includes(std::string file,std::vector<std::string> &out)
 {
 	// setup package grind
-	file = file.substr(0,file.length()-3)+'h';
 	std::vector<std::string> packages;
 	grind_packages("ccb/",packages);
 	grind_packages("script/",packages);
@@ -339,11 +338,12 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 				// get subsequent classes related to recompiled object
 				uint16_t ifile = 0;
 				std::vector<std::string> ifiles;
-				grind_includes(found->d_name,ifiles);
+				std::string coname(found->d_name);
+				grind_includes(coname.substr(0,coname.length()-3)+'h',ifiles);
 
-				// process related files in tree
-				while (true) {
-
+				// process related files in tree & jitterly turn off directory search for complete compile
+				// FIXME: check proceedings earlier to save time
+				while (!comp_all) {
 					if (ifile>=ifiles.size()) break;
 
 					// process tree information
@@ -351,14 +351,15 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 					printf("subsequently compiling %s towards %s\n",ifiles[ifile].c_str(),sout.c_str());
 
 					// get related files to subsequently recompiled module (god help me)
-					grind_includes(sout.substr(0,sout.length())+".h",ifiles);
+					std::cout << sout.substr(0,sout.length()-1)+'h' << '\n';
+					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
 
 					// compile current file related to main compile target
-					system(("g++ "+ifiles[ifile]+" -o lib/"+sout+" -c").c_str());
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -c").c_str());
 
 					ifile++;
 				} out = "compiled "+out_file;
-			} // FIXME: world.h falls back towards this case. stop world.h from grinding subsequent sources when collectively compiled
+			}
 
 			// grind sources at respective root
 			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
