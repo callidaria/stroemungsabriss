@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <stdio.h>
 #include <dirent.h>
@@ -37,9 +38,11 @@ const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STA
 void write_selection();
 bool get_selected();
 bool get_ftype(const char* file);
-std::string get_outfile(const char* file);
+std::string get_outfile(const char* file,uint8_t offs=3);
 char get_input_char();
 void grind_annotations(const char* path);
+void grind_packages(std::string path,std::vector<std::string> &packages);
+void grind_includes(std::string file,std::vector<std::string> &out);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -181,10 +184,10 @@ bool get_ftype(const char* file)
 	return fext=="cpp"||!reached_ext;
 }
 
-std::string get_outfile(const char* file)
+std::string get_outfile(const char* file,uint8_t offs)
 {
 	std::string out = std::string(file);
-	out = out.substr(0,out.length()-3)+'o';
+	out = out.substr(0,out.length()-offs)+'o';
 	return out;
 }
 
@@ -237,6 +240,51 @@ void grind_annotations(const char* path)
 }
 // FIXME: yeah i know, just try to stop me
 
+void grind_packages(std::string path,std::vector<std::string> &packages)
+{
+	// setup directory grind
+	packages.push_back(path);
+	DIR* dir = opendir(path.c_str());
+	struct dirent* found = readdir(dir);
+
+	// read all packages and files from given root
+	while (found!=NULL) {
+		if (found->d_type==DT_DIR&&found->d_name[0]!='.') packages.push_back(path+found->d_name+'/');
+		found = readdir(dir);
+	} closedir(dir);
+}
+
+void grind_includes(std::string file,std::vector<std::string> &out)
+{
+	// setup package grind
+	std::vector<std::string> packages;
+	grind_packages("ccb/",packages);
+	grind_packages("script/",packages);
+	for (auto package : packages) {
+
+		// grind direcories for code files
+		DIR* dir = opendir(package.c_str());
+		struct dirent* found = readdir(dir);
+		while (found!=NULL) {
+			std::string cname(found->d_name);
+			if (found->d_type!=DT_DIR&&cname.substr(cname.length()-3,cname.length())!="cpp"&&std::find(out.begin(),out.end(),package+found->d_name)==out.end()) {
+
+				// navigate through code files
+				std::ifstream gfile(package+found->d_name,std::ios::in);
+				std::string gline;
+				while (getline(gfile,gline)) {
+
+					// looking for includes and compare
+					if (gline.find(file)!=std::string::npos) {
+						out.push_back(package+found->d_name);
+						break;
+					}
+				}
+			} found = readdir(dir);
+		} closedir(dir);
+	}
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -283,14 +331,38 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			}
 
 			// compile source on demand
-			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&comp_all&&found->d_type!=DT_DIR)) {
+			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
 				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
-				out = "compiled "+out_file;
+
+				// get subsequent classes related to recompiled object
+				uint16_t ifile = 0;
+				std::vector<std::string> ifiles;
+				std::string coname(found->d_name);
+				grind_includes(coname.substr(0,coname.length()-3)+'h',ifiles);
+
+				// process related files in tree & jitterly turn off directory search for complete compile
+				// FIXME: check proceedings earlier to save time
+				while (!comp_all) {
+					if (ifile>=ifiles.size()) break;
+
+					// process tree information
+					std::string sout = get_outfile(ifiles[ifile].substr(ifiles[ifile].find_last_of('/')+1,ifiles[ifile].length()).c_str(),1);
+					printf("subsequently compiling %s towards %s\n",ifiles[ifile].c_str(),sout.c_str());
+
+					// get related files to subsequently recompiled module (god help me)
+					std::cout << sout.substr(0,sout.length()-1)+'h' << '\n';
+					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
+
+					// compile current file related to main compile target
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -c").c_str());
+
+					ifile++;
+				} out = "compiled "+out_file;
 			}
 
 			// grind sources at respective root
-			else if (!update&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
+			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
 
 			// compile all sources in directory on demand
 			else if ((get_selected()&&found->d_type==DT_DIR&&!update)||(!update&&comp_all&&found->d_type==DT_DIR)||!update&&grind_tasks&&found->d_type==DT_DIR) {
@@ -402,13 +474,13 @@ std::string count_lines()
 	printf(" COUNT LINES\n");
 
 	// run in chosen
-	if (get_selected())
+	if (get_selected()) {
 #ifdef __WIN32__
 		system("echo feature not available on windows");
 #else
-		system("find ccb/aud/ ccb/fcn/ ccb/frm/ ccb/gfx/ ccb/mat/ ccb/net/ ccb/ppe/ script/ script/boss/ script/menu/ script/struct/ script/systems script/ui/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
+		system("find ccb/ script/ shader/ main.cpp ccb.cpp -type f | xargs wc -l | tail -n 1");
 #endif
-	// TODO: auto find component directories
+	}
 
 	// prepare next
 	itr++;
