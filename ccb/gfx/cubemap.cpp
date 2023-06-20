@@ -272,7 +272,7 @@ void Cubemap::load_irradiance_maps(std::string id,uint8_t lod_count)
 	\param lod_count: number of mip levels for specular precalculation based on roughness
 	\param sample_count: amount of samples to use for specular irradiance map precalculation
 */
-/*void Cubemap::dynamic_precalculation_load_switch(std::string id,int32_t resolution,
+void Cubemap::dynamic_precalculation_load_switch(std::string id,int32_t resolution,
 		int32_t ri_res,uint32_t re_res,uint8_t lod_count,uint16_t sample_count)
 {
 	// setup directory & informations
@@ -289,7 +289,7 @@ void Cubemap::load_irradiance_maps(std::string id,uint8_t lod_count)
 		load_irradiance_cube(id);
 		load_irradiance_maps(id,lod_count);
 	}
-}*/
+}
 
 /*
 	prepare() -> void

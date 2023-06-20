@@ -49,11 +49,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// lighting maps
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);
-	//irradiance_map.render_irradiance_to_cubemap("tcasino",1024);
-	//irradiance_map.approximate_irradiance("tcasino",32,128,7,2048);
-	irradiance_map.load_irradiance_cube("tcasino");
-	irradiance_map.load_irradiance_maps("tcasino",7);
-	//irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
+	irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
 	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
 }
 
