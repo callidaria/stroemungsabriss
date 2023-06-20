@@ -6,8 +6,6 @@
 
 #include <glm/glm.hpp>
 
-#include "../definition_settings.h"
-
 #include "../mat/camera3d.h"
 #include "../mat/toolbox.h"
 
