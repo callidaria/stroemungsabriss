@@ -34,7 +34,7 @@ public:
 			float fdiv,uint16_t res);
 
 	// loaders
-	void load(Camera3D cam3d);
+	void load(Camera3D cam3d,float &progress,float pseq);
 
 	// preparations
 	void prepare();

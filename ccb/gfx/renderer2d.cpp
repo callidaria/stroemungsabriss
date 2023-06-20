@@ -50,22 +50,25 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uin
 	load_vertex() -> void
 	purpose: upload all vertices of sprites and animations to buffer
 */
-void Renderer2D::load_vertex()
+void Renderer2D::load_vertex(float &progress,float pseq)
 {
 	// create write arrays
 	std::vector<float> v;
 	std::vector<unsigned int> e;
+	uint32_t ptarget = pseq/(sl.size()+al.size());
 
 	// write sprite vertex values to upload list
 	for (int i=0;i<sl.size();i++) {
 		v.insert(v.end(),sl[i].v.begin(),sl[i].v.end());
 		Toolbox::generate_elements(i,e);
+		progress += ptarget;
 	}
 
 	// write animation vertex values to upload list
 	for(int i=0;i<al.size();i++) {
 		v.insert(v.end(),al[i].v.begin(),al[i].v.end());
 		Toolbox::generate_elements(i+sl.size(),e);
+		progress += ptarget;
 	}
 
 	// upload to buffers
@@ -78,22 +81,28 @@ void Renderer2D::load_vertex()
 	load_texture() -> void
 	purpose: load all textures for every added sprite and animation
 */
-void Renderer2D::load_texture()
+void Renderer2D::load_texture(float &progress,float pseq)
 {
-	for (int i=0;i<sl.size();i++) sl.at(i).texture();
-	for (int i=0;i<al.size();i++) al.at(i).texture();
-	s2d.upload_int("tex",0);
+	uint32_t ptarget = pseq/(sl.size()+al.size());
+	for (int i=0;i<sl.size();i++) {
+		sl.at(i).texture();
+		progress += ptarget;
+	} for (int i=0;i<al.size();i++) {
+		al.at(i).texture();
+		progress += ptarget;
+	} s2d.upload_int("tex",0);
 }
 
 /*
 	load() -> void
 	purpose: combine vertex and texture loading and compile shader program in between
 */
-void Renderer2D::load()
+void Renderer2D::load(float &progress,float pseq)
 {
-	load_vertex();
+	float ssq = pseq/2.0f;
+	load_vertex(progress,ssq);
 	s2d.compile2d("shader/vertex2d.shader","shader/fragment2d.shader");
-	load_texture();
+	load_texture(progress,ssq);
 }
 
 /*
@@ -101,9 +110,9 @@ void Renderer2D::load()
 	cam2d: the 2D camera used to render the loaded sprites and animations in relation to
 	purpose: additionally to the features of load() the view and projection matrices are uploaded
 */
-void Renderer2D::load(Camera2D* cam2d)
+void Renderer2D::load(Camera2D* cam2d,float &progress,float pseq)
 {
-	load();
+	load(progress,pseq);
 	s2d.upload_camera(*cam2d);
 }
 

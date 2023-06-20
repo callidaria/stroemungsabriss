@@ -27,8 +27,8 @@ public:
 			uint8_t f,uint8_t itn);
 
 	// loaders
-	void load();
-	void load(Camera2D* cam2d);
+	void load(float &progress,float pseq);
+	void load(Camera2D* cam2d,float &progress,float pseq);
 
 	// preparation
 	void prepare();
@@ -49,8 +49,8 @@ public:
 private:
 
 	// loaders
-	void load_vertex();
-	void load_texture();
+	void load_vertex(float &progress,float pseq);
+	void load_texture(float &progress,float pseq);
 
 public:
 

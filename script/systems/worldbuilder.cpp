@@ -69,8 +69,7 @@ void Worldbuilder::load_menu()
 	progress = .33f;
 	m_world->add_ui(menu);
 	progress = .66f;
-	m_world->load_geometry();
-	progress = 1.0f;
+	m_world->load_geometry(progress,.34f);
 }
 void Worldbuilder::load_casino()
 {
@@ -83,8 +82,7 @@ void Worldbuilder::load_casino()
 	progress = .6f;
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 0;
-	m_world->load_geometry();
-	progress = .8f;
+	m_world->load_geometry(progress,.3f);
 	m_world->upload_lighting();
 	m_world->upload_lightmap();
 	progress = 1.0f;
@@ -97,7 +95,7 @@ void Worldbuilder::load_cards()
 	m_world->add_scene(ctable);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 3;
-	m_world->load_geometry();
+	m_world->load_geometry(progress,1.0f);
 	m_world->upload_lighting();
 }
 void Worldbuilder::load_airfield()
@@ -114,7 +112,7 @@ void Worldbuilder::load_dpilot()
 	m_world->add_boss(dpilot);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 1;
-	m_world->load_geometry();
+	m_world->load_geometry(progress,1.0f);
 }
 
 /*
