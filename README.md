@@ -85,6 +85,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - improving code quality/portability by substituting pragma once usage
 - constant face culling, no more disable/enable calls
 - dynamic directory/file finder for line counter
+- improved runtime debug output
 
 ### fixes:
 - FIXED: double main loop
@@ -189,4 +190,5 @@ Worktime: 120h
 	+ 153: 74h 20min
 	+ 112: 57min
 	+ 159: 5h 32min
+	+ 62: 1h 52min
 - Total Code Lines: 14.314
