@@ -70,7 +70,7 @@ public:
 
 	// construction
 	Menu() {  }
-	Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf);
+	Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progress,float pseq);
 	~Menu();
 
 	// draw

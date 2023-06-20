@@ -65,54 +65,53 @@ void Worldbuilder::load_titles()
 { std::cout << "loading: title display\n"; }
 void Worldbuilder::load_menu()
 {
-	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf);
-	progress = .33f;
+	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf,progress,.75f);
 	m_world->add_ui(menu);
-	progress = .66f;
-	m_world->load_geometry(progress,.34f);
+	m_world->load_geometry(progress,.25f);
 }
 void Worldbuilder::load_casino()
 {
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	progress = .2f;
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs);
-	progress = .4f;
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs,progress,.5f);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
-	progress = .6f;
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 0;
-	m_world->load_geometry(progress,.3f);
+	m_world->load_geometry(progress,.21f);
 	m_world->upload_lighting();
 	m_world->upload_lightmap();
 	progress = 1.0f;
 }
 void Worldbuilder::load_cards()
 {
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
-	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs);
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
+	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs,progress,.5f);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 3;
-	m_world->load_geometry(progress,1.0f);
+	m_world->load_geometry(progress,.21f);
 	m_world->upload_lighting();
+	progress = 1.0f;
 }
 void Worldbuilder::load_airfield()
 { std::cout << "loading: airfield scene\n"; }
 void Worldbuilder::load_dpilot()
 {
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap);
+	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
+	progress += .2f;
 	JaegerJet* jj = new JaegerJet(m_ccbf);
+	progress += .2f;
 	DPilot* dpilot = new DPilot(m_ccbf);
+	progress += .2f;
 	m_world->add_ui(action_menu);
 	m_world->add_scene(nmw);
 	m_world->add_playable(jj);
 	m_world->add_boss(dpilot);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 1;
-	m_world->load_geometry(progress,1.0f);
+	m_world->load_geometry(progress,.2f);
 }
 
 /*

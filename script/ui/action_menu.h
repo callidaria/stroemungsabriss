@@ -33,7 +33,7 @@ class ActionMenu : public UI
 public:
 
 	// construction
-	ActionMenu(Frame* frame,InputMap* input_map);
+	ActionMenu(Frame* frame,InputMap* input_map,float &progress,float pseq);
 	~ActionMenu() {  }
 
 	// runtime interactions
