@@ -107,7 +107,8 @@ void World::upload_lighting()
 }
 
 /*
-	TODO
+	upload_lightmap() -> void
+	purpose: upload diffusion convolution and specular integral maps to shader
 */
 void World::upload_lightmap()
 {

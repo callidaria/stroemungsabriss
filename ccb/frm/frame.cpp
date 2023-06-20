@@ -330,16 +330,16 @@ void Frame::input_stop()
 { SDL_StopTextInput(); }
 
 /*
-	time_delta() -> float
+	get_time_delta() -> float
 	returns: time delta between render updates to disconnect physics from non-synced fps counts
 	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
-	TODO: fix this doc
 */
 float Frame::get_time_delta()
 { return time_delta*60; }
 
 /*
-	TODO
+	create_new_context() -> SDL_GLContext
+	\returns new render context for the current thread this was called by
 */
 SDL_GLContext Frame::create_new_context()
 { return SDL_GL_CreateContext(m_frame); }

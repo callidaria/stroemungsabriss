@@ -115,7 +115,11 @@ void Worldbuilder::load_dpilot()
 }
 
 /*
-	TODO
+	show_load_progression(bool*,CascabelBaseFeature*,float*) -> void
+	purpose: display loading screen by a different thread, to visualize load progression
+	\param loading: memory address of boolean holding info, if load instructions are being processed
+	\param ccbf: addresses to main feature objects of cascabel
+	\param progress: address of loading progress variable
 */
 void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress)
 {
@@ -177,3 +181,4 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 		ccbf->frame->update();
 	} SDL_GL_DeleteContext(context);
 }
+// TODO: what if multiple load instructions are in queue? the loading bar will reset! fix this!

@@ -276,19 +276,19 @@ void Cubemap::dynamic_precalculation_load_switch(std::string id,int32_t resoluti
 		int32_t ri_res,uint32_t re_res,uint8_t lod_count,uint16_t sample_count)
 {
 	// setup directory & informations
-	/*std::string path = "./dat/precalc/"+id;
+	std::string path = "./dat/precalc/"+id;
 	std::filesystem::create_directories(path.c_str());
 	size_t cmap = std::distance(std::filesystem::directory_iterator{ path },
-			std::filesystem::directory_iterator{  });*/
+			std::filesystem::directory_iterator{  });
 
 	// switch precalculation to loading should data aleady exist
-	/*if (cmap<(2+lod_count)*6) {
+	if (cmap<(2+lod_count)*6) {
 		render_irradiance_to_cubemap(id,resolution);
 		approximate_irradiance(id,ri_res,re_res,lod_count,sample_count);
-	} else {*/
+	} else {
 		load_irradiance_cube(id);
 		load_irradiance_maps(id,lod_count);
-	//}
+	}
 }
 
 /*
