@@ -29,7 +29,7 @@
 // windows compile predefinition
 #ifdef __WIN32__
 const std::string path_mingw = "C:/MinGW/lib";
-const std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lOpenAL32";
+const std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lOpenAL32 -lpthread";
 const std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STATIC";
 #endif
 
@@ -133,7 +133,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -pthread");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lpthread");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 

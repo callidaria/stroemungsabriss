@@ -129,7 +129,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 
 	// loading bar setup
 	std::vector<float> ld_canvas
-			= Toolbox::create_sprite_canvas_triangled(glm::vec2(0),700,25);
+			= Toolbox::create_sprite_canvas_triangled(glm::vec2(0),700,10);
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);
@@ -138,14 +138,13 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	ld_shader.upload_camera(cam2D);
 
 	// bar borders setup
-	float x_lft = 520.0f,x_rgt = 1240.0f,y_dwn = 40.0f,y_up = 85.0f;
+	float x_lft = 528.0f,x_rgt = 1232.0f,y_dwn = 42.0f,y_up = 57.0f,brd_offset = 4;
 	std::vector<float> ld_bar = {
-		x_lft,y_up, x_lft+12,y_up, x_lft,y_up, x_lft,y_up-12,
-		x_rgt,y_up, x_rgt-12,y_up, x_rgt,y_up, x_rgt,y_up-12,
-		x_lft,y_dwn, x_lft+12,y_dwn, x_lft,y_dwn, x_lft,y_dwn+12,
-		x_rgt,y_dwn, x_rgt-12,y_dwn, x_rgt,y_dwn, x_rgt,y_dwn+12,
-	};
-	Buffer brd_buffer = Buffer();
+		x_lft,y_up, x_lft+brd_offset,y_up, x_lft,y_up, x_lft,y_up-brd_offset,
+		x_rgt,y_up, x_rgt-brd_offset,y_up, x_rgt,y_up, x_rgt,y_up-brd_offset,
+		x_lft,y_dwn, x_lft+brd_offset,y_dwn, x_lft,y_dwn, x_lft,y_dwn+brd_offset,
+		x_rgt,y_dwn, x_rgt-brd_offset,y_dwn, x_rgt,y_dwn, x_rgt,y_dwn+brd_offset,
+	}; Buffer brd_buffer = Buffer();
 	brd_buffer.bind();
 	brd_buffer.upload_vertices(ld_bar);
 	Shader brd_shader = Shader();
@@ -159,13 +158,15 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 		// clear loading screen
 		ccbf->frame->clear(.1f,.1f,.1f);
 		ccbf->frame->vsync(60);
+		ccbf->frame->calc_time_delta();
+		// create stylized background animation OR timed background action art iterations
 
 		// prepare bar
 		ld_shader.enable();
 		ld_buffer.bind();
 
 		// translate bar
-		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(530,50,0));
+		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(530,45,0));
 		rmodel = glm::scale(rmodel,glm::vec3(*progress,1,1));
 		ld_shader.upload_matrix("model",rmodel);
 
