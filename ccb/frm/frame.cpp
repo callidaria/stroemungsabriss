@@ -260,7 +260,7 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
-	m_context = SDL_GL_CreateContext(m_frame);
+	m_context = create_new_context();
 
 	// opengl setup
 	glewInit();
@@ -272,7 +272,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
 	glViewport(0,0,width,height);
 
 	// openal setup
@@ -323,22 +322,24 @@ void Frame::kill_controllers()
 
 /*
 	input_start() -> void
-	purpose: activate text input mode
+	purpose: activate/deactivate text input mode
 */
 void Frame::input_start()
 { SDL_StartTextInput(); }
-
-/*
-	input_stop() -> void
-	purpose: deactivate text input mode
-*/
 void Frame::input_stop()
 { SDL_StopTextInput(); }
 
 /*
-	time_delta() -> float
+	get_time_delta() -> float
 	returns: time delta between render updates to disconnect physics from non-synced fps counts
 	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
 float Frame::get_time_delta()
 { return time_delta*60; }
+
+/*
+	create_new_context() -> SDL_GLContext
+	\returns new render context for the current thread this was called by
+*/
+SDL_GLContext Frame::create_new_context()
+{ return SDL_GL_CreateContext(m_frame); }

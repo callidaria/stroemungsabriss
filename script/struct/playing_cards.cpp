@@ -32,13 +32,12 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 		cverts.push_back(overts[i+3]);cverts.push_back(-overts[i+4]);
 		cverts.push_back(overts[i+5]);cverts.push_back(overts[i+6]);cverts.push_back(overts[i+7]);
 		cverts.push_back(0);
-		vertex_count++;
 	} for (uint32_t i=0;i<overts.size();i+=14) {
 		cverts.push_back(-overts[i]);cverts.push_back(overts[i+1]);cverts.push_back(overts[i+2]);
 		cverts.push_back(overts[i+3]);cverts.push_back(overts[i+4]);
 		cverts.push_back(overts[i+5]);cverts.push_back(overts[i+6]);cverts.push_back(overts[i+7]);
 		cverts.push_back(1);
-	} vertex_count *= 2;
+	}
 
 	// upload card vertices
 	bfr.bind();
@@ -79,7 +78,7 @@ void PlayingCards::render_shadow()
 	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
 	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
 	sdr.upload_vec3("shadow_dir",shadow_dir);
-	glDrawArraysInstanced(GL_TRIANGLES,0,vertex_count,112);
+	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 }
 

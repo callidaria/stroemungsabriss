@@ -8,7 +8,6 @@ in vec3 bitangent;
 
 out vec4 Position;
 out vec2 TexCoords;
-out vec3 Normals;
 out mat3 TBN;
 
 // camera & world transformation
@@ -31,7 +30,7 @@ void main()
 
 	// reorthogonalize TBN-matrix per-vertex according to gram-schmidt
 	vec3 T = normalize((model*vec4(tangent,0)).xyz);
-	Normals = normalize((model*vec4(normals,0)).xyz);
+	vec3 Normals = normalize((model*vec4(normals,0)).xyz);
 	T = normalize(T-dot(T,Normals)*Normals);
 	TBN = mat3(T,cross(Normals,T),Normals);
 }

@@ -29,7 +29,7 @@ public:
 			uint8_t itn,uint8_t f);
 
 	// loaders
-	void load();
+	void load(float &progress,float pseq);
 
 	// preparation
 	void prepare(float dtime);

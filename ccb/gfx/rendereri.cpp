@@ -43,12 +43,18 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,ui
 	load() -> void
 	purpose: combine vertex upload and texturing and compile shader
 */
-void RendererI::load()
+void RendererI::load(float &progress,float pseq)
 {
 	// write all object vertices to master array
+	float ptarget = (pseq/2.0f)/(il.size()+ial.size());
 	std::vector<float> v;
-	for (int i=0;i<il.size();i++) v.insert(v.end(),il[i].v.begin(),il[i].v.end());
-	for (int i=0;i<ial.size();i++) v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+	for (int i=0;i<il.size();i++) {
+		v.insert(v.end(),il[i].v.begin(),il[i].v.end());
+		progress += ptarget;
+	} for (int i=0;i<ial.size();i++) {
+		v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+		progress += ptarget;
+	}
 
 	// upload to buffer
 	buffer.bind();
@@ -67,9 +73,13 @@ void RendererI::load()
 	// we could make instanced_anim the only instanced object or find a different solution??
 
 	// texture
-	for (int i=0;i<il.size();i++) il[i].texture();
-	for (int i=0;i<ial.size();i++) ial[i].texture();
-	sI.upload_int("tex",0);
+	for (int i=0;i<il.size();i++) {
+		il[i].texture();
+		progress += ptarget;
+	} for (int i=0;i<ial.size();i++) {
+		ial[i].texture();
+		progress += ptarget;
+	} sI.upload_int("tex",0);
 
 	// coordinate system
 	sI.upload_camera(Camera2D(1280.0f,720.0f));

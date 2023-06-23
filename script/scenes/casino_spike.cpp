@@ -6,10 +6,11 @@
 	set_rigs: stage utility setup
 	purpose: create dilapidated casino scene
 */
-CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
+CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// object loading
+	float sseq = pseq/3.0f;
 	index_p3D = m_ccbf->r3d->add_physical("./res/casino/test_floor.obj",
 			"./res/casino/paquet_colour.png","./res/casino/paquet_normal.png",
 			"./res/casino/paquet_material.png","./res/none.png",glm::vec3(),1,glm::vec3(),false);
@@ -34,6 +35,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/casino/fabric_normals.png","./res/casino/fabric_material.png","./res/none.png",
 			glm::vec3(2.5f,.5f,-1.5f),.5f,glm::vec3(),true);
 	texture_repeat.push_back(1);
+	progress += sseq;
 
 	// simulated lighting
 	glm::vec3 light_pos[] = {
@@ -46,11 +48,13 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 			"./res/dnormal.png","./res/all.png",light_pos[i],.25f,glm::vec3(),true);
 		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
 	} oheights[0] = 5.5f,oheights[1] = 7,oheights[2] = 6.5f,oheights[3] = 6;
+	progress += sseq;
 
 	// lighting maps
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);
 	irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
 	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
+	progress += sseq;
 }
 
 /*

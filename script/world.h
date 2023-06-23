@@ -42,8 +42,9 @@ public:
 	void remove_boss(uint8_t boss_id);
 
 	// load
-	void load_geometry();
+	void load_geometry(float &progress,float ldsplit);
 	void upload_lighting();
+	void upload_lightmap();
 
 	// draw
 	void render(uint32_t &running,bool &reboot);

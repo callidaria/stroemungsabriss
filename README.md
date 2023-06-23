@@ -68,9 +68,11 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
-- dynamic world loading
 - deferred rendering for a much more complex lighting system
 - new physical based shading system
+- loading feedback screen
+- dynamic world loading
+- store "macro" savestate pattern
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - store "macro" savestate pattern
 - automatic compilation of all files using the originally updated source
@@ -91,6 +93,9 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: double main loop
 - FIXED: memory leaks
 - FIXED: shadow transition acne on heavily sloped surfaces
+- FIXED: memory issues with 3D renderer
+
+<br>
 
 ## v0.0.4 DEV [UNX]
 
@@ -191,4 +196,5 @@ Worktime: 120h
 	+ 112: 57min
 	+ 159: 5h 32min
 	+ 62: 1h 52min
+	+ 90: 9h 50min
 - Total Code Lines: 14.314

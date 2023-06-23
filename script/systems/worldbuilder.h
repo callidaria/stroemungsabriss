@@ -2,6 +2,7 @@
 #define SCR_SYSTEMS_WORLDBUILDER
 
 #include <iostream>
+#include <thread>
 #include <queue>
 
 #include "../../ccb/fcn/ccb_manager.h"
@@ -38,6 +39,9 @@ private:
 	void load_airfield();
 	void load_dpilot();
 
+	// loading progression feedback
+	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress);
+
 private:
 
 	// system
@@ -45,6 +49,8 @@ private:
 	StageSetup* m_setRigs;
 	CCBManager* m_ccbm;
 	World* m_world;
+	bool ldfb_showing = false;
+	float progress;
 };
 
 #endif

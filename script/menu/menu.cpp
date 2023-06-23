@@ -11,10 +11,11 @@
 	cam3d: camera to draw all objects of [r3d] in relation to
 	purpose: setup menu environment, populate with menu lists and define input possibilities
 */
-Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
+Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progress,float pseq)
 	: m_world(world),m_ccbm(ccbm),m_ccbf(ccbf)
 {
 	// constructions
+	float sseq = pseq/7.0f;
 	md_conf = MenuDialogue(glm::vec2(200,250),250,150,m_ccbf->r2d,&cam2d,"confirm changes?",pth_conf,
 			75,75);
 	md_diff = MenuDialogue(glm::vec2(200,100),880,520,m_ccbf->r2d,&cam2d,"select difficulty",pth_diff,
@@ -26,11 +27,9 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	// add globe and pointer object
 	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
-	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png",":/res/none.png",
+	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
-
-	// shader materials and light for globe map preview
-	mat0 = Material3D(m_ccbf->r3d,1,8,16);
+	progress += sseq;
 
 	// setup dare message on idle screen
 	tft = Text(fnt);
@@ -46,6 +45,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 			+"1.3.1vE (OpenGL)";
 	vtft.add(title_vmessage.c_str(),glm::vec2(600,20));
 	vtft.load();
+	progress += sseq;
 
 	// submenu lists to interact with and choose from
 	mls[0] = MenuList();
@@ -60,11 +60,13 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	mls[9] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgfx");
 	mls[10] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optgm");
 	mls[11] = MenuList(m_ccbf->r2d,&cam2d,"lvload/ml_optext");
+	progress += sseq;
 	// FIXME: mess
 
 	// load savestates
 	mls[4].load_saves(savestates);
 	savestates.write_savefile();
+	progress += sseq;
 
 	/*
 		setup splash vertices by origin position, target position and colour:
@@ -106,6 +108,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	};
 	buffer.bind();
 	buffer.upload_vertices(sverts,sizeof(sverts));
+	progress += sseq;
 	// ??clockwise rotation triangle hardcoded replace
 	// FIXME: mess
 	// TODO: remove hardcoded secondary segment coords
@@ -117,6 +120,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 	sshd.def_attributeF("colour",3,4,8);
 	sshd.def_attributeF("idx",1,7,8);
 	sshd.upload_camera(cam2d);
+	progress += sseq;
 
 	// framebuffer creation
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
@@ -130,6 +134,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf)
 
 	// minimize difficulty choice banners
 	for (int i=0;i<4;i++) m_ccbf->r2d->sl.at(msindex+14+i).scale_arbit(1,0);
+	progress += sseq;
 } Menu::~Menu() {  }
 
 /*
@@ -477,7 +482,6 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_ccbf->r3d->s3d.upload_matrix("model",model);
 
 	// render globe preview to framebuffer
-	mat0.upload();
 	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
 	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
 	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);

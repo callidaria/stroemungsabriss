@@ -126,18 +126,23 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
 */
-void Renderer3D::load(Camera3D cam3d)
+void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 {
 	// combine all mesh vertices to master vertex list & upload
+	float ptarget = (pseq/6.0f)/(ml.size()+iml.size()+pml.size());
 	std::vector<float> v;
-	for (uint16_t i=0;i<ml.size();i++) v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
-	buffer.bind();
+	for (uint16_t i=0;i<ml.size();i++) {
+		v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
+		progress += ptarget;
+	} buffer.bind();
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
 	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
-	for(uint16_t i=0;i<ml.size();i++) ml[i].texture();
-	s3d.upload_int("tex",0);
+	for(uint16_t i=0;i<ml.size();i++) {
+		ml[i].texture();
+		progress += ptarget;
+	} s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
 	s3d.upload_int("nmap",3);
@@ -145,8 +150,10 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// combine all added instance vertices to master instance vertex list & upload
 	std::vector<float> iv;
-	for (uint16_t i=0;i<iml.size();i++) iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
-	ibuffer.bind();
+	for (uint16_t i=0;i<iml.size();i++) {
+		iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
+		progress += ptarget;
+	} ibuffer.bind();
 	ibuffer.upload_vertices(iv);
 
 	// compile instance shader
@@ -157,8 +164,10 @@ void Renderer3D::load(Camera3D cam3d)
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
 
 	// load textures
-	for(uint16_t i=0;i<iml.size();i++) iml[i].texture();
-	is3d.upload_int("tex",0);
+	for(uint16_t i=0;i<iml.size();i++) {
+		iml[i].texture();
+		progress += ptarget;
+	} is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
 	is3d.upload_int("nmap",3);
@@ -166,14 +175,18 @@ void Renderer3D::load(Camera3D cam3d)
 
 	// combine physical mesh vertices to master vertex list & upload
 	std::vector<float> pv;
-	for (uint16_t i=0;i<pml.size();i++) pv.insert(pv.end(),pml[i].verts.begin(),pml[i].verts.end());
-	pbuffer.bind();
+	for (uint16_t i=0;i<pml.size();i++) {
+		pv.insert(pv.end(),pml[i].verts.begin(),pml[i].verts.end());
+		progress += ptarget;
+	} pbuffer.bind();
 	pbuffer.upload_vertices(pv);
 
 	// compile physical mesh shader & load textures
 	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
-	for (uint16_t i=0;i<pml.size();i++) pml[i].texture();
-	pbms.upload_int("colour_map",0);
+	for (uint16_t i=0;i<pml.size();i++) {
+		pml[i].texture();
+		progress += ptarget;
+	} pbms.upload_int("colour_map",0);
 	pbms.upload_int("normal_map",1);
 	pbms.upload_int("material_map",2);
 	pbms.upload_int("emission_map",3);

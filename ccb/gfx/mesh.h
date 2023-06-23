@@ -33,7 +33,7 @@ public:
 
 	// upload data
 	std::vector<float> v;
-	GLuint tex,specmap,normap,emitmap;
+	uint32_t tex,specmap,normap,emitmap;
 
 	// transformation
 	glm::mat4 model = glm::mat4(1);

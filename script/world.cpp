@@ -12,6 +12,9 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	// g-buffer setup
 	gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
 
+	// memfail avoidance shadow setup
+	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
+
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
@@ -83,11 +86,13 @@ void World::remove_boss(uint8_t boss_id)
 	load_geometry() -> void
 	purpose: upload 2D and 3D geometry of added objects based on the active cameras
 */
-void World::load_geometry()
+void World::load_geometry(float &progress,float ldsplit)
 {
-	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D]);
-	m_ccbf->rI->load();
-	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D]);
+	float org_progress = progress,pr_progress = ldsplit/3.0f;
+	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D],progress,pr_progress);
+	m_ccbf->rI->load(progress,pr_progress);
+	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+	progress = org_progress+ldsplit;
 }
 
 /*
@@ -99,7 +104,14 @@ void World::upload_lighting()
 	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
+}
 
+/*
+	upload_lightmap() -> void
+	purpose: upload diffusion convolution and specular integral maps to shader
+*/
+void World::upload_lightmap()
+{
 	// upload irradiance maps
 	glActiveTexture(GL_TEXTURE4);
 	m_setRigs->lighting.upload_diffusion_map();

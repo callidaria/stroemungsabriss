@@ -11,7 +11,7 @@ class CasinoSpike : public Scene
 public:
 
 	// construction
-	CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs);
+	CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq);
 	~CasinoSpike() {  }
 
 	// draw

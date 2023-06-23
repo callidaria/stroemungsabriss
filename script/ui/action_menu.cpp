@@ -6,10 +6,11 @@
 	input_map: input map to use prehandled controller/keyboard/stick input
 	purpose: creates the lightweight in-action menu to pause and use while in-game
 */
-ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
+ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float pseq)
 	: m_frame(frame),imap(input_map)
 {
 	// vertices for selection splash
+	float sseq = pseq/3.0f;
 	float sverts[] = { 0,-25,0, 1280,0,2, 0,0,1, 1280,0,2, 0,-25,0, 1280,-25,3, };
 	splash_buffer.bind();
 	splash_buffer.upload_vertices(sverts,sizeof(sverts));
@@ -17,6 +18,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 	splash_shader.def_attributeF("position",2,0,3);
 	splash_shader.def_attributeF("index",1,2,3);
 	splash_shader.upload_camera(Camera2D(1280,720));
+	progress += sseq;
 
 	// add menu text
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
@@ -28,6 +30,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE));
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	mtext.load();
+	progress += sseq;
 
 	// add text shadow
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
@@ -38,6 +41,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map)
 	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE-4));
 	stext.add("world order",glm::vec2(2237,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE-4));
 	stext.load();
+	progress += sseq;
 }
 
 /*
