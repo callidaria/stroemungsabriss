@@ -26,7 +26,7 @@ void Worldbuilder::load()
 			ldfb_showing = true;
 			std::thread load_fdb(show_load_progression,&ldfb_showing,m_ccbf,&progress);
 			load_fdb.detach();
-		}
+		} // FIXME: yes, this causes a memory leak ...too bad. called by member?
 
 		// switch load instructions
 		switch (m_ccbf->ld.front()) {
