@@ -168,13 +168,13 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
 				cjkey.dur_positions.push_back(cnanim->mPositionKeys[k].mTime);
-				cjkey.key_positions.push_back(glmify_animvec3(cnanim->mPositionKeys[k].mValue));
+				cjkey.key_positions.push_back(glmify(cnanim->mPositionKeys[k].mValue));
 			} for (uint32_t k=0;k<cnanim->mNumScalingKeys;k++) {
 				cjkey.dur_scales.push_back(cnanim->mScalingKeys[k].mTime);
-				cjkey.key_scales.push_back(glmify_animvec3(cnanim->mScalingKeys[k].mValue));
+				cjkey.key_scales.push_back(glmify(cnanim->mScalingKeys[k].mValue));
 			} for (uint32_t k=0;k<cnanim->mNumRotationKeys;k++) {
 				cjkey.dur_rotations.push_back(cnanim->mRotationKeys[k].mTime);
-				cjkey.key_rotations.push_back(glmify_animquat(cnanim->mRotationKeys[k].mValue));
+				cjkey.key_rotations.push_back(glmify(cnanim->mRotationKeys[k].mValue));
 			}
 
 			// add joint to animation & add animation to list
@@ -216,12 +216,17 @@ void MeshAnimation::interpolate(Shader* shader)
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
-		std::cout << joint.joint_id << ',' << iteration_id << '\n';
-		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
+		std::cout << joint.joint_id << ',' << iteration_id << ',' << joint.key_positions.size() 
+				<< ',' << rel_joint->children.size() << '\n';
+		//rel_joint->gtrans = glm::translate(glm::mat4(1.0f),joint.key_positions[0]);
+		//rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
+		//shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
+		//		rel_joint->gtrans);
 		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
-				rel_joint->gtrans);
+				rel_joint->trans);
 	}
 
+	// recursion for translated transformation
 	// TODO: recursively iterate joints for translated transformation
 }
 
@@ -370,6 +375,7 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 	ColladaJoint* out;
 	uint8_t child_id = 0;
 	while (curr_id<anim_id) {
+		std::cout << "\tsync\n";
 		if (child_id>=cjoint->children.size()) { std::cout << "bruh, " << cjoint->id.c_str(); return nullptr; }
 		curr_id++;
 		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,curr_id);
@@ -388,9 +394,9 @@ void MeshAnimation::rc_upload_joint(Shader* shader,ColladaJoint cjoint,uint16_t 
 /*
 	TODO
 */
-glm::vec3 MeshAnimation::glmify_animvec3(aiVector3D ivec3)
+glm::vec3 MeshAnimation::glmify(aiVector3D ivec3)
 { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
-glm::quat MeshAnimation::glmify_animquat(aiQuaternion iquat)
+glm::quat MeshAnimation::glmify(aiQuaternion iquat)
 { return glm::quat(iquat.x,iquat.y,iquat.z,iquat.w); }
 
 /*

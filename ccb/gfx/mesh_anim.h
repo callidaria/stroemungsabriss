@@ -78,8 +78,8 @@ private:
 #endif
 
 	// conversion
-	static glm::vec3 glmify_animvec3(aiVector3D ivec3);
-	static glm::quat glmify_animquat(aiQuaternion iquat);
+	static glm::vec3 glmify(aiVector3D ivec3);
+	static glm::quat glmify(aiQuaternion iquat);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);

@@ -2,4 +2,5 @@
 /*.ini
 lib/
 include/
+dat/precalc/
 .vscode/
