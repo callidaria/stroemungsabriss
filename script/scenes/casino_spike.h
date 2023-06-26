@@ -2,7 +2,6 @@
 #define SCR_SCENES_CASINO_SPIKE
 
 #include "../../ccb/gfx/cubemap.h"
-#include "../../ccb/gfx/particle_system.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
@@ -24,7 +23,6 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
 	Cubemap irradiance_map = Cubemap("./res/irradiance_map.hdr");
-	ParticleSystem psystem = ParticleSystem();
 	uint16_t index_r3D,index_p3D;
 	std::vector<uint8_t> texture_repeat;
 

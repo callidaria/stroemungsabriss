@@ -38,8 +38,8 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	progress += sseq;
 
 	// particle system
-	psystem.add("./res/weight.png",glm::vec3(0),glm::vec3(.1f,.4f,0),4,4096);
-	psystem.load();
+	m_ccbf->pSys->add("./res/weight.png",glm::vec3(0),glm::vec3(.1f,.4f,0),4,2048);
+	for (uint16_t i=0;i<2048;i++) m_ccbf->pSys->entity_list[0].indices[i*3+2] = (i-1024)*.007f;
 	progress += sseq;
 
 	// simulated lighting
@@ -112,10 +112,6 @@ void CasinoSpike::render()
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
 	}
-
-	// render particles
-	psystem.prepare(m_setRigs->cam3D[0]);
-	psystem.render(0);
 
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);

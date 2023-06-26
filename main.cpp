@@ -11,6 +11,7 @@
 #include "ccb/gfx/renderer2d.h"
 #include "ccb/gfx/renderer3d.h"
 #include "ccb/gfx/rendereri.h"
+#include "ccb/gfx/particle_system.h"
 
 #include "ccb/mat/camera2d.h"
 #include "ccb/mat/camera3d.h"
@@ -54,12 +55,13 @@ int main(int argc,char** argv)
 	Renderer2D r2d = Renderer2D();
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
+	ParticleSystem psys = ParticleSystem();
 	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	// LOADERS
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
-	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&bsys,&imap };
+	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
 	StageSetup set_rigs = { {  },{  },Lighting() };
 
 	// BUILD SET

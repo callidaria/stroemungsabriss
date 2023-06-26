@@ -39,6 +39,11 @@ public:
 	// setter
 	void set_wind_direction(glm::vec3 wdir);
 
+public:
+
+	// entities
+	std::vector<ParticleEntity> entity_list;
+
 private:
 
 	// engine
@@ -47,7 +52,6 @@ private:
 
 	// data
 	std::vector<float> verts;
-	std::vector<ParticleEntity> entity_list;
 
 	// information
 	glm::vec3 wind_direction = glm::vec3(0);

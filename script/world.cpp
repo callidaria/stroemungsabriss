@@ -92,6 +92,7 @@ void World::load_geometry(float &progress,float ldsplit)
 	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D],progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+	m_ccbf->pSys->load();
 	progress = org_progress+ldsplit;
 }
 
@@ -173,6 +174,10 @@ void World::render(uint32_t &running,bool &reboot)
 	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
 	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
 	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// particle rendering
+	m_ccbf->pSys->prepare(m_setRigs->cam3D[0]);
+	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
 
 	// render ui
 	game_fb.close();

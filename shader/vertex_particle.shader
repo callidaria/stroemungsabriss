@@ -13,5 +13,5 @@ uniform mat4 proj;
 void main()
 {
 	TexCoords = texCoords;
-	gl_Position = proj*view*vec4(position,1.0);
+	gl_Position = proj*view*vec4(position+particle_position,1.0);
 }

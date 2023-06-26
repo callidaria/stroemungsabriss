@@ -9,6 +9,7 @@
 #include "../../ccb/gfx/renderer2d.h"
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
+#include "../../ccb/gfx/particle_system.h"
 
 #include "../../ccb/mat/camera3d.h"
 #include "../../ccb/mat/lighting.h"
@@ -33,6 +34,7 @@ struct CascabelBaseFeature {
 	Renderer2D* r2d;
 	Renderer3D* r3d;
 	RendererI* rI;
+	ParticleSystem* pSys;
 	BulletSystem* bSys;
 	InputMap* iMap;
 	std::queue<LoadInstruction> ld;
