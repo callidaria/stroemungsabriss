@@ -176,7 +176,7 @@ void World::render(uint32_t &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// particle rendering
-	m_ccbf->pSys->prepare(m_setRigs->cam3D[0]);
+	m_ccbf->pSys->prepare(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
 	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
 
 	// render ui

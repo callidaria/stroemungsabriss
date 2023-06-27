@@ -17,7 +17,8 @@ struct ParticleEntity
 	uint32_t texture;
 	glm::vec3 origin_pos,drive_dir;
 	std::vector<float> indices;
-	uint32_t count;
+	uint32_t count,cactive=1;
+	float spwn_timeout,spwn_delta=.0f;
 };
 
 class ParticleSystem
@@ -29,11 +30,12 @@ public:
 	~ParticleSystem() {  }
 
 	// load
-	void add(const char* panim,glm::vec3 opos,glm::vec3 ddir,float scl,uint32_t count);
+	uint16_t add(const char* panim,glm::vec3 opos,float scl,glm::vec3 ddir,
+			float spwn_timeout,uint32_t count);
 	void load();
 
 	// draw
-	void prepare(Camera3D cam3D);
+	void prepare(Camera3D cam3D,float delta_time);
 	void render(uint16_t i);
 
 	// setter

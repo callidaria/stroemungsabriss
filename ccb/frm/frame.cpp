@@ -128,7 +128,7 @@ void Frame::calc_time_delta()
 {
 	// circle ticks
 	time_pticks = time_cticks;
-	time_cticks = SDL_GetTicks();
+	time_cticks = SDL_GetTicks64();
 
 	// calculate time delta
 	time_delta = ((time_cticks-time_pticks)/1000.0f)*time_mod;
@@ -335,7 +335,7 @@ void Frame::input_stop()
 	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
 float Frame::get_time_delta()
-{ return time_delta*60; }
+{ return time_delta; }
 
 /*
 	create_new_context() -> SDL_GLContext

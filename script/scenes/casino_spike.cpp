@@ -38,8 +38,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	progress += sseq;
 
 	// particle system
-	m_ccbf->pSys->add("./res/weight.png",glm::vec3(0),glm::vec3(.1f,.4f,0),4,2048);
-	for (uint16_t i=0;i<2048;i++) m_ccbf->pSys->entity_list[0].indices[i*3+2] = (i-1024)*.007f;
+	m_ccbf->pSys->add("./res/weight.png",glm::vec3(0,-.5f,0),1,glm::vec3(.001f,.0007f,0),1.5f,1024);
 	progress += sseq;
 
 	// simulated lighting
