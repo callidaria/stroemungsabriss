@@ -9,12 +9,16 @@ ParticleSystem::ParticleSystem()
 /*
 	TODO
 */
-uint16_t ParticleSystem::add(const char* panim,glm::vec3 opos,float scl,glm::vec3 ddir,
-		float spwn_timeout,uint32_t count)
+uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,
+		glm::vec3 opos,float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count)
 {
 	// entity creation and data
 	ParticleEntity pentity;
 	pentity.panim = panim;
+	pentity.rows = rows;
+	pentity.cols = cols;
+	pentity.cframes = acnt;
+	pentity.anim_duration = dur;
 	pentity.origin_pos = opos;
 	pentity.drive_dir = ddir;
 	pentity.count = count;
@@ -22,11 +26,12 @@ uint16_t ParticleSystem::add(const char* panim,glm::vec3 opos,float scl,glm::vec
 
 	// setup gpu data
 	glGenTextures(1,&pentity.texture);
-	pentity.indices = std::vector<float>(count*3);
+	pentity.indices = std::vector<float>(count*5);
+	pentity.anim_timing = std::vector<float>(count);
 	for (uint32_t i=0;i<count;i++) {
-		pentity.indices[i*3] = opos.x;
-		pentity.indices[i*3+1] = opos.y;
-		pentity.indices[i*3+2] = opos.z;
+		pentity.indices[i*5] = opos.x;
+		pentity.indices[i*5+1] = opos.y;
+		pentity.indices[i*5+2] = opos.z;
 	}
 
 	// add vertex information
@@ -55,10 +60,11 @@ void ParticleSystem::load()
 	shader.def_attributeF("position",3,0,5);
 	shader.def_attributeF("texCoords",2,3,5);
 	buffer.bind_index();
-	shader.def_indexF(buffer.get_indices(),"particle_position",3,0,3);
+	shader.def_indexF(buffer.get_indices(),"particle_position",3,0,5);
+	shader.def_indexF(buffer.get_indices(),"anim_index",2,3,5);
 
 	// load textures
-	for (auto entity : entity_list) Toolbox::load_texture(entity.texture,entity.panim,true);
+	for (auto entity : entity_list) Toolbox::load_texture(entity.texture,entity.panim,false);
 	shader.upload_int("tex",0);
 }
 
@@ -78,11 +84,26 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 		entity_list[j].cactive += spawn;
 		entity_list[j].spwn_delta -= entity_list[j].spwn_timeout*spawn;
 
-		// write position & animation updates for active instances
+		// TODO: let wind direction act on particle momentum
+
+		// write updates for active instances
 		for (uint32_t i=0;i<entity_list[j].cactive;i++) {
-			entity_list[j].indices[i*3] += entity_list[j].drive_dir.x;
-			entity_list[j].indices[i*3+1] += entity_list[j].drive_dir.y;
-			entity_list[j].indices[i*3+2] += entity_list[j].drive_dir.z;
+
+			// individual positions
+			entity_list[j].indices[i*5] += entity_list[j].drive_dir.x;
+			entity_list[j].indices[i*5+1] += entity_list[j].drive_dir.y;
+			entity_list[j].indices[i*5+2] += entity_list[j].drive_dir.z;
+
+			// individual animation frames
+			entity_list[j].anim_timing[i] += delta_time;
+			bool reset_timing = entity_list[j].anim_timing[i]>entity_list[j].anim_duration;
+			entity_list[j].anim_timing[i] -= entity_list[j].anim_duration*reset_timing;
+			uint16_t anim_index = entity_list[j].cframes
+					* (entity_list[j].anim_timing[i]/entity_list[j].anim_duration);
+			entity_list[j].indices[i*5+3] = anim_index%entity_list[j].cols;
+			entity_list[j].indices[i*5+4] = anim_index/entity_list[j].cols;
+
+			// TODO: individual drives
 		}
 	}
 
@@ -101,6 +122,8 @@ void ParticleSystem::render(uint16_t i)
 	// setup
 	glBindTexture(GL_TEXTURE_2D,entity_list[i].texture);
 	buffer.upload_indices(entity_list[i].indices);
+	shader.upload_int("anim_rows",entity_list[i].rows);
+	shader.upload_int("anim_cols",entity_list[i].cols);
 
 	// render particles
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,entity_list[i].cactive);

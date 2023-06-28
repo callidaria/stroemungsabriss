@@ -15,6 +15,10 @@ struct ParticleEntity
 {
 	const char* panim;
 	uint32_t texture;
+	uint8_t rows,cols;
+	uint16_t cframes;
+	float anim_duration;
+	std::vector<float> anim_timing;
 	glm::vec3 origin_pos,drive_dir;
 	std::vector<float> indices;
 	uint32_t count,cactive=1;
@@ -30,8 +34,8 @@ public:
 	~ParticleSystem() {  }
 
 	// load
-	uint16_t add(const char* panim,glm::vec3 opos,float scl,glm::vec3 ddir,
-			float spwn_timeout,uint32_t count);
+	uint16_t add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,glm::vec3 opos,
+			float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count);
 	void load();
 
 	// draw
