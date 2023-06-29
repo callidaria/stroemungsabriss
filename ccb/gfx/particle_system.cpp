@@ -20,7 +20,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.cframes = acnt;
 	pentity.anim_duration = dur;
 	pentity.origin_pos = opos;
-	pentity.drive_dir = ddir;
+	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
 
@@ -28,11 +28,6 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	glGenTextures(1,&pentity.texture);
 	pentity.indices = std::vector<float>(count*5);
 	pentity.anim_timing = std::vector<float>(count);
-	for (uint32_t i=0;i<count;i++) {
-		pentity.indices[i*5] = opos.x;
-		pentity.indices[i*5+1] = opos.y;
-		pentity.indices[i*5+2] = opos.z;
-	}
 
 	// add vertex information
 	float hs = -scl/2.0f;
@@ -76,23 +71,31 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 	// update
 	for (uint32_t j=0;j<entity_list.size();j++) {
 
-		// TODO: reset spawn index when cactive > count
-
 		// stall activations according to spawn timeout
 		entity_list[j].spwn_delta += delta_time;
 		bool spawn = entity_list[j].spwn_delta>entity_list[j].spwn_timeout;
-		entity_list[j].cactive += spawn;
-		entity_list[j].spwn_delta -= entity_list[j].spwn_timeout*spawn;
 
-		// TODO: let wind direction act on particle momentum
+		// reset spawn index should maximum entities have been spawned
+		if (spawn) {
+			entity_list[j].cactive += entity_list[j].cactive<entity_list[j].count;
+			entity_list[j].spwn_delta -= entity_list[j].spwn_timeout;
+			entity_list[j].sindex -= (entity_list[j].sindex>=entity_list[j].count)
+					* entity_list[j].count;
+			entity_list[j].indices[entity_list[j].sindex*5] = entity_list[j].origin_pos.x;
+			entity_list[j].indices[entity_list[j].sindex*5+1] = entity_list[j].origin_pos.y;
+			entity_list[j].indices[entity_list[j].sindex*5+2] = entity_list[j].origin_pos.z;
+			entity_list[j].indices[entity_list[j].sindex*5+3] = .0f;
+			entity_list[j].indices[entity_list[j].sindex*5+4] = .0f;
+			entity_list[j].sindex++;
+		}
 
 		// write updates for active instances
 		for (uint32_t i=0;i<entity_list[j].cactive;i++) {
 
 			// individual positions
-			entity_list[j].indices[i*5] += entity_list[j].drive_dir.x;
-			entity_list[j].indices[i*5+1] += entity_list[j].drive_dir.y;
-			entity_list[j].indices[i*5+2] += entity_list[j].drive_dir.z;
+			entity_list[j].indices[i*5] += entity_list[j].drive_dir[i].x;
+			entity_list[j].indices[i*5+1] += entity_list[j].drive_dir[i].y;
+			entity_list[j].indices[i*5+2] += entity_list[j].drive_dir[i].z;
 
 			// individual animation frames
 			entity_list[j].anim_timing[i] += delta_time;
@@ -102,8 +105,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 					* (entity_list[j].anim_timing[i]/entity_list[j].anim_duration);
 			entity_list[j].indices[i*5+3] = anim_index%entity_list[j].cols;
 			entity_list[j].indices[i*5+4] = anim_index/entity_list[j].cols;
-
-			// TODO: individual drives
+			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
 		}
 	}
 
@@ -128,9 +130,3 @@ void ParticleSystem::render(uint16_t i)
 	// render particles
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,entity_list[i].cactive);
 }
-
-/*
-	TODO
-*/
-void ParticleSystem::set_wind_direction(glm::vec3 wdir)
-{ wind_direction = wdir; }

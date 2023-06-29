@@ -19,9 +19,10 @@ struct ParticleEntity
 	uint16_t cframes;
 	float anim_duration;
 	std::vector<float> anim_timing;
-	glm::vec3 origin_pos,drive_dir;
+	glm::vec3 origin_pos;
+	std::vector<glm::vec3> drive_dir;
 	std::vector<float> indices;
-	uint32_t count,cactive=1;
+	uint32_t count,cactive=0,sindex=0;
 	float spwn_timeout,spwn_delta=.0f;
 };
 
@@ -42,9 +43,6 @@ public:
 	void prepare(Camera3D cam3D,float delta_time);
 	void render(uint16_t i);
 
-	// setter
-	void set_wind_direction(glm::vec3 wdir);
-
 public:
 
 	// entities
@@ -58,9 +56,6 @@ private:
 
 	// data
 	std::vector<float> verts;
-
-	// information
-	glm::vec3 wind_direction = glm::vec3(0);
 };
 
 #endif
