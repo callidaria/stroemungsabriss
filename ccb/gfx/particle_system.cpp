@@ -10,15 +10,16 @@ ParticleSystem::ParticleSystem()
 	TODO
 */
 uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,
-		glm::vec3 opos,float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count)
+		bool loop,glm::vec3 opos,float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count)
 {
 	// entity creation and data
 	ParticleEntity pentity;
 	pentity.panim = panim;
 	pentity.rows = rows;
 	pentity.cols = cols;
-	pentity.cframes = acnt;
+	pentity.cframes = acnt-1;
 	pentity.anim_duration = dur;
+	pentity.loop_anim = loop;
 	pentity.origin_pos = opos;
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
 	pentity.count = count;
@@ -86,6 +87,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 			entity_list[j].indices[entity_list[j].sindex*5+2] = entity_list[j].origin_pos.z;
 			entity_list[j].indices[entity_list[j].sindex*5+3] = .0f;
 			entity_list[j].indices[entity_list[j].sindex*5+4] = .0f;
+			entity_list[j].anim_timing[entity_list[j].sindex] = 0;
 			entity_list[j].sindex++;
 		}
 
@@ -100,9 +102,12 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 			// individual animation frames
 			entity_list[j].anim_timing[i] += delta_time;
 			bool reset_timing = entity_list[j].anim_timing[i]>entity_list[j].anim_duration;
-			entity_list[j].anim_timing[i] -= entity_list[j].anim_duration*reset_timing;
-			uint16_t anim_index = entity_list[j].cframes
-					* (entity_list[j].anim_timing[i]/entity_list[j].anim_duration);
+			entity_list[j].anim_timing[i] -= reset_timing
+					* (entity_list[j].anim_duration*entity_list[j].loop_anim
+					+ (entity_list[j].anim_timing[i]-entity_list[j].anim_duration)
+					* !entity_list[j].loop_anim);
+			uint16_t anim_index = (entity_list[j].anim_timing[i]/entity_list[j].anim_duration)
+					* entity_list[j].cframes;
 			entity_list[j].indices[i*5+3] = anim_index%entity_list[j].cols;
 			entity_list[j].indices[i*5+4] = anim_index/entity_list[j].cols;
 			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
