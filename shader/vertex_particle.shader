@@ -18,7 +18,12 @@ uniform mat4 proj;
 
 void main()
 {
+	// animation spritesheet picker
 	TexCoords = vec2(texCoords.x/anim_cols+anim_index.x/anim_cols,
 			texCoords.y/anim_rows+anim_index.y/anim_rows);
-	gl_Position = proj*view*vec4(position+particle_position,1.0);
+
+	// orthogonal particle faces in relation to camera
+	vec3 cpos = vec3(view[0][0],view[1][0],view[2][0])*position.x
+			+ vec3(view[0][1],view[1][1],view[2][1])*position.y;
+	gl_Position = proj*view*vec4(cpos+particle_position,1.0);
 }

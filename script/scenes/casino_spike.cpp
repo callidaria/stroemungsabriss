@@ -38,7 +38,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	progress += sseq;
 
 	// particle system
-	m_ccbf->pSys->add("./res/fuzzyshit.png",4,8,32,1.5f,false,glm::vec3(0,-.5f,0),1,
+	m_ccbf->pSys->add("./res/fuzzyshit.png",4,8,32,2.5f,false,glm::vec3(0),1,
 			glm::vec3(.001f,.0007f,0),1.5f,10);
 	progress += sseq;
 
