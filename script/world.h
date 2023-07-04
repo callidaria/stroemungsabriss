@@ -59,7 +59,7 @@ private:
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
-	FrameBuffer deferred_fb,game_fb;
+	FrameBuffer deferred_fb,transparency_fb,game_fb;
 	GBuffer gbuffer;
 
 	// scene components

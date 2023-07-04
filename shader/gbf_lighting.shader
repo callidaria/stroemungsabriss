@@ -36,6 +36,10 @@ uniform sampler2D gbuffer_position;
 uniform sampler2D gbuffer_normals;
 uniform sampler2D gbuffer_materials;
 
+// transparency
+uniform sampler2D transparency_buffer;
+uniform sampler2D transparency_depth;
+
 // camera information
 uniform vec3 view_pos;
 uniform int spec_exponent = 16;
@@ -154,6 +158,12 @@ void main()
 	// colour corrections: high dynamic exposure & gamma correction
 	cmb_colours = vec3(1.0)-exp(-cmb_colours*lens_exposure);
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
+
+	// merge transparency buffer
+	vec4 tbuffer = texture(transparency_buffer,TexCoords);
+	cmb_colours += tbuffer.rgb*tbuffer.a*float(tbuffer.r<colour.b);
+	//cmb_colours.rgb -= texture(transparency_depth,TexCoords).r*10000.0;
+	//cmb_colours = vec3(tbuffer.r);
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);

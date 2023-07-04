@@ -73,8 +73,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - loading feedback screen
 - dynamic world loading
 - store "macro" savestate pattern
+- particle emission & management system
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
-- store "macro" savestate pattern
 - automatic compilation of all files using the originally updated source
 
 ### optimizations:
@@ -197,5 +197,5 @@ Worktime: 120h
 	+ 159: 5h 32min
 	+ 62: 1h 52min
 	+ 90: 9h 50min
-	+ 83: 8h 16min
+	+ 83: 12h 1min
 - Total Code Lines: 14.314

@@ -25,14 +25,16 @@ public:
 
 	// details
 	void prepare();
+	void create_depth_texture();
 
 	// write
 	void render();
 	void render(float ptrans);
 
 	// getters
-	GLuint get_fbo();  // !!check if used
-	GLuint get_tex();  // !!check if used
+	GLuint get_fbo();
+	GLuint get_tex();
+	GLuint get_depth();
 
 	// setters
 	void overwrite_texture(GLuint tex);
@@ -55,7 +57,7 @@ public:
 private:
 
 	// buffers
-	GLuint tex,rbo;
+	GLuint tex,dptex,rbo;
 	GLuint fbo;
 	uint32_t frw,frh;
 };

@@ -45,6 +45,7 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 	glGenFramebuffers(1,&fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,fbo);
 	glGenTextures(1,&tex);
+	glGenTextures(1,&dptex);
 	glGenRenderbuffers(1,&rbo);
 
 	// buffer data
@@ -55,20 +56,28 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 	// compile shader
 	s.compile2d(vsp,fsp);
 
-	// texture setup
+	// setup colour texture
 	glBindTexture(GL_TEXTURE_2D,tex); // !!differentiation gives negative style points ??can it be fixed .relfrm
 	if (float_buffer)
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,fr_width,fr_height,0,GL_RGBA,GL_FLOAT,NULL);
 	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fr_width,fr_height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D,0);
-
-	// framebuffer texture
+	Toolbox::set_texture_parameter_linear_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex,0);
+	// FIXME: are we sure we want the framebuffer textures to be linear not nearest?
+
+	// setup depth map texture
+	/*glBindTexture(GL_TEXTURE_2D,dptex);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,frw,frh,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+	Toolbox::set_texture_parameter_linear_unfiltered();
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_TEXTURE_2D,dptex,0);*/
+
+	// renderbuffer setup
 	glBindRenderbuffer(GL_RENDERBUFFER,rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,fr_width,fr_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
+
+	/*uint32_t fb_components[2] = { GL_COLOR_ATTACHMENT0,GL_DEPTH_STENCIL_ATTACHMENT };
+	glDrawBuffers(2,fb_components);*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
@@ -91,6 +100,43 @@ void FrameBuffer::prepare()
 	// buffer & shader
 	s.enable();
 	buffer.bind();
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::create_depth_texture()
+{
+	// setup
+	/*glGenFramebuffers(1,&rdpfb);
+	glGenTextures(1,&dptex);
+
+	// define
+	glBindFramebuffer(GL_RENDERBUFFER,rbo);
+	glBindFramebuffer(GL_FRAMEBUFFER,rdpfb);
+	glBindTexture(GL_TEXTURE_2D,dptex);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,frw,frh,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_TEXTURE_2D,rdpfb,0);
+	close();
+	glBindRenderbuffer(GL_RENDERBUFFER,0);*/
+
+	// setup shadow map texture
+	glGenTextures(1,&dptex);
+	glBindTexture(GL_TEXTURE_2D,dptex);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,frw,frh,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+	Toolbox::set_texture_parameter_nearest_unfiltered();
+	Toolbox::set_texture_parameter_clamp_to_edge();
+	// FIXME: are we sure about that GL_FLOAT?
+
+	// setup depth sensitive framebuffer object
+	//glGenFramebuffers(1,&depth_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 /*
@@ -128,18 +174,15 @@ void FrameBuffer::render(float ptrans)
 }
 
 /*
-	get_fbo() -> GLuint
-	returns: frame buffer object
+	get_<component>() -> GLuint
+	returns: desired frame buffer texture
 */
 GLuint FrameBuffer::get_fbo()
 { return fbo; }
-
-/*
-	get_tex() -> GLuint
-	returns: frame buffer texture
-*/
 GLuint FrameBuffer::get_tex()
 { return tex; }
+GLuint FrameBuffer::get_depth()
+{ return dptex; }
 
 /*
 	overwrite_texture(GLuint) -> void

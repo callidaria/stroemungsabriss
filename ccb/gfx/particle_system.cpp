@@ -21,6 +21,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.anim_duration = dur;
 	pentity.loop_anim = loop;
 	pentity.origin_pos = opos;
+	pentity.scale = scl;
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
@@ -116,6 +117,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 
 	// binding
 	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_DEPTH_TEST);
 	shader.enable();
 	buffer.bind();
 	shader.upload_camera(cam3D);
@@ -131,6 +133,7 @@ void ParticleSystem::render(uint16_t i)
 	buffer.upload_indices(entity_list[i].indices);
 	shader.upload_int("anim_rows",entity_list[i].rows);
 	shader.upload_int("anim_cols",entity_list[i].cols);
+	shader.upload_float("scale",entity_list[i].scale);
 
 	// render particles
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,entity_list[i].cactive);

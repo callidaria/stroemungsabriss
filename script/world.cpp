@@ -28,6 +28,11 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("specular_map",5);
 	deferred_fb.s.upload_int("specular_brdf",6);
 	deferred_fb.s.upload_int("shadow_map",7);
+	deferred_fb.s.upload_int("transparency_buffer",8);
+	deferred_fb.s.upload_int("transparency_depth",9);
+	transparency_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
+	//transparency_fb.create_depth_texture();
 }
 
 /*
@@ -150,13 +155,25 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// end geometry pass deferred scene
 	FrameBuffer::close();
+
+	// prepare transparency render
 	glEnable(GL_BLEND);
+	transparency_fb.bind();
+	m_ccbf->frame->clear();
 
 	// render bullets
 	m_ccbf->bSys->render();
 
-	// upload g-buffer components to deferred light shader
+	// render particles
+	m_ccbf->pSys->prepare(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
+	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
+	// FIXME: move this loop to standard functionality for ParticleSystem::render(void)
+
+	// prepare scene render
+	transparency_fb.close();
 	game_fb.bind();
+
+	// upload g-buffer components to deferred light shader
 	deferred_fb.prepare();
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
 	glActiveTexture(GL_TEXTURE1);
@@ -167,6 +184,10 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_tex());
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_depth());
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);
@@ -174,10 +195,6 @@ void World::render(uint32_t &running,bool &reboot)
 	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
 	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
 	glDrawArrays(GL_TRIANGLES,0,6);
-
-	// particle rendering
-	m_ccbf->pSys->prepare(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
-	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
 
 	// render ui
 	game_fb.close();

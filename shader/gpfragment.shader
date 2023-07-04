@@ -20,6 +20,7 @@ void main()
 {
 	// extract colour
 	gbuffer_colour = vec4(texture(colour_map,TexCoords).rgb,0.0);
+	gbuffer_colour = vec4(0,0,gl_FragCoord.z,0);
 
 	// translate position & shadow
 	gbuffer_position = vec4(Position.rgb,0.0);

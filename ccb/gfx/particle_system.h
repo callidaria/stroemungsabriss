@@ -21,6 +21,7 @@ struct ParticleEntity
 	std::vector<float> anim_timing;
 	bool loop_anim;
 	glm::vec3 origin_pos;
+	float scale;
 	std::vector<glm::vec3> drive_dir;
 	std::vector<float> indices;
 	uint32_t count,cactive=0,sindex=0;
