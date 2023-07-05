@@ -103,6 +103,7 @@ void main()
 
 	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
+	float gdepth = colourxspec.a;
 	float speculars = colourxspec.a;
 	vec3 position = positionxnull.rgb;
 	vec3 normals = normalsxemission.rgb;
@@ -161,9 +162,8 @@ void main()
 
 	// merge transparency buffer
 	vec4 tbuffer = texture(transparency_buffer,TexCoords);
-	cmb_colours += tbuffer.rgb*tbuffer.a*float(tbuffer.r<colour.b);
+	cmb_colours += tbuffer.rgb*tbuffer.a*float(tbuffer.r<gdepth);
 	//cmb_colours.rgb -= texture(transparency_depth,TexCoords).r*10000.0;
-	//cmb_colours = vec3(tbuffer.r);
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);

@@ -47,8 +47,8 @@ GBuffer::GBuffer(float w_res,float h_res)
 
 	// define depth component
 	glBindRenderbuffer(GL_RENDERBUFFER,rb_depth);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT,w_res,h_res);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rb_depth);
+	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,w_res,h_res);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rb_depth);
 
 	// compile buffer
 	uint32_t g_components[4]
