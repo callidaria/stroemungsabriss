@@ -99,8 +99,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
-	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE];
-	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE];
+	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
+	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
 
@@ -136,7 +136,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
 
 		// correct weight array after simplification
-		glm::vec4 vrip_weight = glm::make_vec4(vweight[i]);
+		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
 
 		// insert influencing bone indices & relating weights

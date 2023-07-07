@@ -83,6 +83,6 @@ void CasinoSpike::render()
 
 	// animation render
 	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
-	m_ccbf->r3d->mal[0].interpolate(&m_ccbf->r3d->as3d);
+	//m_ccbf->r3d->mal[0].interpolate(&m_ccbf->r3d->as3d);
 	m_ccbf->r3d->render_anim(0);
 }
