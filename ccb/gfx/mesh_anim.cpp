@@ -212,18 +212,12 @@ void MeshAnimation::set_animation(uint16_t anim_id)
 void MeshAnimation::interpolate(Shader* shader)
 {
 	// iterate all joints for local transformations
-	std::cout << anims[current_anim].joints.size() << '\n';
 	for (auto joint : anims[current_anim].joints) {
-		uint16_t iteration_id;
+		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
-		std::cout << joint.joint_id << ',' << iteration_id << ',' << joint.key_positions.size() 
-				<< ',' << rel_joint->children.size() << '\n';
-		//rel_joint->gtrans = glm::translate(glm::mat4(1.0f),joint.key_positions[0]);
-		//rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
-		//shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
-		//		rel_joint->gtrans);
+		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
 		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
-				rel_joint->trans);
+				rel_joint->gtrans);
 	}
 
 	// recursion for translated transformation
@@ -374,9 +368,9 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 {
 	ColladaJoint* out;
 	uint8_t child_id = 0;
-	while (curr_id<anim_id) {
-		std::cout << "\tsync\n";
-		if (child_id>=cjoint->children.size()) { std::cout << "bruh, " << cjoint->id.c_str(); return nullptr; }
+	while (curr_id<=anim_id) {
+		if (anim_id==curr_id) return cjoint;
+		else if (child_id>=cjoint->children.size()) return nullptr;
 		curr_id++;
 		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,curr_id);
 		child_id++;
