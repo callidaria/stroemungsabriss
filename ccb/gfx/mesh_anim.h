@@ -56,7 +56,7 @@ public:
 
 	// update
 	void set_animation(uint16_t anim_id);
-	void interpolate(Shader* shader);
+	void interpolate(Shader* shader,uint8_t i);
 
 	// system
 	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);

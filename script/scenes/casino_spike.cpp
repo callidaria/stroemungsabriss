@@ -82,7 +82,12 @@ void CasinoSpike::render()
 	m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
 
 	// animation render
+	avx += m_ccbf->frame->get_time_delta();
+	bool inc = avx>4;
+	avx -= avx*inc;
+	aac += inc;
+	aac -= aac*(aac>24);
 	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
-	m_ccbf->r3d->mal[0].interpolate(&m_ccbf->r3d->as3d);
+	m_ccbf->r3d->mal[0].interpolate(&m_ccbf->r3d->as3d,aac);
 	m_ccbf->r3d->render_anim(0);
 }

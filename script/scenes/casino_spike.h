@@ -28,6 +28,10 @@ private:
 	// camera
 	glm::vec3 cp_pos = glm::vec3(0,5,-5),cp_dir = glm::vec3(0,-.05f,.05f);
 	float pitch = 0,yaw = 45.0f;
+
+	// test
+	float avx = 0;
+	uint8_t aac;
 };
 
 #endif

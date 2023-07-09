@@ -25,9 +25,11 @@ void main()
 	Normals = normals;
 
 	// animation transformation
-	Position = vec4(0.0);
+	Position = vec4(.0);
 	for (int i=0;i<4;i++)
 		Position += joint_transform[int(boneIndex[i])]*boneWeight[i]*vec4(position,1.0);
+	Position += int(length(Position)==.0)*vec4(position,1.0);
+	// FIXME: yes, this is not a very elegant circumvention of multiplication fails
 
 	// return position
 	gl_Position = proj*view*model*Position;

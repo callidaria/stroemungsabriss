@@ -99,7 +99,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
-	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
+	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { -1 };
 	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
@@ -209,13 +209,13 @@ void MeshAnimation::set_animation(uint16_t anim_id)
 /*
 	TODO
 */
-void MeshAnimation::interpolate(Shader* shader)
+void MeshAnimation::interpolate(Shader* shader,uint8_t i)
 {
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
-		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[0]);
+		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[i]);
 		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
 				rel_joint->gtrans);
 	}
@@ -331,6 +331,7 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 		rt.a3,rt.b3,rt.c3,rt.d3,
 		rt.a4,rt.b4,rt.c4,rt.d4,
 	}; out.trans = glm::make_mat4(arr_trans);
+	out.trans = glm::rotate(out.trans,glm::radians(90.0f),glm::vec3(1,0,0));
 	out.inv_trans = glm::inverse(out.trans);
 
 	// recursively process children joints
@@ -371,8 +372,7 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 	while (curr_id<=anim_id) {
 		if (anim_id==curr_id) return cjoint;
 		else if (child_id>=cjoint->children.size()) return nullptr;
-		curr_id++;
-		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,curr_id);
+		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,++curr_id);
 		child_id++;
 	} return out;
 }
