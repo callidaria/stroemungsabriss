@@ -99,10 +99,11 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
-	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { -1 };
+	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
+		std::cout << cmesh->mBones[i]->mName.C_Str() << '\n';
 
 		// map bone weights onto vertices
 		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
@@ -110,6 +111,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			uint8_t cindex = veindex[cweight.mVertexId]++;
 			vbindex[cweight.mVertexId][cindex] = i;
 			vweight[cweight.mVertexId][cindex] = cweight.mWeight;
+			std::cout << cweight.mVertexId << ',';
 
 			// handle weight overflow
 			if (veindex[cweight.mVertexId]>BONE_INFLUENCE_STACK_RANGE) {
@@ -118,10 +120,12 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 				//	then set index towards that weight.
 				// 	then write weight everytime it is higher than the currently pointed at weight.
 			}
-		}
+		} std::cout << '\n';
 
 	// assemble vertex array
+	std::cout << '\n';
 	} for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
+		std::cout << (unsigned int)veindex[i] << ',';
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
@@ -164,6 +168,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			// correlate bone string id with tree location
 			bool found = false;
 			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found)-1;
+			std::cout << cnanim->mNodeName.C_Str() << ": " << cjkey.joint_id << '\n';
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -214,7 +219,7 @@ void MeshAnimation::interpolate(Shader* shader,uint8_t i)
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
-		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
+		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
 		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[i]);
 		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
 				rel_joint->gtrans);
@@ -322,6 +327,7 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	// get joint name
 	ColladaJoint out;
 	out.id = joint->mName.C_Str();
+	std::cout << out.id << ": ";
 
 	// translation matrices
 	aiMatrix4x4 rt = joint->mTransformation;
@@ -333,6 +339,25 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	}; out.trans = glm::make_mat4(arr_trans);
 	out.trans = glm::rotate(out.trans,glm::radians(90.0f),glm::vec3(1,0,0));
 	out.inv_trans = glm::inverse(out.trans);
+	std::cout
+			<< out.trans[0][0] << ','
+			<< out.trans[1][0] << ','
+			<< out.trans[2][0] << ','
+			<< out.trans[3][0] << ','
+			<< out.trans[0][1] << ','
+			<< out.trans[1][1] << ','
+			<< out.trans[2][1] << ','
+			<< out.trans[3][1] << ','
+			<< out.trans[0][2] << ','
+			<< out.trans[1][2] << ','
+			<< out.trans[2][2] << ','
+			<< out.trans[3][2] << ','
+			<< out.trans[0][3] << ','
+			<< out.trans[1][3] << ','
+			<< out.trans[2][3] << ','
+			<< out.trans[3][3] << '\n';
+	// FIXME: remove axis correction through rotation,
+	//		gfx will export assets in the superior coordinate system when asked to do so
 
 	// recursively process children joints
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
@@ -370,8 +395,10 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 	ColladaJoint* out;
 	uint8_t child_id = 0;
 	while (curr_id<=anim_id) {
-		if (anim_id==curr_id) return cjoint;
-		else if (child_id>=cjoint->children.size()) return nullptr;
+		if (anim_id==curr_id) {
+			curr_id++;
+			return cjoint;
+		} else if (child_id>=cjoint->children.size()) return nullptr;
 		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,++curr_id);
 		child_id++;
 	} return out;
