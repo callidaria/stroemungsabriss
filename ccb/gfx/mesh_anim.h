@@ -56,7 +56,7 @@ public:
 
 	// update
 	void set_animation(uint16_t anim_id);
-	void interpolate(Shader* shader,uint8_t i);
+	void interpolate(Shader* shader,float i);
 
 	// system
 	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
@@ -106,6 +106,10 @@ private:
 	std::vector<ColladaAnimationData> anims;
 	uint16_t current_anim;
 	float anim_progression = 0;
+
+	// timing
+	float avx = 0;
+	uint8_t aac;
 };
 
 #endif
