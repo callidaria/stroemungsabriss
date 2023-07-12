@@ -218,16 +218,19 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation timing
 	avx += dt;
-	bool inc = avx>4;
+	bool inc = avx>=1;
 	avx -= avx*inc;
 	aac += inc;
-	aac -= aac*(aac>=anims[current_anim].joints[0].key_positions.size());
+	aac %= anims[current_anim].joints[0].key_positions.size();
 
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
-		rel_joint->gtrans = glm::translate(rel_joint->trans,joint.key_positions[aac]);
+		glm::mat4 tmat = glm::translate(rel_joint->trans,joint.key_positions[aac]);
+		glm::mat4 rmat = glm::toMat4(glm::normalize(joint.key_rotations[aac]));
+		glm::mat4 smat = glm::scale(rel_joint->trans,joint.key_scales[aac]);
+		rel_joint->gtrans = tmat*rmat*smat;
 		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
 				rel_joint->gtrans);
 	}
