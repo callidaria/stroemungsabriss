@@ -103,7 +103,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
-		std::cout << cmesh->mBones[i]->mName.C_Str() << '\n';
 
 		// map bone weights onto vertices
 		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
@@ -111,7 +110,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			uint8_t cindex = veindex[cweight.mVertexId]++;
 			vbindex[cweight.mVertexId][cindex] = i;
 			vweight[cweight.mVertexId][cindex] = cweight.mWeight;
-			std::cout << cweight.mVertexId << ',';
 
 			// handle weight overflow
 			if (veindex[cweight.mVertexId]>BONE_INFLUENCE_STACK_RANGE) {
@@ -120,12 +118,10 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 				//	then set index towards that weight.
 				// 	then write weight everytime it is higher than the currently pointed at weight.
 			}
-		} std::cout << '\n';
+		}
 
 	// assemble vertex array
-	std::cout << '\n';
 	} for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
-		std::cout << (unsigned int)veindex[i] << ',';
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
@@ -168,7 +164,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			// correlate bone string id with tree location
 			bool found = false;
 			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found)-1;
-			std::cout << cnanim->mNodeName.C_Str() << ": " << cjkey.joint_id << '\n';
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -218,25 +213,28 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation timing
 	avx += dt;
-	bool inc = avx>=1;
-	avx -= avx*inc;
-	aac += inc;
-	aac %= anims[current_anim].joints[0].key_positions.size();
+	avx -= (avx>=30)*30;
 
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
-		glm::mat4 tmat = glm::translate(rel_joint->trans,joint.key_positions[aac]);
-		glm::mat4 rmat = glm::toMat4(glm::normalize(joint.key_rotations[aac]));
-		glm::mat4 smat = glm::scale(rel_joint->trans,joint.key_scales[aac]);
-		rel_joint->gtrans = tmat*rmat*smat;
-		shader->upload_matrix(("joint_transform["+std::to_string(joint.joint_id)+']').c_str(),
-				rel_joint->gtrans);
-	}
+		rel_joint->iid = joint.joint_id;
 
-	// recursion for translated transformation
-	// TODO: recursively iterate joints for translated transformation
+		// calculate transform interpolation
+		uint16_t tac = joint.key_positions.size()*(avx/30.0f);
+		glm::mat4 tmat = glm::translate(rel_joint->trans,joint.key_positions[tac]);
+		uint16_t rac = joint.key_rotations.size()*(avx/30.0f);
+		glm::mat4 rmat = glm::toMat4(glm::normalize(joint.key_rotations[rac]));
+		uint16_t sac = joint.key_scales.size()*(avx/30.0f);
+		glm::mat4 smat = glm::scale(rel_joint->trans,joint.key_scales[sac]);
+		rel_joint->ltrans = tmat*rmat*smat;
+	}
+	// FIXME: setting iid of joint every time adds a lot of redundancy
+	// FIXME: determine if quaternion normalization is really required for this process
+
+	// kickstart transformation matrix recursion
+	rc_transform_interpolation(shader,jroot,glm::mat4(1));
 }
 
 /*
@@ -337,7 +335,6 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	// get joint name
 	ColladaJoint out;
 	out.id = joint->mName.C_Str();
-	std::cout << out.id << ": ";
 
 	// translation matrices
 	aiMatrix4x4 rt = joint->mTransformation;
@@ -346,34 +343,11 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 		rt.a2,rt.b2,rt.c2,rt.d2,
 		rt.a3,rt.b3,rt.c3,rt.d3,
 		rt.a4,rt.b4,rt.c4,rt.d4,
-	}; out.trans = glm::make_mat4(arr_trans);
-	out.trans = glm::rotate(out.trans,glm::radians(90.0f),glm::vec3(1,0,0));
-	out.inv_trans = glm::inverse(out.trans);
-	std::cout
-			<< out.trans[0][0] << ','
-			<< out.trans[1][0] << ','
-			<< out.trans[2][0] << ','
-			<< out.trans[3][0] << ','
-			<< out.trans[0][1] << ','
-			<< out.trans[1][1] << ','
-			<< out.trans[2][1] << ','
-			<< out.trans[3][1] << ','
-			<< out.trans[0][2] << ','
-			<< out.trans[1][2] << ','
-			<< out.trans[2][2] << ','
-			<< out.trans[3][2] << ','
-			<< out.trans[0][3] << ','
-			<< out.trans[1][3] << ','
-			<< out.trans[2][3] << ','
-			<< out.trans[3][3] << '\n';
-	// FIXME: remove axis correction through rotation,
-	//		gfx will export assets in the superior coordinate system when asked to do so
+	};
 
-	// recursively process children joints
+	// recursively process children joints & output results
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
 		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
-
-	// output results
 	return out;
 }
 
@@ -417,9 +391,11 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 /*
 	TODO
 */
-void MeshAnimation::rc_upload_joint(Shader* shader,ColladaJoint cjoint,uint16_t id)
+void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans)
 {
-	// TODO
+	glm::mat4 lgtrans = gtrans*cjoint.ltrans;
+	shader->upload_matrix(("joint_transform["+std::to_string(cjoint.iid)+"]").c_str(),lgtrans);
+	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans);
 }
 
 /*
