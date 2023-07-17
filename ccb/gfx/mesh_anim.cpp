@@ -107,16 +107,24 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		// map bone weights onto vertices
 		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
 			aiVertexWeight cweight = cbone->mWeights[j];
-			uint8_t cindex = veindex[cweight.mVertexId]++;
-			vbindex[cweight.mVertexId][cindex] = i;
-			vweight[cweight.mVertexId][cindex] = cweight.mWeight;
+
+			// store indices & weights until overflow
+			if (veindex[cweight.mVertexId]<BONE_INFLUENCE_STACK_RANGE) {
+				uint8_t cindex = veindex[cweight.mVertexId]++;
+				vbindex[cweight.mVertexId][cindex] = i;
+				vweight[cweight.mVertexId][cindex] = cweight.mWeight;
 
 			// handle weight overflow
-			if (veindex[cweight.mVertexId]>BONE_INFLUENCE_STACK_RANGE) {
-				// TODO: write automatic exchange of higher weights with the lowest weight:
-				// 	just insert a check for the lowest weight here,
-				//	then set index towards that weight.
-				// 	then write weight everytime it is higher than the currently pointed at weight.
+			} else {
+				uint8_t cwidx = 0;
+				float cwproc = vweight[cweight.mVertexId][0];
+				for (uint8_t ci=1;ci<4;ci++) {
+					if (cwproc>vweight[cweight.mVertexId][ci]) {
+						cwproc = vweight[cweight.mVertexId][ci];
+						cwidx = ci;
+					}
+				} if (cweight.mWeight>vweight[cweight.mVertexId][cwidx])
+					vweight[cweight.mVertexId][cwidx] = cweight.mWeight;
 			}
 		}
 
