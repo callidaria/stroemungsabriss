@@ -226,9 +226,7 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
-		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
-		std::cout << '\n';
-		rel_joint->iid = joint.joint_id;
+		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
 
 		// calculate transform interpolation
 		uint16_t tac = joint.key_positions.size()*(avx/30.0f);
@@ -238,13 +236,13 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 		uint16_t sac = joint.key_scales.size()*(avx/30.0f);
 		glm::mat4 smat = glm::scale(rel_joint->trans,joint.key_scales[sac]);
 		rel_joint->ltrans = tmat*rmat*smat;
-	} std::cout << "setup ended\n\n";
-	// FIXME: setting iid of joint every time adds a lot of redundancy
+	}
 	// FIXME: determine if quaternion normalization is really required for this process
 	// FIXME: try mapping instead of finding for interpolation
 
 	// kickstart transformation matrix recursion
-	rc_transform_interpolation(shader,jroot,glm::mat4(1));
+	uint8_t tree_id = 0;
+	rc_transform_interpolation(shader,jroot,glm::mat4(1),tree_id);
 }
 
 /*
@@ -386,7 +384,6 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,
 		uint16_t &curr_id)
 {
-	std::cout << cjoint->id << '\n';
 	ColladaJoint* out;
 	uint8_t child_id = 0;
 	while (curr_id<=anim_id) {
@@ -402,12 +399,12 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 /*
 	TODO
 */
-void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans)
+void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
+		uint8_t &id)
 {
-	std::cout << cjoint.id << '\n';
-	glm::mat4 lgtrans = glm::mat4(1.0f);//gtrans*cjoint.ltrans;
-	shader->upload_matrix(("joint_transform["+std::to_string(cjoint.iid)+"]").c_str(),lgtrans);
-	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans);
+	glm::mat4 lgtrans = gtrans*cjoint.ltrans;
+	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),lgtrans);
+	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
 }
 
 /*
