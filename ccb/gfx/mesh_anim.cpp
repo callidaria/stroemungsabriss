@@ -221,12 +221,12 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation timing
 	avx += dt;
-	avx -= (avx>=30)*30;
+	avx -= (uint32_t)(avx/30)*30;
 
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
-		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
+		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
 
 		// calculate transform interpolation
 		uint16_t tac = joint.key_positions.size()*(avx/30.0f);

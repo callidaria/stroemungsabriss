@@ -24,13 +24,10 @@ void main()
 	TexCoords = texCoords;
 
 	// animation transformation
-	Position = vec4(.0);
-	Normals = vec3(.0);
-	for (int i=0;i<4;i++) {
-		mat4 index_transform = joint_transform[int(boneIndex[i])]*boneWeight[i];
-		Position += index_transform*vec4(position,1.0);
-		Normals += (index_transform*vec4(normals,1.0)).xyz;
-	}
+	mat4 index_transform = mat4(.0);
+	for (int i=0;i<4;i++) index_transform += joint_transform[int(boneIndex[i])]*boneWeight[i];
+	Position = index_transform*vec4(position,1.0);
+	Normals = (index_transform*vec4(normals,1.0)).xyz;
 
 	// return position
 	gl_Position = proj*view*model*Position;
