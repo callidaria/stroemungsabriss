@@ -219,7 +219,7 @@ void MeshAnimation::set_animation(uint16_t anim_id)
 */
 void MeshAnimation::interpolate(Shader* shader,float dt)
 {
-	// interpolation timing
+	// interpolation delta
 	avx += dt;
 	avx -= (uint32_t)(avx/30)*30;
 
@@ -241,7 +241,7 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 	// FIXME: try mapping instead of finding for interpolation
 
 	// kickstart transformation matrix recursion
-	uint8_t tree_id = 0;
+	uint16_t tree_id = 0;
 	rc_transform_interpolation(shader,jroot,glm::mat4(1),tree_id);
 }
 
@@ -344,16 +344,8 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	ColladaJoint out;
 	out.id = joint->mName.C_Str();
 
-	// translation matrices
-	aiMatrix4x4 rt = joint->mTransformation;
-	float arr_trans[16] = {
-		rt.a1,rt.b1,rt.c1,rt.d1,
-		rt.a2,rt.b2,rt.c2,rt.d2,
-		rt.a3,rt.b3,rt.c3,rt.d3,
-		rt.a4,rt.b4,rt.c4,rt.d4,
-	};
-
 	// recursively process children joints & output results
+	out.trans = glmify(joint->mTransformation);
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
 		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
 	return out;
@@ -400,7 +392,7 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 	TODO
 */
 void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
-		uint8_t &id)
+		uint16_t &id)
 {
 	glm::mat4 lgtrans = gtrans*cjoint.ltrans;
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),lgtrans);
@@ -413,7 +405,25 @@ void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoin
 glm::vec3 MeshAnimation::glmify(aiVector3D ivec3)
 { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
 glm::quat MeshAnimation::glmify(aiQuaternion iquat)
-{ return glm::quat(iquat.x,iquat.y,iquat.z,iquat.w); }
+{ return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
+glm::mat4 MeshAnimation::glmify(aiMatrix3x3 imat3)
+{
+	float arr_trans[16] = {
+		imat3.a1,imat3.b1,imat3.c1,0,
+		imat3.a2,imat3.b2,imat3.c2,0,
+		imat3.a3,imat3.b3,imat3.c3,0,
+		0,0,0,1,
+	}; return glm::make_mat4(arr_trans);
+}
+glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
+{
+	float arr_trans[16] = {
+		imat4.a1,imat4.b1,imat4.c1,imat4.d1,
+		imat4.a2,imat4.b2,imat4.c2,imat4.d2,
+		imat4.a3,imat4.b3,imat4.c3,imat4.d3,
+		imat4.a4,imat4.b4,imat4.c4,imat4.d4,
+	}; return glm::make_mat4(arr_trans);
+}
 
 /*
 	TODO

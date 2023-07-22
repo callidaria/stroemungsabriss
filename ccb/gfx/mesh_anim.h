@@ -77,11 +77,13 @@ private:
 	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
 	static void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
-			uint8_t &id);
+			uint16_t &id);
 
 	// conversion
 	static glm::vec3 glmify(aiVector3D ivec3);
 	static glm::quat glmify(aiQuaternion iquat);
+	static glm::mat4 glmify(aiMatrix3x3 imat3);
+	static glm::mat4 glmify(aiMatrix4x4 imat4);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
