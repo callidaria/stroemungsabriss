@@ -96,6 +96,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// extract animation nodes
 	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
+	gmat = jroot.trans;
+	ginverse = glm::inverse(jroot.trans);
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -103,6 +105,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
+		bone_offsets.push_back(glmify(cbone->mOffsetMatrix));
 
 		// map bone weights onto vertices
 		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
@@ -224,18 +227,20 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 	avx -= (uint32_t)(avx/30)*30;
 
 	// iterate all joints for local transformations
+	int16_t bone_index = 0;
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
+		rel_joint->bone_index = bone_index++;
 
 		// calculate transform interpolation
 		uint16_t tac = joint.key_positions.size()*(avx/30.0f);
-		glm::mat4 tmat = glm::translate(rel_joint->trans,joint.key_positions[tac]);
+		glm::mat4 tmat = glm::translate(glm::mat4(1),joint.key_positions[tac]);
 		uint16_t rac = joint.key_rotations.size()*(avx/30.0f);
 		glm::mat4 rmat = glm::toMat4(glm::normalize(joint.key_rotations[rac]));
 		uint16_t sac = joint.key_scales.size()*(avx/30.0f);
-		glm::mat4 smat = glm::scale(rel_joint->trans,joint.key_scales[sac]);
-		rel_joint->ltrans = tmat*rmat*smat;
+		glm::mat4 smat = glm::scale(glm::mat4(1),joint.key_scales[sac]);
+		rel_joint->trans = tmat*rmat*smat;
 	}
 	// FIXME: determine if quaternion normalization is really required for this process
 	// FIXME: try mapping instead of finding for interpolation
@@ -394,10 +399,12 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 		uint16_t &id)
 {
-	glm::mat4 lgtrans = gtrans*cjoint.ltrans;
+	glm::mat4 lgtrans = glm::mat4(1);
+	if (id>2&&id<16) lgtrans = gtrans*cjoint.trans*bone_offsets[id-3];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),lgtrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
 }
+// TODO: this bone id determination is a big fat hack, a sensible system has yet to be implemented
 
 /*
 	TODO
@@ -408,21 +415,21 @@ glm::quat MeshAnimation::glmify(aiQuaternion iquat)
 { return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
 glm::mat4 MeshAnimation::glmify(aiMatrix3x3 imat3)
 {
-	float arr_trans[16] = {
-		imat3.a1,imat3.b1,imat3.c1,0,
-		imat3.a2,imat3.b2,imat3.c2,0,
-		imat3.a3,imat3.b3,imat3.c3,0,
-		0,0,0,1,
-	}; return glm::make_mat4(arr_trans);
+	glm::mat4 out;
+	out[0][0] = imat3.a1,out[0][1] = imat3.b1,out[0][2] = imat3.c1,out[0][3] = 0,
+	out[1][0] = imat3.a2,out[1][1] = imat3.b2,out[1][2] = imat3.c2,out[1][3] = 0,
+	out[2][0] = imat3.a3,out[2][1] = imat3.b3,out[2][2] = imat3.c3,out[2][3] = 0,
+	out[3][0] = 0,out[3][1] = 0,out[3][2] = 0,out[3][3] = 1;
+	return out;
 }
 glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
 {
-	float arr_trans[16] = {
-		imat4.a1,imat4.b1,imat4.c1,imat4.d1,
-		imat4.a2,imat4.b2,imat4.c2,imat4.d2,
-		imat4.a3,imat4.b3,imat4.c3,imat4.d3,
-		imat4.a4,imat4.b4,imat4.c4,imat4.d4,
-	}; return glm::make_mat4(arr_trans);
+	glm::mat4 out;
+	out[0][0] = imat4.a1,out[0][1] = imat4.b1,out[0][2] = imat4.c1,out[0][3] = imat4.d1,
+	out[1][0] = imat4.a2,out[1][1] = imat4.b2,out[1][2] = imat4.c2,out[1][3] = imat4.d2,
+	out[2][0] = imat4.a3,out[2][1] = imat4.b3,out[2][2] = imat4.c3,out[2][3] = imat4.d3,
+	out[3][0] = imat4.a4,out[3][1] = imat4.b4,out[3][2] = imat4.c4,out[3][3] = imat4.d4;
+	return out;
 }
 
 /*

@@ -25,7 +25,8 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans = glm::mat4(1.0f),ltrans = glm::mat4(1.0f);
+	int16_t bone_index = -1;
+	glm::mat4 trans = glm::mat4(1);
 	std::vector<ColladaJoint> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -76,7 +77,7 @@ private:
 #endif
 	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
-	static void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
+	void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 			uint16_t &id);
 
 	// conversion
@@ -98,6 +99,8 @@ public:
 
 	// transformation
 	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 gmat,ginverse;
+	std::vector<glm::mat4> bone_offsets;
 
 private:
 
