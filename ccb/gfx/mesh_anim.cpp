@@ -96,8 +96,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// extract animation nodes
 	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
-	gmat = jroot.trans;
-	ginverse = glm::inverse(jroot.trans);
+	std::cout << dae_file->mRootNode->mNumChildren << '\n';
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -114,7 +113,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			// store indices & weights until overflow
 			if (veindex[cweight.mVertexId]<BONE_INFLUENCE_STACK_RANGE) {
 				uint8_t cindex = veindex[cweight.mVertexId]++;
-				vbindex[cweight.mVertexId][cindex] = i;
+				vbindex[cweight.mVertexId][cindex] = i+3;
 				vweight[cweight.mVertexId][cindex] = cweight.mWeight;
 
 			// handle weight overflow
@@ -174,7 +173,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// correlate bone string id with tree location
 			bool found = false;
-			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found)-1;
+			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -227,11 +226,9 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 	avx -= (uint32_t)(avx/30)*30;
 
 	// iterate all joints for local transformations
-	int16_t bone_index = 0;
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
-		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id+1,iteration_id);
-		rel_joint->bone_index = bone_index++;
+		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
 
 		// calculate transform interpolation
 		uint16_t tac = joint.key_positions.size()*(avx/30.0f);
@@ -399,7 +396,8 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 		uint16_t &id)
 {
-	glm::mat4 lgtrans = glm::mat4(1);
+	glm::mat4 lgtrans = gtrans*cjoint.trans*glm::mat4(1);
+	//glm::mat4 lgtrans = glm::mat4(1);
 	if (id>2&&id<16) lgtrans = gtrans*cjoint.trans*bone_offsets[id-3];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),lgtrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
@@ -423,14 +421,7 @@ glm::mat4 MeshAnimation::glmify(aiMatrix3x3 imat3)
 	return out;
 }
 glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
-{
-	glm::mat4 out;
-	out[0][0] = imat4.a1,out[0][1] = imat4.b1,out[0][2] = imat4.c1,out[0][3] = imat4.d1,
-	out[1][0] = imat4.a2,out[1][1] = imat4.b2,out[1][2] = imat4.c2,out[1][3] = imat4.d2,
-	out[2][0] = imat4.a3,out[2][1] = imat4.b3,out[2][2] = imat4.c3,out[2][3] = imat4.d3,
-	out[3][0] = imat4.a4,out[3][1] = imat4.b4,out[3][2] = imat4.c4,out[3][3] = imat4.d4;
-	return out;
-}
+{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 /*
 	TODO
