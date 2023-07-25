@@ -25,7 +25,7 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans = glm::mat4(1);
+	glm::mat4 trans = glm::mat4(1),gtrans = glm::mat4(1);
 	std::vector<ColladaJoint> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -56,7 +56,7 @@ public:
 	void texture();
 
 	// update
-	void set_animation(uint16_t anim_id);
+	void set_animation(uint16_t anim_id,float ctime);
 	void interpolate(Shader* shader,float i);
 
 	// system
@@ -64,16 +64,19 @@ public:
 
 private:
 
+#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
+
 	// read helpers
 	std::vector<float> extract_array_data(std::vector<std::string> raw_data);
 	std::vector<std::string> parameters_from_line(std::string line);
 
-	// recursion
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
+	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
 	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
 #endif
+
+	// standard recursion
 	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
 	void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
@@ -97,7 +100,7 @@ public:
 	uint32_t ofs,size = 0;
 
 	// transformation
-	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 model = glm::mat4(1.0f),glmat,ivmat;
 	std::vector<glm::mat4> bone_offsets;
 
 private:
@@ -113,6 +116,7 @@ private:
 	float anim_progression = 0;
 
 	// timing
+	float cap_time = 30.0f;
 	float avx = 0;
 };
 

@@ -96,7 +96,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// extract animation nodes
 	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
-	std::cout << dae_file->mRootNode->mNumChildren << '\n';
+	glmat = jroot.trans;
+	ivmat = glm::inverse(glmat);
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -210,10 +211,11 @@ void MeshAnimation::texture()
 /*
 	TODO
 */
-void MeshAnimation::set_animation(uint16_t anim_id)
+void MeshAnimation::set_animation(uint16_t anim_id,float ctime)
 {
 	current_anim = anim_id;
 	anim_progression = 0;
+	cap_time = ctime;
 }
 
 /*
@@ -223,23 +225,33 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation delta
 	avx += dt;
-	avx -= (uint32_t)(avx/30)*30;
+	avx -= (uint32_t)(avx/cap_time)*cap_time;  // TODO: change to fmod (probably better optimized)
+	float aprog = (avx/cap_time);
 
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
 
-		// calculate transform interpolation
-		uint16_t tac = joint.key_positions.size()*(avx/30.0f);
-		glm::mat4 tmat = glm::translate(glm::mat4(1),joint.key_positions[tac]);
-		uint16_t rac = joint.key_rotations.size()*(avx/30.0f);
-		glm::mat4 rmat = glm::toMat4(glm::normalize(joint.key_rotations[rac]));
-		uint16_t sac = joint.key_scales.size()*(avx/30.0f);
-		glm::mat4 smat = glm::scale(glm::mat4(1),joint.key_scales[sac]);
+		// determine transformation keyframes
+		float tac = (joint.key_positions.size()-1)*aprog;
+		float rac = (joint.key_rotations.size()-1)*aprog;
+		float sac = (joint.key_scales.size()-1)*aprog;
+
+		// smooth interpolation between keyframes
+		glm::vec3 tip
+				= glm::mix(joint.key_positions[tac],joint.key_positions[tac+1],fmod(tac,1.0f));
+		glm::quat rip
+				= glm::slerp(joint.key_rotations[rac],joint.key_rotations[rac+1],fmod(rac,1.0f));
+		glm::vec3 sip
+				= glm::mix(joint.key_scales[sac],joint.key_scales[sac+1],fmod(sac,1.0f));
+
+		// combine translation matrices
+		glm::mat4 tmat = glm::translate(glm::mat4(1),tip);
+		glm::mat4 rmat = glm::toMat4(rip);
+		glm::mat4 smat = glm::scale(glm::mat4(1),sip);
 		rel_joint->trans = tmat*rmat*smat;
 	}
-	// FIXME: determine if quaternion normalization is really required for this process
 	// FIXME: try mapping instead of finding for interpolation
 
 	// kickstart transformation matrix recursion
@@ -259,6 +271,8 @@ std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 	MeshAnimation::rc_print_joint_tree(os,obj.jroot,0);
 	return os;
 }
+
+#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
 /*
 	TODO
@@ -296,8 +310,6 @@ std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
 	while (std::getline(pline,rdata,' ')) out.push_back(rdata);
 	return out;
 }
-
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
 /*
 	TODO
@@ -347,11 +359,13 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 	out.id = joint->mName.C_Str();
 
 	// recursively process children joints & output results
-	out.trans = glmify(joint->mTransformation);
+	out.gtrans = glmify(joint->mTransformation);
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
 		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
 	return out;
 }
+
+#endif
 
 /*
 	TODO
@@ -369,8 +383,6 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 		out += rc_get_joint_id(jname,child,found);
 	} return out;
 }
-
-#endif
 
 /*
 	TODO
@@ -397,7 +409,6 @@ void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoin
 		uint16_t &id)
 {
 	glm::mat4 lgtrans = gtrans*cjoint.trans*glm::mat4(1);
-	//glm::mat4 lgtrans = glm::mat4(1);
 	if (id>2&&id<16) lgtrans = gtrans*cjoint.trans*bone_offsets[id-3];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),lgtrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
