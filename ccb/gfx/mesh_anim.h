@@ -25,7 +25,7 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans = glm::mat4(1),gtrans = glm::mat4(1);
+	glm::mat4 trans = glm::mat4(1),gtrans = glm::mat4(1),ivtrans = glm::mat4(1);
 	std::vector<ColladaJoint> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -73,7 +73,7 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
-	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
+	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint,glm::mat4 ptrans);
 #endif
 
 	// standard recursion
