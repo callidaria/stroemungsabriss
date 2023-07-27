@@ -96,8 +96,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// extract animation nodes
 	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,glm::mat4(1));
-	glmat = jroot.trans;
-	ivmat = glm::inverse(glmat);
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -245,7 +243,7 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 		glm::vec3 sip = glm::mix(joint.key_scales[sac],joint.key_scales[sac+1],fmod(sac,1.0f));
 
 		// combine translation matrices
-		rel_joint->gtrans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
+		rel_joint->trans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
 				* glm::scale(glm::mat4(1),sip);
 	}
 	// TODO: process interpolation progression with individual key durations
@@ -357,10 +355,8 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,glm::mat4 
 
 	// recursively process children joints & output results
 	out.trans = glmify(joint->mTransformation);
-	out.gtrans = ptrans*out.trans;
-	out.ivtrans = glm::inverse(out.trans);
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
-		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i],out.gtrans));
+		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i],out.trans));
 	return out;
 }
 
@@ -407,8 +403,8 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 		uint16_t &id)
 {
-	glm::mat4 lgtrans = gtrans*cjoint.gtrans;
-	glm::mat4 btrans = lgtrans*glm::mat4(1);
+	glm::mat4 lgtrans = gtrans*cjoint.trans;
+	glm::mat4 btrans = glm::mat4();
 	if (id>2&&id<19) btrans = lgtrans*bone_offsets[id-3];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),btrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
