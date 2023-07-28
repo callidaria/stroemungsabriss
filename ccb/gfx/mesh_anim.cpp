@@ -95,7 +95,14 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
-	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,glm::mat4(1));
+	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
+
+	// extract bone armature offset
+	bool aofound = false;
+	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
+	bone_offsets = std::vector<glm::mat4>(armature_offset,glm::mat4());
+	std::cout << "armature bone offset:  " << armature_offset << '\n';
+	// TODO: find out how much of a good idea this is in reality
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -112,7 +119,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 			// store indices & weights until overflow
 			if (veindex[cweight.mVertexId]<BONE_INFLUENCE_STACK_RANGE) {
 				uint8_t cindex = veindex[cweight.mVertexId]++;
-				vbindex[cweight.mVertexId][cindex] = i+3;
+				vbindex[cweight.mVertexId][cindex] = i+armature_offset;
 				vweight[cweight.mVertexId][cindex] = cweight.mWeight;
 
 			// handle weight overflow
@@ -163,7 +170,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
+		proc.duration = canim->mDuration;
 		proc.delta_ticks = canim->mTicksPerSecond;
+		std::cout << proc.duration << ' ' << proc.delta_ticks << '\n';
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
@@ -209,11 +218,10 @@ void MeshAnimation::texture()
 /*
 	TODO
 */
-void MeshAnimation::set_animation(uint16_t anim_id,float ctime)
+void MeshAnimation::set_animation(uint16_t anim_id)
 {
 	current_anim = anim_id;
 	anim_progression = 0;
-	cap_time = ctime;
 }
 
 /*
@@ -223,8 +231,8 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation delta
 	avx += dt;
-	avx = fmod(avx,cap_time);
-	float aprog = (avx/cap_time);
+	avx = fmod(avx,anims[current_anim].duration);
+	float aprog = (avx/anims[current_anim].duration);
 
 	// iterate all joints for local transformations
 	for (auto joint : anims[current_anim].joints) {
@@ -347,7 +355,7 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 /*
 	TODO
 */
-ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,glm::mat4 ptrans)
+ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
 {
 	// get joint name
 	ColladaJoint out;
@@ -356,7 +364,7 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,glm::mat4 
 	// recursively process children joints & output results
 	out.trans = glmify(joint->mTransformation);
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
-		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i],out.trans));
+		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
 	return out;
 }
 
@@ -404,8 +412,7 @@ void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoin
 		uint16_t &id)
 {
 	glm::mat4 lgtrans = gtrans*cjoint.trans;
-	glm::mat4 btrans = glm::mat4();
-	if (id>2&&id<19) btrans = lgtrans*bone_offsets[id-3];
+	glm::mat4 btrans = lgtrans*bone_offsets[id];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),btrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
 }

@@ -29,7 +29,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 
 	// animation test
 	m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png");
-	m_ccbf->r3d->mal[0].set_animation(0,300.0f);
+	m_ccbf->r3d->mal[0].set_animation(0);
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);

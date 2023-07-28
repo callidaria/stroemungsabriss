@@ -40,7 +40,7 @@ struct JointKeys {
 
 // structure of animation data
 struct ColladaAnimationData {
-	double delta_ticks;
+	double duration,delta_ticks;
 	std::vector<JointKeys> joints;
 };
 
@@ -56,7 +56,7 @@ public:
 	void texture();
 
 	// update
-	void set_animation(uint16_t anim_id,float ctime);
+	void set_animation(uint16_t anim_id);
 	void interpolate(Shader* shader,float i);
 
 	// system
@@ -73,7 +73,7 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
-	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint,glm::mat4 ptrans);
+	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
 #endif
 
 	// standard recursion
@@ -101,7 +101,6 @@ public:
 
 	// transformation
 	glm::mat4 model = glm::mat4(1.0f);
-	std::vector<glm::mat4> bone_offsets;
 
 private:
 
@@ -112,11 +111,11 @@ private:
 	// rigging data
 	ColladaJoint jroot;
 	std::vector<ColladaAnimationData> anims;
+	std::vector<glm::mat4> bone_offsets;
 	uint16_t current_anim;
 	float anim_progression = 0;
 
 	// timing
-	float cap_time = 30.0f;
 	float avx = 0;
 };
 
