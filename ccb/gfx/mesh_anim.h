@@ -85,7 +85,6 @@ private:
 	// conversion
 	static glm::vec3 glmify(aiVector3D ivec3);
 	static glm::quat glmify(aiQuaternion iquat);
-	static glm::mat4 glmify(aiMatrix3x3 imat3);
 	static glm::mat4 glmify(aiMatrix4x4 imat4);
 
 	// system

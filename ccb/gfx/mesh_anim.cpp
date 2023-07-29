@@ -91,7 +91,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	// load collada file
 	Assimp::Importer importer;
 	const aiScene* dae_file = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
-			|aiProcess_JoinIdenticalVertices|aiProcess_SortByPType);
+			|aiProcess_JoinIdenticalVertices);
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
@@ -99,7 +99,10 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 	// extract bone armature offset
 	bool aofound = false;
-	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
+	std::cout << "bones found: " << cmesh->mNumBones << '\n';
+	uint16_t armature_offset = 0;
+	if (cmesh->mNumBones)
+		armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
 	bone_offsets = std::vector<glm::mat4>(armature_offset,glm::mat4());
 	std::cout << "armature bone offset:  " << armature_offset << '\n';
 	// TODO: find out how much of a good idea this is in reality
@@ -425,15 +428,6 @@ glm::vec3 MeshAnimation::glmify(aiVector3D ivec3)
 { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
 glm::quat MeshAnimation::glmify(aiQuaternion iquat)
 { return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
-glm::mat4 MeshAnimation::glmify(aiMatrix3x3 imat3)
-{
-	glm::mat4 out;
-	out[0][0] = imat3.a1,out[0][1] = imat3.b1,out[0][2] = imat3.c1,out[0][3] = 0,
-	out[1][0] = imat3.a2,out[1][1] = imat3.b2,out[1][2] = imat3.c2,out[1][3] = 0,
-	out[2][0] = imat3.a3,out[2][1] = imat3.b3,out[2][2] = imat3.c3,out[2][3] = 0,
-	out[3][0] = 0,out[3][1] = 0,out[3][2] = 0,out[3][3] = 1;
-	return out;
-}
 glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
 { return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
