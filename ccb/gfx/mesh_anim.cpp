@@ -95,17 +95,13 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
-	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode);
+	uint16_t joint_count = 0;
+	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
 
 	// extract bone armature offset
 	bool aofound = false;
-	std::cout << "bones found: " << cmesh->mNumBones << '\n';
-	uint16_t armature_offset = 0;
-	if (cmesh->mNumBones)
-		armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
-	bone_offsets = std::vector<glm::mat4>(armature_offset,glm::mat4());
-	std::cout << "armature bone offset:  " << armature_offset << '\n';
-	// TODO: find out how much of a good idea this is in reality
+	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
+	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -113,7 +109,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	float vweight[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
 	for (uint16_t i=0;i<cmesh->mNumBones;i++) {
 		aiBone* cbone = cmesh->mBones[i];
-		bone_offsets.push_back(glmify(cbone->mOffsetMatrix));
+		bone_offsets[i+armature_offset] = glmify(cbone->mOffsetMatrix);
 
 		// map bone weights onto vertices
 		for (uint32_t j=0;j<cbone->mNumWeights;j++) {
@@ -358,16 +354,17 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 /*
 	TODO
 */
-ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint)
+ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
 {
 	// get joint name
 	ColladaJoint out;
 	out.id = joint->mName.C_Str();
+	joint_count++;
 
 	// recursively process children joints & output results
 	out.trans = glmify(joint->mTransformation);
 	for (uint16_t i=0;i<joint->mNumChildren;i++)
-		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i]));
+		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count));
 	return out;
 }
 

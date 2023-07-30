@@ -73,7 +73,7 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
-	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint);
+	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
 #endif
 
 	// standard recursion
