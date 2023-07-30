@@ -169,9 +169,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
-		proc.duration = canim->mDuration;
-		proc.delta_ticks = canim->mTicksPerSecond;
-		std::cout << proc.duration << ' ' << proc.delta_ticks << '\n';
+		proc.duration = canim->mDuration/canim->mTicksPerSecond;
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {

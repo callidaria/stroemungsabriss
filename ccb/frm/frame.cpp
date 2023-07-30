@@ -337,4 +337,4 @@ void Frame::input_stop()
 	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
 float Frame::get_time_delta()
-{ return time_delta*60; }
+{ return time_delta; }

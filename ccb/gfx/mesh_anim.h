@@ -40,7 +40,7 @@ struct JointKeys {
 
 // structure of animation data
 struct ColladaAnimationData {
-	double duration,delta_ticks;
+	double duration;
 	std::vector<JointKeys> joints;
 };
 
