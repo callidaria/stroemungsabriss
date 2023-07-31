@@ -169,7 +169,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
-		proc.duration = canim->mDuration/canim->mTicksPerSecond;
+		proc.duration = (canim->mDuration/canim->mTicksPerSecond)*1000.0f;
+		std::cout << "animation duration: " << proc.duration << '\n';
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
@@ -194,7 +195,13 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// add joint to animation & add animation to list
 			proc.joints.push_back(cjkey);
-		} anims.push_back(proc);
+		}
+
+		// initialize keyframe counter lists and store animation data
+		proc.crr_position = std::vector<uint16_t>(proc.joints.size(),0);
+		proc.crr_scale = std::vector<uint16_t>(proc.joints.size(),0);
+		proc.crr_rotation = std::vector<uint16_t>(proc.joints.size(),0);
+		anims.push_back(proc);
 	}
 
 	// vertex size & offset
@@ -216,10 +223,7 @@ void MeshAnimation::texture()
 	TODO
 */
 void MeshAnimation::set_animation(uint16_t anim_id)
-{
-	current_anim = anim_id;
-	anim_progression = 0;
-}
+{ current_anim = anim_id; }
 
 /*
 	TODO
@@ -227,31 +231,35 @@ void MeshAnimation::set_animation(uint16_t anim_id)
 void MeshAnimation::interpolate(Shader* shader,float dt)
 {
 	// interpolation delta
-	avx += dt;
+	avx += dt*1000.0f;
 	avx = fmod(avx,anims[current_anim].duration);
-	float aprog = (avx/anims[current_anim].duration);
 
 	// iterate all joints for local transformations
-	for (auto joint : anims[current_anim].joints) {
+	ColladaAnimationData* anim = &anims[current_anim];
+	for (uint16_t i=0;i<anim->joints.size();i++) {
+		auto joint = anim->joints[i];
+
+		// find pointer to correlating collada joint
 		uint16_t iteration_id = 0;
 		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
 
 		// determine transformation keyframes
-		float tac = (joint.key_positions.size()-1)*aprog;
-		float rac = (joint.key_rotations.size()-1)*aprog;
-		float sac = (joint.key_scales.size()-1)*aprog;
+		float pprog = advance_animation(anim->crr_position[i],joint.dur_positions);
+		float rprog = advance_animation(anim->crr_rotation[i],joint.dur_rotations);
+		float sprog = advance_animation(anim->crr_scale[i],joint.dur_scales);
 
 		// smooth interpolation between keyframes
-		glm::vec3 tip = glm::mix(joint.key_positions[tac],joint.key_positions[tac+1],fmod(tac,1.0f));
-		glm::quat rip = glm::slerp(joint.key_rotations[rac],joint.key_rotations[rac+1],
-				fmod(rac,1.0f));
-		glm::vec3 sip = glm::mix(joint.key_scales[sac],joint.key_scales[sac+1],fmod(sac,1.0f));
+		glm::vec3 tip = glm::mix(joint.key_positions[anim->crr_position[i]],
+				joint.key_positions[anim->crr_position[i]+1],pprog);
+		glm::quat rip = glm::slerp(joint.key_rotations[anim->crr_rotation[i]],
+				joint.key_rotations[anim->crr_rotation[i]+1],rprog);
+		glm::vec3 sip = glm::mix(joint.key_scales[anim->crr_scale[i]],
+				joint.key_scales[anim->crr_scale[i]+1],sprog);
 
 		// combine translation matrices
 		rel_joint->trans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
 				* glm::scale(glm::mat4(1),sip);
 	}
-	// TODO: process interpolation progression with individual key durations
 	// FIXME: try mapping instead of finding for interpolation
 
 	// kickstart transformation matrix recursion
@@ -425,6 +433,16 @@ glm::quat MeshAnimation::glmify(aiQuaternion iquat)
 { return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
 glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
 { return glm::transpose(glm::make_mat4(&imat4.a1)); }
+
+/*
+	TODO
+*/
+float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> key_indices)
+{
+	while (key_indices[crr_index+1]<avx) crr_index++;
+	crr_index *= crr_index<key_indices.size()&&key_indices[crr_index]<avx;
+	return (avx-key_indices[crr_index])/(key_indices[crr_index+1]-key_indices[crr_index]);
+}
 
 /*
 	TODO

@@ -42,6 +42,7 @@ struct JointKeys {
 struct ColladaAnimationData {
 	double duration;
 	std::vector<JointKeys> joints;
+	std::vector<uint16_t> crr_position,crr_scale,crr_rotation;
 };
 
 class MeshAnimation
@@ -87,6 +88,9 @@ private:
 	static glm::quat glmify(aiQuaternion iquat);
 	static glm::mat4 glmify(aiMatrix4x4 imat4);
 
+	// animation
+	float advance_animation(uint16_t &crr_index,std::vector<double> key_indices);
+
 	// system
 	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
 
@@ -112,7 +116,6 @@ private:
 	std::vector<ColladaAnimationData> anims;
 	std::vector<glm::mat4> bone_offsets;
 	uint16_t current_anim;
-	float anim_progression = 0;
 
 	// timing
 	float avx = 0;
