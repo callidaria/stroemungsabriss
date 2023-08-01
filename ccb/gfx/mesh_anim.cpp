@@ -95,12 +95,15 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
+	joints = std::vector<ColladaJoint>(128,ColladaJoint());
 	uint16_t joint_count = 0;
-	jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
+	//jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
+	rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
+	// TODO: add a joint counter to not overinitialize joint list
 
 	// extract bone armature offset
 	bool aofound = false;
-	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),jroot,aofound);
+	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),joints[0],aofound);
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
 	// assemble bone influence weights
@@ -170,16 +173,19 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
 		proc.duration = (canim->mDuration/canim->mTicksPerSecond)*1000.0f;
-		std::cout << "animation duration: " << proc.duration << '\n';
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
 			aiNodeAnim* cnanim = canim->mChannels[j];
 			JointKeys cjkey;
 
-			// correlate bone string id with tree location
+			// correlate bone string id with object from joint tree
 			bool found = false;
-			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
+			uint16_t iteration_id = 0;
+			/*uint16_t joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
+			cjkey.joint = rc_get_joint_object(&jroot,joint_id,iteration_id);*/
+			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),joints[0],found);
+			//joints[cjkey.joint_id] = *rc_get_joint_object(&joints[0],cjkey.joint_id,iteration_id);
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -239,10 +245,6 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 	for (uint16_t i=0;i<anim->joints.size();i++) {
 		auto joint = anim->joints[i];
 
-		// find pointer to correlating collada joint
-		uint16_t iteration_id = 0;
-		ColladaJoint* rel_joint = rc_get_joint_object(&jroot,joint.joint_id,iteration_id);
-
 		// determine transformation keyframes
 		float pprog = advance_animation(anim->crr_position[i],joint.dur_positions);
 		float rprog = advance_animation(anim->crr_rotation[i],joint.dur_rotations);
@@ -257,14 +259,13 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 				joint.key_scales[anim->crr_scale[i]+1],sprog);
 
 		// combine translation matrices
-		rel_joint->trans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
+		joints[joint.joint_id].trans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
 				* glm::scale(glm::mat4(1),sip);
 	}
-	// FIXME: try mapping instead of finding for interpolation
 
 	// kickstart transformation matrix recursion
 	uint16_t tree_id = 0;
-	rc_transform_interpolation(shader,jroot,glm::mat4(1),tree_id);
+	rc_transform_interpolation(shader,joints[0],glm::mat4(1),tree_id);
 }
 
 /*
@@ -276,7 +277,7 @@ std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 	os << "vertex array size: " << obj.verts.size() << '\n';
 	os << "vertex drawcall count: " << obj.size << "    drawcall offset: " << obj.ofs << '\n';
 	os << "joint tree:\n";
-	MeshAnimation::rc_print_joint_tree(os,obj.jroot,0);
+	MeshAnimation::rc_print_joint_tree(os,obj.joints,0,0);
 	return os;
 }
 
@@ -360,18 +361,20 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 /*
 	TODO
 */
-ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
+void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
 {
-	// get joint name
+	// get joint name & process transformation matrix
 	ColladaJoint out;
+	uint16_t joint_id = joint_count;
 	out.id = joint->mName.C_Str();
+	out.trans = glmify(joint->mTransformation);
 	joint_count++;
 
 	// recursively process children joints & output results
-	out.trans = glmify(joint->mTransformation);
-	for (uint16_t i=0;i<joint->mNumChildren;i++)
-		out.children.push_back(rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count));
-	return out;
+	for (uint16_t i=0;i<joint->mNumChildren;i++) {
+		out.children.push_back(joint_count);
+		rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count);
+	} joints[joint_id] = out;
 }
 
 #endif
@@ -389,7 +392,7 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 	// recursively check children nodes
 	for (auto child : cjoint.children) {
 		if (found) break;
-		out += rc_get_joint_id(jname,child,found);
+		out += rc_get_joint_id(jname,joints[child],found);
 	} return out;
 }
 
@@ -406,7 +409,7 @@ ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t a
 			curr_id++;
 			return cjoint;
 		} else if (child_id>=cjoint->children.size()) return nullptr;
-		out = rc_get_joint_object(&cjoint->children[child_id],anim_id,++curr_id);
+		out = rc_get_joint_object(&joints[cjoint->children[child_id]],anim_id,++curr_id);
 		child_id++;
 	} return out;
 }
@@ -420,7 +423,7 @@ void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoin
 	glm::mat4 lgtrans = gtrans*cjoint.trans;
 	glm::mat4 btrans = lgtrans*bone_offsets[id];
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),btrans);
-	for (auto child : cjoint.children) rc_transform_interpolation(shader,child,lgtrans,id);
+	for (auto child : cjoint.children) rc_transform_interpolation(shader,joints[child],lgtrans,id);
 }
 // TODO: this bone id determination is a big fat hack, a sensible system has yet to be implemented
 
@@ -447,11 +450,12 @@ float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> k
 /*
 	TODO
 */
-void MeshAnimation::rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth)
+void MeshAnimation::rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,
+		uint16_t jid,uint8_t depth)
 {
-	for (auto joint : cjoint.children) {
+	for (auto joint : joints[jid].children) {
 		for (uint8_t i=0;i<depth;i++) os << "--";
-		os << "> " << joint.id << '\n';
-		rc_print_joint_tree(os,joint,depth+1);
+		os << "> " << joints[joint].id << '\n';
+		rc_print_joint_tree(os,joints,joint,++depth);
 	}
 }

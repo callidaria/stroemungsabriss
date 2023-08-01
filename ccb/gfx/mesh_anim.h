@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -26,7 +27,7 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 struct ColladaJoint {
 	std::string id;
 	glm::mat4 trans = glm::mat4(1);
-	std::vector<ColladaJoint> children;
+	std::vector<uint16_t> children;
 };
 // TODO: correlate string ids with equivalent integers after read
 
@@ -74,11 +75,11 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
-	static ColladaJoint rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
+	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
 #endif
 
 	// standard recursion
-	static uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
+	uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
 	void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 			uint16_t &id);
@@ -92,7 +93,8 @@ private:
 	float advance_animation(uint16_t &crr_index,std::vector<double> key_indices);
 
 	// system
-	static void rc_print_joint_tree(std::ostream &os,ColladaJoint cjoint,uint8_t depth);
+	static void rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,uint16_t jid,
+			uint8_t depth);
 
 public:
 
@@ -112,7 +114,9 @@ private:
 	std::vector<float> vaddress;
 
 	// rigging data
-	ColladaJoint jroot;
+	//ColladaJoint jroot;
+	//std::map<uint16_t,ColladaJoint> joint_map;
+	std::vector<ColladaJoint> joints;
 	std::vector<ColladaAnimationData> anims;
 	std::vector<glm::mat4> bone_offsets;
 	uint16_t current_anim;
