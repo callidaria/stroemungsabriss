@@ -95,11 +95,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
-	joints = std::vector<ColladaJoint>(128,ColladaJoint());
 	uint16_t joint_count = 0;
-	//jroot = rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
+	joints = std::vector<ColladaJoint>(rc_get_joint_count(dae_file->mRootNode),ColladaJoint());
 	rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
-	// TODO: add a joint counter to not overinitialize joint list
 
 	// extract bone armature offset
 	bool aofound = false;
@@ -181,11 +179,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// correlate bone string id with object from joint tree
 			bool found = false;
-			uint16_t iteration_id = 0;
-			/*uint16_t joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),jroot,found);
-			cjkey.joint = rc_get_joint_object(&jroot,joint_id,iteration_id);*/
 			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),joints[0],found);
-			//joints[cjkey.joint_id] = *rc_get_joint_object(&joints[0],cjkey.joint_id,iteration_id);
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -218,18 +212,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 #endif
 
 }
-
-/*
-	TODO
-*/
-void MeshAnimation::texture()
-{ Toolbox::load_texture_repeat(tex,tex_path,true); }
-
-/*
-	TODO
-*/
-void MeshAnimation::set_animation(uint16_t anim_id)
-{ current_anim = anim_id; }
 
 /*
 	TODO
@@ -276,7 +258,7 @@ std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 	os << "---------------------< MeshAnimation >-----------------------\n";
 	os << "vertex array size: " << obj.verts.size() << '\n';
 	os << "vertex drawcall count: " << obj.size << "    drawcall offset: " << obj.ofs << '\n';
-	os << "joint tree:\n";
+	os << obj.joints.size() << " joints found -> joint tree:\n";
 	MeshAnimation::rc_print_joint_tree(os,obj.joints,0,0);
 	return os;
 }
@@ -361,20 +343,32 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 /*
 	TODO
 */
+uint16_t MeshAnimation::rc_get_joint_count(aiNode* joint)
+{
+	uint16_t out = 1;
+	for (uint16_t i=0;i<joint->mNumChildren;i++) out += rc_get_joint_count(joint->mChildren[i]);
+	return out;
+}
+
+/*
+	TODO
+*/
 void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
 {
-	// get joint name & process transformation matrix
+	// get joint name & convert initial transformation matrix
 	ColladaJoint out;
-	uint16_t joint_id = joint_count;
 	out.id = joint->mName.C_Str();
 	out.trans = glmify(joint->mTransformation);
+
+	// save joints place in memory and increase
+	uint16_t memory_id = joint_count;
 	joint_count++;
 
 	// recursively process children joints & output results
 	for (uint16_t i=0;i<joint->mNumChildren;i++) {
 		out.children.push_back(joint_count);
 		rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count);
-	} joints[joint_id] = out;
+	} joints[memory_id] = out;
 }
 
 #endif
@@ -399,24 +393,6 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 /*
 	TODO
 */
-ColladaJoint* MeshAnimation::rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,
-		uint16_t &curr_id)
-{
-	ColladaJoint* out;
-	uint8_t child_id = 0;
-	while (curr_id<=anim_id) {
-		if (anim_id==curr_id) {
-			curr_id++;
-			return cjoint;
-		} else if (child_id>=cjoint->children.size()) return nullptr;
-		out = rc_get_joint_object(&joints[cjoint->children[child_id]],anim_id,++curr_id);
-		child_id++;
-	} return out;
-}
-
-/*
-	TODO
-*/
 void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 		uint16_t &id)
 {
@@ -425,17 +401,6 @@ void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoin
 	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),btrans);
 	for (auto child : cjoint.children) rc_transform_interpolation(shader,joints[child],lgtrans,id);
 }
-// TODO: this bone id determination is a big fat hack, a sensible system has yet to be implemented
-
-/*
-	TODO
-*/
-glm::vec3 MeshAnimation::glmify(aiVector3D ivec3)
-{ return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
-glm::quat MeshAnimation::glmify(aiQuaternion iquat)
-{ return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
-glm::mat4 MeshAnimation::glmify(aiMatrix4x4 imat4)
-{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 /*
 	TODO

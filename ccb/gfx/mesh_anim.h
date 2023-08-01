@@ -6,7 +6,6 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -55,10 +54,10 @@ public:
 	~MeshAnimation() {  }
 
 	// load
-	void texture();
+	inline void texture() { Toolbox::load_texture_repeat(tex,tex_path,true); }
 
 	// update
-	void set_animation(uint16_t anim_id);
+	inline void set_animation(uint16_t anim_id) { current_anim = anim_id; }
 	void interpolate(Shader* shader,float i);
 
 	// system
@@ -75,19 +74,21 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
+	uint16_t rc_get_joint_count(aiNode* joint);
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
 #endif
 
 	// standard recursion
 	uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
-	ColladaJoint* rc_get_joint_object(ColladaJoint* cjoint,uint16_t anim_id,uint16_t &curr_id);
 	void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
 			uint16_t &id);
 
 	// conversion
-	static glm::vec3 glmify(aiVector3D ivec3);
-	static glm::quat glmify(aiQuaternion iquat);
-	static glm::mat4 glmify(aiMatrix4x4 imat4);
+	static inline glm::vec3 glmify(aiVector3D ivec3) { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
+	static inline glm::quat glmify(aiQuaternion iquat)
+		{ return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
+	static inline glm::mat4 glmify(aiMatrix4x4 imat4)
+		{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 	// animation
 	float advance_animation(uint16_t &crr_index,std::vector<double> key_indices);
