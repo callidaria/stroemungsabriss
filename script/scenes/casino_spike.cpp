@@ -28,8 +28,13 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
 
 	// animation test
-	m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png");
-	m_ccbf->r3d->mal[0].set_animation(0);
+	uint16_t a0 = m_ccbf->r3d->add("./res/testkaks.dae","./res/anim_tex.png",glm::vec3(4,0,4),
+			.4f,true);
+	uint16_t a1 = m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png",glm::vec3(0),.7f,true);
+	m_ccbf->r3d->mal[a0].set_animation(0);
+	m_ccbf->r3d->mal[a1].set_animation(0);
+	m_ccbf->r3d->start_animation(a0);
+	m_ccbf->r3d->start_animation(a1);
 
 	// lighting
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),25,25,10,4096);
@@ -83,6 +88,6 @@ void CasinoSpike::render()
 
 	// animation render
 	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
-	m_ccbf->r3d->mal[0].interpolate(&m_ccbf->r3d->as3d,m_ccbf->frame->get_time_delta());
 	m_ccbf->r3d->render_anim(0);
+	m_ccbf->r3d->render_anim(1);
 }

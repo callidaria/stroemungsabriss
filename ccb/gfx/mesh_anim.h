@@ -25,7 +25,7 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id;
-	glm::mat4 trans = glm::mat4(1);
+	glm::mat4 trans = glm::mat4(1),btrans = glm::mat4(1);
 	std::vector<uint16_t> children;
 };
 // TODO: correlate string ids with equivalent integers after read
@@ -55,10 +55,11 @@ public:
 
 	// load
 	inline void texture() { Toolbox::load_texture_repeat(tex,tex_path,true); }
+	void upload_interpolation(Shader* shader);
 
 	// update
 	inline void set_animation(uint16_t anim_id) { current_anim = anim_id; }
-	void interpolate(Shader* shader,float i);
+	void interpolate(float dt);
 
 	// system
 	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
@@ -76,12 +77,12 @@ private:
 #else
 	uint16_t rc_get_joint_count(aiNode* joint);
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
+
 #endif
 
 	// standard recursion
 	uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
-	void rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
-			uint16_t &id);
+	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);
 
 	// conversion
 	static inline glm::vec3 glmify(aiVector3D ivec3) { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
@@ -115,8 +116,6 @@ private:
 	std::vector<float> vaddress;
 
 	// rigging data
-	//ColladaJoint jroot;
-	//std::map<uint16_t,ColladaJoint> joint_map;
 	std::vector<ColladaJoint> joints;
 	std::vector<ColladaAnimationData> anims;
 	std::vector<glm::mat4> bone_offsets;

@@ -216,7 +216,17 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 /*
 	TODO
 */
-void MeshAnimation::interpolate(Shader* shader,float dt)
+void MeshAnimation::upload_interpolation(Shader* shader)
+{ 
+	for (uint16_t i=0;i<joints.size();i++)
+		shader->upload_matrix(("joint_transform["+std::to_string(i)+"]").c_str(),joints[i].btrans);
+}
+// FIXME: bad form to do string addition in loopcode
+
+/*
+	TODO
+*/
+void MeshAnimation::interpolate(float dt)
 {
 	// interpolation delta
 	avx += dt*1000.0f;
@@ -247,7 +257,7 @@ void MeshAnimation::interpolate(Shader* shader,float dt)
 
 	// kickstart transformation matrix recursion
 	uint16_t tree_id = 0;
-	rc_transform_interpolation(shader,joints[0],glm::mat4(1),tree_id);
+	rc_transform_interpolation(&joints[0],glm::mat4(1),tree_id);
 }
 
 /*
@@ -393,13 +403,11 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 /*
 	TODO
 */
-void MeshAnimation::rc_transform_interpolation(Shader* shader,ColladaJoint cjoint,glm::mat4 gtrans,
-		uint16_t &id)
+void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id)
 {
-	glm::mat4 lgtrans = gtrans*cjoint.trans;
-	glm::mat4 btrans = lgtrans*bone_offsets[id];
-	shader->upload_matrix(("joint_transform["+std::to_string(id++)+"]").c_str(),btrans);
-	for (auto child : cjoint.children) rc_transform_interpolation(shader,joints[child],lgtrans,id);
+	glm::mat4 lgtrans = gtrans*cjoint->trans;
+	cjoint->btrans = lgtrans*bone_offsets[id++];
+	for (auto child : cjoint->children) rc_transform_interpolation(&joints[child],lgtrans,id);
 }
 
 /*

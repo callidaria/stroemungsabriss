@@ -104,11 +104,15 @@ void World::upload_lighting()
 */
 void World::render(uint32_t &running,bool &reboot)
 {
+	// animation updates
+	m_ccbf->r3d->update_animations(m_ccbf->frame->get_time_delta());
+
 	// shadow processing
 	glDisable(GL_BLEND);
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
+	m_ccbf->r3d->render_animation_shadow();
 	m_ccbf->r3d->render_geometry_shadow();
 	m_ccbf->r3d->close_shadow(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 

@@ -67,12 +67,18 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 /*
 	TODO
 */
-uint16_t Renderer3D::add(const char* a,const char* t)
+uint16_t Renderer3D::add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow)
 {
+	// load animated mesh
 	uint16_t animation_id = mal.size();
 	MeshAnimation proc = MeshAnimation(a,t,amofs);
-	std::cout << proc << '\n';
+
+	// transform model matrix & store animated mesh
+	proc.model = glm::translate(glm::mat4(1),p)*glm::scale(glm::mat4(1),glm::vec3(s));
 	mal.push_back(proc);
+
+	// check shadow cast request & return mesh id
+	if (cast_shadow) scast_animation_ids.push_back(animation_id);
 	return animation_id;
 }
 
@@ -169,7 +175,7 @@ void Renderer3D::load(Camera3D cam3d)
 	for (uint16_t i=0;i<mal.size();i++) {
 		av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
 		for (auto elem : mal[i].elems) ae.push_back(elem+eoffset);
-		eoffset += mal[i].elems.size();
+		eoffset += mal[i].verts.size();
 	} abuffer.bind();
 	abuffer.upload_vertices(av);
 	abuffer.upload_elements(ae);
@@ -331,6 +337,15 @@ void Renderer3D::clear_memory()
 }
 
 /*
+	TODO
+*/
+void Renderer3D::update_animations(float dt)
+{
+	for (auto id : update_animation_ids)
+		mal[id].interpolate(dt);
+}
+
+/*
 	render_mesh_shadow() -> void
 	purpose: project mesh shadow onto shadow map
 	NOTE: call in-between of prepare_shadow() & close_shadow()
@@ -366,6 +381,25 @@ void Renderer3D::render_instance_shadow()
 		ibuffer.upload_indices(mesh_indices[id]);
 		is3d.upload_matrix("model",iml[id].model);
 		glDrawArraysInstanced(GL_TRIANGLES,iml[id].ofs,iml[id].size,iml[id].inst_count);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_animation_shadow()
+{
+	// prepare animation buffer & shader to render shadow map
+	prepare_anim();
+	as3d.upload_matrix("view",shadow_view);
+	as3d.upload_matrix("proj",shadow_proj);
+
+	// project casting animated objects to shadow map
+	for (auto id : scast_animation_ids) {
+		as3d.upload_matrix("model",mal[id].model);
+		mal[id].upload_interpolation(&as3d);
+		glDrawElements(GL_TRIANGLES,mal[id].size,GL_UNSIGNED_INT,
+				(void*)(mal[id].ofs*sizeof(uint32_t)));
 	}
 }
 
@@ -432,6 +466,7 @@ void Renderer3D::render_anim(uint16_t i)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
 	as3d.upload_matrix("model",mal[i].model);
+	mal[i].upload_interpolation(&as3d);
 	glDrawElements(GL_TRIANGLES,mal[i].size,GL_UNSIGNED_INT,(void*)(mal[i].ofs*sizeof(uint32_t)));
 }
 

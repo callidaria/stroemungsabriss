@@ -28,7 +28,7 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow=false);
-	uint16_t add(const char* a,const char* t);
+	uint16_t add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow=false);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 			float fdiv,uint16_t res);
 
@@ -49,9 +49,13 @@ public:
 	void close_shadow(uint16_t w_res,uint16_t h_res);
 	void clear_memory();
 
+	// update
+	void update_animations(float dt);
+
 	// shadow
 	void render_mesh_shadow();
 	void render_instance_shadow();
+	void render_animation_shadow();
 	void render_geometry_shadow();
 
 	// draw
@@ -66,6 +70,9 @@ public:
 	// setters
 	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);
 	void inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot);
+	inline void start_animation(uint16_t id) { update_animation_ids.push_back(id); }
+	inline void stop_animation(uint16_t id)
+		{ std::remove(update_animation_ids.begin(),update_animation_ids.end(),id); }
 
 private:
 
@@ -82,10 +89,14 @@ public:
 	std::vector<MeshAnimation> mal;
 	std::vector<std::vector<float>> mesh_indices;
 
+	// update
+	std::vector<uint16_t> update_animation_ids;
+
 	// shadow
 	uint16_t shadow_res;
 	std::vector<uint16_t> scast_mesh_ids;
 	std::vector<uint16_t> scast_instance_ids;
+	std::vector<uint16_t> scast_animation_ids;
 	std::vector<ShadowGeometry*> shadow_geometry;
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
