@@ -11,7 +11,7 @@ Renderer3D::Renderer3D()
 }
 
 /*
-	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> uint16_t
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,bool) -> uint16_t
 	m: path to .obj file to read mesh vertices from
 	t: path to file to read texture from
 	sm: path to specular map file
@@ -37,7 +37,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,uint16_t)
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,uint16_t,bool)
 			-> uint16_t
 	overloads previous add()
 	dcap: maximum amount of duplicates created from added instance
@@ -65,7 +65,11 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	TODO
+	add(const char*,const char*,vec3,float,bool) -> uint16_t !O(1)b
+	overloads previous add()
+	purpose: add animated object to the renderer
+	\param a: path to collada (.dae) animation file
+	\returns: memory index to refer to the created animated object by when drawing
 */
 uint16_t Renderer3D::add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow)
 {
@@ -263,7 +267,8 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 }
 
 /*
-	TODO
+	prepare_anim() -> void !O(1)
+	purpose: prepare shader & buffer for animation rendering
 */
 void Renderer3D::prepare_anim()
 {
@@ -277,7 +282,9 @@ void Renderer3D::prepare_anim()
 }
 
 /*
-	TODO
+	prepare_anim(Camera3D) -> void !O(1)
+	overloads previous prepare_anim
+	purpose: not only prepare animation rendering, but also upload camera
 */
 void Renderer3D::prepare_anim(Camera3D cam3d)
 {
@@ -336,7 +343,9 @@ void Renderer3D::clear_memory()
 }
 
 /*
-	TODO
+	update_animations(float) -> void !O(n)
+	purpose: update all animations that have been started and thus added to the update id list
+	\param dt: time delta since last frame
 */
 void Renderer3D::update_animations(float dt)
 {
@@ -384,7 +393,9 @@ void Renderer3D::render_instance_shadow()
 }
 
 /*
-	TODO
+	render_animation_shadow() -> void !O(n)
+	purpose: project shadow of animated meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
 */
 void Renderer3D::render_animation_shadow()
 {
@@ -438,8 +449,8 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
-	i: memory index of instanced object that is to be drawn
-	purpose: render given amount of desired instance's duplicates
+	purpose: render instanced object by given memory index
+	\param i: memory index of instanced object that is to be drawn
 */
 void Renderer3D::render_inst(uint16_t i)
 {
@@ -458,7 +469,9 @@ void Renderer3D::render_inst(uint16_t i)
 }
 
 /*
-	TODO
+	render_anim(uint16_t) -> void !O(1)
+	purpose: render animation object by given memory index
+	\param i: memory index of animated object that is to be drawn
 */
 void Renderer3D::render_anim(uint16_t i)
 {

@@ -75,7 +75,7 @@ private:
 	// specialized recursion
 	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
 #else
-	uint16_t rc_get_joint_count(aiNode* joint);
+	static uint16_t rc_get_joint_count(aiNode* joint);
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
 
 #endif
@@ -92,7 +92,7 @@ private:
 		{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 	// animation
-	float advance_animation(uint16_t &crr_index,std::vector<double> key_indices);
+	float advance_animation(uint16_t &crr_index,std::vector<double> keys);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,uint16_t jid,

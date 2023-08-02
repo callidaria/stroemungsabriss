@@ -1,7 +1,11 @@
 #include "mesh_anim.h"
 
 /*
-	TODO
+	constructor(const char*,const char*,uint32_t&)
+	purpose: load animation file, holding object mesh and animation key data
+	\param path: path to collada (.dae) file, holding mesh and animation key data
+	\param itex_path: path to animation mesh texture
+	\param mofs: self increasing offset, which saves the buffer offset when draw calling
 */
 MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mofs)
 	: tex_path(itex_path)
@@ -214,7 +218,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 }
 
 /*
-	TODO
+	upload_interpolation(Shader*) -> void !O(n)
+	purpose: upload joint interpolation data to animation shader
+	\param shader: animation shader to upload interpolation data to
 */
 void MeshAnimation::upload_interpolation(Shader* shader)
 { 
@@ -224,7 +230,9 @@ void MeshAnimation::upload_interpolation(Shader* shader)
 // FIXME: bad form to do string addition in loopcode
 
 /*
-	TODO
+	interpolate(float) -> void !O(2n) => O(n)
+	purpose: calculate current bone transformations, interpolate between keys and recurse influence
+	\param dt: time passed since last interpolation
 */
 void MeshAnimation::interpolate(float dt)
 {
@@ -261,7 +269,9 @@ void MeshAnimation::interpolate(float dt)
 }
 
 /*
-	TODO
+	operator<<(std::ostream&,MeshAnimation& const) -> std::ostream& (friend)
+	purpose: make animation object information console printable
+	conforming to: operator definition
 */
 std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 {
@@ -351,7 +361,10 @@ ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 #else
 
 /*
-	TODO
+	rc_get_joint_count(aiNode*) -> uint16_t (private,static,recursive) !O(n)
+	purpose: used by constructor to analyse how much memory has to be allocated by joint list
+	\param joint: root node in assimp node format, to start depthsearch count from
+	\returns total number of nodes in joint tree
 */
 uint16_t MeshAnimation::rc_get_joint_count(aiNode* joint)
 {
@@ -361,7 +374,10 @@ uint16_t MeshAnimation::rc_get_joint_count(aiNode* joint)
 }
 
 /*
-	TODO
+	rc_assemble_joint_hierarchy(aiNode*,uint16_t&) -> void (private,recursive) !O(n)
+	purpose: used by constructor to extract joint information from tree
+	\param joint: root node in assimp node format, to start processing extraction from
+	\joint_count: current progression of id count to identify joint's place in memory by
 */
 void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
 {
@@ -384,7 +400,11 @@ void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_co
 #endif
 
 /*
-	TODO
+	rc_get_joint_id(string,ColladaJoint,bool&) -> uint16_t (private,recursive) ~O(n)
+	purpose: used to link joints, referred to by name, to their actual objects
+	\param jname: name of joint, which has to be found
+	\param cjoint: rootnode of joint
+	NOTE: WILL BE CHANGED BEFORE MERGE. DOCUMENTATION STOPPED
 */
 uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found)
 {
@@ -399,9 +419,14 @@ uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bo
 		out += rc_get_joint_id(jname,joints[child],found);
 	} return out;
 }
+// FIXME: this does not have to be recursive, iterate through list until the name has been found
 
 /*
-	TODO
+	rc_transform_interpolation(ColladaJoint*,mat4,uint16t&) -> void (private,recursive) !O(n)
+	purpose: recursion through joint tree, calculating transforms with chained parent influence
+	\param cjoint: rootnode of joint tree
+	\param gtrans: previous transformation influence until this joint within the chain
+	\param id: current joint index
 */
 void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id)
 {
@@ -411,17 +436,26 @@ void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gt
 }
 
 /*
-	TODO
+	advance_animation(uint16_t&,vector<double>) -> float (private) !O(1)
+	purpose: update animation key index based on animation time advancement
+	\param crr_index: current key index, to be advanced by this method
+	\param keys: key timing list for advancement comparison & interpolation
+	\returns 0 <= n <= 1, where n describes the interpolation mixing between current & next key
 */
-float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> key_indices)
+float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> keys)
 {
-	while (key_indices[crr_index+1]<avx) crr_index++;
-	crr_index *= crr_index<key_indices.size()&&key_indices[crr_index]<avx;
-	return (avx-key_indices[crr_index])/(key_indices[crr_index+1]-key_indices[crr_index]);
+	while (keys[crr_index+1]<avx) crr_index++;
+	crr_index *= crr_index<keys.size()&&keys[crr_index]<avx;
+	return (avx-keys[crr_index])/(keys[crr_index+1]-keys[crr_index]);
 }
 
 /*
-	TODO
+	rc_print_joint_tree(ostream&,vector<ColladaJoint>,uint16_t,uint8_t)
+			-> void (private,static recursive) !O(n)
+	purpose: paint joint tree to console output
+	\param os: ostream to print output to
+	\param joints: list of joints
+	\param jid: current id of node to print depthsearch output from
 */
 void MeshAnimation::rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,
 		uint16_t jid,uint8_t depth)
