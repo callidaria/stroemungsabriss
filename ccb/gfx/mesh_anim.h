@@ -24,11 +24,10 @@ constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 
 // rotary joints for animation information
 struct ColladaJoint {
-	std::string id;
+	std::string id,uniform_location;
 	glm::mat4 trans = glm::mat4(1),btrans = glm::mat4(1);
 	std::vector<uint16_t> children;
 };
-// TODO: correlate string ids with equivalent integers after read
 
 // structure of keys throughout animations
 struct JointKeys {
@@ -81,10 +80,10 @@ private:
 #endif
 
 	// standard recursion
-	uint16_t rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found);
 	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);
 
 	// conversion
+	uint16_t get_joint_id(std::string jname);
 	static inline glm::vec3 glmify(aiVector3D ivec3) { return glm::vec3(ivec3.x,ivec3.y,ivec3.z); }
 	static inline glm::quat glmify(aiQuaternion iquat)
 		{ return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }

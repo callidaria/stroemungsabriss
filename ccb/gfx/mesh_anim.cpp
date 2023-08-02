@@ -104,8 +104,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	rc_assemble_joint_hierarchy(dae_file->mRootNode,joint_count);
 
 	// extract bone armature offset
-	bool aofound = false;
-	uint16_t armature_offset = rc_get_joint_id(cmesh->mBones[0]->mName.C_Str(),joints[0],aofound);
+	uint16_t armature_offset = get_joint_id(cmesh->mBones[0]->mName.C_Str());
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
 	// assemble bone influence weights
@@ -183,7 +182,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// correlate bone string id with object from joint tree
 			bool found = false;
-			cjkey.joint_id = rc_get_joint_id(cnanim->mNodeName.C_Str(),joints[0],found);
+			cjkey.joint_id = get_joint_id(cnanim->mNodeName.C_Str());
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
@@ -225,9 +224,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 void MeshAnimation::upload_interpolation(Shader* shader)
 { 
 	for (uint16_t i=0;i<joints.size();i++)
-		shader->upload_matrix(("joint_transform["+std::to_string(i)+"]").c_str(),joints[i].btrans);
+		shader->upload_matrix(joints[i].uniform_location.c_str(),joints[i].btrans);
 }
-// FIXME: bad form to do string addition in loopcode
 
 /*
 	interpolate(float) -> void !O(2n) => O(n)
@@ -285,9 +283,7 @@ std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 
 #ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
-/*
-	TODO
-*/
+// experimental method
 std::vector<float> MeshAnimation::extract_array_data(std::vector<std::string> raw_data)
 {
 	// extract & filter first value
@@ -309,9 +305,7 @@ std::vector<float> MeshAnimation::extract_array_data(std::vector<std::string> ra
 	return out;
 }
 
-/*
-	TODO
-*/
+// experimental method
 std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
 {
 	uint8_t lstart = line.find('<')+1;
@@ -322,9 +316,7 @@ std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
 	return out;
 }
 
-/*
-	TODO
-*/
+// experimental method
 ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
 {
 	// extract node information from file
@@ -388,6 +380,7 @@ void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_co
 
 	// save joints place in memory and increase
 	uint16_t memory_id = joint_count;
+	out.uniform_location = "joint_transform["+std::to_string(memory_id)+"]";
 	joint_count++;
 
 	// recursively process children joints & output results
@@ -398,28 +391,6 @@ void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_co
 }
 
 #endif
-
-/*
-	rc_get_joint_id(string,ColladaJoint,bool&) -> uint16_t (private,recursive) ~O(n)
-	purpose: used to link joints, referred to by name, to their actual objects
-	\param jname: name of joint, which has to be found
-	\param cjoint: rootnode of joint
-	NOTE: WILL BE CHANGED BEFORE MERGE. DOCUMENTATION STOPPED
-*/
-uint16_t MeshAnimation::rc_get_joint_id(std::string jname,ColladaJoint cjoint,bool &found)
-{
-	// check id equivalence
-	uint16_t out = 0;
-	found = jname==cjoint.id||found;
-	out += !found;
-
-	// recursively check children nodes
-	for (auto child : cjoint.children) {
-		if (found) break;
-		out += rc_get_joint_id(jname,joints[child],found);
-	} return out;
-}
-// FIXME: this does not have to be recursive, iterate through list until the name has been found
 
 /*
 	rc_transform_interpolation(ColladaJoint*,mat4,uint16t&) -> void (private,recursive) !O(n)
@@ -433,6 +404,19 @@ void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gt
 	glm::mat4 lgtrans = gtrans*cjoint->trans;
 	cjoint->btrans = lgtrans*bone_offsets[id++];
 	for (auto child : cjoint->children) rc_transform_interpolation(&joints[child],lgtrans,id);
+}
+
+/*
+	get_joint_id(string) -> uint16_t ~O(n)
+	purpose: used to link joints, referred to by name, to their actual objects
+	\param jname: name of joint, which has to be found
+	\returns memory index of equinamed joint
+*/
+uint16_t MeshAnimation::get_joint_id(std::string jname)
+{
+	uint16_t i = 0;
+	while (jname!=joints[i].id) i++;
+	return i;
 }
 
 /*
@@ -456,6 +440,7 @@ float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> k
 	\param os: ostream to print output to
 	\param joints: list of joints
 	\param jid: current id of node to print depthsearch output from
+	\param depth: current depth of recursion
 */
 void MeshAnimation::rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,
 		uint16_t jid,uint8_t depth)

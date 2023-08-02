@@ -52,6 +52,7 @@ public:
 
 	// update
 	void update_animations(float dt);
+	void update_shadows(float swidth,float sheight);
 
 	// shadow
 	void render_mesh_shadow();
@@ -91,14 +92,11 @@ public:
 	std::vector<std::vector<float>> mesh_indices;
 
 	// update
-	std::vector<uint16_t> update_animation_ids;
+	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_animation_ids,update_animation_ids;
+	std::vector<ShadowGeometry*> shadow_geometry;
 
 	// shadow
 	uint16_t shadow_res;
-	std::vector<uint16_t> scast_mesh_ids;
-	std::vector<uint16_t> scast_instance_ids;
-	std::vector<uint16_t> scast_animation_ids;
-	std::vector<ShadowGeometry*> shadow_geometry;
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
 };

@@ -354,6 +354,22 @@ void Renderer3D::update_animations(float dt)
 }
 
 /*
+	update_shadows(float,float) -> void
+	purpose: run all shadow projection stages without exceptions
+	\param swidth: screen width as stored in frame for viewport reset
+	\param sheight: screen height as stored in frame for viewport reset
+*/
+void Renderer3D::update_shadows(float swidth,float sheight)
+{
+	prepare_shadow();
+	render_mesh_shadow();
+	render_instance_shadow();
+	render_animation_shadow();
+	render_geometry_shadow();
+	close_shadow(swidth,sheight);
+}
+
+/*
 	render_mesh_shadow() -> void
 	purpose: project mesh shadow onto shadow map
 	NOTE: call in-between of prepare_shadow() & close_shadow()
