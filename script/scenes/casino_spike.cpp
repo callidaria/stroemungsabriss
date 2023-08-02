@@ -28,8 +28,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs)
 	m_ccbf->r3d->ml[index_r3D+4].model = glm::translate(glm::mat4(1),mv_pos);
 
 	// animation test
-	uint16_t a0 = m_ccbf->r3d->add("./res/testkaks.dae","./res/anim_tex.png",glm::vec3(4,0,4),
-			.4f,true);
+	uint16_t a0 = m_ccbf->r3d->add("./res/testkaks.dae","./res/kaks.png",glm::vec3(4,0,4),.4f,true);
 	uint16_t a1 = m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png",glm::vec3(0),.7f,true);
 	m_ccbf->r3d->mal[a0].set_animation(0);
 	m_ccbf->r3d->mal[a1].set_animation(0);

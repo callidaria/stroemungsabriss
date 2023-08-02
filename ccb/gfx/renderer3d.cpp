@@ -171,22 +171,21 @@ void Renderer3D::load(Camera3D cam3d)
 	// combine animated meshes into instance vertex list & upload
 	std::vector<float> av;
 	std::vector<uint32_t> ae;
-	uint32_t eoffset = 0;
 	for (uint16_t i=0;i<mal.size();i++) {
+		uint32_t eoffset = av.size()/R3D_ANIMATION_MAP_REPEAT;
 		av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
-		for (auto elem : mal[i].elems) ae.push_back(elem+eoffset);
-		eoffset += mal[i].verts.size();
+		for (auto elem : mal[i].elems) ae.push_back(eoffset+elem);
 	} abuffer.bind();
 	abuffer.upload_vertices(av);
 	abuffer.upload_elements(ae);
 
 	// compile animation shader & upload textures
 	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
-	as3d.def_attributeF("position",3,0,16);
-	as3d.def_attributeF("texCoords",2,3,16);
-	as3d.def_attributeF("normals",3,5,16);
-	as3d.def_attributeF("boneIndex",4,8,16);
-	as3d.def_attributeF("boneWeight",4,12,16);
+	as3d.def_attributeF("position",3,0,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("texCoords",2,3,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("normals",3,5,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneIndex",4,8,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneWeight",4,12,R3D_ANIMATION_MAP_REPEAT);
 	for (uint16_t i=0;i<mal.size();i++) mal[i].texture();
 	as3d.upload_int("tex",0);
 	as3d.upload_camera(cam3d);
