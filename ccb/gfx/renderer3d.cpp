@@ -438,6 +438,7 @@ void Renderer3D::update_shadows(float swidth,float sheight)
 	render_mesh_shadow();
 	render_instance_shadow();
 	render_animation_shadow();
+	render_physical_shadow();
 	render_geometry_shadow();
 	close_shadow(swidth,sheight);
 }
@@ -583,8 +584,6 @@ void Renderer3D::render_inst(uint16_t i)
 }
 
 /*
-	render_pmsh(uint16_t) -> void
-	purpose: render desired physical based mesh
 	render_anim(uint16_t) -> void !O(1)
 	purpose: render animation object by given memory index
 	\param i: memory index of animated object that is to be drawn
@@ -599,8 +598,9 @@ void Renderer3D::render_anim(uint16_t i)
 }
 
 /*
-	upload_shadow() -> void
-	purpose: upload shadow projection to mesh geometry pass shader
+	render_pmsh(uint16_t) -> void
+	purpose: render desired physical based mesh
+	\param i: memory index of physically shaded object that is to be drawn
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {

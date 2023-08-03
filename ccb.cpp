@@ -136,7 +136,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lpthread");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 

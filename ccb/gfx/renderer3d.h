@@ -81,16 +81,13 @@ public:
 
 private:
 
-	uint32_t mofs = 0,imofs = 0,pmofs = 0;
-	uint32_t mofs = 0,imofs = 0,amofs = 0;
+	uint32_t mofs = 0,imofs = 0,pmofs = 0,amofs = 0;
 
 public:
 
 	// cascabel
-	Buffer buffer,ibuffer,abuffer;
-	Shader s3d,is3d,as3d,shs;
-	Buffer buffer,ibuffer,pbuffer;
-	Shader s3d,is3d,pbms,shs;
+	Buffer buffer,ibuffer,abuffer,pbuffer;
+	Shader s3d,is3d,as3d,pbms,shs;
 
 	// object information upload lists
 	std::vector<Mesh> ml,iml;
@@ -99,13 +96,13 @@ public:
 	std::vector<std::vector<float>> mesh_indices;
 
 	// update
-	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_animation_ids,update_animation_ids;
+	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_animation_ids,
+			update_animation_ids,scast_physical_ids;
 	std::vector<ShadowGeometry*> shadow_geometry;
 
 	// shadow
 	glm::vec3 slight_pos;
 	uint16_t shadow_res;
-	std::vector<uint16_t> scast_mesh_ids,scast_instance_ids,scast_physical_ids;
 	GLuint depth_fbo,shadow_map;
 	glm::mat4 shadow_proj,shadow_view,scam_projection;
 };
