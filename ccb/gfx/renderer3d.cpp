@@ -5,10 +5,13 @@
 	purpose: create renderer object to subsequently add 3D objects to and draw them
 */
 Renderer3D::Renderer3D()
-{ ibuffer.add_buffer(); }
+{
+	ibuffer.add_buffer();
+	abuffer.add_buffer();
+}
 
 /*
-	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3) -> uint16_t
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,bool) -> uint16_t
 	m: path to .obj file to read mesh vertices from
 	t: path to file to read texture from
 	sm: path to specular map file
@@ -34,7 +37,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,uint16_t)
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,vec3,uint16_t,bool)
 			-> uint16_t
 	overloads previous add()
 	dcap: maximum amount of duplicates created from added instance
@@ -59,6 +62,28 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
 	return mesh_id;
+}
+
+/*
+	add(const char*,const char*,vec3,float,bool) -> uint16_t !O(1)b
+	overloads previous add()
+	purpose: add animated object to the renderer
+	\param a: path to collada (.dae) animation file
+	\returns: memory index to refer to the created animated object by when drawing
+*/
+uint16_t Renderer3D::add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow)
+{
+	// load animated mesh
+	uint16_t animation_id = mal.size();
+	MeshAnimation proc = MeshAnimation(a,t,amofs);
+
+	// transform model matrix & store animated mesh
+	proc.model = glm::translate(glm::mat4(1),p)*glm::scale(glm::mat4(1),glm::vec3(s));
+	mal.push_back(proc);
+
+	// check shadow cast request & return mesh id
+	if (cast_shadow) scast_animation_ids.push_back(animation_id);
+	return animation_id;
 }
 
 /*
@@ -138,7 +163,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
-	s3d.compile3d("shader/gvertex.shader","shader/gfragment.shader");
+	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
 	for(uint16_t i=0;i<ml.size();i++) {
 		ml[i].texture();
 		progress += ptarget;
@@ -157,13 +182,13 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	ibuffer.upload_vertices(iv);
 
 	// compile instance shader
-	is3d.compile3d("shader/givertex.shader","shader/gfragment.shader");
+	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
 
-	// load textures
+	// load textures & camera
 	for(uint16_t i=0;i<iml.size();i++) {
 		iml[i].texture();
 		progress += ptarget;
@@ -172,6 +197,28 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	is3d.upload_int("emit",2);
 	is3d.upload_int("nmap",3);
 	is3d.upload_camera(cam3d);
+
+	// combine animated meshes into instance vertex list & upload
+	std::vector<float> av;
+	std::vector<uint32_t> ae;
+	for (uint16_t i=0;i<mal.size();i++) {
+		uint32_t eoffset = av.size()/R3D_ANIMATION_MAP_REPEAT;
+		av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
+		for (auto elem : mal[i].elems) ae.push_back(eoffset+elem);
+	} abuffer.bind();
+	abuffer.upload_vertices(av);
+	abuffer.upload_elements(ae);
+
+	// compile animation shader & upload textures
+	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
+	as3d.def_attributeF("position",3,0,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("texCoords",2,3,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("normals",3,5,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneIndex",4,8,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneWeight",4,12,R3D_ANIMATION_MAP_REPEAT);
+	for (uint16_t i=0;i<mal.size();i++) mal[i].texture();
+	as3d.upload_int("tex",0);
+	as3d.upload_camera(cam3d);
 
 	// combine physical mesh vertices to master vertex list & upload
 	std::vector<float> pv;
@@ -194,7 +241,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 
 	// compile shadow shader
 	Buffer::unbind();
-	shs.compile("shader/fbv_shadow.shader","shader/fbf_shadow.shader");
+	shs.compile("./shader/fbv_shadow.shader","./shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
 // TODO: check validity of this loading approach. processing vertex lists ?twice
@@ -261,6 +308,36 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 	// update camera
 	is3d.upload_camera(cam3d);
 	is3d.upload_vec3("view_pos",cam3d.pos);
+}
+
+/*
+	prepare_anim() -> void !O(1)
+	purpose: prepare shader & buffer for animation rendering
+*/
+void Renderer3D::prepare_anim()
+{
+	// gl settings
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// prepare shader & buffer
+	as3d.enable();
+	abuffer.bind();
+}
+
+/*
+	prepare_anim(Camera3D) -> void !O(1)
+	overloads previous prepare_anim
+	purpose: not only prepare animation rendering, but also upload camera
+*/
+void Renderer3D::prepare_anim(Camera3D cam3d)
+{
+	// basic preparations
+	prepare_anim();
+
+	// update camera
+	as3d.upload_camera(cam3d);
+	as3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -339,6 +416,33 @@ void Renderer3D::clear_memory()
 }
 
 /*
+	update_animations(float) -> void !O(n)
+	purpose: update all animations that have been started and thus added to the update id list
+	\param dt: time delta since last frame
+*/
+void Renderer3D::update_animations(float dt)
+{
+	for (auto id : update_animation_ids)
+		mal[id].interpolate(dt);
+}
+
+/*
+	update_shadows(float,float) -> void
+	purpose: run all shadow projection stages without exceptions
+	\param swidth: screen width as stored in frame for viewport reset
+	\param sheight: screen height as stored in frame for viewport reset
+*/
+void Renderer3D::update_shadows(float swidth,float sheight)
+{
+	prepare_shadow();
+	render_mesh_shadow();
+	render_instance_shadow();
+	render_animation_shadow();
+	render_geometry_shadow();
+	close_shadow(swidth,sheight);
+}
+
+/*
 	render_mesh_shadow() -> void
 	purpose: project mesh shadow onto shadow map
 	NOTE: call in-between of prepare_shadow() & close_shadow()
@@ -374,6 +478,27 @@ void Renderer3D::render_instance_shadow()
 		ibuffer.upload_indices(mesh_indices[id]);
 		is3d.upload_matrix("model",iml[id].model);
 		glDrawArraysInstanced(GL_TRIANGLES,iml[id].ofs,iml[id].size,iml[id].inst_count);
+	}
+}
+
+/*
+	render_animation_shadow() -> void !O(n)
+	purpose: project shadow of animated meshes onto shadow map
+	NOTE: call in-between of prepare_shadow() & close_shadow()
+*/
+void Renderer3D::render_animation_shadow()
+{
+	// prepare animation buffer & shader to render shadow map
+	prepare_anim();
+	as3d.upload_matrix("view",shadow_view);
+	as3d.upload_matrix("proj",shadow_proj);
+
+	// project casting animated objects to shadow map
+	for (auto id : scast_animation_ids) {
+		as3d.upload_matrix("model",mal[id].model);
+		mal[id].upload_interpolation(&as3d);
+		glDrawElements(GL_TRIANGLES,mal[id].size,GL_UNSIGNED_INT,
+				(void*)(mal[id].ofs*sizeof(uint32_t)));
 	}
 }
 
@@ -438,8 +563,8 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 
 /*
 	render_inst(uint16_t i,uint16_t) -> void
-	i: memory index of instanced object that is to be drawn
-	purpose: render given amount of desired instance's duplicates
+	purpose: render instanced object by given memory index
+	\param i: memory index of instanced object that is to be drawn
 */
 void Renderer3D::render_inst(uint16_t i)
 {
@@ -460,6 +585,22 @@ void Renderer3D::render_inst(uint16_t i)
 /*
 	render_pmsh(uint16_t) -> void
 	purpose: render desired physical based mesh
+	render_anim(uint16_t) -> void !O(1)
+	purpose: render animation object by given memory index
+	\param i: memory index of animated object that is to be drawn
+*/
+void Renderer3D::render_anim(uint16_t i)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
+	as3d.upload_matrix("model",mal[i].model);
+	mal[i].upload_interpolation(&as3d);
+	glDrawElements(GL_TRIANGLES,mal[i].size,GL_UNSIGNED_INT,(void*)(mal[i].ofs*sizeof(uint32_t)));
+}
+
+/*
+	upload_shadow() -> void
+	purpose: upload shadow projection to mesh geometry pass shader
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {

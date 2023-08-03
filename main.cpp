@@ -26,7 +26,7 @@
 
 #include "ccb/fcn/ccb_manager.h"
 
-#include "ccb/gfx/material3d.h"
+#include "ccb/gfx/mesh_anim.h"
 
 #include "script/systems/input_map.h"
 #include "script/systems/worldbuilder.h"

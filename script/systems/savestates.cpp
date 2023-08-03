@@ -50,7 +50,7 @@ void SaveStates::read_savefile()
 
 		// list save data
 		saves.push_back(save);
-	}
+	} file.close();
 }
 
 /*

@@ -37,6 +37,15 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	texture_repeat.push_back(1);
 	progress += sseq;
 
+	// animation test
+	uint16_t a0 = m_ccbf->r3d->add("./res/testkaks.dae","./res/kaks.png",glm::vec3(4,0,4),.4f,true);
+	uint16_t a1 = m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png",glm::vec3(7,0,-4),
+			.7f,true);
+	m_ccbf->r3d->mal[a0].set_animation(0);
+	m_ccbf->r3d->mal[a1].set_animation(0);
+	m_ccbf->r3d->start_animation(a0);
+	m_ccbf->r3d->start_animation(a1);
+
 	// simulated lighting
 	glm::vec3 light_pos[] = {
 		glm::vec3(0,2,0),glm::vec3(3,2,-3),glm::vec3(7,.25f,-7),glm::vec3(7,.25f,-3),
@@ -107,6 +116,11 @@ void CasinoSpike::render()
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
 	}
+
+	// animation render
+	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->render_anim(0);
+	m_ccbf->r3d->render_anim(1);
 
 	// render irradiance
 	irradiance_map.prepare(m_setRigs->cam3D[0]);
