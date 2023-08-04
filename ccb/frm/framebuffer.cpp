@@ -105,7 +105,7 @@ void FrameBuffer::prepare()
 /*
 	TODO
 */
-void FrameBuffer::create_depth_texture()
+/*void FrameBuffer::create_depth_texture()
 {
 	// setup
 	/*glGenFramebuffers(1,&rdpfb);
@@ -123,7 +123,7 @@ void FrameBuffer::create_depth_texture()
 	glBindRenderbuffer(GL_RENDERBUFFER,0);*/
 
 	// setup shadow map texture
-	glGenTextures(1,&dptex);
+	/*glGenTextures(1,&dptex);
 	glBindTexture(GL_TEXTURE_2D,dptex);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,frw,frh,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
@@ -137,7 +137,7 @@ void FrameBuffer::create_depth_texture()
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
-}
+}*/
 
 /*
 	render() -> void

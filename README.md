@@ -68,8 +68,8 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
-- deferred rendering for a much more complex lighting system
-- new physical based shading system
+- deferred shading with support for transparent objects
+- new physical based lighting system
 - loading feedback screen
 - dynamic world loading
 - store "macro" savestate pattern
@@ -197,5 +197,5 @@ Worktime: 120h
 	+ 159: 5h 32min
 	+ 62: 1h 52min
 	+ 90: 9h 50min
-	+ 83: 13h 20min
+	+ 83: 13h 44min
 - Total Code Lines: 14.314

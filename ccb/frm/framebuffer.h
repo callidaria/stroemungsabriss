@@ -25,7 +25,7 @@ public:
 
 	// details
 	void prepare();
-	void create_depth_texture();
+	//void create_depth_texture();
 
 	// write
 	void render();
