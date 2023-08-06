@@ -16,16 +16,15 @@ public:
 	// construction
 	FrameBuffer() {  }
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
-			const char* fsp,bool float_buffer);
+			const char* fsp,bool float_buffer=false,bool depth_buffer=false);
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-			const char* vsp,const char* fsp,bool float_buffer);
+			const char* vsp,const char* fsp,bool float_buffer=false,bool depth_buffer=false);
 
 	// read
 	void bind();
 
 	// details
 	void prepare();
-	//void create_depth_texture();
 
 	// write
 	void render();
@@ -46,7 +45,7 @@ private:
 
 	// standard initialization
 	void init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer);
+		const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer);
 
 public:
 

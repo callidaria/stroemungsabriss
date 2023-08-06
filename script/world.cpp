@@ -17,9 +17,9 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_menu.shader","./shader/fbf_menu.shader");
 	deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
+			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader");
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
@@ -31,8 +31,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("transparency_buffer",8);
 	deferred_fb.s.upload_int("transparency_depth",9);
 	transparency_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
-	//transparency_fb.create_depth_texture();
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
 }
 
 /*

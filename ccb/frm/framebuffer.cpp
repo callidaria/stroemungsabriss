@@ -16,9 +16,9 @@
 	purpose: creates framebuffer object to change original visuals through shaders
 */
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
-		const char* fsp,bool float_buffer)
+		const char* fsp,bool float_buffer,bool depth_buffer)
 	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer); }
+{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer,depth_buffer); }
 
 /*
 	constructor(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool)
@@ -27,9 +27,9 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 	purpose: creates framebuffer object to change original visuals through shaders
 */
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
+		const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer)
 	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer); }
+{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer,depth_buffer); }
 // TODO: make the resolution of framebuffers dynamic (cambased)
 
 /*
@@ -39,7 +39,7 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,u
 	purpose: complete initialization of framebuffer objects
 */
 void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
+		const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer)
 {
 	// setup
 	glGenFramebuffers(1,&fbo);
@@ -63,23 +63,23 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fr_width,fr_height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
 	Toolbox::set_texture_parameter_linear_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex,0);
-	// FIXME: are we sure we want the framebuffer textures to be linear not nearest?
 
 	// setup depth map texture
-	/*glBindTexture(GL_TEXTURE_2D,dptex);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,frw,frh,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
-	Toolbox::set_texture_parameter_linear_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_TEXTURE_2D,dptex,0);*/
+	if (depth_buffer) {
+		glBindTexture(GL_TEXTURE_2D,dptex);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT24,frw,frh,0,GL_DEPTH_COMPONENT,
+				GL_FLOAT,NULL);
+		Toolbox::set_texture_parameter_linear_unfiltered();
+		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
+	}
 
 	// renderbuffer setup
 	glBindRenderbuffer(GL_RENDERBUFFER,rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,fr_width,fr_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
-
-	/*uint32_t fb_components[2] = { GL_COLOR_ATTACHMENT0,GL_DEPTH_STENCIL_ATTACHMENT };
-	glDrawBuffers(2,fb_components);*/
+	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,fr_width,fr_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
+// TODO: extend documentation
 
 /*
 	bind() -> void
@@ -101,43 +101,6 @@ void FrameBuffer::prepare()
 	s.enable();
 	buffer.bind();
 }
-
-/*
-	TODO
-*/
-/*void FrameBuffer::create_depth_texture()
-{
-	// setup
-	/*glGenFramebuffers(1,&rdpfb);
-	glGenTextures(1,&dptex);
-
-	// define
-	glBindFramebuffer(GL_RENDERBUFFER,rbo);
-	glBindFramebuffer(GL_FRAMEBUFFER,rdpfb);
-	glBindTexture(GL_TEXTURE_2D,dptex);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,frw,frh,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_TEXTURE_2D,rdpfb,0);
-	close();
-	glBindRenderbuffer(GL_RENDERBUFFER,0);*/
-
-	// setup shadow map texture
-	/*glGenTextures(1,&dptex);
-	glBindTexture(GL_TEXTURE_2D,dptex);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,frw,frh,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
-	Toolbox::set_texture_parameter_nearest_unfiltered();
-	Toolbox::set_texture_parameter_clamp_to_edge();
-	// FIXME: are we sure about that GL_FLOAT?
-
-	// setup depth sensitive framebuffer object
-	//glGenFramebuffers(1,&depth_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER,fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
-}*/
 
 /*
 	render() -> void
