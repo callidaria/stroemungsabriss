@@ -128,7 +128,11 @@ void Frame::calc_time_delta()
 {
 	// circle ticks
 	time_pticks = time_cticks;
+#ifdef BUILDISSUE_OLD_SDL_VERSION
+	time_cticks = SDL_GetTicks();
+#else
 	time_cticks = SDL_GetTicks64();
+#endif
 
 	// calculate time delta
 	time_delta = ((time_cticks-time_pticks)/1000.0f)*time_mod;

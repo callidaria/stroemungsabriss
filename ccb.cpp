@@ -136,7 +136,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lpthread");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -std=c++17 -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lpthread");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -333,7 +333,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
-				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -std=c++17 -c").c_str());
 
 				// get subsequent classes related to recompiled object
 				uint16_t ifile = 0;
@@ -355,7 +355,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
 
 					// compile current file related to main compile target
-					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -c").c_str());
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -std=c++17 -c").c_str());
 
 					ifile++;
 				} out = "compiled "+out_file;
@@ -382,7 +382,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c").c_str());
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -std=c++17 -c").c_str());
 					} cfound = readdir(cdir);
 				}
 

@@ -12,6 +12,8 @@
 
 #include <AL/alc.h>
 
+#define BUILDISSUE_OLD_SDL_VERSION
+
 struct Keyboard
 {
 	bool ka[285] = { false };	// list of keyboard scan results
