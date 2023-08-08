@@ -122,11 +122,11 @@ int main(int argc,char* argv[])
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		printf("\n\n\n\n> %s\033[30;47m\n",out.c_str());
 		SetConsoleTextAttribute(hConsole,BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
-		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
-		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 #endif
 
 		// read user input
@@ -136,7 +136,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread -std=c++17");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -165,7 +165,7 @@ void write_selection()
 }
 
 bool get_selected()
-{ return itr==idx&&inp==' '; }
+{ return (itr==idx&&inp==' ')||(itr==idx&&inp=='h'); }
 
 bool get_ftype(const char* file)
 {
@@ -333,7 +333,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
-				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -std=c++17 -c").c_str());
 
 				// get subsequent classes related to recompiled object
 				uint16_t ifile = 0;
@@ -343,7 +343,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 
 				// process related files in tree & jitterly turn off directory search for complete compile
 				// FIXME: check proceedings earlier to save time
-				while (!comp_all) {
+				while (!comp_all&&inp=='h') {
 					if (ifile>=ifiles.size()) break;
 
 					// process tree information
@@ -355,7 +355,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
 
 					// compile current file related to main compile target
-					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -c").c_str());
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -std=c++17 -c").c_str());
 
 					ifile++;
 				} out = "compiled "+out_file;
@@ -382,7 +382,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c").c_str());
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -std=c++17 -c").c_str());
 					} cfound = readdir(cdir);
 				}
 
