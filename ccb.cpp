@@ -43,6 +43,7 @@ char get_input_char();
 void grind_annotations(const char* path);
 void grind_packages(std::string path,std::vector<std::string> &packages);
 void grind_includes(std::string file,std::vector<std::string> &out);
+void assembly_analysis_mode(const char* path);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -126,7 +127,7 @@ int main(int argc,char* argv[])
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
-		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [a] assembly analysis  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 #endif
 
 		// read user input
@@ -285,6 +286,47 @@ void grind_includes(std::string file,std::vector<std::string> &out)
 	}
 }
 
+void assembly_analysis_mode(const char* path)
+{
+	// extract function implementations
+	std::cout << path << '\n';
+	std::ifstream file(path,std::ios::in);
+	std::string cline;
+	std::vector<std::string> func_names,func_codes;
+	std::string pfunc_name = "",pfunc_code = "",ptrunc_code = "";
+	uint8_t indent = 0;
+	while (getline(file,cline)) {
+
+		// content analysis of line
+		for (auto cc : cline) {
+			indent -= cc=='}';
+
+			// read method name & classifications
+			if (cc=='{'&&indent==0) {
+
+				// navigate trunc code until method definition
+				uint16_t i = ptrunc_code.length()-1,pivot = 0;
+				while (ptrunc_code[i]==' '||ptrunc_code[i]=='\n') i--; pivot = i+1;
+				while (ptrunc_code[i]!='\n') i--; i++;
+				while (i<pivot) { pfunc_name += ptrunc_code[i];i++; }
+				ptrunc_code = "";
+
+			// save method implementation & reset function code
+			} else if (cc=='}'&&!indent) {
+				func_names.push_back(pfunc_name),func_codes.push_back(pfunc_code);
+				pfunc_name = "",pfunc_code = "";
+
+			// execute copy mode
+			} if (indent) pfunc_code += cc;
+			else ptrunc_code += cc;
+			indent += cc=='{';
+		}
+	} file.close();
+
+	for (uint16_t i=0;i<func_names.size();i++) printf("%s:\n%s\n\n\n\n",func_names[i].c_str(),func_codes[i].c_str());
+	// TODO: write function contents to test file and assemble
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -359,7 +401,9 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 
 					ifile++;
 				} out = "compiled "+out_file;
-			}
+
+			// run compile to assembly request
+			} else if (inp=='a'&&found->d_type!=DT_DIR&&itr==idx) assembly_analysis_mode((dir_path+"/"+std::string(found->d_name)).c_str());
 
 			// grind sources at respective root
 			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
