@@ -289,7 +289,6 @@ void grind_includes(std::string file,std::vector<std::string> &out)
 void assembly_analysis_mode(const char* path)
 {
 	// extract function implementations
-	std::cout << path << '\n';
 	std::ifstream file(path,std::ios::in);
 	std::string cline;
 	std::vector<std::string> func_names,func_codes;
@@ -306,9 +305,38 @@ void assembly_analysis_mode(const char* path)
 
 				// navigate trunc code until method definition
 				uint16_t i = ptrunc_code.length()-1,pivot = 0;
-				while (ptrunc_code[i]==' '||ptrunc_code[i]=='\n') i--; pivot = i+1;
-				while (ptrunc_code[i]!='\n') i--; i++;
-				while (i<pivot) { pfunc_name += ptrunc_code[i];i++; }
+				bool bracket = false;
+				uint8_t scount = 2;
+				while (scount||bracket) {
+					if (ptrunc_code[i]==')') { bracket = true;pivot = i+1; }
+					else if (ptrunc_code[i]=='(') { bracket = false;scount = 2; }
+					scount -= ptrunc_code[i]==':';
+					i--;
+				} i += 3;
+				/*while (ptrunc_code[i]!='(') i--;
+				while (ptrunc_code[i]!=':') i--;*/
+
+				// extract return datatype
+				/*std::string return_type = "";
+				uint8_t j=i,scount = 2;
+				std::cout << "backward: ";
+				while (scount) {
+					std::cout << ptrunc_code[j];
+					if (ptrunc_code[j]==' '||ptrunc_code[j]=='\n') scount--;
+					j--;
+				} j++; std::cout << '\n';
+				std::cout << "forward: ";
+				while (ptrunc_code[j]!=' '&&ptrunc_code[j]!='\n') {
+					std::cout << ptrunc_code[j];
+					return_type += ptrunc_code[j];
+					j++;
+				} i++; std::cout << "\n\n";*/
+
+				// write function description
+				while (i<pivot) {
+					if (ptrunc_code[i]!='\t'&&ptrunc_code[i]!='\n') pfunc_name += ptrunc_code[i];
+					i++;
+				} //pfunc_name += " : "+return_type;
 				ptrunc_code = "";
 
 			// save method implementation & reset function code
@@ -320,10 +348,11 @@ void assembly_analysis_mode(const char* path)
 			} if (indent) pfunc_code += cc;
 			else ptrunc_code += cc;
 			indent += cc=='{';
-		}
+		} ptrunc_code += '\n';
 	} file.close();
 
-	for (uint16_t i=0;i<func_names.size();i++) printf("%s:\n%s\n\n\n\n",func_names[i].c_str(),func_codes[i].c_str());
+	// show functions & selection
+	for (uint16_t i=0;i<func_names.size();i++) printf("-> %s\n",func_names[i].c_str());
 	// TODO: write function contents to test file and assemble
 }
 
