@@ -365,6 +365,7 @@ void assembly_analysis_mode(std::string path)
 		printf("\033[0m\033[2J\033[1;1HC++:\n\n%s\nEND\n\n\n",func_codes[asm_idx].c_str());
 		std::ofstream tmp_cmp("tmp_cmp.cpp");
 		tmp_cmp << func_codes[asm_idx];
+		tmp_cmp.close();
 		printf("proceed to compiled assembly by pressing any key...\n");
 		get_input_char();
 		system("g++ tmp_cmp.cpp -S");
@@ -373,6 +374,7 @@ void assembly_analysis_mode(std::string path)
 		uint32_t clines = 0;
 		printf("\033[0m\033[2J\033[1;1HASSEMBLY:\n\n");
 		while (getline(tmp_asm,asmline)) { printf("%s\n",asmline.c_str());clines++; }
+		tmp_asm.close();
 		printf("lines: %i\n",clines);
 		printf("press any key to continue...\n");
 		get_input_char();
