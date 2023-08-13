@@ -43,7 +43,7 @@ char get_input_char();
 void grind_annotations(const char* path);
 void grind_packages(std::string path,std::vector<std::string> &packages);
 void grind_includes(std::string file,std::vector<std::string> &out);
-void assembly_analysis_mode(const char* path);
+void assembly_analysis_mode(std::string path);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -286,7 +286,7 @@ void grind_includes(std::string file,std::vector<std::string> &out)
 	}
 }
 
-void assembly_analysis_mode(const char* path)
+void assembly_analysis_mode(std::string path)
 {
 	// extract function implementations
 	std::ifstream file(path,std::ios::in);
@@ -313,47 +313,71 @@ void assembly_analysis_mode(const char* path)
 					scount -= ptrunc_code[i]==':';
 					i--;
 				} i += 3;
-				/*while (ptrunc_code[i]!='(') i--;
-				while (ptrunc_code[i]!=':') i--;*/
-
-				// extract return datatype
-				/*std::string return_type = "";
-				uint8_t j=i,scount = 2;
-				std::cout << "backward: ";
-				while (scount) {
-					std::cout << ptrunc_code[j];
-					if (ptrunc_code[j]==' '||ptrunc_code[j]=='\n') scount--;
-					j--;
-				} j++; std::cout << '\n';
-				std::cout << "forward: ";
-				while (ptrunc_code[j]!=' '&&ptrunc_code[j]!='\n') {
-					std::cout << ptrunc_code[j];
-					return_type += ptrunc_code[j];
-					j++;
-				} i++; std::cout << "\n\n";*/
 
 				// write function description
 				while (i<pivot) {
 					if (ptrunc_code[i]!='\t'&&ptrunc_code[i]!='\n') pfunc_name += ptrunc_code[i];
 					i++;
-				} //pfunc_name += " : "+return_type;
-				ptrunc_code = "";
+				}
 
 			// save method implementation & reset function code
 			} else if (cc=='}'&&!indent) {
-				func_names.push_back(pfunc_name),func_codes.push_back(pfunc_code);
-				pfunc_name = "",pfunc_code = "";
+				func_names.push_back(pfunc_name),func_codes.push_back("#include \""+path.substr(0,path.size()-3)+"h\"\n\n"+ptrunc_code+pfunc_code+'}');
+				pfunc_name = "",pfunc_code = "",ptrunc_code = "";
 
 			// execute copy mode
 			} if (indent) pfunc_code += cc;
-			else ptrunc_code += cc;
+			else if (!indent&&cc!='}') ptrunc_code += cc;
 			indent += cc=='{';
-		} ptrunc_code += '\n';
+		}
+
+		// write newlines for aesthetics
+		if (indent) pfunc_code += '\n';
+		else ptrunc_code += '\n';
 	} file.close();
 
 	// show functions & selection
-	for (uint16_t i=0;i<func_names.size();i++) printf("-> %s\n",func_names[i].c_str());
-	// TODO: write function contents to test file and assemble
+	bool asm_cnf = false;
+	uint16_t asm_idx = 0;
+	char asm_inp = 'x';
+	while (true) {
+
+		// process print
+		printf("\033[0m\033[2J\033[1;1H ASSEMBLY MODE\n\n");
+		for (uint16_t i=0;i<func_names.size();i++) {
+			if (asm_idx==i) printf("%s",SELECT);
+			printf("-> %s%s\n",func_names[i].c_str(),RESET);
+		}
+		if (asm_idx==func_names.size()) printf("%s",SELECT);
+		printf("\nCOMPLETE ASSEMBLY%s\n",RESET);
+		if (asm_idx==func_names.size()+1) printf("%s",SELECT);
+		printf("[Q]UIT%s",RESET);
+
+		// process input
+		asm_inp = get_input_char();
+		asm_cnf = asm_inp==' ';
+		if (asm_inp=='q'||asm_inp=='Q'||asm_cnf) break;
+		asm_idx += (asm_inp=='B'&&asm_idx<func_names.size()+1)-(asm_inp=='A'&&asm_idx>0);
+	}
+
+	// show code snippet before assembly when confirmation has been given
+	if (asm_cnf) {
+		printf("\033[0m\033[2J\033[1;1HC++:\n\n%s\nEND\n\n\n",func_codes[asm_idx].c_str());
+		std::ofstream tmp_cmp("tmp_cmp.cpp");
+		tmp_cmp << func_codes[asm_idx];
+		printf("proceed to compiled assembly by pressing any key...\n");
+		get_input_char();
+		system("g++ tmp_cmp.cpp -S");
+		std::ifstream tmp_asm("tmp_cmp.s");
+		std::string asmline;
+		uint32_t clines = 0;
+		printf("\033[0m\033[2J\033[1;1HASSEMBLY:\n\n");
+		while (getline(tmp_asm,asmline)) { printf("%s\n",asmline.c_str());clines++; }
+		printf("lines: %i\n",clines);
+		printf("press any key to continue...\n");
+		get_input_char();
+		system("rm tmp_cmp.cpp tmp_cmp.s");
+	}
 }
 
 void offer_root(std::string &dir_path,std::string rt_dir)
