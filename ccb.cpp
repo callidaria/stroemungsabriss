@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -43,6 +44,7 @@ char get_input_char();
 void grind_annotations(const char* path);
 void grind_packages(std::string path,std::vector<std::string> &packages);
 void grind_includes(std::string file,std::vector<std::string> &out);
+void assembly_analysis_mode(std::string path);
 
 // engine features
 void offer_root(std::string &dir_path,std::string rt_dir);
@@ -122,11 +124,11 @@ int main(int argc,char* argv[])
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		printf("\n\n\n\n> %s\033[30;47m\n",out.c_str());
 		SetConsoleTextAttribute(hConsole,BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
-		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [a] assembly analysis  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
-		printf("[r] run game  [b] build main  [SPACE] run selected  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [a] assembly analysis  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\033[0m\n");
 #endif
 
 		// read user input
@@ -136,7 +138,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread");waiting=true; }
+		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread -std=c++17");waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -165,7 +167,7 @@ void write_selection()
 }
 
 bool get_selected()
-{ return itr==idx&&inp==' '; }
+{ return (itr==idx&&inp==' ')||(itr==idx&&inp=='h'); }
 
 bool get_ftype(const char* file)
 {
@@ -285,6 +287,131 @@ void grind_includes(std::string file,std::vector<std::string> &out)
 	}
 }
 
+void assembly_analysis_mode(std::string path)
+{
+	// extract function implementations
+	std::ifstream file(path,std::ios::in);
+	std::string cline;
+	std::vector<std::string> func_names,func_codes;
+	std::string pfunc_name = "",pfunc_code = "",ptrunc_code = "";
+	uint8_t indent = 0;
+	while (getline(file,cline)) {
+
+		// exclude compiler macros
+		if (cline[0]=='#') continue;
+
+		// content analysis of line
+		for (auto cc : cline) {
+			indent -= cc=='}';
+
+			// read method name & classifications
+			if (cc=='{'&&indent==0) {
+
+				// navigate trunc code until method definition
+				uint16_t i = ptrunc_code.length()-1,pivot = 0;
+				bool bracket = false;
+				uint8_t scount = 2;
+				while (scount||bracket) {
+					if (ptrunc_code[i]==')') { bracket = true;pivot = i+1; }
+					else if (ptrunc_code[i]=='(') { bracket = false;scount = 2; }
+					scount -= ptrunc_code[i]==':';
+					i--;
+				} i += 3;
+
+				// write function description
+				while (i<pivot) {
+					if (ptrunc_code[i]!='\t'&&ptrunc_code[i]!='\n') pfunc_name += ptrunc_code[i];
+					i++;
+				}
+
+			// save method implementation & reset function code
+			} else if (cc=='}'&&!indent) {
+				func_names.push_back(pfunc_name),func_codes.push_back("#include \""+path.substr(0,path.size()-3)+"h\"\n\n"+ptrunc_code+pfunc_code+'}');
+				pfunc_name = "",pfunc_code = "",ptrunc_code = "";
+
+			// execute copy mode
+			} if (indent) pfunc_code += cc;
+			else if (!indent&&cc!='}') ptrunc_code += cc;
+			indent += cc=='{';
+		}
+
+		// write newlines for aesthetics
+		if (indent) pfunc_code += '\n';
+		else ptrunc_code += '\n';
+	} file.close();
+
+	// show functions & selection
+	bool asm_cnf = false;
+	uint16_t asm_idx = 0;
+	char asm_inp = 'x';
+	while (true) {
+
+		// process print
+		printf("\033[0m\033[2J\033[1;1H ASSEMBLY MODE\n\n");
+		for (uint16_t i=0;i<func_names.size();i++) {
+			if (asm_idx==i) printf("%s",SELECT);
+			printf("-> %s%s\n",func_names[i].c_str(),RESET);
+		}
+		if (asm_idx==func_names.size()) printf("%s",SELECT);
+		printf("\nCOMPLETE ASSEMBLY%s\n",RESET);
+		if (asm_idx==func_names.size()+1) printf("%s",SELECT);
+		printf("[Q]UIT%s",RESET);
+
+		// process input
+		asm_inp = get_input_char();
+		asm_cnf = asm_inp==' ';
+		if (asm_inp=='q'||asm_inp=='Q'||asm_cnf) break;
+		asm_idx += (asm_inp=='B'&&asm_idx<func_names.size()+1)-(asm_inp=='A'&&asm_idx>0);
+	}
+
+	// show code snippet before assembly when confirmation has been given
+	if (asm_cnf) {
+		printf("\033[0m\033[2J\033[1;1HC++:\n\n%s\nEND\n\n\n",func_codes[asm_idx].c_str());
+		std::ofstream tmp_cmp("tmp_cmp.cpp");
+		tmp_cmp << func_codes[asm_idx];
+		tmp_cmp.close();
+		printf("proceed to compiled assembly by pressing any key...\n");
+		get_input_char();
+
+		// translate to assembly & prepare analysis output
+		system("g++ tmp_cmp.cpp -S -fverbose-asm");
+		std::ifstream tmp_asm("tmp_cmp.s");
+		std::string asmline;
+		std::vector<std::string> clasms;
+		bool dumpstate = true;
+		std::string rfname,csnip,linebuf,llinebuf;
+		printf("ASSEMBLY:\n\n");
+		while (getline(tmp_asm,asmline)) {
+
+			// check for annotation lines & external instructions
+			if (asmline[0]=='#') {
+
+				// write relevant lines & dump includes
+				if (dumpstate) clasms.clear();
+				else if (llinebuf!=linebuf) printf("%s%s\n%s",COLOUR_DEPRECATED,csnip.c_str(),RESET);
+				if (!dumpstate) {
+					for (auto al : clasms) printf("%s\n",al.c_str());
+					printf("\n");
+					llinebuf = linebuf;
+					clasms.clear();
+				}
+
+				// split up annotation string
+				std::istringstream asmant(asmline);
+				getline(asmant,rfname,':'),getline(asmant,linebuf,':'),getline(asmant,csnip);
+				// FIXME: ??use sscanf instead??
+
+				// dumpstate
+				dumpstate = rfname!="# tmp_cmp.cpp";
+			} else clasms.push_back(asmline);
+		} for (auto al : clasms) printf("%s\n",al.c_str());
+		tmp_asm.close();
+		printf("press any key to continue...\n");
+		get_input_char();
+		system("rm tmp_cmp.cpp tmp_cmp.s");
+	}
+}
+
 void offer_root(std::string &dir_path,std::string rt_dir)
 {
 	if (dir_path!=rt_dir) {
@@ -333,7 +460,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
-				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -c").c_str());
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -std=c++17 -c").c_str());
 
 				// get subsequent classes related to recompiled object
 				uint16_t ifile = 0;
@@ -343,7 +470,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 
 				// process related files in tree & jitterly turn off directory search for complete compile
 				// FIXME: check proceedings earlier to save time
-				while (!comp_all) {
+				while (!comp_all&&inp=='h') {
 					if (ifile>=ifiles.size()) break;
 
 					// process tree information
@@ -355,11 +482,13 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
 
 					// compile current file related to main compile target
-					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -c").c_str());
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -std=c++17 -c").c_str());
 
 					ifile++;
 				} out = "compiled "+out_file;
-			}
+
+			// run compile to assembly request
+			} else if (inp=='a'&&found->d_type!=DT_DIR&&itr==idx) assembly_analysis_mode((dir_path+"/"+std::string(found->d_name)).c_str());
 
 			// grind sources at respective root
 			else if (!update&&grind_tasks&&found->d_type!=DT_DIR) grind_annotations((dir_path+"/"+found->d_name).c_str());
@@ -382,7 +511,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -c").c_str());
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -std=c++17 -c").c_str());
 					} cfound = readdir(cdir);
 				}
 

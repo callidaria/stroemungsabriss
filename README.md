@@ -75,7 +75,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - import & interpolate mesh animations
 - finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - store "macro" savestate pattern
-- automatic compilation of all files using the originally updated source
+- documented assembly translation analysis
+- automatic compilation of all files using the originally updated source (upon request)
 
 ### optimizations:
 - system to remove world objects should they have been deemed obsolete
@@ -198,4 +199,5 @@ Worktime: 120h
 	+ 62: 1h 52min
 	+ 90: 9h 50min
 	+ 176: 61h 49min
-- Total Code Lines: 14.314
+	+ ?? console improvements: 9h 41min
+- Total Code Lines: 15.555
