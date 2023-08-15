@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -296,6 +297,9 @@ void assembly_analysis_mode(std::string path)
 	uint8_t indent = 0;
 	while (getline(file,cline)) {
 
+		// exclude compiler macros
+		if (cline[0]=='#') continue;
+
 		// content analysis of line
 		for (auto cc : cline) {
 			indent -= cc=='}';
@@ -368,14 +372,40 @@ void assembly_analysis_mode(std::string path)
 		tmp_cmp.close();
 		printf("proceed to compiled assembly by pressing any key...\n");
 		get_input_char();
-		system("g++ tmp_cmp.cpp -S");
+
+		// translate to assembly & prepare analysis output
+		system("g++ tmp_cmp.cpp -S -fverbose-asm");
 		std::ifstream tmp_asm("tmp_cmp.s");
 		std::string asmline;
-		uint32_t clines = 0;
-		printf("\033[0m\033[2J\033[1;1HASSEMBLY:\n\n");
-		while (getline(tmp_asm,asmline)) { printf("%s\n",asmline.c_str());clines++; }
+		std::vector<std::string> clasms;
+		bool dumpstate = true;
+		std::string rfname,csnip,linebuf,llinebuf;
+		printf("ASSEMBLY:\n\n");
+		while (getline(tmp_asm,asmline)) {
+
+			// check for annotation lines & external instructions
+			if (asmline[0]=='#') {
+
+				// write relevant lines & dump includes
+				if (dumpstate) clasms.clear();
+				else if (llinebuf!=linebuf) printf("%s%s\n%s",COLOUR_DEPRECATED,csnip.c_str(),RESET);
+				if (!dumpstate) {
+					for (auto al : clasms) printf("%s\n",al.c_str());
+					printf("\n");
+					llinebuf = linebuf;
+					clasms.clear();
+				}
+
+				// split up annotation string
+				std::istringstream asmant(asmline);
+				getline(asmant,rfname,':'),getline(asmant,linebuf,':'),getline(asmant,csnip);
+				// FIXME: ??use sscanf instead??
+
+				// dumpstate
+				dumpstate = rfname!="# tmp_cmp.cpp";
+			} else clasms.push_back(asmline);
+		} for (auto al : clasms) printf("%s\n",al.c_str());
 		tmp_asm.close();
-		printf("lines: %i\n",clines);
 		printf("press any key to continue...\n");
 		get_input_char();
 		system("rm tmp_cmp.cpp tmp_cmp.s");
