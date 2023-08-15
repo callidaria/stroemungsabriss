@@ -124,7 +124,7 @@ int main(int argc,char* argv[])
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		printf("\n\n\n\n> %s\033[30;47m\n",out.c_str());
 		SetConsoleTextAttribute(hConsole,BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
-		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
+		printf("[r] run game  [b] build main  [SPACE] run selected  [h] include recursion  [a] assembly analysis  [RIGHT] open  [c] jump to engine  [p] jump to project  [e] exit\n");
 		SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #else
 		printf("\033[0m\n\n\n\n> %s\033[30;47m\n",out.c_str());
