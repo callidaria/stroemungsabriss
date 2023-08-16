@@ -21,10 +21,7 @@ uniform mat4 proj;
 void main()
 {
 	// extract colour
-	vec4 inv_depth = inverse(proj)*vec4(0,0,gl_FragCoord.z*2.0-1.0,1.0);
-	float gdepth = (inv_depth/inv_depth.w).z;
-	gbuffer_colour = vec4(texture(colour_map,TexCoords).rgb,gl_FragCoord.z);
-	gbuffer_colour = vec4(gl_FragCoord.z,Position.w/10.0,0,gl_FragCoord.z);
+	gbuffer_colour = vec4(texture(colour_map,TexCoords).rgb,0);
 
 	// translate position & shadow
 	gbuffer_position = vec4(Position.rgb,0.0);

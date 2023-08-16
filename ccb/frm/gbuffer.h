@@ -9,6 +9,8 @@
 
 #include "../mat/toolbox.h"
 
+constexpr uint8_t CCB_GBUFFER_COMPONENT_COUNT = 4;
+
 class GBuffer
 {
 public:
@@ -22,16 +24,17 @@ public:
 	void bind();
 
 	// getter
-	uint32_t get_colour();
-	uint32_t get_position();
-	uint32_t get_normals();
-	uint32_t get_materials();
+	inline uint32_t get_colour() { return t_col; }
+	inline uint32_t get_position() { return t_pos; }
+	inline uint32_t get_normals() { return t_norm; }
+	inline uint32_t get_materials() { return t_pbm; }
+	inline uint32_t get_depth() { return t_depth; }
 
 private:
 
 	// content
-	uint32_t buffer;
-	uint32_t t_col,t_pos,t_norm,t_pbm,rb_depth;
+	uint32_t buffer,wbuffer;
+	uint32_t t_col,t_pos,t_norm,t_pbm,/*rb_depth,*/t_depth;
 };
 
 #endif

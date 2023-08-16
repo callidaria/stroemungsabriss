@@ -21,7 +21,7 @@ public:
 			const char* vsp,const char* fsp,bool float_buffer=false,bool depth_buffer=false);
 
 	// read
-	void bind();
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
 
 	// details
 	void prepare();
@@ -31,15 +31,15 @@ public:
 	void render(float ptrans);
 
 	// getters
-	GLuint get_fbo();
-	GLuint get_tex();
-	GLuint get_depth();
+	inline uint32_t get_fbo() { return fbo; }
+	inline uint32_t get_tex() { return tex; }
+	inline uint32_t get_depth() { return dptex; }
 
 	// setters
-	void overwrite_texture(GLuint tex);
+	inline void overwrite_texture(GLuint wTex) { tex = wTex; }
 
 	// statics
-	static void close();
+	static inline void close() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
 
 private:
 
@@ -56,8 +56,10 @@ public:
 private:
 
 	// buffers
-	GLuint tex,dptex,rbo;
-	GLuint fbo;
+	uint32_t fbo;
+	uint32_t tex,dptex;//,rbo;
+
+	// dimensions
 	uint32_t frw,frh;
 };
 

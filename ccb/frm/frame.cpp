@@ -70,8 +70,9 @@ Frame::Frame(const char* title,int8_t screen,int16_t width,int16_t height,SDL_Wi
 void Frame::clear(float cr,float cg,float cb)
 {
 	glClearColor(cr,cg,cb,0);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); // ??maybe outside option to clear without depth buffer
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
+// TODO: add method to skip depth buffer clear
 
 /*
 	update() -> void
@@ -250,6 +251,7 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
 	SDL_StopTextInput();
 	//SDL_ShowCursor(SDL_DISABLE);
+	// TODO: dynamically hide the cursor, when controller input is mainly used
 }
 
 /*

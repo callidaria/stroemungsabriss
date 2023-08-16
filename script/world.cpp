@@ -30,6 +30,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("shadow_map",7);
 	deferred_fb.s.upload_int("transparency_buffer",8);
 	deferred_fb.s.upload_int("transparency_depth",9);
+	deferred_fb.s.upload_int("world_depth",10);
 	transparency_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
 }
@@ -106,7 +107,6 @@ void World::load_geometry(float &progress,float ldsplit)
 */
 void World::upload_lighting()
 {
-	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
 }
@@ -136,6 +136,7 @@ void World::render(uint32_t &running,bool &reboot)
 {
 	// shadow processing
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	m_ccbf->r3d->prepare_shadow();
 	m_ccbf->r3d->render_mesh_shadow();
 	m_ccbf->r3d->render_instance_shadow();
@@ -166,6 +167,7 @@ void World::render(uint32_t &running,bool &reboot)
 	// render particles
 	m_ccbf->pSys->prepare(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
 	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
+	glDisable(GL_DEPTH_TEST);
 	// FIXME: move this loop to standard functionality for ParticleSystem::render(void)
 
 	// prepare scene render
@@ -187,6 +189,8 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_tex());
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_depth());
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.get_depth());
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);

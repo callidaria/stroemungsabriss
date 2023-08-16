@@ -121,6 +121,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 	shader.enable();
 	buffer.bind();
 	shader.upload_camera(cam3D);
+	// TODO: cleanup and structurize
 }
 
 /*
