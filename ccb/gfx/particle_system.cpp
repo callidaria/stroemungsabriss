@@ -23,6 +23,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.origin_pos = opos;
 	pentity.scale = scl;
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
+	pentity.dists = std::vector<glm::vec3>(count,glm::vec3(0));
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
 
@@ -70,49 +71,57 @@ void ParticleSystem::load()
 */
 void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 {
-	// update
-	for (uint32_t j=0;j<entity_list.size();j++) {
+	// update individual particles
+	for (auto pie : entity_list) {
 
 		// stall activations according to spawn timeout
-		entity_list[j].spwn_delta += delta_time;
-		bool spawn = entity_list[j].spwn_delta>entity_list[j].spwn_timeout;
+		pie.spwn_delta += delta_time;
+		bool spawn = pie.spwn_delta>pie.spwn_timeout;
 
 		// reset spawn index should maximum entities have been spawned
 		if (spawn) {
-			entity_list[j].cactive += entity_list[j].cactive<entity_list[j].count;
-			entity_list[j].spwn_delta -= entity_list[j].spwn_timeout;
-			entity_list[j].sindex -= (entity_list[j].sindex>=entity_list[j].count)
-					* entity_list[j].count;
-			entity_list[j].indices[entity_list[j].sindex*5] = entity_list[j].origin_pos.x;
-			entity_list[j].indices[entity_list[j].sindex*5+1] = entity_list[j].origin_pos.y;
-			entity_list[j].indices[entity_list[j].sindex*5+2] = entity_list[j].origin_pos.z;
-			entity_list[j].indices[entity_list[j].sindex*5+3] = .0f;
-			entity_list[j].indices[entity_list[j].sindex*5+4] = .0f;
-			entity_list[j].anim_timing[entity_list[j].sindex] = 0;
-			entity_list[j].sindex++;
+			pie.cactive += pie.cactive<pie.count;
+			pie.spwn_delta -= pie.spwn_timeout;
+			pie.sindex -= (pie.sindex>=pie.count)
+					* pie.count;
+			pie.indices[pie.sindex*5] = pie.origin_pos.x;
+			pie.indices[pie.sindex*5+1] = pie.origin_pos.y;
+			pie.indices[pie.sindex*5+2] = pie.origin_pos.z;
+			pie.indices[pie.sindex*5+3] = .0f;
+			pie.indices[pie.sindex*5+4] = .0f;
+			pie.anim_timing[pie.sindex] = 0;
+			pie.sindex++;
 		}
 
 		// write updates for active instances
-		for (uint32_t i=0;i<entity_list[j].cactive;i++) {
+		for (uint32_t i=0;i<pie.cactive;i++) {
 
 			// individual positions
-			entity_list[j].indices[i*5] += entity_list[j].drive_dir[i].x;
-			entity_list[j].indices[i*5+1] += entity_list[j].drive_dir[i].y;
-			entity_list[j].indices[i*5+2] += entity_list[j].drive_dir[i].z;
+			pie.indices[i*5] += pie.drive_dir[i].x;
+			pie.indices[i*5+1] += pie.drive_dir[i].y;
+			pie.indices[i*5+2] += pie.drive_dir[i].z;
 
 			// individual animation frames
-			entity_list[j].anim_timing[i] += delta_time;
-			bool reset_timing = entity_list[j].anim_timing[i]>entity_list[j].anim_duration;
-			entity_list[j].anim_timing[i] -= reset_timing
-					* (entity_list[j].anim_duration*entity_list[j].loop_anim
-					+ (entity_list[j].anim_timing[i]-entity_list[j].anim_duration)
-					* !entity_list[j].loop_anim);
-			uint16_t anim_index = (entity_list[j].anim_timing[i]/entity_list[j].anim_duration)
-					* entity_list[j].cframes;
-			entity_list[j].indices[i*5+3] = anim_index%entity_list[j].cols;
-			entity_list[j].indices[i*5+4] = anim_index/entity_list[j].cols;
+			pie.anim_timing[i] += delta_time;
+			bool reset_timing = pie.anim_timing[i]>pie.anim_duration;
+			pie.anim_timing[i] -= reset_timing
+					* (pie.anim_duration*pie.loop_anim
+					+ (pie.anim_timing[i]-pie.anim_duration)
+					* !pie.loop_anim);
+			uint16_t anim_index = (pie.anim_timing[i]/pie.anim_duration)
+					* pie.cframes;
+			pie.indices[i*5+3] = anim_index%pie.cols;
+			pie.indices[i*5+4] = anim_index/pie.cols;
 			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
+
+			// calculate instance distances for render queue
+			glm::vec3 inst_pos = glm::vec3(pie.indices[i*5],pie.indices[i*5+1],pie.indices[i*5+2]);
+			pie.dists[i] = glm::length(inst_pos-cam3D.pos);
+			// TODO: test for performance badness, see if it is almost fine and then leave it
 		}
+
+		// order instances by depth
+		// TODO: store position ids and restore every frame based on renderqueue (sort based on dist)
 	}
 
 	// binding

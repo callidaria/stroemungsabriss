@@ -18,7 +18,7 @@ struct ParticleEntity
 	uint8_t rows,cols;
 	uint16_t cframes;
 	float anim_duration;
-	std::vector<float> anim_timing;
+	std::vector<float> anim_timing,dists;
 	bool loop_anim;
 	glm::vec3 origin_pos;
 	float scale;

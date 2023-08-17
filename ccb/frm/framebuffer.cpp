@@ -58,7 +58,7 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 	glBindTexture(GL_TEXTURE_2D,tex);
 	if (float_buffer)
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,fr_width,fr_height,0,GL_RGBA,GL_FLOAT,NULL);
-	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fr_width,fr_height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,fr_width,fr_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
 	Toolbox::set_texture_parameter_linear_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex,0);
 	// FIXME: kill branch by switching between floatbuffer setup by index math
