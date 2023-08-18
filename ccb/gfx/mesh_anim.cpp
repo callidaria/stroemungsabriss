@@ -173,7 +173,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
-		proc.duration = (canim->mDuration/canim->mTicksPerSecond)*1000.0f;
+		proc.duration = canim->mDuration/canim->mTicksPerSecond;
+		std::cout << canim->mDuration << '/' << canim->mTicksPerSecond << " = " << proc.duration << '\n';
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
@@ -235,7 +236,7 @@ void MeshAnimation::upload_interpolation(Shader* shader)
 void MeshAnimation::interpolate(float dt)
 {
 	// interpolation delta
-	avx += dt*1000.0f;
+	avx += dt;
 	avx = fmod(avx,anims[current_anim].duration);
 
 	// iterate all joints for local transformations
