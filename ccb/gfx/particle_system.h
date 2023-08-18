@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <numeric>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 
@@ -19,14 +21,16 @@ struct ParticleEntity
 	uint16_t cframes;
 	float anim_duration;
 	std::vector<float> anim_timing,dists;
+	std::vector<uint16_t> queue_order;
 	bool loop_anim;
 	glm::vec3 origin_pos;
 	float scale;
-	std::vector<glm::vec3> drive_dir;
+	std::vector<glm::vec3> curr_pos,drive_dir;
 	std::vector<float> indices;
 	uint32_t count,cactive=0,sindex=0;
 	float spwn_timeout,spwn_delta=.0f;
 };
+// TODO: clean this up!
 
 class ParticleSystem
 {
@@ -44,6 +48,12 @@ public:
 	// draw
 	void prepare(Camera3D cam3D,float delta_time);
 	void render(uint16_t i);
+
+private:
+
+	// index uploads
+	void upload_position(uint16_t eid,uint32_t iid,glm::vec3 pos);
+	void upload_animloc(uint16_t eid,uint32_t iid,glm::vec2 aid);
 
 public:
 

@@ -22,8 +22,10 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.loop_anim = loop;
 	pentity.origin_pos = opos;
 	pentity.scale = scl;
+	pentity.curr_pos = std::vector<glm::vec3>(count,opos);
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
-	pentity.dists = std::vector<glm::vec3>(count,glm::vec3(0));
+	pentity.dists = std::vector<float>(count);
+	pentity.queue_order = std::vector<uint16_t>(count);
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
 
@@ -72,56 +74,46 @@ void ParticleSystem::load()
 void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 {
 	// update individual particles
-	for (auto pie : entity_list) {
-
-		// stall activations according to spawn timeout
-		pie.spwn_delta += delta_time;
-		bool spawn = pie.spwn_delta>pie.spwn_timeout;
+	for (uint16_t pie_id=0;pie_id<entity_list.size();pie_id++) {
+		ParticleEntity &pie = entity_list[pie_id];
 
 		// reset spawn index should maximum entities have been spawned
-		if (spawn) {
+		pie.spwn_delta += delta_time;
+		if (pie.spwn_delta>pie.spwn_timeout) {
 			pie.cactive += pie.cactive<pie.count;
 			pie.spwn_delta -= pie.spwn_timeout;
-			pie.sindex -= (pie.sindex>=pie.count)
-					* pie.count;
-			pie.indices[pie.sindex*5] = pie.origin_pos.x;
-			pie.indices[pie.sindex*5+1] = pie.origin_pos.y;
-			pie.indices[pie.sindex*5+2] = pie.origin_pos.z;
-			pie.indices[pie.sindex*5+3] = .0f;
-			pie.indices[pie.sindex*5+4] = .0f;
+			pie.sindex -= (pie.sindex>=pie.count)*pie.count;
+			pie.curr_pos[pie.sindex] = pie.origin_pos;
+			upload_animloc(pie_id,pie.sindex,glm::vec2(0));
 			pie.anim_timing[pie.sindex] = 0;
 			pie.sindex++;
 		}
 
-		// write updates for active instances
+		// updates for active instances
 		for (uint32_t i=0;i<pie.cactive;i++) {
 
-			// individual positions
-			pie.indices[i*5] += pie.drive_dir[i].x;
-			pie.indices[i*5+1] += pie.drive_dir[i].y;
-			pie.indices[i*5+2] += pie.drive_dir[i].z;
+			// individual positions & instance distances for render queue
+			pie.curr_pos[i] += pie.drive_dir[i];
+			pie.dists[i] = glm::length(pie.curr_pos[i]-cam3D.pos);
+			// TODO: test for performance badness, see if it is almost fine and then leave it
 
 			// individual animation frames
 			pie.anim_timing[i] += delta_time;
 			bool reset_timing = pie.anim_timing[i]>pie.anim_duration;
-			pie.anim_timing[i] -= reset_timing
-					* (pie.anim_duration*pie.loop_anim
-					+ (pie.anim_timing[i]-pie.anim_duration)
-					* !pie.loop_anim);
-			uint16_t anim_index = (pie.anim_timing[i]/pie.anim_duration)
-					* pie.cframes;
-			pie.indices[i*5+3] = anim_index%pie.cols;
-			pie.indices[i*5+4] = anim_index/pie.cols;
+			pie.anim_timing[i] -= reset_timing*(pie.anim_duration*pie.loop_anim
+					+ (pie.anim_timing[i]-pie.anim_duration)*!pie.loop_anim);
+			uint16_t anim_index = (pie.anim_timing[i]/pie.anim_duration)*pie.cframes;
+			upload_animloc(pie_id,i,glm::vec2(anim_index%pie.cols,anim_index/pie.cols));
 			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
-
-			// calculate instance distances for render queue
-			glm::vec3 inst_pos = glm::vec3(pie.indices[i*5],pie.indices[i*5+1],pie.indices[i*5+2]);
-			pie.dists[i] = glm::length(inst_pos-cam3D.pos);
-			// TODO: test for performance badness, see if it is almost fine and then leave it
 		}
 
 		// order instances by depth
-		// TODO: store position ids and restore every frame based on renderqueue (sort based on dist)
+		std::iota(pie.queue_order.begin(),pie.queue_order.end(),0);
+		std::sort(pie.queue_order.begin(),pie.queue_order.end(),
+				[&](uint16_t n,uint16_t k) { return pie.dists[n]>pie.dists[k]; });
+		for (auto iter : pie.queue_order) upload_position(pie_id,iter,pie.curr_pos[iter]),
+				std::cout << pie.dists[iter] << ',';
+		std::cout << '\n';
 	}
 
 	// binding
@@ -148,3 +140,18 @@ void ParticleSystem::render(uint16_t i)
 	// render particles
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,entity_list[i].cactive);
 }
+
+/*
+	TODO
+*/
+void ParticleSystem::upload_position(uint16_t eid,uint32_t iid,glm::vec3 pos)
+{
+	entity_list[eid].indices[iid*5] = pos.x,entity_list[eid].indices[iid*5+1] = pos.y,
+			entity_list[eid].indices[iid*5+2] = pos.z;
+}
+
+/*
+	TODO
+*/
+void ParticleSystem::upload_animloc(uint16_t eid,uint32_t iid,glm::vec2 aid)
+{ entity_list[eid].indices[iid*5+3] = aid.x,entity_list[eid].indices[iid*5+4] = aid.y; }
