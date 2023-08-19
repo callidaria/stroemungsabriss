@@ -420,7 +420,7 @@ void Renderer3D::clear_memory()
 	purpose: update all animations that have been started and thus added to the update id list
 	\param dt: time delta since last frame
 */
-void Renderer3D::update_animations(float dt)
+void Renderer3D::update_animations(double dt)
 {
 	for (auto id : update_animation_ids)
 		mal[id].interpolate(dt);

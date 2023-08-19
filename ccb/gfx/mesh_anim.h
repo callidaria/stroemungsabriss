@@ -58,7 +58,7 @@ public:
 
 	// update
 	inline void set_animation(uint16_t anim_id) { current_anim = anim_id; }
-	void interpolate(float dt);
+	void interpolate(double dt);
 
 	// system
 	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
@@ -121,7 +121,7 @@ private:
 	uint16_t current_anim;
 
 	// timing
-	float avx = 0;
+	double avx = 0;
 };
 
 #endif

@@ -174,7 +174,6 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		aiAnimation* canim = dae_file->mAnimations[i];
 		ColladaAnimationData proc;
 		proc.duration = canim->mDuration/canim->mTicksPerSecond;
-		std::cout << canim->mDuration << '/' << canim->mTicksPerSecond << " = " << proc.duration << '\n';
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
@@ -187,13 +186,13 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 			// add key information
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
-				cjkey.dur_positions.push_back(cnanim->mPositionKeys[k].mTime);
+				cjkey.dur_positions.push_back(cnanim->mPositionKeys[k].mTime/canim->mTicksPerSecond);
 				cjkey.key_positions.push_back(glmify(cnanim->mPositionKeys[k].mValue));
 			} for (uint32_t k=0;k<cnanim->mNumScalingKeys;k++) {
-				cjkey.dur_scales.push_back(cnanim->mScalingKeys[k].mTime);
+				cjkey.dur_scales.push_back(cnanim->mScalingKeys[k].mTime/canim->mTicksPerSecond);
 				cjkey.key_scales.push_back(glmify(cnanim->mScalingKeys[k].mValue));
 			} for (uint32_t k=0;k<cnanim->mNumRotationKeys;k++) {
-				cjkey.dur_rotations.push_back(cnanim->mRotationKeys[k].mTime);
+				cjkey.dur_rotations.push_back(cnanim->mRotationKeys[k].mTime/canim->mTicksPerSecond);
 				cjkey.key_rotations.push_back(glmify(cnanim->mRotationKeys[k].mValue));
 			}
 
@@ -233,7 +232,7 @@ void MeshAnimation::upload_interpolation(Shader* shader)
 	purpose: calculate current bone transformations, interpolate between keys and recurse influence
 	\param dt: time passed since last interpolation
 */
-void MeshAnimation::interpolate(float dt)
+void MeshAnimation::interpolate(double dt)
 {
 	// interpolation delta
 	avx += dt;

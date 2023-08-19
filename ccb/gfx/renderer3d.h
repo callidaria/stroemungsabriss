@@ -56,7 +56,7 @@ public:
 	void clear_memory();
 
 	// update
-	void update_animations(float dt);
+	void update_animations(double dt);
 	void update_shadows(float swidth,float sheight);
 
 	// shadow
