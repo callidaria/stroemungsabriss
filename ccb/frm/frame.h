@@ -54,8 +54,8 @@ public:
 
 	// time
 	void calc_time_delta();
-	void set_tmod(float tmod);
-	void change_tmod(float goal,float rate);
+	void set_tmod(double tmod);
+	void change_tmod(double goal,double rate);
 
 	// controlling
 	void input(uint32_t &running);
@@ -68,7 +68,7 @@ public:
 	void input_stop();
 
 	// getter
-	float get_time_delta();
+	double get_time_delta();
 	SDL_GLContext create_new_context();
 
 private:
@@ -109,7 +109,7 @@ private:
 
 	// time & vsync
 	uint32_t past_ticks = 0,current_ticks = 0,fps = 0,temp_fps = 0,lO = 0;
-	float time_mod = 1.0f,time_delta = 0;
+	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 };
 

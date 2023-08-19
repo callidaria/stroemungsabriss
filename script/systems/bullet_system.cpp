@@ -83,7 +83,7 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float 
 	purpose: move specific bullet according to outsidely precalculated direction and speed
 */
 void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
-{ m_rI->add_aOffset(cluster,index,dPos*m_frame->get_time_delta()); }
+{ m_rI->add_aOffset(cluster,index,dPos*(float)m_frame->get_time_delta()); }
 
 /*
 	delta_fDir(uint8_t) -> void
@@ -93,7 +93,7 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
-		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*m_frame->get_time_delta());
+		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*(float)m_frame->get_time_delta());
 }
 
 /*

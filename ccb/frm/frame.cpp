@@ -131,7 +131,7 @@ void Frame::calc_time_delta()
 	time_cticks = SDL_GetTicks();
 
 	// calculate time delta
-	time_delta = ((time_cticks-time_pticks)/1000.0f)*time_mod;
+	time_delta = ((time_cticks-time_pticks)/1000.0)*time_mod;
 }
 
 /*
@@ -139,7 +139,7 @@ void Frame::calc_time_delta()
 	tmod: new value of time modificator to
 	purpose: directly set the value of the time modificator to the given value
 */
-void Frame::set_tmod(float tmod)
+void Frame::set_tmod(double tmod)
 { time_mod = tmod; }
 
 /*
@@ -148,7 +148,7 @@ void Frame::set_tmod(float tmod)
 	rate: rate at which the time modificator time_mod should change towards the target value
 	purpose: changing time modification to a set goal at a given rate
 */
-void Frame::change_tmod(float goal,float rate)
+void Frame::change_tmod(double goal,double rate)
 { time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
 
 /*
@@ -332,9 +332,8 @@ void Frame::input_stop()
 /*
 	get_time_delta() -> float
 	returns: time delta between render updates to disconnect physics from non-synced fps counts
-	DEPRECATED: do not calculate for 60 individual ticks but for per-second-delta
 */
-float Frame::get_time_delta()
+double Frame::get_time_delta()
 { return time_delta; }
 
 /*
