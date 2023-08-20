@@ -10,7 +10,7 @@ ParticleSystem::ParticleSystem()
 	TODO
 */
 uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,
-		bool loop,glm::vec3 opos,float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count)
+		bool loop,glm::vec3 opos,float scl,glm::vec3 ddir,double spwn_timeout,uint32_t count)
 {
 	// entity creation and data
 	ParticleEntity pentity;
@@ -23,9 +23,10 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.origin_pos = opos;
 	pentity.scale = scl;
 	pentity.curr_pos = std::vector<glm::vec3>(count,opos);
+	pentity.curr_aloc = std::vector<glm::vec2>(count);
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
 	pentity.dists = std::vector<float>(count);
-	pentity.queue_order = std::vector<uint16_t>(count);
+	pentity.queue_order = std::vector<uint32_t>(count);
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
 
@@ -71,7 +72,7 @@ void ParticleSystem::load()
 /*
 	TODO
 */
-void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
+void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 {
 	// update individual particles
 	for (uint16_t pie_id=0;pie_id<entity_list.size();pie_id++) {
@@ -84,7 +85,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 			pie.spwn_delta -= pie.spwn_timeout;
 			pie.sindex -= (pie.sindex>=pie.count)*pie.count;
 			pie.curr_pos[pie.sindex] = pie.origin_pos;
-			upload_animloc(pie_id,pie.sindex,glm::vec2(0));
+			pie.curr_aloc[pie.sindex] = glm::vec2(0);
 			pie.anim_timing[pie.sindex] = 0;
 			pie.sindex++;
 		}
@@ -103,7 +104,7 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 			pie.anim_timing[i] -= reset_timing*(pie.anim_duration*pie.loop_anim
 					+ (pie.anim_timing[i]-pie.anim_duration)*!pie.loop_anim);
 			uint16_t anim_index = (pie.anim_timing[i]/pie.anim_duration)*pie.cframes;
-			upload_animloc(pie_id,i,glm::vec2(anim_index%pie.cols,anim_index/pie.cols));
+			pie.curr_aloc[i] = glm::vec2(anim_index%pie.cols,anim_index/pie.cols);
 			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
 		}
 
@@ -111,9 +112,10 @@ void ParticleSystem::prepare(Camera3D cam3D,float delta_time)
 		std::iota(pie.queue_order.begin(),pie.queue_order.end(),0);
 		std::sort(pie.queue_order.begin(),pie.queue_order.end(),
 				[&](uint16_t n,uint16_t k) { return pie.dists[n]>pie.dists[k]; });
-		for (auto iter : pie.queue_order) upload_position(pie_id,iter,pie.curr_pos[iter]),
-				std::cout << pie.dists[iter] << ',';
-		std::cout << '\n';
+		for (uint32_t i=0;i<pie.cactive;i++)
+			upload_position(pie_id,i,pie.curr_pos[pie.queue_order[i]]),
+					upload_animloc(pie_id,i,pie.curr_aloc[pie.queue_order[i]]);
+		// TODO: write a more specific implementation
 	}
 
 	// binding
@@ -146,12 +148,16 @@ void ParticleSystem::render(uint16_t i)
 */
 void ParticleSystem::upload_position(uint16_t eid,uint32_t iid,glm::vec3 pos)
 {
-	entity_list[eid].indices[iid*5] = pos.x,entity_list[eid].indices[iid*5+1] = pos.y,
-			entity_list[eid].indices[iid*5+2] = pos.z;
+	entity_list[eid].indices[iid*PARTICLE_SYSTEM_INDEX_RANGE] = pos.x,
+	entity_list[eid].indices[iid*PARTICLE_SYSTEM_INDEX_RANGE+1] = pos.y,
+	entity_list[eid].indices[iid*PARTICLE_SYSTEM_INDEX_RANGE+2] = pos.z;
 }
 
 /*
 	TODO
 */
 void ParticleSystem::upload_animloc(uint16_t eid,uint32_t iid,glm::vec2 aid)
-{ entity_list[eid].indices[iid*5+3] = aid.x,entity_list[eid].indices[iid*5+4] = aid.y; }
+{
+	entity_list[eid].indices[iid*PARTICLE_SYSTEM_INDEX_RANGE+3] = aid.x,
+	entity_list[eid].indices[iid*PARTICLE_SYSTEM_INDEX_RANGE+4] = aid.y;
+}

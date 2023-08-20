@@ -12,6 +12,8 @@
 #include "../mat/toolbox.h"
 #include "shader.h"
 
+constexpr uint8_t PARTICLE_SYSTEM_INDEX_RANGE = 5;
+
 // holds data, offsets & behaviour of particle emission
 struct ParticleEntity
 {
@@ -21,14 +23,15 @@ struct ParticleEntity
 	uint16_t cframes;
 	float anim_duration;
 	std::vector<float> anim_timing,dists;
-	std::vector<uint16_t> queue_order;
+	std::vector<uint32_t> queue_order;
 	bool loop_anim;
 	glm::vec3 origin_pos;
 	float scale;
 	std::vector<glm::vec3> curr_pos,drive_dir;
+	std::vector<glm::vec2> curr_aloc;
 	std::vector<float> indices;
 	uint32_t count,cactive=0,sindex=0;
-	float spwn_timeout,spwn_delta=.0f;
+	double spwn_timeout,spwn_delta=.0;
 };
 // TODO: clean this up!
 
@@ -42,11 +45,11 @@ public:
 
 	// load
 	uint16_t add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,bool loop,
-			glm::vec3 opos,float scl,glm::vec3 ddir,float spwn_timeout,uint32_t count);
+			glm::vec3 opos,float scl,glm::vec3 ddir,double spwn_timeout,uint32_t count);
 	void load();
 
 	// draw
-	void prepare(Camera3D cam3D,float delta_time);
+	void prepare(Camera3D cam3D,double delta_time);
 	void render(uint16_t i);
 
 private:
