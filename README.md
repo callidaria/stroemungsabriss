@@ -65,6 +65,18 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
+## v0.0.6 DEV
+
+### features:
+- choose between recursive build in case of header changes and single source build
+- annotated assembly compiler analysis of isolated functions through ccb_console
+
+### fixes:
+- FIXED: inconsitent animation timing results on different machines
+- FIXED: globe location preview, faulty render & rotation changes
+
+<br>
+
 ## v0.0.5 DEV
 
 ### features:
@@ -199,6 +211,8 @@ Worktime: 120h
 	+ 62: 1h 52min
 	+ 90: 9h 50min
 	+ 176: 61h 49min
+- Elapsed Worktime After v0.0.5
 	+ ?? console improvements: 9h 41min
 	+ 223: 1h 54min
+	+ 199: 1h 38min
 - Total Code Lines: 15.555

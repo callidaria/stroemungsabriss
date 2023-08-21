@@ -147,6 +147,31 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 // FIXME: i know of the commutative properties of matrix multiplication, maybe generally precalc cam?
 
 /*
+	TODO
+*/
+uint8_t Renderer3D::add_target(Frame* frame)
+{
+	// gbuffer setup
+	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
+
+	// deferred shading buffer setup
+	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
+			"./shader/gbf_lighting.shader",false);
+	cbuffer.s.upload_int("gbuffer_colour",0);
+	cbuffer.s.upload_int("gbuffer_position",1);
+	cbuffer.s.upload_int("gbuffer_normals",2);
+	cbuffer.s.upload_int("gbuffer_materials",3);
+	cbuffer.s.upload_int("irradiance_map",4);
+	cbuffer.s.upload_int("specular_map",5);
+	cbuffer.s.upload_int("specular_brdf",6);
+	cbuffer.s.upload_int("shadow_map",7);
+
+	// store
+	rtargets.push_back({ gbuffer,cbuffer });
+	return rtargets.size()-1;
+}
+
+/*
 	load(Camera3D) -> void
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
@@ -245,6 +270,27 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	shs.def_attributeF("position",3,0,3);
 }
 // TODO: check validity of this loading approach. processing vertex lists ?twice
+
+void Renderer3D::prepare_target(uint8_t id,Camera3D cam3D)
+{
+	// upload buffers elements
+	rtargets[id].cbuffer.prepare();
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_colour());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_position());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_normals());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_materials());
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+	// TODO: create single shadow maps for each target?
+
+	// uniform uploads
+	rtargets[id].cbuffer.s.upload_vec3("view_pos",cam3D.pos);
+	rtargets[id].cbuffer.s.upload_vec3("light_position",slight_pos);
+	rtargets[id].cbuffer.s.upload_matrix("shadow_matrix",scam_projection);
+}
 
 /*
 	prepare() -> void
@@ -601,6 +647,7 @@ void Renderer3D::render_anim(uint16_t i)
 	render_pmsh(uint16_t) -> void
 	purpose: render desired physical based mesh
 	\param i: memory index of physically shaded object that is to be drawn
+	FIXME: naming for physical prepare & render is unintuitive
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {

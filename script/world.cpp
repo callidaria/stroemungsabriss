@@ -10,7 +10,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	: m_ccbf(eref),m_setRigs(set_rigs)
 {
 	// g-buffer setup
-	gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
+	//gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
 
 	// memfail avoidance shadow setup
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
@@ -18,7 +18,8 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
-	deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
+	rtarget_id = eref->r3d->add_target(eref->frame);
+	/*deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
@@ -27,7 +28,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("irradiance_map",4);
 	deferred_fb.s.upload_int("specular_map",5);
 	deferred_fb.s.upload_int("specular_brdf",6);
-	deferred_fb.s.upload_int("shadow_map",7);
+	deferred_fb.s.upload_int("shadow_map",7);*/
 }
 
 /*
@@ -135,13 +136,15 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
-	gbuffer.bind();
+	//gbuffer.bind();
+	m_ccbf->r3d->start_target(rtarget_id);
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
+	//for (auto ui : ui_master) ui->render_gbuffer();
 
 	// end geometry pass deferred scene
 	FrameBuffer::close();
@@ -152,7 +155,7 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// upload g-buffer components to deferred light shader
 	game_fb.bind();
-	deferred_fb.prepare();
+	/*deferred_fb.prepare();
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
@@ -161,13 +164,15 @@ void World::render(uint32_t &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
 	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
+	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);*/
+	m_ccbf->r3d->prepare_target(rtarget_id,m_setRigs->cam3D[active_cam3D]);
 
 	// deferred light shading
-	m_setRigs->lighting.upload(&deferred_fb.s);
-	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
+	//m_setRigs->lighting.upload(&deferred_fb.s);
+	m_setRigs->lighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
+	/*deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
 	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
-	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
+	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);*/
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui

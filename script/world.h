@@ -61,6 +61,7 @@ private:
 	StageSetup* m_setRigs;
 	FrameBuffer deferred_fb,game_fb;
 	GBuffer gbuffer;
+	uint8_t rtarget_id;
 
 	// scene components
 	std::vector<UI*> ui_master;

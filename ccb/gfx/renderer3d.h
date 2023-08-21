@@ -12,10 +12,17 @@
 #include "../mat/camera3d.h"
 
 #include "../frm/frame.h"
+#include "../frm/framebuffer.h"
+#include "../frm/gbuffer.h"
 #include "../fcn/buffer.h"
 
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
 constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 16;
+
+struct Target3D {
+	GBuffer gbuffer;
+	FrameBuffer cbuffer;
+};
 
 class Renderer3D
 {
@@ -35,9 +42,14 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 			float fdiv,uint16_t res);
+	uint8_t add_target(Frame* frame);
 
 	// loaders
 	void load(Camera3D cam3d,float &progress,float pseq);
+
+	// targets
+	inline void start_target(uint8_t id) { rtargets[id].gbuffer.bind(); }
+	void prepare_target(uint8_t id,Camera3D cam3D);
 
 	// preparations
 	void prepare();
@@ -88,6 +100,7 @@ public:
 	// cascabel
 	Buffer buffer,ibuffer,abuffer,pbuffer;
 	Shader s3d,is3d,as3d,pbms,shs;
+	std::vector<Target3D> rtargets;
 
 	// object information upload lists
 	std::vector<Mesh> ml,iml;

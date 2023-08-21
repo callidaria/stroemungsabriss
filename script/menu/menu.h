@@ -74,6 +74,7 @@ public:
 	~Menu();
 
 	// draw
+	//virtual void render_gbuffer();
 	virtual void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
 
 private:

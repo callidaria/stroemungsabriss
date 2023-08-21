@@ -25,10 +25,13 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	// add globe and pointer object
-	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
+	/*ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
 	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));
+			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));*/
+	ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
+			"./res/terra/norm.png","./res/terra/materials.png","./res/none.png",glm::vec3(0),
+			1,glm::vec3(0));
 	progress += sseq;
 
 	// setup dare message on idle screen
@@ -136,6 +139,23 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	for (int i=0;i<4;i++) m_ccbf->r2d->sl.at(msindex+14+i).scale_arbit(1,0);
 	progress += sseq;
 } Menu::~Menu() {  }
+
+/*
+	TODO
+*/
+/*void Menu::render_gbuffer()
+{
+	// rotate camera towards globe
+	cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
+	cam3d.front.y = sin(glm::radians(pitch));
+	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
+	cam3d.front = glm::normalize(cam3d.front);
+	cam3d.update();
+
+	// render globe
+	m_ccbf->r3d->prepare_pmesh(cam3d);
+	m_ccbf->r3d->render_pmsh(ridx_terra);
+}*/
 
 /*
 	render(uint32_t&)
@@ -467,24 +487,25 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// rotate camera towards globe
-	cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
+	/*cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
 	cam3d.front.y = sin(glm::radians(pitch));
 	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
 	cam3d.front = glm::normalize(cam3d.front);
-	cam3d.update();
-	m_ccbf->r3d->prepare(cam3d);
+	cam3d.update();*/
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location
-	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
+	/*glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
-	model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
-	m_ccbf->r3d->s3d.upload_matrix("model",model);
+	m_ccbf->r3d->pml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));*/
+	/*model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
+	m_ccbf->r3d->s3d.upload_matrix("model",model);*/
 
 	// render globe preview to framebuffer
-	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);
+	/*m_ccbf->r3d->prepare_pmesh(cam3d);
+	m_ccbf->r3d->render_pmsh(ridx_terra);*/
+	/*m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
+	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);*/
 	globe_fb.close();
 
 	// render combined splash overlay
