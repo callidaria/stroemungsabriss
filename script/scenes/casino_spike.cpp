@@ -39,7 +39,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 
 	// particle system
 	m_ccbf->pSys->add("./res/fuzzyshit.png",4,8,32,2.5f,false,glm::vec3(0),1,
-			glm::vec3(.001f,.0007f,0),1.5f,10);
+			glm::vec3(.001f,.001f,-.001f),1.5f,10);
 	progress += sseq;
 
 	// simulated lighting

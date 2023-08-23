@@ -76,7 +76,8 @@ void ParticleSystem::load()
 void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 {
 	// calculate camera plane
-	glm::vec3 pform = glm::cross(cam3D.up,glm::cross(cam3D.up,cam3D.front));
+	glm::vec3 pform = glm::cross(glm::vec3(cam3D.view3D[0][1],cam3D.view3D[1][1],cam3D.view3D[2][1]),
+			glm::vec3(cam3D.view3D[0][0],cam3D.view3D[1][0],cam3D.view3D[2][0]));
 	float pform_a = cam3D.pos.x*pform.x+cam3D.pos.y*pform.y+cam3D.pos.z*pform.z;
 
 	// update individual particles
@@ -103,7 +104,6 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 			pie.dists[i] = glm::abs(pform.x*pie.curr_pos[i].x+pform.y*pie.curr_pos[i].y
 					+ pform.z*pie.curr_pos[i].z-pform_a)
 					/ glm::sqrt(pow(pform.x,2)+pow(pform.y,2)+pow(pform.z,2));
-			//pie.dists[i] = glm::length(pie.curr_pos[i]-cam3D.pos);
 			// TODO: test for performance badness, see if it is almost fine and then leave it
 
 			// individual animation frames
