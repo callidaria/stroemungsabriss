@@ -1,13 +1,28 @@
 #include "particle_system.h"
 
 /*
-	TODO
+	constructor() !O(1)
+	purpose: setup particle system
 */
 ParticleSystem::ParticleSystem()
 { buffer.add_buffer(); }
 
 /*
-	TODO
+	add(const char*,uint8_t,uint8_t,uint16_t,float,bool,opos,float,vec3,double,uint32_t)
+			-> uint16_t !O(1)
+	purpose: add particle type to spawn instances of
+	\param panim: path to animation spritesheet
+	\param rows: rows on animation spritesheet
+	\param cols: cols on animation spritesheet
+	\param acnt: animation frame count stored in spritesheet
+	\param dur: duration to fully complete animation in seconds
+	\param loop: if animation should loop after completion
+	\param opos: origin position to spawn particle instances from
+	\param scl: scale of particle instances
+	\param ddir: drift direction of particles
+	\param spwn_timeout: time that passes between new particle spawns in seconds
+	\param count: maximum amount of particle instances
+	\returns particle type memory index, to reference particle type by, after creation
 */
 uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_t acnt,float dur,
 		bool loop,glm::vec3 opos,float scl,glm::vec3 ddir,double spwn_timeout,uint32_t count)
@@ -49,7 +64,8 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 }
 
 /*
-	TODO
+	load() -> void !O(n)
+	purpose: load all created particle types
 */
 void ParticleSystem::load()
 {
@@ -71,7 +87,10 @@ void ParticleSystem::load()
 }
 
 /*
-	TODO
+	prepare(Camera3D,double) -> void !O(n)
+	purpose: update particle animations & positioning, setup render queue & ready for rendering
+	\param cam3D: camera, used to render the scene
+	\param delta_time: time passed since last update
 */
 void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 {
@@ -133,9 +152,12 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 	shader.upload_camera(cam3D);
 	// TODO: cleanup and structurize
 }
+// FIXME: not all particle types have to be updated every frame. some may not be active/rendered
 
 /*
-	TODO
+	render(uint16_t) -> void !O(1)
+	purpose: draw particle instances of requested particle type
+	\param i: particle type memory index, given at creation
 */
 void ParticleSystem::render(uint16_t i)
 {
@@ -151,7 +173,11 @@ void ParticleSystem::render(uint16_t i)
 }
 
 /*
-	TODO
+	upload_position(uint16_t,uint32_t,vec3) -> void (private) !O(1)
+	purpose: helper function to upload position vector to shader indices list
+	\param eid: particle type entity id
+	\param iid: particle instance id
+	\param pos: position vector to upload
 */
 void ParticleSystem::upload_position(uint16_t eid,uint32_t iid,glm::vec3 pos)
 {
@@ -161,7 +187,11 @@ void ParticleSystem::upload_position(uint16_t eid,uint32_t iid,glm::vec3 pos)
 }
 
 /*
-	TODO
+	upload_animloc(uint16_t,uint32_t,vec2) -> void (private) !O(1)
+	purpose: helper function to upload sprite location on spritesheet to shader indices list
+	\param eid: particle type entity id
+	\param iid: particle instance id
+	\param aid: animation sprite location on animation spritesheet
 */
 void ParticleSystem::upload_animloc(uint16_t eid,uint32_t iid,glm::vec2 aid)
 {
