@@ -21,20 +21,17 @@ public:
 	~GBuffer() {  }
 
 	// bind
-	void bind();
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,buffer); }
 
-	// getter
-	inline uint32_t get_colour() { return t_col; }
-	inline uint32_t get_position() { return t_pos; }
-	inline uint32_t get_normals() { return t_norm; }
-	inline uint32_t get_materials() { return t_pbm; }
-	inline uint32_t get_depth() { return t_depth; }
+public:
+
+	// component textures
+	uint32_t t_colour,t_position,t_normals,t_materials,t_depth;
 
 private:
 
 	// content
-	uint32_t buffer,wbuffer;
-	uint32_t t_col,t_pos,t_norm,t_pbm,/*rb_depth,*/t_depth;
+	uint32_t buffer;
 };
 
 #endif

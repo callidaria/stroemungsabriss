@@ -1,45 +1,16 @@
 #include "framebuffer.h"
 
 /*
-	PARAMETER DEFINITIONS:
-	fr_wres: frame resolution width
-	fr_hres: frame resolution height
-	vsp: path to vertex shader file
-	fsp: path to fragment shader file
-	float_buffer: indicates if constructed object is a float buffer
-*/
-
-/*
-	constructor(uint32_t,uint32_t,const char*,const char*,bool)
-	fr_width: width of frame, in this case identical to frame resolution width
-	fr_height: height of frame, in this case identical to frame resolution height
+	constructor(uint32_t,uint32_t,const char*,const char*,bool) !O(1)b
 	purpose: creates framebuffer object to change original visuals through shaders
+	\param fr_width: width of frame, in this case identical to frame resolution width
+	\param fr_height: height of frame, in this case identical to frame resolution height
+	\param vsp: path to vertex shader file
+	\param fsp: path to fragment shader file
 */
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 		const char* fsp,bool float_buffer,bool depth_buffer)
 	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer,depth_buffer); }
-
-/*
-	constructor(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool)
-	fr_width: width of frame
-	fr_height: height of frame
-	purpose: creates framebuffer object to change original visuals through shaders
-*/
-FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer)
-	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer,depth_buffer); }
-// TODO: make the resolution of framebuffers dynamic (cambased)
-
-/*
-	init(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool) -> void
-	fr_width: width of frame
-	fr_height: height of frame
-	purpose: complete initialization of framebuffer objects
-*/
-void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer)
 {
 	// setup
 	glGenFramebuffers(1,&fbo);
@@ -73,7 +44,7 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
 	}
 }
-// TODO: extend documentation
+// TODO: make the resolution of framebuffers dynamic (cambased)
 
 /*
 	prepare() -> void

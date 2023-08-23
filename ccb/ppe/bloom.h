@@ -40,11 +40,11 @@ public:
 		sfb.enable();
 		buffer.bind();
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D,fb.get_tex());
+		glBindTexture(GL_TEXTURE_2D,fb.tex);
 		sfb.upload_int("tex",0);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D,blm.get_tex());
+		glBindTexture(GL_TEXTURE_2D,blm.tex);
 		sfb.upload_int("bloom",1);
 
 		glDrawArrays(GL_TRIANGLES,0,6);

@@ -48,7 +48,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 
 	// setup gpu data
 	glGenTextures(1,&pentity.texture);
-	pentity.indices = std::vector<float>(count*5);
+	pentity.indices = std::vector<float>(count*PARTICLE_SYSTEM_INDEX_RANGE);
 	pentity.anim_timing = std::vector<float>(count);
 
 	// add vertex information
@@ -74,7 +74,7 @@ void ParticleSystem::load()
 	buffer.upload_vertices(verts);
 
 	// compile shader
-	shader.compile("./shader/vertex_particle.shader","./shader/fragment_particle.shader");
+	shader.compile("./shader/vertex_particle.shader","./shader/fbf_standard.shader");
 	shader.def_attributeF("position",3,0,5);
 	shader.def_attributeF("texCoords",2,3,5);
 	buffer.bind_index();
@@ -87,7 +87,7 @@ void ParticleSystem::load()
 }
 
 /*
-	prepare(Camera3D,double) -> void !O(n)
+	prepare(Camera3D,double) -> void !O(n)b<-O(?std::sort())
 	purpose: update particle animations & positioning, setup render queue & ready for rendering
 	\param cam3D: camera, used to render the scene
 	\param delta_time: time passed since last update
@@ -132,7 +132,6 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 					+ (pie.anim_timing[i]-pie.anim_duration)*!pie.loop_anim);
 			uint16_t anim_index = (pie.anim_timing[i]/pie.anim_duration)*pie.cframes;
 			pie.curr_aloc[i] = glm::vec2(anim_index%pie.cols,anim_index/pie.cols);
-			// FIXME: ??maybe do this in shader and only upload timing value & duration uniform
 		}
 
 		// order instances by depth

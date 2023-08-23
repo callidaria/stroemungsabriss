@@ -16,8 +16,6 @@ uniform sampler2D normal_map;
 uniform sampler2D material_map;
 uniform sampler2D emission_map;
 
-uniform mat4 proj;
-
 void main()
 {
 	// extract colour

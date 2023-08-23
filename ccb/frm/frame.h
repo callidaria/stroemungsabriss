@@ -110,7 +110,11 @@ private:
 	ALCcontext* m_alccon;
 
 	// time & vsync
+#ifdef BUILDISSUE_OLD_SDL_VERSION
+	uint32_t past_ticks = 0,current_ticks = 0;
+#else
 	uint64_t past_ticks = 0,current_ticks = 0;
+#endif
 	uint32_t fps = 0,temp_fps = 0,lO = 0;
 	float time_mod = 1.0f,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;

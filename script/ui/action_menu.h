@@ -39,9 +39,6 @@ public:
 	// runtime interactions
 	void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
 
-	// getter
-	GLuint get_scene_texture();
-
 private:
 
 	// cascabel

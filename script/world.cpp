@@ -176,21 +176,21 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// upload g-buffer components to deferred light shader
 	deferred_fb.prepare();
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_colour);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_position);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_normals);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_materials);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
 	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_tex());
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.tex);
 	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D,transparency_fb.get_depth());
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.dptex);
 	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_depth());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_depth);
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);
