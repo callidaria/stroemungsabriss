@@ -27,6 +27,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
 	pentity.dists = std::vector<float>(count);
 	pentity.queue_order = std::vector<uint32_t>(count);
+	std::iota(pentity.queue_order.begin(),pentity.queue_order.end(),0);
 	pentity.count = count;
 	pentity.spwn_timeout = spwn_timeout;
 
@@ -74,6 +75,10 @@ void ParticleSystem::load()
 */
 void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 {
+	// calculate camera plane
+	glm::vec3 pform = glm::cross(cam3D.up,glm::cross(cam3D.up,cam3D.front));
+	float pform_a = cam3D.pos.x*pform.x+cam3D.pos.y*pform.y+cam3D.pos.z*pform.z;
+
 	// update individual particles
 	for (uint16_t pie_id=0;pie_id<entity_list.size();pie_id++) {
 		ParticleEntity &pie = entity_list[pie_id];
@@ -95,7 +100,10 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 
 			// individual positions & instance distances for render queue
 			pie.curr_pos[i] += pie.drive_dir[i];
-			pie.dists[i] = glm::length(pie.curr_pos[i]-cam3D.pos);
+			pie.dists[i] = glm::abs(pform.x*pie.curr_pos[i].x+pform.y*pie.curr_pos[i].y
+					+ pform.z*pie.curr_pos[i].z-pform_a)
+					/ glm::sqrt(pow(pform.x,2)+pow(pform.y,2)+pow(pform.z,2));
+			//pie.dists[i] = glm::length(pie.curr_pos[i]-cam3D.pos);
 			// TODO: test for performance badness, see if it is almost fine and then leave it
 
 			// individual animation frames
@@ -109,7 +117,6 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 		}
 
 		// order instances by depth
-		std::iota(pie.queue_order.begin(),pie.queue_order.end(),0);
 		std::sort(pie.queue_order.begin(),pie.queue_order.end(),
 				[&](uint16_t n,uint16_t k) { return pie.dists[n]>pie.dists[k]; });
 		for (uint32_t i=0;i<pie.cactive;i++)

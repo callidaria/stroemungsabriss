@@ -7,7 +7,6 @@ in vec3 particle_position;
 in vec2 anim_index;
 
 out vec2 TexCoords;
-out float dproj;
 
 // texture information
 uniform int anim_rows = 1;
@@ -30,5 +29,4 @@ void main()
 	vec3 cpos = vec3(view[0][0],view[1][0],view[2][0])*scale*position.x
 			+ vec3(view[0][1],view[1][1],view[2][1])*scale*position.y;
 	gl_Position = proj*view*vec4(cpos+particle_position,1.0);
-	dproj = gl_Position.w;
 }
