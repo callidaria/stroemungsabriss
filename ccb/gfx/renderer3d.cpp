@@ -30,6 +30,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	// load mesh
 	uint16_t mesh_id = ml.size();
 	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,mofs));
+	std::cout << mofs << '\n';
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
@@ -70,12 +71,14 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	purpose: add animated object to the renderer
 	\param a: path to collada (.dae) animation file
 	\returns: memory index to refer to the created animated object by when drawing
+	// TODO: extend documentation
 */
-uint16_t Renderer3D::add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow)
+uint16_t Renderer3D::add(const char* a,const char* t,const char* n,const char* m,const char* e,
+		glm::vec3 p,float s,bool cast_shadow)
 {
 	// load animated mesh
 	uint16_t animation_id = mal.size();
-	MeshAnimation proc = MeshAnimation(a,t,amofs);
+	MeshAnimation proc = MeshAnimation(a,t,n,m,e,amofs);
 
 	// transform model matrix & store animated mesh
 	proc.model = glm::translate(glm::mat4(1),p)*glm::scale(glm::mat4(1),glm::vec3(s));
@@ -156,16 +159,16 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// combine all mesh vertices to master vertex list & upload
 	float ptarget = (pseq/6.0f)/(ml.size()+iml.size()+pml.size());
 	std::vector<float> v;
-	for (uint16_t i=0;i<ml.size();i++) {
-		v.insert(v.end(),ml[i].v.begin(),ml[i].v.end());
+	for (auto im : ml) {
+		v.insert(v.end(),im.v.begin(),im.v.end());
 		progress += ptarget;
 	} buffer.bind();
 	buffer.upload_vertices(v);
 
 	// compile shader & load textures
 	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
-	for(uint16_t i=0;i<ml.size();i++) {
-		ml[i].texture();
+	for (auto im : ml) {
+		im.texture();
 		progress += ptarget;
 	} s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
@@ -175,8 +178,8 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 
 	// combine all added instance vertices to master instance vertex list & upload
 	std::vector<float> iv;
-	for (uint16_t i=0;i<iml.size();i++) {
-		iv.insert(iv.end(),iml[i].v.begin(),iml[i].v.end());
+	for (auto im : iml) {
+		iv.insert(iv.end(),im.v.begin(),im.v.end());
 		progress += ptarget;
 	} ibuffer.bind();
 	ibuffer.upload_vertices(iv);
@@ -189,8 +192,8 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
 
 	// load textures & camera
-	for(uint16_t i=0;i<iml.size();i++) {
-		iml[i].texture();
+	for (auto im : iml) {
+		im.texture();
 		progress += ptarget;
 	} is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
@@ -201,37 +204,43 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// combine animated meshes into instance vertex list & upload
 	std::vector<float> av;
 	std::vector<uint32_t> ae;
-	for (uint16_t i=0;i<mal.size();i++) {
+	for (auto im : mal) {
 		uint32_t eoffset = av.size()/R3D_ANIMATION_MAP_REPEAT;
-		av.insert(av.end(),mal[i].verts.begin(),mal[i].verts.end());
-		for (auto elem : mal[i].elems) ae.push_back(eoffset+elem);
+		av.insert(av.end(),im.verts.begin(),im.verts.end());
+		for (auto elem : im.elems) ae.push_back(eoffset+elem);
 	} abuffer.bind();
 	abuffer.upload_vertices(av);
 	abuffer.upload_elements(ae);
 
 	// compile animation shader & upload textures
-	as3d.compile("./shader/vanimation.shader","./shader/fanimation.shader");
+	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
 	as3d.def_attributeF("position",3,0,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("texCoords",2,3,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("normals",3,5,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneIndex",4,8,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneWeight",4,12,R3D_ANIMATION_MAP_REPEAT);
-	for (uint16_t i=0;i<mal.size();i++) mal[i].texture();
-	as3d.upload_int("tex",0);
+	as3d.def_attributeF("tangent",3,8,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("bitangent",3,11,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneIndex",4,14,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneWeight",4,18,R3D_ANIMATION_MAP_REPEAT);
+	for (auto im : mal) im.texture();
+	pbms.upload_int("colour_map",0);
+	pbms.upload_int("normal_map",1);
+	pbms.upload_int("material_map",2);
+	pbms.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
+	// TODO: adjust loading progression
 
 	// combine physical mesh vertices to master vertex list & upload
 	std::vector<float> pv;
-	for (uint16_t i=0;i<pml.size();i++) {
-		pv.insert(pv.end(),pml[i].verts.begin(),pml[i].verts.end());
+	for (auto im : pml) {
+		pv.insert(pv.end(),im.verts.begin(),im.verts.end());
 		progress += ptarget;
 	} pbuffer.bind();
 	pbuffer.upload_vertices(pv);
 
 	// compile physical mesh shader & load textures
 	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
-	for (uint16_t i=0;i<pml.size();i++) {
-		pml[i].texture();
+	for (auto im : pml) {
+		im.texture();
 		progress += ptarget;
 	} pbms.upload_int("colour_map",0);
 	pbms.upload_int("normal_map",1);
@@ -591,10 +600,17 @@ void Renderer3D::render_inst(uint16_t i)
 void Renderer3D::render_anim(uint16_t i)
 {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,mal[i].tex);
+	glBindTexture(GL_TEXTURE_2D,mal[i].t_colour);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,mal[i].t_normals);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,mal[i].t_material);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,mal[i].t_emission);
 	as3d.upload_matrix("model",mal[i].model);
 	mal[i].upload_interpolation(&as3d);
 	glDrawElements(GL_TRIANGLES,mal[i].size,GL_UNSIGNED_INT,(void*)(mal[i].ofs*sizeof(uint32_t)));
+	glActiveTexture(GL_TEXTURE0);
 }
 
 /*

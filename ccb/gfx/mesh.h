@@ -41,7 +41,8 @@ public:
 	float scl;
 
 	// information
-	uint16_t ofs,size,inst_count = 0;
+	uint32_t ofs,size;
+	uint16_t inst_count = 0;
 
 private:
 

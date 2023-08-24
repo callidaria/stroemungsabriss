@@ -22,7 +22,7 @@ public:
 	std::vector<float> verts;
 	uint32_t tex_colour,tex_normal,tex_material,tex_emission;
 	glm::mat4 model = glm::mat4(1);
-	uint16_t size,offset;
+	uint32_t size,offset;
 
 private:
 

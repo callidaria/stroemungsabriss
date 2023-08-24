@@ -49,11 +49,12 @@ class MeshAnimation
 public:
 
 	// construction
-	MeshAnimation(const char* path,const char* itex_path,uint32_t &mofs);
+	MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
+			const char* ipemit,uint32_t &mofs);
 	~MeshAnimation() {  }
 
 	// load
-	inline void texture() { Toolbox::load_texture_repeat(tex,tex_path,true); }
+	void texture();
 	void upload_interpolation(Shader* shader);
 
 	// update
@@ -102,7 +103,7 @@ public:
 	// vertex data
 	std::vector<float> verts;
 	std::vector<uint32_t> elems;
-	uint32_t tex;
+	uint32_t t_colour,t_normals,t_material,t_emission;
 	uint32_t ofs,size = 0;
 
 	// transformation
@@ -111,7 +112,7 @@ public:
 private:
 
 	// vertex information
-	const char* tex_path;
+	const char* path_colour,*path_normals,*path_materials,*path_emission;
 	std::vector<float> vaddress;
 
 	// rigging data

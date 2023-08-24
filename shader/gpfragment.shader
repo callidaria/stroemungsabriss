@@ -2,7 +2,6 @@
 
 in vec4 Position;
 in vec2 TexCoords;
-in vec3 Normals;
 in mat3 TBN;
 
 out vec4 gbuffer_colour;
@@ -18,10 +17,8 @@ uniform sampler2D emission_map;
 
 void main()
 {
-	// extract colour
+	// extract colour & position
 	gbuffer_colour = vec4(texture(colour_map,TexCoords).rgb,.0);
-
-	// translate position & shadow
 	gbuffer_position = vec4(Position.rgb,.0);
 
 	// translate normals & emission
