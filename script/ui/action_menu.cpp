@@ -106,11 +106,3 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	mtext.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(-2000*menu_inf,0,0)));
 	mtext.render(1024*(menu_sys||menu_inf),glm::vec4(0,.4f,0,1));
 }
-
-/*
-	get_scene_texture() -> GLuint
-	purpose: returns scene framebuffer for extern usages & effects
-	returns: scene framebuffer
-*/
-GLuint ActionMenu::get_scene_texture()
-{ return game_fb.get_tex(); }

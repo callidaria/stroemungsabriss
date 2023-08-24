@@ -8,73 +8,53 @@
 */
 GBuffer::GBuffer(float w_res,float h_res)
 {
-	// generating buffer & textures
+	// generating framebuffer
 	glGenFramebuffers(1,&buffer);
 	glBindFramebuffer(GL_FRAMEBUFFER,buffer);
-	glGenTextures(1,&t_col);
-	glGenTextures(1,&t_pos);
-	glGenTextures(1,&t_norm);
-	glGenTextures(1,&t_pbm);
-	glGenRenderbuffers(1,&rb_depth);
 
 	// define colour component
-	glBindTexture(GL_TEXTURE_2D,t_col);
+	glGenTextures(1,&t_colour);
+	glBindTexture(GL_TEXTURE_2D,t_colour);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w_res,h_res,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,t_col,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,t_colour,0);
 	// data pattern: vec4(colour.x,colour.y,colour.z,specular.rgb)
 
 	// define position component
-	glBindTexture(GL_TEXTURE_2D,t_pos);
+	glGenTextures(1,&t_position);
+	glBindTexture(GL_TEXTURE_2D,t_position);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,w_res,h_res,0,GL_RGBA,GL_FLOAT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,t_pos,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT1,GL_TEXTURE_2D,t_position,0);
 	// data pattern: vec4(position.x,position.y,position.z,null)
 
 	// define normal component
-	glBindTexture(GL_TEXTURE_2D,t_norm);
+	glGenTextures(1,&t_normals);
+	glBindTexture(GL_TEXTURE_2D,t_normals);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,w_res,h_res,0,GL_RGBA,GL_FLOAT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,t_norm,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT2,GL_TEXTURE_2D,t_normals,0);
 	// data pattern: vec4(normal.x,normal.y,normal.z,emission.rgb)
 
 	// define physical based material component
-	glBindTexture(GL_TEXTURE_2D,t_pbm);
+	glGenTextures(1,&t_materials);
+	glBindTexture(GL_TEXTURE_2D,t_materials);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,w_res,h_res,0,GL_RGBA,GL_FLOAT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,t_pbm,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT3,GL_TEXTURE_2D,t_materials,0);
 	// data pattern: vec4(metallic.rgb,roughness.rgb,ambient_occlusion.rgb,null)
 
 	// define depth component
-	glBindRenderbuffer(GL_RENDERBUFFER,rb_depth);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT,w_res,h_res);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rb_depth);
+	glGenTextures(1,&t_depth);
+	glBindTexture(GL_TEXTURE_2D,t_depth);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,w_res,h_res,0,GL_DEPTH_COMPONENT,
+			GL_UNSIGNED_INT,NULL);
+	Toolbox::set_texture_parameter_nearest_unfiltered();
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,t_depth,0);
 
-	// compile buffer
-	uint32_t g_components[4]
+	// define drawable g-buffer components & close
+	uint32_t g_components[CCB_GBUFFER_COMPONENT_COUNT]
 		= { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2,GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4,g_components);
-
-	// close gbuffer
+	glDrawBuffers(CCB_GBUFFER_COMPONENT_COUNT,g_components);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
-
-/*
-	bind() -> void
-	purpose: bind the g-buffer
-*/
-void GBuffer::bind()
-{ glBindFramebuffer(GL_FRAMEBUFFER,buffer); }
-
-/*
-	get_<component>() -> uint32_t
-	returns: desired g-buffer component as texture
-*/
-uint32_t GBuffer::get_colour()
-{ return t_col; }
-uint32_t GBuffer::get_position()
-{ return t_pos; }
-uint32_t GBuffer::get_normals()
-{ return t_norm; }
-uint32_t GBuffer::get_materials()
-{ return t_pbm; }

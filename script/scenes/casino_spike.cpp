@@ -107,9 +107,6 @@ void CasinoSpike::render()
 	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+9);
 
-	// render wordly objects
-	//m_ccbf->r3d->render_mesh(index_r3D+2,index_r3D+5);
-
 	// render physical based objects
 	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
 	for (uint8_t i=0;i<6;i++) {

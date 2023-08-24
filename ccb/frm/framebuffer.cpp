@@ -1,51 +1,20 @@
 #include "framebuffer.h"
 
 /*
-	PARAMETER DEFINITIONS:
-	fr_wres: frame resolution width
-	fr_hres: frame resolution height
-	vsp: path to vertex shader file
-	fsp: path to fragment shader file
-	float_buffer: indicates if constructed object is a float buffer
-*/
-
-/*
-	constructor(uint32_t,uint32_t,const char*,const char*,bool)
-	fr_width: width of frame, in this case identical to frame resolution width
-	fr_height: height of frame, in this case identical to frame resolution height
+	constructor(uint32_t,uint32_t,const char*,const char*,bool) !O(1)b
 	purpose: creates framebuffer object to change original visuals through shaders
+	\param fr_width: width of frame, in this case identical to frame resolution width
+	\param fr_height: height of frame, in this case identical to frame resolution height
+	\param vsp: path to vertex shader file
+	\param fsp: path to fragment shader file
 */
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
-		const char* fsp,bool float_buffer)
+		const char* fsp,bool float_buffer,bool depth_buffer)
 	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer); }
-
-/*
-	constructor(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool)
-	fr_width: width of frame
-	fr_height: height of frame
-	purpose: creates framebuffer object to change original visuals through shaders
-*/
-FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
-	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer); }
-// TODO: make the resolution of framebuffers dynamic (cambased)
-
-/*
-	init(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool) -> void
-	fr_width: width of frame
-	fr_height: height of frame
-	purpose: complete initialization of framebuffer objects
-*/
-void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
 {
 	// setup
 	glGenFramebuffers(1,&fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER,fbo);
-	glGenTextures(1,&tex);
-	glGenRenderbuffers(1,&rbo);
 
 	// buffer data
 	std::vector<float> verts = Toolbox::create_sprite_canvas();
@@ -55,29 +24,27 @@ void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uin
 	// compile shader
 	s.compile2d(vsp,fsp);
 
-	// texture setup
-	glBindTexture(GL_TEXTURE_2D,tex); // !!differentiation gives negative style points ??can it be fixed .relfrm
+	// setup colour texture
+	glGenTextures(1,&tex);
+	glBindTexture(GL_TEXTURE_2D,tex);
 	if (float_buffer)
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,fr_width,fr_height,0,GL_RGBA,GL_FLOAT,NULL);
-	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,fr_width,fr_height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D,0);
-
-	// framebuffer texture
+	else glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,fr_width,fr_height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+	Toolbox::set_texture_parameter_linear_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,tex,0);
-	glBindRenderbuffer(GL_RENDERBUFFER,rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,fr_width,fr_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
-	glBindFramebuffer(GL_FRAMEBUFFER,0);
-}
+	// FIXME: kill branch by switching between floatbuffer setup by index math
 
-/*
-	bind() -> void
-	purpose: binds the framebuffer object to read and save following draws until close()
-*/
-void FrameBuffer::bind()
-{ glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
+	// setup depth map
+	if (depth_buffer) {
+		glGenTextures(1,&dptex);
+		glBindTexture(GL_TEXTURE_2D,dptex);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,fr_width,fr_height,0,GL_DEPTH_COMPONENT,
+				GL_UNSIGNED_INT,NULL);
+		Toolbox::set_texture_parameter_nearest_unfiltered();
+		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
+	}
+}
+// TODO: make the resolution of framebuffers dynamic (cambased)
 
 /*
 	prepare() -> void
@@ -126,32 +93,3 @@ void FrameBuffer::render(float ptrans)
 	s.upload_float("ptrans",ptrans);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
-
-/*
-	get_fbo() -> GLuint
-	returns: frame buffer object
-*/
-GLuint FrameBuffer::get_fbo()
-{ return fbo; }
-
-/*
-	get_tex() -> GLuint
-	returns: frame buffer texture
-*/
-GLuint FrameBuffer::get_tex()
-{ return tex; }
-
-/*
-	overwrite_texture(GLuint) -> void
-	wTex: texture to write as the framebuffer output texture at render
-	purpose: set the given texture as framebuffer texture output
-*/
-void FrameBuffer::overwrite_texture(GLuint wTex)
-{ tex = wTex; }
-
-/*
-	close() -> void (static)
-	purpose: unbinds any bound framebuffer
-*/
-void FrameBuffer::close()
-{ glBindFramebuffer(GL_FRAMEBUFFER,0); }

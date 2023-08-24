@@ -9,6 +9,8 @@
 
 #include "../mat/toolbox.h"
 
+constexpr uint8_t CCB_GBUFFER_COMPONENT_COUNT = 4;
+
 class GBuffer
 {
 public:
@@ -19,19 +21,17 @@ public:
 	~GBuffer() {  }
 
 	// bind
-	void bind();
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,buffer); }
 
-	// getter
-	uint32_t get_colour();
-	uint32_t get_position();
-	uint32_t get_normals();
-	uint32_t get_materials();
+public:
+
+	// component textures
+	uint32_t t_colour,t_position,t_normals,t_materials,t_depth;
 
 private:
 
 	// content
 	uint32_t buffer;
-	uint32_t t_col,t_pos,t_norm,t_pbm,rb_depth;
 };
 
 #endif

@@ -81,6 +81,7 @@ void Worldbuilder::load_casino()
 	m_world->upload_lighting();
 	m_world->upload_lightmap();
 	progress = 1.0f;
+	// TODO: dynamification of camera and ui (etc...) picker
 }
 void Worldbuilder::load_cards()
 {

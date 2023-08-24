@@ -68,13 +68,14 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.5 DEV
 
 ### features:
-- deferred rendering for a much more complex lighting system
-- new physical based shading system
+- deferred shading with support for transparent objects
+- new physical based lighting system
 - loading feedback screen
 - dynamic world loading
 - import & interpolate mesh animations
-- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - store "macro" savestate pattern
+- particle emission & management system
+- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - documented assembly translation analysis
 - automatic compilation of all files using the originally updated source (upon request)
 
@@ -201,4 +202,5 @@ Worktime: 120h
 	+ 176: 61h 49min
 	+ ?? console improvements: 9h 41min
 	+ 223: 1h 54min
+	+ 83: 34h 42min
 - Total Code Lines: 15.555

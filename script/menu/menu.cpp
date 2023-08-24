@@ -125,8 +125,8 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	// framebuffer creation
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
 			"shader/fbf_menu.shader",false);
-	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,m_ccbf->frame->w_res/4,
-			m_ccbf->frame->h_res/4,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	// create msaa effect for selection splash
 	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",m_ccbf->frame->w_res,
@@ -492,7 +492,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	fb.render(ptrans);
 
 	// anti aliasing for selection splashes
-	msaa.render(fb.get_tex());
+	msaa.render(fb.tex);
 
 	// render menu lists and sublists
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
@@ -504,7 +504,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// render globe location preview framebuffer
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->s2d.upload_float("vFlip",1.0f);
-	m_ccbf->r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.get_tex());
+	m_ccbf->r2d->render_sprite(msindex+20,msindex+21*(mselect==4||mselect==5),globe_fb.tex);
 	m_ccbf->r2d->s2d.upload_float("vFlip",0);
 	m_ccbf->r2d->render_sprite(0,0);
 

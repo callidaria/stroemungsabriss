@@ -36,6 +36,11 @@ uniform sampler2D gbuffer_position;
 uniform sampler2D gbuffer_normals;
 uniform sampler2D gbuffer_materials;
 
+// transparency
+uniform sampler2D transparency_buffer;
+uniform sampler2D transparency_depth;
+uniform sampler2D world_depth;
+
 // camera information
 uniform vec3 view_pos;
 uniform int spec_exponent = 16;
@@ -96,6 +101,7 @@ void main()
 	vec4 positionxnull = texture(gbuffer_position,TexCoords);
 	vec4 normalsxemission = texture(gbuffer_normals,TexCoords);
 	vec4 materials = texture(gbuffer_materials,TexCoords);
+	float gdepth = texture(world_depth,TexCoords).r;
 
 	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
@@ -106,6 +112,10 @@ void main()
 	float metallic = materials.r;
 	float roughness = materials.g;
 	float ambient_occlusion = materials.b;
+
+	// read transparency buffer
+	vec4 tbuffer = texture(transparency_buffer,TexCoords);
+	float tdepth = texture(transparency_depth,TexCoords).r;
 
 	// precalculations
 	camera_dir = normalize(view_pos-position);
@@ -154,6 +164,9 @@ void main()
 	// colour corrections: high dynamic exposure & gamma correction
 	cmb_colours = vec3(1.0)-exp(-cmb_colours*lens_exposure);
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
+
+	// merge transparency buffer
+	cmb_colours.rgb = mix(cmb_colours.rgb,tbuffer.rgb,tbuffer.a*int(tdepth<gdepth));
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);

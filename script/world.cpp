@@ -17,9 +17,9 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_menu.shader","./shader/fbf_menu.shader");
 	deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
+			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader");
 	deferred_fb.s.upload_int("gbuffer_colour",0);
 	deferred_fb.s.upload_int("gbuffer_position",1);
 	deferred_fb.s.upload_int("gbuffer_normals",2);
@@ -28,21 +28,12 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	deferred_fb.s.upload_int("specular_map",5);
 	deferred_fb.s.upload_int("specular_brdf",6);
 	deferred_fb.s.upload_int("shadow_map",7);
+	deferred_fb.s.upload_int("transparency_buffer",8);
+	deferred_fb.s.upload_int("transparency_depth",9);
+	deferred_fb.s.upload_int("world_depth",10);
+	transparency_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
 }
-
-/*
-	add_<element>(<element>*) -> void
-	argument[0]: element to add to element list it belongs to
-	purpose: create an element in the world that will be handled according to the world's logic
-*/
-void World::add_ui(UI* ui)
-{ ui_master.push_back(ui); }
-void World::add_scene(Scene* scene)
-{ scene_master.push_back(scene); }
-void World::add_playable(Player* player)
-{ player_master.push_back(player); }
-void World::add_boss(Boss* boss)
-{ boss_master.push_back(boss); }
 
 /*
 	free_memory() -> void
@@ -92,6 +83,7 @@ void World::load_geometry(float &progress,float ldsplit)
 	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D],progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+	m_ccbf->pSys->load();
 	progress = org_progress+ldsplit;
 }
 
@@ -101,7 +93,6 @@ void World::load_geometry(float &progress,float ldsplit)
 */
 void World::upload_lighting()
 {
-	// upload simulated lights
 	deferred_fb.s.enable();
 	m_setRigs->lighting.upload(&deferred_fb.s);
 }
@@ -131,6 +122,7 @@ void World::render(uint32_t &running,bool &reboot)
 {
 	// update
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	m_ccbf->r3d->update_animations(m_ccbf->frame->get_time_delta());
 	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
@@ -145,23 +137,41 @@ void World::render(uint32_t &running,bool &reboot)
 
 	// end geometry pass deferred scene
 	FrameBuffer::close();
+
+	// prepare transparency render
 	glEnable(GL_BLEND);
+	transparency_fb.bind();
+	m_ccbf->frame->clear();
 
 	// render bullets
 	m_ccbf->bSys->render();
 
-	// upload g-buffer components to deferred light shader
+	// render particles
+	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
+	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
+	glDisable(GL_DEPTH_TEST);
+
+	// prepare scene render
+	transparency_fb.close();
 	game_fb.bind();
+
+	// upload g-buffer components to deferred light shader
 	deferred_fb.prepare();
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_colour);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_position);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_normals);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_materials);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.tex);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D,transparency_fb.dptex);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D,gbuffer.t_depth);
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);

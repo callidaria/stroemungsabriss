@@ -29,10 +29,10 @@ public:
 	~World() {  }
 
 	// creation
-	void add_ui(UI* ui);
-	void add_scene(Scene* scene);
-	void add_playable(Player* player);
-	void add_boss(Boss* boss);
+	inline void add_ui(UI* ui) { ui_master.push_back(ui); }
+	inline void add_scene(Scene* scene) { scene_master.push_back(scene); }
+	inline void add_playable(Player* player) { player_master.push_back(player); }
+	inline void add_boss(Boss* boss) { boss_master.push_back(boss); }
 
 	// destruction
 	void free_memory();
@@ -59,7 +59,7 @@ private:
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
-	FrameBuffer deferred_fb,game_fb;
+	FrameBuffer deferred_fb,transparency_fb,game_fb;
 	GBuffer gbuffer;
 
 	// scene components

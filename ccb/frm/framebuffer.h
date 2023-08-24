@@ -16,12 +16,11 @@ public:
 	// construction
 	FrameBuffer() {  }
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
-			const char* fsp,bool float_buffer);
-	FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-			const char* vsp,const char* fsp,bool float_buffer);
+			const char* fsp,bool float_buffer=false,bool depth_buffer=false);
 
-	// read
-	void bind();
+	// binding
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
+	static inline void close() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
 
 	// details
 	void prepare();
@@ -30,33 +29,18 @@ public:
 	void render();
 	void render(float ptrans);
 
-	// getters
-	GLuint get_fbo();  // !!check if used
-	GLuint get_tex();  // !!check if used
-
-	// setters
-	void overwrite_texture(GLuint tex);
-
-	// statics
-	static void close();
-
-private:
-
-	// standard initialization
-	void init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer);
-
 public:
 
 	// engine components
 	Buffer buffer = Buffer();
 	Shader s = Shader();
 
+	// buffer & textures
+	uint32_t fbo,tex,dptex;
+
 private:
 
-	// buffers
-	GLuint tex,rbo;
-	GLuint fbo;
+	// dimensions
 	uint32_t frw,frh;
 };
 

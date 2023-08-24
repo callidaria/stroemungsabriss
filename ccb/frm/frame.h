@@ -12,6 +12,8 @@
 
 #include <AL/alc.h>
 
+#define BUILDISSUE_OLD_SDL_VERSION
+
 struct Keyboard
 {
 	bool ka[285] = { false };	// list of keyboard scan results
@@ -108,7 +110,12 @@ private:
 	ALCcontext* m_alccon;
 
 	// time & vsync
-	uint32_t past_ticks = 0,current_ticks = 0,fps = 0,temp_fps = 0,lO = 0;
+#ifdef BUILDISSUE_OLD_SDL_VERSION
+	uint32_t past_ticks = 0,current_ticks = 0;
+#else
+	uint64_t past_ticks = 0,current_ticks = 0;
+#endif
+	uint32_t fps = 0,temp_fps = 0,lO = 0;
 	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 };
