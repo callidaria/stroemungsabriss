@@ -36,20 +36,6 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 }
 
 /*
-	add_<element>(<element>*) -> void
-	argument[0]: element to add to element list it belongs to
-	purpose: create an element in the world that will be handled according to the world's logic
-*/
-void World::add_ui(UI* ui)
-{ ui_master.push_back(ui); }
-void World::add_scene(Scene* scene)
-{ scene_master.push_back(scene); }
-void World::add_playable(Player* player)
-{ player_master.push_back(player); }
-void World::add_boss(Boss* boss)
-{ boss_master.push_back(boss); }
-
-/*
 	free_memory() -> void
 	purpose: clear memory of all dynamically created objects that still exist
 */
@@ -165,10 +151,9 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->bSys->render();
 
 	// render particles
-	m_ccbf->pSys->prepare(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
-	for (uint16_t i=0;i<m_ccbf->pSys->entity_list.size();i++) m_ccbf->pSys->render(i);
+	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
+	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
 	glDisable(GL_DEPTH_TEST);
-	// FIXME: move this loop to standard functionality for ParticleSystem::render(void)
 
 	// prepare scene render
 	transparency_fb.close();

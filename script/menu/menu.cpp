@@ -125,7 +125,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	// framebuffer creation
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
 			"shader/fbf_menu.shader",false);
-	globe_fb = FrameBuffer(m_ccbf->frame->w_res/4,m_ccbf->frame->h_res/4,
+	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 
 	// create msaa effect for selection splash

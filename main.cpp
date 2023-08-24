@@ -74,7 +74,7 @@ int main(int argc,char** argv)
 
 	// WORLD LOADING
 	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
-	eref.ld.push(LOAD_CASINO);
+	eref.ld.push(LOAD_START);
 
 #if BUILD_DEV_MODE
 	bool dactive = false;

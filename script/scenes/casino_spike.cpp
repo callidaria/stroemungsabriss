@@ -10,7 +10,7 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
 	// object loading
-	float sseq = pseq/4.0f;
+	float sseq = pseq/3.0f;
 	index_p3D = m_ccbf->r3d->add_physical("./res/casino/test_floor.obj",
 			"./res/casino/paquet_colour.png","./res/casino/paquet_normal.png",
 			"./res/casino/paquet_material.png","./res/none.png",glm::vec3(),1,glm::vec3(),false);
@@ -35,11 +35,6 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 			"./res/casino/fabric_normals.png","./res/casino/fabric_material.png","./res/none.png",
 			glm::vec3(2.5f,.5f,-1.5f),.5f,glm::vec3(),true);
 	texture_repeat.push_back(1);
-	progress += sseq;
-
-	// particle system
-	m_ccbf->pSys->add("./res/fuzzyshit.png",4,8,32,2.5f,false,glm::vec3(0),1,
-			glm::vec3(.001f,.001f,-.001f),1.5f,10);
 	progress += sseq;
 
 	// simulated lighting

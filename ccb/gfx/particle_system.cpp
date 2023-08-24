@@ -87,12 +87,12 @@ void ParticleSystem::load()
 }
 
 /*
-	prepare(Camera3D,double) -> void !O(n)b<-O(?std::sort())
-	purpose: update particle animations & positioning, setup render queue & ready for rendering
+	update(Camera3D,double) -> void ~O(n)b<-O(?std::sort())
+	purpose: update particle animations & positioning & setup render queue
 	\param cam3D: camera, used to render the scene
 	\param delta_time: time passed since last update
 */
-void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
+void ParticleSystem::update(Camera3D cam3D,double delta_time)
 {
 	// calculate camera plane
 	glm::vec3 pform = glm::cross(glm::vec3(cam3D.view3D[0][1],cam3D.view3D[1][1],cam3D.view3D[2][1]),
@@ -100,7 +100,7 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 	float pform_a = cam3D.pos.x*pform.x+cam3D.pos.y*pform.y+cam3D.pos.z*pform.z;
 
 	// update individual particles
-	for (uint16_t pie_id=0;pie_id<entity_list.size();pie_id++) {
+	for (auto pie_id : particle_update_ids) {
 		ParticleEntity &pie = entity_list[pie_id];
 
 		// reset spawn index should maximum entities have been spawned
@@ -142,16 +142,21 @@ void ParticleSystem::prepare(Camera3D cam3D,double delta_time)
 					upload_animloc(pie_id,i,pie.curr_aloc[pie.queue_order[i]]);
 		// TODO: write a more specific implementation
 	}
+}
 
-	// binding
+/*
+	prepare(Camera3D) -> void !O(1)
+	purpose: prepare particle rendering
+	\param cam3D: camera, used to render the scene
+*/
+void ParticleSystem::prepare(Camera3D cam3D)
+{
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_DEPTH_TEST);
 	shader.enable();
 	buffer.bind();
 	shader.upload_camera(cam3D);
-	// TODO: cleanup and structurize
 }
-// FIXME: not all particle types have to be updated every frame. some may not be active/rendered
 
 /*
 	render(uint16_t) -> void !O(1)
@@ -169,6 +174,17 @@ void ParticleSystem::render(uint16_t i)
 
 	// render particles
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,entity_list[i].cactive);
+}
+
+/*
+	render(Camera3D) -> void !O(n)
+	purpose: automatically prepare & render all activated particle types
+	\param cam3D: camera, used to render the scene
+*/
+void ParticleSystem::auto_render(Camera3D cam3D)
+{
+	prepare(cam3D);
+	for (auto id : particle_update_ids) render(id);
 }
 
 /*
