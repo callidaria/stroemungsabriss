@@ -18,8 +18,9 @@ public:
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 			const char* fsp,bool float_buffer=false,bool depth_buffer=false);
 
-	// read
+	// binding
 	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,fbo); }
+	static inline void close() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
 
 	// details
 	void prepare();
@@ -27,9 +28,6 @@ public:
 	// write
 	void render();
 	void render(float ptrans);
-
-	// statics
-	static inline void close() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
 
 public:
 
