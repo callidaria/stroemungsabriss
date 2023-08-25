@@ -156,7 +156,7 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 {
 	// combine all mesh vertices to master vertex list & upload
-	float ptarget = (pseq/6.0f)/(ml.size()+iml.size()+pml.size());
+	float ptarget = (pseq/8.0f)/(ml.size()+iml.size()+mal.size()+pml.size());
 	std::vector<float> v;
 	for (auto im : ml) {
 		v.insert(v.end(),im.v.begin(),im.v.end());
@@ -207,26 +207,30 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 		uint32_t eoffset = av.size()/R3D_ANIMATION_MAP_REPEAT;
 		av.insert(av.end(),im.verts.begin(),im.verts.end());
 		for (auto elem : im.elems) ae.push_back(eoffset+elem);
+		progress += ptarget;
 	} abuffer.bind();
 	abuffer.upload_vertices(av);
 	abuffer.upload_elements(ae);
 
-	// compile animation shader & upload textures
+	// compile animation shader
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
 	as3d.def_attributeF("position",3,0,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("texCoords",2,3,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("normals",3,5,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("tangent",3,8,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("bitangent",3,11,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneIndex",4,14,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneWeight",4,18,R3D_ANIMATION_MAP_REPEAT);
-	for (auto im : mal) im.texture();
+	as3d.def_attributeF("boneIndex",4,11,R3D_ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneWeight",4,15,R3D_ANIMATION_MAP_REPEAT);
+
+	// load textures
+	for (auto im : mal) {
+		im.texture();
+		progress += ptarget;
+	}
 	as3d.upload_int("colour_map",0);
 	as3d.upload_int("normal_map",1);
 	as3d.upload_int("material_map",2);
 	as3d.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
-	// TODO: adjust loading progression
 
 	// combine physical mesh vertices to master vertex list & upload
 	std::vector<float> pv;

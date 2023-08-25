@@ -158,10 +158,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 		aiVector3D normals = cmesh->mNormals[i];
 		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
 
-		// tangent & bitangent
-		aiVector3D tangent = cmesh->mTangents[i],bitangent = cmesh->mBitangents[i];
+		// tangent for normal mapping
+		aiVector3D tangent = cmesh->mTangents[i];
 		verts.push_back(tangent.x),verts.push_back(tangent.y),verts.push_back(tangent.z);
-		verts.push_back(bitangent.x),verts.push_back(bitangent.y),verts.push_back(bitangent.z);
 
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);

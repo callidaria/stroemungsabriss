@@ -4,7 +4,6 @@ in vec3 position;
 in vec2 texCoords;
 in vec3 normals;
 in vec3 tangent;
-in vec3 bitangent;
 
 in vec3 offset;
 in vec3 rotation_sin;

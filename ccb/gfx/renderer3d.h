@@ -15,7 +15,7 @@
 #include "../fcn/buffer.h"
 
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
-constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 22;
+constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 19;
 
 class Renderer3D
 {

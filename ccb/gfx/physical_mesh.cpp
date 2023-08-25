@@ -28,7 +28,7 @@ PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char
 	Toolbox::load_object(obj_path,verts,position,scale,rotation);
 
 	// save and increase offset for phyiscal mesh render index
-	size = verts.size()/14;
+	size = verts.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
 	mofs += size;
 }
 

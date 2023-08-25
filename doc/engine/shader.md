@@ -96,7 +96,7 @@ shader.compile2d("./path/to/vertex.shader","./path/to/fragment.shader");
 // OR
 // setup for general 3D structure
 // [position,position,position,texture coordinate,texture coordinate,normal,normal,normal,
-//  tangent,tangent,tangent,bitangent,bitangent,bitangent]
+//  tangent,tangent,tangent]
 shader.compile3d("./path/to/vertex.shader","./path/to/fragment.shader");
 ```
 

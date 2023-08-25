@@ -22,6 +22,8 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
+
 // debug timing keys to record individual loadtimes for task sequences
 struct DebugLogKey
 {

@@ -11,6 +11,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../mat/toolbox.h"
 #include "../mat/camera2d.h"
 #include "../mat/camera3d.h"
 
