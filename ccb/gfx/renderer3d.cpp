@@ -30,7 +30,6 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	// load mesh
 	uint16_t mesh_id = ml.size();
 	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,mofs));
-	std::cout << mofs << '\n';
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
@@ -222,10 +221,10 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	as3d.def_attributeF("boneIndex",4,14,R3D_ANIMATION_MAP_REPEAT);
 	as3d.def_attributeF("boneWeight",4,18,R3D_ANIMATION_MAP_REPEAT);
 	for (auto im : mal) im.texture();
-	pbms.upload_int("colour_map",0);
-	pbms.upload_int("normal_map",1);
-	pbms.upload_int("material_map",2);
-	pbms.upload_int("emission_map",3);
+	as3d.upload_int("colour_map",0);
+	as3d.upload_int("normal_map",1);
+	as3d.upload_int("material_map",2);
+	as3d.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
 	// TODO: adjust loading progression
 
@@ -281,12 +280,8 @@ void Renderer3D::prepare()
 */
 void Renderer3D::prepare(Camera3D cam3d)
 {
-	// run normal preparations
 	prepare();
-
-	// update and upload camera & position for normal mapping
 	s3d.upload_camera(cam3d);
-	s3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -311,12 +306,8 @@ void Renderer3D::prepare_inst()
 */
 void Renderer3D::prepare_inst(Camera3D cam3d)
 {
-	// run normal preparations
 	prepare_inst();
-
-	// update camera
 	is3d.upload_camera(cam3d);
-	is3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -341,12 +332,8 @@ void Renderer3D::prepare_anim()
 */
 void Renderer3D::prepare_anim(Camera3D cam3d)
 {
-	// basic preparations
 	prepare_anim();
-
-	// update camera
 	as3d.upload_camera(cam3d);
-	as3d.upload_vec3("view_pos",cam3d.pos);
 }
 
 /*
@@ -370,12 +357,8 @@ void Renderer3D::prepare_pmesh()
 */
 void Renderer3D::prepare_pmesh(Camera3D cam3d)
 {
-	// run normal preparations
 	prepare_pmesh();
-
-	// update camera
 	pbms.upload_camera(cam3d);
-	pbms.upload_vec3("camera_pos",cam3d.pos);
 }
 
 /*
