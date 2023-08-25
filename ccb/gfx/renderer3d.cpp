@@ -65,12 +65,19 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 }
 
 /*
-	add(const char*,const char*,vec3,float,bool) -> uint16_t !O(1)b
-	overloads previous add()
+	add(const char*,const char*,const char*,const char*,const char*,vec3,float,bool)
+			-> uint16_t !O(1)b
+	.overloads previous add()
 	purpose: add animated object to the renderer
 	\param a: path to collada (.dae) animation file
+	\param t: path to colour texture
+	\param n: path to normal map
+	\param m: path to physical based material map
+	\param e: path to emission texture
+	\param p: origin position translated by model matrix in shader
+	\param s: object scaling translated by model matrix in shader
+	\param cast_shadow: (default false) determines if object projects shadow
 	\returns: memory index to refer to the created animated object by when drawing
-	// TODO: extend documentation
 */
 uint16_t Renderer3D::add(const char* a,const char* t,const char* n,const char* m,const char* e,
 		glm::vec3 p,float s,bool cast_shadow)

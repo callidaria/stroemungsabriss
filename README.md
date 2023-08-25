@@ -97,6 +97,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: memory leaks
 - FIXED: memory issues with 3D renderer
 
+Worktime: 322h 51min
+
 <br>
 
 ## v0.0.4
@@ -176,7 +178,5 @@ Worktime: 120h
 <br>
 
 ## Trivia
-- Total Worktime: 462h 26min
-- Elapsed Worktime After v0.0.4: 317h 42min
-	+ 213: 4h 55min
-- Total Code Lines: 15.850
+- Total Worktime: 785h 17min
+- Total Code Lines: 15.823
