@@ -178,5 +178,5 @@ Worktime: 120h
 ## Trivia
 - Total Worktime: 462h 26min
 - Elapsed Worktime After v0.0.4: 317h 42min
-	+ 213: 3h 20min
+	+ 213: 4h 15min
 - Total Code Lines: 15.850

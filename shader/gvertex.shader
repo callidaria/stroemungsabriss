@@ -5,6 +5,7 @@ in vec2 texCoords;
 in vec3 normals;
 in vec3 tangent;
 in vec3 bitangent;
+// FIXME: remove bitangent when using gram-schmidt process
 
 out vec4 Position;
 out vec2 TexCoords;
