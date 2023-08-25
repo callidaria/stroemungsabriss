@@ -62,7 +62,7 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 	}
 
 	// translate vertex data to object vertices
-	glm::vec3 tg(1.0f),btg(1.0f);
+	glm::vec3 tg(1.0f);
 	for(int i=0;i<ovi.size();i++) {
 
 		// precalculations for normal mapping
@@ -78,14 +78,8 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 			tg.y = ff*(duv2.y*e1.y-duv1.y*e2.y);
 			tg.z = ff*(duv2.y*e1.z-duv1.y*e2.z);
 			tg = glm::normalize(tg);
-
-			// calculate bitangent
-			btg.x = ff*(-duv2.x*e1.x+duv1.x*e2.x);
-			btg.y = ff*(-duv2.x*e1.y+duv1.x*e2.y);
-			btg.z = ff*(-duv2.x*e1.z+duv1.x*e2.z);
-			btg = glm::normalize(btg);
 			// FIXME: using a matrix calculation might be significantly faster
-		}  // FIXME: remove branch from multiupload
+		}
 
 		// get read vertices to process and save
 		unsigned int tvi = ovi[i],tui = oui[i],tni = oni[i];
@@ -101,7 +95,6 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		ov.push_back(tu.x);ov.push_back(tu.y);							// texture coordinates
 		ov.push_back(tn.x);ov.push_back(tn.y);ov.push_back(tn.z);		// normals
 		ov.push_back(tg.x);ov.push_back(tg.y);ov.push_back(tg.z);		// tangents
-		ov.push_back(btg.x);ov.push_back(btg.y);ov.push_back(btg.z);	// bitangents
 	}
 }
 

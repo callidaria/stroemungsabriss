@@ -15,7 +15,7 @@
 #include "../fcn/buffer.h"
 
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
-constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 16;
+constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 19;
 
 class Renderer3D
 {
@@ -30,7 +30,8 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	uint16_t add(const char* m,const char* t,const char* sm,const char* nm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r,uint16_t dcap,bool cast_shadow=false);
-	uint16_t add(const char* a,const char* t,glm::vec3 p,float s,bool cast_shadow=false);
+	uint16_t add(const char* a,const char* t,const char* n,const char* m,const char* e,glm::vec3 p,
+			float s,bool cast_shadow=false);
 	uint16_t add_physical(const char* m,const char* t,const char* nm,const char* mm,const char* em,
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,

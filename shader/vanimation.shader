@@ -3,12 +3,13 @@
 in vec3 position;
 in vec2 texCoords;
 in vec3 normals;
+in vec3 tangent;
 in vec4 boneIndex;
 in vec4 boneWeight;
 
 out vec4 Position;
 out vec2 TexCoords;
-out vec3 Normals;
+out mat3 TBN;
 
 // camera projection
 uniform mat4 proj;
@@ -26,9 +27,14 @@ void main()
 	// animation transformation
 	mat4 index_transform = mat4(.0);
 	for (int i=0;i<4;i++) index_transform += joint_transform[int(boneIndex[i])]*boneWeight[i];
-	Position = index_transform*vec4(position,1.0);
-	Normals = (index_transform*vec4(normals,1.0)).xyz;
+	Position = model*index_transform*vec4(position,1.0);
+
+	// TBN-matrix with gram-schmidt reorthogonalization
+	vec3 T = normalize((model*index_transform*vec4(tangent,.0)).xyz);
+	vec3 Normals = normalize((model*index_transform*vec4(normals,.0)).xyz);
+	T = normalize(T-dot(T,Normals)*Normals);
+	TBN = mat3(T,cross(Normals,T),Normals);
 
 	// return position
-	gl_Position = proj*view*model*Position;
+	gl_Position = proj*view*Position;
 }

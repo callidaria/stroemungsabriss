@@ -1,18 +1,25 @@
 #include "mesh_anim.h"
 
 /*
-	constructor(const char*,const char*,uint32_t&)
+	constructor(const char*,const char*,const char*,const char*,const char*,uint32_t&)
 	purpose: load animation file, holding object mesh and animation key data
 	\param path: path to collada (.dae) file, holding mesh and animation key data
-	\param itex_path: path to animation mesh texture
-	\param mofs: self increasing offset, which saves the buffer offset when draw calling
+	\param ipcol: path to animation mesh texture
+	\param ipnorm: path to animation mesh normal map
+	\param ipmat: path to animation mesh material map
+	\param ipemit: path to animation mesh emission texture
+	\param mofs: self increasing offset, which saves the buffer offset for later draw calls
 */
-MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mofs)
-	: tex_path(itex_path)
+MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
+			const char* ipemit,uint32_t &mofs)
+	: path_colour(ipcol),path_normals(ipnorm),path_materials(ipmat),path_emission(ipemit)
 {
-
 	// texture generation
-	glGenTextures(1,&tex);
+	glGenTextures(1,&t_colour);
+	glGenTextures(1,&t_normals);
+	glGenTextures(1,&t_material);
+	glGenTextures(1,&t_emission);
+	// TODO: test differences between this and glGenTextures(4,[]);
 
 #ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
@@ -154,6 +161,10 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 		aiVector3D normals = cmesh->mNormals[i];
 		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
 
+		// tangent for normal mapping
+		aiVector3D tangent = cmesh->mTangents[i];
+		verts.push_back(tangent.x),verts.push_back(tangent.y),verts.push_back(tangent.z);
+
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
@@ -214,6 +225,18 @@ MeshAnimation::MeshAnimation(const char* path,const char* itex_path,uint32_t &mo
 
 #endif
 
+}
+
+/*
+	texture() -> void !O(1)
+	purpose: load textures for animated meshes
+*/
+void MeshAnimation::texture()
+{
+	Toolbox::load_texture_repeat(t_colour,path_colour,true);
+	Toolbox::load_texture_repeat(t_normals,path_normals);
+	Toolbox::load_texture_repeat(t_material,path_materials);
+	Toolbox::load_texture_repeat(t_emission,path_emission);
 }
 
 /*

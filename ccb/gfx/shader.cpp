@@ -44,11 +44,10 @@ void Shader::compile2d(const char* vspath,const char* fspath)
 void Shader::compile3d(const char* vspath,const char* fspath)
 {
 	compile(vspath,fspath);
-	def_attributeF("position",3,0,14);
-	def_attributeF("texCoords",2,3,14);
-	def_attributeF("normals",3,5,14);
-	def_attributeF("tangent",3,8,14);
-	def_attributeF("bitangent",3,11,14);
+	def_attributeF("position",3,0,TOOLBOX_OBJECT_LOAD_REPEAT);
+	def_attributeF("texCoords",2,3,TOOLBOX_OBJECT_LOAD_REPEAT);
+	def_attributeF("normals",3,5,TOOLBOX_OBJECT_LOAD_REPEAT);
+	def_attributeF("tangent",3,8,TOOLBOX_OBJECT_LOAD_REPEAT);
 }
 
 /*

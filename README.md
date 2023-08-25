@@ -65,41 +65,43 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
-## v0.0.5 DEV
+## v0.0.5 [UNX]
 
 ### features:
-- deferred shading with support for transparent objects
-- new physical based lighting system
-- loading feedback screen
-- dynamic world loading
 - import & interpolate mesh animations
-- store "macro" savestate pattern
+- new physical based lighting system
+- deferred shading with support for transparent objects
+- loading feedback screen
+- custom byte format savefiles
 - particle emission & management system
-- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 - documented assembly translation analysis
 - automatic compilation of all files using the originally updated source (upon request)
+- dynamic world loading
+- finding all FIXMEs, TODOs & DEPRECATEDs in source code and show in ccb console by path
 
 ### optimizations:
-- system to remove world objects should they have been deemed obsolete
 - hotplugging controllers
-- switching dynamically between input methods
-- autoremoving all libraries when the whole project gets rebuilt
 - colour correction: high dynamic range
 - colour correction: gamma correction
-- improving code quality/portability by substituting pragma once usage
+- switching dynamically between input methods
 - constant face culling, no more disable/enable calls
-- dynamic directory/file finder for line counter
 - improved runtime debug output
+- improving code quality/portability by substituting pragma once usage
+- dynamic directory/file finder for line counter
+- autoremoving all libraries when the whole project gets rebuilt
+- system to remove world objects should they have been deemed obsolete
 
 ### fixes:
+- FIXED: shadow transition acne on heavily sloped surfaces
 - FIXED: double main loop
 - FIXED: memory leaks
-- FIXED: shadow transition acne on heavily sloped surfaces
 - FIXED: memory issues with 3D renderer
+
+Worktime: 322h 51min
 
 <br>
 
-## v0.0.4 DEV [UNX]
+## v0.0.4
 
 ### features:
 - individual rotations of instanced objects
@@ -114,6 +116,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: bullet system renders spawned bullets twice with a slight offset
 - FIXED: texture issues with opponent's flyfighter object
 - FIXED: lined & misplaced rendering of emitted projectiles
+
+Worktime: 174h 35min
 
 <br>
 
@@ -174,33 +178,5 @@ Worktime: 120h
 <br>
 
 ## Trivia
-- Total Worktime: 287h 51min
-- Elapsed Worktime After v0.0.3:
-	+ 43: 9h 17min
-	+ 114: 2min
-	+ 91: 16h 37min
-	+ 106: 64h 32min
-	+ 82: 20h 50min
-	+ 137: 15h 13min
-	+ 108: 48h 4min
-- Elapsed Worktime After v0.0.4:
-	+ 97: 7h 2min
-	+ 129: 8h 4min
-	+ 132: 7min
-	+ 64: 2h 20min
-	+ 47: 20h 57min
-	+ 164: 9h 27min
-	+ 147: 50h 53min
-	+ 169: 2h 1min
-	+ 124: 15h 14min
-	+ 125: 1h
-	+ 153: 74h 20min
-	+ 112: 57min
-	+ 159: 5h 32min
-	+ 62: 1h 52min
-	+ 90: 9h 50min
-	+ 176: 61h 49min
-	+ ?? console improvements: 9h 41min
-	+ 223: 1h 54min
-	+ 83: 34h 42min
-- Total Code Lines: 15.555
+- Total Worktime: 785h 17min
+- Total Code Lines: 15.823

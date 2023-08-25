@@ -28,7 +28,7 @@ Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char*
 	Toolbox::load_object(m,v,pos,scl,rot);
 
 	// save and increase offset for mesh render index
-	size = v.size()/14;
+	size = v.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
 	mofs += size;
 }
 

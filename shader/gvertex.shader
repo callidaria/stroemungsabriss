@@ -4,7 +4,6 @@ in vec3 position;
 in vec2 texCoords;
 in vec3 normals;
 in vec3 tangent;
-in vec3 bitangent;
 
 out vec4 Position;
 out vec2 TexCoords;
