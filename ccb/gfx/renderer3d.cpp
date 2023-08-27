@@ -271,10 +271,6 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 */
 void Renderer3D::prepare()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	s3d.enable();
 	buffer.bind();
 }
@@ -301,10 +297,6 @@ void Renderer3D::prepare(Camera3D cam3d)
 */
 void Renderer3D::prepare_inst()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	is3d.enable();
 	ibuffer.bind();
 }
@@ -327,11 +319,6 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 */
 void Renderer3D::prepare_anim()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	// prepare shader & buffer
 	as3d.enable();
 	abuffer.bind();
 }
@@ -353,10 +340,6 @@ void Renderer3D::prepare_anim(Camera3D cam3d)
 */
 void Renderer3D::prepare_pmesh()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	pbms.enable();
 	pbuffer.bind();
 }
@@ -545,7 +528,6 @@ void Renderer3D::render_geometry_shadow()
 void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 {
 	for (int i=b;i<e;i++) {
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D,ml[i].tex);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D,ml[i].specmap);
@@ -555,7 +537,8 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 		glBindTexture(GL_TEXTURE_2D,ml[i].normap);
 		s3d.upload_matrix("model",ml[i].model);
 		glDrawArrays(GL_TRIANGLES,ml[i].ofs,ml[i].size);
-	} glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
+	}
 }
 // FIXME: please finally choose if TEXTURE0 should be set at the beginning or reset after drawing
 // FIXME: try to remove loop from this
@@ -573,7 +556,6 @@ void Renderer3D::render_mesh(uint16_t b,uint16_t e)
 void Renderer3D::render_inst(uint16_t i)
 {
 	ibuffer.upload_indices(mesh_indices[i]);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,iml[i].tex);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,iml[i].specmap);
@@ -593,7 +575,6 @@ void Renderer3D::render_inst(uint16_t i)
 */
 void Renderer3D::render_anim(uint16_t i)
 {
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,mal[i].t_colour);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,mal[i].t_normals);
@@ -614,7 +595,6 @@ void Renderer3D::render_anim(uint16_t i)
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,pml[i].tex_colour);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,pml[i].tex_normal);

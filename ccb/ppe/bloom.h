@@ -39,7 +39,7 @@ public:
 	{
 		sfb.enable();
 		buffer.bind();
-		glActiveTexture(GL_TEXTURE0);
+
 		glBindTexture(GL_TEXTURE_2D,fb.tex);
 		sfb.upload_int("tex",0);
 
