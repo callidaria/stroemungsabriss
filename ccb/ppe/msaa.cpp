@@ -104,6 +104,7 @@ void MSAA::render(GLuint ovltex)
 
 	// draw
 	glDrawArrays(GL_TRIANGLES,0,6);
+	glActiveTexture(GL_TEXTURE0);
 }
 
 /*
@@ -126,7 +127,6 @@ void MSAA::prepare()
 	buffer.bind();
 
 	// gl setup
-	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_DEPTH_TEST);
 
 	// texture upload

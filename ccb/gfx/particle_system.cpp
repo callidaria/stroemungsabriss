@@ -151,7 +151,6 @@ void ParticleSystem::update(Camera3D cam3D,double delta_time)
 */
 void ParticleSystem::prepare(Camera3D cam3D)
 {
-	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_DEPTH_TEST);
 	shader.enable();
 	buffer.bind();

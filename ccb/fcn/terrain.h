@@ -77,8 +77,6 @@ public:
 	}
 	void render(Camera3D* c,glm::mat4 shadow)
 	{
-		glDisable(GL_CULL_FACE);
-		glActiveTexture(GL_TEXTURE0);
 		ts.enable();
 		glBindVertexArray(vao);
 		c->update();

@@ -297,7 +297,6 @@ void Cubemap::dynamic_precalculation_load_switch(std::string id,int32_t resoluti
 */
 void Cubemap::prepare()
 {
-	glActiveTexture(GL_TEXTURE0);
 	s.enable();
 	buffer.bind();
 }

@@ -52,10 +52,6 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 */
 void FrameBuffer::prepare()
 {
-	// gl setup
-	glActiveTexture(GL_TEXTURE0);
-
-	// buffer & shader
 	s.enable();
 	buffer.bind();
 }
@@ -82,7 +78,6 @@ void FrameBuffer::render()
 void FrameBuffer::render(float ptrans)
 {
 	// setup
-	glActiveTexture(GL_TEXTURE0); // !!please tidy this up
 	s.enable();
 	buffer.bind();
 	glBindTexture(GL_TEXTURE_2D,tex);

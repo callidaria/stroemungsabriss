@@ -110,6 +110,7 @@ void World::upload_lightmap()
 	m_setRigs->lighting.upload_specular_map();
 	glActiveTexture(GL_TEXTURE6);
 	m_setRigs->lighting.upload_specular_brdf();
+	glActiveTexture(GL_TEXTURE0);
 }
 
 /*
@@ -172,6 +173,7 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,transparency_fb.dptex);
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D,gbuffer.t_depth);
+	glActiveTexture(GL_TEXTURE0);
 
 	// deferred light shading
 	m_setRigs->lighting.upload(&deferred_fb.s);

@@ -65,6 +65,14 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
+## v0.0.6 DEV
+
+### optimizations:
+- minimized on/off switching of depth testing
+- active texture reset call reduction by uniformly switching back after render
+
+<br>
+
 ## v0.0.5 [UNX]
 
 ### features:
@@ -179,4 +187,6 @@ Worktime: 120h
 
 ## Trivia
 - Total Worktime: 785h 17min
+- TPB for v0.0.6:
+    + 209: 19min
 - Total Code Lines: 15.823

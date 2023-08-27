@@ -165,7 +165,6 @@ void Text::load()
 void Text::prepare()
 {
 	// gl settings
-	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_DEPTH_TEST);
 
 	// prepare shader & buffer
