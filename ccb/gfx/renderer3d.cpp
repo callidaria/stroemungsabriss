@@ -271,10 +271,6 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 */
 void Renderer3D::prepare()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	s3d.enable();
 	buffer.bind();
 }
@@ -301,10 +297,6 @@ void Renderer3D::prepare(Camera3D cam3d)
 */
 void Renderer3D::prepare_inst()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	is3d.enable();
 	ibuffer.bind();
 }
@@ -327,10 +319,6 @@ void Renderer3D::prepare_inst(Camera3D cam3d)
 */
 void Renderer3D::prepare_anim()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	as3d.enable();
 	abuffer.bind();
 }
@@ -352,10 +340,6 @@ void Renderer3D::prepare_anim(Camera3D cam3d)
 */
 void Renderer3D::prepare_pmesh()
 {
-	// gl settings
-	glEnable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	pbms.enable();
 	pbuffer.bind();
 }

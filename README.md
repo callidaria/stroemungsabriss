@@ -188,5 +188,5 @@ Worktime: 120h
 ## Trivia
 - Total Worktime: 785h 17min
 - TPB for v0.0.6:
-    + 209: 19min
+    + 209: 44min
 - Total Code Lines: 15.823

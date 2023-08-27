@@ -121,39 +121,34 @@ void World::upload_lightmap()
 */
 void World::render(uint32_t &running,bool &reboot)
 {
-	// update
-	glDisable(GL_BLEND);
+	// 3D
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	// update
 	m_ccbf->r3d->update_animations(m_ccbf->frame->get_time_delta());
 	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
-	// start geometry pass deferred scene
+	// scene
 	gbuffer.bind();
-	m_ccbf->frame->clear(.1f,.1f,.1f);
-
-	// handle environments, bosses & player
+	m_ccbf->frame->clear();
 	for (auto scene : scene_master) scene->render();
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
 
-	// end geometry pass deferred scene
+	// TRANSPARENCY
 	FrameBuffer::close();
-
-	// prepare transparency render
 	glEnable(GL_BLEND);
 	transparency_fb.bind();
 	m_ccbf->frame->clear();
 
-	// render bullets
-	m_ccbf->bSys->render();
-
 	// render particles
 	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
 	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
-	glDisable(GL_DEPTH_TEST);
 
-	// prepare scene render
+	// 2D
 	transparency_fb.close();
+	glDisable(GL_DEPTH_TEST);
 	game_fb.bind();
 
 	// upload g-buffer components to deferred light shader
@@ -175,12 +170,15 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.t_depth);
 	glActiveTexture(GL_TEXTURE0);
 
-	// deferred light shading
+	// physical based deferred shading
 	m_setRigs->lighting.upload(&deferred_fb.s);
 	deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
 	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
 	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);
 	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// render bullets
+	m_ccbf->bSys->render();
 
 	// render ui
 	game_fb.close();

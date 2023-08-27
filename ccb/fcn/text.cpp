@@ -164,10 +164,6 @@ void Text::load()
 */
 void Text::prepare()
 {
-	// gl settings
-	glDisable(GL_DEPTH_TEST);
-
-	// prepare shader & buffer
 	sT.enable();
 	buffer.bind();
 }

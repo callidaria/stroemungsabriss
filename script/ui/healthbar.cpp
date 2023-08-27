@@ -155,7 +155,6 @@ void Healthbar::render()
 	floating_nanobars();
 
 	// setup & draw hpbar
-	glDisable(GL_DEPTH_TEST);
 	shp.enable();
 	hpbuffer.bind();
 	hpbuffer.bind_index();

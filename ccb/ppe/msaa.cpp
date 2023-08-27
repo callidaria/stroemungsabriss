@@ -126,9 +126,6 @@ void MSAA::prepare()
 	sfb.enable();
 	buffer.bind();
 
-	// gl setup
-	glDisable(GL_DEPTH_TEST);
-
 	// texture upload
 	glBindTexture(GL_TEXTURE_2D,get_buffer());
 }
