@@ -2,6 +2,7 @@
 #define CCB_FRAME_SELFTITLED
 
 #include <iostream>
+//#include <chrono>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,8 @@
 #include <AL/alc.h>
 
 #define BUILDISSUE_OLD_SDL_VERSION
+
+constexpr uint32_t FRAME_REFRATE_DEFAULT_DELTA = 1000/60;
 
 struct Keyboard
 {
@@ -52,7 +55,9 @@ public:
 
 	// fps
 	void print_fps();
-	void vsync(uint8_t frames=60);
+	static void gpu_vsync_on();
+	inline void set_refresh_rate(uint16_t refresh_rate=60) { rate_delta = 1000/refresh_rate; }
+	void cpu_vsync();
 
 	// time
 	void calc_time_delta();
@@ -115,9 +120,10 @@ private:
 #else
 	uint64_t past_ticks = 0,current_ticks = 0;
 #endif
-	uint32_t fps = 0,temp_fps = 0,lO = 0;
+	uint32_t fps = 0,temp_fps = 0,last_out = 0;
 	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
+	uint32_t rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
 };
 
 #endif

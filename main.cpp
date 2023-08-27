@@ -46,6 +46,8 @@ int main(int argc,char** argv)
 	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
 			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
 			(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
+	f.gpu_vsync_on();
+	//f.set_refresh_rate(60);
 	InputMap imap = InputMap(&f);
 
 	// AUDIO
@@ -89,7 +91,7 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.vsync(60);
+		//f.vsync();
 		f.calc_time_delta();
 		f.input(run);
 

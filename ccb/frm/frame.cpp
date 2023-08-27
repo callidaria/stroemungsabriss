@@ -90,36 +90,49 @@ void Frame::print_fps()
 	fps++;
 	if (1000<=SDL_GetTicks()-past_ticks) {
 		past_ticks = SDL_GetTicks();
-		printf("\rFPS: %i    TIME MOD: %f",fps,time_mod);
+		printf("\rFPS: %i  TIME MOD: %f",fps,time_mod);
 		fflush(stdout);
 		fps = 0;
 	}
 }
 
 /*
-	vsync(uint8_t) -> void
-	max_frames (60): maximum frames per second
-	purpose: capping frames per second to given value
-	!! DEPRECATED: PLEASE KILL BRANCHING, THIS IS PATHETIC LOOPCODE !!
+	gpu_vsync_on() -> void (static) !O(1)b
+	purpose: enable GPU vsync (adaptive if possible)
 */
-void Frame::vsync(uint8_t max_frames)
+void Frame::gpu_vsync_on()
+{
+	if (SDL_GL_SetSwapInterval(-1)==-1) {
+		printf("\033[1;31madaptive vsync not supported\033[0m\n");
+		SDL_GL_SetSwapInterval(1);
+	}
+}
+
+/*
+	cpu_vsync(uint8_t) -> void !O(1)b
+	purpose: capping frames per second to given value
+	TODO: redo this
+*/
+void Frame::cpu_vsync()
 {
 	// count continue
 	past_ticks = current_ticks;
 	current_ticks = SDL_GetTicks();
+	//current_ticks = std::chrono::steady_clock::now();
 	temp_fps++;
 
 	// reset after running second is completed
-	if (current_ticks-lO>=1000) {
-		lO = current_ticks;
+	if ((current_ticks-last_out)>=1000) {
+		last_out = current_ticks;
 		fps = temp_fps;
 		temp_fps = 0;
 	}
 
 	// delay while counting second
-	if (current_ticks-past_ticks<1000/max_frames)
-		SDL_Delay(1000/max_frames-SDL_GetTicks()+past_ticks);
+	uint32_t delta_ticks = current_ticks-past_ticks;
+	if (delta_ticks<rate_delta) SDL_Delay(rate_delta-delta_ticks);
 }
+// FIXME: this doesn't make me feel right. i think there is a more satisfying solution
 
 /*
 	calc_time_delta() -> void
