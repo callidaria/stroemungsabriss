@@ -214,6 +214,22 @@ void MenuList::save()
 }
 
 /*
+	globe_rotation(uint16_t) -> vec2
+	li: list index of selected entity to read globe preview rotation from
+	returns: globe rotation vector toward list entity preview destination
+*/
+glm::vec2 MenuList::globe_rotation(uint16_t li)
+{ return glm::vec2(les[li].gRot[0],les[li].gRot[3]); }
+
+/*
+	write_tempID(uint8_t)
+	index: gets the selected menu list element
+	purpose: writes the temporary selection id to the selected menu list entity id when called
+*/
+void MenuList::write_tempID(uint8_t index)
+{ les[index].sID = t_slID; }
+
+/*
 	was_changed() -> bool
 	returns: if any attributes of any list elements were changed
 */

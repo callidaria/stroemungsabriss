@@ -23,12 +23,11 @@ public:
 	void spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float r);
 
 	// relative movement
-	inline void delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
-		{ m_rI->add_aOffset(cluster,index,dPos*(float)m_frame->time_delta); }
+	void delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos);
 	void delta_fDir(uint8_t cluster);
 
 	// update
-	inline void inc_tick(uint8_t cluster) { for(int i=0;i<bCount[cluster];i++) ts[cluster][i]++; }
+	void inc_tick(uint8_t cluster);
 	inline void reset_tick(uint8_t cluster,uint32_t index) { ts[cluster][index] = 0; }
 
 	// set

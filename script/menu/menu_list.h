@@ -61,9 +61,8 @@ public:
 	// modification
 	inline void reset() { les = rles; }
 	void save();
-	inline glm::vec2 globe_rotation(uint16_t li)
-		{ return glm::vec2(les[li].gRot[0],les[li].gRot[3]); }
-	inline void write_tempID(uint8_t index) { les[index].sID = t_slID; }
+	glm::vec2 globe_rotation(uint16_t li);
+	void write_tempID(uint8_t index);
 
 	// information
 	bool was_changed();

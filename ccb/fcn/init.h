@@ -17,7 +17,7 @@ public:
 
 	Init(const char* path);
 
-	uint32_t rINT(uint32_t id) { return iConfig[id]; }
+	uint32_t rINT(uint32_t id);
 
 private:
 

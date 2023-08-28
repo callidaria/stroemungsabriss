@@ -78,6 +78,14 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float 
 }
 
 /*
+	delta_bltPos(uint8_t,uint32_t,glm::vec2) -> void
+	dPos: the direction and speed the bullet should move according to
+	purpose: move specific bullet according to outsidely precalculated direction and speed
+*/
+void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
+{ m_rI->add_aOffset(cluster,index,dPos*(float)m_frame->time_delta); }
+
+/*
 	delta_fDir(uint8_t) -> void
 	purpose: update all bullets in a specified cluster according to their current movement directions
 */
@@ -86,6 +94,16 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
 		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*(float)m_frame->time_delta);
+}
+
+/*
+	inc_tick(uint8_t) -> void
+	purpose: tick all bullets in a cluster
+*/
+void BulletSystem::inc_tick(uint8_t cluster)
+{
+	for(int i=0;i<bCount[cluster];i++)
+		ts[cluster][i]++;
 }
 
 /*

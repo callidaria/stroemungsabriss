@@ -41,10 +41,8 @@ public:
 	void render_anim(uint16_t i,uint16_t amt);
 
 	// uploads
-	inline glm::vec2 get_offset(uint16_t i,uint16_t j)
-		{ return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]); }
-	inline glm::vec2 get_aOffset(uint16_t i,uint16_t j)
-		{ return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]); }
+	glm::vec2 get_offset(uint16_t i,uint16_t j);
+	glm::vec2 get_aOffset(uint16_t i,uint16_t j);
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
 	void set_aOffset(uint16_t i,uint16_t j,glm::vec2 o);
 	void set_rotation(uint16_t i,uint16_t j,float r);

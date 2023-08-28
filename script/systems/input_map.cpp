@@ -115,6 +115,20 @@ bool InputMap::request(uint8_t request_id)
 { return *key_actions[request_id]||*cnt_actions[request_id]; }
 
 /*
+	precalculate(uint8_t) -> void
+	purpose: precalculate if requested input has been made and store result for repeated usage
+*/
+void InputMap::precalculate(uint8_t request_id)
+{ input_val[request_id] = request(request_id); }
+
+/*
+	precalculate_vector() -> void
+	purpose: precalculate movement direction and store result for repeated usage
+*/
+void InputMap::precalculate_vector()
+{ move_dir = req_vectorized_direction(); }
+
+/*
 	precalculate_dpad() -> void
 	purpose: precalculate all directional inputs that relate to dpad functionality
 */

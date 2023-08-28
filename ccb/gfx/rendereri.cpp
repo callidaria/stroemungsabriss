@@ -144,6 +144,21 @@ void RendererI::render_anim(uint16_t i,uint16_t amt)
 */
 
 /*
+	get_offset(uint16_t,uint16_t) -> vec2
+	returns: vectorized offset direction and length as derived from index upload list
+*/
+glm::vec2 RendererI::get_offset(uint16_t i,uint16_t j)
+{ return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]); }
+
+/*
+	get_aOffset(uint16_t i,uint16_t j) -> vec2
+	variation of: get_offset()
+	returns: vectorized offset direction and length as derived from index upload list of animation
+*/
+glm::vec2 RendererI::get_aOffset(uint16_t i,uint16_t j)
+{ return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]); }
+
+/*
 	set_offset(uint16_t,uint16_t,vec2) -> void
 	o: vector value to set the selected position transform vector to
 	purpose: set a certain position transform vector of a specific object

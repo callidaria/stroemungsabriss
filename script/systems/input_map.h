@@ -46,8 +46,8 @@ public:
 	bool request(uint8_t request_id);
 
 	// precalculate input
-	inline void precalculate(uint8_t request_id) { input_val[request_id] = request(request_id); }
-	inline void precalculate_vector() { move_dir = req_vectorized_direction(); }
+	void precalculate(uint8_t request_id);
+	void precalculate_vector();
 	void precalculate_dpad();
 	void precalculate_all();
 

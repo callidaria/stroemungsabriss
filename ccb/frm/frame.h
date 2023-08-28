@@ -56,8 +56,7 @@ public:
 
 	// time
 	void calc_time_delta();
-	inline void change_tmod(double goal,double rate)
-		{ time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
+	void change_tmod(double goal,double rate);
 
 	// controlling
 	void input(uint32_t &running);
@@ -70,7 +69,7 @@ public:
 	inline void input_stop() { SDL_StopTextInput(); }
 
 	// getter
-	SDL_GLContext create_new_context() { return SDL_GL_CreateContext(m_frame); }
+	inline SDL_GLContext create_new_context() { return SDL_GL_CreateContext(m_frame); }
 
 private:
 

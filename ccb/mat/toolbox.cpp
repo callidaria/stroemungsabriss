@@ -99,6 +99,39 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 }
 
 /*
+	calculate_vecangle(vec2,vec2) -> float (static)
+	a: first vector, 0 degrees towards the origin
+	b: second vector, returned degrees from first vector
+	returns: angle between vectors in radians
+*/
+float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
+{ return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
+
+/*
+	transform_vector(vec3&,vec3,float,vec3) -> void (static)
+	pos: additive modification of vector direction & endpoint
+	scl: multiplicative modification of vector length
+	purpose: full vector transformation
+*/
+void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
+{
+	rotate_vector(ov,rot);
+	ov *= scl;
+	ov += pos;
+}
+
+/*
+	rotate_vector(vec3&,vec3) -> void (static)
+	purpose: 3D vector rotation
+*/
+void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
+{
+	ov = glm::rotate(ov,glm::radians(rot.x),glm::vec3(1,0,0));
+	ov = glm::rotate(ov,glm::radians(rot.y),glm::vec3(0,1,0));
+	ov = glm::rotate(ov,glm::radians(rot.z),glm::vec3(0,0,1));
+}
+
+/*
 	start_debug_logging(DebugLogData&,const char*) -> void
 	purpose: start time difference debug recording
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
@@ -152,30 +185,6 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 	ov: vector to be transformed
 	rot: rotation of vector, without directional reset
 */
-
-/*
-	transform_vector(vec3&,vec3,float,vec3) -> void (static)
-	pos: additive modification of vector direction & endpoint
-	scl: multiplicative modification of vector length
-	purpose: full vector transformation
-*/
-void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
-{
-	rotate_vector(ov,rot);
-	ov *= scl;
-	ov += pos;
-}
-
-/*
-	rotate_vector(vec3&,vec3) -> void (static)
-	purpose: 3D vector rotation
-*/
-void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
-{
-	ov = glm::rotate(ov,glm::radians(rot.x),glm::vec3(1,0,0));
-	ov = glm::rotate(ov,glm::radians(rot.y),glm::vec3(0,1,0));
-	ov = glm::rotate(ov,glm::radians(rot.z),glm::vec3(0,0,1));
-}
 
 /*
 	create_sprite_canvas() -> std::vector<float> (static)

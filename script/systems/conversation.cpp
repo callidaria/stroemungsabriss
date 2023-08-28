@@ -420,6 +420,15 @@ std::string Conversation::grind_raw_node_by_key(std::string raw,std::string key)
 }
 
 /*
+	convert_rawid(string) -> uint32_t (private)
+	rawid: node id filtered as substring from raw node data
+	purpose: convert raw node id string to usable node id integer
+	returns: given node id as integer
+*/
+uint32_t Conversation::convert_rawid(std::string rawid)
+{ return stoi(std::string(rawid,3)); }
+
+/*
 	rc_depthsearch(root,uint32_t) -> ConversationNode (private)
 	root: rootnode of tree to depthsearch
 	id: id that references target node of depthsearch

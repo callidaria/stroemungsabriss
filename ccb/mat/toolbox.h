@@ -48,8 +48,7 @@ public:
 			float scl,glm::vec3 rot);
 
 	// math helper
-	static inline float calculate_vecangle(glm::vec2 a,glm::vec2 b)
-		{ return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
+	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
 	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
 
