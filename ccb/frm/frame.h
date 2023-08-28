@@ -2,7 +2,8 @@
 #define CCB_FRAME_SELFTITLED
 
 #include <iostream>
-//#include <chrono>
+#include <thread>
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,7 @@
 
 #define BUILDISSUE_OLD_SDL_VERSION
 
-constexpr uint32_t FRAME_REFRATE_DEFAULT_DELTA = 1000/60;
+constexpr double FRAME_REFRATE_DEFAULT_DELTA = 1000.0/60.0;
 
 struct Keyboard
 {
@@ -56,6 +57,7 @@ public:
 	// fps
 	void print_fps();
 	static void gpu_vsync_on();
+	static inline void gpu_vsync_off() { SDL_GL_SetSwapInterval(0); }
 	inline void set_refresh_rate(uint16_t refresh_rate=60) { rate_delta = 1000/refresh_rate; }
 	void cpu_vsync();
 
@@ -116,14 +118,16 @@ private:
 
 	// time & vsync
 #ifdef BUILDISSUE_OLD_SDL_VERSION
-	uint32_t past_ticks = 0,current_ticks = 0;
+	//uint32_t past_ticks = 0,current_ticks = 0;
+	std::chrono::steady_clock::time_point past_ticks = std::chrono::steady_clock::now(),
+			current_ticks;
 #else
 	uint64_t past_ticks = 0,current_ticks = 0;
 #endif
-	uint32_t fps = 0,temp_fps = 0,last_out = 0;
+	uint32_t fps = 0,temp_fps = 0,last_zero = 0,last_out = 0;
 	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
-	uint32_t rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
+	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
 };
 
 #endif

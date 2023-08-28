@@ -65,6 +65,13 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
+## v0.0.6 DEV
+
+### fixes:
+- FIXED: vsync refresh rate inaccuracies
+
+<br>
+
 ## v0.0.5 [UNX]
 
 ### features:
@@ -180,5 +187,5 @@ Worktime: 120h
 ## Trivia
 - Total Worktime: 785h 17min
 - TPB for v0.0.6:
-    + 171: 1h 37min
+    + 171: 2h 49min
 - Total Code Lines: 15.823

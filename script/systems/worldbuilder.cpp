@@ -158,7 +158,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 
 		// clear loading screen
 		ccbf->frame->clear(.1f,.1f,.1f);
-		ccbf->frame->vsync();
+		ccbf->frame->cpu_vsync();
 		ccbf->frame->calc_time_delta();
 		// create stylized background animation OR timed background action art iterations
 
