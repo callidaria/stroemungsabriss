@@ -17,14 +17,7 @@ Anim::Anim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,uin
 {
 	v = Toolbox::create_sprite_canvas(p,w,h);
 	glGenTextures(1,&tex);
-} Anim::~Anim() {  }
-
-/*
-	texture() -> void
-	purpose: upload texture data to shader program to be used as sampler2D
-*/
-void Anim::texture()
-{ Toolbox::load_texture(tex,tp); }
+}
 
 /*
 	setup() -> uint8_t

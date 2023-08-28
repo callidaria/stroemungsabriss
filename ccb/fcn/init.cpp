@@ -37,14 +37,16 @@ Init::Init(const char* path)
 			iConfig[j+i] = ex[i];
 		}
 	}
-} // FIXME: find a faster way to do this
+}
+// FIXME: find a faster way to do this
 
 /*
 	rINT(uint32_t) -> uint32_t
 	id: key id to get value by
 	returns: value according to given key id. Use key macros to identify values.
 */
-uint32_t Init::rINT(uint32_t id) { return iConfig[id]; }
+uint32_t Init::rINT(uint32_t id)
+{ return iConfig[id]; }
 
 /*
 	find_iKey(const char*) -> uint32_t

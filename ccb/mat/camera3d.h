@@ -15,7 +15,7 @@ public:
 	Camera3D(glm::vec3 cp,glm::vec3 front,float w_res,float h_res,float fov);
 
 	// calculations
-	void update();
+	inline void update() { view3D = glm::lookAt(pos,pos+front,up); }
 
 public:
 

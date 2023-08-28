@@ -80,7 +80,7 @@ public:
 	// construction
 	Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<int> phases,
 			std::vector<int> hp,const char* boss_name);
-	~Healthbar();
+	~Healthbar() {  }
 
 	// draw
 	void render();

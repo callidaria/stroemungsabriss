@@ -10,9 +10,9 @@ Cubemap::Cubemap(const char* path)
 	// buffer setup
 	init_buffer();
 	glGenTextures(1,&irr_tex);
-	glGenTextures(1,&imap);
-	glGenTextures(1,&smap);
-	glGenTextures(1,&pcsmap);
+	glGenTextures(1,&diffusion_approx);
+	glGenTextures(1,&specular_approx);
+	glGenTextures(1,&specbrdf);
 
 	// framebuffer setup
 	glGenFramebuffers(1,&cmfbo);
@@ -30,8 +30,8 @@ Cubemap::Cubemap(const char* path)
 	s.upload_int("irradiance_map",0);
 
 	// setup specular brdf integral precalculation
-	glBindTexture(GL_TEXTURE_2D,pcsmap);
-	Toolbox::load_texture_unfiltered(pcsmap,"./res/brdf_pcintegral.png",false);
+	glBindTexture(GL_TEXTURE_2D,specbrdf);
+	Toolbox::load_texture_unfiltered(specbrdf,"./res/brdf_pcintegral.png",false);
 
 	// load hdr irradiance map
 	int32_t width,height;
@@ -66,7 +66,7 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 	s.def_attributeF("position",3,0,3);
 
 	// cubemap textures
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	int32_t width,height;
 	for (int i=0;i<tp.size();i++) {
 		unsigned char* image = stbi_load(tp.at(i),&width,&height,0,STBI_rgb); // ??alpha needed
@@ -92,7 +92,7 @@ void Cubemap::render_irradiance_to_cubemap(std::string id,int32_t resolution)
 	source_res = resolution;
 
 	// setup cubemap texture
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	init_cubemap_texture(resolution);
 	Toolbox::set_cubemap_texture_parameters();
 
@@ -111,7 +111,7 @@ void Cubemap::render_irradiance_to_cubemap(std::string id,int32_t resolution)
 	for (uint8_t i=0;i<6;i++) {
 		irrs.upload_matrix("view",cam_attrib[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,
-				tex,0);
+				irradiance_map,0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES,0,36);
 
@@ -142,7 +142,7 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,cmrbo);
 
 	// setup irradiance map texture
-	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,diffusion_approx);
 	init_cubemap_texture(ri_res);
 	Toolbox::set_cubemap_texture_parameters();
 
@@ -158,11 +158,11 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 
 	// draw precise to convoluted
 	glViewport(0,0,ri_res,ri_res);
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	for (uint8_t i=0;i<6;i++) {
 		approx_irr.upload_matrix("view",cam_attrib[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,
-				imap,0);
+				diffusion_approx,0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES,0,36);
 
@@ -174,7 +174,7 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 	}
 
 	// setup specular approximation
-	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,specular_approx);
 	init_cubemap_texture(re_res);
 	Toolbox::set_cubemap_texture_parameters_mipmap();
 
@@ -183,7 +183,7 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 	approx_ref.upload_int("source_resolution",source_res);
 	approx_ref.upload_int("sample_count",sample_count);
 	approx_ref.upload_matrix("proj",cam_proj);
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	for (uint8_t j=0;j<lod_count;j++) {
 
 		// scale towards current level of detail
@@ -197,7 +197,7 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 		for (uint8_t i=0;i<6;i++) {
 			approx_ref.upload_matrix("view",cam_attrib[i]);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,smap,j);
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,specular_approx,j);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			glDrawArrays(GL_TRIANGLES,0,36);
 
@@ -217,7 +217,7 @@ void Cubemap::approximate_irradiance(std::string id,int32_t ri_res,uint32_t re_r
 */
 void Cubemap::load_irradiance_cube(std::string id)
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	int32_t width,height;
 	for (uint8_t i=0;i<6;i++) {
 		unsigned char* image = stbi_load(("./dat/precalc/"+id+"/irradiance"+std::to_string(i)+".png")
@@ -237,7 +237,7 @@ void Cubemap::load_irradiance_cube(std::string id)
 void Cubemap::load_irradiance_maps(std::string id,uint8_t lod_count)
 {
 	// load convoluted diffusion map
-	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,diffusion_approx);
 	int32_t width,height;
 	for (uint8_t i=0;i<6;i++) {
 		unsigned char* image = stbi_load(("./dat/precalc/"+id+"/convolution"+std::to_string(i)+".png")
@@ -248,7 +248,7 @@ void Cubemap::load_irradiance_maps(std::string id,uint8_t lod_count)
 	} Toolbox::set_cubemap_texture_parameters();
 
 	// load multidetailed specular irradiance map
-	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,specular_approx);
 	for (uint8_t i=0;i<6;i++) {
 		for (uint8_t lod=0;lod<lod_count;lod++) {
 			float* image = stbi_loadf(("./dat/precalc/"+id+"/specular"+std::to_string(i)+"_lod"
@@ -319,32 +319,19 @@ void Cubemap::prepare(Camera3D cam3D)
 */
 void Cubemap::render_irradiance()
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP,tex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
 	glDrawArrays(GL_TRIANGLES,0,36);
 }
 void Cubemap::render_diffusion_approximated()
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP,imap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,diffusion_approx);
 	glDrawArrays(GL_TRIANGLES,0,36);
 }
 void Cubemap::render_specular_approximated()
 {
-	glBindTexture(GL_TEXTURE_CUBE_MAP,smap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP,specular_approx);
 	glDrawArrays(GL_TRIANGLES,0,36);
 }
-
-/*
-	get_<irradiance_map_component>() -> uint32_t
-	\returns requested component of irradiance map
-*/
-uint32_t Cubemap::get_irradiance_map()
-{ return tex; }
-uint32_t Cubemap::get_diffusion_approximation()
-{ return imap; }
-uint32_t Cubemap::get_specular_approximation()
-{ return smap; }
-uint32_t Cubemap::get_specular_brdf()
-{ return pcsmap; }
 
 /*
 	init_buffer() -> void (private)
@@ -353,7 +340,7 @@ uint32_t Cubemap::get_specular_brdf()
 void Cubemap::init_buffer()
 {
 	// texture setup
-	glGenTextures(1,&tex);
+	glGenTextures(1,&irradiance_map);
 
 	// buffer data
 	buffer.bind();

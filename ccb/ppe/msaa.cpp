@@ -31,12 +31,12 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	glBindFramebuffer(GL_FRAMEBUFFER,rfbo);
 
 	// generate multisampled colour buffer
-	glGenTextures(1,&colbuffer);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,colbuffer);
+	glGenTextures(1,&colour_buffer);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,colour_buffer);
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,los,GL_RGBA,fbw,fbh,GL_TRUE);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D_MULTISAMPLE,
-			colbuffer,0);
+			colour_buffer,0);
 
 	// renderbuffer creation and multisampling settings
 	glGenRenderbuffers(1,&rbo);
@@ -50,22 +50,14 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
 	glBindFramebuffer(GL_FRAMEBUFFER,wfbo);
 
 	// generate screen buffer
-	glGenTextures(1,&scrbuffer);
-	glBindTexture(GL_TEXTURE_2D,scrbuffer);
+	glGenTextures(1,&screen_buffer);
+	glBindTexture(GL_TEXTURE_2D,screen_buffer);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,fbw,fbh,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,scrbuffer,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,screen_buffer,0);
 }
-
-/*
-	bind() -> void
-	purpose: bind multisampling framebuffer
-*/
-void MSAA::bind()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER,rfbo);
-}
+// TODO: make resolution dynamic
 
 /*
 	blit() -> void
@@ -108,15 +100,6 @@ void MSAA::render(GLuint ovltex)
 }
 
 /*
-	get_buffer() -> GLuint
-	returns: screen buffer holding current multisampled frame
-*/
-GLuint MSAA::get_buffer()
-{
-	return scrbuffer;
-}
-
-/*
 	prepare() -> void
 	purpose: used to prepare all render methods
 */
@@ -127,5 +110,5 @@ void MSAA::prepare()
 	buffer.bind();
 
 	// texture upload
-	glBindTexture(GL_TEXTURE_2D,get_buffer());
+	glBindTexture(GL_TEXTURE_2D,screen_buffer);
 }

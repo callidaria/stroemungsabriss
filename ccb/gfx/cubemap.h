@@ -41,12 +41,6 @@ public:
 	void render_diffusion_approximated();
 	void render_specular_approximated();
 
-	// getter
-	uint32_t get_irradiance_map();
-	uint32_t get_diffusion_approximation();
-	uint32_t get_specular_approximation();
-	uint32_t get_specular_brdf();
-
 private:
 
 	// helper
@@ -58,12 +52,15 @@ public:
 	// cascabel
 	Shader s,approx_irr,approx_ref,pc_specular,irrs;
 
+	// irradiance maps
+	uint32_t irradiance_map,diffusion_approx,specular_approx,specbrdf;
+
 private:
 
 	// graphics
 	Buffer buffer = Buffer(),cnv_buffer = Buffer();
 	uint32_t cmfbo,cmrbo;
-	uint32_t tex,irr_tex,imap,smap,pcsmap;
+	uint32_t irr_tex;
 	uint16_t source_res;
 
 	// math

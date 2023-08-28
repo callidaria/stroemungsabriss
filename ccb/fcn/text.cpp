@@ -21,7 +21,6 @@ Text::Text(Font f)
 */
 uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
-	// identifying sprite sheet position & write
 	uint8_t i = get_spritesheet_location(c);
 	return add(i,p);
 }
@@ -113,29 +112,6 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 }
 
 /*
-	clear() -> void
-	purpose: clear all character entries from text entity index buffer
-*/
-void Text::clear()
-{ ibv.clear(); }
-
-/*
-	texture() -> void
-	purpose: load font texture from pointed texture path
-	WARNING: somehow it is necessary to use this additionally to the constructor when Text()
-		was the first construction usage. yeah don't ask me why i don't understand this shit either
-*/
-void Text::texture()
-{ Toolbox::load_texture(ftexture,font.tp); }
-
-/*
-	enable_shader() -> void
-	purpose: enable text shader outside of text class
-*/
-void Text::enable_shader()
-{ sT.enable(); }
-
-/*
 	load(Camera2D*) -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
@@ -148,10 +124,10 @@ void Text::load()
 	buffer.bind_index();
 
 	// index upload mapping
-	sT.def_indexF(buffer.get_indices(),"offset",2,0,8);
-	sT.def_indexF(buffer.get_indices(),"texpos",2,2,8);
-	sT.def_indexF(buffer.get_indices(),"bounds",2,4,8);
-	sT.def_indexF(buffer.get_indices(),"cursor",2,6,8);
+	sT.def_indexF(buffer.iebo,"offset",2,0,8);
+	sT.def_indexF(buffer.iebo,"texpos",2,2,8);
+	sT.def_indexF(buffer.iebo,"bounds",2,4,8);
+	sT.def_indexF(buffer.iebo,"cursor",2,6,8);
 	sT.upload_float("wdt",font.mw);
 	sT.upload_camera(Camera2D(1280.0f,720.0f));
 	texture();
@@ -192,14 +168,6 @@ void Text::set_scroll(glm::vec2 scroll)
 	glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(scroll.x,scroll.y,0));
 	sT.upload_matrix("model",model);
 }
-
-/*
-	set_scroll(mat4) -> void
-	model: model matrix to upload to shader
-	purpose: emulate a free text scrolling effect by common model transformation of sprites
-*/
-void Text::set_scroll(glm::mat4 model)
-{ sT.upload_matrix("model",model); }
 
 /*
 	load_vertex() -> void (private)

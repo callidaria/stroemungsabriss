@@ -42,10 +42,3 @@ Camera3D::Camera3D(glm::vec3 cp,glm::vec3 in_front,float w_res,float h_res,float
 	view3D = glm::lookAt(pos,front,up);
 	proj3D = glm::perspective(glm::radians(fov),w_res/h_res,0.1f,10000.0f);
 }
-
-/*
-	update() -> void
-	purpose: recalculate view matrix after position and front change
-*/
-void Camera3D::update()
-{ view3D = glm::lookAt(pos,pos+front,up); }

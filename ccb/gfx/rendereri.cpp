@@ -63,10 +63,10 @@ void RendererI::load(float &progress,float pseq)
 	// compile classical instance shader program
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
-	sI.def_indexF(buffer.get_indices(),"offset",2,0,6);
-	sI.def_indexF(buffer.get_indices(),"rotation_sin",1,2,6);
-	sI.def_indexF(buffer.get_indices(),"rotation_cos",1,3,6);
-	sI.def_indexF(buffer.get_indices(),"i_tex",2,4,6);
+	sI.def_indexF(buffer.iebo,"offset",2,0,6);
+	sI.def_indexF(buffer.iebo,"rotation_sin",1,2,6);
+	sI.def_indexF(buffer.iebo,"rotation_cos",1,3,6);
+	sI.def_indexF(buffer.iebo,"i_tex",2,4,6);
 	// ??maybe find a different way of representing instanced rotation??
 	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
@@ -94,19 +94,8 @@ void RendererI::prepare(float dtime)
 {
 	sI.enable();
 	buffer.bind();
-
-	// update instance animations
 	for (int i=0;i<ial.size();i++) ial[i].update(dtime);
 }
-
-/*
-	reset_anim_ticks(uint16_t,uint16_t) -> void
-	cluster: index identification of added cluster
-	idx: memory list index for animation update ticks
-	purpose: reset given tick within given cluster
-*/
-void RendererI::reset_anim_tick(uint16_t cluster,uint16_t idx)
-{ ial[cluster].reset_tick(idx); }
 
 /*
 	render(uint16_t,uint16_t) -> void
@@ -116,11 +105,8 @@ void RendererI::reset_anim_tick(uint16_t cluster,uint16_t idx)
 */
 void RendererI::render(uint16_t i,uint16_t amt)
 {
-	// setup
 	il.at(i).setup();
 	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
-
-	// render instanced
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
 
@@ -132,12 +118,9 @@ void RendererI::render(uint16_t i,uint16_t amt)
 */
 void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 {
-	// load texture & index buffer data
 	ial[i].setup(&sI);
 	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
 	sI.upload_vec2("i_tex",i_tex);
-
-	// draw
 	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
@@ -149,11 +132,8 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 */
 void RendererI::render_anim(uint16_t i,uint16_t amt)
 {
-	// load texture & index buffer data
 	ial[i].setup(&sI);
 	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
-
-	// draw
 	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
@@ -243,17 +223,3 @@ void RendererI::add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv)
 	ial[i].i[j*INSTANCE_REPEAT] += dv.x;
 	ial[i].i[j*INSTANCE_REPEAT+1] += dv.y;
 }
-
-/*
-	get_next_instindex() -> uint16_t
-	returns: memory index of instance, that will be uploaded next
-*/
-uint16_t RendererI::get_next_instindex()
-{ return il.size(); }
-
-/*
-	get_next_animindex() -> uint16_t
-	returns: memory index of animated instance, that will be uploaded next
-*/
-uint16_t RendererI::get_next_animindex()
-{ return ial.size(); }

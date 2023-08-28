@@ -22,16 +22,16 @@ public:
 			glm::vec3 vel=glm::vec3(0.0f),bool play_loop=false);
 
 	// action
-	void play();	// plays the sound
-	void remove();	// removes the audio entity
+	inline void play() { alSourcePlay(m_audio); }
+	void remove();
 
 	// setter
 	void set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play_loop);
-	void set_gain(float gain);
-	void set_pitch(float pitch);
-	void set_position(glm::vec3 pos);
-	void set_velocity(glm::vec3 vel);
-	void set_loop(bool play_loop);
+	inline void set_gain(float gain) { alSourcef(m_audio,AL_GAIN,gain); }
+	inline void set_pitch(float pitch) { alSourcef(m_audio,AL_PITCH,pitch); }
+	inline void set_position(glm::vec3 pos) { alSource3f(m_audio,AL_POSITION,pos.x,pos.y,pos.z); }
+	inline void set_velocity(glm::vec3 vel) { alSource3f(m_audio,AL_VELOCITY,vel.x,vel.y,vel.z); }
+	inline void set_loop(bool play_loop) { alSourcei(m_audio,AL_LOOPING,play_loop); }
 
 private:
 

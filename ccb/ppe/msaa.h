@@ -14,22 +14,24 @@ public:
 	// construction
 	MSAA();
 	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los);
-	// TODO: make resolution dynamic
+	~MSAA() {  }
 
 	// action
-	void bind();
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,rfbo); }
 	void blit();
 
 	// draw
 	void render();
 	void render(GLuint ovltex);
 
-	// export
-	GLuint get_buffer();
-
 private:
 
 	void prepare();
+
+public:
+
+	// buffers
+	uint32_t colour_buffer,screen_buffer;
 
 private:
 
@@ -39,7 +41,7 @@ private:
 
 	// essentials
 	Buffer buffer = Buffer();
-	GLuint rfbo,wfbo,rbo,colbuffer,scrbuffer;
+	uint32_t rfbo,wfbo,rbo;
 };
 
 #endif

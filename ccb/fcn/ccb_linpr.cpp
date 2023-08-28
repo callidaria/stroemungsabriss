@@ -17,7 +17,7 @@ CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,const char* path)
 uint16_t CCBLInterpreter::load_level()
 {
 	// setup
-	int out = m_r2d->get_max_sprite();
+	int out = m_r2d->sl.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
 	std::vector<std::string> lines;
 	std::string tline;

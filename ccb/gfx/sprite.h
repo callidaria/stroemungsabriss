@@ -18,19 +18,19 @@ public:
 
 	// construction
 	Sprite(glm::vec2 p,float w,float h,const char* t);
-	~Sprite();
+	~Sprite() {  }
 
 	// setup
-	void texture();
-	void setup();
+	inline void texture() { Toolbox::load_texture(tex,texpath); }
+	inline void setup() { glBindTexture(GL_TEXTURE_2D,tex); }
 
 	// transformation
 	void transform(glm::vec2 tp,glm::vec2 ts,float tr);
 	void transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a);
-	void translate(glm::vec2 tp);
+	inline void translate(glm::vec2 tp) { model = glm::translate(model,glm::vec3(tp.x,tp.y,0)); }
 	void scale(float wscale,float hscale);
 	void scale_arbit(float wscale,float hscale);
-	void rotate(float rot);
+	inline void rotate(float rot) { model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }
 
 public:
 

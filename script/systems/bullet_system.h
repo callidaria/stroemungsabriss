@@ -28,17 +28,20 @@ public:
 
 	// update
 	void inc_tick(uint8_t cluster);
-	void reset_tick(uint8_t cluster,uint32_t index);
+	inline void reset_tick(uint8_t cluster,uint32_t index) { ts[cluster][index] = 0; }
 
 	// set
-	void set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos);
-	void set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir);
+	inline void set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos)
+		{ m_rI->set_aOffset(cluster,index,nPos); }
+	inline void set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
+		{ dirs[cluster][index] = nDir; }
 
 	// get
-	glm::vec2 get_bltPos(uint8_t cluster,uint32_t index);
-	glm::vec2 get_bltDir(uint8_t cluster,uint32_t index);
-	uint16_t get_bCount(uint8_t cluster);
-	int32_t get_ts(uint8_t cluster,uint32_t index);
+	inline glm::vec2 get_bltPos(uint8_t cluster,uint32_t index)
+		{ return m_rI->get_aOffset(cluster,index); }
+	inline glm::vec2 get_bltDir(uint8_t cluster,uint32_t index) { return dirs[cluster][index]; }
+	inline uint16_t get_bCount(uint8_t cluster) { return bCount[cluster]; }
+	inline int32_t get_ts(uint8_t cluster,uint32_t index) { return ts[cluster][index]; }
 	uint8_t get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br);
 
 	// draw

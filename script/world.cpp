@@ -126,7 +126,7 @@ void World::render(uint32_t &running,bool &reboot)
 	glDisable(GL_BLEND);
 
 	// update
-	m_ccbf->r3d->update_animations(m_ccbf->frame->get_time_delta());
+	m_ccbf->r3d->update_animations(m_ccbf->frame->time_delta);
 	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// scene
@@ -143,7 +143,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->frame->clear();
 
 	// render particles
-	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->get_time_delta());
+	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->time_delta);
 	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
 
 	// 2D

@@ -193,9 +193,9 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// compile instance shader
 	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
-	is3d.def_indexF(ibuffer.get_indices(),"offset",3,0,R3D_INDEX_REPEAT);
-	is3d.def_indexF(ibuffer.get_indices(),"rotation_sin",3,3,R3D_INDEX_REPEAT);
-	is3d.def_indexF(ibuffer.get_indices(),"rotation_cos",3,6,R3D_INDEX_REPEAT);
+	is3d.def_indexF(ibuffer.iebo,"offset",3,0,R3D_INDEX_REPEAT);
+	is3d.def_indexF(ibuffer.iebo,"rotation_sin",3,3,R3D_INDEX_REPEAT);
+	is3d.def_indexF(ibuffer.iebo,"rotation_cos",3,6,R3D_INDEX_REPEAT);
 
 	// load textures & camera
 	for (auto im : iml) {
@@ -361,10 +361,7 @@ void Renderer3D::prepare_pmesh(Camera3D cam3d)
 */
 void Renderer3D::prepare_shadow()
 {
-	// set front face culling to avoid peter panning
 	glCullFace(GL_FRONT);
-
-	// prepare shadow framebuffer
 	glViewport(0,0,shadow_res,shadow_res);
 	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 	Frame::clear();

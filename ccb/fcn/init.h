@@ -17,12 +17,12 @@ public:
 
 	Init(const char* path);
 
-	uint32_t rINT(uint32_t id);  // get integer value by key id or constant
+	uint32_t rINT(uint32_t id);
 
 private:
 
-	uint32_t find_iKey(const char* key);  // convert key name to key id
-	std::vector<uint32_t> read_cartesian(std::string val);  // converting value patterns
+	uint32_t find_iKey(const char* key);
+	std::vector<uint32_t> read_cartesian(std::string val);
 
 public:
 

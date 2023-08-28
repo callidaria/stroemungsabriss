@@ -18,10 +18,10 @@ public:
 
 	// construction
 	Anim(glm::vec2 p,float w,float h,const char* t,uint8_t row,uint8_t col,uint8_t itn,uint8_t f);
-	~Anim();
+	~Anim() {  }
 
 	// setup
-	void texture();
+	inline void texture() { Toolbox::load_texture(tex,tp); }
 	uint8_t setup();
 
 	// transformation

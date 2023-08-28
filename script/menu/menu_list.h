@@ -59,7 +59,7 @@ public:
 	void load_saves(SaveStates states);
 
 	// modification
-	void reset();
+	inline void reset() { les = rles; }
 	void save();
 	glm::vec2 globe_rotation(uint16_t li);
 	void write_tempID(uint8_t index);

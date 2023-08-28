@@ -57,11 +57,11 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
 	bfr.bind_index();
-	sdr.def_indexF(bfr.get_indices(),"tofs",3,0,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF(bfr.get_indices(),"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.iebo,"tofs",3,0,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.iebo,"i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.iebo,"rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.iebo,"rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF(bfr.iebo,"deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
 }
 // TODO: compare performance between card object and cutouts with render queue
 

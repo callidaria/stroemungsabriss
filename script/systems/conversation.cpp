@@ -179,7 +179,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 
 		// reduce input cooldown or reset
 		bool filling = sltr_count<sltr_target;
-		iwait -= m_frame->get_time_delta()*!!iwait;
+		iwait -= m_frame->time_delta*!!iwait;
 		iwait = iwait*!filling+CNV_CONFIRMATION_COOLDOWN*filling;
 	}
 }
@@ -270,7 +270,7 @@ void Conversation::render(GLuint scene_tex)
 		m_r2D->render_anim(btn_rindex);
 
 		// increase disengage wait frames when input is blocked
-		dwait += m_frame->get_time_delta()*input_blocked;
+		dwait += m_frame->time_delta*input_blocked;
 	}
 }
 // FIXME: branch in main loop

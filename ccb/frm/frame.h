@@ -48,7 +48,7 @@ public:
 
 	// modification
 	static void clear(float cr=0,float cg=0,float cb=0);
-	void update();
+	inline void update() { SDL_GL_SwapWindow(m_frame); }
 
 	// fps
 	void print_fps();
@@ -56,7 +56,6 @@ public:
 
 	// time
 	void calc_time_delta();
-	void set_tmod(double tmod);
 	void change_tmod(double goal,double rate);
 
 	// controlling
@@ -66,12 +65,11 @@ public:
 	void vanish();
 
 	// text input
-	void input_start();
-	void input_stop();
+	inline void input_start() { SDL_StartTextInput(); }
+	inline void input_stop() { SDL_StopTextInput(); }
 
 	// getter
-	double get_time_delta();
-	SDL_GLContext create_new_context();
+	inline SDL_GLContext create_new_context() { return SDL_GL_CreateContext(m_frame); }
 
 private:
 
@@ -89,6 +87,7 @@ public:
 	// properties
 	int w_res,h_res;
 	bool event_active = false;
+	double time_mod = 1.0,time_delta = 0;
 
 	// input
 	std::vector<SDL_GameController*> m_gc;
@@ -116,7 +115,6 @@ private:
 	uint64_t past_ticks = 0,current_ticks = 0;
 #endif
 	uint32_t fps = 0,temp_fps = 0,lO = 0;
-	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 };
 
