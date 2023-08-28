@@ -23,21 +23,3 @@ Instance::Instance(glm::vec2 p,float w,float h,const char* t)
 	// generate textures
 	glGenTextures(1,&tex);
 }
-
-/*
-	texture() -> void
-	purpose: load texture of instancable object from given path
-*/
-void Instance::texture()
-{
-	Toolbox::load_texture(tex,tp);
-}
-
-/*
-	setup() -> void
-	purpose: bind texture before rendering
-*/
-void Instance::setup()
-{
-	glBindTexture(GL_TEXTURE_2D,tex);
-}

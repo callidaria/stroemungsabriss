@@ -279,14 +279,6 @@ void CardSystem::create_player(glm::vec2 pos,float rot,uint16_t capital)
 }
 
 /*
-	create_pile(vec2) -> void
-	pos: position of newly defined pile
-	purpose: define a new place where cards can pile up
-*/
-void CardSystem::create_pile(glm::vec2 pos)
-{ dpiles.push_back({ {},pos }); }
-
-/*
 	create_currency_stack(vec2,float) -> void
 	pos: position of new currency stack
 	rot: rotation of direction the stacks are lined up towards
@@ -386,7 +378,7 @@ void CardSystem::update()
 	// remove if deal is completed & update deal stall time
 	else if (!auto_deals[crr_deal].amount&&!stall)
 		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
-	crr_dtime += m_ccbf->frame->get_time_delta();
+	crr_dtime += m_ccbf->frame->time_delta;
 
 	// animate
 	i = 0;

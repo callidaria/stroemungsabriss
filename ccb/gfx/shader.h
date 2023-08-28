@@ -20,7 +20,7 @@ class Shader
 public:
 
 	// construction
-	Shader();  // DEPRECATED
+	Shader() {  }
 	~Shader() {  }
 
 	// compilation
@@ -30,30 +30,36 @@ public:
 
 	// definition
 	void def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
-	void def_indexF(unsigned int ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
+	void def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 
 	// setup
-	void enable();
-	static void disable();
+	inline void enable() { glUseProgram(m_shaderProgram); }
+	static inline void disable() { glUseProgram(0); }
 
 	// upload
-	void upload_int(const char* loc,int i);
-	void upload_float(const char* loc,float f);
-	void upload_vec2(const char* loc,glm::vec2 v);
-	void upload_vec3(const char* loc,glm::vec3 v);
-	void upload_vec4(const char* loc,glm::vec4 v);
-	void upload_matrix(const char* loc,glm::mat4 m);
+	inline void upload_int(const char* loc,int i)
+		{ glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
+	inline void upload_float(const char* loc,float f)
+		{ glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
+	inline void upload_vec2(const char* loc,glm::vec2 v)
+		{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y); }
+	inline void upload_vec3(const char* loc,glm::vec3 v)
+		{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z); }
+	inline void upload_vec4(const char* loc,glm::vec4 v)
+		{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
+	inline void upload_matrix(const char* loc,glm::mat4 m)
+	{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
 	void upload_camera(Camera2D cam2d);
 	void upload_camera(Camera3D cam3d);
 
 private:
 
 	// helpers
-	unsigned int compile_shader(const char* path,GLenum stype);
+	uint32_t compile_shader(const char* path,GLenum stype);
 
 private:
 
-	unsigned int m_shaderProgram;
+	uint32_t m_shaderProgram;
 };
 
 #endif

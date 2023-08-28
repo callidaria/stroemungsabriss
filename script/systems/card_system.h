@@ -98,7 +98,7 @@ public:
 
 	// creation
 	void create_player(glm::vec2 pos,float rot,uint16_t capital);
-	void create_pile(glm::vec2 pos);
+	inline void create_pile(glm::vec2 pos) { dpiles.push_back({ {},pos }); }
 	void create_currency_stack(glm::vec2 pos,float rot);
 
 	// update

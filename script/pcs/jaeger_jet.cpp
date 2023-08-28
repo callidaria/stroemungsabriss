@@ -39,7 +39,7 @@ void JaegerJet::update()
 
 	// change position of player based on calculated movement direction
 	position += glm::vec3(m_ccbf->iMap->move_dir.x*mvspeed,m_ccbf->iMap->move_dir.y*mvspeed,0)
-			* glm::vec3(m_ccbf->frame->get_time_delta());
+			* glm::vec3(m_ccbf->frame->time_delta);
 
 	// force player in-bounds
 	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
@@ -55,7 +55,7 @@ void JaegerJet::update()
 
 	// run requested shot type or idle
 	uint8_t sidx = ((m_ccbf->iMap->input_val[IMP_REQWIDE]&&!m_ccbf->iMap->input_val[IMP_REQFOCUS])+2
-			* m_ccbf->iMap->input_val[IMP_REQFOCUS])*(m_ccbf->frame->get_time_delta()>.1f);
+			* m_ccbf->iMap->input_val[IMP_REQFOCUS])*(m_ccbf->frame->time_delta>.1f);
 	rng_flib.at(sidx)(m_ccbf->bSys,treg);
 
 	// TODO: bombs
@@ -65,8 +65,8 @@ void JaegerJet::update()
 	// calculate player jet tilt
 	bool abs_right = m_ccbf->iMap->input_val[IMP_REQRIGHT];
 	bool abs_left = m_ccbf->iMap->input_val[IMP_REQLEFT];
-	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*m_ccbf->frame->get_time_delta();
-	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*m_ccbf->frame->get_time_delta();
+	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*m_ccbf->frame->time_delta;
+	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*m_ccbf->frame->time_delta;
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
 
 	// render and move player character

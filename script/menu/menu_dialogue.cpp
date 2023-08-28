@@ -42,7 +42,7 @@ MenuDialogue::MenuDialogue(glm::vec2 pos,float width,float height,Renderer2D* r2
 	int32_t blank = (width-srnd*ewidth)/srnd+ewidth;
 	for (int i=0;i<srnd;i++)
 		m_r2d->add(pos+glm::vec2((blank-ewidth)/2+i*blank,15),ewidth,eheight,paths[i]);
-} MenuDialogue::~MenuDialogue() {  }
+}
 
 /*
 	render(uint8_t&) -> void
@@ -95,9 +95,3 @@ uint8_t MenuDialogue::stall_input(bool &conf,bool &back)
 	return out;
 }
 // FIXME: is it possible to achieve a 3 in decision, and what does it result in?
-
-/*
-	open_dialogue() -> void
-	purpose: opens the dialogue window
-*/
-void MenuDialogue::open_dialogue() { open = true; }

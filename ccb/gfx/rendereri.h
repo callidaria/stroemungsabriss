@@ -33,7 +33,7 @@ public:
 
 	// preparation
 	void prepare(float dtime);
-	void reset_anim_tick(uint16_t cluster,uint16_t idx);
+	inline void reset_anim_tick(uint16_t cluster,uint16_t idx) { ial[cluster].reset_tick(idx); }
 
 	// draw
 	void render(uint16_t i,uint16_t amt);
@@ -41,8 +41,10 @@ public:
 	void render_anim(uint16_t i,uint16_t amt);
 
 	// uploads
-	glm::vec2 get_offset(uint16_t i,uint16_t j);
-	glm::vec2 get_aOffset(uint16_t i,uint16_t j);
+	inline glm::vec2 get_offset(uint16_t i,uint16_t j)
+		{ return glm::vec2(il[i].o[j*INSTANCE_REPEAT],il[i].o[j*INSTANCE_REPEAT+1]); }
+	inline glm::vec2 get_aOffset(uint16_t i,uint16_t j)
+		{ return glm::vec2(ial[i].i[j*INSTANCE_REPEAT],ial[i].i[j*INSTANCE_REPEAT+1]); }
 	void set_offset(uint16_t i,uint16_t j,glm::vec2 o);
 	void set_aOffset(uint16_t i,uint16_t j,glm::vec2 o);
 	void set_rotation(uint16_t i,uint16_t j,float r);
@@ -50,19 +52,17 @@ public:
 	void add_offset(uint16_t i,uint16_t j,glm::vec2 dv);
 	void add_aOffset(uint16_t i,uint16_t j,glm::vec2 dv);
 
-	// getters
-	uint16_t get_next_instindex();
-	uint16_t get_next_animindex();
+public:
+
+	// instance object lists
+	std::vector<Instance> il;
+	std::vector<InstancedAnim> ial;
 
 private:
 
 	// cascabel
 	Buffer buffer = Buffer();
 	Shader sI = Shader();
-
-	// instance object lists
-	std::vector<Instance> il;
-	std::vector<InstancedAnim> ial;
 };
 
 #endif

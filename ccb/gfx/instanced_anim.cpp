@@ -27,13 +27,6 @@ InstancedAnim::InstancedAnim(glm::vec2 p,float w,float h,const char* t,uint8_t i
 }
 
 /*
-	texture() -> void
-	purpose: textures the instanced animation canvas once the shader has been compiled and bound
-*/
-void InstancedAnim::texture()
-{ Toolbox::load_texture(tex,tpath); }
-
-/*
 	setup(Shader*) -> void
 	shader: shader program to upload saved uniform variables to
 	purpose: takes all actions necessary to render instances from source object
@@ -67,14 +60,4 @@ void InstancedAnim::update(float dtime)
 		ticks[idx] += dtime;
 		ticks[idx] *= (ticks[idx]<tick_cap);
 	}
-}
-
-/*
-	reset_tick(uint16_t) -> void
-	idx: memory index in offset list to reset ticks of
-	purpose: reset tick counter at given memory index
-*/
-void InstancedAnim::reset_tick(uint16_t idx)
-{
-	ticks[idx] = 0;
 }

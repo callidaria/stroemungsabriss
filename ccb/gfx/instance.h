@@ -24,8 +24,8 @@ public:
 	~Instance() {  }
 
 	// setup
-	void texture();
-	void setup();
+	inline void texture() { Toolbox::load_texture(tex,tp); }
+	inline void setup() { glBindTexture(GL_TEXTURE_2D,tex); }
 
 public:
 

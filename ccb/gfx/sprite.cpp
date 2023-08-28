@@ -13,21 +13,7 @@ Sprite::Sprite(glm::vec2 p,float w,float h,const char* t)
 {
 	v = Toolbox::create_sprite_canvas(p,w,h);
 	glGenTextures(1,&tex);
-} Sprite::~Sprite() {  }
-
-/*
-	texture() -> void
-	purpose: upload file data to texture to use in shader program as sampler2D
-*/
-void Sprite::texture()
-{ Toolbox::load_texture(tex,texpath); }
-
-/*
-	setup() -> void
-	purpose: ready the components of sprite to be ready for drawing
-*/
-void Sprite::setup()
-{ glBindTexture(GL_TEXTURE_2D,tex); }
+}
 
 /*
 	transform(vec2,vec2,float) -> void
@@ -62,14 +48,6 @@ void Sprite::transform(glm::vec2 tp,glm::vec2 ts,float tr,glm::vec2 a)
 }
 
 /*
-	translate(vec2) -> void
-	tp: vector holding direction and length to move the sprite towards
-	purpose: transform sprite position from the existing position by the given amount and direction
-*/
-void Sprite::translate(glm::vec2 tp)
-{ model = glm::translate(model,glm::vec3(tp.x,tp.y,0)); }
-
-/*
 	scale(float,float) -> void
 	wscale: x-axis scale describing the sprites width
 	hscale: y-axis scale describing the sprites height
@@ -94,12 +72,3 @@ void Sprite::scale_arbit(float wscale,float hscale)
 	scale(wscale,hscale);
 	translate(pos);
 }
-
-/*
-	rotate(float) -> void
-	rot: the sprites delta rotation
-	purpose: rotates the sprite: this is not a setter!
-		the previous rotation will be changed, not reset before rotation
-*/
-void Sprite::rotate(float rot)
-{ model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }

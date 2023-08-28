@@ -8,28 +8,7 @@ Buffer::Buffer()
 {
 	glGenVertexArrays(1,&vao);
 	glGenBuffers(1,&vbo);
-} Buffer::~Buffer() {  }
-
-/*
-	add_buffer() -> void
-	purpose: creating optional buffer if used by any feature
-*/
-void Buffer::add_buffer()
-{ glGenBuffers(1,&iebo); }
-
-/*
-	bind() -> void
-	purpose: binds the vertex array before uploading and rendering
-*/
-void Buffer::bind()
-{ glBindVertexArray(vao); }
-
-/*
-	bind_index() -> void
-	purpose: binds the index or the element buffer before usage
-*/
-void Buffer::bind_index()
-{ glBindBuffer(GL_ARRAY_BUFFER,iebo); }
+}
 
 /*
 	unbind() -> void (static)
@@ -108,13 +87,4 @@ void Buffer::upload_indices(float* is,size_t issize)
 {
 	glBindBuffer(GL_ARRAY_BUFFER,iebo);
 	glBufferData(GL_ARRAY_BUFFER,issize,is,GL_DYNAMIC_DRAW);
-}
-
-/*
-	get_indices() -> GLuint
-	returns: index or element array buffer
-*/
-GLuint Buffer::get_indices()
-{
-	return iebo;
 }

@@ -26,7 +26,7 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 */
 void DPilot::update(glm::vec2 pPos)
 {
-	if (m_ccbf->frame->get_time_delta()>.1f) {
+	if (m_ccbf->frame->time_delta>.1f) {
 
 		// movement
 		ePos = glm::vec2(!mv_stage)

@@ -78,14 +78,6 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float 
 }
 
 /*
-	delta_bltPos(uint8_t,uint32_t,glm::vec2) -> void
-	dPos: the direction and speed the bullet should move according to
-	purpose: move specific bullet according to outsidely precalculated direction and speed
-*/
-void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
-{ m_rI->add_aOffset(cluster,index,dPos*(float)m_frame->get_time_delta()); }
-
-/*
 	delta_fDir(uint8_t) -> void
 	purpose: update all bullets in a specified cluster according to their current movement directions
 */
@@ -93,22 +85,8 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<countCaps.at(cluster);i++)
-		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*(float)m_frame->get_time_delta());
+		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*(float)m_frame->time_delta);
 }
-
-/*
-	inc_tick(uint8_t) -> void
-	purpose: tick all bullets in a cluster
-*/
-void BulletSystem::inc_tick(uint8_t cluster)
-{ for(int i=0;i<bCount[cluster];i++) ts[cluster][i]++; }
-
-/*
-	reset_tick(uint8_t,uint32_t) -> void
-	purpose: resetting tick counter of a specific bullet in a specific cluster
-*/
-void BulletSystem::reset_tick(uint8_t cluster,uint32_t index)
-{ ts[cluster][index] = 0; }
 
 /*
 	get_pHit(uint8_t,glm::vec2,float,float) -> uint8_t
@@ -148,53 +126,9 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 */
 void BulletSystem::render()
 {
-	m_rI->prepare(m_frame->get_time_delta());
+	m_rI->prepare(m_frame->time_delta);
 	for (int i=0;i<bCount.size();i++) m_rI->render_anim(i,countCaps[i]);
 }
-
-/*
-	set_bltPos(uint8_t,uint32_t,glm::vec2) -> void
-	nPos: new position of bullet to be set by this method
-	purpose: change position of bullet to position pointed towards by given vector
-*/
-void BulletSystem::set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos)
-{ m_rI->set_aOffset(cluster,index,nPos); }
-
-/*
-	set_bltDir(uint8_t,uint32_t,glm::vec2) -> void
-	nDir: new direction the projectile should move towards or in relation to
-	purpose: change direction of bullet to vector direction
-*/
-void BulletSystem::set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
-{ dirs[cluster][index] = nDir; }
-
-/*
-	get_bltPos(uint8_t,uint32_t) -> vec2
-	returns: position of a specific bullet in a specific cluster
-*/
-glm::vec2 BulletSystem::get_bltPos(uint8_t cluster,uint32_t index)
-{ return m_rI->get_aOffset(cluster,index); }
-
-/*
-	get_bltDir(uint8_t,uint32_t) -> vec2
-	returns: movement direction and speed of a specific bullet in a specific cluster
-*/
-glm::vec2 BulletSystem::get_bltDir(uint8_t cluster,uint32_t index)
-{ return dirs[cluster][index]; }
-
-/*
-	get_bCount(uint8_t) -> uint16_t
-	returns: the amount of active bullets in a cluster
-*/
-uint16_t BulletSystem::get_bCount(uint8_t cluster)
-{ return bCount[cluster]; }
-
-/*
-	get_ts(uint8_t,uint32_t) -> int32_t
-	returns: get tick counter of a specific bullet in a specific cluster
-*/
-int32_t BulletSystem::get_ts(uint8_t cluster,uint32_t index)
-{ return ts[cluster][index]; }
 // TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)
 // TODO: add a reset method
 // TODO: add projectile rendering rotation

@@ -53,9 +53,12 @@ public:
 
 	// upload
 	void upload(Shader* shader);
-	void upload_diffusion_map();
-	void upload_specular_map();
-	void upload_specular_brdf();
+	inline void upload_diffusion_map()
+		{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.diff_component); }
+	inline void upload_specular_map()
+		{ glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map.spec_component); }
+	inline void upload_specular_brdf()
+		{ glBindTexture(GL_TEXTURE_2D,irradiance_map.brdf_component); }
 
 public:
 

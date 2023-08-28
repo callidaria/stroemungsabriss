@@ -42,10 +42,6 @@ public:
 	// settings
 	void reset_shader();
 
-	// getters
-	uint16_t get_max_sprite();
-	uint16_t get_max_anim();
-
 private:
 
 	// loaders

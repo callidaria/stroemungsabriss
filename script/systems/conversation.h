@@ -74,7 +74,7 @@ private:
 	// tools
 	ConversationNode rc_compile_node_data(std::vector<std::string> ls,uint32_t &si);
 	std::string grind_raw_node_by_key(std::string raw,std::string key);
-	uint32_t convert_rawid(std::string rawid);
+	inline uint32_t convert_rawid(std::string rawid) { return stoi(std::string(rawid,3)); }
 	ConversationNode rc_depthsearch(ConversationNode root,uint32_t id);
 	uint16_t count_instances(std::string text);
 	void manipulate_background_edges();

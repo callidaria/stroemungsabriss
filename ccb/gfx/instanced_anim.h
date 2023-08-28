@@ -23,10 +23,10 @@ public:
 	~InstancedAnim() {  }
 
 	// setup
-	void texture();
+	inline void texture() { Toolbox::load_texture(tex,tpath); }
 	void setup(Shader* shader);
 	void update(float dtime);
-	void reset_tick(uint16_t idx);
+	inline void reset_tick(uint16_t idx) { ticks[idx] = 0; }
 
 public:
 

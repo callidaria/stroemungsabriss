@@ -58,13 +58,6 @@ Audio::Audio(const char* path,float gain,float pitch,glm::vec3 pos,glm::vec3 vel
 }
 
 /*
-	play() -> void
-	purpose: play sound or music
-*/
-void Audio::play()
-{ alSourcePlay(m_audio); }
-
-/*
 	remove() -> void
 	purpose: remove audio should it not be needed anymore
 */
@@ -91,43 +84,3 @@ void Audio::set_all(float gain,float pitch,glm::vec3 pos,glm::vec3 vel,bool play
 	set_velocity(vel);
 	set_loop(play_loop);
 }
-
-/*
-	set_gain(float) -> void
-	gain: new gain of audio
-	purpose: update gain of emission
-*/
-void Audio::set_gain(float gain)
-{ alSourcef(m_audio,AL_GAIN,gain); }
-
-/*
-	set_pitch(float) -> void
-	pitch: new pitch of audio
-	purpose: update pitch of emission
-*/
-void Audio::set_pitch(float pitch)
-{ alSourcef(m_audio,AL_PITCH,pitch); }
-
-/*
-	set_position(vec3) -> void
-	pos: new position of audio emitter
-	purpose: update position of emitter
-*/
-void Audio::set_position(glm::vec3 pos)
-{ alSource3f(m_audio,AL_POSITION,pos.x,pos.y,pos.z); }
-
-/*
-	set_velocity(vec3) -> void
-	vel: new velocity & direction the audio emitter travels in
-	purpose: update velocity & direction of emitter movement
-*/
-void Audio::set_velocity(glm::vec3 vel)
-{ alSource3f(m_audio,AL_VELOCITY,vel.x,vel.y,vel.z); }
-
-/*
-	set_loop(bool) -> void
-	play_loop: new information if audio should loop
-	purpose: update if audio is supposed to loop
-*/
-void Audio::set_loop(bool play_loop)
-{ alSourcei(m_audio,AL_LOOPING,play_loop); }

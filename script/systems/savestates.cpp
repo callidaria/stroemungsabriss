@@ -122,7 +122,10 @@ unsigned char SaveStates::to_byte_list_overflow(bool* xs,bool* ys,uint8_t xstart
 	\param out: output array to copy bitwise values from byte to
 */
 void SaveStates::byte_to_booleans(unsigned char byte,bool out[8])
-{ for (uint8_t i=0;i<8;i++) out[7-i] = byte&(0x01<<i); }
+{
+	for (uint8_t i=0;i<8;i++)
+		out[7-i] = byte&(0x01<<i);
+}
 
 /*
 	boolean_list_byte_overflow(bool[8],bool[8],uint8_t,bool*,size_t) -> void (private,static)

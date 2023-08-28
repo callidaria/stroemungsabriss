@@ -201,13 +201,6 @@ void MenuList::load_saves(SaveStates states)
 }
 
 /*
-	reset() -> void
-	purpose: reset all changes of any list attribute entities
-*/
-void MenuList::reset()
-{ les = rles; }
-
-/*
 	save(void)
 	purpose: identify destination & write all changes to config file
 */
@@ -317,22 +310,6 @@ void MenuList::render(float dtrans,float piscroll,uint16_t index,float &edge_mod
 	les[index].dtxt.set_scroll(glm::translate(glm::mat4(1.0f),glm::vec3(0,-75*(is_diff),0)));
 	les[index].dtxt.render(dtrans*1024,glm::vec4(1,1,1,1));
 }
-
-/*
-	globe_rotation(uint16_t) -> vec2
-	li: list index of selected entity to read globe preview rotation from
-	returns: globe rotation vector toward list entity preview destination
-*/
-glm::vec2 MenuList::globe_rotation(uint16_t li)
-{ return glm::vec2(les[li].gRot[0],les[li].gRot[3]); }
-
-/*
-	write_tempID(uint8_t)
-	index: gets the selected menu list element
-	purpose: writes the temporary selection id to the selected menu list entity id when called
-*/
-void MenuList::write_tempID(uint8_t index)
-{ les[index].sID = t_slID; }
 
 /*
 	breakgrind(std::string,uint32_t&)

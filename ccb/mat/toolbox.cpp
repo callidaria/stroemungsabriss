@@ -99,15 +99,6 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 }
 
 /*
-	calculate_vecangle(vec2,vec2) -> float (static)
-	a: first vector, 0 degrees towards the origin
-	b: second vector, returned degrees from first vector
-	returns: angle between vectors in radians
-*/
-float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
-{ return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
-
-/*
 	start_debug_logging(DebugLogData&,const char*) -> void
 	purpose: start time difference debug recording
 	\param dld: variable holding runtime debug data, such as recording keys & their string id

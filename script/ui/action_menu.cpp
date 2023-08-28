@@ -65,7 +65,7 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 	// game time modification
 	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
-	m_frame->set_tmod(ptrans);
+	m_frame->time_mod = ptrans;
 
 	// process user selection
 	int8_t smod = ((down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))

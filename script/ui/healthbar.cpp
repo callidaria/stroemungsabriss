@@ -37,15 +37,15 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// hpbar indexing
 	hpbuffer.bind_index();
-	shp.def_indexF(hpbuffer.get_indices(),"ofs",1,0,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"wdt",1,1,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"dmg",1,2,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[0]",1,3,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[1]",1,4,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[2]",1,5,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"edg_trans[3]",1,6,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"flt",2,7,PT_REPEAT);
-	shp.def_indexF(hpbuffer.get_indices(),"target",1,9,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"ofs",1,0,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"wdt",1,1,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"dmg",1,2,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"edg_trans[0]",1,3,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"edg_trans[1]",1,4,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"edg_trans[2]",1,5,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"edg_trans[3]",1,6,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"flt",2,7,PT_REPEAT);
+	shp.def_indexF(hpbuffer.iebo,"target",1,9,PT_REPEAT);
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -69,15 +69,15 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF(brdbuffer.get_indices(),"ofs",1,0,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"wdt",1,1,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"dmg",1,2,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[0]",1,3,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[1]",1,4,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[2]",1,5,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"edg_trans[3]",1,6,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"flt",2,7,BRD_REPEAT);
-	sborder.def_indexF(brdbuffer.get_indices(),"target",1,9,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"ofs",1,0,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"wdt",1,1,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"dmg",1,2,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"edg_trans[0]",1,3,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"edg_trans[1]",1,4,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"edg_trans[2]",1,5,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"edg_trans[3]",1,6,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"flt",2,7,BRD_REPEAT);
+	sborder.def_indexF(brdbuffer.iebo,"target",1,9,BRD_REPEAT);
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -96,9 +96,9 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// splice indexing
 	splcbuffer.bind_index();
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[0]",2,0,SL_REPEAT);
-	ssplice.def_indexF(splcbuffer.get_indices(),"ofs[1]",2,2,SL_REPEAT);
-	ssplice.def_indexF(splcbuffer.get_indices(),"spread",1,4,SL_REPEAT);
+	ssplice.def_indexF(splcbuffer.iebo,"ofs[0]",2,0,SL_REPEAT);
+	ssplice.def_indexF(splcbuffer.iebo,"ofs[1]",2,2,SL_REPEAT);
+	ssplice.def_indexF(splcbuffer.iebo,"spread",1,4,SL_REPEAT);
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -140,7 +140,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	hpswap.phcnt = Text(hbfont);
 	hpswap.phcnt.add("0/X",glm::vec2(0));
 	hpswap.phcnt.load();
-} Healthbar::~Healthbar() {  }
+}
 
 /*
 	render() -> void

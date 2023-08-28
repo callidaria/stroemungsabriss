@@ -217,21 +217,3 @@ void Renderer2D::reset_shader()
 	s2d.upload_int("col",1);
 	s2d.upload_vec2("i_tex",glm::vec2(0,0));
 }
-
-/*
-	get_max_sprite() -> uint16_t
-	returns: length of sprite list
-*/
-uint16_t Renderer2D::get_max_sprite()
-{
-	return sl.size();
-}
-
-/*
-	get_max_anim() -> uint16_t
-	returns: length of animation list
-*/
-uint16_t Renderer2D::get_max_anim()
-{
-	return al.size();
-}
