@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.6 DEV
 
 ### features:
+- render to multiple subscreens within the main window
 - choose between recursive build in case of header changes and single source build
 - annotated assembly compiler analysis of isolated functions through ccb_console
 
@@ -214,5 +215,5 @@ Worktime: 120h
 - Elapsed Worktime After v0.0.5
 	+ ?? console improvements: 9h 41min
 	+ 223: 1h 54min
-	+ 199: 4h 23min
+	+ 199: 4h 38min
 - Total Code Lines: 15.555

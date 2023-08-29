@@ -25,15 +25,11 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	// add globe scene
-	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
-			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
-	/*m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
-			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));*/
-	/*ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
+	ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
 			"./res/terra/norm.png","./res/terra/materials.png","./res/none.png",glm::vec3(0),
-			1,glm::vec3(0));*/
+			1,glm::vec3(0));
 	glighting = Lighting();
-	glighting.add_sunlight({ glm::vec3(50,100,0),glm::vec3(1),1.0f });
+	glighting.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.0f });
 	progress += sseq;
 	// TODO: add location indicator
 
@@ -495,15 +491,17 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// calculate globe rotation towards preview location
 	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
-	m_ccbf->r3d->ml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
+	m_ccbf->r3d->pml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
 
 	// render globe preview to framebuffer
 	m_ccbf->r3d->start_target(rtarget_id);
 	m_ccbf->frame->clear();
-	/*m_ccbf->r3d->prepare_pmesh(cam3d);
-	m_ccbf->r3d->render_pmsh(ridx_terra);*/
-	m_ccbf->r3d->prepare(cam3d);
-	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	m_ccbf->r3d->prepare_pmesh(cam3d);
+	m_ccbf->r3d->render_pmsh(ridx_terra);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 	FrameBuffer::close();
 	globe_fb.bind();
 	m_ccbf->frame->clear();

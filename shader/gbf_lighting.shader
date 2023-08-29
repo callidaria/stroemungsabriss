@@ -157,8 +157,6 @@ void main()
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);
-	outColour = vec4(normals,1.0);
-	// outColour = vec4(0,1,0,1);
 }
 
 // specular processing
