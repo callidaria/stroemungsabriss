@@ -148,31 +148,6 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 // FIXME: i know of the commutative properties of matrix multiplication, maybe generally precalc cam?
 
 /*
-	TODO
-*/
-uint8_t Renderer3D::add_target(Frame* frame)
-{
-	// gbuffer setup
-	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
-
-	// deferred shading buffer setup
-	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
-			"./shader/gbf_lighting.shader",false);
-	cbuffer.s.upload_int("gbuffer_colour",0);
-	cbuffer.s.upload_int("gbuffer_position",1);
-	cbuffer.s.upload_int("gbuffer_normals",2);
-	cbuffer.s.upload_int("gbuffer_materials",3);
-	cbuffer.s.upload_int("irradiance_map",4);
-	cbuffer.s.upload_int("specular_map",5);
-	cbuffer.s.upload_int("specular_brdf",6);
-	cbuffer.s.upload_int("shadow_map",7);
-
-	// store & return
-	rtargets.push_back({ gbuffer,cbuffer });
-	return rtargets.size()-1;
-}
-
-/*
 	load(Camera3D) -> void
 	cam3d: camera to relate mesh objects to
 	purpose: combine texture and vertex loading, define gl settings & compile shader program
@@ -272,7 +247,56 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 }
 // TODO: check validity of this loading approach. processing vertex lists ?twice
 
-void Renderer3D::prepare_target(uint8_t id,Camera3D cam3D)
+/*
+	TODO
+*/
+uint8_t Renderer3D::add_target(Frame* frame)
+{
+	// gbuffer setup
+	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
+
+	// deferred shading buffer setup
+	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
+			"./shader/gbf_lighting.shader",false);
+	cbuffer.s.upload_int("gbuffer_colour",0);
+	cbuffer.s.upload_int("gbuffer_position",1);
+	cbuffer.s.upload_int("gbuffer_normals",2);
+	cbuffer.s.upload_int("gbuffer_materials",3);
+	cbuffer.s.upload_int("irradiance_map",4);
+	cbuffer.s.upload_int("specular_map",5);
+	cbuffer.s.upload_int("specular_brdf",6);
+	cbuffer.s.upload_int("shadow_map",7);
+
+	// store & return
+	rtargets.push_back({ gbuffer,cbuffer });
+	return rtargets.size()-1;
+}
+// TODO: specify different shaders for different deferred shaded targets
+
+/*
+	TODO
+*/
+void Renderer3D::start_target(uint8_t id)
+{
+	rtargets[id].gbuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+}
+
+/*
+	TODO
+*/
+void Renderer3D::stop_target()
+{
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	FrameBuffer::close();
+}
+
+/*
+	TODO
+*/
+void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].cbuffer.prepare();
@@ -291,6 +315,10 @@ void Renderer3D::prepare_target(uint8_t id,Camera3D cam3D)
 	rtargets[id].cbuffer.s.upload_vec3("view_pos",cam3D.pos);
 	rtargets[id].cbuffer.s.upload_vec3("light_position",slight_pos);
 	rtargets[id].cbuffer.s.upload_matrix("shadow_matrix",scam_projection);
+	lighting->upload(&rtargets[id].cbuffer.s);
+
+	// process deferred shading
+	glDrawArrays(GL_TRIANGLES,0,6);
 }
 
 /*

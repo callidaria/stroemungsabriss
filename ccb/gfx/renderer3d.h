@@ -10,6 +10,7 @@
 
 #include "../mat/toolbox.h"
 #include "../mat/camera3d.h"
+#include "../mat/lighting.h"
 
 #include "../frm/frame.h"
 #include "../frm/framebuffer.h"
@@ -42,14 +43,15 @@ public:
 			glm::vec3 p,float s,glm::vec3 r,bool cast_shadow=false);
 	void create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float mheight,
 			float fdiv,uint16_t res);
-	uint8_t add_target(Frame* frame);
 
 	// loaders
 	void load(Camera3D cam3d,float &progress,float pseq);
 
 	// targets
-	inline void start_target(uint8_t id) { rtargets[id].gbuffer.bind(); }
-	void prepare_target(uint8_t id,Camera3D cam3D);
+	uint8_t add_target(Frame* frame);
+	void start_target(uint8_t id);
+	static void stop_target();
+	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
 
 	// preparations
 	void prepare();

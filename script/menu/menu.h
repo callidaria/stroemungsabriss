@@ -53,6 +53,10 @@ constexpr glm::vec3 ENTITLE_MENU = glm::vec3(590,642,0);
 constexpr glm::vec3 title_dir = TITLE_MENU-TITLE_START;
 constexpr glm::vec3 entitle_dir = ENTITLE_MENU-ENTITLE_START;
 
+// clobe camera translation
+constexpr float pitch = 15;
+constexpr float yaw = -110;
+
 // colour scheme constants
 #if NCOLOUR == 0
 constexpr glm::vec3 s_rgb = glm::vec3(.245f,.606f,.564f);
@@ -135,13 +139,9 @@ private:
 	MenuDialogue md_diff,md_conf;
 	uint8_t dsi_diff = 0,dsi_conf = 0;
 
-	// game
+	// index
 	uint8_t difflv = 0;
-
-	// globe preview
 	uint16_t ridx_terra;
-	float pitch = 15;
-	float yaw = -110;
 };
 
 #endif

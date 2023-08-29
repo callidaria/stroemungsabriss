@@ -165,15 +165,15 @@ void World::render(uint32_t &running,bool &reboot)
 	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);*/
-	m_ccbf->r3d->prepare_target(rtarget_id,m_setRigs->cam3D[active_cam3D]);
+	m_ccbf->r3d->render_target(rtarget_id,m_setRigs->cam3D[active_cam3D],&m_setRigs->lighting);
 
 	// deferred light shading
 	//m_setRigs->lighting.upload(&deferred_fb.s);
-	m_setRigs->lighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
+	//m_setRigs->lighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
 	/*deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
 	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
 	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);*/
-	glDrawArrays(GL_TRIANGLES,0,6);
+	//glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render ui
 	game_fb.close();

@@ -33,6 +33,11 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	progress += sseq;
 	// TODO: add location indicator
 
+	// rotate camera towards globe
+	cam3d.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
+			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
+	cam3d.update();
+
 	// setup dare message on idle screen
 	tft = Text(fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
@@ -482,32 +487,22 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
 
-	// rotate camera towards globe
-	cam3d.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
-			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
-	cam3d.update();
-	// FIXME: dont update static camera constantly. either animate or do this outside loop
-
 	// calculate globe rotation towards preview location
 	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
 	m_ccbf->r3d->pml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
 
-	// render globe preview to framebuffer
+	// render globe preview to target
 	m_ccbf->r3d->start_target(rtarget_id);
 	m_ccbf->frame->clear();
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
 	m_ccbf->r3d->prepare_pmesh(cam3d);
 	m_ccbf->r3d->render_pmsh(ridx_terra);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	FrameBuffer::close();
+	Renderer3D::stop_target();
+
+	// deferred shading for globe target
 	globe_fb.bind();
 	m_ccbf->frame->clear();
-	m_ccbf->r3d->prepare_target(rtarget_id,cam3d);
-	glighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
-	glDrawArrays(GL_TRIANGLES,0,6);
+	m_ccbf->r3d->render_target(rtarget_id,cam3d,&glighting);
 	FrameBuffer::close();
 
 	// render combined splash overlay
