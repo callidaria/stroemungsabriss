@@ -12,7 +12,6 @@ class UI
 {
 public:
 	virtual ~UI() {  }
-	//virtual void render_gbuffer() {  }
 	virtual void render(FrameBuffer*,uint32_t&,bool&) {  }
 };
 

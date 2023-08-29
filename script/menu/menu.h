@@ -74,7 +74,6 @@ public:
 	~Menu();
 
 	// draw
-	//virtual void render_gbuffer();
 	virtual void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
 
 private:
@@ -93,6 +92,8 @@ private:
 	MSAA msaa;
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
+	Lighting glighting;
+	uint8_t rtarget_id;
 
 	// loading
 	SaveStates savestates;

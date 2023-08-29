@@ -24,15 +24,18 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	// interpret level loader file
 	msindex = ccbm->add_lv("lvload/menu.ccb");
 
-	// add globe and pointer object
-	/*ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
+	// add globe scene
+	ridx_terra = m_ccbf->r3d->add("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/spec.png",
 			"./res/terra/norm.png","./res/none.png",glm::vec3(0,0,0),1.0f,glm::vec3(0,0,0));
-	m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
+	/*m_ccbf->r3d->add("./res/selection.obj","./res/fast_bullet.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,1),.015f,glm::vec3(120,0,0));*/
-	ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
+	/*ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
 			"./res/terra/norm.png","./res/terra/materials.png","./res/none.png",glm::vec3(0),
-			1,glm::vec3(0));
+			1,glm::vec3(0));*/
+	glighting = Lighting();
+	glighting.add_sunlight({ glm::vec3(50,100,0),glm::vec3(1),1.0f });
 	progress += sseq;
+	// TODO: add location indicator
 
 	// setup dare message on idle screen
 	tft = Text(fnt);
@@ -128,8 +131,9 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	// framebuffer creation
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
 			"shader/fbf_menu.shader",false);
-	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,m_ccbf->frame->w_res/4,
-			m_ccbf->frame->h_res/4,"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
+	rtarget_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 
 	// create msaa effect for selection splash
 	msaa = MSAA("shader/fbv_splash.shader","shader/fbf_splash.shader",m_ccbf->frame->w_res,
@@ -482,31 +486,31 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	vtft.render(100,glm::vec4(0,0,.5f,1));
 	fb.close();
 
-	// prepare globe preview draw
-	globe_fb.bind();
-	m_ccbf->frame->clear(.1f,.1f,.1f);
-
 	// rotate camera towards globe
-	/*cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
-	cam3d.front.y = sin(glm::radians(pitch));
-	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
-	cam3d.front = glm::normalize(cam3d.front);
-	cam3d.update();*/
+	cam3d.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
+			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
+	cam3d.update();
 	// FIXME: dont update static camera constantly. either animate or do this outside loop
 
 	// calculate globe rotation towards preview location
-	/*glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
+	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians(gRot.x),glm::vec3(1,0,0));
-	m_ccbf->r3d->pml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));*/
-	/*model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
-	m_ccbf->r3d->s3d.upload_matrix("model",model);*/
+	m_ccbf->r3d->ml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
 
 	// render globe preview to framebuffer
+	m_ccbf->r3d->start_target(rtarget_id);
+	m_ccbf->frame->clear();
 	/*m_ccbf->r3d->prepare_pmesh(cam3d);
 	m_ccbf->r3d->render_pmsh(ridx_terra);*/
-	/*m_ccbf->r3d->s3d.upload_matrix("model",glm::mat4(1.0f));
-	m_ccbf->r3d->render_mesh(ridx_terra+1,ridx_terra+2);*/
-	globe_fb.close();
+	m_ccbf->r3d->prepare(cam3d);
+	m_ccbf->r3d->render_mesh(ridx_terra,ridx_terra+1);
+	FrameBuffer::close();
+	globe_fb.bind();
+	m_ccbf->frame->clear();
+	m_ccbf->r3d->prepare_target(rtarget_id,cam3d);
+	glighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
+	glDrawArrays(GL_TRIANGLES,0,6);
+	FrameBuffer::close();
 
 	// render combined splash overlay
 	m_ccbf->frame->clear(0,0,0);
@@ -532,7 +536,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// animate and move dialogue selector to dialogue choice
 	bool dopen = dsi_diff||dsi_conf;
 	glm::vec3 disp = glm::vec3(235,135,0)*glm::vec3(dsi_diff>0)
-			+glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
+			+ glm::vec3(257,285,0)*glm::vec3(dsi_conf>0);
 	disp.x += (dsi_diff-(dsi_diff>0))*220+(dsi_conf-(dsi_conf>0))*125;
 	glm::mat4 disptrans = glm::translate(glm::mat4(1.0f),disp+glm::vec3(-5,15,0));
 	glm::mat4 disprot = glm::rotate(glm::mat4(1.0f),glm::radians(dlgrot_cnt),glm::vec3(0,0,1));

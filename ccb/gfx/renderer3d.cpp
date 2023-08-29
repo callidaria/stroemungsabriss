@@ -136,6 +136,7 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	// FIXME: framebuffer handling for shadow depth map
 
 	// calculate shadow projection
 	slight_pos = pos;
@@ -166,7 +167,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	cbuffer.s.upload_int("specular_brdf",6);
 	cbuffer.s.upload_int("shadow_map",7);
 
-	// store
+	// store & return
 	rtargets.push_back({ gbuffer,cbuffer });
 	return rtargets.size()-1;
 }
@@ -429,14 +430,6 @@ void Renderer3D::prepare_shadow()
 	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 	Frame::clear();
 }
-
-/*
-	register_geometry(ShadowGeometry*) -> void
-	geometry: geometry which is capable of casting shadows
-	purpose: add shadow casting geometry to shadow projection routine
-*/
-void Renderer3D::register_geometry(ShadowGeometry* geometry)
-{ shadow_geometry.push_back(geometry); }
 
 /*
 	close_shadow(uint16_t,uint16_t) -> void

@@ -18,18 +18,7 @@
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 		const char* fsp,bool float_buffer)
 	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_width,fr_height,vsp,fsp,float_buffer); }
-
-/*
-	constructor(uint32_t,uint32_t,uint32_t,uint32_t,const char*,const char*,bool)
-	fr_width: width of frame
-	fr_height: height of frame
-	purpose: creates framebuffer object to change original visuals through shaders
-*/
-FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
-	: frw(fr_width),frh(fr_height)
-{ init(fr_width,fr_height,fr_wres,fr_hres,vsp,fsp,float_buffer); }
+{ init(fr_width,fr_height,vsp,fsp,float_buffer); }
 // TODO: make the resolution of framebuffers dynamic (cambased)
 
 /*
@@ -38,8 +27,8 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,u
 	fr_height: height of frame
 	purpose: complete initialization of framebuffer objects
 */
-void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer)
+void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,const char* vsp,const char* fsp,
+		bool float_buffer)
 {
 	// setup
 	glGenFramebuffers(1,&fbo);

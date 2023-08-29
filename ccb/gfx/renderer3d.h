@@ -61,7 +61,7 @@ public:
 	void prepare_pmesh();
 	void prepare_pmesh(Camera3D cam3d);
 	void prepare_shadow();
-	void register_geometry(ShadowGeometry* geometry);
+	inline void register_geometry(ShadowGeometry* geometry) { shadow_geometry.push_back(geometry); }
 
 	// close process
 	void close_shadow(uint16_t w_res,uint16_t h_res);

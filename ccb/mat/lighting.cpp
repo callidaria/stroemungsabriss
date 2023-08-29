@@ -1,18 +1,6 @@
 #include "lighting.h"
 
 /*
-	add_<lighttype>(LightSun|LightPoint|LightSpot) -> void
-	args[0]: new light to add to scene
-	purpose: add a new light to the scene
-*/
-void Lighting::add_sunlight(LightSun sunlight)
-{ sunlights.push_back(sunlight); }
-void Lighting::add_pointlight(LightPoint pointlight)
-{ pointlights.push_back(pointlight); }
-void Lighting::add_spotlight(LightSpot spotlight)
-{ spotlights.push_back(spotlight); }
-
-/*
 	load_irradiance_maps(Cubemap) -> void
 	purpose: get all irradiance map components from the given skybox
 	\param imap: cubemap holding the desired irradiance map components

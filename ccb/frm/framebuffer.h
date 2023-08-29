@@ -17,8 +17,6 @@ public:
 	FrameBuffer() {  }
 	FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 			const char* fsp,bool float_buffer);
-	FrameBuffer(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-			const char* vsp,const char* fsp,bool float_buffer);
 
 	// read
 	void bind();
@@ -43,8 +41,8 @@ public:
 private:
 
 	// standard initialization
-	void init(uint32_t fr_width,uint32_t fr_height,uint32_t fr_wres,uint32_t fr_hres,
-		const char* vsp,const char* fsp,bool float_buffer);
+	void init(uint32_t fr_width,uint32_t fr_height,const char* vsp,const char* fsp,
+			bool float_buffer);
 
 public:
 
