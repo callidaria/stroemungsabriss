@@ -52,6 +52,7 @@ void Lighting::upload(Shader* shader)
 		shader->upload_float((arr_location+"cut_out").c_str(),spotlights[i].cut_out);
 	} shader->upload_int("spotlight_count",spotlight_count);
 }
+// TODO: distinguish between dynamic and static lights, to reduce unnecessary uploads
 
 /*
 	upload_<irradiance_component>() -> void

@@ -69,11 +69,8 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### features:
 - render to multiple subscreens within the main window
-- choose between recursive build in case of header changes and single source build
-- annotated assembly compiler analysis of isolated functions through ccb_console
 
 ### fixes:
-- FIXED: inconsitent animation timing results on different machines
 - FIXED: globe location preview, faulty render & rotation changes
 
 <br>
@@ -107,6 +104,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: double main loop
 - FIXED: memory leaks
 - FIXED: shadow transition acne on heavily sloped surfaces
+- FIXED: inconsitent animation timing results on different machines
 - FIXED: memory issues with 3D renderer
 
 <br>
@@ -187,33 +185,6 @@ Worktime: 120h
 
 ## Trivia
 - Total Worktime: 287h 51min
-- Elapsed Worktime After v0.0.3:
-	+ 43: 9h 17min
-	+ 114: 2min
-	+ 91: 16h 37min
-	+ 106: 64h 32min
-	+ 82: 20h 50min
-	+ 137: 15h 13min
-	+ 108: 48h 4min
-- Elapsed Worktime After v0.0.4:
-	+ 97: 7h 2min
-	+ 129: 8h 4min
-	+ 132: 7min
-	+ 64: 2h 20min
-	+ 47: 20h 57min
-	+ 164: 9h 27min
-	+ 147: 50h 53min
-	+ 169: 2h 1min
-	+ 124: 15h 14min
-	+ 125: 1h
-	+ 153: 74h 20min
-	+ 112: 57min
-	+ 159: 5h 32min
-	+ 62: 1h 52min
-	+ 90: 9h 50min
-	+ 176: 61h 49min
-- Elapsed Worktime After v0.0.5
-	+ ?? console improvements: 9h 41min
-	+ 223: 1h 54min
-	+ 199: 5h 3min
+- Elapsed Worktime After v0.0.5:
+	+ 199: 5h 57min
 - Total Code Lines: 15.555

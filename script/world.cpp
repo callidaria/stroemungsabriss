@@ -87,39 +87,17 @@ void World::remove_boss(uint8_t boss_id)
 	load_geometry() -> void
 	purpose: upload 2D and 3D geometry of added objects based on the active cameras
 */
-void World::load_geometry(float &progress,float ldsplit)
+void World::load(float &progress,float ldsplit)
 {
-	float org_progress = progress,pr_progress = ldsplit/3.0f;
+	// geometry
+	float org_progress = progress,pr_progress = ldsplit/4.0f;
 	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D],progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+
+	// lighting
+	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&m_setRigs->lighting);
 	progress = org_progress+ldsplit;
-}
-
-/*
-	upload_lighting() -> void
-	purpose: upload lighting to deferred shader
-*/
-void World::upload_lighting()
-{
-	// upload simulated lights
-	deferred_fb.s.enable();
-	m_setRigs->lighting.upload(&deferred_fb.s);
-}
-
-/*
-	upload_lightmap() -> void
-	purpose: upload diffusion convolution and specular integral maps to shader
-*/
-void World::upload_lightmap()
-{
-	// upload irradiance maps
-	glActiveTexture(GL_TEXTURE4);
-	m_setRigs->lighting.upload_diffusion_map();
-	glActiveTexture(GL_TEXTURE5);
-	m_setRigs->lighting.upload_specular_map();
-	glActiveTexture(GL_TEXTURE6);
-	m_setRigs->lighting.upload_specular_brdf();
 }
 
 /*
@@ -144,7 +122,6 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto scene : scene_master) scene->render();
 	for (auto boss : boss_master) boss->update(glm::vec2(100));
 	for (auto player : player_master) player->update();
-	//for (auto ui : ui_master) ui->render_gbuffer();
 
 	// end geometry pass deferred scene
 	FrameBuffer::close();
@@ -153,29 +130,11 @@ void World::render(uint32_t &running,bool &reboot)
 	// render bullets
 	m_ccbf->bSys->render();
 
-	// upload g-buffer components to deferred light shader
+	// run deferred shading
 	game_fb.bind();
-	/*deferred_fb.prepare();
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_colour());
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_position());
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_normals());
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,gbuffer.get_materials());
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D,m_ccbf->r3d->shadow_map);*/
 	m_ccbf->r3d->render_target(rtarget_id,m_setRigs->cam3D[active_cam3D],&m_setRigs->lighting);
-
-	// deferred light shading
-	//m_setRigs->lighting.upload(&deferred_fb.s);
-	//m_setRigs->lighting.upload(&m_ccbf->r3d->rtargets[rtarget_id].cbuffer.s);
-	/*deferred_fb.s.upload_vec3("view_pos",m_setRigs->cam3D[active_cam3D].pos);
-	deferred_fb.s.upload_vec3("light_position",m_ccbf->r3d->slight_pos);
-	deferred_fb.s.upload_matrix("shadow_matrix",m_ccbf->r3d->scam_projection);*/
-	//glDrawArrays(GL_TRIANGLES,0,6);
+	game_fb.close();
 
 	// render ui
-	game_fb.close();
 	ui_master[active_daui]->render(&game_fb,running,reboot);
 }

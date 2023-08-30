@@ -276,6 +276,24 @@ uint8_t Renderer3D::add_target(Frame* frame)
 /*
 	TODO
 */
+void Renderer3D::upload_target_static_lighting(uint8_t id,Lighting* lighting)
+{
+	// simulated lights
+	rtargets[id].cbuffer.s.enable();
+	lighting->upload(&rtargets[id].cbuffer.s);
+
+	// light mapping
+	glActiveTexture(GL_TEXTURE4);
+	lighting->upload_diffusion_map();
+	glActiveTexture(GL_TEXTURE5);
+	lighting->upload_specular_map();
+	glActiveTexture(GL_TEXTURE6);
+	lighting->upload_specular_brdf();
+}
+
+/*
+	TODO
+*/
 void Renderer3D::start_target(uint8_t id)
 {
 	rtargets[id].gbuffer.bind();

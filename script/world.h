@@ -42,9 +42,7 @@ public:
 	void remove_boss(uint8_t boss_id);
 
 	// load
-	void load_geometry(float &progress,float ldsplit);
-	void upload_lighting();
-	void upload_lightmap();
+	void load(float &progress,float ldsplit);
 
 	// draw
 	void render(uint32_t &running,bool &reboot);
@@ -59,8 +57,7 @@ private:
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
 	StageSetup* m_setRigs;
-	FrameBuffer deferred_fb,game_fb;
-	GBuffer gbuffer;
+	FrameBuffer game_fb;
 	uint8_t rtarget_id;
 
 	// scene components

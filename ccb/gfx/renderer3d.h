@@ -49,6 +49,7 @@ public:
 
 	// targets
 	uint8_t add_target(Frame* frame);
+	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
 	void start_target(uint8_t id);
 	static void stop_target();
 	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
