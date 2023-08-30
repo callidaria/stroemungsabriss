@@ -146,23 +146,6 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 } Menu::~Menu() {  }
 
 /*
-	TODO
-*/
-/*void Menu::render_gbuffer()
-{
-	// rotate camera towards globe
-	cam3d.front.x = cos(glm::radians(pitch))*cos(glm::radians(yaw));
-	cam3d.front.y = sin(glm::radians(pitch));
-	cam3d.front.z = cos(glm::radians(pitch))*sin(glm::radians(yaw));
-	cam3d.front = glm::normalize(cam3d.front);
-	cam3d.update();
-
-	// render globe
-	m_ccbf->r3d->prepare_pmesh(cam3d);
-	m_ccbf->r3d->render_pmsh(ridx_terra);
-}*/
-
-/*
 	render(uint32_t&)
 	running: is application still running, and if so which lvindex?
 	reboot: will be rebooting with new settings after game closed?
@@ -494,7 +477,6 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 	// render globe preview to target
 	m_ccbf->r3d->start_target(rtarget_id);
-	m_ccbf->frame->clear();
 	m_ccbf->r3d->prepare_pmesh(cam3d);
 	m_ccbf->r3d->render_pmsh(ridx_terra);
 	Renderer3D::stop_target();

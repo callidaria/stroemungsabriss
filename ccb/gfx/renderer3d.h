@@ -20,9 +20,9 @@
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
 constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 16;
 
-struct Target3D {
+struct DeferredTarget {
 	GBuffer gbuffer;
-	FrameBuffer cbuffer;
+	FrameBuffer dbuffer;
 };
 
 class Renderer3D
@@ -103,7 +103,7 @@ public:
 	// cascabel
 	Buffer buffer,ibuffer,abuffer,pbuffer;
 	Shader s3d,is3d,as3d,pbms,shs;
-	std::vector<Target3D> rtargets;
+	std::vector<DeferredTarget> rtargets;
 
 	// object information upload lists
 	std::vector<Mesh> ml,iml;

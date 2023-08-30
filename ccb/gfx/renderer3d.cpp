@@ -248,7 +248,10 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 // TODO: check validity of this loading approach. processing vertex lists ?twice
 
 /*
-	TODO
+	add_target(Frame*) -> uint8_t !O(1)
+	purpose: add deferred shading target to render 3D scenes to
+	\param frame: current window to get maximum resolution from
+	\returns target id
 */
 uint8_t Renderer3D::add_target(Frame* frame)
 {
@@ -272,15 +275,19 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	return rtargets.size()-1;
 }
 // TODO: specify different shaders for different deferred shaded targets
+// TODO: specify different resolutions independent from full frame resolution
 
 /*
-	TODO
+	upload_target_static_lighting(uint8_t,Lighting*) -> void !O(1)
+	purpose: upload lightmaps and static simulated lightsources
+	\param id: id of target to upload static lighting to
+	\param lighting: pointer to lighting containing scenes lightmaps and static lights
 */
 void Renderer3D::upload_target_static_lighting(uint8_t id,Lighting* lighting)
 {
 	// simulated lights
-	rtargets[id].cbuffer.s.enable();
-	lighting->upload(&rtargets[id].cbuffer.s);
+	rtargets[id].dbuffer.s.enable();
+	lighting->upload(&rtargets[id].dbuffer.s);
 
 	// light mapping
 	glActiveTexture(GL_TEXTURE4);
@@ -292,17 +299,21 @@ void Renderer3D::upload_target_static_lighting(uint8_t id,Lighting* lighting)
 }
 
 /*
-	TODO
+	start_target(uint8_t) -> void !O(1)
+	purpose: start rendering to target, to store results in targets gbuffer
+	\param id: id of target to render to
 */
 void Renderer3D::start_target(uint8_t id)
 {
 	rtargets[id].gbuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+	Frame::clear();
 }
 
 /*
-	TODO
+	stop_target() -> void (static) !O(1)
+	purpose: stop rendering to current target
 */
 void Renderer3D::stop_target()
 {
@@ -312,12 +323,16 @@ void Renderer3D::stop_target()
 }
 
 /*
-	TODO
+	render_target(uint8_t,Camera3D,Lighting*) -> void !O(1)
+	purpose: render deferred shading of requested target based on camera and dynamic lighting
+	\param id: index of target to render
+	\param cam3D: camera to draw scene in perspective to
+	\param lighting: pointer to lighting containing the simulated dynamic lights
 */
 void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 {
 	// upload buffers elements
-	rtargets[id].cbuffer.prepare();
+	rtargets[id].dbuffer.prepare();
 	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_colour());
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_position());
@@ -330,10 +345,10 @@ void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 	// TODO: create single shadow maps for each target?
 
 	// uniform uploads
-	rtargets[id].cbuffer.s.upload_vec3("view_pos",cam3D.pos);
-	rtargets[id].cbuffer.s.upload_vec3("light_position",slight_pos);
-	rtargets[id].cbuffer.s.upload_matrix("shadow_matrix",scam_projection);
-	lighting->upload(&rtargets[id].cbuffer.s);
+	rtargets[id].dbuffer.s.upload_vec3("view_pos",cam3D.pos);
+	rtargets[id].dbuffer.s.upload_vec3("light_position",slight_pos);
+	rtargets[id].dbuffer.s.upload_matrix("shadow_matrix",scam_projection);
+	lighting->upload(&rtargets[id].dbuffer.s);
 
 	// process deferred shading
 	glDrawArrays(GL_TRIANGLES,0,6);

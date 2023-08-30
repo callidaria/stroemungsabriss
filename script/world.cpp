@@ -9,9 +9,6 @@
 World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	: m_ccbf(eref),m_setRigs(set_rigs)
 {
-	// g-buffer setup
-	//gbuffer = GBuffer(eref->frame->w_res,eref->frame->h_res);
-
 	// memfail avoidance shadow setup
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
 
@@ -19,16 +16,6 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 	rtarget_id = eref->r3d->add_target(eref->frame);
-	/*deferred_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/gbf_lighting.shader",false);
-	deferred_fb.s.upload_int("gbuffer_colour",0);
-	deferred_fb.s.upload_int("gbuffer_position",1);
-	deferred_fb.s.upload_int("gbuffer_normals",2);
-	deferred_fb.s.upload_int("gbuffer_materials",3);
-	deferred_fb.s.upload_int("irradiance_map",4);
-	deferred_fb.s.upload_int("specular_map",5);
-	deferred_fb.s.upload_int("specular_brdf",6);
-	deferred_fb.s.upload_int("shadow_map",7);*/
 }
 
 /*
@@ -84,8 +71,10 @@ void World::remove_boss(uint8_t boss_id)
 }
 
 /*
-	load_geometry() -> void
-	purpose: upload 2D and 3D geometry of added objects based on the active cameras
+	load(float&,float) -> void !O(1)
+	purpose: load geometry of added objects & upload static lighting & maps
+	\param progress: load progress to be changed while loading
+	\param ldsplit: partition of load progress influenced by load progression
 */
 void World::load(float &progress,float ldsplit)
 {
