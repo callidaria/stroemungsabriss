@@ -145,6 +145,7 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	// FIXME: framebuffer handling for shadow depth map
 
 	// calculate shadow projection
 	slight_pos = pos;
@@ -266,6 +267,113 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 // TODO: check validity of this loading approach. processing vertex lists ?twice
 
 /*
+	add_target(Frame*) -> uint8_t !O(1)
+	purpose: add deferred shading target to render 3D scenes to
+	\param frame: current window to get maximum resolution from
+	\returns target id
+*/
+uint8_t Renderer3D::add_target(Frame* frame)
+{
+	// gbuffer setup
+	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
+
+	// deferred shading buffer setup
+	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
+			"./shader/gbf_lighting.shader",false);
+	cbuffer.s.upload_int("gbuffer_colour",0);
+	cbuffer.s.upload_int("gbuffer_position",1);
+	cbuffer.s.upload_int("gbuffer_normals",2);
+	cbuffer.s.upload_int("gbuffer_materials",3);
+	cbuffer.s.upload_int("irradiance_map",4);
+	cbuffer.s.upload_int("specular_map",5);
+	cbuffer.s.upload_int("specular_brdf",6);
+	cbuffer.s.upload_int("shadow_map",7);
+
+	// store & return
+	rtargets.push_back({ gbuffer,cbuffer });
+	return rtargets.size()-1;
+}
+// TODO: specify different shaders for different deferred shaded targets
+// TODO: specify different resolutions independent from full frame resolution
+
+/*
+	upload_target_static_lighting(uint8_t,Lighting*) -> void !O(1)
+	purpose: upload lightmaps and static simulated lightsources
+	\param id: id of target to upload static lighting to
+	\param lighting: pointer to lighting containing scenes lightmaps and static lights
+*/
+void Renderer3D::upload_target_static_lighting(uint8_t id,Lighting* lighting)
+{
+	// simulated lights
+	rtargets[id].dbuffer.s.enable();
+	lighting->upload(&rtargets[id].dbuffer.s);
+
+	// light mapping
+	glActiveTexture(GL_TEXTURE4);
+	lighting->upload_diffusion_map();
+	glActiveTexture(GL_TEXTURE5);
+	lighting->upload_specular_map();
+	glActiveTexture(GL_TEXTURE6);
+	lighting->upload_specular_brdf();
+}
+
+/*
+	start_target(uint8_t) -> void !O(1)
+	purpose: start rendering to target, to store results in targets gbuffer
+	\param id: id of target to render to
+*/
+void Renderer3D::start_target(uint8_t id)
+{
+	rtargets[id].gbuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	Frame::clear();
+}
+
+/*
+	stop_target() -> void (static) !O(1)
+	purpose: stop rendering to current target
+*/
+void Renderer3D::stop_target()
+{
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	FrameBuffer::close();
+}
+
+/*
+	render_target(uint8_t,Camera3D,Lighting*) -> void !O(1)
+	purpose: render deferred shading of requested target based on camera and dynamic lighting
+	\param id: index of target to render
+	\param cam3D: camera to draw scene in perspective to
+	\param lighting: pointer to lighting containing the simulated dynamic lights
+*/
+void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
+{
+	// upload buffers elements
+	rtargets[id].dbuffer.prepare();
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_colour());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_position());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_normals());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_materials());
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D,shadow_map);
+	// TODO: create single shadow maps for each target?
+
+	// uniform uploads
+	rtargets[id].dbuffer.s.upload_vec3("view_pos",cam3D.pos);
+	rtargets[id].dbuffer.s.upload_vec3("light_position",slight_pos);
+	rtargets[id].dbuffer.s.upload_matrix("shadow_matrix",scam_projection);
+	lighting->upload(&rtargets[id].dbuffer.s);
+
+	// process deferred shading
+	glDrawArrays(GL_TRIANGLES,0,6);
+}
+
+/*
 	prepare() -> void
 	purpose: prepare shader and buffer for rendering
 */
@@ -366,14 +474,6 @@ void Renderer3D::prepare_shadow()
 	glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 	Frame::clear();
 }
-
-/*
-	register_geometry(ShadowGeometry*) -> void
-	geometry: geometry which is capable of casting shadows
-	purpose: add shadow casting geometry to shadow projection routine
-*/
-void Renderer3D::register_geometry(ShadowGeometry* geometry)
-{ shadow_geometry.push_back(geometry); }
 
 /*
 	close_shadow(uint16_t,uint16_t) -> void
@@ -589,6 +689,7 @@ void Renderer3D::render_anim(uint16_t i)
 	render_pmsh(uint16_t) -> void
 	purpose: render desired physical based mesh
 	\param i: memory index of physically shaded object that is to be drawn
+	FIXME: naming for physical prepare & render is unintuitive
 */
 void Renderer3D::render_pmsh(uint16_t i)
 {

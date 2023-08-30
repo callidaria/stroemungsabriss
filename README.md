@@ -67,6 +67,12 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ## v0.0.6 DEV
 
+### features:
+- render to multiple subscreens within the main window
+
+### fixes:
+- FIXED: globe location preview, faulty render & rotation changes
+
 ### optimizations:
 - minimized on/off switching of depth testing
 - active texture reset call reduction by uniformly switching back after render
@@ -104,6 +110,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: shadow transition acne on heavily sloped surfaces
 - FIXED: double main loop
 - FIXED: memory leaks
+- FIXED: inconsitent animation timing results on different machines
 - FIXED: memory issues with 3D renderer
 
 Worktime: 322h 51min
@@ -188,7 +195,8 @@ Worktime: 120h
 
 ## Trivia
 - Total Worktime: 785h 17min
-- TPB for v0.0.6:
+- Elapsed Worktime After v0.0.5:
     + 209: 44min
     + 215: 2h 28min
+	+ 199: 7h 4min
 - Total Code Lines: 15.823

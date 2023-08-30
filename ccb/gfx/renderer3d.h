@@ -10,12 +10,20 @@
 
 #include "../mat/toolbox.h"
 #include "../mat/camera3d.h"
+#include "../mat/lighting.h"
 
 #include "../frm/frame.h"
+#include "../frm/framebuffer.h"
+#include "../frm/gbuffer.h"
 #include "../fcn/buffer.h"
 
 constexpr uint8_t R3D_INDEX_REPEAT = 9;
 constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 19;
+
+struct DeferredTarget {
+	GBuffer gbuffer;
+	FrameBuffer dbuffer;
+};
 
 class Renderer3D
 {
@@ -40,6 +48,13 @@ public:
 	// loaders
 	void load(Camera3D cam3d,float &progress,float pseq);
 
+	// targets
+	uint8_t add_target(Frame* frame);
+	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
+	void start_target(uint8_t id);
+	static void stop_target();
+	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
+
 	// preparations
 	void prepare();
 	void prepare(Camera3D cam3d);
@@ -50,7 +65,7 @@ public:
 	void prepare_pmesh();
 	void prepare_pmesh(Camera3D cam3d);
 	void prepare_shadow();
-	void register_geometry(ShadowGeometry* geometry);
+	inline void register_geometry(ShadowGeometry* geometry) { shadow_geometry.push_back(geometry); }
 
 	// close process
 	void close_shadow(uint16_t w_res,uint16_t h_res);
@@ -89,6 +104,7 @@ public:
 	// cascabel
 	Buffer buffer,ibuffer,abuffer,pbuffer;
 	Shader s3d,is3d,as3d,pbms,shs;
+	std::vector<DeferredTarget> rtargets;
 
 	// object information upload lists
 	std::vector<Mesh> ml,iml;

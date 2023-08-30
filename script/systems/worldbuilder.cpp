@@ -67,7 +67,7 @@ void Worldbuilder::load_menu()
 {
 	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf,progress,.75f);
 	m_world->add_ui(menu);
-	m_world->load_geometry(progress,.25f);
+	m_world->load(progress,.25f);
 }
 void Worldbuilder::load_casino()
 {
@@ -77,9 +77,7 @@ void Worldbuilder::load_casino()
 	m_world->add_scene(cspike);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 0;
-	m_world->load_geometry(progress,.21f);
-	m_world->upload_lighting();
-	m_world->upload_lightmap();
+	m_world->load(progress,.21f);
 	progress = 1.0f;
 	// TODO: dynamification of camera and ui (etc...) picker
 }
@@ -91,8 +89,7 @@ void Worldbuilder::load_cards()
 	m_world->add_scene(ctable);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 3;
-	m_world->load_geometry(progress,.21f);
-	m_world->upload_lighting();
+	m_world->load(progress,.21f);
 	progress = 1.0f;
 }
 void Worldbuilder::load_airfield()
@@ -112,7 +109,7 @@ void Worldbuilder::load_dpilot()
 	m_world->add_boss(dpilot);
 	m_world->active_daui = 1;
 	m_world->active_cam3D = 1;
-	m_world->load_geometry(progress,.2f);
+	m_world->load(progress,.2f);
 }
 
 /*

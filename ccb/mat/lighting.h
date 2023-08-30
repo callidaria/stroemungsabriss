@@ -44,9 +44,9 @@ public:
 	~Lighting() {  }
 
 	// creation
-	void add_sunlight(LightSun sunlight);
-	void add_pointlight(LightPoint pointlight);
-	void add_spotlight(LightSpot spotlight);
+	inline void add_sunlight(LightSun sunlight) { sunlights.push_back(sunlight); }
+	inline void add_pointlight(LightPoint pointlight) { pointlights.push_back(pointlight); }
+	inline void add_spotlight(LightSpot spotlight) { spotlights.push_back(spotlight); }
 
 	// extraction
 	void load_irradiance_maps(Cubemap imap);
