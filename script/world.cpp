@@ -16,11 +16,6 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
 			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
 	rtarget_id = eref->r3d->add_target(eref->frame);
-	deferred_fb.s.upload_int("transparency_buffer",8);
-	deferred_fb.s.upload_int("transparency_depth",9);
-	deferred_fb.s.upload_int("world_depth",10);
-	transparency_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
 }
 
 /*
@@ -97,9 +92,7 @@ void World::render(uint32_t &running,bool &reboot)
 	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
-	//gbuffer.bind();
 	m_ccbf->r3d->start_target(rtarget_id);
-	m_ccbf->frame->clear(.1f,.1f,.1f);
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
@@ -107,18 +100,19 @@ void World::render(uint32_t &running,bool &reboot)
 	for (auto player : player_master) player->update();
 
 	// TRANSPARENCY
-	FrameBuffer::close();
-	glEnable(GL_BLEND);
-	transparency_fb.bind();
-	m_ccbf->frame->clear();
+	m_ccbf->r3d->switch_target_transparency(rtarget_id);
 
 	// render particles
 	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->time_delta);
 	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
 
 	// run deferred shading
+	glDisable(GL_DEPTH_TEST);
 	game_fb.bind();
 	m_ccbf->r3d->render_target(rtarget_id,m_setRigs->cam3D[active_cam3D],&m_setRigs->lighting);
+
+	// render bullets
+	m_ccbf->bSys->render();
 	game_fb.close();
 
 	// render ui

@@ -22,7 +22,7 @@ constexpr uint8_t R3D_ANIMATION_MAP_REPEAT = 19;
 
 struct DeferredTarget {
 	GBuffer gbuffer;
-	FrameBuffer dbuffer;
+	FrameBuffer dbuffer,tbuffer;
 };
 
 class Renderer3D
@@ -52,7 +52,7 @@ public:
 	uint8_t add_target(Frame* frame);
 	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
 	void start_target(uint8_t id);
-	static void stop_target();
+	void switch_target_transparency(uint8_t id);
 	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
 
 	// preparations

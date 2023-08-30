@@ -476,10 +476,11 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_ccbf->r3d->pml[ridx_terra].model = glm::rotate(model,glm::radians(gRot.y),glm::vec3(0,-1,0));
 
 	// render globe preview to target
+	glEnable(GL_DEPTH_TEST),glDisable(GL_BLEND);
 	m_ccbf->r3d->start_target(rtarget_id);
 	m_ccbf->r3d->prepare_pmesh(cam3d);
 	m_ccbf->r3d->render_pmsh(ridx_terra);
-	Renderer3D::stop_target();
+	glDisable(GL_DEPTH_TEST),glEnable(GL_BLEND);
 
 	// deferred shading for globe target
 	globe_fb.bind();
