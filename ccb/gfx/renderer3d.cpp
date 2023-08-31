@@ -288,9 +288,16 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	cbuffer.s.upload_int("specular_map",5);
 	cbuffer.s.upload_int("specular_brdf",6);
 	cbuffer.s.upload_int("shadow_map",7);
+	cbuffer.s.upload_int("transparency_buffer",8);
+	cbuffer.s.upload_int("transparency_depth",9);
+	cbuffer.s.upload_int("world_depth",10);
+
+	// transparency buffer
+	FrameBuffer tbuffer = FrameBuffer(frame->w_res,frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
 
 	// store & return
-	rtargets.push_back({ gbuffer,cbuffer });
+	rtargets.push_back({ gbuffer,cbuffer,tbuffer });
 	return rtargets.size()-1;
 }
 // TODO: specify different shaders for different deferred shaded targets
@@ -315,30 +322,33 @@ void Renderer3D::upload_target_static_lighting(uint8_t id,Lighting* lighting)
 	lighting->upload_specular_map();
 	glActiveTexture(GL_TEXTURE6);
 	lighting->upload_specular_brdf();
+	glActiveTexture(GL_TEXTURE0);
 }
 
 /*
 	start_target(uint8_t) -> void !O(1)
 	purpose: start rendering to target, to store results in targets gbuffer
 	\param id: id of target to render to
+	\note GL_DEPTH_TEST should be enabled and GL_BLEND should be forbidden
+	\note to stop rendering to target call FrameBuffer::close();
 */
 void Renderer3D::start_target(uint8_t id)
 {
 	rtargets[id].gbuffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
 	Frame::clear();
 }
 
 /*
-	stop_target() -> void (static) !O(1)
-	purpose: stop rendering to current target
+	switch_target_transparency(uint8_t) -> void !O(1)
+	purpose: switch to transparency buffer of specified target
+	\param id: id of target to switch transparency mode of
+	\note GL_BLEND will be automatically enabled
 */
-void Renderer3D::stop_target()
+void Renderer3D::switch_target_transparency(uint8_t id)
 {
-	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	FrameBuffer::close();
+	rtargets[id].tbuffer.bind();
+	Frame::clear();
 }
 
 /*
@@ -352,16 +362,16 @@ void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].dbuffer.prepare();
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_colour());
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_position());
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_position);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_normals());
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_normals);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.get_materials());
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_materials);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,shadow_map);
-	// TODO: create single shadow maps for each target?
+	glActiveTexture(GL_TEXTURE0);
 
 	// uniform uploads
 	rtargets[id].dbuffer.s.upload_vec3("view_pos",cam3D.pos);
