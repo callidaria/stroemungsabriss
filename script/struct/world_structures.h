@@ -12,7 +12,7 @@ class UI
 {
 public:
 	virtual ~UI() {  }
-	virtual void render(FrameBuffer*,uint32_t&,bool&) {  }
+	virtual void render(FrameBuffer*,bool&,bool&) {  }
 };
 
 // describes all environments the player visits during playtime

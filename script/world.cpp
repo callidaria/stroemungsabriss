@@ -81,7 +81,7 @@ void World::load(float &progress,float ldsplit)
 	reboot: holds if program should reboot after it has been closed
 	purpose: render & handle world entites
 */
-void World::render(uint32_t &running,bool &reboot)
+void World::render(bool &running,bool &reboot)
 {
 	// 3D
 	glEnable(GL_DEPTH_TEST);

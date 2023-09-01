@@ -59,7 +59,7 @@ public:
 	void change_tmod(double goal,double rate);
 
 	// controlling
-	void input(uint32_t &running);
+	void input(bool &running);
 
 	// termination
 	void vanish();

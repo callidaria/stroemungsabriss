@@ -70,13 +70,15 @@ To see the full documentation of engine go [here](doc/index.md)
 ### features:
 - render to multiple subscreens within the main window
 
-### fixes:
-- FIXED: globe location preview, faulty render & rotation changes
-
 ### optimizations:
+- refactor/rewrite of main menu code (also menu listing and menu dialogue component)
+- optimization of globe preview render
 - minimized on/off switching of depth testing
 - active texture reset call reduction by uniformly switching back after render
 - using inlines for small functions with trivial implementation and straight forward usage
+
+### fixes:
+- FIXED: globe location preview, faulty render & rotation changes
 
 <br>
 
@@ -199,4 +201,5 @@ Worktime: 120h
     + 209: 44min
     + 215: 2h 28min
 	+ 199: 7h 34min
+    + 16: 2h 2min
 - Total Code Lines: 15.823

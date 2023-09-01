@@ -130,8 +130,8 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	progress += sseq;
 
 	// framebuffer creation
-	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
-			"shader/fbf_menu.shader",false);
+	/*fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",
+			"shader/fbf_menu.shader",false);*/
 	globe_fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"shader/fbv_standard.shader","shader/fbf_standard.shader",false);
 	rtarget_id = m_ccbf->r3d->add_target(m_ccbf->frame);
@@ -151,7 +151,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	reboot: will be rebooting with new settings after game closed?
 	purpose: render the main menu, calculate geometry and process interactions
 */
-void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
+void Menu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// process input triggers
 	bool hit_a = m_ccbf->iMap->input_val[IMP_REQFOCUS]&&!trg_start,
@@ -427,8 +427,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	diffsel = lselect;
 
 	// render menu
-	fb.bind();
-	m_ccbf->frame->clear(0,0,0);
+	/*fb.bind();
+	m_ccbf->frame->clear(0,0,0);*/
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->s2d.upload_float("ptrans",ptrans);
 
@@ -468,7 +468,7 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// write version notification printout
 	vtft.prepare();
 	vtft.render(100,glm::vec4(0,0,.5f,1));
-	fb.close();
+	//fb.close();
 
 	// calculate globe rotation towards preview location
 	glm::vec2 gRot = mls[i_ml].globe_rotation(lselect);
@@ -489,8 +489,8 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	FrameBuffer::close();
 
 	// render combined splash overlay
-	m_ccbf->frame->clear(0,0,0);
-	fb.render(ptrans);
+	/*m_ccbf->frame->clear(0,0,0);
+	fb.render(ptrans);*/
 
 	// anti aliasing for selection splashes
 	msaa.render(fb.tex);
@@ -539,4 +539,3 @@ void Menu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	m_ccbf->r2d->render_sprite(msindex+19,msindex+20*dopen);
 	dlgrot_val += 2-(dlgrot_val>360)*360;
 }
-// FIXME: branching in main loop

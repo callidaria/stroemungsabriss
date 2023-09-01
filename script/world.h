@@ -45,7 +45,7 @@ public:
 	void load(float &progress,float ldsplit);
 
 	// draw
-	void render(uint32_t &running,bool &reboot);
+	void render(bool &running,bool &reboot);
 
 public:
 

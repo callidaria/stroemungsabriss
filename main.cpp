@@ -81,8 +81,7 @@ int main(int argc,char** argv)
 #endif
 
 	// MAIN LOOP
-	uint32_t run = 1;
-	bool reboot = false;
+	bool run = true,reboot = false;
 	while (run) {
 
 		// process loading requests
@@ -92,6 +91,7 @@ int main(int argc,char** argv)
 		f.vsync(60);
 		f.calc_time_delta();
 		f.input(run);
+		Frame::clear();
 
 		// input mapping
 		imap.update();

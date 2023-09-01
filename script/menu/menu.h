@@ -78,7 +78,7 @@ public:
 	~Menu();
 
 	// draw
-	virtual void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
+	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
 
 private:
 
@@ -142,6 +142,15 @@ private:
 	// index
 	uint8_t difflv = 0;
 	uint16_t ridx_terra;
+
+	// cascabel
+	/*CascabelBaseFeature* m_ccbf;
+	CCBManager* m_ccbm;
+	World* m_world;
+	FrameBuffer fb;
+
+	// animation
+	float ptrans = 0;*/
 };
 
 #endif

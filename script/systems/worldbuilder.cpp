@@ -65,8 +65,9 @@ void Worldbuilder::load_titles()
 { std::cout << "loading: title display\n"; }
 void Worldbuilder::load_menu()
 {
-	Menu* menu = new Menu(m_world,m_ccbm,m_ccbf,progress,.75f);
-	m_world->add_ui(menu);
+	//Menu* main_menu = new Menu(m_world,m_ccbm,m_ccbf,progress,.75f);
+	MainMenu* main_menu = new MainMenu(m_ccbm,m_ccbf,m_world,progress,.75f);
+	m_world->add_ui(main_menu);
 	m_world->load(progress,.25f);
 }
 void Worldbuilder::load_casino()

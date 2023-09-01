@@ -63,7 +63,7 @@ void CCBManager::vanish()
 	dactive: reference to boolean holding if developer console should be activated & shown
 	purpose: renders and breaths life into developer console
 */
-void CCBManager::dev_console(uint32_t &running,bool &dactive)
+void CCBManager::dev_console(bool &running,bool &dactive)
 {
 	// draw developer mode label
 	m_r2d->prepare();

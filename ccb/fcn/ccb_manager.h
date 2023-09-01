@@ -25,7 +25,7 @@ public:
 	void vanish();
 
 	// functionality
-	void dev_console(uint32_t &running,bool &dactive);
+	void dev_console(bool &running,bool &dactive);
 
 private:
 
