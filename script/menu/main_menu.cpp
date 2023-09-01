@@ -11,9 +11,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 		float &progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
+	// asset load
+	index_ranim = ccbf->r2d->al.size();
+	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
+
 	// buffers
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader");
+			"./shader/fbv_mainmenu.shader","./shader/fbf_mainmenu.shader");
 }
 
 /*
@@ -25,13 +29,37 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 */
 void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
-	// render to menu buffer
+	// input
+	bool plmb = m_ccbf->frame->mouse.mcl&&!trg_lmb,prmb = m_ccbf->frame->mouse.mcr&&!trg_rmb;
+	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
+			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb,
+		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
+			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
+	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
+
+	// menu transition
+	menu_action = (menu_action||hit_a)&&!hit_b;
+	mtransition += (menu_action-!menu_action)*TITLE_SPEED*m_ccbf->frame->time_delta;
+	mtransition = std::clamp(mtransition,.0f,1.f);
+
+	// title animation
+	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),
+			VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition);
+	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),
+			HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition);
+
+	// START RENDER MENU BUFFER
 	fb.bind();
 	Frame::clear();
 
-	// stop render to menu buffer
+	// render titles
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
+	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
+
+	// STOP RENDER MENU BUFFER
 	FrameBuffer::close();
 
 	// render menu
-	fb.render();
+	fb.render(mtransition);
 }

@@ -22,7 +22,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 			150,450);
 
 	// interpret level loader file
-	msindex = ccbm->add_lv("lvload/menu.ccb");
+	//msindex = ccbm->add_lv("lvload/menu.ccb");
 
 	// add globe scene
 	ridx_terra = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg",
@@ -338,9 +338,9 @@ void Menu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mve.x,mve.y,0));
 	m_ccbf->r2d->sl.at(msindex+mselect*2-3).model
 			= glm::translate(glm::mat4(1.0f),dtrans*glm::vec3(mvj.x,mvj.y,0));
-	pos_title = glm::translate(glm::mat4(1.0f),
+	/*pos_title = glm::translate(glm::mat4(1.0f),
 			TITLE_START+title_dir*ptrans+dtrans*glm::vec3(-140,0,0));
-	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));
+	pos_entitle = glm::translate(glm::mat4(1.0f),ENTITLE_START+entitle_dir*(ptrans-dtrans));*/
 
 	// menu list selection and scrolling
 	lscroll += (lselect>lbounds)-(lselect<(lbounds-7));

@@ -100,6 +100,9 @@ int main(int argc,char** argv)
 		// render scene
 		world.render(run,reboot);
 
+		// debrief
+		imap.update_triggers();
+
 		// developer tools in debug mode
 #if BUILD_DEV_MODE
 		ccbm.dev_console(run,dactive);

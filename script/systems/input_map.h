@@ -24,6 +24,7 @@ constexpr uint8_t IMP_REQLEFT = 12;
 constexpr uint8_t IMP_REQRIGHT = 13;
 
 // values
+constexpr uint8_t IMP_MAX_INPUTS = 14;
 constexpr uint16_t IMP_CONTROLLERCAP = 32767;
 constexpr uint16_t IMP_CONTROLLER_DEADZONE = 12000;
 // TODO: change deadzone in options
@@ -40,6 +41,7 @@ public:
 	void map_keyboard();
 	void map_controller();
 	void update();
+	void update_triggers();
 
 	// action translation
 	glm::vec2 req_vectorized_direction();
@@ -51,10 +53,13 @@ public:
 	void precalculate_dpad();
 	void precalculate_all();
 
+	// special
+	inline bool get_input_triggered(uint8_t id) { return input_val[id]&&!input_trg[id]; }
+
 public:
 
 	// precalculate input values
-	bool input_val[14];
+	bool input_val[IMP_MAX_INPUTS],input_trg[IMP_MAX_INPUTS];
 	glm::vec2 move_dir;
 
 private:
@@ -67,13 +72,11 @@ private:
 	int32_t rpl_int = 0;
 
 	// references
-	bool* key_actions[14];
-	bool* cnt_actions[14];
+	bool* key_actions[IMP_MAX_INPUTS],*cnt_actions[IMP_MAX_INPUTS];
 
 	// axis references
 	int32_t* cnt_udaxis,*cnt_lraxis;
 };
+// TODO: make the input map dynamic for button reallocation
 
 #endif
-
-// TODO: make the input map dynamic for button reallocation

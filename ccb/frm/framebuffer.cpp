@@ -75,7 +75,7 @@ void FrameBuffer::render()
 	purpose: render menu transformation between two shader states
 	DEVELOPED EXCLUSIVELY FOR : yomisensei
 */
-void FrameBuffer::render(float ptrans)
+void FrameBuffer::render(float mtransition)
 {
 	// setup
 	s.enable();
@@ -83,8 +83,9 @@ void FrameBuffer::render(float ptrans)
 	glBindTexture(GL_TEXTURE_2D,tex);
 
 	// render
-	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
-	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
-	s.upload_float("ptrans",ptrans);
+	s.upload_vec2("ratio",glm::vec2(frw,frh)); // !!do not do this in update
+	s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
+	s.upload_float("mtransition",mtransition);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
+// FIXME: an extra implementation for this seems a little unelegant

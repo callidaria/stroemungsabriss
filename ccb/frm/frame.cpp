@@ -162,24 +162,17 @@ void Frame::input(bool &running)
 			tline.pop_back();
 		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
 
-		// read mouse input
+		// read mouse axis
 		SDL_GetMouseState(&mouse.mx,&mouse.my);
 		mouse.mxfr = (float)mouse.mx/w_res; // ??make those optional
 		mouse.myfr = (float)(h_res-mouse.my)/h_res;
 		// !!fix on move cancellation && carry boolean when button released
-		if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
-			mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT;
-			mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT;
-		} if (m_fe.type==SDL_MOUSEBUTTONUP) { // !!not the practical way
-			mouse.mcl = m_fe.button.button!=SDL_BUTTON_LEFT;
-			mouse.mcr = m_fe.button.button!=SDL_BUTTON_RIGHT;
-		}
-		/*mouse.mcl = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_LEFT)
-				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_LEFT);
-		mouse.mcr = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_RIGHT)
-				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_RIGHT);*/
-		/*mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN;
-		mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN;*/
+
+		// read mouse buttons
+		mouse.mcl = (m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
+				||(mouse.mcl&&!(m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONUP));
+		mouse.mcr = (m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
+				||(mouse.mcr&&!(m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONUP));
 		mouse.mw = m_fe.wheel.y;
 
 		// check for controller plug-in

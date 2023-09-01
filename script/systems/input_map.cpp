@@ -63,7 +63,7 @@ void InputMap::map_controller()
 	// no controller input
 	else {
 		cnt_udaxis = &rpl_int;cnt_lraxis = &rpl_int;
-		for (uint8_t i=0;i<14;i++) cnt_actions[i] = &rpl_bool;
+		for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) cnt_actions[i] = &rpl_bool;
 	}
 }
 // TODO: add option to change players controller when multiple are plugged in
@@ -80,6 +80,16 @@ void InputMap::update()
 	}
 }
 // FIXME: constant (nested) branching. maybe worth it, but it can always be improved
+
+/*
+	update_triggers() -> void !O(1)
+	purpose: save raw last frame inputs to update input triggers
+*/
+void InputMap::update_triggers()
+{
+	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++)
+		input_trg[i] = input_val[i];
+}
 
 /*
 	req_vectorized_direction() -> vec2
@@ -134,7 +144,7 @@ void InputMap::precalculate_vector()
 */
 void InputMap::precalculate_dpad()
 {
-	for (uint8_t i=10;i<14;i++)
+	for (uint8_t i=10;i<IMP_MAX_INPUTS;i++)
 		precalculate(i);
 }
 
@@ -145,5 +155,5 @@ void InputMap::precalculate_dpad()
 void InputMap::precalculate_all()
 {
 	precalculate_vector();
-	for (uint8_t i=0;i<14;i++) precalculate(i);
+	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) precalculate(i);
 }

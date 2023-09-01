@@ -69,6 +69,8 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### features:
 - render to multiple subscreens within the main window
+- improved menu navigation with instructional annotations
+- improved menu animations
 
 ### optimizations:
 - refactor/rewrite of main menu code (also menu listing and menu dialogue component)
@@ -201,5 +203,5 @@ Worktime: 120h
     + 209: 44min
     + 215: 2h 28min
 	+ 199: 7h 34min
-    + 16: 2h 2min
+    + 16: 5h 39min
 - Total Code Lines: 15.823
