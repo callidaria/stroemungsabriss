@@ -15,6 +15,17 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
+	// text setup
+	std::string dmessage = "press [FOCUS] if you DARE";
+	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
+	std::string vmessage = "yomisensei by callidaria. danmaku v"
+			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
+			+ std::to_string(INFO_VERSION_DEVSTEP)+INFO_VERSION_MODE_SUFFIX
+			+ " - running on cascabel base (OpenGL)";
+	tx_version.add(vmessage.c_str(),TEXT_VERSION_POSITION);
+	tx_dare.load(),tx_version.load();
+	tcap_dare = dmessage.length(),tcap_version = vmessage.length();
+
 	// buffers
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_mainmenu.shader","./shader/fbf_mainmenu.shader");
@@ -44,6 +55,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	mtransition = (mtransition<.0f) ? .0f : (mtransition>1.f) ? 1.f : mtransition;
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
+	float inv_mtransition = 1.f-mtransition;
 
 	// title animation
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),
@@ -54,6 +66,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// START RENDER MENU BUFFER
 	fb.bind();
 	Frame::clear();
+
+	// render text
+	tx_dare.prepare();
+	tx_dare.render(tcap_dare*inv_mtransition,TEXT_DARE_COLOUR);
+	tx_version.prepare();
+	tx_version.render(tcap_version*inv_mtransition,TEXT_VERSION_COLOUR);
 
 	// render titles
 	m_ccbf->r2d->prepare();

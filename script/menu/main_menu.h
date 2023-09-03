@@ -1,12 +1,22 @@
 #ifndef SRC_MENU_MAIN
 #define SRC_MENU_MAIN
 
-#include "../../ccb/frm/framebuffer.h"
 #include "../../ccb/fcn/ccb_manager.h"
+#include "../../ccb/fcn/font.h"
+#include "../../ccb/fcn/text.h"
+
+#include "../../ccb/frm/framebuffer.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 #include "../world.h"
+
+// information
+constexpr uint8_t INFO_VERSION_RELEASE = 0;
+constexpr uint8_t INFO_VERSION_SUBRELEASE = 0;
+constexpr uint8_t INFO_VERSION_DEVSTEP = 6;
+constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
+// MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
@@ -15,6 +25,12 @@ constexpr glm::vec3 HRZ_TITLE_START = glm::vec3(590,800,0);
 constexpr glm::vec3 HRZ_TITLE_END = glm::vec3(590,642,0);
 constexpr glm::vec3 VRT_TITLE_TRANSITION = VRT_TITLE_END-VRT_TITLE_START;
 constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
+
+// text attributes
+constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
+constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
+constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
+constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
@@ -36,9 +52,12 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
 	FrameBuffer fb;
+	Text tx_dare = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25)),
+		tx_version = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15));
 
 	// index
 	uint16_t index_rsprite,index_ranim;
+	uint8_t tcap_dare,tcap_version;
 
 	// input
 	bool trg_lmb = false,trg_rmb = false;

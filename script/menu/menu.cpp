@@ -39,7 +39,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	cam3d.update();
 
 	// setup dare message on idle screen
-	tft = Text(fnt);
+	/*tft = Text(fnt);
 	tft.add("press START if you DARE",glm::vec2(450,250));
 	tft.load();
 
@@ -51,7 +51,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 			+std::to_string(GVERSION_DEVSTEP)+GVERSION_SUFFIX+" - running on cascabel "
 			+"1.3.1vE (OpenGL)";
 	vtft.add(title_vmessage.c_str(),glm::vec2(600,20));
-	vtft.load();
+	vtft.load();*/
 	progress += sseq;
 
 	// submenu lists to interact with and choose from
@@ -462,12 +462,12 @@ void Menu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_sprite(msindex,msindex+14*(mm>0));
 
 	// write dare message
-	tft.prepare();
+	/*tft.prepare();
 	tft.render(19*(1-ptrans),glm::vec4(1,0,0,1));
 
 	// write version notification printout
 	vtft.prepare();
-	vtft.render(100,glm::vec4(0,0,.5f,1));
+	vtft.render(100,glm::vec4(0,0,.5f,1));*/
 	//fb.close();
 
 	// calculate globe rotation towards preview location
