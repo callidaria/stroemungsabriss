@@ -32,6 +32,7 @@ void InputMap::map_keyboard()
 	key_actions[IMP_REQDOWN] = &m_frame->kb.ka[SDL_SCANCODE_DOWN];
 	key_actions[IMP_REQLEFT] = &m_frame->kb.ka[SDL_SCANCODE_LEFT];
 	key_actions[IMP_REQRIGHT] = &m_frame->kb.ka[SDL_SCANCODE_RIGHT];
+	key_actions[IMP_REQCONFIRM] = &m_frame->kb.ka[SDL_SCANCODE_RETURN];
 }
 
 /*
@@ -58,6 +59,7 @@ void InputMap::map_controller()
 		cnt_actions[IMP_REQDOWN] = &m_frame->xb[0].xbb[SDL_CONTROLLER_BUTTON_DPAD_DOWN];
 		cnt_actions[IMP_REQLEFT] = &m_frame->xb[0].xbb[SDL_CONTROLLER_BUTTON_DPAD_LEFT];
 		cnt_actions[IMP_REQRIGHT] = &m_frame->xb[0].xbb[SDL_CONTROLLER_BUTTON_DPAD_RIGHT];
+		cnt_actions[IMP_REQCONFIRM] = &m_frame->xb[0].xbb[SDL_CONTROLLER_BUTTON_A];
 	}
 
 	// no controller input

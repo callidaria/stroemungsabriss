@@ -22,9 +22,10 @@ constexpr uint8_t IMP_REQUP = 10;
 constexpr uint8_t IMP_REQDOWN = 11;
 constexpr uint8_t IMP_REQLEFT = 12;
 constexpr uint8_t IMP_REQRIGHT = 13;
+constexpr uint8_t IMP_REQCONFIRM = 14;
 
 // values
-constexpr uint8_t IMP_MAX_INPUTS = 14;
+constexpr uint8_t IMP_MAX_INPUTS = 15;
 constexpr uint16_t IMP_CONTROLLERCAP = 32767;
 constexpr uint16_t IMP_CONTROLLER_DEADZONE = 12000;
 // TODO: change deadzone in options

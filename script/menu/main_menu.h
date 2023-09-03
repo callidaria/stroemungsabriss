@@ -17,7 +17,7 @@ constexpr glm::vec3 VRT_TITLE_TRANSITION = VRT_TITLE_END-VRT_TITLE_START;
 constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
 
 // animation timing
-constexpr float TITLE_SPEED = 8.5f;
+constexpr float TRANSITION_SPEED = 11.5f;
 
 class MainMenu : public UI
 {
@@ -49,3 +49,10 @@ private:
 };
 
 #endif
+
+/*
+			TODO QA:
+
+	- TRANSITION_SPEED modifier too fast/too slow?
+	- input satisfaction feedback
+*/

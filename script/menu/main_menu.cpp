@@ -32,15 +32,18 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// input
 	bool plmb = m_ccbf->frame->mouse.mcl&&!trg_lmb,prmb = m_ccbf->frame->mouse.mcr&&!trg_rmb;
 	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
-			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb,
+			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
+			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
 		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
 	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
 
 	// menu transition
 	menu_action = (menu_action||hit_a)&&!hit_b;
-	mtransition += (menu_action-!menu_action)*TITLE_SPEED*m_ccbf->frame->time_delta;
-	mtransition = std::clamp(mtransition,.0f,1.f);
+	mtransition += (menu_action-!menu_action)*TRANSITION_SPEED*m_ccbf->frame->time_delta;
+	mtransition = (mtransition<.0f) ? .0f : (mtransition>1.f) ? 1.f : mtransition;
+	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
+	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 
 	// title animation
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),
