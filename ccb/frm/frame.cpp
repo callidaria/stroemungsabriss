@@ -260,6 +260,10 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
+
+	// controller setup
+	kill_controllers();
+	load_controllers();
 }
 
 /*
@@ -299,5 +303,5 @@ void Frame::load_controllers()
 void Frame::kill_controllers()
 {
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i));
-	m_gc.clear();
+	m_gc.clear(),xb.clear();
 }

@@ -69,6 +69,8 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### features:
 - render to multiple subscreens within the main window
+- dynamic player readable identification of requested buttons based on input mapping
+- automatic recognition of main input device between game controller and keyboard
 - improved menu navigation with instructional annotations
 - improved menu animations
 
@@ -203,5 +205,5 @@ Worktime: 120h
     + 209: 44min
     + 215: 2h 28min
 	+ 199: 7h 34min
-    + 16: 7h 38min
+    + 16: 10h 17min
 - Total Code Lines: 15.823

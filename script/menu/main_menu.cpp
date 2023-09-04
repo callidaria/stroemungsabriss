@@ -16,7 +16,9 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
 	// text setup
-	std::string dmessage = "press [FOCUS] if you DARE";
+	std::string reqbutton = (ccbf->frame->xb.size()) ? ccbf->iMap->cnt_name[IMP_REQPAUSE]
+			: ccbf->iMap->key_name[IMP_REQCONFIRM];
+	std::string dmessage = "press ["+reqbutton+"] if you DARE";
 	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
 			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
