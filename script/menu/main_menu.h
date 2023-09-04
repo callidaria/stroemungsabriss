@@ -47,6 +47,10 @@ public:
 
 private:
 
+	void update_peripheral_annotations();
+
+private:
+
 	// cascabel
 	CCBManager* m_ccbm;
 	CascabelBaseFeature* m_ccbf;
@@ -60,6 +64,7 @@ private:
 	uint8_t tcap_dare,tcap_version;
 
 	// input
+	bool cpref_peripheral;
 	bool trg_lmb = false,trg_rmb = false;
 
 	// animation

@@ -164,15 +164,16 @@ void Frame::input(bool &running)
 
 		// read mouse axis
 		SDL_GetMouseState(&mouse.mx,&mouse.my);
-		mouse.mxfr = (float)mouse.mx/w_res; // ??make those optional
+		mouse.mxfr = (float)mouse.mx/w_res;
 		mouse.myfr = (float)(h_res-mouse.my)/h_res;
-		// !!fix on move cancellation && carry boolean when button released
 
 		// read mouse buttons
 		mouse.mcl = (m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
-				||(mouse.mcl&&!(m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONUP));
+				|| (mouse.mcl&&!(m_fe.button.button==SDL_BUTTON_LEFT
+				&& m_fe.type==SDL_MOUSEBUTTONUP));
 		mouse.mcr = (m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
-				||(mouse.mcr&&!(m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONUP));
+				|| (mouse.mcr&&!(m_fe.button.button==SDL_BUTTON_RIGHT
+				&& m_fe.type==SDL_MOUSEBUTTONUP));
 		mouse.mw = m_fe.wheel.y;
 
 		// check for controller plug-in
@@ -183,17 +184,25 @@ void Frame::input(bool &running)
 		}
 
 		// read controller input
+		bool relevant_motion = false;
 		for (int i=0;i<m_gc.size();i++) {
-			for (int j=0;j<6;j++)
-				xb.at(i).xba[j] = SDL_GameControllerGetAxis(m_gc.at(i),(SDL_GameControllerAxis)j);
-			for (int j=0;j<16;j++)
-				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),(SDL_GameControllerButton)j);
+			for (int j=0;j<6;j++) {
+				int32_t motion = SDL_GameControllerGetAxis(m_gc.at(i),(SDL_GameControllerAxis)j);
+				xb.at(i).xba[j] = motion;
+				relevant_motion = (abs(motion)>AXIS_MOTION_RELEVANCE)||relevant_motion;
+			} for (int j=0;j<16;j++)
+				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),
+						(SDL_GameControllerButton)j);
 		}
-		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
-		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers having exchanged a&b recognition
-		// switch input refuses to be read. conn ok but no prints
+		// FIXME: switch input refuses to be read. conn ok but no prints
+
+		// update preferred peripheral
+		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
+				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
 	}
 }
+// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
+// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers, while a&b is exchanged
 
 /*
 	vanish() -> void
@@ -264,7 +273,9 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	// controller setup
 	kill_controllers();
 	load_controllers();
+	cpref_peripheral = xb.size();
 }
+// FIXME: opening the window will cause doubled controller load
 
 /*
 	get_screen(int8_t,SDL_Rect*) -> void

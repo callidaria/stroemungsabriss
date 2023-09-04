@@ -16,17 +16,16 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
 	// text setup
-	std::string reqbutton = (ccbf->frame->xb.size()) ? ccbf->iMap->cnt_name[IMP_REQPAUSE]
-			: ccbf->iMap->key_name[IMP_REQCONFIRM];
-	std::string dmessage = "press ["+reqbutton+"] if you DARE";
-	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
 			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
 			+ std::to_string(INFO_VERSION_DEVSTEP)+INFO_VERSION_MODE_SUFFIX
 			+ " - running on cascabel base (OpenGL)";
 	tx_version.add(vmessage.c_str(),TEXT_VERSION_POSITION);
-	tx_dare.load(),tx_version.load();
-	tcap_dare = dmessage.length(),tcap_version = vmessage.length();
+	tx_version.load();
+	tcap_version = vmessage.length();
+
+	// peripheral sensitive input request annotations
+	update_peripheral_annotations();
 
 	// buffers
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
@@ -65,6 +64,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),
 			HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition);
 
+	// peripheral switch for input request annotation
+	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
+
 	// START RENDER MENU BUFFER
 	fb.bind();
 	Frame::clear();
@@ -85,4 +87,22 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render menu
 	fb.render(mtransition);
+}
+
+/*
+	TODO
+*/
+void MainMenu::update_peripheral_annotations()
+{
+	// update shown preferred peripheral
+	cpref_peripheral = m_ccbf->frame->cpref_peripheral;
+
+	// title screen dare message
+	tx_dare.clear();
+	std::string reqbutton = (cpref_peripheral) ? m_ccbf->iMap->cnt_name[IMP_REQPAUSE]
+			: m_ccbf->iMap->key_name[IMP_REQCONFIRM];
+	std::string dmessage = "press ["+reqbutton+"] if you DARE";
+	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
+	tcap_dare = dmessage.length();
+	tx_dare.load();
 }

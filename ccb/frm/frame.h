@@ -14,6 +14,8 @@
 
 #define BUILDISSUE_OLD_SDL_VERSION
 
+constexpr uint32_t AXIS_MOTION_RELEVANCE = 7000;
+
 struct Keyboard
 {
 	bool ka[285] = { false };	// list of keyboard scan results
@@ -88,6 +90,7 @@ public:
 	int w_res,h_res;
 	bool event_active = false;
 	double time_mod = 1.0,time_delta = 0;
+	bool cpref_peripheral = false;
 
 	// input
 	std::vector<SDL_GameController*> m_gc;
