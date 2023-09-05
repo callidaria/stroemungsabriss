@@ -43,10 +43,15 @@ public:
 	MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq);
 	~MainMenu() {  }
 
+	// draw
 	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
 
 private:
 
+	// splashes
+	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u);
+
+	// system
 	void update_peripheral_annotations();
 
 private:
@@ -58,6 +63,10 @@ private:
 	FrameBuffer fb;
 	Text tx_dare = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25)),
 		tx_version = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15));
+
+	// splashes
+	Buffer sh_buffer = Buffer();
+	Shader sh_shader = Shader();
 
 	// index
 	uint16_t index_rsprite,index_ranim;

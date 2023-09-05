@@ -80,7 +80,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 		pattern: origin_position_x,origin_position_y,target_position_x,target_position_y,
 				vertex_colour_r,vertex_colour_g,vertex_colour_b,vertex_edge_id
 	*/
-	float sverts[] = {
+	/*float sverts[] = {
 
 		// title splash
 		-25,0,25,0,.5f,0,0,0, 600,720,25,720,.5f,0,0,2, 420,720,-25,720,.5f,0,0,1,
@@ -127,7 +127,7 @@ Menu::Menu(World* world,CCBManager* ccbm,CascabelBaseFeature* ccbf,float &progre
 	sshd.def_attributeF("colour",3,4,8);
 	sshd.def_attributeF("idx",1,7,8);
 	sshd.upload_camera(cam2d);
-	progress += sseq;
+	progress += sseq;*/
 
 	// framebuffer creation
 	/*fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,"shader/fbv_menu.shader",

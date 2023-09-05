@@ -15,6 +15,16 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
+	// selection splash setup
+	std::vector<float> sverts;
+	create_splash(sverts,glm::vec2(12.5f,0),glm::vec2(510,720));
+	sh_buffer.bind();
+	sh_buffer.upload_vertices(sverts);
+	sh_shader.compile("./shader/vsplash.shader","./shader/fsplash.shader");
+	sh_shader.def_attributeF("position",2,0,3);
+	sh_shader.def_attributeF("edge_id",1,2,3);
+	sh_shader.upload_camera(Camera2D(1280,720));
+
 	// text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
 			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
@@ -57,6 +67,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	float inv_mtransition = 1.f-mtransition;
+	// TODO: compare linear transition with sinespeed transition implementation
 
 	// title animation
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),
@@ -66,6 +77,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
+
+	// selection splash render
+	sh_buffer.bind();
+	sh_shader.enable();
+	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// START RENDER MENU BUFFER
 	fb.bind();
@@ -87,6 +103,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render menu
 	fb.render(mtransition);
+}
+
+/*
+	TODO
+*/
+void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u)
+{
+	std::vector<float> verts
+			= { l.x,l.y,0, u.x,u.y,2, u.x,u.y,1, u.x,u.y,2, l.x,l.y,0, l.x,l.y,3 };
+	sverts.insert(sverts.end(),verts.begin(),verts.end());
 }
 
 /*
