@@ -60,6 +60,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
 	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
 
+	// timing
+	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
+	anim_timing += m_ccbf->frame->time_delta;
+	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
+			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
+
 	// menu transition
 	menu_action = (menu_action||hit_a)&&!hit_b;
 	mtransition += (menu_action-!menu_action)*TRANSITION_SPEED*m_ccbf->frame->time_delta;
@@ -69,19 +75,31 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	float inv_mtransition = 1.f-mtransition;
 	// TODO: compare linear transition with sinespeed transition implementation
 
+	// title rattle animation
+	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
+		rattle_countermove = rattle_mobility/2;
+	glm::vec3 title_action = glm::vec3((rand()%rattle_mobility-rattle_countermove)*anim_go,
+			(rand()%rattle_mobility-rattle_countermove)*anim_go,0);
+
+	// title shiftdown animation
+	float tshift = (speedup) ? 1.f+SHIFTDOWN_ZOOM_INCREASE*sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
+			: 1.f+SHIFTDOWN_ZOOM_INCREASE*(TITLE_NORMALIZATION_TIMEOUT-dt_tnormalize);
+
 	// title animation
-	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),
-			VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition);
-	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),
-			HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition);
+	glm::mat4 tscale = glm::scale(glm::mat4(1),glm::vec3(tshift));
+	m_ccbf->r2d->al[index_ranim].model = glm::translate(tscale,
+			VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action);
+	glm::mat4 htscale = 
+	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(tscale,
+			HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action);
 
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
 	// selection splash render
-	sh_buffer.bind();
+	/*sh_buffer.bind();
 	sh_shader.enable();
-	glDrawArrays(GL_TRIANGLES,0,6);
+	glDrawArrays(GL_TRIANGLES,0,6);*/
 
 	// START RENDER MENU BUFFER
 	fb.bind();
@@ -89,6 +107,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render text
 	tx_dare.prepare();
+	tx_dare.set_scroll(glm::vec2(title_action));
 	tx_dare.render(tcap_dare*inv_mtransition,TEXT_DARE_COLOUR);
 	tx_version.prepare();
 	tx_version.render(tcap_version*inv_mtransition,TEXT_VERSION_COLOUR);
@@ -103,6 +122,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render menu
 	fb.render(mtransition);
+	// FIXME: remove special treatment and transfer to a more controllable implementation
+
+	// finishing
+	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
+			normalize_over = dt_tnormalize>TITLE_NORMALIZATION_TIMEOUT;
+	anim_timing -= ANIMATION_UPDATE_TIMEOUT*anim_go;
+	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
+			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
+	speedup = (speedup&&!shiftdown_over)||normalize_over;
 }
 
 /*
