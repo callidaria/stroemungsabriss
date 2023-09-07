@@ -35,7 +35,7 @@ constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
 constexpr float TITLE_SHIFTDOWN_TIMEOUT = 4.f;
-constexpr float TITLE_NORMALIZATION_TIMEOUT = 2.f;
+constexpr float TITLE_NORMALIZATION_TIMEOUT = .5f;
 constexpr float ANIMATION_UPDATE_TIMEOUT = .01f;
 
 // animation attributes
@@ -44,7 +44,8 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .2f;
 
 // math constants
-constexpr double MATH_OCTAPI = 3.141592653/8.0;
+constexpr double MATH_PI = 3.141592653;
+constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 class MainMenu : public UI
 {

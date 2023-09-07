@@ -82,16 +82,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			(rand()%rattle_mobility-rattle_countermove)*anim_go,0);
 
 	// title shiftdown animation
-	float tshift = (speedup) ? 1.f+SHIFTDOWN_ZOOM_INCREASE*sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
-			: 1.f+SHIFTDOWN_ZOOM_INCREASE*(TITLE_NORMALIZATION_TIMEOUT-dt_tnormalize);
+	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
+			: -sqrt(dt_tnormalize)+1);
 
 	// title animation
-	glm::mat4 tscale = glm::scale(glm::mat4(1),glm::vec3(tshift));
-	m_ccbf->r2d->al[index_ranim].model = glm::translate(tscale,
-			VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action);
-	glm::mat4 htscale = 
-	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(tscale,
-			HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action);
+	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
+			hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
+	glm::mat4 vrt_scale = glm::scale(glm::mat4(1),glm::vec3(tshift)),
+			hrz_scale = glm::scale(glm::mat4(1),glm::vec3(tshift));
+	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale;
+	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
