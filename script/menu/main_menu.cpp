@@ -72,8 +72,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	mtransition = (mtransition<.0f) ? .0f : (mtransition>1.f) ? 1.f : mtransition;
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
-	float inv_mtransition = 1.f-mtransition;
 	// TODO: compare linear transition with sinespeed transition implementation
+	float inv_mtransition = 1.f-mtransition;
 
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
@@ -82,14 +82,17 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			(rand()%rattle_mobility-rattle_countermove)*anim_go,0);
 
 	// title shiftdown animation
+	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
 	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
-			: -sqrt(dt_tnormalize)+1);
+			: 1.f-sqrt(dt_tnormalize));
 
 	// title animation
 	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
-			hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
-	glm::mat4 vrt_scale = glm::scale(glm::mat4(1),glm::vec3(tshift)),
-			hrz_scale = glm::scale(glm::mat4(1),glm::vec3(tshift));
+		hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
+	glm::mat4 vrt_scale = glm::translate(glm::scale(glm::translate(glm::mat4(1),
+			-VRT_TITLE_SCALESET),glm::vec3(tshift)),VRT_TITLE_SCALESET),
+		hrz_scale = glm::translate(glm::scale(glm::translate(glm::mat4(1),
+			-HRZ_TITLE_SCALESET),glm::vec3(tshift)),HRZ_TITLE_SCALESET);
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale;
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 

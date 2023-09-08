@@ -25,6 +25,8 @@ constexpr glm::vec3 HRZ_TITLE_START = glm::vec3(590,800,0);
 constexpr glm::vec3 HRZ_TITLE_END = glm::vec3(590,642,0);
 constexpr glm::vec3 VRT_TITLE_TRANSITION = VRT_TITLE_END-VRT_TITLE_START;
 constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
+constexpr glm::vec3 VRT_TITLE_SCALESET = VRT_TITLE_END-glm::vec3(640,360,0);
+constexpr glm::vec3 HRZ_TITLE_SCALESET = HRZ_TITLE_END-glm::vec3(640,360,0);
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
@@ -41,7 +43,7 @@ constexpr float ANIMATION_UPDATE_TIMEOUT = .01f;
 // animation attributes
 constexpr uint8_t RATTLE_THRESHOLD = 2;
 constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
-constexpr float SHIFTDOWN_ZOOM_INCREASE = .2f;
+constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 
 // math constants
 constexpr double MATH_PI = 3.141592653;
