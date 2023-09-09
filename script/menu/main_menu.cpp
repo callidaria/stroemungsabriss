@@ -38,8 +38,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	update_peripheral_annotations();
 
 	// buffers
+	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_splash.shader",
+			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
 	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_mainmenu.shader","./shader/fbf_mainmenu.shader");
+	fb_overlay = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
 }
 
 /*
@@ -99,12 +103,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
+	// start multisampled render
+	msaa.bind();
+
 	// selection splash render
-	/*sh_buffer.bind();
+	sh_buffer.bind();
 	sh_shader.enable();
-	glDrawArrays(GL_TRIANGLES,0,6);*/
+	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// START RENDER MENU BUFFER
+	msaa.blit();
 	fb.bind();
 	Frame::clear();
 
@@ -125,6 +133,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render menu
 	fb.render(mtransition);
+	fb_overlay.bind();
+	m_ccbf->frame->clear();
+	fb.render(mtransition);
+	fb_overlay.close();
+	msaa.render(fb_overlay.tex);
 	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// finishing
