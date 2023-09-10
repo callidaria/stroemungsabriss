@@ -38,12 +38,11 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	update_peripheral_annotations();
 
 	// buffers
-	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_splash.shader",
+	msaa = MSAA("./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader",
 			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
-	fb = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_mainmenu.shader","./shader/fbf_mainmenu.shader");
-	fb_overlay = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
+	msaa.sfb.upload_int("menu_fb",1);
+	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
 }
 
 /*
@@ -113,7 +112,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// START RENDER MENU BUFFER
 	msaa.blit();
-	fb.bind();
+	fb_menu.bind();
 	Frame::clear();
 
 	// render text
@@ -132,12 +131,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	FrameBuffer::close();
 
 	// render menu
-	fb.render(mtransition);
-	fb_overlay.bind();
-	m_ccbf->frame->clear();
-	fb.render(mtransition);
-	fb_overlay.close();
-	msaa.render(fb_overlay.tex);
+	fb_menu.render(mtransition);
+	msaa.prepare();
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,fb_menu.tex);
+	MSAA::render();
+	glActiveTexture(GL_TEXTURE0);
 	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// finishing

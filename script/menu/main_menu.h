@@ -75,7 +75,7 @@ private:
 	CCBManager* m_ccbm;
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
-	FrameBuffer fb,fb_overlay;
+	FrameBuffer fb_menu;
 	Text tx_dare = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25)),
 		tx_version = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15));
 	MSAA msaa;

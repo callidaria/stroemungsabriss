@@ -21,14 +21,13 @@ public:
 	void blit();
 
 	// draw
-	void render();
-	void render(GLuint ovltex);
-
-private:
-
 	void prepare();
+	static inline void render() { glDrawArrays(GL_TRIANGLES,0,6); }
 
 public:
+
+	// shader
+	Shader sfb = Shader();
 
 	// buffers
 	uint32_t colour_buffer,screen_buffer;
@@ -36,7 +35,6 @@ public:
 private:
 
 	// extern
-	Shader sfb = Shader();
 	uint16_t fbw,fbh;
 
 	// essentials

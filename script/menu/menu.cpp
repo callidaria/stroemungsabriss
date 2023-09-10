@@ -493,7 +493,7 @@ void Menu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	fb.render(ptrans);*/
 
 	// anti aliasing for selection splashes
-	msaa.render(fb.tex);
+	msaa.render();
 
 	// render menu lists and sublists
 	mls[i_ml].render(dtrans,lscroll,lselect,edge_mod,ml_delta,edge_sel,md_disp);
