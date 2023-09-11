@@ -104,13 +104,17 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// START MULTISAMPLED RENDER
 	msaa.bind();
+	Frame::clear();
 
 	// selection splash render
 	sh_buffer.bind();
 	sh_shader.enable();
 
 	// title splash upload & render
-	upload_splash_width(SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,false);
+	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
+	float tlext = SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD*mtransition,
+		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
+	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// START RENDER MENU BUFFER
@@ -165,8 +169,9 @@ void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u)
 	TODO
 	NOTE: selection shader has to be enabled before calling this function
 */
-void MainMenu::upload_splash_width(float le,float ue,bool hrz)
+void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
 {
+	sh_shader.upload_vec2("lupos[0]",lp),sh_shader.upload_vec2("lupos[1]",up);
 	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
 	sh_shader.upload_int("is_hrz",hrz);
 }

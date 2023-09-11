@@ -6,7 +6,8 @@ in float edge_id;
 out vec3 Colour;
 
 // geometry
-uniform float luext[2] = { 0,0 };
+uniform vec2 lupos[2];
+uniform float luext[2];
 uniform int is_hrz = 0;
 
 // camera
@@ -24,5 +25,5 @@ void main()
 	vmod[is_hrz] = luext[is_upper]*efac;
 
 	// final vertex position
-	gl_Position = proj*view*vec4(position.xy+vmod,.0,1.);
+	gl_Position = proj*view*vec4(position.xy+lupos[is_upper]+vmod,.0,1.);
 }

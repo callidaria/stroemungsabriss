@@ -37,6 +37,10 @@ constexpr float SPLICE_TITLE_LOWER_START = 12.5f;
 constexpr float SPLICE_TITLE_UPPER_START = 510.f;
 constexpr float SPLICE_TITLE_LOWER_SWIDTH = 10.f;
 constexpr float SPLICE_TITLE_UPPER_SWIDTH = 100.f;
+constexpr float SPLICE_TITLE_LOWER_MOD = 150.f;
+constexpr float SPLICE_TITLE_UPPER_MOD = -485.f;
+constexpr float SPLICE_TITLE_LWIDTH_MOD = 40.f;
+constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
@@ -74,7 +78,7 @@ private:
 
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u);
-	void upload_splash_width(float le,float ue,bool hrz);
+	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
 
 	// system
 	void update_peripheral_annotations();
