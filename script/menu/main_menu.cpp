@@ -17,13 +17,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	std::vector<float> sverts;
-	create_splash(sverts,glm::vec2(12.5f,0),glm::vec2(510,720));
+	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),glm::vec2(SPLICE_TITLE_UPPER_START,720));
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
-	sh_shader.compile("./shader/vsplash.shader","./shader/fsplash.shader");
-	sh_shader.def_attributeF("position",2,0,3);
-	sh_shader.def_attributeF("edge_id",1,2,3);
-	sh_shader.upload_camera(Camera2D(1280,720));
+	sh_shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
+	sh_shader.def_attributeF("position",2,0,SPLICE_VERTEX_FLOAT_COUNT);
+	sh_shader.def_attributeF("edge_id",1,2,SPLICE_VERTEX_FLOAT_COUNT);
+	sh_shader.upload_camera(Camera2D(1280.f,720.f));
 
 	// text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
@@ -102,12 +102,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
-	// start multisampled render
+	// START MULTISAMPLED RENDER
 	msaa.bind();
 
 	// selection splash render
 	sh_buffer.bind();
 	sh_shader.enable();
+
+	// title splash upload & render
+	upload_splash_width(SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// START RENDER MENU BUFFER
@@ -153,9 +156,19 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 */
 void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u)
 {
-	std::vector<float> verts
-			= { l.x,l.y,0, u.x,u.y,2, u.x,u.y,1, u.x,u.y,2, l.x,l.y,0, l.x,l.y,3 };
-	sverts.insert(sverts.end(),verts.begin(),verts.end());
+	std::vector<float> verts = {
+		l.x,l.y,0, u.x,u.y,3, u.x,u.y,2, u.x,u.y,3, l.x,l.y,0, l.x,l.y,1
+	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
+}
+
+/*
+	TODO
+	NOTE: selection shader has to be enabled before calling this function
+*/
+void MainMenu::upload_splash_width(float le,float ue,bool hrz)
+{
+	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
+	sh_shader.upload_int("is_hrz",hrz);
 }
 
 /*

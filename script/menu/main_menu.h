@@ -19,6 +19,9 @@ constexpr uint8_t INFO_VERSION_DEVSTEP = 6;
 constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
+// system constants
+constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 3;
+
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
 constexpr glm::vec3 VRT_TITLE_END = glm::vec3(100,250,0);
@@ -28,6 +31,12 @@ constexpr glm::vec3 VRT_TITLE_TRANSITION = VRT_TITLE_END-VRT_TITLE_START;
 constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
 constexpr glm::vec3 VRT_TITLE_SCALESET = VRT_TITLE_END-glm::vec3(640,360,0);
 constexpr glm::vec3 HRZ_TITLE_SCALESET = HRZ_TITLE_END-glm::vec3(640,360,0);
+
+// splice positioning & transitions
+constexpr float SPLICE_TITLE_LOWER_START = 12.5f;
+constexpr float SPLICE_TITLE_UPPER_START = 510.f;
+constexpr float SPLICE_TITLE_LOWER_SWIDTH = 10.f;
+constexpr float SPLICE_TITLE_UPPER_SWIDTH = 100.f;
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
@@ -65,6 +74,7 @@ private:
 
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u);
+	void upload_splash_width(float le,float ue,bool hrz);
 
 	// system
 	void update_peripheral_annotations();
