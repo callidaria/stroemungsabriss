@@ -17,12 +17,18 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	std::vector<float> sverts;
-	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),glm::vec2(SPLICE_TITLE_UPPER_START,720));
+	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),glm::vec2(SPLICE_TITLE_UPPER_START,720),
+			glm::vec3(.5f,0,0));
+	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_LOWER_START),glm::vec2(1280,SPLICE_HEAD_UPPER_START),
+			SPLICE_HEAD_COLOUR);
+	create_splash(sverts,glm::vec2(SPLICE_SELECTION_LOWER_START,0),
+			glm::vec2(SPLICE_SELECTION_UPPER_START,720),SPLICE_SELECTION_COLOUR);
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
 	sh_shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
 	sh_shader.def_attributeF("position",2,0,SPLICE_VERTEX_FLOAT_COUNT);
-	sh_shader.def_attributeF("edge_id",1,2,SPLICE_VERTEX_FLOAT_COUNT);
+	sh_shader.def_attributeF("colour",3,2,SPLICE_VERTEX_FLOAT_COUNT);
+	sh_shader.def_attributeF("edge_id",1,5,SPLICE_VERTEX_FLOAT_COUNT);
 	sh_shader.upload_camera(Camera2D(1280.f,720.f));
 
 	// text setup
@@ -110,6 +116,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	sh_buffer.bind();
 	sh_shader.enable();
 
+	// head splash upload & render
+	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_HEAD_LOWER_WIDTH*mtransition,
+			SPLICE_HEAD_UPPER_WIDTH*mtransition,true);
+	glDrawArrays(GL_TRIANGLES,6,6);
+
+	// selection splash upload & render
+	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_SELECTION_LOWER_WIDTH*mtransition,
+			SPLICE_SELECTION_UPPER_WIDTH*mtransition,false);
+	glDrawArrays(GL_TRIANGLES,12,6);
+
 	// title splash upload & render
 	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
 	float tlext = SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD*mtransition,
@@ -158,10 +174,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 /*
 	TODO
 */
-void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u)
+void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
 {
 	std::vector<float> verts = {
-		l.x,l.y,0, u.x,u.y,3, u.x,u.y,2, u.x,u.y,3, l.x,l.y,0, l.x,l.y,1
+		l.x,l.y,c.x,c.y,c.z,0, u.x,u.y,c.x,c.y,c.z,3, u.x,u.y,c.x,c.y,c.z,2,
+		u.x,u.y,c.x,c.y,c.z,3, l.x,l.y,c.x,c.y,c.z,0, l.x,l.y,c.x,c.y,c.z,1
 	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
 }
 

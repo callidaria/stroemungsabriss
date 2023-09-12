@@ -20,7 +20,7 @@ constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
 // system constants
-constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 3;
+constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
@@ -32,7 +32,7 @@ constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
 constexpr glm::vec3 VRT_TITLE_SCALESET = VRT_TITLE_END-glm::vec3(640,360,0);
 constexpr glm::vec3 HRZ_TITLE_SCALESET = HRZ_TITLE_END-glm::vec3(640,360,0);
 
-// splice positioning & transitions
+// title splice
 constexpr float SPLICE_TITLE_LOWER_START = 12.5f;
 constexpr float SPLICE_TITLE_UPPER_START = 510.f;
 constexpr float SPLICE_TITLE_LOWER_SWIDTH = 10.f;
@@ -41,6 +41,21 @@ constexpr float SPLICE_TITLE_LOWER_MOD = 150.f;
 constexpr float SPLICE_TITLE_UPPER_MOD = -485.f;
 constexpr float SPLICE_TITLE_LWIDTH_MOD = 40.f;
 constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
+constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
+
+// head splice
+constexpr float SPLICE_HEAD_LOWER_START = 520.f;
+constexpr float SPLICE_HEAD_UPPER_START = 470.f;
+constexpr float SPLICE_HEAD_LOWER_WIDTH = 50.f;
+constexpr float SPLICE_HEAD_UPPER_WIDTH = 75.f;
+constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.5f,.5f,.0f);
+
+// selection splice
+constexpr float SPLICE_SELECTION_LOWER_START = 670.f;
+constexpr float SPLICE_SELECTION_UPPER_START = 820.f;
+constexpr float SPLICE_SELECTION_LOWER_WIDTH = 20.f;
+constexpr float SPLICE_SELECTION_UPPER_WIDTH = 125.f;
+constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0f,.5f,.5f);
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
@@ -77,7 +92,7 @@ public:
 private:
 
 	// splashes
-	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u);
+	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
 	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
 
 	// system
