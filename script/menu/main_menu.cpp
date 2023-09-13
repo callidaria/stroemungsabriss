@@ -156,6 +156,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// render menu
 	fb_menu.render(mtransition);
 	msaa.prepare();
+	msaa.sfb.upload_float("mtrans",mtransition);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,fb_menu.tex);
 	MSAA::render();

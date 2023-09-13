@@ -12,6 +12,8 @@
 #include "../struct/world_structures.h"
 #include "../world.h"
 
+#define COLOUR_COMPOSITION_NEO
+
 // information
 constexpr uint8_t INFO_VERSION_RELEASE = 0;
 constexpr uint8_t INFO_VERSION_SUBRELEASE = 0;
@@ -41,21 +43,29 @@ constexpr float SPLICE_TITLE_LOWER_MOD = 150.f;
 constexpr float SPLICE_TITLE_UPPER_MOD = -485.f;
 constexpr float SPLICE_TITLE_LWIDTH_MOD = 40.f;
 constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
-constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
 
 // head splice
 constexpr float SPLICE_HEAD_LOWER_START = 520.f;
 constexpr float SPLICE_HEAD_UPPER_START = 470.f;
-constexpr float SPLICE_HEAD_LOWER_WIDTH = 50.f;
-constexpr float SPLICE_HEAD_UPPER_WIDTH = 75.f;
-constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.5f,.5f,.0f);
+constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f;
+constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f;
 
 // selection splice
 constexpr float SPLICE_SELECTION_LOWER_START = 670.f;
 constexpr float SPLICE_SELECTION_UPPER_START = 820.f;
 constexpr float SPLICE_SELECTION_LOWER_WIDTH = 20.f;
 constexpr float SPLICE_SELECTION_UPPER_WIDTH = 125.f;
+
+// splice colours
+constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
+#ifdef COLOUR_COMPOSITION_NEO
+constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.75f,.4125f,0);
+constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0985f,.270f,.037f);
+#else
+constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.5f,.5f,.0f);
 constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0f,.5f,.5f);
+#endif
+// TODO: figure out colour scheme and if gamma correction in splice shader will be upheld
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
