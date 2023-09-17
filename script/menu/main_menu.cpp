@@ -41,16 +41,18 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	tcap_version = vmessage.length();
 
 	// menu options text
-	float mo_tcenter[MENU_MAIN_OPTION_COUNT];
-	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++)
-		mo_tcenter[i] = fnt_mopts.calc_wordwidth(main_options[i])/2.f;
-	glm::vec2 mo_startleft = MENU_OPTIONS_CLEFT+glm::vec2(mo_tcenter[0],0),
-		mo_fulladdr = MENU_OPTIONS_CADDR-glm::vec2(mo_tcenter[MENU_MAIN_OPTION_COUNT-1],0);
+	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
+	float mo_twidth[MENU_MAIN_OPTION_COUNT];
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
-		tx_mopts[i].add(main_options[i],mo_startleft+mo_fulladdr
-				* glm::vec2(i/((float)MENU_MAIN_OPTION_COUNT-1.f))
-				- glm::vec2(fnt_mopts.calc_wordwidth(main_options[i])/2.f,0));
+		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i]);
+		mo_twidth[i] = wwidth;
+		mo_prog.x -= wwidth;
+	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
+	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_twidth[0]/2.f,0);
+	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+		tx_mopts[i].add(main_options[i],mo_cursor);
 		tx_mopts[i].load();
+		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
 	}
 
 	// peripheral sensitive input request annotations
