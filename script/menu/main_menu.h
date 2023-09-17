@@ -22,6 +22,7 @@ constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
 // system constants
+constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 
 // title position & transition destination
@@ -73,6 +74,13 @@ constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 
+// menu option text position scope
+constexpr float MENU_OPTIONS_TSIZE = 35.f;
+constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE/2.f;
+constexpr glm::vec2 MENU_OPTIONS_CLEFT = glm::vec2(120,510)+glm::vec2(0,MENU_OPTIONS_HSIZE);
+constexpr glm::vec2 MENU_OPTIONS_CRIGHT = glm::vec2(1240,470)+glm::vec2(0,MENU_OPTIONS_HSIZE);
+constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
+
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
 constexpr float TITLE_SHIFTDOWN_TIMEOUT = 4.f;
@@ -115,8 +123,11 @@ private:
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
 	FrameBuffer fb_menu;
-	Text tx_dare = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",25,25)),
-		tx_version = Text(Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",15,15));
+	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
+	Text tx_dare = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25)),
+		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
+	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
 
 	// splashes
@@ -137,6 +148,10 @@ private:
 	float anim_timing = .0f;
 	float dt_tshiftdown = .0f,dt_tnormalize = .0f;
 	bool speedup = true;
+
+	// predefinitions
+	const char* main_options[MENU_MAIN_OPTION_COUNT]
+		= { "exit","options","extras","practice","load","continue","new game" };
 };
 
 #endif

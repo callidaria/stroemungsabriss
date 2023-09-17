@@ -31,7 +31,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	sh_shader.def_attributeF("edge_id",1,5,SPLICE_VERTEX_FLOAT_COUNT);
 	sh_shader.upload_camera(Camera2D(1280.f,720.f));
 
-	// text setup
+	// version annotation text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
 			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
 			+ std::to_string(INFO_VERSION_DEVSTEP)+INFO_VERSION_MODE_SUFFIX
@@ -39,6 +39,19 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	tx_version.add(vmessage.c_str(),TEXT_VERSION_POSITION);
 	tx_version.load();
 	tcap_version = vmessage.length();
+
+	// menu options text
+	float mo_tcenter[MENU_MAIN_OPTION_COUNT];
+	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++)
+		mo_tcenter[i] = fnt_mopts.calc_wordwidth(main_options[i])/2.f;
+	glm::vec2 mo_startleft = MENU_OPTIONS_CLEFT+glm::vec2(mo_tcenter[0],0),
+		mo_fulladdr = MENU_OPTIONS_CADDR-glm::vec2(mo_tcenter[MENU_MAIN_OPTION_COUNT-1],0);
+	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+		tx_mopts[i].add(main_options[i],mo_startleft+mo_fulladdr
+				* glm::vec2(i/((float)MENU_MAIN_OPTION_COUNT-1.f))
+				- glm::vec2(fnt_mopts.calc_wordwidth(main_options[i])/2.f,0));
+		tx_mopts[i].load();
+	}
 
 	// peripheral sensitive input request annotations
 	update_peripheral_annotations();
@@ -144,6 +157,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	tx_dare.render(tcap_dare*inv_mtransition,TEXT_DARE_COLOUR);
 	tx_version.prepare();
 	tx_version.render(tcap_version*inv_mtransition,TEXT_VERSION_COLOUR);
+
+	// render main options
+	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+		tx_mopts[i].prepare();
+		tx_mopts[i].render(strlen(main_options[i]),glm::vec4(.5f,1.f,.5f,mtransition));
+	}
 
 	// render titles
 	m_ccbf->r2d->prepare();

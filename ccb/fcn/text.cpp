@@ -21,7 +21,7 @@ Text::Text(Font f)
 */
 uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is very bad pracice with public method
 {
-	uint8_t i = get_spritesheet_location(c);
+	uint8_t i = font.get_spritesheet_location(c);
 	return add(i,p);
 }
 
@@ -35,10 +35,10 @@ uint32_t Text::add(char c,glm::vec2 p) // !!passing x increment like this is ver
 uint32_t Text::add(uint8_t i,glm::vec2 p)
 {
 	// character information write
-	ibv.push_back(p.x);ibv.push_back(p.y);
-	ibv.push_back(font.x[i]);ibv.push_back(font.y[i]);
-	ibv.push_back(font.wdt[i]);ibv.push_back(font.hgt[i]);
-	ibv.push_back(font.xo[i]);ibv.push_back(font.yo[i]);
+	ibv.push_back(p.x),ibv.push_back(p.y);
+	ibv.push_back(font.x[i]),ibv.push_back(font.y[i]);
+	ibv.push_back(font.wdt[i]),ibv.push_back(font.hgt[i]);
+	ibv.push_back(font.xo[i]),ibv.push_back(font.yo[i]);
 
 	return font.xa[i]*(font.mw/83.0f);
 	// ??do this with a vec2 pointer maybe & also with dynamic texdiv
@@ -87,7 +87,7 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 		uint16_t estm_wwidth = 0;
 		std::vector<uint8_t> char_ids;
 		for (auto c:wrd) {
-			uint8_t ssloc = get_spritesheet_location(c);
+			uint8_t ssloc = font.get_spritesheet_location(c);
 			estm_wwidth += font.xa[ssloc]*(font.mw/83.0f);	// ??outdated
 			char_ids.push_back(ssloc);
 		}
@@ -178,20 +178,3 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 	buffer.bind();
 	buffer.upload_vertices(font.v,sizeof(font.v));
 }
-
-/*
-	get_spritesheet_location(char) -> uint8_t
-	c: char to get spritesheet location id for
-	purpose: get spritesheet id for desired char, to reference char gfx in font
-	returns: spritesheet id of given char
-*/
-uint8_t Text::get_spritesheet_location(char c)
-{
-	int i = 0;
-	while (i<96) { // ??maybe alternate iteration until correct index that is more performant
-		if (font.id[i]==(int)c) break;
-		i++;
-	}
-	return i;
-}
-// FIXME: optimize please
