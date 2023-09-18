@@ -23,6 +23,7 @@ constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 
 // system constants
 constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
+constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 
 // title position & transition destination
@@ -52,10 +53,7 @@ constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f;
 constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f;
 
 // selection splice
-constexpr float SPLICE_SELECTION_LOWER_START = 670.f;
-constexpr float SPLICE_SELECTION_UPPER_START = 820.f;
-constexpr float SPLICE_SELECTION_LOWER_WIDTH = 20.f;
-constexpr float SPLICE_SELECTION_UPPER_WIDTH = 125.f;
+constexpr float SPLICE_SELECTION_WIDTH_ORG = 50.f;
 
 // splice colours
 constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
@@ -109,6 +107,9 @@ public:
 
 private:
 
+	// logic
+	uint8_t get_selected_main_option(float mx);
+
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
 	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
@@ -134,6 +135,10 @@ private:
 	Buffer sh_buffer = Buffer();
 	Shader sh_shader = Shader();
 
+	// text
+	float mo_cposition[MENU_MAIN_OPTION_COUNT];
+	float mo_twidth[MENU_MAIN_OPTION_COUNT];
+
 	// index
 	uint16_t index_rsprite,index_ranim;
 	uint8_t tcap_dare,tcap_version;
@@ -141,6 +146,9 @@ private:
 	// input
 	bool cpref_peripheral;
 	bool trg_lmb = false,trg_rmb = false;
+
+	// status
+	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
 
 	// animation
 	bool menu_action = false;

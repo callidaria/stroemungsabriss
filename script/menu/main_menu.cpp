@@ -21,8 +21,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 			glm::vec3(.5f,0,0));
 	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_LOWER_START),glm::vec2(1280,SPLICE_HEAD_UPPER_START),
 			SPLICE_HEAD_COLOUR);
-	create_splash(sverts,glm::vec2(SPLICE_SELECTION_LOWER_START,0),
-			glm::vec2(SPLICE_SELECTION_UPPER_START,720),SPLICE_SELECTION_COLOUR);
+	create_splash(sverts,glm::vec2(0),glm::vec2(0,720),SPLICE_SELECTION_COLOUR);
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
 	sh_shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
@@ -42,16 +41,16 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// menu options text
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
-	float mo_twidth[MENU_MAIN_OPTION_COUNT];
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
-		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i]);
+		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i])*.5f;
 		mo_twidth[i] = wwidth;
 		mo_prog.x -= wwidth;
 	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
-	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_twidth[0]/2.f,0);
+	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_twidth[0],0);
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].add(main_options[i],mo_cursor);
 		tx_mopts[i].load();
+		mo_cposition[i] = mo_cursor.x;
 		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
 	}
 
@@ -82,6 +81,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
 		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
+	vselect += ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
+			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
+	vselect = (m_ccbf->frame->mpref_peripheral)
+			? get_selected_main_option(m_ccbf->frame->mouse.mxfr) : vselect;
 	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
 
 	// timing
@@ -127,7 +130,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	msaa.bind();
 	Frame::clear();
 
-	// selection splash render
+	// splash render
 	sh_buffer.bind();
 	sh_shader.enable();
 
@@ -137,8 +140,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
-	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_SELECTION_LOWER_WIDTH*mtransition,
-			SPLICE_SELECTION_UPPER_WIDTH*mtransition,false);
+	modify_splash(glm::vec2(mo_cposition[vselect]+mo_twidth[vselect],0),
+			glm::vec2(mo_cposition[vselect]+mo_twidth[vselect],0),
+			SPLICE_SELECTION_WIDTH_ORG*mtransition,SPLICE_SELECTION_WIDTH_ORG*mtransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
 
 	// title splash upload & render
@@ -191,6 +195,17 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
 			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
 	speedup = (speedup&&!shiftdown_over)||normalize_over;
+}
+
+/*
+	TODO
+*/
+uint8_t MainMenu::get_selected_main_option(float mx)
+{
+	float tsmx = mx*1280.f;
+	uint8_t out_id = MENU_MAIN_OPTION_CAP;
+	while (out_id>=0&&tsmx<mo_cposition[out_id]) out_id--;
+	return out_id;
 }
 
 /*

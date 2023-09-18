@@ -199,6 +199,8 @@ void Frame::input(bool &running)
 		// update preferred peripheral
 		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
 				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
+		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
+				|| (m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN);
 	}
 }
 // face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y

@@ -104,7 +104,7 @@ private:
 		"RETURN","ESCAPE","BACKSPACE","TAB","SPACE","RIGHT","LEFT","DOWN","UP"
 	},cntnames[21] = {
 		"A","B","X","Y","OPTIONS","GUIDE","START","LSTICK","RSTICK","RSHOULDER","LSHOULDER",
-		"UP","DOWN","LEFT","RIGHT","CAPTURE","PADDLE 1","PADDLE 2","PADDLE 3","PADDLE 4","TPAD"
+		"UP","DOWN","LEFT","RIGHT","CAPTURE","PADDLE 1","PADDLE 2","PADDLE 3","PADDLE 4","TRIGGERPAD"
 	},axisnames[2] = { "LTRIGGER","RTRIGGER" };
 
 	// replacement addresses

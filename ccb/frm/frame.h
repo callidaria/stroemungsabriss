@@ -91,6 +91,7 @@ public:
 	bool event_active = false;
 	double time_mod = 1.0,time_delta = 0;
 	bool cpref_peripheral = false;
+	bool mpref_peripheral = false;
 
 	// input
 	std::vector<SDL_GameController*> m_gc;
