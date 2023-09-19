@@ -50,9 +50,9 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].add(main_options[i],mo_cursor);
 		tx_mopts[i].load();
-		mo_cposition[i] = mo_cursor.x;
+		mo_cposition[i] = mo_cursor;
 		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
-	}
+	} vrt_lwidth = rand()%(uint16_t)mo_twidth[vselect],vrt_uwidth = rand()%(uint16_t)mo_twidth[vselect];
 
 	// peripheral sensitive input request annotations
 	update_peripheral_annotations();
@@ -81,10 +81,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
 		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
-	vselect += ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
+	int8_t lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
-	vselect = (m_ccbf->frame->mpref_peripheral)
-			? get_selected_main_option(m_ccbf->frame->mouse.mxfr) : vselect;
 	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
 
 	// timing
@@ -101,6 +99,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	// TODO: compare linear transition with sinespeed transition implementation
 	float inv_mtransition = 1.f-mtransition;
+
+	// processing selection input
+	bool ch_select = lrmv!=0;
+	vselect += lrmv;
+	vselect = (m_ccbf->frame->mpref_peripheral)
+			? get_selected_main_option(m_ccbf->frame->mouse.mxfr,ch_select) : vselect;
 
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
@@ -140,9 +144,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
-	modify_splash(glm::vec2(mo_cposition[vselect]+mo_twidth[vselect],0),
-			glm::vec2(mo_cposition[vselect]+mo_twidth[vselect],0),
-			SPLICE_SELECTION_WIDTH_ORG*mtransition,SPLICE_SELECTION_WIDTH_ORG*mtransition,false);
+	vrt_lwidth = (ch_select) ? (rand()%(uint16_t)mo_twidth[vselect]) : vrt_lwidth,
+		vrt_uwidth = (ch_select) ? (rand()%(uint16_t)mo_twidth[vselect]) : vrt_uwidth;
+	glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_twidth[vselect],0);
+	glm::vec2 vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
+	glm::vec2 vrt_upos = glm::vec2(vrt_cpos.x,0);
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
 
 	// title splash upload & render
@@ -200,11 +207,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 /*
 	TODO
 */
-uint8_t MainMenu::get_selected_main_option(float mx)
+uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 {
 	float tsmx = mx*1280.f;
 	uint8_t out_id = MENU_MAIN_OPTION_CAP;
-	while (out_id>=0&&tsmx<mo_cposition[out_id]) out_id--;
+	while (out_id>0&&tsmx<mo_cposition[out_id].x) out_id--;
+	ch_select = ch_select||(out_id!=vselect);
 	return out_id;
 }
 
