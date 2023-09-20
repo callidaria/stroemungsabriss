@@ -52,7 +52,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 		tx_mopts[i].load();
 		mo_cposition[i] = mo_cursor;
 		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
-	} vrt_lwidth = rand()%(uint16_t)mo_twidth[vselect],vrt_uwidth = rand()%(uint16_t)mo_twidth[vselect];
+	}
 
 	// peripheral sensitive input request annotations
 	update_peripheral_annotations();
@@ -92,6 +92,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
 	// menu transition
+	bool req_transition = hit_a&&!menu_action;
 	menu_action = (menu_action||hit_a)&&!hit_b;
 	mtransition += (menu_action-!menu_action)*TRANSITION_SPEED*m_ccbf->frame->time_delta;
 	mtransition = (mtransition<.0f) ? .0f : (mtransition>1.f) ? 1.f : mtransition;
@@ -144,12 +145,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
-	vrt_lwidth = (ch_select) ? (rand()%(uint16_t)mo_twidth[vselect]) : vrt_lwidth,
-		vrt_uwidth = (ch_select) ? (rand()%(uint16_t)mo_twidth[vselect]) : vrt_uwidth;
-	glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_twidth[vselect],0);
-	glm::vec2 vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
-	glm::vec2 vrt_upos = glm::vec2(vrt_cpos.x,0);
-	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
+	if (ch_select||req_transition) {
+		vrt_lwidth = rand()%(uint16_t)mo_twidth[vselect],
+			vrt_uwidth = rand()%(uint16_t)mo_twidth[vselect];
+		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_twidth[vselect],0);
+		vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
+		glm::vec2 vrt_dir = vrt_cpos-vrt_lpos;
+		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
+	} modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
 
 	// title splash upload & render

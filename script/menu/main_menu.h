@@ -150,6 +150,7 @@ private:
 
 	// selectors
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
+	glm::vec2 vrt_lpos,vrt_upos;
 	uint16_t vrt_lwidth,vrt_uwidth;
 
 	// animation
