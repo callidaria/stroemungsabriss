@@ -40,7 +40,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	tcap_version = vmessage.length();
 
 	// menu options text
-	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i])*.5f;
 		mo_twidth[i] = wwidth;
@@ -214,8 +213,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 {
 	float tsmx = mx*1280.f;
-	uint8_t out_id = MENU_MAIN_OPTION_CAP;
-	while (out_id>0&&tsmx<mo_cposition[out_id].x) out_id--;
+	uint8_t out_id = vselect;
+	while (tsmx<(mo_cposition[out_id].x-mo_prog.x)&&out_id>0) out_id--;
+	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP) out_id++;
 	ch_select = ch_select||(out_id!=vselect);
 	return out_id;
 }

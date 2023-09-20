@@ -137,6 +137,7 @@ private:
 	Shader sh_shader = Shader();
 
 	// text
+	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
 	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
 	float mo_twidth[MENU_MAIN_OPTION_COUNT];
 
