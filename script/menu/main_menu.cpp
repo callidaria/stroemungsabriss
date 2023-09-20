@@ -41,11 +41,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// menu options text
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
-		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i])*.5f;
+		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i]);
 		mo_twidth[i] = wwidth;
+		mo_hwidth[i] = wwidth*.5f;
 		mo_prog.x -= wwidth;
 	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
-	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_twidth[0],0);
+	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_hwidth[0],0);
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].add(main_options[i],mo_cursor);
 		tx_mopts[i].load();
@@ -145,9 +146,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// selection splash upload & render
 	if (ch_select||req_transition) {
-		vrt_lwidth = rand()%(uint16_t)mo_twidth[vselect],
-			vrt_uwidth = rand()%(uint16_t)mo_twidth[vselect];
-		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_twidth[vselect],0);
+		vrt_lwidth = rand()%(uint16_t)mo_hwidth[vselect],
+			vrt_uwidth = rand()%(uint16_t)mo_hwidth[vselect];
+		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_hwidth[vselect],0);
 		vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
 		glm::vec2 vrt_dir = vrt_cpos-vrt_lpos;
 		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
@@ -215,10 +216,12 @@ uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 	float tsmx = mx*1280.f;
 	uint8_t out_id = vselect;
 	while (tsmx<(mo_cposition[out_id].x-mo_prog.x)&&out_id>0) out_id--;
-	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP) out_id++;
+	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP)
+		out_id++;
 	ch_select = ch_select||(out_id!=vselect);
 	return out_id;
 }
+// FIXME: halfed moveback but forward works well
 
 /*
 	TODO
