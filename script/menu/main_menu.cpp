@@ -75,6 +75,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// input
+	m_ccbf->iMap->stick_to_dpad();
 	bool plmb = m_ccbf->frame->mouse.mcl&&!trg_lmb,prmb = m_ccbf->frame->mouse.mcr&&!trg_rmb;
 	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
@@ -221,7 +222,6 @@ uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 	ch_select = ch_select||(out_id!=vselect);
 	return out_id;
 }
-// FIXME: halfed moveback but forward works well
 
 /*
 	TODO

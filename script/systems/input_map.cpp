@@ -131,12 +131,23 @@ void InputMap::precalculate_dpad()
 
 /*
 	precalculate_all() -> void
-	purpose: precalculate inputs for all actions ans store results for repeated usage
+	purpose: precalculate inputs for all actions and store results for repeated usage
 */
 void InputMap::precalculate_all()
 {
 	precalculate_vector();
 	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) precalculate(i);
+}
+
+/*
+	TODO
+*/
+void InputMap::stick_to_dpad()
+{
+	input_val[IMP_REQUP] = input_val[IMP_REQUP]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
+	input_val[IMP_REQDOWN] = input_val[IMP_REQDOWN]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[IMP_REQLEFT] = input_val[IMP_REQLEFT]||*cnt_lraxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[IMP_REQRIGHT] = input_val[IMP_REQRIGHT]||*cnt_lraxis>IMP_CONTROLLER_DEADZONE;
 }
 
 /*

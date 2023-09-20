@@ -53,6 +53,7 @@ public:
 	void precalculate_vector();
 	void precalculate_dpad();
 	void precalculate_all();
+	void stick_to_dpad();
 
 	// special
 	inline bool get_input_triggered(uint8_t id) { return input_val[id]&&!input_trg[id]; }
