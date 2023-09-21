@@ -26,14 +26,14 @@ struct Keyboard
 struct Mouse
 {
 	bool mcl = false,mcr = false;	// mouse button requests
-	int32_t mx,my;					// mouse positions x,y
-	float mxfr,myfr;				// mouse position x,y scaled to absolute range
-	int32_t mw;						// mouse wheel movements
+	int32_t mx,my;			// mouse positions x,y
+	float mxfr,myfr;		// mouse position x,y scaled to absolute range
+	int32_t mw;			// mouse wheel movements
 };
 
 struct XBox
 {
-	int xba[6];					// controller axis tilts
+	int xba[6];			// controller axis tilts
 	bool xbb[16] = { false };	// controller button requests
 };
 
@@ -58,7 +58,7 @@ public:
 	void print_fps();
 	static void gpu_vsync_on();
 	static inline void gpu_vsync_off() { SDL_GL_SetSwapInterval(0); }
-	inline void set_refresh_rate(uint16_t refresh_rate=60) { rate_delta = 1000/refresh_rate; }
+	inline void set_refresh_rate(double refresh_rate=60.0) { rate_delta = 1000.0/refresh_rate; }
 	void cpu_vsync();
 
 	// time
@@ -120,11 +120,11 @@ private:
 #ifdef BUILDISSUE_OLD_SDL_VERSION
 	//uint32_t past_ticks = 0,current_ticks = 0;
 	std::chrono::steady_clock::time_point past_ticks = std::chrono::steady_clock::now(),
-			current_ticks;
+			current_ticks,last_out = std::chrono::steady_clock::now();
 #else
 	uint64_t past_ticks = 0,current_ticks = 0;
 #endif
-	uint32_t fps = 0,temp_fps = 0,last_zero = 0,last_out = 0;
+	uint32_t fps = 0,temp_fps = 0;
 	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
