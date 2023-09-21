@@ -73,12 +73,14 @@ constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 
-// menu option text position scope
+// menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
 constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE/2.f;
 constexpr glm::vec2 MENU_OPTIONS_CLEFT = glm::vec2(120,510)+glm::vec2(0,MENU_OPTIONS_HSIZE);
 constexpr glm::vec2 MENU_OPTIONS_CRIGHT = glm::vec2(1240,470)+glm::vec2(0,MENU_OPTIONS_HSIZE);
 constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
+constexpr float MENU_OPTIONS_SCALE_THRES = 1.2f;
+constexpr uint8_t MENU_OPTIONS_RDEG_THRES = 16;
 
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
@@ -140,6 +142,7 @@ private:
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
 	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
 	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
+	float st_rot;
 
 	// index
 	uint16_t index_rsprite,index_ranim;

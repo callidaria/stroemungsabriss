@@ -96,6 +96,7 @@ int main(int argc,char** argv)
 		// input mapping
 		imap.update();
 		imap.precalculate_all();
+		imap.stick_to_dpad();
 
 		// render scene
 		world.render(run,reboot);

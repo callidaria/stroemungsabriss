@@ -42,14 +42,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	// menu options text
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i]);
-		mo_twidth[i] = wwidth;
-		mo_hwidth[i] = wwidth*.5f;
+		mo_twidth[i] = wwidth,mo_hwidth[i] = wwidth*.5f;
 		mo_prog.x -= wwidth;
 	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
 	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_hwidth[0],0);
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
-		tx_mopts[i].add(main_options[i],mo_cursor);
-		tx_mopts[i].load();
+		tx_mopts[i].add(main_options[i],glm::vec2(-mo_hwidth[i],0)),tx_mopts[i].load();
 		mo_cposition[i] = mo_cursor;
 		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
 	}
@@ -75,7 +73,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// input
-	m_ccbf->iMap->stick_to_dpad();
 	bool plmb = m_ccbf->frame->mouse.mcl&&!trg_lmb,prmb = m_ccbf->frame->mouse.mcr&&!trg_rmb;
 	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
@@ -129,6 +126,22 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale;
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 
+	// selection splash update calculations
+	if (ch_select||req_transition) {
+
+		// selector dimensions
+		vrt_lwidth = rand()%(uint16_t)mo_hwidth[vselect],
+			vrt_uwidth = rand()%(uint16_t)mo_hwidth[vselect];
+		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_hwidth[vselect],0);
+		vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
+		glm::vec2 vrt_dir = vrt_cpos-vrt_lpos;
+		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
+
+		// menu option text
+		st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+	}
+
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
@@ -146,16 +159,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
-	if (ch_select||req_transition) {
-		vrt_lwidth = rand()%(uint16_t)mo_hwidth[vselect],
-			vrt_uwidth = rand()%(uint16_t)mo_hwidth[vselect];
-		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_hwidth[vselect],0);
-		vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
-		glm::vec2 vrt_dir = vrt_cpos-vrt_lpos;
-		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
-		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
-	} modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
+	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions or too thin selectors
 
 	// title splash upload & render
 	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
@@ -179,7 +185,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// render main options
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].prepare();
-		tx_mopts[i].render(strlen(main_options[i]),glm::vec4(.5f,1.f,.5f,mtransition));
+		glm::mat4 opt_trans = glm::translate(glm::mat4(1.f),
+				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y,0));
+		glm::vec4 opt_colour = glm::vec4(.5f,1.f,.5f,mtransition);
+		if (i==vselect) {
+			opt_trans = glm::scale(opt_trans,glm::vec3(MENU_OPTIONS_SCALE_THRES));
+			opt_trans = glm::rotate(opt_trans,st_rot,glm::vec3(0,0,1));
+			opt_colour.z = 1.f;
+		} tx_mopts[i].set_scroll(opt_trans);
+		tx_mopts[i].render(strlen(main_options[i]),opt_colour);
 	}
 
 	// render titles
