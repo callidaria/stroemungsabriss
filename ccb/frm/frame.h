@@ -128,6 +128,7 @@ private:
 	double time_mod = 1.0,time_delta = 0;
 	uint32_t time_pticks,time_cticks = 0;
 	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
+	double stalled_time = .0;
 };
 
 #endif

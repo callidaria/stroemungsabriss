@@ -90,9 +90,9 @@ void Frame::print_fps()
 	fps++;
 	if (1000000000<=(std::chrono::steady_clock::now()-last_out).count()) {
 		last_out = std::chrono::steady_clock::now();
-		printf("\rFPS: %i  TIME MOD: %f",fps,time_mod);
+		printf("\r%ifps -> STALLED: %fms,  TIME MOD: %f",fps,stalled_time,time_mod);
 		fflush(stdout);
-		fps = 0;
+		fps = 0,stalled_time = 0;
 	}
 }
 
@@ -115,27 +115,20 @@ void Frame::gpu_vsync_on()
 */
 void Frame::cpu_vsync()
 {
-	// count continue
+	// delta calculation
 	past_ticks = current_ticks;
-	//current_ticks = SDL_GetTicks();
 	current_ticks = std::chrono::steady_clock::now();
-	//std::chrono::duration<double,std::milli> dt = current_ticks-past_ticks;
-	auto dt = (double)(current_ticks-past_ticks).count()/1000000.;
-	//std::cout << '\n' << dt << '<' << rate_delta << "\n\n";
+	std::chrono::duration<double,std::milli> dt = current_ticks-past_ticks;
 
-	// delay while counting second
-	//uint32_t delta_ticks = current_ticks-past_ticks;
-	if (dt<rate_delta) {
-		//SDL_Delay(rate_delta-(SDL_GetTicks()-past_ticks));
-		std::chrono::milliseconds delta_ticks((uint32_t)(rate_delta-dt));
-		std::cout << "STALL: " << (uint32_t)(rate_delta-dt) << '\n';
-		//std::this_thread::sleep_for(delta_ticks);
+	// process potential delay
+	if (dt.count()<rate_delta) {
+		double lft_delta = rate_delta-dt.count();
+		std::this_thread::sleep_for(std::chrono::milliseconds((uint32_t)lft_delta));
+		stalled_time += lft_delta;
 	}
-		/*std::chrono::duration<double,std::milli> sc = rate_delta-(SDL_GetTicks()-past_ticks),
-		std::this_thread::sleep_for(sc);*/
 }
-// FIXME: this doesn't make me feel right. i think there is a more satisfying solution
-// TODO: compare chrono implementation performance with getTicks implementation performance
+// FIXME: stall precision looses about 2 frames
+// FIXME: still a problem with doubled refresh rate for some unknown reason
 
 /*
 	calc_time_delta() -> void
