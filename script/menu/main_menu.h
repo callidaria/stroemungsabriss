@@ -142,7 +142,7 @@ private:
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
 	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
 	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
-	float st_rot;
+	float st_rot = .0f;
 
 	// index
 	uint16_t index_rsprite,index_ranim;
@@ -154,8 +154,8 @@ private:
 
 	// selectors
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
-	glm::vec2 vrt_lpos,vrt_upos;
-	uint16_t vrt_lwidth,vrt_uwidth;
+	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
+	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
 
 	// animation
 	bool menu_action = false;

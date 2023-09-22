@@ -149,31 +149,67 @@ void Frame::change_tmod(double goal,double rate)
 */
 void Frame::input(bool &running)
 {
-	// FIXME: this is loopcode. make it work as such !!branches!!
+	// process events and set input activity
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
 		event_active = true;
-		running = m_fe.type!=SDL_QUIT; // exit the program when closing is requested
 
-		// read keyboard input
-		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
-		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
+		// switch input handling (not my favourite necessarily)
+		switch (m_fe.type)
+		{
+
+		// keyboard input
+		case SDL_KEYDOWN: kb.ka[m_fe.key.keysym.scancode] = true;
+			break;
+		case SDL_KEYUP: kb.ka[m_fe.key.keysym.scancode] = false;
+			break;
+
+		// mouse input
+		case SDL_MOUSEMOTION:
+			SDL_GetMouseState(&mouse.mx,&mouse.my);
+			mouse.mxfr = (float)mouse.mx/w_res;
+			mouse.myfr = (float)(h_res-mouse.my)/h_res;
+			break;
+		case SDL_MOUSEBUTTONDOWN: mouse.mb[m_fe.button.button-1] = true;
+			break;
+		case SDL_MOUSEBUTTONUP: mouse.mb[m_fe.button.button-1] = false;
+			break;
+		case SDL_MOUSEWHEEL: mouse.mw = m_fe.wheel.y;
+			break;
+		// FIXME: button is able to break mouse button memory range
+
+		// controller input
+		case 
+
+		// controller hotswapping
+		case SDL_JOYDEVICEADDED:
+		case SDL_JOYDEVICEREMOVED:
+			kill_controllers();
+			load_controllers();
+			controller_remap = true;
+			break;
+
+		// window close request
+		case SDL_QUIT:running = false;
+			break;
+
+		}
+		// TODO: improve further, this seems really simple minded
+		//	a quick look into the assembly translation of this will surely motivate due to rage
+		// FIXME: switch input refuses to be read. conn ok but no prints
+
+		// update preferred peripheral
+		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
+				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
+		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
+				|| (m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN);
+
+		/*running = m_fe.type!=SDL_QUIT;
+
 		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
 			tline.pop_back();
-		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
+		if (m_fe.type==SDL_TEXTINPUT) tline += m_fe.text.text;
 
-		// read mouse axis
-		SDL_GetMouseState(&mouse.mx,&mouse.my);
-		mouse.mxfr = (float)mouse.mx/w_res;
-		mouse.myfr = (float)(h_res-mouse.my)/h_res;
-
-		// read mouse buttons
-		mouse.mcl = (m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
-				|| (mouse.mcl&&!(m_fe.button.button==SDL_BUTTON_LEFT
-				&& m_fe.type==SDL_MOUSEBUTTONUP));
-		mouse.mcr = (m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN)
-				|| (mouse.mcr&&!(m_fe.button.button==SDL_BUTTON_RIGHT
-				&& m_fe.type==SDL_MOUSEBUTTONUP));
 		mouse.mw = m_fe.wheel.y;
 
 		// check for controller plug-in
@@ -181,7 +217,7 @@ void Frame::input(bool &running)
 			kill_controllers();
 			load_controllers();
 			controller_remap = true;
-		}
+		}*/
 
 		// read controller input
 		bool relevant_motion = false;
@@ -194,13 +230,6 @@ void Frame::input(bool &running)
 				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),
 						(SDL_GameControllerButton)j);
 		}
-		// FIXME: switch input refuses to be read. conn ok but no prints
-
-		// update preferred peripheral
-		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
-				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
-		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
-				|| (m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN);
 	}
 }
 // face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y

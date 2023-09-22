@@ -202,7 +202,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
 
 		// if mouse button is pressen while console active
-		if (m_frame->mouse.mcl&&!activeonmcl) {
+		if (m_frame->mouse.mb[0]&&!activeonmcl) {
 
 			// catch mouse coordinates and print them
 			std::string mouse_out
@@ -215,7 +215,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		}
 
 		// prevent consecutive frame mouse click printout
-		activeonmcl = m_frame->mouse.mcl;
+		activeonmcl = m_frame->mouse.mb[0];
 
 		// rewrite console input line
 		cl.clear(); // ??maybe directly add and remove chars from text instead of rewrite

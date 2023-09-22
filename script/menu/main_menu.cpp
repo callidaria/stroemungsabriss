@@ -73,7 +73,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// input
-	bool plmb = m_ccbf->frame->mouse.mcl&&!trg_lmb,prmb = m_ccbf->frame->mouse.mcr&&!trg_rmb;
+	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
 	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
@@ -81,7 +81,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
 	int8_t lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
-	trg_lmb = m_ccbf->frame->mouse.mcl,trg_rmb = m_ccbf->frame->mouse.mcr;
+	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 
 	// timing
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;

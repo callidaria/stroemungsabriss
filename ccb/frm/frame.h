@@ -23,15 +23,15 @@ struct Keyboard
 
 struct Mouse
 {
-	bool mcl = false,mcr = false;	// mouse button requests
-	int32_t mx,my;					// mouse positions x,y
-	float mxfr,myfr;				// mouse position x,y scaled to absolute range
-	int32_t mw;						// mouse wheel movements
+	bool mb[3] = { false };		// mouse button requests
+	int32_t mx,my;			// mouse positions x,y
+	float mxfr,myfr;		// mouse position x,y scaled to absolute range
+	int32_t mw;			// mouse wheel movements
 };
 
 struct XBox
 {
-	int xba[6];					// controller axis tilts
+	int xba[6];			// controller axis tilts
 	bool xbb[16] = { false };	// controller button requests
 };
 
@@ -90,8 +90,7 @@ public:
 	int w_res,h_res;
 	bool event_active = false;
 	double time_mod = 1.0,time_delta = 0;
-	bool cpref_peripheral = false;
-	bool mpref_peripheral = false;
+	bool cpref_peripheral = false,mpref_peripheral = false;
 
 	// input
 	std::vector<SDL_GameController*> m_gc;
