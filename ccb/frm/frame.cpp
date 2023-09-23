@@ -153,8 +153,10 @@ void Frame::input(bool &running)
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
 		event_active = true;
+		bool relevant_motion = false;
 
 		// switch input handling (not my favourite necessarily)
+		int32_t motion;
 		switch (m_fe.type)
 		{
 
@@ -176,10 +178,19 @@ void Frame::input(bool &running)
 			break;
 		case SDL_MOUSEWHEEL: mouse.mw = m_fe.wheel.y;
 			break;
-		// FIXME: button is able to break mouse button memory range
 
 		// controller input
-		case 
+		case SDL_CONTROLLERAXISMOTION:
+			motion = SDL_GameControllerGetAxis(m_gc[0],(SDL_GameControllerAxis)m_fe.caxis.axis);
+			xb[0].xba[m_fe.caxis.axis] = motion;
+			relevant_motion = (abs(motion)>AXIS_MOTION_RELEVANCE)||relevant_motion;
+			break;
+		case SDL_CONTROLLERBUTTONDOWN: xb[0].xbb[m_fe.cbutton.button] = true;
+			break;
+		case SDL_CONTROLLERBUTTONUP: xb[0].xbb[m_fe.cbutton.button] = false;
+			break;
+		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
+		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers while a&b is exchanged
 
 		// controller hotswapping
 		case SDL_JOYDEVICEADDED:
@@ -190,9 +201,8 @@ void Frame::input(bool &running)
 			break;
 
 		// window close request
-		case SDL_QUIT:running = false;
+		case SDL_QUIT: running = false;
 			break;
-
 		}
 		// TODO: improve further, this seems really simple minded
 		//	a quick look into the assembly translation of this will surely motivate due to rage
@@ -204,36 +214,12 @@ void Frame::input(bool &running)
 		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
 				|| (m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN);
 
-		/*running = m_fe.type!=SDL_QUIT;
-
-		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
+		/*if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
 			tline.pop_back();
-		if (m_fe.type==SDL_TEXTINPUT) tline += m_fe.text.text;
-
-		mouse.mw = m_fe.wheel.y;
-
-		// check for controller plug-in
-		if (m_fe.type==SDL_JOYDEVICEADDED||m_fe.type==SDL_JOYDEVICEREMOVED) {
-			kill_controllers();
-			load_controllers();
-			controller_remap = true;
-		}*/
-
-		// read controller input
-		bool relevant_motion = false;
-		for (int i=0;i<m_gc.size();i++) {
-			for (int j=0;j<6;j++) {
-				int32_t motion = SDL_GameControllerGetAxis(m_gc.at(i),(SDL_GameControllerAxis)j);
-				xb.at(i).xba[j] = motion;
-				relevant_motion = (abs(motion)>AXIS_MOTION_RELEVANCE)||relevant_motion;
-			} for (int j=0;j<16;j++)
-				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),
-						(SDL_GameControllerButton)j);
-		}
+		if (m_fe.type==SDL_TEXTINPUT) tline += m_fe.text.text;*/
+		// TODO: make this code happen sensibly within this new input processing implementation
 	}
 }
-// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
-// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers, while a&b is exchanged
 
 /*
 	vanish() -> void

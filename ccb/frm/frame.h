@@ -18,21 +18,21 @@ constexpr uint32_t AXIS_MOTION_RELEVANCE = 7000;
 
 struct Keyboard
 {
-	bool ka[285] = { false };	// list of keyboard scan results
+	bool ka[285] = { false };
 };
 
 struct Mouse
 {
-	bool mb[3] = { false };		// mouse button requests
-	int32_t mx,my;			// mouse positions x,y
-	float mxfr,myfr;		// mouse position x,y scaled to absolute range
-	int32_t mw;			// mouse wheel movements
+	bool mb[5] = { false };
+	int32_t mx,my;
+	float mxfr,myfr;
+	int32_t mw;
 };
 
 struct XBox
 {
-	int xba[6];			// controller axis tilts
-	bool xbb[16] = { false };	// controller button requests
+	int32_t xba[6];
+	bool xbb[22] = { false };
 };
 
 class Frame
