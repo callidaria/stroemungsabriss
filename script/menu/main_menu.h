@@ -22,6 +22,8 @@ constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
 // system constants
+constexpr uint8_t MENU_GBUFFER_COLOUR = 0;
+constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
@@ -126,13 +128,14 @@ private:
 	CCBManager* m_ccbm;
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
-	FrameBuffer fb_menu;
+	FrameBuffer fb_menu,fb_slice;
+	GBuffer gbf_slices;
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
 	Text tx_dare = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25)),
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
-	MSAA msaa;
+	//MSAA msaa;
 
 	// splashes
 	Buffer sh_buffer = Buffer();

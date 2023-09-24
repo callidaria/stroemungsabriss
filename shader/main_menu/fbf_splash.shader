@@ -4,8 +4,9 @@ in vec2 TexCoords;
 
 out vec4 outColour;
 
-uniform sampler2D tex;
 uniform sampler2D menu_fb;
+uniform sampler2D gbuffer_colour;
+uniform sampler2D gbuffer_normals;
 
 // transition
 uniform float mtrans = .0;
@@ -13,8 +14,9 @@ uniform float mtrans = .0;
 void main()
 {
 	// buffer read
-	vec4 overlay_tex = texture(tex,TexCoords);
 	vec4 menu_tex = texture(menu_fb,TexCoords);
+	vec4 overlay_tex = texture(gbuffer_colour,TexCoords);
+	vec4 overlay_norm = texture(gbuffer_normals,TexCoords);
 
 	// text colour intersection inversion
 	vec3 menu_colour = abs(mtrans-menu_tex.rgb);

@@ -56,11 +56,20 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	update_peripheral_annotations();
 
 	// buffers
-	msaa = MSAA("./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader",
-			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
-	msaa.sfb.upload_int("menu_fb",1);
+	/*msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
+			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);*/
+	gbf_slices = GBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+	gbf_slices.add_colour_component();
+	gbf_slices.add_colour_component(true);
+	gbf_slices.finalize_buffer();
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
+	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader");
+	fb_slice.s.upload_int("menu_fb",0);
+	fb_slice.s.upload_int("gbuffer_colour",1);
+	fb_slice.s.upload_int("gbuffer_normals",2);
+	// TODO: multisample regardless of gbuffer trickery
 }
 
 /*
@@ -148,7 +157,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
 	// START MULTISAMPLED RENDER
-	msaa.bind();
+	//msaa.bind();
+	gbf_slices.bind();
 	Frame::clear();
 
 	// splash render
@@ -173,7 +183,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// START RENDER MENU BUFFER
-	msaa.blit();
+	//msaa.blit();
 	fb_menu.bind();
 	Frame::clear();
 
@@ -207,13 +217,21 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	FrameBuffer::close();
 
 	// render menu
+	/*msaa.bind();
+	Frame::clear();*/
 	fb_menu.render(mtransition);
-	msaa.prepare();
-	msaa.sfb.upload_float("mtrans",mtransition);
+	fb_slice.prepare();
+	fb_slice.tex = fb_menu.tex;
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,fb_menu.tex);
-	MSAA::render();
+	glBindTexture(GL_TEXTURE_2D,gbf_slices.t_colour_components[MENU_GBUFFER_COLOUR]);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,gbf_slices.t_colour_components[MENU_GBUFFER_NORMALS]);
 	glActiveTexture(GL_TEXTURE0);
+	fb_slice.s.upload_float("mtrans",mtransition);
+	fb_slice.render();
+	/*msaa.blit();
+	msaa.prepare();
+	MSAA::render();*/
 	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// finishing

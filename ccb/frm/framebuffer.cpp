@@ -57,14 +57,11 @@ void FrameBuffer::prepare()
 }
 
 /*
-	render() -> void
+	render_LIKE_A_FUCKING_IDIOT() -> void
 	purpose: draw buffer in combination with given shader manipulations
 */
 void FrameBuffer::render()
 {
-	prepare();
-
-	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }

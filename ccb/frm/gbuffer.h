@@ -38,6 +38,7 @@ private:
 
 	// content
 	uint32_t buffer;
+	std::vector<uint32_t> def_colour_components;
 
 	// attributes
 	bool has_depth = false;

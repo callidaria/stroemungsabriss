@@ -12,7 +12,7 @@ GBuffer::GBuffer(float wres,float hres)
 {
 	// generating framebuffer
 	glGenFramebuffers(1,&buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER,buffer);
+	bind();
 }
 
 /*
@@ -22,15 +22,14 @@ GBuffer::GBuffer(float wres,float hres)
 void GBuffer::add_colour_component(bool fcomp)
 {
 	// define component
-	uint32_t t_component;
+	uint32_t t_component,def_component = GL_COLOR_ATTACHMENT0+t_colour_components.size();
 	glGenTextures(1,&t_component);
 	glBindTexture(GL_TEXTURE_2D,t_component);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA+fcomp*0x6F12,w_res,h_res,0,GL_RGBA,
 			GL_UNSIGNED_INT+fcomp,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0+t_colour_components.size(),
-			GL_TEXTURE_2D,t_component,0);
-	t_colour_components.push_back(t_component);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,def_component,GL_TEXTURE_2D,t_component,0);
+	t_colour_components.push_back(t_component),def_colour_components.push_back(def_component);
 }
 
 /*
@@ -56,6 +55,6 @@ uint8_t GBuffer::add_depth_component()
 */
 void GBuffer::finalize_buffer()
 {
-	for (uint8_t i=0;i<t_colour_components.size();i++) glDrawBuffer(GL_COLOR_ATTACHMENT0+i);
+	glDrawBuffers(def_colour_components.size(),&def_colour_components[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
