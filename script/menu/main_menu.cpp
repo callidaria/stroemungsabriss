@@ -139,7 +139,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
 
 		// menu option text
-		st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+		//st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+		st_rot = 0;
+		// disabled due to pseudoshadow implementation testing simplification
 	}
 
 	// peripheral switch for input request annotation

@@ -276,6 +276,12 @@ uint8_t Renderer3D::add_target(Frame* frame)
 {
 	// gbuffer setup
 	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
+	gbuffer.add_colour_component();
+	gbuffer.add_colour_component(true);
+	gbuffer.add_colour_component(true);
+	gbuffer.add_colour_component(true);
+	gbuffer.add_depth_component();
+	gbuffer.finalize_buffer();
 
 	// deferred shading buffer setup
 	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
@@ -362,13 +368,13 @@ void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].dbuffer.prepare();
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_COLOUR]);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_position);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_POSITION]);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_normals);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_NORMALS]);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_materials);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_MATERIALS]);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,shadow_map);
 	glActiveTexture(GL_TEXTURE0);
