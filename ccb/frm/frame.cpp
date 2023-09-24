@@ -286,11 +286,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
-
-	// controller setup
-	kill_controllers();
-	load_controllers();
-	cpref_peripheral = xb.size();
 }
 // FIXME: opening the window will cause doubled controller load
 

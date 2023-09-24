@@ -99,7 +99,7 @@ public:
 	Mouse mouse;
 	std::vector<XBox> xb;
 	std::string tline = "";
-	bool controller_remap = true;
+	bool controller_remap = false;
 
 private:
 
