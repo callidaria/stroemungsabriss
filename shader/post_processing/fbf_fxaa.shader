@@ -116,6 +116,12 @@ void main()
 		i++;
 	}
 
-	// test return
-	outColour = vec4(.0,1.,.0,1.);
+	// edge distance
+	float negDistance = (TexCoords.x-pxPos[0].x)+(TexCoords.y-pxPos[0].y);
+	float posDistance = (pxPos[1].x-TexCoords.x)+(pxPos[1].y-TexCoords.y);
+	float ofsDistance = -min(negDistance,posDistance)/(negDistance+posDistance)+.5;
+
+	// calculate final coordinate
+	vec2 fUV = TexCoords+vec2(edgeVert,edgeHorz)*vec2(ofsDistance)*pxStep;
+	outColour = texture(tex,fUV);
 }
