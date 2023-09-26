@@ -56,20 +56,27 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	update_peripheral_annotations();
 
 	// buffers
-	/*msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
-			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);*/
+#if FORCE_CONVENTIONAL_MULTISAMPLE
+	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
+			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
+	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
+#else
+	fb_fxaa = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/post_processing/fbf_fxaa.shader");
 	gbf_slices = GBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 	gbf_slices.add_colour_component();
 	gbf_slices.add_colour_component(true);
 	gbf_slices.finalize_buffer();
+#endif
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader");
-	fb_slice.s.upload_int("menu_fb",0);
-	fb_slice.s.upload_int("gbuffer_colour",1);
-	fb_slice.s.upload_int("gbuffer_normals",2);
-	// TODO: multisample regardless of gbuffer trickery
+	fb_slice.s.upload_int("gbuffer_colour",0);
+	fb_slice.s.upload_int("gbuffer_normals",1);
+	fb_slice.s.upload_int("menu_fb",2);
+	// TODO: stop aliasing regardless of gbuffer trickery
 }
 
 /*
@@ -157,8 +164,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
 	// START MULTISAMPLED RENDER
-	//msaa.bind();
+#if FORCE_CONVENTIONAL_MULTISAMPLE
+	msaa.bind();
+#else
 	gbf_slices.bind();
+#endif
 	Frame::clear();
 
 	// splash render
@@ -182,8 +192,26 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
+#if FORCE_CONVENTIONAL_MULTISAMPLE
+	msaa.blit();
+	fb_nslice.bind();
+	Frame::clear();
+
+	// head splash upload & render
+	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_HEAD_LOWER_WIDTH*mtransition,
+			SPLICE_HEAD_UPPER_WIDTH*mtransition,true);
+	glDrawArrays(GL_TRIANGLES,6,6);
+
+	// selection splash upload & render
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
+	glDrawArrays(GL_TRIANGLES,12,6);
+
+	// title splash upload & render
+	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
+	glDrawArrays(GL_TRIANGLES,0,6);
+#endif
+
 	// START RENDER MENU BUFFER
-	//msaa.blit();
 	fb_menu.bind();
 	Frame::clear();
 
@@ -215,24 +243,44 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// STOP RENDER MENU BUFFER
 	FrameBuffer::close();
+#if !FORCE_CONVENTIONAL_MULTISAMPLE
+	fb_fxaa.bind();
+	Frame::clear();
+#endif
 
 	// render menu
-	/*msaa.bind();
-	Frame::clear();*/
 	fb_menu.render(mtransition);
+#if FORCE_CONVENTIONAL_MULTISAMPLE
+	fb_menu.render(mtransition);
+	fb_slice.bind();
+	Frame::clear();
+	msaa.prepare();
+	MSAA::render();
+	FrameBuffer::close();
+#else
+	fb_slice.tex = gbf_slices.t_colour_components[MENU_GBUFFER_COLOUR];
+#endif
+
+	// render overlay
 	fb_slice.prepare();
-	fb_slice.tex = fb_menu.tex;
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,gbf_slices.t_colour_components[MENU_GBUFFER_COLOUR]);
-	glActiveTexture(GL_TEXTURE2);
+#if FORCE_CONVENTIONAL_MULTISAMPLE
+	glBindTexture(GL_TEXTURE_2D,fb_nslice.tex);
+#else
 	glBindTexture(GL_TEXTURE_2D,gbf_slices.t_colour_components[MENU_GBUFFER_NORMALS]);
+#endif
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D,fb_menu.tex);
 	glActiveTexture(GL_TEXTURE0);
 	fb_slice.s.upload_float("mtrans",mtransition);
 	fb_slice.render();
-	/*msaa.blit();
-	msaa.prepare();
-	MSAA::render();*/
 	// FIXME: remove special treatment and transfer to a more controllable implementation
+
+#if !FORCE_CONVENTIONAL_MULTISAMPLE
+	FrameBuffer::close();
+	fb_fxaa.prepare();
+	fb_fxaa.render();
+#endif
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,

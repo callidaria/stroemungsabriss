@@ -4,9 +4,9 @@ in vec2 TexCoords;
 
 out vec4 outColour;
 
-uniform sampler2D menu_fb;
 uniform sampler2D gbuffer_colour;
 uniform sampler2D gbuffer_normals;
+uniform sampler2D menu_fb;
 
 // transition
 uniform float mtrans = .0;

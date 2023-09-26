@@ -13,6 +13,7 @@
 #include "../world.h"
 
 #define COLOUR_COMPOSITION_NEO
+#define FORCE_CONVENTIONAL_MULTISAMPLE 0
 
 // information
 constexpr uint8_t INFO_VERSION_RELEASE = 0;
@@ -128,14 +129,14 @@ private:
 	CCBManager* m_ccbm;
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
-	FrameBuffer fb_menu,fb_slice;
+	FrameBuffer fb_menu,fb_nslice,fb_slice,fb_fxaa;
 	GBuffer gbf_slices;
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
 	Text tx_dare = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25)),
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
-	//MSAA msaa;
+	MSAA msaa;
 
 	// splashes
 	Buffer sh_buffer = Buffer();
