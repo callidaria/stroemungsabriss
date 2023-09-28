@@ -14,9 +14,10 @@
 
 #include <AL/alc.h>
 
-#define BUILDISSUE_OLD_SDL_VERSION
+#include "../mat/toolbox.h"
 
-constexpr double FRAME_REFRATE_DEFAULT_DELTA = 1000.0/60.0;
+// timing
+constexpr double FRAME_REFRATE_DEFAULT_DELTA = 1./60.;
 
 struct Keyboard
 {
@@ -54,17 +55,17 @@ public:
 	static void clear(float cr=0,float cg=0,float cb=0);
 	void update();
 
-	// fps
-	void print_fps();
-	static void gpu_vsync_on();
-	static inline void gpu_vsync_off() { SDL_GL_SetSwapInterval(0); }
-	inline void set_refresh_rate(double refresh_rate=60.0) { rate_delta = 1000.0/refresh_rate; }
-	void cpu_vsync();
-
 	// time
 	void calc_time_delta();
 	void set_tmod(double tmod);
 	void change_tmod(double goal,double rate);
+
+	// fps
+	inline void set_refresh_rate(double refresh_rate=60.0) { rate_delta = 1./refresh_rate; }
+	static void gpu_vsync_on();
+	static inline void gpu_vsync_off() { SDL_GL_SetSwapInterval(0); }
+	void cpu_vsync();
+	void print_fps();
 
 	// controlling
 	void input(uint32_t &running);
@@ -82,6 +83,7 @@ public:
 
 private:
 
+	// setup helper
 	void init();
 	void setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
 			SDL_WindowFlags fs);
@@ -117,16 +119,10 @@ private:
 	ALCcontext* m_alccon;
 
 	// time & vsync
-#ifdef BUILDISSUE_OLD_SDL_VERSION
-	//uint32_t past_ticks = 0,current_ticks = 0;
-	std::chrono::steady_clock::time_point past_ticks = std::chrono::steady_clock::now(),
-			current_ticks,last_out = std::chrono::steady_clock::now();
-#else
-	uint64_t past_ticks = 0,current_ticks = 0;
-#endif
+	std::chrono::steady_clock::time_point past_ticks,curr_ticks = std::chrono::steady_clock::now(),
+			last_out = std::chrono::steady_clock::now();
 	uint32_t fps = 0,temp_fps = 0;
-	double time_mod = 1.0,time_delta = 0;
-	uint32_t time_pticks,time_cticks = 0;
+	double time_mod = 1.,time_delta = .0,time_delta_nmod = .0;
 	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
 	double stalled_time = .0;
 };

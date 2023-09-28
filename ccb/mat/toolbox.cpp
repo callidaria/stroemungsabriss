@@ -108,7 +108,7 @@ float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 { return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
 
 /*
-	start_debug_logging(DebugLogData&,const char*) -> void
+	start_debug_logging(DebugLogData&,const char*) -> void (static) !O(1)
 	purpose: start time difference debug recording
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 	\param tname: title of debug log, to describe output information to recognize their allegiance
@@ -116,13 +116,13 @@ float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
 {
 	dld.task_name = tname;
-	dld.last_ticks = SDL_GetTicks();
+	dld.last_ticks = std::chrono::steady_clock::now();
 	dld.key_list = {  };
 	printf("\033[1;35mprocessing -> %s\033[0m",tname);
 }
 
 /*
-	add_timekey(DebugLogData&,const char*) -> void
+	add_timekey(DebugLogData&,const char*) -> void (static) !O(1)
 	purpose: create a timekey, recording the time difference since the last key or the data creation
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 	\param kname: string id of created key, to describe what was achieved within the recorded time
@@ -131,14 +131,15 @@ void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 {
 	DebugLogKey nkey;
 	nkey.key_name = kname;
-	nkey.delta_ticks = SDL_GetTicks()-dld.last_ticks;
+	nkey.delta_ticks = (std::chrono::steady_clock::now()-dld.last_ticks).count()
+			* CONVERSION_MULT_MILLISECONDS;
 	dld.key_list.push_back(nkey);
-	dld.last_ticks = SDL_GetTicks();
+	dld.last_ticks = std::chrono::steady_clock::now();
 	printf("...");
 }
 
 /*
-	flush_debug_logging(DebugLogData) -> void
+	flush_debug_logging(DebugLogData) -> void (static) !O(1)
 	purpose: writes structured runtime debug log data to the console
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 */
@@ -147,13 +148,13 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 	printf("\n----------------------------------------\n");
 	printf("| \033[1;34m%s\033[0m\n",dld.task_name);
 	printf("----------------------------------------\n");
-	uint32_t total_time = 0;
+	double total_time = .0;
 	for(auto key : dld.key_list) {
-		printf("| \033[1;32m%s\033[0m: \033[1;33m%i\033[0m\n",key.key_name,key.delta_ticks);
+		printf("| \033[1;32m%s\033[0m: \033[1;33m%fms\033[0m\n",key.key_name,key.delta_ticks);
 		total_time += key.delta_ticks;
 	} printf("----------------------------------------\n");
-	printf("| total time: \033[1;35m%i\033[0m\n",total_time);
-	printf("----------------------------------------\n");
+	printf("| total time: \033[1;35m%fms\033[0m\n",total_time);
+	printf("----------------------------------------\n\n");
 }
 
 /*

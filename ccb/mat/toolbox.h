@@ -2,6 +2,7 @@
 #define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
+#include <chrono>
 #include <vector>
 
 #include <GL/glew.h>
@@ -22,13 +23,24 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+#define CALIBRA_DEBUG_OUTPUT_LOAD
+
+// conversion
+constexpr uint32_t CONVERSION_THRES_MILLISECONDS = 1000;
+constexpr uint32_t CONVERSION_THRES_MICROSECONDS = 1000000;
+constexpr uint32_t CONVERSION_THRES_NANOSECONDS = 1000000000;
+constexpr double CONVERSION_MULT_MICROSECONDS = .001;
+constexpr double CONVERSION_MULT_MILLISECONDS = .000001;
+constexpr double CONVERSION_MULT_SECONDS = .000000001;
+
+// pattern
 constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
 
 // debug timing keys to record individual loadtimes for task sequences
 struct DebugLogKey
 {
 	const char* key_name;
-	uint32_t delta_ticks;
+	double delta_ticks;
 };
 
 // structure to hold all timing debug data for a single method
@@ -36,7 +48,7 @@ struct DebugLogData
 {
 	const char* task_name;
 	std::vector<DebugLogKey> key_list;
-	uint32_t last_ticks;
+	std::chrono::steady_clock::time_point last_ticks;
 };
 
 class Toolbox

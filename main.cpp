@@ -91,9 +91,9 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.print_fps();
-		f.cpu_vsync();
 		f.calc_time_delta();
+		f.cpu_vsync();
+		f.print_fps();
 		f.input(run);
 
 		// input mapping

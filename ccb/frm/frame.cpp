@@ -82,70 +82,15 @@ void Frame::update()
 { SDL_GL_SwapWindow(m_frame); }
 
 /*
-	print_fps() -> void
-	purpose: prints current fps and uts into cascabel console or terminal
-*/
-void Frame::print_fps()
-{
-	fps++;
-	if (1000000000<=(std::chrono::steady_clock::now()-last_out).count()) {
-		last_out = std::chrono::steady_clock::now();
-		printf("\r%ifps -> STALLED: %fms,  TIME MOD: %f",fps,stalled_time,time_mod);
-		fflush(stdout);
-		fps = 0,stalled_time = 0;
-	}
-}
-
-/*
-	gpu_vsync_on() -> void (static) !O(1)b
-	purpose: enable GPU vsync (adaptive if possible)
-*/
-void Frame::gpu_vsync_on()
-{
-	if (SDL_GL_SetSwapInterval(-1)==-1) {
-		printf("\033[1;31madaptive vsync not supported\033[0m\n");
-		SDL_GL_SetSwapInterval(1);
-	}
-}
-
-/*
-	cpu_vsync(uint8_t) -> void !O(1)b
-	purpose: capping frames per second to given value
-	TODO: redo this
-*/
-void Frame::cpu_vsync()
-{
-	// delta calculation
-	past_ticks = current_ticks;
-	current_ticks = std::chrono::steady_clock::now();
-	std::chrono::duration<double,std::milli> dt = current_ticks-past_ticks;
-
-	// process potential delay
-	if (dt.count()<rate_delta) {
-		double lft_delta = rate_delta-dt.count();
-		std::this_thread::sleep_for(std::chrono::milliseconds((uint32_t)lft_delta));
-		stalled_time += lft_delta;
-	}
-}
-// FIXME: stall precision looses about 2 frames
-// FIXME: still a problem with doubled refresh rate for some unknown reason
-
-/*
 	calc_time_delta() -> void
 	purpose: calculate time delta to disconnect frame from update and make physics timebased
 */
 void Frame::calc_time_delta()
 {
-	// circle ticks
-	time_pticks = time_cticks;
-#ifdef BUILDISSUE_OLD_SDL_VERSION
-	time_cticks = SDL_GetTicks();
-#else
-	time_cticks = SDL_GetTicks64();
-#endif
-
-	// calculate time delta
-	time_delta = ((time_cticks-time_pticks)/1000.0)*time_mod;
+	past_ticks = curr_ticks;
+	curr_ticks = std::chrono::steady_clock::now();
+	time_delta_nmod = (curr_ticks-past_ticks).count()*CONVERSION_MULT_SECONDS;
+	time_delta = time_delta_nmod*time_mod;
 }
 
 /*
@@ -165,6 +110,51 @@ void Frame::set_tmod(double tmod)
 */
 void Frame::change_tmod(double goal,double rate)
 { time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
+
+/*
+	gpu_vsync_on() -> void (static) !O(1)b
+	purpose: enable GPU vsync (adaptive if possible)
+*/
+void Frame::gpu_vsync_on()
+{
+	if (SDL_GL_SetSwapInterval(-1)==-1) {
+		printf("\033[1;31madaptive vsync not supported\033[0m\n");
+		SDL_GL_SetSwapInterval(1);
+	}
+}
+
+/*
+	cpu_vsync() -> void !O(1)b
+	purpose: capping frames per second to given value
+	\note calc_time_delta() has to be run before, but within the same frame (updates clock progress)
+*/
+void Frame::cpu_vsync()
+{
+	if (time_delta_nmod<rate_delta) {
+		double lft_delta = rate_delta-time_delta_nmod;
+		std::this_thread::sleep_for(std::chrono::milliseconds(
+				(uint32_t)(lft_delta*CONVERSION_THRES_MILLISECONDS)));
+		stalled_time += lft_delta;
+	}
+}
+// FIXME: stall precision looses about 2 frames
+// FIXME: still a problem with doubled refresh rate for some unknown reason
+
+/*
+	print_fps() -> void
+	purpose: prints current fps and uts into cascabel console or terminal
+*/
+void Frame::print_fps()
+{
+	fps++;
+	if (CONVERSION_THRES_NANOSECONDS<=(std::chrono::steady_clock::now()-last_out).count()) {
+		last_out = std::chrono::steady_clock::now();
+		printf("\r%ifps -> processing: %fs,  tmod: %f",fps,1.-stalled_time,time_mod);
+		fflush(stdout);
+		fps = 0,stalled_time = 0;
+	}
+}
+// FIXME: NEGATIVE?!?!?!? PROCESSING TIME?!
 
 /*
 	input(uint32_t&,bool) -> void
@@ -253,6 +243,11 @@ void Frame::vanish()
 */
 void Frame::init()
 {
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	DebugLogData dld;
+	Toolbox::start_debug_logging(dld,"Window Initialization");
+#endif
+
 	// sdl setup
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
@@ -262,6 +257,11 @@ void Frame::init()
 	SDL_StopTextInput();
 	//SDL_ShowCursor(SDL_DISABLE);
 	// TODO: dynamically hide the cursor, when controller input is mainly used
+
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	Toolbox::add_timekey(dld,"SDL Settings");
+	Toolbox::flush_debug_logging(dld);
+#endif
 }
 
 /*
@@ -273,10 +273,19 @@ void Frame::init()
 void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
 		SDL_WindowFlags fs)
 {
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	DebugLogData dld;
+	Toolbox::start_debug_logging(dld,"OpenGL Setup");
+#endif
+
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
 	m_context = create_new_context();
+
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	Toolbox::add_timekey(dld,"Window Creation");
+#endif
 
 	// opengl setup
 	glewInit();
@@ -290,10 +299,19 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glViewport(0,0,width,height);
 
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	Toolbox::add_timekey(dld,"OpenGL Initialization");
+#endif
+
 	// openal setup
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
+
+#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
+	Toolbox::add_timekey(dld,"Audio Setup");
+	Toolbox::flush_debug_logging(dld);
+#endif
 }
 
 /*
