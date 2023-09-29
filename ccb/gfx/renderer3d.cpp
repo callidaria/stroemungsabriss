@@ -186,8 +186,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 
 	// load animations
 	abuffer.bind();
-	abuffer.upload_vertices(v_animation);
-	abuffer.upload_elements(e_animation);
+	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
 	as3d.def_attributeF("position",3,0,ANIMATION_MAP_REPEAT),
 			as3d.def_attributeF("texCoords",2,3,ANIMATION_MAP_REPEAT),

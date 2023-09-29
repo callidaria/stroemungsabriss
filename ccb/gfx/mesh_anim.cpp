@@ -212,7 +212,7 @@ void MeshAnimation::interpolate(double dt)
 }
 
 /*
-	operator<<(std::ostream&,MeshAnimation& const) -> std::ostream& (friend)
+	operator<<(std::ostream&,MeshAnimation& const) -> std::ostream& (friend) joints:!O(n)
 	purpose: make animation object information console printable
 	conforming to: operator definition
 */
