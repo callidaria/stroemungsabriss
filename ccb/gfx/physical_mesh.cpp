@@ -15,7 +15,7 @@
 */
 PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char* inorm_path,
 		const char* imtl_path,const char* iems_path,glm::vec3 position,float scale,
-		glm::vec3 rotation,uint32_t &mofs)
+		glm::vec3 rotation,std::vector<float> &vl,uint32_t &mofs)
 	: tex_path(itex_path),norm_path(inorm_path),mtl_path(imtl_path),ems_path(iems_path),offset(mofs)
 {
 	// generate textures
@@ -25,10 +25,7 @@ PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char
 	glGenTextures(1,&tex_emission);
 
 	// load object
-	Toolbox::load_object(obj_path,verts,position,scale,rotation);
-
-	// save and increase offset for phyiscal mesh render index
-	size = verts.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
+	size = Toolbox::load_object(obj_path,vl,position,scale,rotation);
 	mofs += size;
 }
 

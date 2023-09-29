@@ -8,8 +8,9 @@
 	scl: direct modification of object scaling
 	rot: direct modification of vertex rotation around the object's origin point
 	purpose: load object from file
+	// TODO: update documentation
 */
-void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
 {
 	// setup vertex information lists
@@ -62,6 +63,7 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 	}
 
 	// translate vertex data to object vertices
+	uint32_t out = 0;
 	glm::vec3 tg(1.0f);
 	for(int i=0;i<ovi.size();i++) {
 
@@ -91,11 +93,12 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		rotate_vector(tn,rot);
 
 		// save data to buffer vector
-		ov.push_back(tv.x);ov.push_back(tv.y);ov.push_back(tv.z);		// vertex positions
-		ov.push_back(tu.x);ov.push_back(tu.y);							// texture coordinates
-		ov.push_back(tn.x);ov.push_back(tn.y);ov.push_back(tn.z);		// normals
-		ov.push_back(tg.x);ov.push_back(tg.y);ov.push_back(tg.z);		// tangents
-	}
+		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z),	// vertex positions
+		ov.push_back(tu.x),ov.push_back(tu.y),						// texture coordinates
+		ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z),	// normals
+		ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);	// tangents
+		out++;
+	} return out;
 }
 
 /*

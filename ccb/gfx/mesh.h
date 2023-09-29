@@ -23,7 +23,7 @@ public:
 
 	// construction
 	Mesh(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-			glm::vec3 ip,float is,glm::vec3 ir,uint32_t &mofs);
+			glm::vec3 ip,float is,glm::vec3 ir,std::vector<float> &vl,uint32_t &mofs);
 	~Mesh() {  }
 
 	// setup
@@ -32,7 +32,7 @@ public:
 public:
 
 	// upload data
-	std::vector<float> v;
+	//std::vector<float> v;
 	uint32_t tex,specmap,normap,emitmap;
 
 	// transformation

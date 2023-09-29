@@ -44,7 +44,7 @@ class Toolbox
 public:
 
 	// loader
-	static void load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+	static uint32_t load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 			float scl,glm::vec3 rot);
 
 	// math helper

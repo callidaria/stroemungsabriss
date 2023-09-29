@@ -11,7 +11,7 @@
 	\param mofs: self increasing offset, which saves the buffer offset for later draw calls
 */
 MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,uint32_t &mofs)
+			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs)
 	: path_colour(ipcol),path_normals(ipnorm),path_materials(ipmat),path_emission(ipemit)
 {
 	// texture generation
@@ -114,6 +114,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 	uint16_t armature_offset = get_joint_id(cmesh->mBones[0]->mName.C_Str());
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
+	// calculate element array offset before pushing to vertex list
+	uint32_t eoffset = vl.size()/ANIMATION_MAP_REPEAT;
+
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
 	float vbindex[cmesh->mNumVertices][BONE_INFLUENCE_STACK_RANGE] = { 0 };
@@ -151,34 +154,35 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
-		verts.push_back(position.x),verts.push_back(position.y),verts.push_back(position.z);
+		vl.push_back(position.x),vl.push_back(position.y),vl.push_back(position.z);
 
 		// extract texture coordinates
 		aiVector3D tex_coords = cmesh->mTextureCoords[0][i];
-		verts.push_back(tex_coords.x),verts.push_back(tex_coords.y);
+		vl.push_back(tex_coords.x),vl.push_back(tex_coords.y);
 
 		// extract normals
 		aiVector3D normals = cmesh->mNormals[i];
-		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
+		vl.push_back(normals.x),vl.push_back(normals.y),vl.push_back(normals.z);
 
 		// tangent for normal mapping
 		aiVector3D tangent = cmesh->mTangents[i];
-		verts.push_back(tangent.x),verts.push_back(tangent.y),verts.push_back(tangent.z);
+		vl.push_back(tangent.x),vl.push_back(tangent.y),vl.push_back(tangent.z);
 
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
 
 		// insert influencing bone indices & relating weights
-		verts.push_back(vbindex[i][0]),verts.push_back(vbindex[i][1]),
-				verts.push_back(vbindex[i][2]),verts.push_back(vbindex[i][3]);
-		verts.push_back(vrip_weight.x),verts.push_back(vrip_weight.y),
-				verts.push_back(vrip_weight.z),verts.push_back(vrip_weight.w);
+		vl.push_back(vbindex[i][0]),vl.push_back(vbindex[i][1]),
+				vl.push_back(vbindex[i][2]),vl.push_back(vbindex[i][3]);
+		vl.push_back(vrip_weight.x),vl.push_back(vrip_weight.y),
+				vl.push_back(vrip_weight.z),vl.push_back(vrip_weight.w);
 
 	// assemble element array
 	} for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
-		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
+		for (uint32_t j=0;j<face.mNumIndices;j++) el.push_back(eoffset+face.mIndices[j]);
+		size += face.mNumIndices;
 
 	// extract animations
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
@@ -218,8 +222,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 		anims.push_back(proc);
 	}
 
-	// vertex size & offset
-	size = elems.size();
+	// vertex offset
 	ofs = mofs;
 	mofs += size;
 
@@ -297,7 +300,7 @@ void MeshAnimation::interpolate(double dt)
 std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 {
 	os << "---------------------< MeshAnimation >-----------------------\n";
-	os << "vertex array size: " << obj.verts.size() << '\n';
+	os << "faces: " << obj.size << '\n';
 	os << "vertex drawcall count: " << obj.size << "    drawcall offset: " << obj.ofs << '\n';
 	os << obj.joints.size() << " joints found -> joint tree:\n";
 	MeshAnimation::rc_print_joint_tree(os,obj.joints,0,0);

@@ -20,6 +20,8 @@
 
 // #define LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
 
+// ranges
+constexpr uint8_t ANIMATION_MAP_REPEAT = 19;
 constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 
 // rotary joints for animation information
@@ -50,7 +52,7 @@ public:
 
 	// construction
 	MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,uint32_t &mofs);
+			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs);
 	~MeshAnimation() {  }
 
 	// load
@@ -100,9 +102,7 @@ private:
 
 public:
 
-	// vertex data
-	std::vector<float> verts;
-	std::vector<uint32_t> elems;
+	// data
 	uint32_t t_colour,t_normals,t_material,t_emission;
 	uint32_t ofs,size = 0;
 

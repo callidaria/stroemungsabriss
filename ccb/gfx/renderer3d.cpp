@@ -29,7 +29,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = ml.size();
-	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,mofs));
+	ml.push_back(Mesh(m,t,sm,nm,em,p,s,r,v_mesh,mofs));
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_mesh_ids.push_back(mesh_id);
@@ -49,7 +49,7 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 {
 	// load mesh
 	uint16_t mesh_id = iml.size();
-	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,imofs));
+	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,v_instance,imofs));
 
 	// create related index upload pattern
 	std::vector<float> cmesh_index;
@@ -84,7 +84,7 @@ uint16_t Renderer3D::add(const char* a,const char* t,const char* n,const char* m
 {
 	// load animated mesh
 	uint16_t animation_id = mal.size();
-	MeshAnimation proc = MeshAnimation(a,t,n,m,e,amofs);
+	MeshAnimation proc = MeshAnimation(a,t,n,m,e,v_animation,e_animation,amofs);
 
 	// transform model matrix & store animated mesh
 	proc.model = glm::translate(glm::mat4(1),p)*glm::scale(glm::mat4(1),glm::vec3(s));
@@ -106,7 +106,7 @@ uint16_t Renderer3D::add_physical(const char* m,const char* t,const char* nm,con
 {
 	// load mesh
 	uint16_t mesh_id = pml.size();
-	pml.push_back(PhysicalMesh(m,t,nm,mm,em,p,s,r,pmofs));
+	pml.push_back(PhysicalMesh(m,t,nm,mm,em,p,s,r,v_pbm,pmofs));
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_physical_ids.push_back(mesh_id);
@@ -163,97 +163,59 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 */
 void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 {
-	// combine all mesh vertices to master vertex list & upload
-	float ptarget = (pseq/8.0f)/(ml.size()+iml.size()+mal.size()+pml.size());
-	std::vector<float> v;
-	for (auto im : ml) {
-		v.insert(v.end(),im.v.begin(),im.v.end());
-		progress += ptarget;
-	} buffer.bind();
-	buffer.upload_vertices(v);
-
-	// compile shader & load textures
+	// load meshes
+	buffer.bind();
+	buffer.upload_vertices(v_mesh);
 	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
-	for (auto im : ml) {
-		im.texture();
-		progress += ptarget;
-	} s3d.upload_int("tex",0);
+	for (auto im : ml) im.texture();
+	s3d.upload_int("tex",0);
 	s3d.upload_int("sm",1);
 	s3d.upload_int("emit",2);
 	s3d.upload_int("nmap",3);
 	s3d.upload_camera(cam3d);
 
-	// combine all added instance vertices to master instance vertex list & upload
-	std::vector<float> iv;
-	for (auto im : iml) {
-		iv.insert(iv.end(),im.v.begin(),im.v.end());
-		progress += ptarget;
-	} ibuffer.bind();
-	ibuffer.upload_vertices(iv);
-
-	// compile instance shader
+	// load instances
+	ibuffer.bind();
+	ibuffer.upload_vertices(v_instance);
 	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.iebo,"offset",3,0,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.iebo,"rotation_sin",3,3,R3D_INDEX_REPEAT);
 	is3d.def_indexF(ibuffer.iebo,"rotation_cos",3,6,R3D_INDEX_REPEAT);
-
-	// load textures & camera
-	for (auto im : iml) {
-		im.texture();
-		progress += ptarget;
-	} is3d.upload_int("tex",0);
+	for (auto im : iml) im.texture();
+	is3d.upload_int("tex",0);
 	is3d.upload_int("sm",1);
 	is3d.upload_int("emit",2);
 	is3d.upload_int("nmap",3);
 	is3d.upload_camera(cam3d);
 
-	// combine animated meshes into instance vertex list & upload
-	std::vector<float> av;
-	std::vector<uint32_t> ae;
-	for (auto im : mal) {
-		uint32_t eoffset = av.size()/R3D_ANIMATION_MAP_REPEAT;
-		av.insert(av.end(),im.verts.begin(),im.verts.end());
-		for (auto elem : im.elems) ae.push_back(eoffset+elem);
-		progress += ptarget;
-	} abuffer.bind();
-	abuffer.upload_vertices(av);
-	abuffer.upload_elements(ae);
-
-	// compile animation shader
+	// load animations
+	abuffer.bind();
+	abuffer.upload_vertices(v_animation);
+	abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
-	as3d.def_attributeF("position",3,0,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("texCoords",2,3,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("normals",3,5,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("tangent",3,8,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneIndex",4,11,R3D_ANIMATION_MAP_REPEAT);
-	as3d.def_attributeF("boneWeight",4,15,R3D_ANIMATION_MAP_REPEAT);
-
-	// load textures
-	for (auto im : mal) {
-		im.texture();
-		progress += ptarget;
-	}
+	as3d.def_attributeF("position",3,0,ANIMATION_MAP_REPEAT);
+	uint16_t a1 = m_ccbf->r3d->add("./res/test_anim.dae","./res/anim_tex.png","./res/dnormal.png",
+			"./res/default_mat.png","./res/none.png",glm::vec3(7,0,-4),.7f,true);
+	as3d.def_attributeF("texCoords",2,3,ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("normals",3,5,ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("tangent",3,8,ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneIndex",4,11,ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("boneWeight",4,15,ANIMATION_MAP_REPEAT);
+	for (auto am : mal) am.texture();
 	as3d.upload_int("colour_map",0);
 	as3d.upload_int("normal_map",1);
 	as3d.upload_int("material_map",2);
 	as3d.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
+	// FIXME: precalculate ANIMATION_MAP_REPEAT as a factor to avoid runtime division
 
-	// combine physical mesh vertices to master vertex list & upload
-	std::vector<float> pv;
-	for (auto im : pml) {
-		pv.insert(pv.end(),im.verts.begin(),im.verts.end());
-		progress += ptarget;
-	} pbuffer.bind();
-	pbuffer.upload_vertices(pv);
-
-	// compile physical mesh shader & load textures
+	// load physical based meshes
+	pbuffer.bind();
+	pbuffer.upload_vertices(v_pbm);
 	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
-	for (auto im : pml) {
-		im.texture();
-		progress += ptarget;
-	} pbms.upload_int("colour_map",0);
+	for (auto im : pml) im.texture();
+	pbms.upload_int("colour_map",0);
 	pbms.upload_int("normal_map",1);
 	pbms.upload_int("material_map",2);
 	pbms.upload_int("emission_map",3);
@@ -264,7 +226,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	shs.compile("./shader/fbv_shadow.shader","./shader/fbf_shadow.shader");
 	shs.def_attributeF("position",3,0,3);
 }
-// TODO: check validity of this loading approach. processing vertex lists ?twice
+// TODO: vertex batches have to be cleaned manually now due to list write at add() call
 
 /*
 	add_target(Frame*) -> uint8_t !O(1)
