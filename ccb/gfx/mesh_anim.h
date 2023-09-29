@@ -18,8 +18,6 @@
 #include "../mat/toolbox.h"
 #include "shader.h"
 
-// #define LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
 // ranges
 constexpr uint8_t ANIMATION_MAP_REPEAT = 19;
 constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
@@ -68,19 +66,8 @@ public:
 
 private:
 
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
-	// read helpers
-	std::vector<float> extract_array_data(std::vector<std::string> raw_data);
-	std::vector<std::string> parameters_from_line(std::string line);
-
-	// specialized recursion
-	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
-#else
 	static uint16_t rc_get_joint_count(aiNode* joint);
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
-
-#endif
 
 	// standard recursion
 	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);

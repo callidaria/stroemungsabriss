@@ -105,12 +105,15 @@ public:
 	Shader s3d,is3d,as3d,pbms,shs;
 	std::vector<DeferredTarget> rtargets;
 
-	// object information upload lists
+	// object information & upload lists
 	std::vector<Mesh> ml,iml;
 	std::vector<MeshAnimation> mal;
 	std::vector<PhysicalMesh> pml;
 	std::vector<float> v_mesh,v_instance,v_animation,v_pbm;
 	std::vector<uint32_t> e_animation;
+
+	// instance lists
+	std::vector<uint32_t> inst_counts;
 	std::vector<std::vector<float>> mesh_indices;
 
 	// update

@@ -2,6 +2,7 @@
 
 /*
 	constructor(const char*,const char*,const char*,const char*,vec3,float,vec3,uint32_t&)
+			vertices:!O(n)
 	purpose: construct a mesh, holding information for physical based rendering
 	\param obj_path: path to .obj file, holding geometric informations of meshes vertices
 	\param itex_path: path to objects texture
@@ -11,6 +12,7 @@
 	\param position: objects origin position
 	\param scale: the objects initial scale multiplier
 	\param rotation: standard rotation of the object after load
+	\param vl: vertex array to save vertex data to
 	\param mofs: tbc value of current vertex counting head
 */
 PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char* inorm_path,
@@ -30,7 +32,7 @@ PhysicalMesh::PhysicalMesh(const char* obj_path,const char* itex_path,const char
 }
 
 /*
-	texture() -> void
+	texture() -> void !O(1)
 	purpose: load textures & maps for this mesh
 */
 void PhysicalMesh::texture()

@@ -412,7 +412,7 @@ void Toolbox::set_texture_parameter_texture_repeat()
 }
 
 /*
-	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static)
+	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static) !O(1)
 	purpose: load texture value from given file
 */
 void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corrected)
@@ -420,7 +420,7 @@ void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corr
 	// setup
 	int width,height;
 	glBindTexture(GL_TEXTURE_2D,tex);
-	int32_t format = corrected ? GL_SRGB : GL_RGBA;
+	int32_t format = GL_RGBA+corrected*0x7338;
 
 	// load texture data from source
 	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);

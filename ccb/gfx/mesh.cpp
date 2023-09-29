@@ -2,36 +2,34 @@
 
 /*
 	constructor(const char*,const char*,const char*,const char*,const char*,vec3,float,
-			vec3,uint16_t*)
-	m: path to .obj file to load the mesh vertices from
-	t: path to main texture file
-	sm: path to specular map file
-	nm: path to normal map file
-	em: path to emission map file
-	ip: the mesh objects origin position
-	is: the mesh objects initial scaling
-	ir: the mesh objects initial rotation
-	mofs: memory offset, describing at which position in vertex memory the created mesh starts
+			vec3,uint16_t*) vertices:!O(n)
 	purpose: create components, read vertex data from source file and calculate normals
-	// TODO: update constructor documentation
+	\param m: path to .obj file to load the mesh vertices from
+	\param t: path to main texture file
+	\param sm: path to specular map file
+	\param nm: path to normal map file
+	\param em: path to emission map file
+	\param pos: the mesh objects origin position
+	\param scale: the mesh objects origin scaling
+	\param rot: the mesh objects origin rotation
+	\param vl: vertex array to save loaded vertex data to
+	\param mofs: memory offset, holding future memory position for created mesh
 */
 Mesh::Mesh(const char* m,const char* t,const char* sm,const char* nm,const char* em,
-		glm::vec3 ip,float is,glm::vec3 ir,std::vector<float> &vl,uint32_t &mofs)
-	: texpath(t),smpath(sm),nmpath(nm),empath(em),pos(ip),scl(is),rot(ir),ofs(mofs)
+		glm::vec3 pos,float scale,glm::vec3 rot,std::vector<float> &vl,uint32_t &mofs)
+	: texpath(t),smpath(sm),nmpath(nm),empath(em),ofs(mofs)
 {
 	// generate textures
-	glGenTextures(1,&tex);		// object texture
-	glGenTextures(1,&specmap);	// specular map
-	glGenTextures(1,&normap);	// normal map
-	glGenTextures(1,&emitmap);	// light emission map
+	glGenTextures(1,&tex),glGenTextures(1,&specmap),
+			glGenTextures(1,&normap),glGenTextures(1,&emitmap);
 
 	// load object
-	size = Toolbox::load_object(m,vl,pos,scl,rot);
+	size = Toolbox::load_object(m,vl,pos,scale,rot);
 	mofs += size;
 }
 
 /*
-	texture() -> void
+	texture() -> void !O(1)
 	purpose: upload texture data to shader program to be used as sampler2D
 */
 void Mesh::texture()

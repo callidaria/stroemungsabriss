@@ -452,7 +452,7 @@ void CardSystem::render()
 	// render currency
 	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
-		m_ccbf->r3d->iml[ir3d_index+i].inst_count = currency_spawn[i];
+		m_ccbf->r3d->inst_counts[ir3d_index+i] = currency_spawn[i];
 		m_ccbf->r3d->render_inst(ir3d_index+i);
 	}
 
