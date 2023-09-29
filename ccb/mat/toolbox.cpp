@@ -1,21 +1,22 @@
 #include "toolbox.h"
 
 /*
-	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static)
-	path: path to .obj file
-	ov: vertices, extracted from given .obj file
-	pos: direct modification of vertex positions
-	scl: direct modification of object scaling
-	rot: direct modification of vertex rotation around the object's origin point
+	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static) !O(n)
 	purpose: load object from file
+	\param path: path to .obj file
+	\param ov: vertex array to save extracted data from .obj file to
+	\param pos: direct modification of vertex positions
+	\param scl: direct modification of object scaling
+	\param rot: direct modification of vertex rotation around the object's origin point#
+	\returns amount of written vertices (vertices NOT values)
 */
-void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
 {
 	// setup vertex information lists
-	std::vector<uint32_t> ovi,oui,oni;	// raw reads from source: vertex,uv,normals
-	std::vector<glm::vec3> verts,norm;	// position vertices & normals
-	std::vector<glm::vec2> uv;			// texture coordinates
+	std::vector<uint32_t> ovi,oui,oni;
+	std::vector<glm::vec3> verts,norm;
+	std::vector<glm::vec2> uv;
 
 	// read source file
 	FILE* file = fopen(path,"r");
@@ -28,19 +29,19 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		else {
 
 			// check value prefix
-			if (strcmp(lh,"v")==0) {			// vertex prefix
+			if (strcmp(lh,"v")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				verts.push_back(p);
-			} else if (strcmp(lh,"vt")==0) {	// texture coordinate prefix
+			} else if (strcmp(lh,"vt")==0) {
 				glm::vec2 p;
 				fscanf(file,"%f %f\n",&p.x,&p.y);
 				uv.push_back(p);
-			} else if (strcmp(lh,"vn")==0) {	// normals prefix
+			} else if (strcmp(lh,"vn")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				norm.push_back(p);
-			} else if(strcmp(lh,"f")==0) {		// element index prefix
+			} else if(strcmp(lh,"f")==0) {
 
 				// read element node for current triangle
 				unsigned int vi[3],ui[3],ni[3];
@@ -54,14 +55,15 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 				rotate_vector(nproc,rot);
 
 				// save values position vertices
-				ovi.push_back(vi[0]);ovi.push_back(vi[1]);ovi.push_back(vi[2]);		// position
-				oui.push_back(ui[0]);oui.push_back(ui[1]);oui.push_back(ui[2]);		// tex coords
-				oni.push_back(ni[0]);oni.push_back(ni[1]);oni.push_back(ni[2]);		// normals
+				ovi.push_back(vi[0]),ovi.push_back(vi[1]),ovi.push_back(vi[2]);
+				oui.push_back(ui[0]),oui.push_back(ui[1]),oui.push_back(ui[2]);
+				oni.push_back(ni[0]),oni.push_back(ni[1]),oni.push_back(ni[2]);
 			}
 		}
 	}
 
 	// translate vertex data to object vertices
+	uint32_t out = 0;
 	glm::vec3 tg(1.0f);
 	for(int i=0;i<ovi.size();i++) {
 
@@ -91,12 +93,14 @@ void Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
 		rotate_vector(tn,rot);
 
 		// save data to buffer vector
-		ov.push_back(tv.x);ov.push_back(tv.y);ov.push_back(tv.z);		// vertex positions
-		ov.push_back(tu.x);ov.push_back(tu.y);							// texture coordinates
-		ov.push_back(tn.x);ov.push_back(tn.y);ov.push_back(tn.z);		// normals
-		ov.push_back(tg.x);ov.push_back(tg.y);ov.push_back(tg.z);		// tangents
-	}
+		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z),
+				ov.push_back(tu.x),ov.push_back(tu.y),
+				ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z),
+				ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
+		out++;
+	} return out;
 }
+// FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
 
 /*
 	calculate_vecangle(vec2,vec2) -> float (static)
@@ -116,8 +120,7 @@ float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	rotate_vector(ov,rot);
-	ov *= scl;
-	ov += pos;
+	ov *= scl,ov += pos;
 }
 
 /*
@@ -193,10 +196,9 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 std::vector<float> Toolbox::create_sprite_canvas()
 {
 	std::vector<float> out = {
-		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,	// first triangle
-		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f		// second triangle
-	};
-	return out;
+		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,
+		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f
+	}; return out;
 }
 
 /*
@@ -213,12 +215,9 @@ std::vector<float> Toolbox::create_sprite_canvas()
 std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float height)
 {
 	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,
-		pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,
-		pos.x,pos.y,0.0f,1.0f
-	};
-	return out;
+		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y+height,1.0f,0.0f,
+		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y,0.0f,1.0f
+	}; return out;
 }
 // FIXME: not intuitive if vertices returned are expecting element buffer
 
@@ -229,14 +228,9 @@ std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float
 std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float width,float height)
 {
 	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,
-		pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,
-		pos.x,pos.y+height,0.0f,0.0f,
-		pos.x,pos.y,0.0f,1.0f,
-	};
-	return out;
+		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y,1.0f,1.0f,pos.x+width,pos.y+height,1.0f,0.0f,
+		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y+height,0.0f,0.0f,pos.x,pos.y,0.0f,1.0f,
+	}; return out;
 }
 
 /*
@@ -409,7 +403,7 @@ void Toolbox::set_texture_parameter_texture_repeat()
 }
 
 /*
-	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static)
+	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static) !O(1)
 	purpose: load texture value from given file
 */
 void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corrected)
@@ -417,7 +411,7 @@ void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corr
 	// setup
 	int width,height;
 	glBindTexture(GL_TEXTURE_2D,tex);
-	int32_t format = corrected ? GL_SRGB : GL_RGBA;
+	int32_t format = GL_RGBA+corrected*0x7338;
 
 	// load texture data from source
 	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);

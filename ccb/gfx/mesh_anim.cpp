@@ -2,107 +2,30 @@
 
 /*
 	constructor(const char*,const char*,const char*,const char*,const char*,uint32_t&)
+			elements:!O(n)
 	purpose: load animation file, holding object mesh and animation key data
 	\param path: path to collada (.dae) file, holding mesh and animation key data
 	\param ipcol: path to animation mesh texture
 	\param ipnorm: path to animation mesh normal map
 	\param ipmat: path to animation mesh material map
 	\param ipemit: path to animation mesh emission texture
+	\param vl: vertex array to save loaded vertex data to
+	\param el: element array to save loaded elements to
 	\param mofs: self increasing offset, which saves the buffer offset for later draw calls
 */
 MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,uint32_t &mofs)
-	: path_colour(ipcol),path_normals(ipnorm),path_materials(ipmat),path_emission(ipemit)
+			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs)
+	: path_colour(ipcol),path_normals(ipnorm),path_materials(ipmat),path_emission(ipemit),ofs(mofs)
 {
 	// texture generation
-	glGenTextures(1,&t_colour);
-	glGenTextures(1,&t_normals);
-	glGenTextures(1,&t_material);
-	glGenTextures(1,&t_emission);
+	glGenTextures(1,&t_colour),glGenTextures(1,&t_normals),
+			glGenTextures(1,&t_material),glGenTextures(1,&t_emission);
 	// TODO: test differences between this and glGenTextures(4,[]);
-
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
-	// iterate collada file
-	std::vector<std::vector<float>> farrs;
-	std::vector<float> weight_count,weight_elements;
-	std::ifstream file(path);
-	std::string line;
-	uint8_t stride = 0;
-	uint8_t farri_weights;
-	bool stride_increment = false;
-	while(std::getline(file,line)) {
-
-		// split lines attribute & accumulate stride value
-		std::vector<std::string> raw_data = parameters_from_line(line);
-		stride += stride_increment;
-
-		// read node definitions
-		if (raw_data[0]=="visual_scene") jroot.children.push_back(rc_assemble_joint_hierarchy(file));
-
-		// check bracket type information for float array & save its data
-		else if (raw_data[0]=="float_array") farrs.push_back(extract_array_data(raw_data));
-
-		// check for vertex element list
-		else if (raw_data[0][0]=='p'&&raw_data[0][1]=='>') {
-			vaddress = extract_array_data(raw_data);
-
-			// switch increment & correct stride value
-			stride_increment = false;
-			stride--;
-		}
-
-		// extract weight linking information
-		else if (raw_data[0][0]=='v'&&raw_data[0][1]=='c')
-			weight_count = extract_array_data(raw_data);
-		else if (raw_data[0][0]=='v'&&raw_data[0][1]=='>')
-			weight_elements = extract_array_data(raw_data);
-
-		// check for triangle element input definition start
-		else if (raw_data[0]=="triangles") stride_increment = true;
-
-		// saving float array indices
-		else if (raw_data[0]=="library_controllers>") farri_weights = farrs.size();
-	} file.close();
-
-	// insert float array information into vertex array
-	uint32_t eprog = 0;
-	std::cout << vaddress.size() << "    " << weight_count.size() << '\n';
-	for (uint32_t i=0;i<vaddress.size();i+=stride) {
-
-		// basic geometry information
-		verts.push_back(farrs[0][vaddress[i]*3]),verts.push_back(farrs[0][vaddress[i]*3+1]),
-			verts.push_back(farrs[0][vaddress[i]*3+2]);
-		verts.push_back(farrs[2][vaddress[i+2]*2]),verts.push_back(farrs[2][vaddress[i+2]*2+1]);
-		verts.push_back(farrs[1][vaddress[i+1]*3]),verts.push_back(farrs[1][vaddress[i+1]*3+1]),
-			verts.push_back(farrs[1][vaddress[i+1]*3+2]);
-
-		// joint weights colouring
-		const uint32_t joint_count = weight_count[size];
-		uint16_t wjoint[joint_count];
-		float jweight[joint_count];
-		for (uint16_t i=0;i<joint_count;i++) {
-
-			// write joint index & get weight value from element index, also increment progression
-			/*wjoint[i] = weight_elements[eprog*2];
-			jweight[i] = farrs[farri_weights+1][weight_elements[eprog*2+1]];*/
-			eprog++;
-		} std::cout << eprog << '\n';
-
-		// increment vertex size
-		size++;
-	}
-
-	// vertex size & offset
-	ofs = mofs;
-	mofs += size;
-
-#else
 
 	// load collada file
 	Assimp::Importer importer;
-	const aiScene* dae_file = importer.ReadFile(path,aiProcess_CalcTangentSpace|aiProcess_Triangulate
-			|aiProcess_JoinIdenticalVertices);
+	const aiScene* dae_file = importer.ReadFile(path,aiProcess_CalcTangentSpace
+			|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
 	aiMesh* cmesh = dae_file->mMeshes[0];
 
 	// extract animation nodes
@@ -113,6 +36,9 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 	// extract bone armature offset
 	uint16_t armature_offset = get_joint_id(cmesh->mBones[0]->mName.C_Str());
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
+
+	// calculate element array offset before pushing to vertex list
+	uint32_t eoffset = vl.size()/ANIMATION_MAP_REPEAT;
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -151,34 +77,35 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
-		verts.push_back(position.x),verts.push_back(position.y),verts.push_back(position.z);
+		vl.push_back(position.x),vl.push_back(position.y),vl.push_back(position.z);
 
 		// extract texture coordinates
 		aiVector3D tex_coords = cmesh->mTextureCoords[0][i];
-		verts.push_back(tex_coords.x),verts.push_back(tex_coords.y);
+		vl.push_back(tex_coords.x),vl.push_back(tex_coords.y);
 
 		// extract normals
 		aiVector3D normals = cmesh->mNormals[i];
-		verts.push_back(normals.x),verts.push_back(normals.y),verts.push_back(normals.z);
+		vl.push_back(normals.x),vl.push_back(normals.y),vl.push_back(normals.z);
 
 		// tangent for normal mapping
 		aiVector3D tangent = cmesh->mTangents[i];
-		verts.push_back(tangent.x),verts.push_back(tangent.y),verts.push_back(tangent.z);
+		vl.push_back(tangent.x),vl.push_back(tangent.y),vl.push_back(tangent.z);
 
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
 
 		// insert influencing bone indices & relating weights
-		verts.push_back(vbindex[i][0]),verts.push_back(vbindex[i][1]),
-				verts.push_back(vbindex[i][2]),verts.push_back(vbindex[i][3]);
-		verts.push_back(vrip_weight.x),verts.push_back(vrip_weight.y),
-				verts.push_back(vrip_weight.z),verts.push_back(vrip_weight.w);
+		vl.push_back(vbindex[i][0]),vl.push_back(vbindex[i][1]),
+				vl.push_back(vbindex[i][2]),vl.push_back(vbindex[i][3]);
+		vl.push_back(vrip_weight.x),vl.push_back(vrip_weight.y),
+				vl.push_back(vrip_weight.z),vl.push_back(vrip_weight.w);
 
 	// assemble element array
 	} for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
-		for (uint32_t j=0;j<face.mNumIndices;j++) elems.push_back(face.mIndices[j]);
+		for (uint32_t j=0;j<face.mNumIndices;j++) el.push_back(eoffset+face.mIndices[j]);
+		size += face.mNumIndices;
 
 	// extract animations
 	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
@@ -218,13 +145,8 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 		anims.push_back(proc);
 	}
 
-	// vertex size & offset
-	size = elems.size();
-	ofs = mofs;
+	// vertex offset
 	mofs += size;
-
-#endif
-
 }
 
 /*
@@ -251,7 +173,7 @@ void MeshAnimation::upload_interpolation(Shader* shader)
 }
 
 /*
-	interpolate(float) -> void !O(2n) => O(n)
+	interpolate(float) -> void !O(2n) => !O(n)
 	purpose: calculate current bone transformations, interpolate between keys and recurse influence
 	\param dt: time passed since last interpolation
 */
@@ -290,90 +212,19 @@ void MeshAnimation::interpolate(double dt)
 }
 
 /*
-	operator<<(std::ostream&,MeshAnimation& const) -> std::ostream& (friend)
+	operator<<(std::ostream&,MeshAnimation& const) -> std::ostream& (friend) joints:!O(n)
 	purpose: make animation object information console printable
 	conforming to: operator definition
 */
 std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
 {
 	os << "---------------------< MeshAnimation >-----------------------\n";
-	os << "vertex array size: " << obj.verts.size() << '\n';
+	os << "faces: " << obj.size << '\n';
 	os << "vertex drawcall count: " << obj.size << "    drawcall offset: " << obj.ofs << '\n';
 	os << obj.joints.size() << " joints found -> joint tree:\n";
 	MeshAnimation::rc_print_joint_tree(os,obj.joints,0,0);
 	return os;
 }
-
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
-// experimental method
-std::vector<float> MeshAnimation::extract_array_data(std::vector<std::string> raw_data)
-{
-	// extract & filter first value
-	bool nfound = true;
-	int8_t vstart = -1;
-	size_t findex;
-	while (nfound) {
-		vstart++;
-		findex = raw_data[vstart].find('>');
-		nfound = findex==std::string::npos;
-	} raw_data[vstart] = raw_data[vstart].substr(findex+1);
-
-	// filter last value
-	raw_data.back() = raw_data.back().substr(0,raw_data.back().find('<'));
-
-	// write values to list
-	std::vector<float> out;
-	for (uint16_t i=vstart;i<raw_data.size();i++) out.push_back(atof(raw_data[i].c_str()));
-	return out;
-}
-
-// experimental method
-std::vector<std::string> MeshAnimation::parameters_from_line(std::string line)
-{
-	uint8_t lstart = line.find('<')+1;
-	std::stringstream pline(line.substr(lstart,line.length()-lstart));
-	std::vector<std::string> out;
-	std::string rdata;
-	while (std::getline(pline,rdata,' ')) out.push_back(rdata);
-	return out;
-}
-
-// experimental method
-ColladaJoint MeshAnimation::rc_assemble_joint_hierarchy(std::ifstream &file)
-{
-	// extract node information from file
-	ColladaJoint out;
-	std::string line;
-	while (std::getline(file,line)) {
-		std::vector<std::string> raw_data = parameters_from_line(line);
-
-		// check for information end bracket
-		if (raw_data[0]=="/node>"||raw_data[0]=="/visual_scene>") break;
-
-		// get translation matrix
-		else if (raw_data[0]=="matrix") {
-			std::vector<float> mvalues = extract_array_data(raw_data);
-			for (uint8_t y=0;y<4;y++) {
-				for (uint8_t x=0;x<4;x++)
-					out.trans[x][y] = mvalues[y*4+x];
-			}
-		}
-
-		// recursive children accumulation
-		else if (raw_data[0]=="node") {
-
-			// add child recursively
-			uint16_t i = out.children.size();
-			out.children.push_back(rc_assemble_joint_hierarchy(file));
-
-			// add node information
-			out.children[i].id = raw_data[1].substr(4,raw_data[1].length()-5);
-		}
-	} return out;
-}
-
-#else
 
 /*
 	rc_get_joint_count(aiNode*) -> uint16_t (private,static,recursive) !O(n)
@@ -412,8 +263,6 @@ void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_co
 		rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count);
 	} joints[memory_id] = out;
 }
-
-#endif
 
 /*
 	rc_transform_interpolation(ColladaJoint*,mat4,uint16t&) -> void (private,recursive) !O(n)

@@ -18,8 +18,8 @@
 #include "../mat/toolbox.h"
 #include "shader.h"
 
-// #define LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
+// ranges
+constexpr uint8_t ANIMATION_MAP_REPEAT = 19;
 constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
 
 // rotary joints for animation information
@@ -50,7 +50,7 @@ public:
 
 	// construction
 	MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,uint32_t &mofs);
+			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs);
 	~MeshAnimation() {  }
 
 	// load
@@ -66,19 +66,8 @@ public:
 
 private:
 
-#ifdef LIGHT_SELFIMPLEMENTATION_COLLADA_LOAD
-
-	// read helpers
-	std::vector<float> extract_array_data(std::vector<std::string> raw_data);
-	std::vector<std::string> parameters_from_line(std::string line);
-
-	// specialized recursion
-	static ColladaJoint rc_assemble_joint_hierarchy(std::ifstream &file);
-#else
 	static uint16_t rc_get_joint_count(aiNode* joint);
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
-
-#endif
 
 	// standard recursion
 	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);
@@ -100,9 +89,7 @@ private:
 
 public:
 
-	// vertex data
-	std::vector<float> verts;
-	std::vector<uint32_t> elems;
+	// data
 	uint32_t t_colour,t_normals,t_material,t_emission;
 	uint32_t ofs,size = 0;
 
