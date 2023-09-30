@@ -47,63 +47,43 @@ uint16_t Renderer2D::add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uin
 }
 
 /*
-	load_vertex() -> void
-	purpose: upload all vertices of sprites and animations to buffer
-*/
-void Renderer2D::load_vertex(float &progress,float pseq)
-{
-	// create write arrays
-	std::vector<float> v;
-	std::vector<unsigned int> e;
-	uint32_t ptarget = pseq/(sl.size()+al.size());
-
-	// write sprite vertex values to upload list
-	for (int i=0;i<sl.size();i++) {
-		v.insert(v.end(),sl[i].v.begin(),sl[i].v.end());
-		Toolbox::generate_elements(i,e);
-		progress += ptarget;
-	}
-
-	// write animation vertex values to upload list
-	for(int i=0;i<al.size();i++) {
-		v.insert(v.end(),al[i].v.begin(),al[i].v.end());
-		Toolbox::generate_elements(i+sl.size(),e);
-		progress += ptarget;
-	}
-
-	// upload to buffers
-	buffer.bind();
-	buffer.upload_vertices(v);
-	buffer.upload_elements(e);
-}
-
-/*
-	load_texture() -> void
-	purpose: load all textures for every added sprite and animation
-*/
-void Renderer2D::load_texture(float &progress,float pseq)
-{
-	uint32_t ptarget = pseq/(sl.size()+al.size());
-	for (int i=0;i<sl.size();i++) {
-		sl.at(i).texture();
-		progress += ptarget;
-	} for (int i=0;i<al.size();i++) {
-		al.at(i).texture();
-		progress += ptarget;
-	} s2d.upload_int("tex",0);
-}
-
-/*
 	load() -> void
 	purpose: combine vertex and texture loading and compile shader program in between
 */
 void Renderer2D::load(float &progress,float pseq)
 {
-	float ssq = pseq/2.0f;
-	load_vertex(progress,ssq);
+	// setup progress bar
+	uint32_t ptarget = (pseq*.5f)/(sl.size()+al.size());
+
+	// write sprite vertex values to upload list
+	for (int i=0;i<sl.size();i++) {
+		std::vector<float> pv = Toolbox::create_sprite_canvas(sl[i].pos,sl[i].sclx,sl[i].scly);
+		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		Toolbox::generate_elements(i,elements);
+		progress += ptarget;
+	}
+
+	// write animation vertex values to upload list
+	for(int i=0;i<al.size();i++) {
+		std::vector<float> pv = Toolbox::create_sprite_canvas(al[i].pos,al[i].sclx,al[i].scly);
+		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		Toolbox::generate_elements(i+sl.size(),elements);
+		progress += ptarget;
+	}
+
+	// upload to buffers
+	buffer.bind();
+	buffer.upload_vertices(vertices),buffer.upload_elements(elements);
+
+	// compile shader
 	s2d.compile2d("shader/vertex2d.shader","shader/fragment2d.shader");
-	load_texture(progress,ssq);
+
+	// load textures
+	for (int i=0;i<sl.size();i++) sl.at(i).texture(),progress += ptarget;
+	for (int i=0;i<al.size();i++) al.at(i).texture(),progress += ptarget;
+	s2d.upload_int("tex",0);
 }
+// TODO: add sensible memory management features
 
 /*
 	load_wcam(Camera2D*) -> void
@@ -115,6 +95,7 @@ void Renderer2D::load(Camera2D* cam2d,float &progress,float pseq)
 	load(progress,pseq);
 	s2d.upload_camera(*cam2d);
 }
+// TODO: remove!
 
 /*
 	prepare() -> void

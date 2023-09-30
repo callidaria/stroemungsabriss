@@ -1,19 +1,16 @@
 #include "sprite.h"
 
 /*
-	constructor(vec2,float,float,const char*)
-	p: the sprites origin position
-	w: width of the sprite
-	h: height of the sprite
-	t: path to sprite texture
-	purpose: calculate vertex upload values and generate texture
+	constructor(vec2,float,float,const char*) !O(1)
+	purpose: create sprite and generate it's texture
+	\param p: the sprites origin position
+	\param w: width of the sprite
+	\param h: height of the sprite
+	\param t: path to sprite texture
 */
 Sprite::Sprite(glm::vec2 p,float w,float h,const char* t)
 	: pos(p),sclx(w),scly(h),texpath(t)
-{
-	v = Toolbox::create_sprite_canvas(p,w,h);
-	glGenTextures(1,&tex);
-}
+{ glGenTextures(1,&tex); }
 
 /*
 	transform(vec2,vec2,float) -> void

@@ -45,41 +45,45 @@ uint16_t RendererI::add(glm::vec2 p,float w,float h,const char* t,uint8_t row,ui
 */
 void RendererI::load(float &progress,float pseq)
 {
-	// write all object vertices to master array
-	float ptarget = (pseq/2.0f)/(il.size()+ial.size());
-	std::vector<float> v;
+	// setup progress bar
+	float ptarget = (pseq*.5f)/(il.size()+ial.size());
+
+	// generate sprite vertices
 	for (int i=0;i<il.size();i++) {
-		v.insert(v.end(),il[i].v.begin(),il[i].v.end());
+		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(il[i].position,
+				il[i].width,il[i].height);
+		vertices.insert(vertices.end(),pv.begin(),pv.end());
 		progress += ptarget;
-	} for (int i=0;i<ial.size();i++) {
-		v.insert(v.end(),ial[i].v.begin(),ial[i].v.end());
+	}
+
+	// generate animation vertices
+	for (int i=0;i<ial.size();i++) {
+		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(ial[i].position,
+				ial[i].width,ial[i].height);
+		vertices.insert(vertices.end(),pv.begin(),pv.end());
 		progress += ptarget;
 	}
 
 	// upload to buffer
 	buffer.bind();
-	buffer.upload_vertices(v);
+	buffer.upload_vertices(vertices);
 
 	// compile classical instance shader program
+	// ??maybe find a different way of representing instanced rotation??
+	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
+	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
+	// we could make instanced_anim the only instanced object or find a different solution??
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
 	sI.def_indexF(buffer.iebo,"offset",2,0,6);
 	sI.def_indexF(buffer.iebo,"rotation_sin",1,2,6);
 	sI.def_indexF(buffer.iebo,"rotation_cos",1,3,6);
 	sI.def_indexF(buffer.iebo,"i_tex",2,4,6);
-	// ??maybe find a different way of representing instanced rotation??
-	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
-	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
-	// we could make instanced_anim the only instanced object or find a different solution??
 
-	// texture
-	for (int i=0;i<il.size();i++) {
-		il[i].texture();
-		progress += ptarget;
-	} for (int i=0;i<ial.size();i++) {
-		ial[i].texture();
-		progress += ptarget;
-	} sI.upload_int("tex",0);
+	// load textures
+	for (int i=0;i<il.size();i++) il[i].texture(),progress += ptarget;
+	for (int i=0;i<ial.size();i++) ial[i].texture(),progress += ptarget;
+	sI.upload_int("tex",0);
 
 	// coordinate system
 	sI.upload_camera(Camera2D(1280.0f,720.0f));
@@ -105,8 +109,9 @@ void RendererI::prepare(float dtime)
 */
 void RendererI::render(uint16_t i,uint16_t amt)
 {
-	il.at(i).setup();
-	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUES);
+	il[i].setup();
+	buffer.upload_indices(il[i].o,sizeof(float)*INSTANCE_VALUE_RANGE);
+	sI.upload_matrix("model",il[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,i*6,6,amt);
 }
 
@@ -119,8 +124,9 @@ void RendererI::render(uint16_t i,uint16_t amt)
 void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 {
 	ial[i].setup(&sI);
-	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUE_RANGE);
 	sI.upload_vec2("i_tex",i_tex);
+	sI.upload_matrix("model",il[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 
@@ -133,7 +139,8 @@ void RendererI::render(uint16_t i,uint16_t amt,glm::vec2 i_tex)
 void RendererI::render_anim(uint16_t i,uint16_t amt)
 {
 	ial[i].setup(&sI);
-	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUES);
+	buffer.upload_indices(ial[i].i,sizeof(float)*IANIMATION_VALUE_RANGE);
+	sI.upload_matrix("model",il[i].model);
 	glDrawArraysInstanced(GL_TRIANGLES,(il.size()+i)*6,6,amt);
 }
 

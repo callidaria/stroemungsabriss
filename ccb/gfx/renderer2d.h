@@ -42,18 +42,17 @@ public:
 	// settings
 	void reset_shader();
 
-private:
-
-	// loaders
-	void load_vertex(float &progress,float pseq);
-	void load_texture(float &progress,float pseq);
-
 public:
 
+	// engine
 	Buffer buffer = Buffer();
 	Shader s2d;
+
+	// data
 	std::vector<Sprite> sl;
 	std::vector<Anim> al;
+	std::vector<float> vertices;
+	std::vector<uint32_t> elements;
 };
 
 #endif

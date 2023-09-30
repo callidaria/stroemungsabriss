@@ -10,7 +10,7 @@
 
 constexpr uint32_t IANIMATION_MCAP = 4096;
 constexpr uint32_t IANIMATION_REPEAT = 6;
-constexpr uint32_t IANIMATION_VALUES = IANIMATION_MCAP*IANIMATION_REPEAT;
+constexpr uint32_t IANIMATION_VALUE_RANGE = IANIMATION_MCAP*IANIMATION_REPEAT;
 // FIXME: all of this always has to be equal to their counterparts in instance.h! remove & replace
 
 class InstancedAnim
@@ -30,12 +30,14 @@ public:
 
 public:
 
-	// vertex and index upload
-	std::vector<float> v;
-	float i[IANIMATION_VALUES];
+	// data
+	uint32_t tex;
+	float i[IANIMATION_VALUE_RANGE];
 
-	// texture
-	GLuint tex;
+	// transform
+	glm::mat4 model = glm::mat4(1.f);
+	glm::vec2 position;
+	float width,height;
 
 private:
 

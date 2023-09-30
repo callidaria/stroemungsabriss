@@ -23,24 +23,19 @@ public:
 	// setup
 	inline void texture() { Toolbox::load_texture(tex,tp); }
 	uint8_t setup();
-
-	// transformation
-	void scale(float wscale,float hscale);
-	// TODO: add transformation feature
-	// TODO: add rotation feature
 	// TODO: add setup method without animation timing
 
 public:
 
-	// system
-	std::vector<float> v;
-	GLuint tex;
+	// data
+	uint32_t tex;
 
 	// values
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::vec2 pos;
 	float sclx,scly;
 	uint8_t r,c;
+	// TODO: ?maybe also save origin position for 3D renderer objects; fast arbitrary transform
 
 private:
 

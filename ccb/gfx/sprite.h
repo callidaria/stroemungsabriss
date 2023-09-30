@@ -31,14 +31,14 @@ public:
 	void scale(float wscale,float hscale);
 	void scale_arbit(float wscale,float hscale);
 	inline void rotate(float rot) { model = glm::rotate(model,glm::radians(rot),glm::vec3(0,0,1)); }
+	// TODO: cleanup, this is not the place for unspecific transformation methods
 
 public:
 
-	// system
-	std::vector<float> v;
-	GLuint tex;
+	// data
+	uint32_t tex;
 
-	// position
+	// transform
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::vec2 pos;
 	float sclx,scly;
