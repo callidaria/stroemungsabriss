@@ -26,11 +26,8 @@ public:
 	uint16_t add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,
 			uint8_t f,uint8_t itn);
 
-	// loaders
+	// setup
 	void load(float &progress,float pseq);
-	void load(Camera2D* cam2d,float &progress,float pseq);
-
-	// preparation
 	void prepare();
 
 	// renderers

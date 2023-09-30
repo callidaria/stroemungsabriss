@@ -69,7 +69,7 @@ void RendererI::load(float &progress,float pseq)
 	buffer.upload_vertices(vertices);
 
 	// compile classical instance shader program
-	// ??maybe find a different way of representing instanced rotation??
+	// TODO: ??maybe find a different way of representing instanced rotation??
 	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
 	// we could make instanced_anim the only instanced object or find a different solution??

@@ -82,20 +82,11 @@ void Renderer2D::load(float &progress,float pseq)
 	for (int i=0;i<sl.size();i++) sl.at(i).texture(),progress += ptarget;
 	for (int i=0;i<al.size();i++) al.at(i).texture(),progress += ptarget;
 	s2d.upload_int("tex",0);
+
+	// coordinate system
+	s2d.upload_camera(Camera2D(1280.0f,720.0f));
 }
 // TODO: add sensible memory management features
-
-/*
-	load_wcam(Camera2D*) -> void
-	cam2d: the 2D camera used to render the loaded sprites and animations in relation to
-	purpose: additionally to the features of load() the view and projection matrices are uploaded
-*/
-void Renderer2D::load(Camera2D* cam2d,float &progress,float pseq)
-{
-	load(progress,pseq);
-	s2d.upload_camera(*cam2d);
-}
-// TODO: remove!
 
 /*
 	prepare() -> void
