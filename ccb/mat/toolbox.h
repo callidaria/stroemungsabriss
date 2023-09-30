@@ -61,6 +61,7 @@ public:
 	static std::vector<float> create_sprite_canvas();
 	static std::vector<float> create_sprite_canvas(glm::vec2 pos,float width,float height);
 	static std::vector<float> create_sprite_canvas_triangled(glm::vec2 pos,float width,float height);
+	// TODO: find a way to create function overloads, that directly add to a vertex array!
 
 	// graphical setup
 	static void load_texture(uint32_t tex,const char* path,bool corrected=false);

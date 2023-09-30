@@ -57,6 +57,7 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 		-hs,-hs+scl,0,0.0f,0.0f, -hs+scl,-hs,0,1.0f,1.0f, -hs+scl,-hs+scl,0,1.0f,0.0f,
 		-hs+scl,-hs,0,1.0f,1.0f, -hs,-hs+scl,0,0.0f,0.0f, -hs,-hs,0,0.0f,1.0f
 	}; verts.insert(verts.end(),arverts.begin(),arverts.end());
+	// TODO: find out the correct way to handle memory insert in this circumstance
 
 	// save entity
 	entity_list.push_back(pentity);

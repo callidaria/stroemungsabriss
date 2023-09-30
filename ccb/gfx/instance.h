@@ -2,18 +2,12 @@
 #define CCB_GRAPHICS_INSTANCE
 
 #include <iostream>
-#include <vector>
-
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
-
 #include "../mat/toolbox.h"
 
 constexpr uint32_t INSTANCE_MCAP = 4096;
 constexpr uint32_t INSTANCE_REPEAT = 6;
-constexpr uint32_t INSTANCE_VALUES = INSTANCE_MCAP*INSTANCE_REPEAT;
+constexpr uint32_t INSTANCE_VALUE_RANGE = INSTANCE_MCAP*INSTANCE_REPEAT;
 
 class Instance
 {
@@ -29,9 +23,14 @@ public:
 
 public:
 
-	std::vector<float> v;
-	GLuint tex;
-	float o[INSTANCE_VALUES];
+	// data
+	uint32_t tex;
+	float o[INSTANCE_VALUE_RANGE];
+
+	// transform
+	glm::mat4 model = glm::mat4(1.f);
+	glm::vec2 position;
+	float width,height;
 
 private:
 
@@ -39,5 +38,3 @@ private:
 };
 
 #endif
-
-// FIXME: fix private/public as well as includes

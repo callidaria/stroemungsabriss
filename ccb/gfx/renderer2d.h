@@ -26,11 +26,8 @@ public:
 	uint16_t add(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,
 			uint8_t f,uint8_t itn);
 
-	// loaders
+	// setup
 	void load(float &progress,float pseq);
-	void load(Camera2D* cam2d,float &progress,float pseq);
-
-	// preparation
 	void prepare();
 
 	// renderers
@@ -42,18 +39,17 @@ public:
 	// settings
 	void reset_shader();
 
-private:
-
-	// loaders
-	void load_vertex(float &progress,float pseq);
-	void load_texture(float &progress,float pseq);
-
 public:
 
+	// engine
 	Buffer buffer = Buffer();
 	Shader s2d;
+
+	// data
 	std::vector<Sprite> sl;
 	std::vector<Anim> al;
+	std::vector<float> vertices;
+	std::vector<uint32_t> elements;
 };
 
 #endif

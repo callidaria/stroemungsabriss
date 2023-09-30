@@ -74,6 +74,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: globe location preview, faulty render & rotation changes
 
 ### optimizations:
+- writing geometry directly to vertex array, instead of copying from respective object pre-load
 - minimized on/off switching of depth testing
 - active texture reset call reduction by uniformly switching back after render
 - using inlines for small functions with trivial implementation and straight forward usage
@@ -199,5 +200,5 @@ Worktime: 120h
     + 209: 44min
     + 215: 2h 28min
 	+ 199: 7h 34min
-	+ 192: 4h 3min
+	+ 192: 7h 4min
 - Total Code Lines: 15.823

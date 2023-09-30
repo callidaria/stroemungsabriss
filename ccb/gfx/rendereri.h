@@ -52,15 +52,14 @@ public:
 
 public:
 
-	// instance object lists
-	std::vector<Instance> il;
-	std::vector<InstancedAnim> ial;
-
-private:
-
-	// cascabel
+	// engine
 	Buffer buffer = Buffer();
 	Shader sI = Shader();
+
+	// data
+	std::vector<Instance> il;
+	std::vector<InstancedAnim> ial;
+	std::vector<float> vertices;
 };
 
 #endif
