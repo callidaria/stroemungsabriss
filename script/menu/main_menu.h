@@ -13,7 +13,6 @@
 #include "../world.h"
 
 #define COLOUR_COMPOSITION_NEO
-#define FORCE_CONVENTIONAL_MULTISAMPLE 0
 
 // information
 constexpr uint8_t INFO_VERSION_RELEASE = 0;
@@ -100,6 +99,14 @@ constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double MATH_PI = 3.141592653;
 constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
+/**
+ * 		TODO QA
+ * 
+ * - TRANSITION_SPEED modifier too fast/too slow?
+ * - input satisfaction feedback
+ * - aliasing recognition threshold & which technique preferred
+*/
+
 class MainMenu : public UI
 {
 public:
@@ -123,14 +130,22 @@ private:
 	// system
 	void update_peripheral_annotations();
 
+public:
+
+	// index
+	uint8_t interface_logic_id = 0;
+
+	// processed input
+	bool hit_a,hit_b;
+	int8_t lrmv;
+
 private:
 
-	// cascabel
+	// engine
 	CCBManager* m_ccbm;
 	CascabelBaseFeature* m_ccbf;
 	World* m_world;
-	FrameBuffer fb_menu,fb_nslice,fb_slice,fb_fxaa;
-	GBuffer gbf_slices;
+	FrameBuffer fb_menu,fb_nslice,fb_slice;
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
 	Text tx_dare = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25)),
@@ -169,15 +184,13 @@ private:
 	bool speedup = true;
 
 	// predefinitions
+	typedef void (*interface_logic)(MainMenu&);
+	interface_logic interface_behaviour[2];
 	const char* main_options[MENU_MAIN_OPTION_COUNT]
 		= { "exit","options","extras","practice","load","continue","new game" };
 };
 
+static void interface_behaviour_macro(MainMenu &tm);
+static void interface_behaviour_options(MainMenu &tm);
+
 #endif
-
-/*
-			TODO QA:
-
-	- TRANSITION_SPEED modifier too fast/too slow?
-	- input satisfaction feedback
-*/

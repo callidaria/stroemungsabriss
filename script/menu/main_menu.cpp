@@ -56,19 +56,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	update_peripheral_annotations();
 
 	// buffers
-#if FORCE_CONVENTIONAL_MULTISAMPLE
 	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
 			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
 	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
-#else
-	fb_fxaa = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/post_processing/fbf_fxaa.shader");
-	gbf_slices = GBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
-	gbf_slices.add_colour_component();
-	gbf_slices.add_colour_component(true);
-	gbf_slices.finalize_buffer();
-#endif
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
@@ -76,7 +67,11 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
-	// TODO: stop aliasing regardless of gbuffer trickery
+
+	// setup logic collection
+	interface_behaviour[0] = interface_behaviour_macro,
+			interface_behaviour[1] = interface_behaviour_options;
+	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 }
 
 /*
@@ -90,12 +85,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// input
 	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
-	bool hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
+	hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
 		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
-	int8_t lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
+	lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 
@@ -104,6 +99,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	anim_timing += m_ccbf->frame->time_delta;
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
+
+	// interface logic
+	interface_behaviour[interface_logic_id](*this);
 
 	// menu transition
 	bool req_transition = hit_a&&!menu_action;
@@ -155,20 +153,14 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
 
 		// menu option text
-		//st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
-		st_rot = 0;
-		// disabled due to pseudoshadow implementation testing simplification
+		st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 	}
 
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
 	// START MULTISAMPLED RENDER
-#if FORCE_CONVENTIONAL_MULTISAMPLE
 	msaa.bind();
-#else
-	gbf_slices.bind();
-#endif
 	Frame::clear();
 
 	// splash render
@@ -192,26 +184,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
-#if FORCE_CONVENTIONAL_MULTISAMPLE
-	msaa.blit();
-	fb_nslice.bind();
-	Frame::clear();
-
-	// head splash upload & render
-	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_HEAD_LOWER_WIDTH*mtransition,
-			SPLICE_HEAD_UPPER_WIDTH*mtransition,true);
-	glDrawArrays(GL_TRIANGLES,6,6);
-
-	// selection splash upload & render
-	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
-	glDrawArrays(GL_TRIANGLES,12,6);
-
-	// title splash upload & render
-	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
-	glDrawArrays(GL_TRIANGLES,0,6);
-#endif
-
 	// START RENDER MENU BUFFER
+	msaa.blit();
 	fb_menu.bind();
 	Frame::clear();
 
@@ -243,44 +217,25 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// STOP RENDER MENU BUFFER
 	FrameBuffer::close();
-#if !FORCE_CONVENTIONAL_MULTISAMPLE
-	fb_fxaa.bind();
-	Frame::clear();
-#endif
 
 	// render menu
-	fb_menu.render(mtransition);
-#if FORCE_CONVENTIONAL_MULTISAMPLE
 	fb_menu.render(mtransition);
 	fb_slice.bind();
 	Frame::clear();
 	msaa.prepare();
 	MSAA::render();
 	FrameBuffer::close();
-#else
-	fb_slice.tex = gbf_slices.t_colour_components[MENU_GBUFFER_COLOUR];
-#endif
 
 	// render overlay
 	fb_slice.prepare();
 	glActiveTexture(GL_TEXTURE1);
-#if FORCE_CONVENTIONAL_MULTISAMPLE
 	glBindTexture(GL_TEXTURE_2D,fb_nslice.tex);
-#else
-	glBindTexture(GL_TEXTURE_2D,gbf_slices.t_colour_components[MENU_GBUFFER_NORMALS]);
-#endif
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D,fb_menu.tex);
 	glActiveTexture(GL_TEXTURE0);
 	fb_slice.s.upload_float("mtrans",mtransition);
 	fb_slice.render();
 	// FIXME: remove special treatment and transfer to a more controllable implementation
-
-#if !FORCE_CONVENTIONAL_MULTISAMPLE
-	FrameBuffer::close();
-	fb_fxaa.prepare();
-	fb_fxaa.render();
-#endif
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
@@ -289,6 +244,23 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
 			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
 	speedup = (speedup&&!shiftdown_over)||normalize_over;
+}
+
+/*
+	TODO
+*/
+static void interface_behaviour_macro(MainMenu &tm)
+{
+	tm.interface_logic_id += tm.hit_a&&tm.hit_b;
+}
+
+/*
+	TODO
+*/
+static void interface_behaviour_options(MainMenu &tm)
+{
+	// TODO
+	std::cout << "options\n";
 }
 
 /*

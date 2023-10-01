@@ -20,6 +20,13 @@ float calc_luminance(vec4 pixel)
 // optimization by disregarding blue as a relevant colour (publication). dabadeedabaday
 // { return pixel.g*(.587/.299)+pixel.r; }
 
+// This will be finished at a later point in development (probably 0.1.0)
+// right now i don't have the time to babysit this abomination
+// i started this implementation early because of the dropshadows with gbuffer in menu
+// but now it dawns on me, that there is a MUCH MUCH easier way to achieve those shadows with msaa
+// also the dropshadows will be delayed for now anyways because today is deadline day :/
+// !!!also also there isn't even an issue open for dropshadow implementation in menu!!! wth?
+
 void main()
 {
 	// local pixels
@@ -122,6 +129,7 @@ void main()
 	float ofsDistance = -min(negDistance,posDistance)/(negDistance+posDistance)+.5;
 
 	// calculate final coordinate
-	vec2 fUV = TexCoords+vec2(edgeVert,edgeHorz)*vec2(ofsDistance)*pxStep;
-	outColour = texture(tex,fUV);
+	vec2 fUV = TexCoords+vec2(ofsDistance)*vec2(tPixelOffset.x*edgeVert,tPixelOffset.y*edgeHorz);
+	vec3 colour_result = texture(tex,fUV).rgb;
+	outColour = vec4(colour_result,pxCenter.a);
 }
