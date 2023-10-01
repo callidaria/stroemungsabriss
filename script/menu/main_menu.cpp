@@ -70,7 +70,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// setup logic collection
 	interface_behaviour[0] = interface_behaviour_macro,
-			interface_behaviour[1] = interface_behaviour_options;
+		interface_behaviour[1] = interface_behaviour_options;
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 }
 
@@ -102,22 +102,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// interface logic
 	interface_behaviour[interface_logic_id](*this);
-
-	// menu transition
-	bool req_transition = hit_a&&!menu_action;
-	menu_action = (menu_action||hit_a)&&!hit_b;
-	mtransition += (menu_action-!menu_action)*TRANSITION_SPEED*m_ccbf->frame->time_delta;
-	mtransition = (mtransition<.0f) ? .0f : (mtransition>1.f) ? 1.f : mtransition;
-	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
-	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
-	// TODO: compare linear transition with sinespeed transition implementation
-	float inv_mtransition = 1.f-mtransition;
-
-	// processing selection input
-	bool ch_select = lrmv!=0;
-	vselect += lrmv;
-	vselect = (m_ccbf->frame->mpref_peripheral)
-			? get_selected_main_option(m_ccbf->frame->mouse.mxfr,ch_select) : vselect;
+	running = !request_close;
 
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
@@ -130,7 +115,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
 			: 1.f-sqrt(dt_tnormalize));
 
-	// title animation
+	// combined title animation
 	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
 		hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
 	glm::mat4 vrt_scale = glm::translate(glm::scale(glm::translate(glm::mat4(1),
@@ -139,22 +124,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			-HRZ_TITLE_SCALESET),glm::vec3(tshift)),HRZ_TITLE_SCALESET);
 	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale;
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
-
-	// selection splash update calculations
-	if (ch_select||req_transition) {
-
-		// selector dimensions
-		vrt_lwidth = rand()%(uint16_t)mo_hwidth[vselect],
-			vrt_uwidth = rand()%(uint16_t)mo_hwidth[vselect];
-		glm::vec2 vrt_cpos = mo_cposition[vselect]+glm::vec2(mo_hwidth[vselect],0);
-		vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)*SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
-		glm::vec2 vrt_dir = vrt_cpos-vrt_lpos;
-		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
-		vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
-
-		// menu option text
-		st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
-	}
 
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
@@ -251,7 +220,41 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 */
 static void interface_behaviour_macro(MainMenu &tm)
 {
-	tm.interface_logic_id += tm.hit_a&&tm.hit_b;
+	// menu transition
+	bool req_transition = tm.hit_a&&!tm.menu_action;
+	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
+	tm.mtransition += (tm.menu_action-!tm.menu_action)*TRANSITION_SPEED*tm.m_ccbf->frame->time_delta;
+	tm.mtransition = (tm.mtransition<.0f) ? .0f : (tm.mtransition>1.f) ? 1.f : tm.mtransition;
+	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
+	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
+	// TODO: compare linear transition with sinespeed transition implementation
+	tm.inv_mtransition = 1.f-tm.mtransition;
+
+	// processing selection input
+	bool ch_select = tm.lrmv!=0;
+	tm.vselect += tm.lrmv;
+	tm.vselect = (tm.m_ccbf->frame->mpref_peripheral)
+			? tm.get_selected_main_option(tm.m_ccbf->frame->mouse.mxfr,ch_select) : tm.vselect;
+
+	// selection splash update calculations
+	if (ch_select||req_transition) {
+
+		// selector dimensions
+		tm.vrt_lwidth = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+			tm.vrt_uwidth = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
+		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]+glm::vec2(tm.mo_hwidth[tm.vselect],0);
+		tm.vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)
+				* SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
+		glm::vec2 vrt_dir = vrt_cpos-tm.vrt_lpos;
+		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+		tm.vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
+
+		// menu option text
+		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+	}
+
+	// process exit selection
+	tm.request_close = tm.hit_a&&tm.menu_action&&tm.vselect==MENU_MAIN_OPTION_EXIT;
 }
 
 /*

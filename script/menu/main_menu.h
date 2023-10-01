@@ -21,10 +21,29 @@ constexpr uint8_t INFO_VERSION_DEVSTEP = 6;
 constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
+// menu options index constants
+constexpr uint8_t MENU_MAIN_OPTION_EXIT = 0;
+constexpr uint8_t MENU_MAIN_OPTION_OPTIONS = 1;
+constexpr uint8_t MENU_MAIN_OPTION_EXTRAS = 2;
+constexpr uint8_t MENU_MAIN_OPTION_PRACTICE = 3;
+constexpr uint8_t MENU_MAIN_OPTION_LOAD = 4;
+constexpr uint8_t MENU_MAIN_OPTION_CONTINUE = 5;
+constexpr uint8_t MENU_MAIN_OPTION_NEWGAME = 6;
+constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
+
+// function pointer index constants
+constexpr uint8_t INTERFACE_LOGIC_MACRO = 0;
+constexpr uint8_t INTERFACE_LOGIC_OPTIONS = 1;
+constexpr uint8_t INTERFACE_LOGIC_EXTRAS = 2;
+constexpr uint8_t INTERFACE_LOGIC_PRACTICE = 3;
+constexpr uint8_t INTERFACE_LOGIC_LOAD = 4;
+constexpr uint8_t INTERFACE_LOGIC_CONTINUE = 5;
+constexpr uint8_t INTERFACE_LOGIC_NEWGAME = 6;
+constexpr uint8_t INTERFACE_LOGIC_COUNT = 7;
+
 // system constants
 constexpr uint8_t MENU_GBUFFER_COLOUR = 0;
 constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
-constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr float MENU_HALFSCREEN_UI = 1280.f*.5f;
@@ -118,10 +137,10 @@ public:
 	// draw
 	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
 
-private:
-
 	// logic
 	uint8_t get_selected_main_option(float mx,bool &ch_select);
+
+private:
 
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
@@ -132,18 +151,37 @@ private:
 
 public:
 
+	// engine
+	CascabelBaseFeature* m_ccbf;
+	bool request_close = false;
+
 	// index
-	uint8_t interface_logic_id = 0;
+	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
+	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
 
 	// processed input
 	bool hit_a,hit_b;
 	int8_t lrmv;
 
+	// animation
+	bool menu_action = false;
+	float mtransition = .0f,inv_mtransition;
+	float delta_tspeed;
+
+	// text
+	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
+	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
+	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
+	float st_rot = .0f;
+
+	// selectors
+	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
+	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
+
 private:
 
 	// engine
 	CCBManager* m_ccbm;
-	CascabelBaseFeature* m_ccbf;
 	World* m_world;
 	FrameBuffer fb_menu,fb_nslice,fb_slice;
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -157,12 +195,6 @@ private:
 	Buffer sh_buffer = Buffer();
 	Shader sh_shader = Shader();
 
-	// text
-	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
-	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
-	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
-	float st_rot = .0f;
-
 	// index
 	uint16_t index_rsprite,index_ranim;
 	uint8_t tcap_dare,tcap_version;
@@ -171,21 +203,14 @@ private:
 	bool cpref_peripheral;
 	bool trg_lmb = false,trg_rmb = false;
 
-	// selectors
-	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
-	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
-	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
-
 	// animation
-	bool menu_action = false;
-	float mtransition = .0f;
 	float anim_timing = .0f;
 	float dt_tshiftdown = .0f,dt_tnormalize = .0f;
 	bool speedup = true;
 
 	// predefinitions
 	typedef void (*interface_logic)(MainMenu&);
-	interface_logic interface_behaviour[2];
+	interface_logic interface_behaviour[INTERFACE_LOGIC_COUNT];
 	const char* main_options[MENU_MAIN_OPTION_COUNT]
 		= { "exit","options","extras","practice","load","continue","new game" };
 };
