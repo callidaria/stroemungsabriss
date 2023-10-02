@@ -118,6 +118,17 @@ constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double MATH_PI = 3.141592653;
 constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
+class MenuList
+{
+public:
+
+	// construction
+	MenuList(const char* path);
+	~MenuList() {  }
+
+private:
+};
+
 /**
  * 		TODO QA
  * 

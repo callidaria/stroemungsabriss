@@ -1,5 +1,83 @@
 #include "main_menu.h"
 
+/**
+ * 		Menu List Implementation with .ldc Language Interpreter
+ * TODO: expand this segment documentation
+ * 
+ * 
+ * 		List Definition Code Language Design
+ * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
+ * following expression are valid and will be handled by menu list interpreter:
+ * (the definitions are using <> to show where custom naming replaces "<contents>")
+ * 
+ * 
+ * 		GENERAL LANGUAGE FEATURES
+ * 
+ * 		:cluster <cluster_name>
+ * this statement marks the definition of a list, sublist or list entity collection
+ * any cluster can be referred to by name within the list definition file
+ * to define the main list use :cluster main
+ * 
+ * 		:logic <condition_list_size>
+ * setup of extern condition logic list to change viewability of entities with :condition command
+ * 
+ * 		:define <entity_name>
+ * define the name of the list entity, that will be shown alongside other list member entities
+ * 
+ * 		:describe
+ * 		<description>
+ * to add a description to the list entity, that will be shown when currently selected
+ * 
+ * 		:segment <segment_name>
+ * whereever a segment is called within the list defintion file, a dividing, stylized line will be
+ * drawn between the imperatively previous and following definition
+ * 
+ * 		:condition <condition_id>
+ * set a condition to activate list entity.
+ * the condition id will read the respective boolean from an extern condition list.
+ * 
+ * 
+ * 		BEHAVIOUR DEFINITIONS
+ * (ideally choose one of the following commands per :define)
+ * 
+ * 		:subsequent <cluster_name>
+ * confirming selection on this entity will load a sublist linked by it's cluster
+ * the list will then be shown under the heading of this list entities :define
+ * 
+ * 		:checkbox
+ * create a simple checkbox for this entity, used to choose between true or false states
+ * 
+ * 		:dropdown
+ * 		<fist_option>;<second_option>;<third_option>
+ * add a dropdown option list to this entity, holding selectable options divided by a ';'
+ * using :dropdown without defining options will still create a dropdown and the list can be
+ * assembled dynamically
+ * 
+ * 		:slider
+ * make this entity contain a horizontally adjustable slider
+ * 
+ * 		:return <output_value>
+ * selecting this entity stops list interaction immediately and returns given value
+ * 
+ * 
+ * The the following implementation is the MenuList constructor, holding the language interpreter
+ * conforming to the above definitions and statements.
+*/
+
+/*
+	TODO
+*/
+MenuList::MenuList(const char* path)
+{
+	// TODO
+}
+
+
+/**
+ * 		The Real Menu Implementation starts Here!
+ * TODO: expand this segment documentation
+*/
+
 /*
 	constructor(CCBManager*,CascabelBaseFeature*,World*,float&,float)
 	purpose: setup menu environment, populate with lists and define input possibilities
@@ -346,6 +424,7 @@ void interface_behaviour_macro(MainMenu &tm)
 void interface_behaviour_options(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -354,6 +433,7 @@ void interface_behaviour_options(MainMenu &tm)
 void interface_behaviour_extras(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -362,6 +442,7 @@ void interface_behaviour_extras(MainMenu &tm)
 void interface_behaviour_practice(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -370,6 +451,7 @@ void interface_behaviour_practice(MainMenu &tm)
 void interface_behaviour_load(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -378,6 +460,7 @@ void interface_behaviour_load(MainMenu &tm)
 void interface_behaviour_continue(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -386,4 +469,5 @@ void interface_behaviour_continue(MainMenu &tm)
 void interface_behaviour_newgame(MainMenu &tm)
 {
 	// TODO
+	tm.interface_logic_id *= !tm.hit_b;
 }
