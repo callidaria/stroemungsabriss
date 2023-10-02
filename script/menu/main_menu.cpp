@@ -69,8 +69,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	fb_slice.s.upload_int("menu_fb",2);
 
 	// setup logic collection
-	interface_behaviour[0] = interface_behaviour_macro,
-		interface_behaviour[1] = interface_behaviour_options;
+	interface_behaviour[INTERFACE_LOGIC_MACRO] = interface_behaviour_macro,
+		interface_behaviour[INTERFACE_LOGIC_OPTIONS] = interface_behaviour_options,
+		interface_behaviour[INTERFACE_LOGIC_EXTRAS] = interface_behaviour_extras,
+		interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_extras,
+		interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_extras,
+		interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_extras,
+		interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_extras;
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 }
 
@@ -93,6 +98,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
+	// FIXME: as soon as the title screen has been passed, start press will become return request
 
 	// timing
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
@@ -144,7 +150,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// selection splash upload & render
 	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
-	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions or too thin selectors
+	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
 	// title splash upload & render
 	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
@@ -215,11 +221,91 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	speedup = (speedup&&!shiftdown_over)||normalize_over;
 }
 
+
+/**
+ * 		Menu Logic Functions
+ * a collection of additional methods, helping with main menu logic
+ * TODO: improve section documentation
+*/
+
 /*
 	TODO
 */
-static void interface_behaviour_macro(MainMenu &tm)
+uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 {
+	float tsmx = mx*1280.f;
+	uint8_t out_id = vselect;
+	while (tsmx<(mo_cposition[out_id].x-mo_prog.x)&&out_id>0) out_id--;
+	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP)
+		out_id++;
+	ch_select = ch_select||(out_id!=vselect);
+	return out_id;
+}
+
+/*
+	TODO
+*/
+void MainMenu::update_peripheral_annotations()
+{
+	// update shown preferred peripheral
+	cpref_peripheral = m_ccbf->frame->cpref_peripheral;
+
+	// title screen dare message
+	tx_dare.clear();
+	std::string reqbutton = (cpref_peripheral) ? m_ccbf->iMap->cnt_name[IMP_REQPAUSE]
+			: m_ccbf->iMap->key_name[IMP_REQCONFIRM];
+	std::string dmessage = "press ["+reqbutton+"] if you DARE";
+	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
+	tcap_dare = dmessage.length();
+	tx_dare.load();
+}
+
+
+/**
+ * 		Start Splash Logic
+ * these methods simplify creation & modification of selection splash geometry
+ * TODO: extend section documentation
+*/
+
+/*
+	TODO
+*/
+void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
+{
+	std::vector<float> verts = {
+		l.x,l.y,c.x,c.y,c.z,0, u.x,u.y,c.x,c.y,c.z,3, u.x,u.y,c.x,c.y,c.z,2,
+		u.x,u.y,c.x,c.y,c.z,3, l.x,l.y,c.x,c.y,c.z,0, l.x,l.y,c.x,c.y,c.z,1
+	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
+}
+
+/*
+	TODO
+	NOTE: selection shader has to be enabled before calling this function
+*/
+void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
+{
+	sh_shader.upload_vec2("lupos[0]",lp),sh_shader.upload_vec2("lupos[1]",up);
+	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
+	sh_shader.upload_int("is_hrz",hrz);
+}
+
+
+/**
+ * 		Start Implementation of Interface Behaviour
+ * this section defines the static functions the renderer will point to for logic switching
+ * TODO: expand documentation of this section
+*/
+
+/*
+	TODO
+*/
+void interface_behaviour_macro(MainMenu &tm)
+{
+	// process macro selection
+	bool action_request = tm.hit_a&&tm.menu_action;
+	tm.request_close = (tm.vselect==MENU_MAIN_OPTION_EXIT)*action_request;
+	tm.interface_logic_id = tm.vselect*action_request;
+
 	// menu transition
 	bool req_transition = tm.hit_a&&!tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
@@ -252,70 +338,52 @@ static void interface_behaviour_macro(MainMenu &tm)
 		// menu option text
 		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 	}
-
-	// process exit selection
-	tm.request_close = tm.hit_a&&tm.menu_action&&tm.vselect==MENU_MAIN_OPTION_EXIT;
 }
 
 /*
 	TODO
 */
-static void interface_behaviour_options(MainMenu &tm)
+void interface_behaviour_options(MainMenu &tm)
 {
 	// TODO
-	std::cout << "options\n";
 }
 
 /*
 	TODO
 */
-uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
+void interface_behaviour_extras(MainMenu &tm)
 {
-	float tsmx = mx*1280.f;
-	uint8_t out_id = vselect;
-	while (tsmx<(mo_cposition[out_id].x-mo_prog.x)&&out_id>0) out_id--;
-	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP)
-		out_id++;
-	ch_select = ch_select||(out_id!=vselect);
-	return out_id;
+	// TODO
 }
 
 /*
 	TODO
 */
-void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
+void interface_behaviour_practice(MainMenu &tm)
 {
-	std::vector<float> verts = {
-		l.x,l.y,c.x,c.y,c.z,0, u.x,u.y,c.x,c.y,c.z,3, u.x,u.y,c.x,c.y,c.z,2,
-		u.x,u.y,c.x,c.y,c.z,3, l.x,l.y,c.x,c.y,c.z,0, l.x,l.y,c.x,c.y,c.z,1
-	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
-}
-
-/*
-	TODO
-	NOTE: selection shader has to be enabled before calling this function
-*/
-void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
-{
-	sh_shader.upload_vec2("lupos[0]",lp),sh_shader.upload_vec2("lupos[1]",up);
-	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
-	sh_shader.upload_int("is_hrz",hrz);
+	// TODO
 }
 
 /*
 	TODO
 */
-void MainMenu::update_peripheral_annotations()
+void interface_behaviour_load(MainMenu &tm)
 {
-	// update shown preferred peripheral
-	cpref_peripheral = m_ccbf->frame->cpref_peripheral;
+	// TODO
+}
 
-	// title screen dare message
-	tx_dare.clear();
-	std::string reqbutton = (cpref_peripheral) ? m_ccbf->iMap->cnt_name[IMP_REQPAUSE]
-			: m_ccbf->iMap->key_name[IMP_REQCONFIRM];
-	std::string dmessage = "press ["+reqbutton+"] if you DARE";
-	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
-	tcap_dare = dmessage.length();
-	tx_dare.load();
+/*
+	// TODO
+*/
+void interface_behaviour_continue(MainMenu &tm)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_newgame(MainMenu &tm)
+{
+	// TODO
 }

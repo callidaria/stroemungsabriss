@@ -130,6 +130,7 @@ class MainMenu : public UI
 {
 public:
 
+	// construction
 	MainMenu() {  }
 	MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq);
 	~MainMenu() {  }
@@ -142,12 +143,12 @@ public:
 
 private:
 
+	// system
+	void update_peripheral_annotations();
+
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
 	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
-
-	// system
-	void update_peripheral_annotations();
 
 public:
 
@@ -217,5 +218,10 @@ private:
 
 static void interface_behaviour_macro(MainMenu &tm);
 static void interface_behaviour_options(MainMenu &tm);
+static void interface_behaviour_extras(MainMenu &tm);
+static void interface_behaviour_practice(MainMenu &tm);
+static void interface_behaviour_load(MainMenu &tm);
+static void interface_behaviour_continue(MainMenu &tm);
+static void interface_behaviour_newgame(MainMenu &tm);
 
 #endif
