@@ -61,16 +61,147 @@
  * 
  * 
  * The the following implementation is the MenuList constructor, holding the language interpreter
- * conforming to the above definitions and statements.
+ * conforming to the above language definitions and statements.
 */
 
 /*
 	TODO
 */
 MenuList::MenuList(const char* path)
+	: fpath(path)
 {
-	// TODO
+	// logic switch overhead
+	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
+		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
+		command_logic_segment,command_logic_condition,command_logic_subsequent,
+		command_logic_checkbox,command_logic_dropdown,command_logic_slider,
+		command_logic_return,command_logic_syntax_error
+	};
+
+	// iterate definition file
+	std::ifstream file(path,std::ios::in);
+	while (!file.eof()) {
+
+		// skip until command
+		std::string line;
+		getline(file,line);
+		if (!line.rfind(':',0)) {
+
+			// translate command to handling logic address
+			uint8_t i = 0;
+			size_t cmd_split = line.find(' ');
+			while (i<LIST_LANGUAGE_COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[i]) i++;
+			interpreter_behaviour[i](*this,line.erase(0,cmd_split+1));
+		} cline++;
+	} file.close();
+
+	// §§testing
+	for (auto cluster : clusters) {
+		std::cout << "open: " << cluster.id << "\n\n";
+		for (auto entity : cluster.elist) {
+			std::cout << entity.head << ": " << entity.description << '\n';
+		} std::cout << "\n\n";
+	}
 }
+
+/*
+	TODO
+*/
+void command_logic_cluster(MenuList &ml,std::string cmd_tail)
+{
+	MenuListCluster cluster;
+	cluster.id = cmd_tail.c_str();
+	ml.clusters.push_back(cluster);
+	ml.t_cluster = &ml.clusters[ml.clusters.size()-1];
+}
+
+/*
+	TODO
+*/
+void command_logic_logiclist(MenuList &ml,std::string cmd_tail)
+{ ml.condition_list = std::vector<bool>(stoi(cmd_tail)); }
+
+/*
+	TODO
+*/
+void command_logic_define(MenuList &ml,std::string cmd_tail)
+{
+	MenuListEntity entity;
+	entity.head = cmd_tail.c_str();
+	ml.t_cluster->elist.push_back(entity);
+	ml.t_entity = &ml.t_cluster->elist[ml.t_cluster->elist.size()-1];
+}
+
+/*
+	TODO
+*/
+void command_logic_describe(MenuList &ml,std::string cmd_tail)
+{
+	ml.t_entity->description = cmd_tail.c_str();
+	// TODO: read until next
+}
+
+/*
+	TODO
+*/
+void command_logic_segment(MenuList &ml,std::string cmd_tail)
+{
+	MenuListSegment segment;
+	segment.position = ml.t_cluster->elist.size();
+	segment.title = cmd_tail.c_str();
+	ml.t_cluster->slist.push_back(segment);
+}
+
+/*
+	TODO
+*/
+void command_logic_condition(MenuList &ml,std::string cmd_tail)
+{ ml.t_entity->condition_id = stoi(cmd_tail); }
+
+/*
+	TODO
+*/
+void command_logic_subsequent(MenuList &ml,std::string cmd_tail)
+{
+	ml.t_entity->child_name = cmd_tail.c_str();
+	ml.t_entity->etype = LIST_ENTITY_TYPE_PARENT;
+}
+
+/*
+	TODO
+*/
+void command_logic_checkbox(MenuList &ml,std::string cmd_tail)
+{ ml.t_entity->etype = LIST_ENTITY_TYPE_CHECKBOX; }
+
+/*
+	TODO
+*/
+void command_logic_dropdown(MenuList &ml,std::string cmd_tail)
+{
+	ml.t_entity->etype = LIST_ENTITY_TYPE_DROPDOWN;
+	// TODO: read until next
+}
+
+/*
+	TODO
+*/
+void command_logic_slider(MenuList &ml,std::string cmd_tail)
+{ ml.t_entity->etype = LIST_ENTITY_TYPE_SLIDER; }
+
+/*
+	TODO
+*/
+void command_logic_return(MenuList &ml,std::string cmd_tail)
+{
+	ml.t_entity->rval = stoi(cmd_tail);
+	ml.t_entity->etype = LIST_ENTITY_TYPE_RETURN;
+}
+
+/*
+	TODO
+*/
+void command_logic_syntax_error(MenuList &ml,std::string cmd_tail)
+{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",ml.fpath,ml.cline); }
 
 
 /**

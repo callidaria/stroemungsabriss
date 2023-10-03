@@ -32,8 +32,6 @@
 #include "script/systems/input_map.h"
 #include "script/systems/worldbuilder.h"
 
-#include "script/menu/menu.h"
-
 #include "script/world.h"
 
 #define MVMT_SPEED 4

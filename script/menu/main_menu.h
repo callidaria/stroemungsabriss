@@ -47,6 +47,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr float MENU_HALFSCREEN_UI = 1280.f*.5f;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 11;
 
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
@@ -103,6 +104,13 @@ constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
 constexpr float MENU_OPTIONS_SCALE_THRES = 1.2f;
 constexpr uint8_t MENU_OPTIONS_RDEG_THRES = 16;
 
+// list entity types
+constexpr uint8_t LIST_ENTITY_TYPE_PARENT = 0;
+constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
+constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
+constexpr uint8_t LIST_ENTITY_TYPE_SLIDER = 3;
+constexpr uint8_t LIST_ENTITY_TYPE_RETURN = 4;
+
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
 constexpr float TITLE_SHIFTDOWN_TIMEOUT = 4.f;
@@ -118,6 +126,34 @@ constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double MATH_PI = 3.141592653;
 constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
+
+/**
+ * 		MenuList Definiton Documentation
+ * TODO: expand
+*/
+
+struct MenuListEntity
+{
+	const char* head,*description,*child_name;
+	uint8_t child_id,condition_id;
+	uint8_t etype;
+	std::vector<const char*> dropdown_options;
+	uint16_t rval;
+};
+
+struct MenuListSegment
+{
+	uint16_t position;
+	const char* title;
+};
+
+struct MenuListCluster
+{
+	const char* id;
+	std::vector<MenuListEntity> elist;
+	std::vector<MenuListSegment> slist;
+};
+
 class MenuList
 {
 public:
@@ -126,10 +162,51 @@ public:
 	MenuList(const char* path);
 	~MenuList() {  }
 
+public:
+
+	// data
+	const char* fpath;
+	uint32_t cline = 1;
+
+	// listing
+	std::vector<MenuListCluster> clusters;
+
+	// access
+	MenuListCluster* t_cluster;
+	MenuListEntity* t_entity;
+
+	// interaction
+	std::vector<bool> condition_list;
+
 private:
+
+	// predefinitions
+	std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+		"cluster","logic","define","describe","segment","condition",
+		"subsequent","checkbox","dropdown","slider","return"
+	};
 };
 
+// command interpretation logic
+typedef void (*interpreter_logic)(MenuList&,std::string);
+static void command_logic_cluster(MenuList &ml,std::string cmd_tail);
+static void command_logic_logiclist(MenuList &ml,std::string cmd_tail);
+static void command_logic_define(MenuList &ml,std::string cmd_tail);
+static void command_logic_describe(MenuList &ml,std::string cmd_tail);
+static void command_logic_segment(MenuList &ml,std::string cmd_tail);
+static void command_logic_condition(MenuList &ml,std::string cmd_tail);
+static void command_logic_subsequent(MenuList &ml,std::string cmd_tail);
+static void command_logic_checkbox(MenuList &ml,std::string cmd_tail);
+static void command_logic_dropdown(MenuList &ml,std::string cmd_tail);
+static void command_logic_slider(MenuList &ml,std::string cmd_tail);
+static void command_logic_return(MenuList &ml,std::string cmd_tail);
+static void command_logic_syntax_error(MenuList &ml,std::string cmd_tail);
+
+
 /**
+ * 		MainMenu Definition Documentation
+ * TODO: expand
+ * 
  * 		TODO QA
  * 
  * - TRANSITION_SPEED modifier too fast/too slow?
@@ -203,6 +280,9 @@ private:
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
 
+	// interactable lists
+	MenuList ml_options = MenuList("./lvload/options.ldc");
+
 	// splashes
 	Buffer sh_buffer = Buffer();
 	Shader sh_shader = Shader();
@@ -227,6 +307,7 @@ private:
 		= { "exit","options","extras","practice","load","continue","new game" };
 };
 
+// predefinition interface behaviour logic
 static void interface_behaviour_macro(MainMenu &tm);
 static void interface_behaviour_options(MainMenu &tm);
 static void interface_behaviour_extras(MainMenu &tm);
