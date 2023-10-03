@@ -134,22 +134,22 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 struct MenuListEntity
 {
-	const char* head,*description,*child_name;
+	std::string head,description,child_name;
 	uint8_t child_id,condition_id;
 	uint8_t etype;
-	std::vector<const char*> dropdown_options;
+	std::vector<std::string> dropdown_options;
 	uint16_t rval;
 };
 
 struct MenuListSegment
 {
 	uint16_t position;
-	const char* title;
+	std::string title;
 };
 
 struct MenuListCluster
 {
-	const char* id;
+	std::string id;
 	std::vector<MenuListEntity> elist;
 	std::vector<MenuListSegment> slist;
 };

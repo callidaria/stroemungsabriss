@@ -110,7 +110,7 @@ MenuList::MenuList(const char* path)
 void command_logic_cluster(MenuList &ml,std::string cmd_tail)
 {
 	MenuListCluster cluster;
-	cluster.id = cmd_tail.c_str();
+	cluster.id = cmd_tail;
 	ml.clusters.push_back(cluster);
 	ml.t_cluster = &ml.clusters[ml.clusters.size()-1];
 }
@@ -127,7 +127,7 @@ void command_logic_logiclist(MenuList &ml,std::string cmd_tail)
 void command_logic_define(MenuList &ml,std::string cmd_tail)
 {
 	MenuListEntity entity;
-	entity.head = cmd_tail.c_str();
+	entity.head = cmd_tail;
 	ml.t_cluster->elist.push_back(entity);
 	ml.t_entity = &ml.t_cluster->elist[ml.t_cluster->elist.size()-1];
 }
@@ -137,7 +137,7 @@ void command_logic_define(MenuList &ml,std::string cmd_tail)
 */
 void command_logic_describe(MenuList &ml,std::string cmd_tail)
 {
-	ml.t_entity->description = cmd_tail.c_str();
+	ml.t_entity->description = cmd_tail;
 	// TODO: read until next
 }
 
@@ -148,7 +148,7 @@ void command_logic_segment(MenuList &ml,std::string cmd_tail)
 {
 	MenuListSegment segment;
 	segment.position = ml.t_cluster->elist.size();
-	segment.title = cmd_tail.c_str();
+	segment.title = cmd_tail;
 	ml.t_cluster->slist.push_back(segment);
 }
 
@@ -205,7 +205,7 @@ void command_logic_syntax_error(MenuList &ml,std::string cmd_tail)
 
 
 /**
- * 		The Real Menu Implementation starts Here!
+ * 		The real menu implementation starts here!
  * TODO: expand this segment documentation
 */
 
