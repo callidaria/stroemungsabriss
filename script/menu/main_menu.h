@@ -103,6 +103,7 @@ constexpr glm::vec2 MENU_OPTIONS_CRIGHT = glm::vec2(1240,470)+glm::vec2(0,MENU_O
 constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
 constexpr float MENU_OPTIONS_SCALE_THRES = 1.2f;
 constexpr uint8_t MENU_OPTIONS_RDEG_THRES = 16;
+constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 
 // list entity types
 constexpr uint8_t LIST_ENTITY_TYPE_PARENT = 0;
@@ -159,6 +160,16 @@ struct MenuListCluster
 	std::string id;
 	std::vector<MenuListEntity> elist;
 	std::vector<MenuListSegment> slist;
+
+	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
+	//		1) creation is complete and utter garbage trash
+	//		2) you instanciate a shader & buffer for each and every single element
+	//		3) every text element => list element has it's own load
+	//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
+	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
+	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
+	// anyway, here's the implementation for now...
+	std::vector<Text> tx_list;
 };
 
 class MenuList
@@ -168,6 +179,9 @@ public:
 	// construction
 	MenuList(const char* path);
 	~MenuList() {  }
+
+	// draw
+	void update();
 
 public:
 
@@ -179,6 +193,7 @@ public:
 	std::vector<MenuListCluster> clusters;
 
 	// interaction
+	uint8_t active_cluster_id = 0;
 	std::vector<bool> condition_list;
 
 private:
@@ -187,6 +202,7 @@ private:
 	std::vector<ListLanguageCommand> cmd_buffer;
 
 	// predefinitions
+	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",30,30);
 	std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
 		"cluster","logic","define","describe","segment","condition",
 		"subsequent","checkbox","dropdown","slider","return"
@@ -250,6 +266,9 @@ public:
 	CascabelBaseFeature* m_ccbf;
 	bool request_close = false;
 
+	// interactable lists
+	MenuList ml_options = MenuList("./lvload/options.ldc");
+
 	// index
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
@@ -285,9 +304,6 @@ private:
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
-
-	// interactable lists
-	MenuList ml_options = MenuList("./lvload/options.ldc");
 
 	// splashes
 	Buffer sh_buffer = Buffer();

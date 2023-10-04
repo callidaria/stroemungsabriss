@@ -105,14 +105,34 @@ MenuList::MenuList(const char* path)
 		cline++;
 	}
 
-	// §§testing
-	for (auto cluster : clusters) {
-		std::cout << "open: " << cluster.id << "\n\n";
-		for (auto entity : cluster.elist) {
-			std::cout << entity.head << ": " << entity.description << '\n';
-			for (auto dde : entity.dropdown_options) std::cout << dde.c_str() << '\n';
-		} std::cout << "\n\n";
+	// post-process list & visuals creation
+	for (MenuListCluster &cluster : clusters) {
+		int32_t vscroll = 515;
+		for (uint16_t i=0;i<cluster.elist.size();i++) {
+
+			// create list segments by id and increase list text scroll
+			// TODO
+
+			// convert cluster name references to cluster id
+			// TODO
+
+			// create list text
+			Text etext = Text(st_font);
+			etext.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll));
+			etext.load();
+			cluster.tx_list.push_back(etext);
+			vscroll -= 45;
+		}
 	}
+}
+
+/*
+	TODO
+*/
+void MenuList::update()
+{
+	for (auto txe : clusters[active_cluster_id].tx_list)
+		txe.prepare(),txe.render(128,glm::vec4(1));
 }
 
 /*
@@ -235,10 +255,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	std::vector<float> sverts;
-	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),glm::vec2(SPLICE_TITLE_UPPER_START,720),
-			glm::vec3(.5f,0,0));
-	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_LOWER_START),glm::vec2(1280,SPLICE_HEAD_UPPER_START),
-			SPLICE_HEAD_COLOUR);
+	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),
+			glm::vec2(SPLICE_TITLE_UPPER_START,720),glm::vec3(.5f,0,0));
+	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_LOWER_START),
+			glm::vec2(1280,SPLICE_HEAD_UPPER_START),SPLICE_HEAD_COLOUR);
 	create_splash(sverts,glm::vec2(0),glm::vec2(0,720),SPLICE_SELECTION_COLOUR);
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
@@ -324,10 +344,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
-	// interface logic
-	interface_behaviour[interface_logic_id](*this);
-	running = !request_close;
-
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
 		rattle_countermove = rattle_mobility/2;
@@ -381,6 +397,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	msaa.blit();
 	fb_menu.bind();
 	Frame::clear();
+
+	// interface logic
+	interface_behaviour[interface_logic_id](*this);
+	running = !request_close;
 
 	// render text
 	tx_dare.prepare();
@@ -563,7 +583,7 @@ void interface_behaviour_macro(MainMenu &tm)
 */
 void interface_behaviour_options(MainMenu &tm)
 {
-	// TODO
+	tm.ml_options.update();
 	tm.interface_logic_id *= !tm.hit_b;
 }
 
