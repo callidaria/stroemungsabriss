@@ -56,7 +56,6 @@ constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
 constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
 
 // list entity types
-constexpr uint8_t LIST_ENTITY_TYPE_PARENT = 0;
 constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
 constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
 constexpr uint8_t LIST_ENTITY_TYPE_SLIDER = 3;
@@ -149,10 +148,11 @@ struct ListLanguageCommand
 struct MenuListEntity
 {
 	std::string head,description,child_name;
-	uint8_t child_id,condition_id;
+	uint8_t child_id,condition_id = 0;
 	uint8_t etype;
 	std::vector<std::string> dropdown_options;
 	uint16_t rval;
+	bool jsegment = false;
 };
 // TODO: add multicondition support
 
@@ -176,7 +176,7 @@ struct MenuListCluster
 	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
 	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
 	// anyway, here's the implementation for now...
-	std::vector<Text> tx_list;
+	std::vector<Text> tx_elist,tx_slist;
 };
 
 class MenuList
@@ -198,6 +198,7 @@ public:
 
 	// listing
 	std::vector<MenuListCluster> clusters;
+	std::vector<MenuListEntity*> parents;
 
 	// interaction
 	uint8_t active_cluster_id = 0;

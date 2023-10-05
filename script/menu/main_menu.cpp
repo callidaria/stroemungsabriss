@@ -103,24 +103,36 @@ MenuList::MenuList(const char* path)
 	for (auto cmd : cmd_buffer) {
 		interpreter_behaviour[cmd.id](*this,cmd);
 		cline++;
-	}
+
+	// convert cluster name references to cluster id
+	} for (auto parent : parents) {
+		uint8_t i = 0;
+		while (clusters[i].id!=parent->child_name&&i<clusters.size()) i++;
+		parent->child_id = i;
 
 	// post-process list & visuals creation
-	for (MenuListCluster &cluster : clusters) {
+	} for (MenuListCluster &cluster : clusters) {
 		int32_t vscroll = MENU_LIST_SCROLL_START;
-		for (uint16_t i=0;i<cluster.elist.size();i++) {
+		uint8_t i_seg = 0;
 
-			// create list segments by id and increase list text scroll
-			// TODO
+		// process list segment heads
+		for (uint8_t i=0;i<cluster.slist.size();i++) {
+			if (cluster.slist[i].position<cluster.elist.size())
+				cluster.elist[cluster.slist[i].position].jsegment = true;
 
-			// convert cluster name references to cluster id
-			// TODO
+			// write segment information in-between list elements
+			Text stext = Text(st_font);
+			stext.add(cluster.slist[i].title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X+100,
+				MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
+				stext.load();
+			cluster.tx_slist.push_back(stext);
 
-			// create list text
+		// process cluster entities
+		} for (auto entity : cluster.elist) {
+			vscroll -= MENU_LIST_SCROLL_Y*entity.jsegment;
 			Text etext = Text(st_font);
-			etext.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll));
-			etext.load();
-			cluster.tx_list.push_back(etext);
+			etext.add(entity.head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),etext.load();
+			cluster.tx_elist.push_back(etext);
 			vscroll -= MENU_LIST_SCROLL_Y;
 		}
 	}
@@ -131,8 +143,13 @@ MenuList::MenuList(const char* path)
 */
 void MenuList::update()
 {
-	for (auto txe : clusters[active_cluster_id].tx_list)
-		txe.prepare(),txe.render(128,glm::vec4(1));
+	// draw segments
+	for (auto txs : clusters[active_cluster_id].tx_slist)
+		txs.prepare(),txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
+
+	// draw entities
+	for (auto txe : clusters[active_cluster_id].tx_elist)
+		txe.prepare(),txe.render(1024,glm::vec4(1));
 }
 
 /*
@@ -190,7 +207,8 @@ void command_logic_condition(MenuList &ml,const ListLanguageCommand &cmd)
 void command_logic_subsequent(MenuList &ml,const ListLanguageCommand &cmd)
 {
 	ml.clusters.back().elist.back().child_name = cmd.tail;
-	ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_PARENT;
+	ml.parents.push_back(&ml.clusters.back().elist.back());
+	// FIXME: probably not going to happen because of the return def in back() ?!? whyever is that?
 }
 
 /*
