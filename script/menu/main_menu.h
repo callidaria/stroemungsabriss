@@ -49,6 +49,19 @@ constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr float MENU_HALFSCREEN_UI = 1280.f*.5f;
 constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 11;
 
+// menu list positioning
+constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
+constexpr uint16_t MENU_LIST_SCROLL_START = 515;
+constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
+constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
+
+// list entity types
+constexpr uint8_t LIST_ENTITY_TYPE_PARENT = 0;
+constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
+constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
+constexpr uint8_t LIST_ENTITY_TYPE_SLIDER = 3;
+constexpr uint8_t LIST_ENTITY_TYPE_RETURN = 4;
+
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
 constexpr glm::vec3 VRT_TITLE_END = glm::vec3(100,250,0);
@@ -70,10 +83,12 @@ constexpr float SPLICE_TITLE_LWIDTH_MOD = 40.f;
 constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
 
 // head splice
-constexpr float SPLICE_HEAD_LOWER_START = 520.f;
-constexpr float SPLICE_HEAD_UPPER_START = 470.f;
-constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f;
-constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f;
+constexpr float SPLICE_HEAD_ORIGIN_POSITION = MENU_LIST_SCROLL_START-MENU_LIST_HEAD_SIZE*.5f;
+constexpr float SPLICE_HEAD_ORIGIN_WIDTH = 15.f;
+constexpr float SPLICE_HEAD_LOWER_START = 520.f-SPLICE_HEAD_ORIGIN_POSITION;
+constexpr float SPLICE_HEAD_UPPER_START = 470.f-SPLICE_HEAD_ORIGIN_POSITION;
+constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH;
+constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH;
 
 // selection splice
 constexpr float SPLICE_OFFCENTER_MV = .33f;
@@ -103,14 +118,6 @@ constexpr glm::vec2 MENU_OPTIONS_CRIGHT = glm::vec2(1240,470)+glm::vec2(0,MENU_O
 constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
 constexpr float MENU_OPTIONS_SCALE_THRES = 1.2f;
 constexpr uint8_t MENU_OPTIONS_RDEG_THRES = 16;
-constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
-
-// list entity types
-constexpr uint8_t LIST_ENTITY_TYPE_PARENT = 0;
-constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
-constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
-constexpr uint8_t LIST_ENTITY_TYPE_SLIDER = 3;
-constexpr uint8_t LIST_ENTITY_TYPE_RETURN = 4;
 
 // animation timing
 constexpr float TRANSITION_SPEED = 11.5f;
@@ -202,7 +209,8 @@ private:
 	std::vector<ListLanguageCommand> cmd_buffer;
 
 	// predefinitions
-	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",30,30);
+	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 	std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
 		"cluster","logic","define","describe","segment","condition",
 		"subsequent","checkbox","dropdown","slider","return"
@@ -280,6 +288,7 @@ public:
 	// animation
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
+	float ftransition = .0f,inv_ftransition;
 	float delta_tspeed;
 
 	// text

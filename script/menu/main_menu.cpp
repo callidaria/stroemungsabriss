@@ -107,7 +107,7 @@ MenuList::MenuList(const char* path)
 
 	// post-process list & visuals creation
 	for (MenuListCluster &cluster : clusters) {
-		int32_t vscroll = 515;
+		int32_t vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// create list segments by id and increase list text scroll
@@ -121,7 +121,7 @@ MenuList::MenuList(const char* path)
 			etext.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll));
 			etext.load();
 			cluster.tx_list.push_back(etext);
-			vscroll -= 45;
+			vscroll -= MENU_LIST_SCROLL_Y;
 		}
 	}
 }
@@ -257,8 +257,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	std::vector<float> sverts;
 	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),
 			glm::vec2(SPLICE_TITLE_UPPER_START,720),glm::vec3(.5f,0,0));
-	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_LOWER_START),
-			glm::vec2(1280,SPLICE_HEAD_UPPER_START),SPLICE_HEAD_COLOUR);
+	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),
+			glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),SPLICE_HEAD_COLOUR);
 	create_splash(sverts,glm::vec2(0),glm::vec2(0,720),SPLICE_SELECTION_COLOUR);
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
@@ -344,6 +344,14 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
+	// focus transition
+	ftransition += (interface_logic_id-!interface_logic_id)*TRANSITION_SPEED
+			* m_ccbf->frame->time_delta;
+	ftransition = (ftransition<.0f) ? .0f : (ftransition>1.f) ? 1.f : ftransition;
+	// TODO: i feel like this implementation lacks wit
+	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
+	inv_ftransition = 1.f-ftransition;
+
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
 		rattle_countermove = rattle_mobility/2;
@@ -377,12 +385,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	sh_shader.enable();
 
 	// head splash upload & render
-	modify_splash(glm::vec2(0),glm::vec2(0),SPLICE_HEAD_LOWER_WIDTH*mtransition,
-			SPLICE_HEAD_UPPER_WIDTH*mtransition,true);
+	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition),
+			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition),
+			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
+			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
-	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*mtransition,vrt_uwidth*mtransition,false);
+	float ctransition = mtransition-ftransition;
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*ctransition,vrt_uwidth*ctransition,false);
 	glDrawArrays(GL_TRIANGLES,12,6);
 	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
@@ -413,7 +424,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].prepare();
 		glm::mat4 opt_trans = glm::translate(glm::mat4(1.f),
-				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y,0));
+				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y+250*ftransition,0));
 		glm::vec4 opt_colour = glm::vec4(.5f,1.f,.5f,mtransition);
 		if (i==vselect) {
 			opt_trans = glm::scale(opt_trans,glm::vec3(MENU_OPTIONS_SCALE_THRES));
@@ -424,6 +435,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	}
 
 	// render titles
+	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
+			glm::vec3(0,150*ftransition,0));
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
@@ -552,6 +565,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	// TODO: compare linear transition with sinespeed transition implementation
+	// 		also relate the results of this todo to the ftransition in main render method
 	tm.inv_mtransition = 1.f-tm.mtransition;
 
 	// processing selection input
