@@ -2,10 +2,12 @@
 
 /**
  * 		Menu List Implementation with .ldc Language Interpreter
+ * 
  * TODO: expand this segment documentation
  * 
  * 
  * 		List Definition Code Language Design
+ * 
  * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
  * following expression are valid and will be handled by menu list interpreter:
  * (the definitions are using <> to show where custom naming replaces "<contents>")
@@ -109,6 +111,7 @@ MenuList::MenuList(const char* path)
 		uint8_t i = 0;
 		while (clusters[i].id!=parent->child_name&&i<clusters.size()) i++;
 		parent->child_id = i;
+	// FIXME: turns out this is not working reliably at all
 
 	// post-process list & visuals creation
 	} for (MenuListCluster &cluster : clusters) {
@@ -141,15 +144,25 @@ MenuList::MenuList(const char* path)
 /*
 	TODO
 */
-void MenuList::update()
+void MenuList::update(uint8_t &grid,int8_t scroll,bool conf)
 {
-	// draw segments
-	for (auto txs : clusters[active_cluster_id].tx_slist)
-		txs.prepare(),txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
+	// translate input
+	int8_t didx = (clusters[active_cluster_id].elist.size()-(lscroll+grid+1));
+	grid += didx*(didx<0);
+	// TODO: make it happen
 
-	// draw entities
+	// §§testing
+	if (conf) std::cout << grid << ' '
+			<< (unsigned int)clusters[active_cluster_id].elist[lscroll+grid].child_id
+			<< ':' << clusters[active_cluster_id].elist[lscroll+grid].child_name << '\n';
+
+	// draw segments & entities
+	for (auto txs : clusters[active_cluster_id].tx_slist)
+		txs.prepare(),txs.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
+			txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
 	for (auto txe : clusters[active_cluster_id].tx_elist)
-		txe.prepare(),txe.render(1024,glm::vec4(1));
+		txe.prepare(),txe.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
+			txe.render(1024,glm::vec4(1));
 }
 
 /*
@@ -253,6 +266,7 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 
 /**
  * 		The real menu implementation starts here!
+ * 
  * TODO: expand this segment documentation
 */
 
@@ -394,36 +408,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
-	// START MULTISAMPLED RENDER
-	msaa.bind();
-	Frame::clear();
-
-	// splash render
-	sh_buffer.bind();
-	sh_shader.enable();
-
-	// head splash upload & render
-	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition),
-			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition),
-			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
-			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
-	glDrawArrays(GL_TRIANGLES,6,6);
-
-	// selection splash upload & render
-	float ctransition = mtransition-ftransition;
-	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*ctransition,vrt_uwidth*ctransition,false);
-	glDrawArrays(GL_TRIANGLES,12,6);
-	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
-
-	// title splash upload & render
-	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
-	float tlext = SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD*mtransition,
-		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
-	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
-	glDrawArrays(GL_TRIANGLES,0,6);
-
 	// START RENDER MENU BUFFER
-	msaa.blit();
 	fb_menu.bind();
 	Frame::clear();
 
@@ -459,8 +444,35 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
-	// STOP RENDER MENU BUFFER
+	// START MULTISAMPLED RENDER
 	FrameBuffer::close();
+	msaa.bind();
+	Frame::clear();
+
+	// splash render
+	sh_buffer.bind();
+	sh_shader.enable();
+
+	// head splash upload & render
+	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+head_translation_y),
+			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+head_translation_y),
+			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
+			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
+	glDrawArrays(GL_TRIANGLES,6,6);
+
+	// selection splash upload & render
+	float ctransition = mtransition-ftransition;
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*ctransition,vrt_uwidth*ctransition,false);
+	glDrawArrays(GL_TRIANGLES,12,6);
+	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
+
+	// title splash upload & render
+	float tlpos = SPLICE_TITLE_LOWER_MOD*mtransition,tupos = SPLICE_TITLE_UPPER_MOD*mtransition;
+	float tlext = SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD*mtransition,
+		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
+	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
+	glDrawArrays(GL_TRIANGLES,0,6);
+	msaa.blit();
 
 	// render menu
 	fb_menu.render(mtransition);
@@ -493,6 +505,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 /**
  * 		Menu Logic Functions
+ * 
  * a collection of additional methods, helping with main menu logic
  * TODO: improve section documentation
 */
@@ -509,6 +522,25 @@ uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 		out_id++;
 	ch_select = ch_select||(out_id!=vselect);
 	return out_id;
+}
+// FIXME: nonsensical implementation of a method for something, that will be used exactly once
+
+/*
+	TODO
+*/
+void MainMenu::update_list_grid(MenuList &ml)
+{
+	float org_delta = (MENU_LIST_SCROLL_START-m_ccbf->frame->mouse.myfr*720.f);
+	org_delta *= org_delta>0;
+	uint8_t grid = org_delta/MENU_LIST_SCROLL_Y;
+	// TODO: make it work for controller & keyboard as well
+
+	// TODO: calculate scroll
+	int8_t scroll = 0;
+
+	// process menu list input & render & translate head selection splash
+	ml.update(grid,scroll,hit_a);
+	head_translation_y = -MENU_LIST_SCROLL_Y*grid;
 }
 
 /*
@@ -532,6 +564,7 @@ void MainMenu::update_peripheral_annotations()
 
 /**
  * 		Start Splash Logic
+ * 
  * these methods simplify creation & modification of selection splash geometry
  * TODO: extend section documentation
 */
@@ -608,6 +641,9 @@ void interface_behaviour_macro(MainMenu &tm)
 		// menu option text
 		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 	}
+
+	// reset
+	tm.head_translation_y = 0;
 }
 
 /*
@@ -615,7 +651,7 @@ void interface_behaviour_macro(MainMenu &tm)
 */
 void interface_behaviour_options(MainMenu &tm)
 {
-	tm.ml_options.update();
+	tm.update_list_grid(tm.ml_options);
 	tm.interface_logic_id *= !tm.hit_b;
 }
 

@@ -188,7 +188,7 @@ public:
 	~MenuList() {  }
 
 	// draw
-	void update();
+	void update(uint8_t &grid,int8_t scroll,bool conf);
 
 public:
 
@@ -208,6 +208,9 @@ private:
 
 	// buffer
 	std::vector<ListLanguageCommand> cmd_buffer;
+
+	// status
+	uint8_t lscroll = 0;
 
 	// predefinitions
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -259,6 +262,7 @@ public:
 
 	// logic
 	uint8_t get_selected_main_option(float mx,bool &ch_select);
+	void update_list_grid(MenuList &ml);
 
 private:
 
@@ -301,6 +305,7 @@ public:
 	// selectors
 	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
 	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
+	float head_translation_y;
 
 private:
 
