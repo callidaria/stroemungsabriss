@@ -126,7 +126,7 @@ MenuList::MenuList(const char* path)
 			// write segment information in-between list elements
 			Text stext = Text(st_font);
 			stext.add(cluster.slist[i].title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X+100,
-				MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
+					MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
 				stext.load();
 			cluster.tx_slist.push_back(stext);
 
@@ -144,15 +144,18 @@ MenuList::MenuList(const char* path)
 /*
 	TODO
 */
-void MenuList::update(uint8_t &grid,int8_t scroll,bool conf)
+void MenuList::update(int8_t &grid,bool conf)
 {
 	// translate input
 	int8_t didx = (clusters[active_cluster_id].elist.size()-(lscroll+grid+1));
 	grid += didx*(didx<0);
+	grid *= grid>0;
 	// TODO: make it happen
 
+	// TODO: automatically handle scrolling
+
 	// §§testing
-	if (conf) std::cout << grid << ' '
+	if (conf) std::cout << (unsigned int)grid << ' '
 			<< (unsigned int)clusters[active_cluster_id].elist[lscroll+grid].child_id
 			<< ':' << clusters[active_cluster_id].elist[lscroll+grid].child_name << '\n';
 
@@ -367,8 +370,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
 	lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
+	udmv = (m_ccbf->iMap->get_input_triggered(IMP_REQDOWN)
+			- m_ccbf->iMap->get_input_triggered(IMP_REQUP))*menu_action;
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 	// FIXME: as soon as the title screen has been passed, start press will become return request
+	// FIXME: why is vertical selector's left/right selection input bound to option list size?
 
 	// timing
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
@@ -530,17 +536,17 @@ uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
 */
 void MainMenu::update_list_grid(MenuList &ml)
 {
-	float org_delta = (MENU_LIST_SCROLL_START-m_ccbf->frame->mouse.myfr*720.f);
-	org_delta *= org_delta>0;
-	uint8_t grid = org_delta/MENU_LIST_SCROLL_Y;
-	// TODO: make it work for controller & keyboard as well
+	// mouse grid selection
+	if (m_ccbf->frame->mpref_peripheral) {
+		float org_delta = (MENU_LIST_SCROLL_START-m_ccbf->frame->mouse.myfr*720.f);
+		vgrid_id = org_delta/MENU_LIST_SCROLL_Y;
 
-	// TODO: calculate scroll
-	int8_t scroll = 0;
+	// button delta selection
+	} else vgrid_id += udmv;
 
 	// process menu list input & render & translate head selection splash
-	ml.update(grid,scroll,hit_a);
-	head_translation_y = -MENU_LIST_SCROLL_Y*grid;
+	ml.update(vgrid_id,hit_a);
+	head_translation_y = -MENU_LIST_SCROLL_Y*vgrid_id;
 }
 
 /*

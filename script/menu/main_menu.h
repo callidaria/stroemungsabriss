@@ -54,6 +54,7 @@ constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
 constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
+constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 
 // list entity types
 constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
@@ -188,7 +189,7 @@ public:
 	~MenuList() {  }
 
 	// draw
-	void update(uint8_t &grid,int8_t scroll,bool conf);
+	void update(int8_t &grid,bool conf);
 
 public:
 
@@ -285,10 +286,11 @@ public:
 	// index
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
+	int8_t vgrid_id = 0;
 
 	// processed input
 	bool hit_a,hit_b;
-	int8_t lrmv;
+	int8_t lrmv,udmv;
 
 	// animation
 	bool menu_action = false;
