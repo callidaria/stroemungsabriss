@@ -107,11 +107,11 @@ MenuList::MenuList(const char* path)
 		cline++;
 
 	// convert cluster name references to cluster id
-	} for (auto parent : parents) {
+	} for (MenuListEntity* parent : parents) {
+		std::cout << parent << ' ' << parent->head << ' ' << parent->child_name << '\n';
 		uint8_t i = 0;
 		while (clusters[i].id!=parent->child_name&&i<clusters.size()) i++;
 		parent->child_id = i;
-	// FIXME: turns out this is not working reliably at all
 
 	// post-process list & visuals creation
 	} for (MenuListCluster &cluster : clusters) {
@@ -150,9 +150,6 @@ void MenuList::update(int8_t &grid,bool conf)
 	int8_t didx = (clusters[active_cluster_id].elist.size()-(lscroll+grid+1));
 	grid += didx*(didx<0);
 	grid *= grid>0;
-	// TODO: make it happen
-
-	// TODO: automatically handle scrolling
 
 	// §§testing
 	if (conf) std::cout << (unsigned int)grid << ' '
@@ -222,9 +219,9 @@ void command_logic_condition(MenuList &ml,const ListLanguageCommand &cmd)
 */
 void command_logic_subsequent(MenuList &ml,const ListLanguageCommand &cmd)
 {
-	ml.clusters.back().elist.back().child_name = cmd.tail;
-	ml.parents.push_back(&ml.clusters.back().elist.back());
-	// FIXME: probably not going to happen because of the return def in back() ?!? whyever is that?
+	MenuListEntity &mle = ml.clusters.back().elist.back();
+	mle.child_name = cmd.tail;
+	ml.parents.push_back(&mle);
 }
 
 /*
@@ -238,10 +235,10 @@ void command_logic_checkbox(MenuList &ml,const ListLanguageCommand &cmd)
 */
 void command_logic_dropdown(MenuList &ml,const ListLanguageCommand &cmd)
 {
-	std::stringstream bfss(cmd.buffer);
+	/*std::stringstream bfss(cmd.buffer);
 	std::string ddoption;
-	while (getline(bfss,ddoption,';')) 
-		ml.clusters.back().elist.back().dropdown_options.push_back(ddoption);
+	while (getline(bfss,ddoption,';'))
+		ml.clusters.back().elist.back().dropdown_options.push_back(ddoption);*/
 	ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
 }
 
