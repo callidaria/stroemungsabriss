@@ -169,6 +169,10 @@ struct MenuListCluster
 	std::vector<MenuListEntity> elist;
 	std::vector<MenuListSegment> slist;
 
+	// previously saved MenuListEntity* list to iterate parents, but memory issues made it break
+	// TODO: look into the original memory issue for the slightest of improvements
+	std::vector<uint16_t> parents;
+
 	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
 	//		1) creation is complete and utter garbage trash
 	//		2) you instanciate a shader & buffer for each and every single element
@@ -199,7 +203,6 @@ public:
 
 	// listing
 	std::vector<MenuListCluster> clusters;
-	std::vector<MenuListEntity*> parents;
 
 	// interaction
 	uint8_t active_cluster_id = 0;

@@ -62,7 +62,7 @@
  * selecting this entity stops list interaction immediately and returns given value
  * 
  * 
- * The the following implementation is the MenuList constructor, holding the language interpreter
+ * The following implementation is the MenuList constructor, holding the language interpreter
  * conforming to the above language definitions and statements.
 */
 
@@ -106,20 +106,19 @@ MenuList::MenuList(const char* path)
 		interpreter_behaviour[cmd.id](*this,cmd);
 		cline++;
 
-	// convert cluster name references to cluster id
-	} for (MenuListEntity* parent : parents) {
-		std::cout << parent << ' ' << parent->head << ' ' << parent->child_name << '\n';
-		uint8_t i = 0;
-		while (clusters[i].id!=parent->child_name&&i<clusters.size()) i++;
-		parent->child_id = i;
-
 	// post-process list & visuals creation
 	} for (MenuListCluster &cluster : clusters) {
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		uint8_t i_seg = 0;
 
+		// convert cluster name references to cluster id
+		for (auto pid : cluster.parents) {
+			uint8_t i = 0;
+			while (clusters[i].id!=cluster.elist[pid].child_name&&i<clusters.size()) i++;
+			cluster.elist[pid].child_id = i;
+
 		// process list segment heads
-		for (uint8_t i=0;i<cluster.slist.size();i++) {
+		} for (uint8_t i=0;i<cluster.slist.size();i++) {
 			if (cluster.slist[i].position<cluster.elist.size())
 				cluster.elist[cluster.slist[i].position].jsegment = true;
 
@@ -151,10 +150,9 @@ void MenuList::update(int8_t &grid,bool conf)
 	grid += didx*(didx<0);
 	grid *= grid>0;
 
-	// §§testing
-	if (conf) std::cout << (unsigned int)grid << ' '
-			<< (unsigned int)clusters[active_cluster_id].elist[lscroll+grid].child_id
-			<< ':' << clusters[active_cluster_id].elist[lscroll+grid].child_name << '\n';
+	// switching list activation
+	if (conf&&clusters[active_cluster_id].elist[lscroll+grid].child_name.size())
+		active_cluster_id = clusters[active_cluster_id].elist[lscroll+grid].child_id;
 
 	// draw segments & entities
 	for (auto txs : clusters[active_cluster_id].tx_slist)
@@ -219,9 +217,8 @@ void command_logic_condition(MenuList &ml,const ListLanguageCommand &cmd)
 */
 void command_logic_subsequent(MenuList &ml,const ListLanguageCommand &cmd)
 {
-	MenuListEntity &mle = ml.clusters.back().elist.back();
-	mle.child_name = cmd.tail;
-	ml.parents.push_back(&mle);
+	ml.clusters.back().elist.back().child_name = cmd.tail;
+	ml.clusters.back().parents.push_back(ml.clusters.back().elist.size()-1);
 }
 
 /*
@@ -235,10 +232,10 @@ void command_logic_checkbox(MenuList &ml,const ListLanguageCommand &cmd)
 */
 void command_logic_dropdown(MenuList &ml,const ListLanguageCommand &cmd)
 {
-	/*std::stringstream bfss(cmd.buffer);
+	std::stringstream bfss(cmd.buffer);
 	std::string ddoption;
 	while (getline(bfss,ddoption,';'))
-		ml.clusters.back().elist.back().dropdown_options.push_back(ddoption);*/
+		ml.clusters.back().elist.back().dropdown_options.push_back(ddoption);
 	ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
 }
 
