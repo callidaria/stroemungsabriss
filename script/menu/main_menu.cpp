@@ -143,7 +143,7 @@ MenuList::MenuList(const char* path)
 /*
 	TODO
 */
-void MenuList::update(int8_t &grid,bool conf)
+void MenuList::update(int8_t &grid,bool conf,bool &back)
 {
 	// translate input
 	int8_t didx = (clusters[active_cluster_id].elist.size()-(lscroll+grid+1));
@@ -153,6 +153,11 @@ void MenuList::update(int8_t &grid,bool conf)
 	// switching list activation
 	if (conf&&clusters[active_cluster_id].elist[lscroll+grid].child_name.size())
 		active_cluster_id = clusters[active_cluster_id].elist[lscroll+grid].child_id;
+
+	// list navigation towards parent
+	bool stall_back = active_cluster_id;
+	active_cluster_id *= !back;
+	back = !stall_back&&back;
 
 	// draw segments & entities
 	for (auto txs : clusters[active_cluster_id].tx_slist)
@@ -394,7 +399,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
 	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
 			: 1.f-sqrt(dt_tnormalize));
-
 	// combined title animation
 	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
 		hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
@@ -513,21 +517,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 /*
 	TODO
 */
-uint8_t MainMenu::get_selected_main_option(float mx,bool &ch_select)
-{
-	float tsmx = mx*1280.f;
-	uint8_t out_id = vselect;
-	while (tsmx<(mo_cposition[out_id].x-mo_prog.x)&&out_id>0) out_id--;
-	while (tsmx>(mo_cposition[out_id].x+mo_twidth[out_id]+mo_prog.x)&&out_id<MENU_MAIN_OPTION_CAP)
-		out_id++;
-	ch_select = ch_select||(out_id!=vselect);
-	return out_id;
-}
-// FIXME: nonsensical implementation of a method for something, that will be used exactly once
-
-/*
-	TODO
-*/
 void MainMenu::update_list_grid(MenuList &ml)
 {
 	// mouse grid selection
@@ -539,7 +528,7 @@ void MainMenu::update_list_grid(MenuList &ml)
 	} else vgrid_id += udmv;
 
 	// process menu list input & render & translate head selection splash
-	ml.update(vgrid_id,hit_a);
+	ml.update(vgrid_id,hit_a,hit_b);
 	head_translation_y = -MENU_LIST_SCROLL_Y*vgrid_id;
 }
 
@@ -621,9 +610,15 @@ void interface_behaviour_macro(MainMenu &tm)
 
 	// processing selection input
 	bool ch_select = tm.lrmv!=0;
-	tm.vselect += tm.lrmv;
-	tm.vselect = (tm.m_ccbf->frame->mpref_peripheral)
-			? tm.get_selected_main_option(tm.m_ccbf->frame->mouse.mxfr,ch_select) : tm.vselect;
+	if (tm.m_ccbf->frame->mpref_peripheral) {
+		float tsmx = tm.m_ccbf->frame->mouse.mxfr*1280.f;
+		uint8_t out_id = tm.vselect;
+		while (tsmx<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
+		while (tsmx>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
+				&& out_id<MENU_MAIN_OPTION_CAP) out_id++;
+		ch_select = ch_select||(out_id!=tm.vselect);
+		tm.vselect = out_id;
+	} else tm.vselect += tm.lrmv;
 
 	// selection splash update calculations
 	if (ch_select||req_transition) {

@@ -193,7 +193,7 @@ public:
 	~MenuList() {  }
 
 	// draw
-	void update(int8_t &grid,bool conf);
+	void update(int8_t &grid,bool conf,bool &back);
 
 public:
 
@@ -265,7 +265,6 @@ public:
 	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
 
 	// logic
-	uint8_t get_selected_main_option(float mx,bool &ch_select);
 	void update_list_grid(MenuList &ml);
 
 private:
