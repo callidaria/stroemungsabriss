@@ -374,6 +374,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 	// FIXME: as soon as the title screen has been passed, start press will become return request
 	// FIXME: why is vertical selector's left/right selection input bound to option list size?
+	// FIXME: up/down movement inverted with controller stick input for some reason
 
 	// timing
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
@@ -399,6 +400,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
 	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
 			: 1.f-sqrt(dt_tnormalize));
+
 	// combined title animation
 	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
 		hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
@@ -458,10 +460,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	sh_shader.enable();
 
 	// head splash upload & render
-	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+head_translation_y),
-			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+head_translation_y),
-			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
-			(SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
+	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+lhead_translation_y),
+			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+uhead_translation_y),
+			(lr_head_extend+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
+			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
@@ -520,6 +522,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 void MainMenu::update_list_grid(MenuList &ml)
 {
 	// mouse grid selection
+	int8_t tid = vgrid_id;
 	if (m_ccbf->frame->mpref_peripheral) {
 		float org_delta = (MENU_LIST_SCROLL_START-m_ccbf->frame->mouse.myfr*720.f);
 		vgrid_id = org_delta/MENU_LIST_SCROLL_Y;
@@ -527,9 +530,17 @@ void MainMenu::update_list_grid(MenuList &ml)
 	// button delta selection
 	} else vgrid_id += udmv;
 
-	// process menu list input & render & translate head selection splash
+	// process menu list input & render
 	ml.update(vgrid_id,hit_a,hit_b);
-	head_translation_y = -MENU_LIST_SCROLL_Y*vgrid_id;
+
+	// update selection splash geometry
+	if (tid!=vgrid_id) {
+		float htrans = -MENU_LIST_SCROLL_Y*vgrid_id;
+		lhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
+		uhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
+		lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
+			ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
+	}
 }
 
 /*
@@ -609,6 +620,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	tm.inv_mtransition = 1.f-tm.mtransition;
 
 	// processing selection input
+	tm.vselect += tm.lrmv;
 	bool ch_select = tm.lrmv!=0;
 	if (tm.m_ccbf->frame->mpref_peripheral) {
 		float tsmx = tm.m_ccbf->frame->mouse.mxfr*1280.f;
@@ -618,7 +630,7 @@ void interface_behaviour_macro(MainMenu &tm)
 				&& out_id<MENU_MAIN_OPTION_CAP) out_id++;
 		ch_select = ch_select||(out_id!=tm.vselect);
 		tm.vselect = out_id;
-	} else tm.vselect += tm.lrmv;
+	}
 
 	// selection splash update calculations
 	if (ch_select||req_transition) {
@@ -638,7 +650,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// reset
-	tm.head_translation_y = 0;
+	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
 }
 
 /*

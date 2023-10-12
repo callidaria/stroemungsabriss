@@ -84,11 +84,14 @@ constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
 
 // head splice
 constexpr float SPLICE_HEAD_ORIGIN_POSITION = MENU_LIST_SCROLL_START-MENU_LIST_HEAD_SIZE*.5f;
-constexpr float SPLICE_HEAD_ORIGIN_WIDTH = 15.f;
+constexpr float SPLICE_HEAD_MINIMUM_WIDTH = 4.f;
+constexpr float SPLICE_HEAD_ORIGIN_WIDTH = 15.f-SPLICE_HEAD_MINIMUM_WIDTH;
 constexpr float SPLICE_HEAD_LOWER_START = 520.f-SPLICE_HEAD_ORIGIN_POSITION;
 constexpr float SPLICE_HEAD_UPPER_START = 470.f-SPLICE_HEAD_ORIGIN_POSITION;
-constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH;
-constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH;
+constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_MINIMUM_WIDTH;
+constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_MINIMUM_WIDTH;
+constexpr uint8_t SPLICE_HEAD_TILT_THRESHOLD = 10;
+constexpr uint8_t SPLICE_HEAD_TILT_DBTHRESHOLD = SPLICE_HEAD_TILT_THRESHOLD*2;
 
 // selection splice
 constexpr float SPLICE_OFFCENTER_MV = .33f;
@@ -309,7 +312,7 @@ public:
 	// selectors
 	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
 	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
-	float head_translation_y;
+	float lhead_translation_y,uhead_translation_y;
 
 private:
 
@@ -327,6 +330,10 @@ private:
 	// splashes
 	Buffer sh_buffer = Buffer();
 	Shader sh_shader = Shader();
+
+	// head selector
+	float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
+		ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
 
 	// index
 	uint16_t index_rsprite,index_ranim;
