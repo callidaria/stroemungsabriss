@@ -1,5 +1,6 @@
 #include "main_menu.h"
 
+
 /**
  * 		Menu List Implementation with .ldc Language Interpreter
  * 
@@ -119,13 +120,14 @@ MenuList::MenuList(const char* path)
 
 		// process list segment heads
 		} for (uint8_t i=0;i<cluster.slist.size();i++) {
-			if (cluster.slist[i].position<cluster.elist.size())
-				cluster.elist[cluster.slist[i].position].jsegment = true;
+			cluster.elist[cluster.slist[i].position].jsegment
+				= cluster.slist[i].position<cluster.elist.size();
 
 			// write segment information in-between list elements
 			Text stext = Text(st_font);
-			stext.add(cluster.slist[i].title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X+100,
-					MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
+			stext.add(cluster.slist[i].title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X
+					+ MENU_LIST_SEGMENT_PUSH_X,MENU_LIST_SCROLL_START
+					- (cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
 				stext.load();
 			cluster.tx_slist.push_back(stext);
 
@@ -146,13 +148,17 @@ MenuList::MenuList(const char* path)
 void MenuList::update(int8_t &grid,bool conf,bool &back)
 {
 	// translate input
-	int8_t didx = (clusters[active_cluster_id].elist.size()-(lscroll+grid+1));
+	uint16_t gsel = lscroll+grid;
+	//gsel += clusters[active_cluster_id].elist[gsel].jsegment;
+	int16_t didx = clusters[active_cluster_id].elist.size()-(gsel+1);
 	grid += didx*(didx<0);
 	grid *= grid>0;
+	gsel = lscroll+grid;
+	// FIXME: don't just update gsel variable. it's bad form i think
 
 	// switching list activation
-	if (conf&&clusters[active_cluster_id].elist[lscroll+grid].child_name.size())
-		active_cluster_id = clusters[active_cluster_id].elist[lscroll+grid].child_id;
+	if (conf&&clusters[active_cluster_id].elist[gsel].child_name.size())
+		active_cluster_id = clusters[active_cluster_id].elist[gsel].child_id;
 
 	// list navigation towards parent
 	bool stall_back = active_cluster_id;

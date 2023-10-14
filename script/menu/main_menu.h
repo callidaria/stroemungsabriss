@@ -54,6 +54,7 @@ constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
 constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
+constexpr uint16_t MENU_LIST_SEGMENT_PUSH_X = 100;
 constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 
 // list entity types
