@@ -273,6 +273,49 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 
 
 /**
+ *		Start Implementation of Popup Dialogue for Main Menu:
+ *
+ * TODO: explain
+*/
+
+MenuDialogue::MenuDialogue(glm::vec2 center,float width,float height)
+{
+	// background setup
+	float hwidth = width*.5f,hheight = height*.5f;
+	/*float bgr_verts[] = {
+		center.x-hwidth,center.y-hheight,0, center.x+hwidth,center.y+hheight,0,center.x,center.y,1,
+		center.x-hwidth,center.y-hheight,0, center.x,center.y,2, center.x+hwidth,center.y+hheight,0,
+	};*/ std::vector<float> bgr_verts = Toolbox::create_sprite_canvas_triangled(glm::vec2(100),100,100);
+	bgr_buffer.bind();
+	//bgr_buffer.upload_vertices(bgr_verts,sizeof(bgr_verts));
+	bgr_buffer.upload_vertices(bgr_verts);
+	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
+	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
+	bgr_shader.def_attributeF("tweight",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
+	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
+	bgr_shader.upload_vec2("displace[0]",glm::vec2(0)),
+		bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
+		bgr_shader.upload_vec2("displace[2]",glm::vec2(hwidth,-hheight));
+	bgr_shader.upload_camera(Camera2D(1280.f,720.f));
+}
+
+/*
+	TODO
+*/
+void MenuDialogue::update(float time_delta)
+{
+	// transition
+	Toolbox::transition_float_on_condition(otrans,TRANSITION_SPEED*time_delta,dialogue_open);
+
+	// draw
+	bgr_buffer.bind();
+	bgr_shader.enable();
+	bgr_shader.upload_float("tprogress",otrans);
+	glDrawArrays(GL_TRIANGLES,0,6);
+}
+
+
+/**
  * 		The real menu implementation starts here!
  * 
  * TODO: expand this segment documentation
@@ -350,10 +393,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	interface_behaviour[INTERFACE_LOGIC_MACRO] = interface_behaviour_macro,
 		interface_behaviour[INTERFACE_LOGIC_OPTIONS] = interface_behaviour_options,
 		interface_behaviour[INTERFACE_LOGIC_EXTRAS] = interface_behaviour_extras,
-		interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_extras,
-		interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_extras,
-		interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_extras,
-		interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_extras;
+		interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_practice,
+		interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_load,
+		interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_continue,
+		interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_newgame;
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 }
 
@@ -389,9 +432,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
 	// focus transition
-	ftransition += (interface_logic_id-!interface_logic_id)*TRANSITION_SPEED
-			* m_ccbf->frame->time_delta;
-	ftransition = (ftransition<.0f) ? .0f : (ftransition>1.f) ? 1.f : ftransition;
+	Toolbox::transition_float_on_condition(ftransition,
+			TRANSITION_SPEED*m_ccbf->frame->time_delta,interface_logic_id);
 	// TODO: i feel like this implementation lacks wit
 	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
 	inv_ftransition = 1.f-ftransition;
@@ -701,6 +743,8 @@ void interface_behaviour_load(MainMenu &tm)
 void interface_behaviour_continue(MainMenu &tm)
 {
 	// TODO
+	tm.md_continue.dialogue_open = true;
+	tm.md_continue.update(tm.m_ccbf->frame->time_delta);
 	tm.interface_logic_id *= !tm.hit_b;
 }
 

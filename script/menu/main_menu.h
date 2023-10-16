@@ -46,6 +46,7 @@ constexpr uint8_t MENU_GBUFFER_COLOUR = 0;
 constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
+constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
 constexpr float MENU_HALFSCREEN_UI = 1280.f*.5f;
 constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 11;
 
@@ -246,6 +247,38 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
 
 
 /**
+ *		MenuDialogue Definition Documentation
+ * TODO: expand
+*/
+
+class MenuDialogue
+{
+public:
+
+	// construction
+	MenuDialogue(glm::vec2 center,float width,float height);
+	~MenuDialogue() {  }
+
+	// draw
+	void update(float time_delta);
+
+public:
+
+	// interaction
+	bool dialogue_open = false;
+
+private:
+
+	// engine
+	Buffer bgr_buffer = Buffer();
+	Shader bgr_shader = Shader();
+
+	// animation
+	float otrans = .0f;
+};
+
+
+/**
  * 		MainMenu Definition Documentation
  * TODO: expand
  * 
@@ -286,8 +319,9 @@ public:
 	CascabelBaseFeature* m_ccbf;
 	bool request_close = false;
 
-	// interactable lists
+	// interactables
 	MenuList ml_options = MenuList("./lvload/options.ldc");
+	MenuDialogue md_continue = MenuDialogue(glm::vec2(640,360),320,250);
 
 	// index
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;

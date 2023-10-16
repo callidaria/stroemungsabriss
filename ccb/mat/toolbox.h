@@ -51,6 +51,7 @@ public:
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
 	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
+	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
 	// timing debug
 	static void start_debug_logging(DebugLogData &dld,const char* tname);
