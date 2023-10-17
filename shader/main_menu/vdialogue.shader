@@ -13,7 +13,6 @@ uniform mat4 proj;
 
 void main()
 {
-	//gl_Position = vec4(position+displace[int(disp_id)]*vec2(tprogress),.0,1.);
-	gl_Position = vec4(position,.0,1.);
+	gl_Position = proj*view*vec4(position+displace[int(disp_id)]*vec2(tprogress),.0,1.);
 
 }

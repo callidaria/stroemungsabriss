@@ -282,16 +282,14 @@ MenuDialogue::MenuDialogue(glm::vec2 center,float width,float height)
 {
 	// background setup
 	float hwidth = width*.5f,hheight = height*.5f;
-	/*float bgr_verts[] = {
+	float bgr_verts[] = {
 		center.x-hwidth,center.y-hheight,0, center.x+hwidth,center.y+hheight,0,center.x,center.y,1,
 		center.x-hwidth,center.y-hheight,0, center.x,center.y,2, center.x+hwidth,center.y+hheight,0,
-	};*/ std::vector<float> bgr_verts = Toolbox::create_sprite_canvas_triangled(glm::vec2(100),100,100);
-	bgr_buffer.bind();
-	//bgr_buffer.upload_vertices(bgr_verts,sizeof(bgr_verts));
-	bgr_buffer.upload_vertices(bgr_verts);
+	}; bgr_buffer.bind();
+	bgr_buffer.upload_vertices(bgr_verts,sizeof(bgr_verts));
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
-	bgr_shader.def_attributeF("tweight",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
+	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0)),
 		bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
@@ -659,8 +657,8 @@ void interface_behaviour_macro(MainMenu &tm)
 	// menu transition
 	bool req_transition = tm.hit_a&&!tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
-	tm.mtransition += (tm.menu_action-!tm.menu_action)*TRANSITION_SPEED*tm.m_ccbf->frame->time_delta;
-	tm.mtransition = (tm.mtransition<.0f) ? .0f : (tm.mtransition>1.f) ? 1.f : tm.mtransition;
+	Toolbox::transition_float_on_condition(tm.mtransition,
+			TRANSITION_SPEED*tm.m_ccbf->frame->time_delta,tm.menu_action);
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	// TODO: compare linear transition with sinespeed transition implementation
