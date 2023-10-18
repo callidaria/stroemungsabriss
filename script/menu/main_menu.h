@@ -256,8 +256,16 @@ class MenuDialogue
 public:
 
 	// construction
-	MenuDialogue(glm::vec2 center,float width,float height);
+	MenuDialogue() {  }
 	~MenuDialogue() {  }
+
+	// creation
+	uint8_t add_dialogue_window(glm::vec2 center,float width,float height);
+	void load();
+
+	// interaction
+	inline void open_dialogue(uint8_t did) { opening_ids.push_back(did); }
+	void close_dialogue(uint8_t did);
 
 	// draw
 	void update(float time_delta);
@@ -272,6 +280,12 @@ private:
 	// engine
 	Buffer bgr_buffer = Buffer();
 	Shader bgr_shader = Shader();
+
+	// data
+	std::vector<float> bgr_verts;
+	std::vecot<uint8_t> opening_ids;
+	std::vector<uint8_t> active_ids;
+	std::vector<uint8_t> closing_ids;
 
 	// animation
 	float otrans = .0f;

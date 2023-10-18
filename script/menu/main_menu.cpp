@@ -278,15 +278,33 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
  * TODO: explain
 */
 
-MenuDialogue::MenuDialogue(glm::vec2 center,float width,float height)
+/*
+	TODO
+*/
+uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float height)
 {
-	// background setup
+	// precalculation & first vertex
 	float hwidth = width*.5f,hheight = height*.5f;
-	float bgr_verts[] = {
-		center.x-hwidth,center.y-hheight,0, center.x+hwidth,center.y+hheight,0,center.x,center.y,1,
-		center.x-hwidth,center.y-hheight,0, center.x,center.y,2, center.x+hwidth,center.y+hheight,0,
-	}; bgr_buffer.bind();
-	bgr_buffer.upload_vertices(bgr_verts,sizeof(bgr_verts));
+	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
+	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
+	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(1);
+
+	// second vertex
+	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
+	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
+	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
+}
+
+/*
+	TODO
+*/
+void MenuDialogue::load()
+{
+	// upload vertices
+	bgr_buffer.bind();
+	bgr_buffer.upload_vertices(bgr_verts);
+
+	// shader setup
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
@@ -295,6 +313,15 @@ MenuDialogue::MenuDialogue(glm::vec2 center,float width,float height)
 		bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
 		bgr_shader.upload_vec2("displace[2]",glm::vec2(hwidth,-hheight));
 	bgr_shader.upload_camera(Camera2D(1280.f,720.f));
+}
+
+/*
+	TODO
+*/
+void MenuDialogue::close_dialogue(uint8_t did)
+{
+	std::remove(active_ids.begin(),active_ids.end(),did);
+	closing_ids.push_back(did);
 }
 
 /*
