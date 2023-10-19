@@ -293,6 +293,10 @@ uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float hei
 	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
 	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
+
+	// data
+	dlg_trans.push_back(.0f);
+	return dlg_trans.size()-1;
 }
 
 /*
@@ -330,13 +334,46 @@ void MenuDialogue::close_dialogue(uint8_t did)
 void MenuDialogue::update(float time_delta)
 {
 	// transition
-	Toolbox::transition_float_on_condition(otrans,TRANSITION_SPEED*time_delta,dialogue_open);
+	/*Toolbox::transition_float_on_condition(otrans,TRANSITION_SPEED*time_delta,dialogue_open);
 
 	// draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
 	bgr_shader.upload_float("tprogress",otrans);
-	glDrawArrays(GL_TRIANGLES,0,6);
+	glDrawArrays(GL_TRIANGLES,0,6);*/
+
+	// setup draw
+	bgr_buffer.bind();
+	bgr_shader.enable();
+
+	// process closing dialogues
+	uint8_t i = 0;
+	while (i<closing_ids.size()) {
+		bgr_shader.upload_float("tprogress",dlg_trans[closing_ids[i]]);
+		glDrawArrays(GL_TRIANGLES,i*6,6);
+		dlg_trans[closing_ids[i]] -= TRANSITION_SPEED*time_delta;
+		if (dlg_trans[closing_ids[i]]<.0f) {
+			dlg_trans[closing_ids[i]] = .0f;
+			closing_ids.erase(closing_ids.begin()+i);
+		} else i++;
+	}
+
+	// process idle dialogues
+	for (uint8_t id : active_ids)
+		bgr_shader.upload_float("tprogress",dlg_trans[active_ids[i]]),glDrawArrays(GL_TRIANGLES,id*6,6);
+
+	// process opening dialogues
+	i = 0;
+	while (i<opening_ids.size()) {
+		bgr_shader.upload_float("tprogress",dlg_trans[opening_ids[i]]);
+		glDrawArrays(GL_TRIANGLES,i*6,6);
+		dlg_trans[opening_ids[i]] += TRANSITION_SPEED*time_delta;
+		if (dlg_trans[opening_ids[i]]>1.f) {
+			dlg_trans[opening_ids[i]] = 1.f;
+			active_ids.push_back(opening_ids[i]);
+			opening_ids.erase(opening_ids.begin()+i);
+		} else i++;
+	}
 }
 
 

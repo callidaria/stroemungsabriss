@@ -283,12 +283,12 @@ private:
 
 	// data
 	std::vector<float> bgr_verts;
-	std::vecot<uint8_t> opening_ids;
+	std::vector<uint8_t> opening_ids;
 	std::vector<uint8_t> active_ids;
 	std::vector<uint8_t> closing_ids;
 
 	// animation
-	float otrans = .0f;
+	std::vector<float> dlg_trans;
 };
 
 
