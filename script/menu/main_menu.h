@@ -270,6 +270,11 @@ public:
 	// draw
 	void update(float time_delta);
 
+private:
+
+	// render
+	void draw_dialogue(uint8_t id);
+
 public:
 
 	// interaction
@@ -282,7 +287,10 @@ private:
 	Shader bgr_shader = Shader();
 
 	// data
+	std::vector<float> dim_width,dim_height;
 	std::vector<float> bgr_verts;
+
+	// id
 	std::vector<uint8_t> opening_ids;
 	std::vector<uint8_t> active_ids;
 	std::vector<uint8_t> closing_ids;
@@ -335,12 +343,13 @@ public:
 
 	// interactables
 	MenuList ml_options = MenuList("./lvload/options.ldc");
-	MenuDialogue md_continue = MenuDialogue(glm::vec2(640,360),320,250);
+	MenuDialogue mdialogues;
 
 	// index
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
 	int8_t vgrid_id = 0;
+	uint8_t dg_continue;
 
 	// processed input
 	bool hit_a,hit_b;

@@ -295,6 +295,7 @@ uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float hei
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
 
 	// data
+	dim_width.push_back(hwidth),dim_height.push_back(hheight);
 	dlg_trans.push_back(.0f);
 	return dlg_trans.size()-1;
 }
@@ -314,8 +315,8 @@ void MenuDialogue::load()
 	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0)),
-		bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
-		bgr_shader.upload_vec2("displace[2]",glm::vec2(hwidth,-hheight));
+	/*	bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
+		bgr_shader.upload_vec2("displace[2]",glm::vec2(hwidth,-hheight));*/
 	bgr_shader.upload_camera(Camera2D(1280.f,720.f));
 }
 
@@ -349,8 +350,7 @@ void MenuDialogue::update(float time_delta)
 	// process closing dialogues
 	uint8_t i = 0;
 	while (i<closing_ids.size()) {
-		bgr_shader.upload_float("tprogress",dlg_trans[closing_ids[i]]);
-		glDrawArrays(GL_TRIANGLES,i*6,6);
+		draw_dialogue(closing_ids[i]);
 		dlg_trans[closing_ids[i]] -= TRANSITION_SPEED*time_delta;
 		if (dlg_trans[closing_ids[i]]<.0f) {
 			dlg_trans[closing_ids[i]] = .0f;
@@ -359,14 +359,12 @@ void MenuDialogue::update(float time_delta)
 	}
 
 	// process idle dialogues
-	for (uint8_t id : active_ids)
-		bgr_shader.upload_float("tprogress",dlg_trans[active_ids[i]]),glDrawArrays(GL_TRIANGLES,id*6,6);
+	for (uint8_t id : active_ids) draw_dialogue(id);
 
 	// process opening dialogues
 	i = 0;
 	while (i<opening_ids.size()) {
-		bgr_shader.upload_float("tprogress",dlg_trans[opening_ids[i]]);
-		glDrawArrays(GL_TRIANGLES,i*6,6);
+		draw_dialogue(opening_ids[i]);
 		dlg_trans[opening_ids[i]] += TRANSITION_SPEED*time_delta;
 		if (dlg_trans[opening_ids[i]]>1.f) {
 			dlg_trans[opening_ids[i]] = 1.f;
@@ -374,6 +372,24 @@ void MenuDialogue::update(float time_delta)
 			opening_ids.erase(opening_ids.begin()+i);
 		} else i++;
 	}
+}
+// FIXME: ugly & badly written
+// FIXME: give transition delta instead of time delta to reduce multiplications
+
+/*
+	TODO
+*/
+void MenuDialogue::draw_dialogue(uint8_t id)
+{
+	// upload current vertex expasion by transition progress
+	bgr_shader.upload_float("tprogess",dlg_trans[id]);
+
+	// upload vertex target displacement
+	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dim_width[id],dim_height[id])),
+		bgr_shader.upload_vec2("displace[2]",glm::vec2(dim_width[id],-dim_height[id]));
+
+	// draw geometry
+	glDrawArrays(GL_TRIANGLES,id*6,6);
 }
 
 
@@ -460,6 +476,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 		interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_continue,
 		interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_newgame;
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
+
+	// dialogue setup
+	dg_continue = mdialogues.add_dialogue_window(glm::vec2(640,360),320,250);
+	mdialogues.load();
 }
 
 /*
@@ -559,6 +579,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
+
+	// update & draw dialogues
+	mdialogues.update(m_ccbf->frame->time_delta);
 
 	// START MULTISAMPLED RENDER
 	FrameBuffer::close();
@@ -759,6 +782,11 @@ void interface_behaviour_macro(MainMenu &tm)
 		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 	}
 
+	// open dialogue for contiuation request
+	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
+	std::cout << tm.hit_a << ' ' << (unsigned int)tm.vselect << '\n';
+	if (tm.hit_a&&tm.vselect==MENU_MAIN_OPTION_CONTINUE) tm.mdialogues.open_dialogue(tm.dg_continue);
+
 	// reset
 	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
 }
@@ -805,9 +833,12 @@ void interface_behaviour_load(MainMenu &tm)
 void interface_behaviour_continue(MainMenu &tm)
 {
 	// TODO
-	tm.md_continue.dialogue_open = true;
-	tm.md_continue.update(tm.m_ccbf->frame->time_delta);
-	tm.interface_logic_id *= !tm.hit_b;
+
+	// closing request
+	if (tm.hit_b) {
+		tm.mdialogues.close_dialogue(tm.dg_continue);
+		tm.interface_logic_id = 0;
+	}
 }
 
 /*
