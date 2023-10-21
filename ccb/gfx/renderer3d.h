@@ -99,8 +99,10 @@ public:
 	void inst_position(uint8_t id,uint8_t mid,glm::vec3 pos);
 	void inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot);
 	inline void start_animation(uint16_t id) { update_animation_ids.push_back(id); }
-	inline void stop_animation(uint16_t id)
-		{ std::remove(update_animation_ids.begin(),update_animation_ids.end(),id); }
+	inline void stop_animation(uint16_t id) {
+		update_animation_ids.erase(std::remove(update_animation_ids.begin(),
+				update_animation_ids.end(),id),update_animation_ids.end());
+	}
 
 private:
 

@@ -264,7 +264,7 @@ public:
 	void load();
 
 	// interaction
-	inline void open_dialogue(uint8_t did) { opening_ids.push_back(did); }
+	void open_dialogue(uint8_t did);
 	void close_dialogue(uint8_t did);
 
 	// draw
@@ -274,11 +274,6 @@ private:
 
 	// render
 	void draw_dialogue(uint8_t id);
-
-public:
-
-	// interaction
-	bool dialogue_open = false;
 
 private:
 
@@ -294,6 +289,9 @@ private:
 	std::vector<uint8_t> opening_ids;
 	std::vector<uint8_t> active_ids;
 	std::vector<uint8_t> closing_ids;
+
+	// state
+	bool dialogue_open = false;
 
 	// animation
 	std::vector<float> dlg_trans;
@@ -349,7 +347,6 @@ public:
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
 	int8_t vgrid_id = 0;
-	uint8_t dg_continue;
 
 	// processed input
 	bool hit_a,hit_b;
@@ -371,6 +368,10 @@ public:
 	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
 	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
 	float lhead_translation_y,uhead_translation_y;
+
+	// memory for static continue
+	uint8_t dg_continue;
+	bool shot_popup = false;
 
 private:
 

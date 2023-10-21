@@ -314,10 +314,18 @@ void MenuDialogue::load()
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
-	bgr_shader.upload_vec2("displace[0]",glm::vec2(0)),
-	/*	bgr_shader.upload_vec2("displace[1]",glm::vec2(-hwidth,hheight)),
-		bgr_shader.upload_vec2("displace[2]",glm::vec2(hwidth,-hheight));*/
+	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
 	bgr_shader.upload_camera(Camera2D(1280.f,720.f));
+}
+
+/*
+	TODO
+*/
+void MenuDialogue::open_dialogue(uint8_t did)
+{
+	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),did),active_ids.end());
+	closing_ids.erase(std::remove(closing_ids.begin(),closing_ids.end(),did),closing_ids.end());
+	opening_ids.push_back(did);
 }
 
 /*
@@ -325,7 +333,8 @@ void MenuDialogue::load()
 */
 void MenuDialogue::close_dialogue(uint8_t did)
 {
-	std::remove(active_ids.begin(),active_ids.end(),did);
+	opening_ids.erase(std::remove(opening_ids.begin(),opening_ids.end(),did),opening_ids.end());
+	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),did),active_ids.end());
 	closing_ids.push_back(did);
 }
 
@@ -334,15 +343,6 @@ void MenuDialogue::close_dialogue(uint8_t did)
 */
 void MenuDialogue::update(float time_delta)
 {
-	// transition
-	/*Toolbox::transition_float_on_condition(otrans,TRANSITION_SPEED*time_delta,dialogue_open);
-
-	// draw
-	bgr_buffer.bind();
-	bgr_shader.enable();
-	bgr_shader.upload_float("tprogress",otrans);
-	glDrawArrays(GL_TRIANGLES,0,6);*/
-
 	// setup draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
@@ -782,10 +782,6 @@ void interface_behaviour_macro(MainMenu &tm)
 		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 	}
 
-	// open dialogue for contiuation request
-	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
-	if (tm.hit_a&&tm.vselect==MENU_MAIN_OPTION_CONTINUE) tm.mdialogues.open_dialogue(tm.dg_continue);
-
 	// reset
 	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
 }
@@ -831,13 +827,22 @@ void interface_behaviour_load(MainMenu &tm)
 */
 void interface_behaviour_continue(MainMenu &tm)
 {
-	// TODO
-
-	// closing request
+	//  handling
 	if (tm.hit_b) {
 		tm.mdialogues.close_dialogue(tm.dg_continue);
 		tm.interface_logic_id = 0;
+		tm.shot_popup = false;
+		return;
 	}
+
+	// open dialogue for continuation request
+	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
+	if (!tm.shot_popup) {
+		tm.mdialogues.open_dialogue(tm.dg_continue);
+		tm.shot_popup = true;
+	}
+
+	// TODO
 }
 
 /*
