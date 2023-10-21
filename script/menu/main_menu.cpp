@@ -382,7 +382,7 @@ void MenuDialogue::update(float time_delta)
 void MenuDialogue::draw_dialogue(uint8_t id)
 {
 	// upload current vertex expasion by transition progress
-	bgr_shader.upload_float("tprogess",dlg_trans[id]);
+	bgr_shader.upload_float("tprogress",dlg_trans[id]);
 
 	// upload vertex target displacement
 	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dim_width[id],dim_height[id])),
@@ -784,7 +784,6 @@ void interface_behaviour_macro(MainMenu &tm)
 
 	// open dialogue for contiuation request
 	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
-	std::cout << tm.hit_a << ' ' << (unsigned int)tm.vselect << '\n';
 	if (tm.hit_a&&tm.vselect==MENU_MAIN_OPTION_CONTINUE) tm.mdialogues.open_dialogue(tm.dg_continue);
 
 	// reset
