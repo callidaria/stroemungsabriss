@@ -294,10 +294,11 @@ uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float hei
 	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
 
-	// data
-	dim_width.push_back(hwidth),dim_height.push_back(hheight);
-	dlg_trans.push_back(.0f);
-	return dlg_trans.size()-1;
+	// additional data
+	SingularDialogueData dgd;
+	dgd.max_width = hwidth,dgd.max_height = hheight;
+	dg_data.push_back(dgd);
+	return dg_data.size()-1;
 }
 
 /*
@@ -323,9 +324,14 @@ void MenuDialogue::load()
 */
 void MenuDialogue::open_dialogue(uint8_t did)
 {
+	// move dialogue id to opening state
 	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),did),active_ids.end());
 	closing_ids.erase(std::remove(closing_ids.begin(),closing_ids.end(),did),closing_ids.end());
 	opening_ids.push_back(did);
+
+	// randomize expansion edges
+	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%5+1)*.1f;
+	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%5+1)*.1f;
 }
 
 /*
@@ -341,40 +347,45 @@ void MenuDialogue::close_dialogue(uint8_t did)
 /*
 	TODO
 */
-void MenuDialogue::update(float time_delta)
+void MenuDialogue::update(float transition_delta)
 {
 	// setup draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
 
-	// process closing dialogues
+	// draw closing dialogues
 	uint8_t i = 0;
 	while (i<closing_ids.size()) {
-		draw_dialogue(closing_ids[i]);
-		dlg_trans[closing_ids[i]] -= TRANSITION_SPEED*time_delta;
-		if (dlg_trans[closing_ids[i]]<.0f) {
-			dlg_trans[closing_ids[i]] = .0f;
+		uint8_t id = closing_ids[i];
+		draw_dialogue(id);
+
+		// transition closing dialogues
+		dg_data[id].dgtrans -= transition_delta;
+		if (dg_data[id].dgtrans<.0f) {
+			dg_data[id].dgtrans = .0f;
 			closing_ids.erase(closing_ids.begin()+i);
 		} else i++;
 	}
 
-	// process idle dialogues
+	// draw idle dialogues
 	for (uint8_t id : active_ids) draw_dialogue(id);
 
-	// process opening dialogues
+	// draw opening dialogues
 	i = 0;
 	while (i<opening_ids.size()) {
-		draw_dialogue(opening_ids[i]);
-		dlg_trans[opening_ids[i]] += TRANSITION_SPEED*time_delta;
-		if (dlg_trans[opening_ids[i]]>1.f) {
-			dlg_trans[opening_ids[i]] = 1.f;
-			active_ids.push_back(opening_ids[i]);
+		uint8_t id = opening_ids[i];
+		draw_dialogue(id);
+
+		// transition opening dialogues
+		dg_data[id].dgtrans += transition_delta;
+		if (dg_data[id].dgtrans>1.f) {
+			dg_data[id].dgtrans = 1.f;
+			active_ids.push_back(id);
 			opening_ids.erase(opening_ids.begin()+i);
 		} else i++;
 	}
 }
 // FIXME: ugly & badly written
-// FIXME: give transition delta instead of time delta to reduce multiplications
 
 /*
 	TODO
@@ -382,11 +393,11 @@ void MenuDialogue::update(float time_delta)
 void MenuDialogue::draw_dialogue(uint8_t id)
 {
 	// upload current vertex expasion by transition progress
-	bgr_shader.upload_float("tprogress",dlg_trans[id]);
+	bgr_shader.upload_float("tprogress",dg_data[id].dgtrans);
 
 	// upload vertex target displacement
-	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dim_width[id],dim_height[id])),
-		bgr_shader.upload_vec2("displace[2]",glm::vec2(dim_width[id],-dim_height[id]));
+	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dg_data[id].dim_width,dg_data[id].dim_height));
+	bgr_shader.upload_vec2("displace[2]",glm::vec2(dg_data[id].dim_width,-dg_data[id].dim_width));
 
 	// draw geometry
 	glDrawArrays(GL_TRIANGLES,id*6,6);
@@ -508,17 +519,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// FIXME: up/down movement inverted with controller stick input for some reason
 
 	// timing
+	transition_delta = TRANSITION_SPEED*m_ccbf->frame->time_delta;
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
 	anim_timing += m_ccbf->frame->time_delta;
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
 	// focus transition
-	Toolbox::transition_float_on_condition(ftransition,
-			TRANSITION_SPEED*m_ccbf->frame->time_delta,interface_logic_id);
-	// TODO: i feel like this implementation lacks wit
-	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
+	Toolbox::transition_float_on_condition(ftransition,transition_delta,interface_logic_id);
 	inv_ftransition = 1.f-ftransition;
+	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
 
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
@@ -572,6 +582,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		} tx_mopts[i].set_scroll(opt_trans);
 		tx_mopts[i].render(strlen(main_options[i]),opt_colour);
 	}
+	// TODO: differenciate between list- & free mode for head splice displacement
 
 	// render titles
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
@@ -581,7 +592,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
 	// update & draw dialogues
-	mdialogues.update(m_ccbf->frame->time_delta);
+	mdialogues.update(transition_delta);
 
 	// START MULTISAMPLED RENDER
 	FrameBuffer::close();
@@ -744,8 +755,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	// menu transition
 	bool req_transition = tm.hit_a&&!tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
-	Toolbox::transition_float_on_condition(tm.mtransition,
-			TRANSITION_SPEED*tm.m_ccbf->frame->time_delta,tm.menu_action);
+	Toolbox::transition_float_on_condition(tm.mtransition,tm.transition_delta,tm.menu_action);
 	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	// TODO: compare linear transition with sinespeed transition implementation

@@ -251,6 +251,13 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
  * TODO: expand
 */
 
+struct SingularDialogueData
+{
+	float max_width,max_height;
+	float dim_width = .0f,dim_height = .0f;
+	float dgtrans = .0f;
+};
+
 class MenuDialogue
 {
 public:
@@ -268,7 +275,7 @@ public:
 	void close_dialogue(uint8_t did);
 
 	// draw
-	void update(float time_delta);
+	void update(float transition_delta);
 
 private:
 
@@ -282,19 +289,11 @@ private:
 	Shader bgr_shader = Shader();
 
 	// data
-	std::vector<float> dim_width,dim_height;
+	std::vector<SingularDialogueData> dg_data;
 	std::vector<float> bgr_verts;
 
-	// id
-	std::vector<uint8_t> opening_ids;
-	std::vector<uint8_t> active_ids;
-	std::vector<uint8_t> closing_ids;
-
-	// state
-	bool dialogue_open = false;
-
-	// animation
-	std::vector<float> dlg_trans;
+	// id states
+	std::vector<uint8_t> opening_ids,active_ids,closing_ids;
 };
 
 
@@ -353,6 +352,7 @@ public:
 	int8_t lrmv,udmv;
 
 	// animation
+	float transition_delta;
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
 	float ftransition = .0f,inv_ftransition;

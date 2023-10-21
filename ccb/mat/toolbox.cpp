@@ -133,14 +133,15 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 
 /*
 	TODO
-	TODO: optimize further (!use assembly translation as guide!)
-	TODO: maybe even set some bounds to enhance the transition range possibilities
 */
 void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
 {
 	tval += tspeed*(cnd-!cnd);
 	tval = (tval<.0f) ? .0f : (tval>1.f) ? 1.f : tval;
 }
+// TODO: optimize further (!use assembly translation as guide!)
+// TODO: maybe even set some bounds to enhance the transition range possibilities
+// TODO: i feel like this implementation lacks wit
 
 /*
 	start_debug_logging(DebugLogData&,const char*) -> void
