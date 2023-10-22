@@ -58,6 +58,11 @@ constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
 constexpr uint16_t MENU_LIST_SEGMENT_PUSH_X = 100;
 constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 
+// menu dialogue positioning
+constexpr uint8_t MENU_DIALOGUE_TITLE_SIZE = 30;
+constexpr uint8_t MENU_DIALOGUE_OPTION_SIZE = 25;
+constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
+
 // list entity types
 constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
 constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
@@ -256,6 +261,7 @@ struct SingularDialogueData
 	float max_width,max_height;
 	float dim_width = .0f,dim_height = .0f;
 	float dgtrans = .0f;
+	Text tx_title,tx_options;
 };
 
 class MenuDialogue
@@ -267,7 +273,8 @@ public:
 	~MenuDialogue() {  }
 
 	// creation
-	uint8_t add_dialogue_window(glm::vec2 center,float width,float height);
+	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,
+			glm::vec2 center,float width,float height);
 	void load();
 
 	// interaction
@@ -287,6 +294,10 @@ private:
 	// engine
 	Buffer bgr_buffer = Buffer();
 	Shader bgr_shader = Shader();
+	Font title_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_DIALOGUE_TITLE_SIZE,MENU_DIALOGUE_TITLE_SIZE);
+	Font option_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_DIALOGUE_OPTION_SIZE,MENU_DIALOGUE_OPTION_SIZE);
 
 	// data
 	std::vector<SingularDialogueData> dg_data;

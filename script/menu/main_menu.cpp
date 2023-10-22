@@ -281,7 +281,8 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 /*
 	TODO
 */
-uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float height)
+uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
+		glm::vec2 center,float width,float height)
 {
 	// precalculation & first vertex
 	float hwidth = width*.5f,hheight = height*.5f;
@@ -294,8 +295,22 @@ uint8_t MenuDialogue::add_dialogue_window(glm::vec2 center,float width,float hei
 	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
 
-	// additional data
+	// dialogue title text setup
 	SingularDialogueData dgd;
+	dgd.tx_title = Text(title_font);
+	dgd.tx_title.add(title,center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
+	dgd.tx_title.load();
+
+	// dialogue option text setup
+	uint8_t hofs = MENU_DIALOGUE_OPTION_SIZE*options.size()>>1;
+	uint8_t cscr = 0;
+	dgd.tx_options = Text(option_font);
+	for (auto option : options)
+		dgd.tx_options.add(option,center+glm::vec2(-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
+				hofs-MENU_DIALOGUE_OPTION_SIZE*cscr)),cscr++;
+	dgd.tx_options.load();
+
+	// additional data
 	dgd.max_width = hwidth,dgd.max_height = hheight;
 	dg_data.push_back(dgd);
 	return dg_data.size()-1;
@@ -399,8 +414,12 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dg_data[id].dim_width,dg_data[id].dim_height));
 	bgr_shader.upload_vec2("displace[2]",glm::vec2(dg_data[id].dim_width,-dg_data[id].dim_width));
 
-	// draw geometry
+	// draw background geometry
 	glDrawArrays(GL_TRIANGLES,id*6,6);
+
+	// write text
+	dg_data[id].tx_title.prepare(),dg_data[id].tx_title.render(128,glm::vec4(1.f,1.f,1.f,1.f));
+	dg_data[id].tx_options.prepare(),dg_data[id].tx_options.render(128,glm::vec4(1.f,1.f,1.f,1.f));
 }
 
 
@@ -489,7 +508,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// dialogue setup
-	dg_continue = mdialogues.add_dialogue_window(glm::vec2(640,360),320,250);
+	std::vector<const char*> cnt_options = { "continue autosave","continue manual load","back" };
+	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,glm::vec2(640,360),320,250);
 	mdialogues.load();
 }
 
@@ -583,6 +603,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		tx_mopts[i].render(strlen(main_options[i]),opt_colour);
 	}
 	// TODO: differenciate between list- & free mode for head splice displacement
+	// TODO: also move active title to upper-left screen position while de-writing non-active
 
 	// render titles
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
