@@ -283,6 +283,7 @@ public:
 
 	// draw
 	void update(float transition_delta);
+	void invert_component();
 
 private:
 
@@ -292,8 +293,8 @@ private:
 private:
 
 	// engine
-	Buffer bgr_buffer = Buffer();
-	Shader bgr_shader = Shader();
+	Buffer bgr_buffer = Buffer(),slc_buffer = Buffer();
+	Shader bgr_shader = Shader(),slc_shader = Shader();
 	Font title_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_DIALOGUE_TITLE_SIZE,MENU_DIALOGUE_TITLE_SIZE);
 	Font option_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -301,7 +302,7 @@ private:
 
 	// data
 	std::vector<SingularDialogueData> dg_data;
-	std::vector<float> bgr_verts;
+	std::vector<float> bgr_verts,slc_verts;
 
 	// id states
 	std::vector<uint8_t> opening_ids,active_ids,closing_ids;

@@ -280,20 +280,27 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 
 /*
 	TODO
-*/
+ */
 uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
 		glm::vec2 center,float width,float height)
 {
-	// precalculation & first vertex
+	// precalculation & background vertices
 	float hwidth = width*.5f,hheight = height*.5f;
 	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
 	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(1);
-
-	// second vertex
 	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
 	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
+
+	// selector vertices
+	slc_verts.push_back(-10),slc_verts.push_back(-10),
+	slc_verts.push_back(10),slc_verts.push_back(10),
+	slc_verts.push_back(-10),slc_verts.push_back(10),
+	slc_verts.push_back(-10),slc_verts.push_back(-10),
+	slc_verts.push_back(10),slc_verts.push_back(-10),
+	slc_verts.push_back(10),slc_verts.push_back(10);
+	// TODO: invert through splash render step
 
 	// dialogue title text setup
 	SingularDialogueData dgd;
@@ -321,17 +328,30 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 */
 void MenuDialogue::load()
 {
-	// upload vertices
+	// upload background vertices
 	bgr_buffer.bind();
 	bgr_buffer.upload_vertices(bgr_verts);
 
-	// shader setup
+	// coordinate system setup
+	Camera2D cam2D = Camera2D(1280.f,720.f);
+
+	// background shader setup
+	// attribute upload pattern: { position.x,position.y,displacement_id }
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
-	bgr_shader.upload_camera(Camera2D(1280.f,720.f));
+	bgr_shader.upload_camera(cam2D);
+
+	// upload selector vertices
+	slc_buffer.bind();
+	slc_buffer.upload_vertices(slc_verts);
+
+	// selector shader setup
+	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
+	slc_shader.def_attributeF("position",2,0,2);
+	bgr_shader.upload_camera(cam2D);
 }
 
 /*
@@ -345,6 +365,7 @@ void MenuDialogue::open_dialogue(uint8_t did)
 	opening_ids.push_back(did);
 
 	// randomize expansion edges
+	// TODO: polish dimension manipulation ranges for the optimal style
 	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%5+1)*.1f;
 	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%5+1)*.1f;
 }
@@ -401,6 +422,20 @@ void MenuDialogue::update(float transition_delta)
 	}
 }
 // FIXME: ugly & badly written
+// FIXME: avoid constant draw recalling, maybe better performance with triangle crunching
+
+/*
+	TODO
+*/
+void MenuDialogue::invert_component()
+{
+	// setup selector draw
+	slc_buffer.bind();
+	slc_shader.enable();
+
+	// draw idle selectors
+	for (uint8_t id : active_ids) glDrawArrays(GL_TRIANGLES,id*6,6);
+}
 
 /*
 	TODO
@@ -643,6 +678,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
 	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// draw dialogue selectors
+	mdialogues.invert_component();
+
+	// STOP MULTISAMPLED RENDER
 	msaa.blit();
 
 	// render menu
