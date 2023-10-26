@@ -294,12 +294,13 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
 
 	// selector vertices
-	slc_verts.push_back(-10),slc_verts.push_back(-10),
-	slc_verts.push_back(10),slc_verts.push_back(10),
-	slc_verts.push_back(-10),slc_verts.push_back(10),
-	slc_verts.push_back(-10),slc_verts.push_back(-10),
-	slc_verts.push_back(10),slc_verts.push_back(-10),
-	slc_verts.push_back(10),slc_verts.push_back(10);
+	float xoffcenter = center.x-hwidth;
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y-10);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y+10);
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y+10);
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y-10);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y-10);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y+10);
 	// TODO: invert through splash render step
 
 	// dialogue title text setup
@@ -349,9 +350,10 @@ void MenuDialogue::load()
 	slc_buffer.upload_vertices(slc_verts);
 
 	// selector shader setup
+	// attribute upload pattern: { position.x,position.y } (for now)
 	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
 	slc_shader.def_attributeF("position",2,0,2);
-	bgr_shader.upload_camera(cam2D);
+	slc_shader.upload_camera(cam2D);
 }
 
 /*
