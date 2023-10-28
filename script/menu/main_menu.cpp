@@ -370,6 +370,9 @@ void MenuDialogue::open_dialogue(uint8_t did)
 	// TODO: polish dimension manipulation ranges for the optimal style
 	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%5+1)*.1f;
 	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%5+1)*.1f;
+
+	// set dialogue info active
+	dg_data[did].dg_active = true;
 }
 
 /*
@@ -377,9 +380,13 @@ void MenuDialogue::open_dialogue(uint8_t did)
 */
 void MenuDialogue::close_dialogue(uint8_t did)
 {
+	// move dialogue id to closing state
 	opening_ids.erase(std::remove(opening_ids.begin(),opening_ids.end(),did),opening_ids.end());
 	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),did),active_ids.end());
 	closing_ids.push_back(did);
+
+	// set dialogue info closed
+	dg_data[did].dg_active = false;
 }
 
 /*
@@ -429,8 +436,21 @@ void MenuDialogue::update(float transition_delta)
 /*
 	TODO
 */
-void MenuDialogue::invert_component()
+void MenuDialogue::selection_component(int8_t &grid,bool conf,bool back)
 {
+	// TODO: only handle updates when active ids hold information && also no ids in opening process
+
+	// close dialogue on request & skip selection update
+	if (back&&active_ids.size()) {
+		close_dialogue(active_ids.back());
+		return;
+	}
+
+	// update interactions
+	// input will act upon the last element of idle dialogues to create a recursive dialogue interaction
+	// starting with selection
+	// TODO
+
 	// setup selector draw
 	slc_buffer.bind();
 	slc_shader.enable();
@@ -682,7 +702,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// draw dialogue selectors
-	mdialogues.invert_component();
+	int8_t grid_placeholder = 0;
+	mdialogues.selection_component(grid_placeholder,hit_a,hit_b);
 
 	// STOP MULTISAMPLED RENDER
 	msaa.blit();
@@ -857,6 +878,7 @@ void interface_behaviour_macro(MainMenu &tm)
 
 	// reset
 	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
+	tm.shot_popup = false;
 }
 
 /*
@@ -900,14 +922,6 @@ void interface_behaviour_load(MainMenu &tm)
 */
 void interface_behaviour_continue(MainMenu &tm)
 {
-	//  handling
-	if (tm.hit_b) {
-		tm.mdialogues.close_dialogue(tm.dg_continue);
-		tm.interface_logic_id = 0;
-		tm.shot_popup = false;
-		return;
-	}
-
 	// open dialogue for continuation request
 	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
 	if (!tm.shot_popup) {
@@ -916,6 +930,9 @@ void interface_behaviour_continue(MainMenu &tm)
 	}
 
 	// TODO
+
+	// closing behaviour
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
 }
 
 /*

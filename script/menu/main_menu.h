@@ -258,6 +258,7 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
 
 struct SingularDialogueData
 {
+	bool dg_active = false;
 	float max_width,max_height;
 	float dim_width = .0f,dim_height = .0f;
 	float dgtrans = .0f;
@@ -283,12 +284,17 @@ public:
 
 	// draw
 	void update(float transition_delta);
-	void invert_component();
+	void selection_component(int8_t &grid,bool conf,bool back);
 
 private:
 
 	// render
 	void draw_dialogue(uint8_t id);
+
+public:
+
+	// data
+	std::vector<SingularDialogueData> dg_data;
 
 private:
 
@@ -301,7 +307,6 @@ private:
 			MENU_DIALOGUE_OPTION_SIZE,MENU_DIALOGUE_OPTION_SIZE);
 
 	// data
-	std::vector<SingularDialogueData> dg_data;
 	std::vector<float> bgr_verts,slc_verts;
 
 	// id states
