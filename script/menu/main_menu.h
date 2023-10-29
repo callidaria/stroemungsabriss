@@ -270,12 +270,16 @@ struct SingularDialogueData
 	// interaction state of the dialogue
 	bool dg_active = false;
 
-	// approximate dialogue dimensions and target iterators
+	// list height, approximate dialogue dimensions and vertex expansion targets
+	float liststart_y;
 	float max_width,max_height;
 	float dim_width = .0f,dim_height = .0f;
 
 	// progression of transition .0f = fully closed (no render) 1.f = fully active (input ready)
 	float dgtrans = .0f;
+
+	// index of selected option
+	uint8_t sindex = 0,max_options;
 
 	// text to display information to user
 	Text tx_title,tx_options;
@@ -299,8 +303,8 @@ public:
 	void close_dialogue(uint8_t did);
 
 	// draw
-	void update(float transition_delta);
-	void selection_component(int8_t &grid,bool conf,bool back);
+	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back,float transition_delta);
+	void selection_component();
 
 private:
 
@@ -382,6 +386,7 @@ public:
 	// processed input
 	bool hit_a,hit_b;
 	int8_t lrmv,udmv;
+	glm::vec2 crd_mouse;
 
 	// animation
 	float transition_delta;

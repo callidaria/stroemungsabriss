@@ -284,6 +284,10 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
 		glm::vec2 center,float width,float height)
 {
+	// setup dialogue data with list start position
+	SingularDialogueData dgd;
+	dgd.liststart_y = center.y+(options.size()>>1)*MENU_DIALOGUE_OPTION_SIZE;
+
 	// precalculation & background vertices
 	float hwidth = width*.5f,hheight = height*.5f;
 	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
@@ -295,35 +299,35 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 
 	// selector vertices
 	float xoffcenter = center.x-hwidth;
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y-10);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y+10);
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y+10);
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(center.y-10);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y-10);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(center.y+10);
-	// TODO: invert through splash render step
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y-20);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y);
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y);
+	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y-20);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y-20);
+	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y);
+	// TODO: dynamify selector scaling
 
 	// dialogue title text setup
-	SingularDialogueData dgd;
 	dgd.tx_title = Text(title_font);
 	dgd.tx_title.add(title,center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 	dgd.tx_title.load();
 
 	// dialogue option text setup
-	uint8_t hofs = MENU_DIALOGUE_OPTION_SIZE*options.size()>>1;
 	uint8_t cscr = 0;
 	dgd.tx_options = Text(option_font);
 	for (auto option : options)
-		dgd.tx_options.add(option,center+glm::vec2(-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-				hofs-MENU_DIALOGUE_OPTION_SIZE*cscr)),cscr++;
+		dgd.tx_options.add(option,glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
+				dgd.liststart_y-MENU_DIALOGUE_OPTION_SIZE*cscr)),cscr++;
 	dgd.tx_options.load();
+	// FIXME: when an even number of options is given the list start will be too high
+	// ??this can be solved by moving (MENU_DIALOGUE_OFFSET_FACTOR>>1)*(options.size()&1);
 
 	// additional data
+	dgd.max_options = options.size()-1;
 	dgd.max_width = hwidth,dgd.max_height = hheight;
 	dg_data.push_back(dgd);
 	return dg_data.size()-1;
 }
-// TODO: add feature to link subsequent dialogue by id and trigger opening by confirming selection
 
 /*
 	TODO
@@ -394,8 +398,34 @@ void MenuDialogue::close_dialogue(uint8_t did)
 /*
 	TODO
 */
-void MenuDialogue::update(float transition_delta)
+void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back,
+		float transition_delta)
 {
+	// check selector update conditions
+	// this does not include the render preparations, breaks if idling & opening simultaneously
+	// excused for now due to the following if statement & exclusivity of open dialogue case
+	// it also adds input security when calling selection_component() every frame
+	if (active_ids.size()&&!opening_ids.size()) {
+
+		// close dialogue on request & skip selection update
+		if (back) {
+			close_dialogue(active_ids.back());
+			return;
+		}
+
+		// update interactions, input will act upon the last element of idle dialogues
+		// this can result in a recursive dialogue interaction (filo principle)
+		// starting with selection
+		SingularDialogueData* csdd = &dg_data[active_ids.back()];
+		if (mperiph) {
+			int8_t pindex = (mypos-csdd->liststart_y)/MENU_DIALOGUE_OPTION_SIZE*-1;
+			csdd->sindex = (pindex<0) ? 0 : (pindex>csdd->max_options) ? csdd->max_options : pindex;
+		}
+
+		// confirmation handling
+		// TODO
+	}
+
 	// setup draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
@@ -432,40 +462,22 @@ void MenuDialogue::update(float transition_delta)
 		} else i++;
 	}
 }
-// FIXME: ugly & badly written
 // FIXME: avoid constant draw recalling, maybe better performance with triangle crunching
 
 /*
 	TODO
 */
-void MenuDialogue::selection_component(int8_t &grid,bool conf,bool back)
+void MenuDialogue::selection_component()
 {
-	// check selector update conditions
-	// this does not include the render preparations, breaks if idling & opening simultaneously
-	// excused for now due to the following if statement & exclusivity of open dialogue case
-	// it also adds input security when calling selection_component() every frame
-	if (active_ids.size()&&!opening_ids.size()) {
-
-		// close dialogue on request & skip selection update
-		if (back) {
-			close_dialogue(active_ids.back());
-			return;
-		}
-
-		// update interactions, input will act upon the last element of idle dialogues
-		// this will result in a recursive dialogue interaction
-		// starting with selection
-		// TODO
-
-		// confirmation handling
-		// TODO
-
 	// setup selector draw
-	} slc_buffer.bind();
+	slc_buffer.bind();
 	slc_shader.enable();
 
 	// draw idle selectors
-	for (uint8_t id : active_ids) glDrawArrays(GL_TRIANGLES,id*6,6);
+	for (uint8_t id : active_ids) {
+		slc_shader.upload_float("mv_select",dg_data[id].sindex*MENU_DIALOGUE_OPTION_SIZE);
+		glDrawArrays(GL_TRIANGLES,id*6,6);
+	}
 }
 
 /*
@@ -599,6 +611,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
 	udmv = (m_ccbf->iMap->get_input_triggered(IMP_REQDOWN)
 			- m_ccbf->iMap->get_input_triggered(IMP_REQUP))*menu_action;
+	crd_mouse = glm::vec2(m_ccbf->frame->mouse.mxfr*1280.f,m_ccbf->frame->mouse.myfr*720.f);
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 	// FIXME: as soon as the title screen has been passed, start press will become return request
 	// FIXME: why is vertical selector's left/right selection input bound to option list size?
@@ -679,7 +692,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
 	// update & draw dialogues
-	mdialogues.update(transition_delta);
+	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b,transition_delta);
 
 	// START MULTISAMPLED RENDER
 	FrameBuffer::close();
@@ -711,8 +724,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// draw dialogue selectors
-	int8_t grid_placeholder = 0;
-	mdialogues.selection_component(grid_placeholder,hit_a,hit_b);
+	mdialogues.selection_component();
 
 	// STOP MULTISAMPLED RENDER
 	msaa.blit();
@@ -761,7 +773,7 @@ void MainMenu::update_list_grid(MenuList &ml)
 	// mouse grid selection
 	int8_t tid = vgrid_id;
 	if (m_ccbf->frame->mpref_peripheral) {
-		float org_delta = (MENU_LIST_SCROLL_START-m_ccbf->frame->mouse.myfr*720.f);
+		float org_delta = (MENU_LIST_SCROLL_START-crd_mouse.y);
 		vgrid_id = org_delta/MENU_LIST_SCROLL_Y;
 
 	// button delta selection
@@ -859,10 +871,9 @@ void interface_behaviour_macro(MainMenu &tm)
 	tm.vselect += tm.lrmv;
 	bool ch_select = tm.lrmv!=0;
 	if (tm.m_ccbf->frame->mpref_peripheral) {
-		float tsmx = tm.m_ccbf->frame->mouse.mxfr*1280.f;
 		uint8_t out_id = tm.vselect;
-		while (tsmx<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
-		while (tsmx>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
+		while (tm.crd_mouse.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
+		while (tm.crd_mouse.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
 				&& out_id<MENU_MAIN_OPTION_CAP) out_id++;
 		ch_select = ch_select||(out_id!=tm.vselect);
 		tm.vselect = out_id;
