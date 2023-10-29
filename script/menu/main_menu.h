@@ -146,8 +146,7 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 
 /**
- * 		MenuList Definiton Documentation
- * TODO: expand
+ * 		MenuList Definiton
 */
 
 struct ListLanguageCommand
@@ -252,16 +251,33 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
 
 
 /**
- *		MenuDialogue Definition Documentation
- * TODO: expand
+ * 		MenuDialogue Definition:
+ * 
+ * SingularDialogueData
+ * 	-> information for each popup dialogue
+ * 
+ * MenuDialogue
+ * 	-> main handler of popup dialogue system, creates dialogues and automates them
+ * 
+ * 
+ * 		TODO QA
+ * - trying to break opening/closing routine
+ * - assessing animations, style, timing & randomizer ranges visually
 */
 
 struct SingularDialogueData
 {
+	// interaction state of the dialogue
 	bool dg_active = false;
+
+	// approximate dialogue dimensions and target iterators
 	float max_width,max_height;
 	float dim_width = .0f,dim_height = .0f;
+
+	// progression of transition .0f = fully closed (no render) 1.f = fully active (input ready)
 	float dgtrans = .0f;
+
+	// text to display information to user
 	Text tx_title,tx_options;
 };
 
@@ -315,8 +331,7 @@ private:
 
 
 /**
- * 		MainMenu Definition Documentation
- * TODO: expand
+ * 		MainMenu Definition
  * 
  * 		TODO QA
  * 

@@ -280,7 +280,7 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 
 /*
 	TODO
- */
+*/
 uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
 		glm::vec2 center,float width,float height)
 {
@@ -323,6 +323,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	dg_data.push_back(dgd);
 	return dg_data.size()-1;
 }
+// TODO: add feature to link subsequent dialogue by id and trigger opening by confirming selection
 
 /*
 	TODO
@@ -351,7 +352,8 @@ void MenuDialogue::load()
 
 	// selector shader setup
 	// attribute upload pattern: { position.x,position.y } (for now)
-	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
+	slc_shader.compile("./shader/main_menu/vdlgselector.shader",
+			"./shader/main_menu/fdlgselector.shader");
 	slc_shader.def_attributeF("position",2,0,2);
 	slc_shader.upload_camera(cam2D);
 }
@@ -438,21 +440,28 @@ void MenuDialogue::update(float transition_delta)
 */
 void MenuDialogue::selection_component(int8_t &grid,bool conf,bool back)
 {
-	// TODO: only handle updates when active ids hold information && also no ids in opening process
+	// check selector update conditions
+	// this does not include the render preparations, breaks if idling & opening simultaneously
+	// excused for now due to the following if statement & exclusivity of open dialogue case
+	// it also adds input security when calling selection_component() every frame
+	if (active_ids.size()&&!opening_ids.size()) {
 
-	// close dialogue on request & skip selection update
-	if (back&&active_ids.size()) {
-		close_dialogue(active_ids.back());
-		return;
-	}
+		// close dialogue on request & skip selection update
+		if (back) {
+			close_dialogue(active_ids.back());
+			return;
+		}
 
-	// update interactions
-	// input will act upon the last element of idle dialogues to create a recursive dialogue interaction
-	// starting with selection
-	// TODO
+		// update interactions, input will act upon the last element of idle dialogues
+		// this will result in a recursive dialogue interaction
+		// starting with selection
+		// TODO
+
+		// confirmation handling
+		// TODO
 
 	// setup selector draw
-	slc_buffer.bind();
+	} slc_buffer.bind();
 	slc_shader.enable();
 
 	// draw idle selectors
