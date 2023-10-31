@@ -401,6 +401,9 @@ void MenuDialogue::close_dialogue(uint8_t did)
 void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back,
 		float transition_delta)
 {
+	// reset dialogue state to default=0, representing no results this frame
+	dg_state = 0;
+
 	// check selector update conditions
 	// this does not include the render preparations, breaks if idling & opening simultaneously
 	// excused for now due to the following if statement & exclusivity of open dialogue case
@@ -417,13 +420,13 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		// this can result in a recursive dialogue interaction (filo principle)
 		// starting with selection
 		SingularDialogueData* csdd = &dg_data[active_ids.back()];
-		if (mperiph) {
-			int8_t pindex = (mypos-csdd->liststart_y)/MENU_DIALOGUE_OPTION_SIZE*-1;
-			csdd->sindex = (pindex<0) ? 0 : (pindex>csdd->max_options) ? csdd->max_options : pindex;
-		}
+		if (!mperiph) csdd->sindex += imv;
+		else csdd->sindex = (mypos-csdd->liststart_y)/MENU_DIALOGUE_OPTION_SIZE*-1;
+		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
+				? csdd->max_options : csdd->sindex;
 
 		// confirmation handling
-		// TODO
+		dg_state = csdd->sindex*conf;
 	}
 
 	// setup draw
@@ -463,6 +466,8 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 	}
 }
 // FIXME: avoid constant draw recalling, maybe better performance with triangle crunching
+// FIXME: rare flickering dialogue disappearance when closing dialogue
+// TODO: render selection component normally and dialogue box inverted for anti-aliasing reasons
 
 /*
 	TODO
@@ -952,7 +957,9 @@ void interface_behaviour_continue(MainMenu &tm)
 	// TODO
 
 	// closing behaviour
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
+	if (tm.mdialogues.dg_state==2) tm.mdialogues.close_dialogue(tm.dg_continue);
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active
+			&& tm.mdialogues.dg_state!=2;
 }
 
 /*

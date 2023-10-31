@@ -279,7 +279,7 @@ struct SingularDialogueData
 	float dgtrans = .0f;
 
 	// index of selected option
-	uint8_t sindex = 0,max_options;
+	int8_t sindex = 0,max_options;
 
 	// text to display information to user
 	Text tx_title,tx_options;
@@ -315,6 +315,7 @@ public:
 
 	// data
 	std::vector<SingularDialogueData> dg_data;
+	uint8_t dg_state = 0;
 
 private:
 
