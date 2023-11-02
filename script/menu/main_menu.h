@@ -303,8 +303,8 @@ public:
 	void close_dialogue(uint8_t did);
 
 	// draw
-	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back,float transition_delta);
-	void selection_component();
+	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
+	void background_component(float transition_delta);
 
 private:
 

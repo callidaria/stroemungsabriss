@@ -398,8 +398,7 @@ void MenuDialogue::close_dialogue(uint8_t did)
 /*
 	TODO
 */
-void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back,
-		float transition_delta)
+void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back)
 {
 	// reset dialogue state to default=0, representing no results this frame
 	dg_state = 0;
@@ -429,6 +428,25 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		dg_state = csdd->sindex*conf;
 	}
 
+	// setup selector draw
+	slc_buffer.bind();
+	slc_shader.enable();
+
+	// draw idle selectors
+	for (uint8_t id : active_ids) {
+		slc_shader.upload_float("mv_select",dg_data[id].sindex*MENU_DIALOGUE_OPTION_SIZE);
+		glDrawArrays(GL_TRIANGLES,id*6,6);
+	}
+}
+// FIXME: text tech results in ugly edge artifacts around letters after inverting to background
+// FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
+// FIXME: rare flickering dialogue disappearance when closing dialogue (mdc)
+
+/*
+	TODO
+*/
+void MenuDialogue::background_component(float transition_delta)
+{
 	// setup draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
@@ -463,25 +481,6 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 			active_ids.push_back(id);
 			opening_ids.erase(opening_ids.begin()+i);
 		} else i++;
-	}
-}
-// FIXME: avoid constant draw recalling, maybe better performance with triangle crunching
-// FIXME: rare flickering dialogue disappearance when closing dialogue
-// TODO: render selection component normally and dialogue box inverted for anti-aliasing reasons
-
-/*
-	TODO
-*/
-void MenuDialogue::selection_component()
-{
-	// setup selector draw
-	slc_buffer.bind();
-	slc_shader.enable();
-
-	// draw idle selectors
-	for (uint8_t id : active_ids) {
-		slc_shader.upload_float("mv_select",dg_data[id].sindex*MENU_DIALOGUE_OPTION_SIZE);
-		glDrawArrays(GL_TRIANGLES,id*6,6);
 	}
 }
 
@@ -697,7 +696,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
 	// update & draw dialogues
-	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b,transition_delta);
+	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START MULTISAMPLED RENDER
 	FrameBuffer::close();
@@ -729,7 +728,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// draw dialogue selectors
-	mdialogues.selection_component();
+	mdialogues.background_component(transition_delta);
 
 	// STOP MULTISAMPLED RENDER
 	msaa.blit();
