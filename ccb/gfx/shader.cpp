@@ -45,6 +45,15 @@ void Shader::compile3d(const char* vspath,const char* fspath)
 }
 
 /*
+	TODO
+*/
+void Shader::def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+{
+	int32_t attrib = handle_attrib_location_by_name(vname);
+	glVertexAttribIPointer(attrib,dim,GL_INT,GL_FALSE,(void*)(offset*sizeof(int32_t)));
+}
+
+/*
 	def_attributeF(const char*,uint8_t,uint8_t,uint8_t) -> void
 	vname: target variable name as referred to in shader code file
 	dim: dimension of variable -> 1 => float, 2 => vec2, 3 => vec3, 4 => vec4
@@ -55,8 +64,7 @@ void Shader::compile3d(const char* vspath,const char* fspath)
 void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
 	size_t vsize = sizeof(float);
-	int attrib = glGetAttribLocation(m_shaderProgram,vname);
-	glEnableVertexAttribArray(attrib);
+	int32_t attrib = handle_attrib_location_by_name(vname);
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 }
 
@@ -121,6 +129,17 @@ uint32_t Shader::compile_shader(const char* path,GLenum stype)
 	// return compiled shader
 	return shader;
 }
+
+/*
+	TODO
+*/
+int32_t Shader::handle_attrib_location_by_name(const char* name)
+{
+	int attrib = glGetAttribLocation(m_shaderProgram,name);
+	glEnableVertexAttribArray(attrib);
+	return attrib;
+}
+// FIXME: find out if the return variable is indeed signed
 
 /*
 	upload_camera(Camera2D||Camera3D) -> void

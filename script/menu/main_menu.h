@@ -263,6 +263,7 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
  * 		TODO QA
  * - trying to break opening/closing routine
  * - assessing animations, style, timing & randomizer ranges visually
+ * - are background dimension manipulation ranges ok or should they be tweaked
 */
 
 struct SingularDialogueData

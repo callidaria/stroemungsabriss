@@ -305,7 +305,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y-20);
 	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y-20);
 	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y);
-	// TODO: dynamify selector scaling
+	// TODO: dynamify text/selector scaling
 
 	// dialogue title text setup
 	dgd.tx_title = Text(title_font);
@@ -345,8 +345,7 @@ void MenuDialogue::load()
 	// attribute upload pattern: { position.x,position.y,displacement_id }
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
-	bgr_shader.def_attributeF("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
-	// FIXME: technically this is an integer not a float, also conversion as memory index in shader
+	bgr_shader.def_attributeI("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
 	bgr_shader.upload_camera(cam2D);
 
@@ -373,9 +372,8 @@ void MenuDialogue::open_dialogue(uint8_t did)
 	opening_ids.push_back(did);
 
 	// randomize expansion edges
-	// TODO: polish dimension manipulation ranges for the optimal style
-	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%5+1)*.1f;
-	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%5+1)*.1f;
+	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%50+25)*.01f;
+	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%50+25)*.01f;
 
 	// set dialogue info active
 	dg_data[did].dg_active = true;

@@ -29,6 +29,7 @@ public:
 	void compile3d(const char* vspath,const char* fspath);
 
 	// definition
+	void def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 	void def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 	void def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 
@@ -56,6 +57,7 @@ private:
 
 	// helpers
 	uint32_t compile_shader(const char* path,GLenum stype);
+	int32_t handle_attrib_location_by_name(const char* name);
 
 private:
 
