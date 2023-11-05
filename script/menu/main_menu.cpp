@@ -290,21 +290,21 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 
 	// precalculation & background vertices
 	float hwidth = width*.5f,hheight = height*.5f;
-	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
-	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
-	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(1);
-	bgr_verts.push_back(center.x-hwidth),bgr_verts.push_back(center.y-hheight),bgr_verts.push_back(0);
-	bgr_verts.push_back(center.x),bgr_verts.push_back(center.y),bgr_verts.push_back(2);
-	bgr_verts.push_back(center.x+hwidth),bgr_verts.push_back(center.y+hheight),bgr_verts.push_back(0);
+	bgr_verts.push_back({ glm::vec2(center.x-hwidth,center.y-hheight),0 });
+	bgr_verts.push_back({ glm::vec2(center.x+hwidth,center.y+hheight),0 });
+	bgr_verts.push_back({ center,1 });
+	bgr_verts.push_back({ glm::vec2(center.x-hwidth,center.y-hheight),0 });
+	bgr_verts.push_back({ center,2 });
+	bgr_verts.push_back({ glm::vec2(center.x+hwidth,center.y+hheight),0 });
 
 	// selector vertices
 	float xoffcenter = center.x-hwidth;
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y-20);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y);
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y);
-	slc_verts.push_back(xoffcenter-10),slc_verts.push_back(dgd.liststart_y-20);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y-20);
-	slc_verts.push_back(xoffcenter+10),slc_verts.push_back(dgd.liststart_y);
+	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y-20));
+	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y));
+	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y));
+	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y-20));
+	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y-20));
+	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y));
 	// TODO: dynamify text/selector scaling
 
 	// dialogue title text setup
@@ -342,7 +342,6 @@ void MenuDialogue::load()
 	Camera2D cam2D = Camera2D(1280.f,720.f);
 
 	// background shader setup
-	// attribute upload pattern: { position.x,position.y,displacement_id }
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
 	bgr_shader.def_attributeI("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
@@ -354,7 +353,6 @@ void MenuDialogue::load()
 	slc_buffer.upload_vertices(slc_verts);
 
 	// selector shader setup
-	// attribute upload pattern: { position.x,position.y } (for now)
 	slc_shader.compile("./shader/main_menu/vdlgselector.shader",
 			"./shader/main_menu/fdlgselector.shader");
 	slc_shader.def_attributeF("position",2,0,2);
@@ -436,7 +434,7 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		glDrawArrays(GL_TRIANGLES,id*6,6);
 	}
 }
-// FIXME: text tech results in ugly edge artifacts around letters after inverting to background
+// FIXME: text tech results in ugly edge artifacts around letters after inverting to background (mdc)
 // FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
 // FIXME: rare flickering dialogue disappearance when closing dialogue (mdc)
 

@@ -49,8 +49,9 @@ void Shader::compile3d(const char* vspath,const char* fspath)
 */
 void Shader::def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
+	size_t vsize = sizeof(int32_t);
 	int32_t attrib = handle_attrib_location_by_name(vname);
-	glVertexAttribIPointer(attrib,dim,GL_INT,GL_FALSE,(void*)(offset*sizeof(int32_t)));
+	glVertexAttribIPointer(attrib,dim,GL_INT,cap*vsize,(void*)(offset*vsize));
 }
 
 /*

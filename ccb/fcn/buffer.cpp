@@ -21,29 +21,6 @@ void Buffer::unbind()
 }
 
 /*
-	upload_vertices(float*,size_t) -> void
-	vertices: array of vertices to upload
-	vsize: size of array to upload (by sizeof return)
-	purpose: upload vertices to array buffer for later usage in graphical processes
-*/
-void Buffer::upload_vertices(float* vertices,size_t vsize)
-{
-	glBindBuffer(GL_ARRAY_BUFFER,vbo);
-	glBufferData(GL_ARRAY_BUFFER,vsize,vertices,GL_STATIC_DRAW);
-}
-
-/*
-	upload_vertices(std::vector<float>) -> void
-	iv: list of vertices to upload
-	purpose: overload previous to support std::vector format
-*/
-void Buffer::upload_vertices(std::vector<float> iv)
-{
-	glBindBuffer(GL_ARRAY_BUFFER,vbo);
-	glBufferData(GL_ARRAY_BUFFER,iv.size()*sizeof(float),&iv[0],GL_STATIC_DRAW);
-}
-
-/*
 	upload_elements(unsigned int*,size_t) -> void
 	elements: array of optional element indices, mapping the vertex order
 	esize: size of array, holding the element indices (by sizeof return)

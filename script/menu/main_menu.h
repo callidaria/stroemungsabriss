@@ -253,6 +253,9 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
 /**
  * 		MenuDialogue Definition:
  * 
+ * DialogueBackgroundGeometry
+ * 	-> background vertex geometry information pattern
+ * 
  * SingularDialogueData
  * 	-> information for each popup dialogue
  * 
@@ -265,6 +268,12 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
  * - assessing animations, style, timing & randomizer ranges visually
  * - are background dimension manipulation ranges ok or should they be tweaked
 */
+
+struct DialogueBackgroundGeometry
+{
+	glm::vec2 position;
+	int32_t disp_id;		// TODO: change to 8-bit unsigned when successful
+};
 
 struct SingularDialogueData
 {
@@ -329,7 +338,8 @@ private:
 			MENU_DIALOGUE_OPTION_SIZE,MENU_DIALOGUE_OPTION_SIZE);
 
 	// data
-	std::vector<float> bgr_verts,slc_verts;
+	std::vector<DialogueBackgroundGeometry> bgr_verts;
+	std::vector<glm::vec2> slc_verts;
 
 	// id states
 	std::vector<uint8_t> opening_ids,active_ids,closing_ids;
