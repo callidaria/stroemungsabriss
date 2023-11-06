@@ -114,6 +114,10 @@ constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0f,.5f,.5f);
 #endif
 // TODO: figure out colour scheme and if gamma correction in splice shader will be upheld
 
+// dialogue constants
+constexpr glm::vec3 DIALOGUE_HEAD_COLOUR = glm::vec3(1.f);
+constexpr glm::vec3 DIALOGUE_OPTION_COLOUR = glm::vec3(1.f);
+
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
 constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
@@ -419,8 +423,8 @@ public:
 	float lhead_translation_y,uhead_translation_y;
 
 	// memory for static continue
-	uint8_t dg_continue;
-	bool shot_popup = false;
+	uint8_t dg_diffs,dg_continue;
+	bool diff_popup = false,shot_popup = false;
 
 private:
 

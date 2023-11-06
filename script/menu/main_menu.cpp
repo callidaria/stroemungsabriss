@@ -286,7 +286,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 {
 	// setup dialogue data with list start position
 	SingularDialogueData dgd;
-	dgd.liststart_y = center.y+(options.size()>>1)*MENU_DIALOGUE_OPTION_SIZE;
+	dgd.liststart_y = center.y+MENU_DIALOGUE_OPTION_SIZE*(options.size()>>1)
+			+ (MENU_DIALOGUE_OPTION_SIZE>>1)*(options.size()&1);
 
 	// precalculation & background vertices
 	float hwidth = width*.5f,hheight = height*.5f;
@@ -317,10 +318,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	dgd.tx_options = Text(option_font);
 	for (auto option : options)
 		dgd.tx_options.add(option,glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-				dgd.liststart_y-MENU_DIALOGUE_OPTION_SIZE*cscr)),cscr++;
+				dgd.liststart_y-MENU_DIALOGUE_OPTION_SIZE*cscr++));
 	dgd.tx_options.load();
-	// FIXME: when an even number of options is given the list start will be too high
-	// ??this can be solved by moving (MENU_DIALOGUE_OFFSET_FACTOR>>1)*(options.size()&1);
 
 	// additional data
 	dgd.max_options = options.size()-1;
@@ -436,7 +435,7 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 }
 // FIXME: text tech results in ugly edge artifacts around letters after inverting to background (mdc)
 // FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
-// FIXME: rare flickering dialogue disappearance when closing dialogue (mdc)
+// FIXME: (rare) flickering dialogue disappearance when closing dialogue (mdc)
 
 /*
 	TODO
@@ -490,15 +489,18 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 
 	// upload vertex target displacement
 	bgr_shader.upload_vec2("displace[1]",glm::vec2(-dg_data[id].dim_width,dg_data[id].dim_height));
-	bgr_shader.upload_vec2("displace[2]",glm::vec2(dg_data[id].dim_width,-dg_data[id].dim_width));
+	bgr_shader.upload_vec2("displace[2]",glm::vec2(dg_data[id].dim_width,-dg_data[id].dim_height));
 
 	// draw background geometry
 	glDrawArrays(GL_TRIANGLES,id*6,6);
 
 	// write text
-	dg_data[id].tx_title.prepare(),dg_data[id].tx_title.render(128,glm::vec4(1.f,1.f,1.f,1.f));
-	dg_data[id].tx_options.prepare(),dg_data[id].tx_options.render(128,glm::vec4(1.f,1.f,1.f,1.f));
+	dg_data[id].tx_title.prepare(),
+		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
+	dg_data[id].tx_options.prepare(),
+		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
 }
+// TODO: exactly define how many instances are rendered per text object (mdc)
 
 
 /**
@@ -524,11 +526,11 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	std::vector<float> sverts;
-	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,0),
-			glm::vec2(SPLICE_TITLE_UPPER_START,720),glm::vec3(.5f,0,0));
-	create_splash(sverts,glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),
-			glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),SPLICE_HEAD_COLOUR);
-	create_splash(sverts,glm::vec2(0),glm::vec2(0,720),SPLICE_SELECTION_COLOUR);
+	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,.0f),
+			glm::vec2(SPLICE_TITLE_UPPER_START,720.f),glm::vec3(.5f,.0f,.0f));
+	create_splash(sverts,glm::vec2(.0f,SPLICE_HEAD_ORIGIN_POSITION),
+			glm::vec2(1280.f,SPLICE_HEAD_ORIGIN_POSITION),SPLICE_HEAD_COLOUR);
+	create_splash(sverts,glm::vec2(.0f),glm::vec2(.0f,720.f),SPLICE_SELECTION_COLOUR);
 	sh_buffer.bind();
 	sh_buffer.upload_vertices(sverts);
 	sh_shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
@@ -586,8 +588,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// dialogue setup
+	std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
 	std::vector<const char*> cnt_options = { "continue autosave","continue manual load","back" };
-	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,glm::vec2(640,360),320,250);
+	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,
+			glm::vec2(670,310),320,140);
+	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,
+			glm::vec2(640,360),320,250);
 	mdialogues.load();
 }
 
@@ -898,7 +904,7 @@ void interface_behaviour_macro(MainMenu &tm)
 
 	// reset
 	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
-	tm.shot_popup = false;
+	tm.diff_popup = false,tm.shot_popup = false;
 }
 
 /*
@@ -943,7 +949,6 @@ void interface_behaviour_load(MainMenu &tm)
 void interface_behaviour_continue(MainMenu &tm)
 {
 	// open dialogue for continuation request
-	// FIXME: this completely defeats the performance benefits we gained earlier, improve activation
 	if (!tm.shot_popup) {
 		tm.mdialogues.open_dialogue(tm.dg_continue);
 		tm.shot_popup = true;
@@ -962,6 +967,14 @@ void interface_behaviour_continue(MainMenu &tm)
 */
 void interface_behaviour_newgame(MainMenu &tm)
 {
+	// opening difficulty popup dialogue when option first is chosen
+	if (!tm.diff_popup) {
+		tm.mdialogues.open_dialogue(tm.dg_diffs);
+		tm.diff_popup = true;
+	}
+
 	// TODO
+
+	// closing condition
 	tm.interface_logic_id *= !tm.hit_b;
 }
