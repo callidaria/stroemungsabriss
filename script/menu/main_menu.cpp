@@ -282,12 +282,12 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 	TODO
 */
 uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
-		glm::vec2 center,float width,float height)
+		glm::vec2 center,float width,float height,uint8_t tsize,uint8_t dsize)
 {
 	// setup dialogue data with list start position
 	SingularDialogueData dgd;
-	dgd.liststart_y = center.y+MENU_DIALOGUE_OPTION_SIZE*(options.size()>>1)
-			+ (MENU_DIALOGUE_OPTION_SIZE>>1)*(options.size()&1);
+	dgd.liststart_y = center.y+dsize*(options.size()>>1)+(dsize>>1)*(options.size()&1);
+	dgd.option_size = dsize;
 
 	// precalculation & background vertices
 	float hwidth = width*.5f,hheight = height*.5f;
@@ -299,26 +299,29 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	bgr_verts.push_back({ glm::vec2(center.x+hwidth,center.y+hheight),0 });
 
 	// selector vertices
+	uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
 	float xoffcenter = center.x-hwidth;
-	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y-20));
-	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y));
-	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y));
-	slc_verts.push_back(glm::vec2(xoffcenter-10,dgd.liststart_y-20));
-	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y-20));
-	slc_verts.push_back(glm::vec2(xoffcenter+10,dgd.liststart_y));
-	// TODO: dynamify text/selector scaling
+	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos));
+	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y));
+	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y));
+	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos));
+	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y-mdos));
+	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y));
+	// TODO: implement prototype selector style
 
 	// dialogue title text setup
-	dgd.tx_title = Text(title_font);
+	dgd.tx_title = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			tsize,tsize));
 	dgd.tx_title.add(title,center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 	dgd.tx_title.load();
 
 	// dialogue option text setup
 	uint8_t cscr = 0;
-	dgd.tx_options = Text(option_font);
+	dgd.tx_options = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			dsize,dsize));
 	for (auto option : options)
 		dgd.tx_options.add(option,glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-				dgd.liststart_y-MENU_DIALOGUE_OPTION_SIZE*cscr++));
+				dgd.liststart_y-dsize*cscr++));
 	dgd.tx_options.load();
 
 	// additional data
@@ -415,7 +418,7 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		// starting with selection
 		SingularDialogueData* csdd = &dg_data[active_ids.back()];
 		if (!mperiph) csdd->sindex += imv;
-		else csdd->sindex = (mypos-csdd->liststart_y)/MENU_DIALOGUE_OPTION_SIZE*-1;
+		else csdd->sindex = (mypos-csdd->liststart_y)/csdd->option_size*-1;
 		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
 				? csdd->max_options : csdd->sindex;
 
@@ -429,7 +432,7 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 
 	// draw idle selectors
 	for (uint8_t id : active_ids) {
-		slc_shader.upload_float("mv_select",dg_data[id].sindex*MENU_DIALOGUE_OPTION_SIZE);
+		slc_shader.upload_float("mv_select",dg_data[id].sindex*dg_data[id].option_size);
 		glDrawArrays(GL_TRIANGLES,id*6,6);
 	}
 }
@@ -590,10 +593,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	// dialogue setup
 	std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
 	std::vector<const char*> cnt_options = { "continue autosave","continue manual load","back" };
-	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,
-			glm::vec2(670,310),320,140);
-	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,
-			glm::vec2(640,360),320,250);
+	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,glm::vec2(670,310),
+			320,140,30,25);
+	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,glm::vec2(640,360),
+			320,250,30,25);
 	mdialogues.load();
 }
 

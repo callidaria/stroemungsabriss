@@ -59,8 +59,6 @@ constexpr uint16_t MENU_LIST_SEGMENT_PUSH_X = 100;
 constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 
 // menu dialogue positioning
-constexpr uint8_t MENU_DIALOGUE_TITLE_SIZE = 30;
-constexpr uint8_t MENU_DIALOGUE_OPTION_SIZE = 25;
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
 
 // list entity types
@@ -297,6 +295,7 @@ struct SingularDialogueData
 
 	// text to display information to user
 	Text tx_title,tx_options;
+	uint8_t option_size;
 };
 
 class MenuDialogue
@@ -308,8 +307,8 @@ public:
 	~MenuDialogue() {  }
 
 	// creation
-	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,
-			glm::vec2 center,float width,float height);
+	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,glm::vec2 center,
+			float width,float height,uint8_t tsize,uint8_t dsize);
 	void load();
 
 	// interaction
@@ -336,10 +335,6 @@ private:
 	// engine
 	Buffer bgr_buffer = Buffer(),slc_buffer = Buffer();
 	Shader bgr_shader = Shader(),slc_shader = Shader();
-	Font title_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			MENU_DIALOGUE_TITLE_SIZE,MENU_DIALOGUE_TITLE_SIZE);
-	Font option_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			MENU_DIALOGUE_OPTION_SIZE,MENU_DIALOGUE_OPTION_SIZE);
 
 	// data
 	std::vector<DialogueBackgroundGeometry> bgr_verts;

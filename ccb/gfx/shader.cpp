@@ -68,6 +68,8 @@ void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t
 	int32_t attrib = handle_attrib_location_by_name(vname);
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 }
+// TODO: identifying attributes like this is broken for anything not 32-bit and also out of fashion
+// we shall implement a more dynamic method, to increase supported datatypes
 
 /*
 	def_indexF(unsigned int,const char*,uint8_t,uint8_t,uint8_t)
