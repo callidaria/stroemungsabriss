@@ -72,6 +72,24 @@ void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t
 // we shall implement a more dynamic method, to increase supported datatypes
 
 /*
+	TODO
+*/
+void Shader::def_irregular_attributeI(const char* vname,uint8_t dim,size_t vsize,size_t osize)
+{
+	int32_t attrib = handle_attrib_location_by_name(vname);
+	glVertexAttribIPointer(attrib,dim,GL_INT,vsize,(void*)osize);
+}
+
+/*
+	TODO
+*/
+void Shader::def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize,size_t osize)
+{
+	int32_t attrib = handle_attrib_location_by_name(vname);
+	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,vsize,(void*)osize);
+}
+
+/*
 	def_indexF(unsigned int,const char*,uint8_t,uint8_t,uint8_t)
 	ibo: index buffer object to be used by shader and defined by layout pattern
 	vname, dim, offset, cap: same function as in def_attributeF

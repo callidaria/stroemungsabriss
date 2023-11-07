@@ -274,7 +274,7 @@ static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &c
 struct DialogueBackgroundGeometry
 {
 	glm::vec2 position;
-	int32_t disp_id;		// TODO: change to 8-bit unsigned when successful
+	uint32_t disp_id;		// TODO: change to 8-bit unsigned when successful
 };
 
 struct SingularDialogueData

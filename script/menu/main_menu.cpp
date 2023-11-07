@@ -345,8 +345,10 @@ void MenuDialogue::load()
 
 	// background shader setup
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
-	bgr_shader.def_attributeF("position",2,0,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
-	bgr_shader.def_attributeI("disp_id",1,2,DIALOGUEBGR_VERTEX_FLOAT_COUNT);
+	bgr_shader.def_irregular_attributeF("position",2,
+			sizeof(DialogueBackgroundGeometry),offsetof(DialogueBackgroundGeometry,position));
+	bgr_shader.def_irregular_attributeI("disp_id",1,
+			sizeof(DialogueBackgroundGeometry),offsetof(DialogueBackgroundGeometry,disp_id));
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
 	bgr_shader.upload_camera(cam2D);
 
