@@ -308,6 +308,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y-mdos));
 	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y));
 	// TODO: implement prototype selector style
+	//	first figure out the idea to make it look nice before blindly implementing
+	// TODO: implement choice description print & change list selector to background geometry
 
 	// dialogue title text setup
 	dgd.tx_title = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -679,21 +681,30 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	tx_version.prepare();
 	tx_version.render(tcap_version*inv_mtransition,TEXT_VERSION_COLOUR);
 
-	// render main options
+	// render & transform main options
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
 		tx_mopts[i].prepare();
 		glm::mat4 opt_trans = glm::translate(glm::mat4(1.f),
-				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y+250*ftransition,0));
+				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y,0));
 		glm::vec4 opt_colour = glm::vec4(.5f,1.f,.5f,mtransition);
+
+		// let currently selected option react to the players choice
 		if (i==vselect) {
+			opt_trans = glm::translate(opt_trans,
+					glm::vec3((-mo_cposition[i]+SPLICE_HEAD_TITLE_OFFSET)*ftransition,0));
 			opt_trans = glm::scale(opt_trans,glm::vec3(MENU_OPTIONS_SCALE_THRES));
-			opt_trans = glm::rotate(opt_trans,st_rot,glm::vec3(0,0,1));
+			opt_trans = glm::rotate(opt_trans,st_rot*inv_ftransition,glm::vec3(0,0,1));
 			opt_colour.z = 1.f;
-		} tx_mopts[i].set_scroll(opt_trans);
-		tx_mopts[i].render(strlen(main_options[i]),opt_colour);
+		}
+
+		// upload transform & render option text
+		tx_mopts[i].set_scroll(opt_trans);
+		tx_mopts[i].render(strlen(main_options[i])*(inv_ftransition+(i==vselect)),opt_colour);
 	}
 	// TODO: differenciate between list- & free mode for head splice displacement
 	// TODO: also move active title to upper-left screen position while de-writing non-active
+	// FIXME: the splash targeting is not intersecting with the exact center of the option text
+	// FIXME: optimize before impending merge, when all the text transitions are done
 
 	// render titles
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
