@@ -282,7 +282,8 @@ void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
 	TODO
 */
 uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
-		glm::vec2 center,float width,float height,uint8_t tsize,uint8_t dsize)
+		std::vector<const char*> descriptions,glm::vec2 center,float width,float height,
+		uint8_t tsize,uint8_t dsize)
 {
 	// setup dialogue data with list start position
 	SingularDialogueData dgd;
@@ -318,13 +319,20 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	dgd.tx_title.load();
 
 	// dialogue option text setup
-	uint8_t cscr = 0;
 	dgd.tx_options = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			dsize,dsize));
-	for (auto option : options)
-		dgd.tx_options.add(option,glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-				dgd.liststart_y-dsize*cscr++));
+	for (uint8_t i=0;i<options.size();i++)
+		dgd.tx_options.add(options[i],glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
+				dgd.liststart_y-dsize*i));
 	dgd.tx_options.load();
+
+	// dialogue description text setup
+	dgd.tx_descriptions = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			25,25));
+	for (uint8_t i=0;i<descriptions.size();i++) {
+		dgd.tx_descriptions.add(descriptions[i],glm::vec2(1030,350-720*i),200.f,20.f);
+		dgd.description_length += strlen(descriptions[i]);
+	} dgd.tx_descriptions.load();
 
 	// additional data
 	dgd.max_options = options.size()-1;
@@ -506,6 +514,10 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
 	dg_data[id].tx_options.prepare(),
 		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
+	dg_data[id].tx_descriptions.prepare();
+	dg_data[id].tx_descriptions.set_scroll(
+			glm::translate(glm::mat4(1.f),glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
+	dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
 }
 // TODO: exactly define how many instances are rendered per text object (mdc)
 
@@ -595,12 +607,19 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// dialogue setup
-	std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
-	std::vector<const char*> cnt_options = { "continue autosave","continue manual load","back" };
-	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,glm::vec2(670,310),
-			320,140,30,25);
-	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,glm::vec2(640,360),
-			320,250,30,25);
+	std::vector<const char*> dsc_diffs = {
+		"original mode:\nintended difficulty!\n WARNING: NOT AN EASY OR NORMAL MODE",
+		"master mode:\nyou are either a seasoned danmaku veteran or original mode doesn't challenge you anymore",
+		"grandmaster mode:\ndon't take this choice lightly, i know it sounds cool but don't do it",
+		"headmaster mode:\nyou must be either a robot, or a mountain hermit to survive this"
+	}; std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
+	std::vector<const char*> dsc_options = {
+		"continue from last save","switch savestate to continue from","return to main selection"
+	}; std::vector<const char*> cnt_options = { "continue","change run","back" };
+	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,dsc_diffs,
+			glm::vec2(670,310),320,140,30,25);
+	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,dsc_options,
+			glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
 }
 

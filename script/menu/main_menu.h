@@ -295,8 +295,9 @@ struct SingularDialogueData
 	int8_t sindex = 0,max_options;
 
 	// text to display information to user
-	Text tx_title,tx_options;
+	Text tx_title,tx_options,tx_descriptions;
 	uint8_t option_size;
+	uint32_t description_length = 0;
 };
 
 class MenuDialogue
@@ -308,8 +309,9 @@ public:
 	~MenuDialogue() {  }
 
 	// creation
-	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,glm::vec2 center,
-			float width,float height,uint8_t tsize,uint8_t dsize);
+	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,
+			std::vector<const char*> descriptions,glm::vec2 center,float width,float height,
+			uint8_t tsize,uint8_t dsize);
 	void load();
 
 	// interaction
