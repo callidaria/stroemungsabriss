@@ -173,6 +173,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 		txe.prepare(),txe.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
 			txe.render(1024,glm::vec4(1));
 }
+// TODO: transition between lists (background to foreground animation, tilt shift?)
 
 /*
 	TODO
@@ -418,17 +419,18 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 	// excused for now due to the following if statement & exclusivity of open dialogue case
 	// it also adds input security when calling selection_component() every frame
 	if (active_ids.size()&&!opening_ids.size()) {
+		uint8_t id = active_ids.back();
 
 		// close dialogue on request & skip selection update
 		if (back) {
-			close_dialogue(active_ids.back());
+			close_dialogue(id);
 			return;
 		}
 
 		// update interactions, input will act upon the last element of idle dialogues
 		// this can result in a recursive dialogue interaction (filo principle)
 		// starting with selection
-		SingularDialogueData* csdd = &dg_data[active_ids.back()];
+		SingularDialogueData* csdd = &dg_data[id];
 		if (!mperiph) csdd->sindex += imv;
 		else csdd->sindex = (mypos-csdd->liststart_y)/csdd->option_size*-1;
 		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
@@ -436,6 +438,17 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 
 		// confirmation handling
 		dg_state = csdd->sindex*conf;
+
+		// description render
+		// write text
+		dg_data[id].tx_title.prepare();
+		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
+		dg_data[id].tx_options.prepare();
+		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
+		dg_data[id].tx_descriptions.prepare();
+		dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
+				glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
+		dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
 	}
 
 	// setup selector draw
@@ -508,16 +521,6 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 
 	// draw background geometry
 	glDrawArrays(GL_TRIANGLES,id*6,6);
-
-	// write text
-	dg_data[id].tx_title.prepare(),
-		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
-	dg_data[id].tx_options.prepare(),
-		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
-	dg_data[id].tx_descriptions.prepare();
-	dg_data[id].tx_descriptions.set_scroll(
-			glm::translate(glm::mat4(1.f),glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
-	dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
 }
 // TODO: exactly define how many instances are rendered per text object (mdc)
 
@@ -610,7 +613,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	std::vector<const char*> dsc_diffs = {
 		"original mode:\nintended difficulty!\n WARNING: NOT AN EASY OR NORMAL MODE",
 		"master mode:\nyou are either a seasoned danmaku veteran or original mode doesn't challenge you anymore",
-		"grandmaster mode:\ndon't take this choice lightly, i know it sounds cool but don't do it",
+		"grandmaster mode:\ndon't take this choice lightly, i know it sounds cool on paper but don't do it",
 		"headmaster mode:\nyou must be either a robot, or a mountain hermit to survive this"
 	}; std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
 	std::vector<const char*> dsc_options = {
@@ -621,6 +624,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,dsc_options,
 			glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
+	// TODO: add second confirmation popup dialogue in case grandmaster or headmaster is selected
 }
 
 /*
@@ -745,10 +749,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	sh_shader.enable();
 
 	// head splash upload & render
-	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+lhead_translation_y),
-			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+uhead_translation_y),
-			(lr_head_extend+SPLICE_HEAD_LOWER_WIDTH*inv_ftransition)*mtransition,
-			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH*inv_ftransition)*mtransition,true);
+	float dialogue_transition = ftransition*mdialogues.system_active();
+	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+lhead_translation_y
+			+ 720.f*dialogue_transition),
+			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+uhead_translation_y
+			- 360.f*dialogue_transition),
+			(lr_head_extend+SPLICE_HEAD_LOWER_WIDTH
+			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,
+			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH
+			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,true);
 	glDrawArrays(GL_TRIANGLES,6,6);
 
 	// selection splash upload & render
@@ -763,6 +772,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
 	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
 	glDrawArrays(GL_TRIANGLES,0,6);
+	// FIXME: optimize all splash transitions and make the math readable
 
 	// draw dialogue selectors
 	mdialogues.background_component(transition_delta);

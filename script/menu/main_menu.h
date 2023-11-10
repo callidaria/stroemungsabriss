@@ -114,8 +114,8 @@ constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0f,.5f,.5f);
 // TODO: figure out colour scheme and if gamma correction in splice shader will be upheld
 
 // dialogue constants
-constexpr glm::vec3 DIALOGUE_HEAD_COLOUR = glm::vec3(1.f);
-constexpr glm::vec3 DIALOGUE_OPTION_COLOUR = glm::vec3(1.f);
+constexpr glm::vec3 DIALOGUE_HEAD_COLOUR = glm::vec3(.75f,.75f,.0f);
+constexpr glm::vec3 DIALOGUE_OPTION_COLOUR = glm::vec3(.75f,.75f,.0f);
 
 // text attributes
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
@@ -322,6 +322,9 @@ public:
 	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void background_component(float transition_delta);
 
+	// info
+	inline bool system_active() { return opening_ids.size()||active_ids.size()||closing_ids.size(); }
+
 private:
 
 	// render
@@ -381,6 +384,7 @@ private:
 	// splashes
 	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
 	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
+	// TODO: deepen the splash modification & creation implementation, gift them their own class
 
 public:
 
