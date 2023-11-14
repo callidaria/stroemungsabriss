@@ -59,13 +59,13 @@ void Text::add(const char* s,glm::vec2 p)
 }
 
 /*
-	add(string,vec2,float,float) -> vec2
-	s: string of characters to write to text entity
-	p: origin position of cursor to specify writing position start
-	bwdt: width of text space until cursor reaches border & automatically inserts breakline
-	nline_offset: distance the cursor should travel on the y-axis for a breakline
+	add(string,vec2,float,float) -> vec2 !O(n)
 	purpose: add string of characters within borders, automatically inserting breaklines
-	returns: new cursor position after text writing is finished
+	\param s: string of characters to write to text entity
+	\param p: origin position of cursor to specify writing position start
+	\param bwdt: width of text space until cursor reaches border & automatically inserts breakline
+	\param nline_offset: distance the cursor should travel on the y-axis for a breakline
+	\returns: new cursor position after text writing is finished
 */
 glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 {
@@ -94,7 +94,7 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 
 		// break line if word violates border width
 		bool br_line = (crr_width+estm_wwidth)>bwdt;
-		p.x -= crr_width*br_line;p.y -= nline_offset*br_line;
+		p.x -= crr_width*br_line,p.y -= nline_offset*br_line;
 		crr_width *= !br_line;
 
 		// add characters to text entity

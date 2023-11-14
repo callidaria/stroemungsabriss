@@ -2,6 +2,45 @@
 
 
 /**
+ *		Selection Splice Geometry Implementation
+ *
+ * // TODO: extend
+*/
+
+/*
+	TODO
+*/
+SelectionSpliceGeometry::SelectionSpliceGeometry()
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,glm::vec3 c)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void SelectionSpliceGeometry::modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
+{
+	// TODO
+}
+
+/*
+	TODO
+*/
+void SelectionSpliceGeometry::render()
+{
+	// TODO
+}
+
+
+/**
  * 		Menu List Implementation with .ldc Language Interpreter
  * 
  * TODO: expand this segment documentation
@@ -759,6 +798,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH
 			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,true);
 	glDrawArrays(GL_TRIANGLES,6,6);
+	// TODO: define states for list-,dialoge-,disabled-mode & transition func in future splash class
 
 	// selection splash upload & render
 	float ctransition = mtransition-ftransition;

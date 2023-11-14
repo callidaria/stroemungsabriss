@@ -149,6 +149,29 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 
 /**
+ *		Selection Splice Geometry Definition
+*/
+
+class SelectionSpliceGeometry
+{
+public:
+
+	// construction
+	SelectionSpliceGeometry();
+	~SelectionSpliceGeometry() {  }
+
+	// creation
+	uint8_t create_splash(glm::vec2 l,glm::vec2 u,glm::vec3 c);
+
+	// modification
+	void modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
+
+	// draw
+	void render();
+};
+
+
+/**
  * 		MenuList Definiton
 */
 
