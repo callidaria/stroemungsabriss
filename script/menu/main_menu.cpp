@@ -10,17 +10,37 @@
 /*
 	TODO
 */
-SelectionSpliceGeometry::SelectionSpliceGeometry()
+uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz)
 {
-	// TODO
+	// write vertices
+	verts.push_back({ l,c,0 }),verts.push_back({ u,c,3 }),verts.push_back({ u,c,2 });
+	verts.push_back({ u,c,3 }),verts.push_back({ l,c,0 }),verts.push_back({ l,c,1 });
+
+	// write splice information
+	SelectionSplice splice;
+	splice.ext_lower = lw,splice.ext_upper = uw;
+	splices.push_back(splice);
+
+	// return id of created selection splice
+	return splices.size()-1;
 }
 
 /*
 	TODO
 */
-uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,glm::vec3 c)
+void SelectionSpliceGeometry::load()
 {
-	// TODO
+	// upload vertex data to buffer
+	buffer.bind();
+	buffer.upload_vertices(verts);
+
+	// compile shader
+	size_t vsize = sizeof(SpliceVertexGeometry);
+	shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
+	shader.def_irregular_attributeF("position",2,vsize,offsetof(SpliceVertexGeometry,position));
+	shader.def_irregular_attributeF("colour",3,vsize,offsetof(SpliceVertexGeometry,colour));
+	shader.def_irregular_attributeI("edge_id",1,vsize,offsetof(SpliceVertexGeometry,edge_id));
+	shader.upload_camera(Camera2D(1280.f,720.f));
 }
 
 /*
@@ -36,7 +56,23 @@ void SelectionSpliceGeometry::modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up
 */
 void SelectionSpliceGeometry::render()
 {
-	// TODO
+	// setup buffer & shader for draw
+	buffer.bind();
+	shader.enable();
+
+	// draw created splashes
+	for (uint8_t i=0;i<splices.size();i++) {
+
+		// uniform upload
+		shader.upload_vec2("lupos[0]",splices[i].disp_lower),
+			shader.upload_vec2("lupos[1]",splices[i].disp_upper);
+		shader.upload_float("luext[0]",splices[i].ext_lower),
+			shader.upload_float("luext[1]",splices[i].ext_upper);
+		shader.upload_int("is_hrz",splices[i].horizontal);
+
+		// draw splice
+		glDrawArrays(GL_TRIANGLES,i*6,6);
+	}
 }
 
 
@@ -394,11 +430,10 @@ void MenuDialogue::load()
 	Camera2D cam2D = Camera2D(1280.f,720.f);
 
 	// background shader setup
+	size_t vsize = sizeof(DialogueBackgroundGeometry);
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
-	bgr_shader.def_irregular_attributeF("position",2,
-			sizeof(DialogueBackgroundGeometry),offsetof(DialogueBackgroundGeometry,position));
-	bgr_shader.def_irregular_attributeI("disp_id",1,
-			sizeof(DialogueBackgroundGeometry),offsetof(DialogueBackgroundGeometry,disp_id));
+	bgr_shader.def_irregular_attributeF("position",2,vsize,offsetof(DialogueBackgroundGeometry,position));
+	bgr_shader.def_irregular_attributeI("disp_id",1,vsize,offsetof(DialogueBackgroundGeometry,disp_id));
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
 	bgr_shader.upload_camera(cam2D);
 
@@ -586,7 +621,15 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
 	// selection splash setup
-	std::vector<float> sverts;
+	splices_geometry.create_splash(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
+			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),230,170,SPLICE_HEAD_COLOUR,true);
+	splices_geometry.create_splash(glm::vec2(0),
+			glm::vec2(0,720),150,250,SPLICE_SELECTION_COLOUR,false);
+	splices_geometry.create_splash(glm::vec2(SPLICE_TITLE_LOWER_START,0),
+			glm::vec2(SPLICE_TITLE_UPPER_START,720),
+			SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false);
+	splices_geometry.load();
+	/*std::vector<float> sverts;
 	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,.0f),
 			glm::vec2(SPLICE_TITLE_UPPER_START,720.f),glm::vec3(.5f,.0f,.0f));
 	create_splash(sverts,glm::vec2(.0f,SPLICE_HEAD_ORIGIN_POSITION),
@@ -598,7 +641,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	sh_shader.def_attributeF("position",2,0,SPLICE_VERTEX_FLOAT_COUNT);
 	sh_shader.def_attributeF("colour",3,2,SPLICE_VERTEX_FLOAT_COUNT);
 	sh_shader.def_attributeF("edge_id",1,5,SPLICE_VERTEX_FLOAT_COUNT);
-	sh_shader.upload_camera(Camera2D(1280.f,720.f));
+	sh_shader.upload_camera(Camera2D(1280.f,720.f));*/
 
 	// version annotation text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
@@ -784,7 +827,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	Frame::clear();
 
 	// splash render
-	sh_buffer.bind();
+	splices_geometry.render();
+	/*sh_buffer.bind();
 	sh_shader.enable();
 
 	// head splash upload & render
@@ -811,7 +855,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	float tlext = SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD*mtransition,
 		tuext = SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD*mtransition;
 	modify_splash(glm::vec2(tlpos,0),glm::vec2(tupos,0),tlext,tuext,false);
-	glDrawArrays(GL_TRIANGLES,0,6);
+	glDrawArrays(GL_TRIANGLES,0,6);*/
 	// FIXME: optimize all splash transitions and make the math readable
 
 	// draw dialogue selectors
@@ -912,24 +956,24 @@ void MainMenu::update_peripheral_annotations()
 /*
 	TODO
 */
-void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
+/*void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
 {
 	std::vector<float> verts = {
 		l.x,l.y,c.x,c.y,c.z,0, u.x,u.y,c.x,c.y,c.z,3, u.x,u.y,c.x,c.y,c.z,2,
 		u.x,u.y,c.x,c.y,c.z,3, l.x,l.y,c.x,c.y,c.z,0, l.x,l.y,c.x,c.y,c.z,1
 	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
-}
+}*/
 
 /*
 	TODO
 	NOTE: selection shader has to be enabled before calling this function
 */
-void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
+/*void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
 {
 	sh_shader.upload_vec2("lupos[0]",lp),sh_shader.upload_vec2("lupos[1]",up);
 	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
 	sh_shader.upload_int("is_hrz",hrz);
-}
+}*/
 
 
 /**

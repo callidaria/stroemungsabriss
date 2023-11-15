@@ -152,22 +152,47 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
  *		Selection Splice Geometry Definition
 */
 
+struct SpliceVertexGeometry
+{
+	glm::vec2 position;
+	glm::vec3 colour;
+	uint32_t edge_id;
+};
+
+struct SelectionSplice
+{
+	glm::vec2 disp_lower = glm::vec2(0),disp_upper = glm::vec2(0);
+	float ext_lower,ext_upper;
+	bool horizontal = true;
+};
+
 class SelectionSpliceGeometry
 {
 public:
 
 	// construction
-	SelectionSpliceGeometry();
+	SelectionSpliceGeometry() {  }
 	~SelectionSpliceGeometry() {  }
 
 	// creation
-	uint8_t create_splash(glm::vec2 l,glm::vec2 u,glm::vec3 c);
+	uint8_t create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz);
+	void load();
 
 	// modification
 	void modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
 
 	// draw
 	void render();
+
+private:
+
+	// engine
+	Buffer buffer;
+	Shader shader;
+
+	// data
+	std::vector<SpliceVertexGeometry> verts;
+	std::vector<SelectionSplice> splices;
 };
 
 
@@ -405,8 +430,8 @@ private:
 	void update_peripheral_annotations();
 
 	// splashes
-	void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
-	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
+	/*void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
+	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);*/
 	// TODO: deepen the splash modification & creation implementation, gift them their own class
 
 public:
@@ -465,8 +490,9 @@ private:
 	MSAA msaa;
 
 	// splashes
-	Buffer sh_buffer = Buffer();
-	Shader sh_shader = Shader();
+	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
+	/*Buffer sh_buffer = Buffer();
+	Shader sh_shader = Shader();*/
 
 	// head selector
 	float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
