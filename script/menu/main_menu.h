@@ -163,7 +163,7 @@ struct SelectionSplice
 {
 	glm::vec2 disp_lower = glm::vec2(0),disp_upper = glm::vec2(0);
 	float ext_lower,ext_upper;
-	bool horizontal = true;
+	bool horizontal;
 };
 
 class SelectionSpliceGeometry
@@ -187,8 +187,8 @@ public:
 private:
 
 	// engine
-	Buffer buffer;
-	Shader shader;
+	Buffer buffer = Buffer();
+	Shader shader = Shader();
 
 	// data
 	std::vector<SpliceVertexGeometry> verts;

@@ -2,7 +2,7 @@
 
 in vec3 position;
 in vec3 colour;
-in float edge_id;
+in int edge_id;
 
 out vec3 Colour;
 

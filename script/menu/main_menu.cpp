@@ -19,6 +19,7 @@ uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,
 	// write splice information
 	SelectionSplice splice;
 	splice.ext_lower = lw,splice.ext_upper = uw;
+	splice.horizontal = hrz;
 	splices.push_back(splice);
 
 	// return id of created selection splice
@@ -622,26 +623,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	splices_geometry.create_splash(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
-			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),230,170,SPLICE_HEAD_COLOUR,true);
+			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),230,170,SPLICE_HEAD_COLOUR,false);
 	splices_geometry.create_splash(glm::vec2(0),
-			glm::vec2(0,720),150,250,SPLICE_SELECTION_COLOUR,false);
+			glm::vec2(0,720),150,250,SPLICE_SELECTION_COLOUR,true);
 	splices_geometry.create_splash(glm::vec2(SPLICE_TITLE_LOWER_START,0),
 			glm::vec2(SPLICE_TITLE_UPPER_START,720),
 			SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false);
 	splices_geometry.load();
-	/*std::vector<float> sverts;
-	create_splash(sverts,glm::vec2(SPLICE_TITLE_LOWER_START,.0f),
-			glm::vec2(SPLICE_TITLE_UPPER_START,720.f),glm::vec3(.5f,.0f,.0f));
-	create_splash(sverts,glm::vec2(.0f,SPLICE_HEAD_ORIGIN_POSITION),
-			glm::vec2(1280.f,SPLICE_HEAD_ORIGIN_POSITION),SPLICE_HEAD_COLOUR);
-	create_splash(sverts,glm::vec2(.0f),glm::vec2(.0f,720.f),SPLICE_SELECTION_COLOUR);
-	sh_buffer.bind();
-	sh_buffer.upload_vertices(sverts);
-	sh_shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
-	sh_shader.def_attributeF("position",2,0,SPLICE_VERTEX_FLOAT_COUNT);
-	sh_shader.def_attributeF("colour",3,2,SPLICE_VERTEX_FLOAT_COUNT);
-	sh_shader.def_attributeF("edge_id",1,5,SPLICE_VERTEX_FLOAT_COUNT);
-	sh_shader.upload_camera(Camera2D(1280.f,720.f));*/
 
 	// version annotation text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"
