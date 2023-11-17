@@ -10,16 +10,28 @@
 /*
 	TODO
 */
-uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz)
+uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,
+		bool hrz,float* tref)
 {
 	// write vertices
 	verts.push_back({ l,c,0 }),verts.push_back({ u,c,3 }),verts.push_back({ u,c,2 });
 	verts.push_back({ u,c,3 }),verts.push_back({ l,c,0 }),verts.push_back({ l,c,1 });
 
-	// write splice information
+	// set default 
+
+	// set initial geometry transition key
+	SelectionSpliceKey t_ssk;
+	t_ssk.disp_lower = l,t_ssk.disp_upper = u;
+	t_ssk.ext_lower = lw,t_ssk.ext_upper = uw;
+
+	// copy initial information to current state & first transition key
 	SelectionSplice splice;
-	splice.ext_lower = lw,splice.ext_upper = uw;
+	splice.current = t_ssk;
+	splice.ssk.push_back(t_ssk);
+
+	// write additional splice information
 	splice.horizontal = hrz;
+	splice.transition_ref = tref;
 	splices.push_back(splice);
 
 	// return id of created selection splice
@@ -47,9 +59,15 @@ void SelectionSpliceGeometry::load()
 /*
 	TODO
 */
-void SelectionSpliceGeometry::modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
+void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue)
 {
-	// TODO
+	// key creation
+	SelectionSpliceKey t_ssk;
+	t_ssk.disp_lower = ld,t_ssk.disp_upper = ud;
+	t_ssk.ext_lower = le,t_ssk.ext_upper = ue;
+
+	// store key
+	splices[id].ssk.push_back(t_ssk);
 }
 
 /*
@@ -64,11 +82,19 @@ void SelectionSpliceGeometry::render()
 	// draw created splashes
 	for (uint8_t i=0;i<splices.size();i++) {
 
+		// transition uniform variables
+		SelectionSpliceKey ckey = splices[i].ssk[*splices[i].transition_ref];
+		splices[i].current.disp_lower = ckey.disp_lower;
+		splices[i].current.disp_upper = ckey.disp_upper;
+		splices[i].current.ext_lower = ckey.ext_lower;
+		splices[i].current.ext_upper = ckey.ext_upper;
+		// TODO: make this a fluid transition instead of jumping around
+
 		// uniform upload
-		shader.upload_vec2("lupos[0]",splices[i].disp_lower),
-			shader.upload_vec2("lupos[1]",splices[i].disp_upper);
-		shader.upload_float("luext[0]",splices[i].ext_lower),
-			shader.upload_float("luext[1]",splices[i].ext_upper);
+		shader.upload_vec2("lupos[0]",splices[i].current.disp_lower),
+			shader.upload_vec2("lupos[1]",splices[i].current.disp_upper);
+		shader.upload_float("luext[0]",splices[i].current.ext_lower),
+			shader.upload_float("luext[1]",splices[i].current.ext_upper);
 		shader.upload_int("is_hrz",splices[i].horizontal);
 
 		// draw splice
@@ -623,12 +649,20 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 
 	// selection splash setup
 	splices_geometry.create_splash(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
-			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),230,170,SPLICE_HEAD_COLOUR,false);
-	splices_geometry.create_splash(glm::vec2(0),
-			glm::vec2(0,720),150,250,SPLICE_SELECTION_COLOUR,true);
-	splices_geometry.create_splash(glm::vec2(SPLICE_TITLE_LOWER_START,0),
-			glm::vec2(SPLICE_TITLE_UPPER_START,720),
-			SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false);
+			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),0,0,SPLICE_HEAD_COLOUR,false,&tkey_head);
+	splices_geometry.create_splash(glm::vec2(0),glm::vec2(0,720),0,0,SPLICE_SELECTION_COLOUR,
+			true,&tkey_selection);
+
+	// setup title splash
+	uint8_t sid = splices_geometry.create_splash(glm::vec2(SPLICE_TITLE_LOWER_START,0),
+			glm::vec2(SPLICE_TITLE_UPPER_START,720),SPLICE_TITLE_LOWER_SWIDTH,
+			SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false,&tkey_title);
+	splices_geometry.add_anim_key(sid,glm::vec2(SPLICE_TITLE_LOWER_START+SPLICE_TITLE_LOWER_MOD,0),
+			glm::vec2(SPLICE_TITLE_UPPER_START+SPLICE_TITLE_UPPER_MOD,0),
+			SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD,
+			SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD);
+
+	// load geometry for splices
 	splices_geometry.load();
 
 	// version annotation text setup
@@ -815,6 +849,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	Frame::clear();
 
 	// splash render
+	tkey_title = mtransition;
 	splices_geometry.render();
 	/*sh_buffer.bind();
 	sh_shader.enable();
@@ -932,36 +967,6 @@ void MainMenu::update_peripheral_annotations()
 	tcap_dare = dmessage.length();
 	tx_dare.load();
 }
-
-
-/**
- * 		Start Splash Logic
- * 
- * these methods simplify creation & modification of selection splash geometry
- * TODO: extend section documentation
-*/
-
-/*
-	TODO
-*/
-/*void MainMenu::create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c)
-{
-	std::vector<float> verts = {
-		l.x,l.y,c.x,c.y,c.z,0, u.x,u.y,c.x,c.y,c.z,3, u.x,u.y,c.x,c.y,c.z,2,
-		u.x,u.y,c.x,c.y,c.z,3, l.x,l.y,c.x,c.y,c.z,0, l.x,l.y,c.x,c.y,c.z,1
-	}; sverts.insert(sverts.end(),verts.begin(),verts.end());
-}*/
-
-/*
-	TODO
-	NOTE: selection shader has to be enabled before calling this function
-*/
-/*void MainMenu::modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz)
-{
-	sh_shader.upload_vec2("lupos[0]",lp),sh_shader.upload_vec2("lupos[1]",up);
-	sh_shader.upload_float("luext[0]",le),sh_shader.upload_float("luext[1]",ue);
-	sh_shader.upload_int("is_hrz",hrz);
-}*/
 
 
 /**

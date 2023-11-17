@@ -159,11 +159,21 @@ struct SpliceVertexGeometry
 	uint32_t edge_id;
 };
 
+struct SelectionSpliceKey
+{
+	glm::vec2 disp_lower,disp_upper;
+	float ext_lower,ext_upper;
+};
+
 struct SelectionSplice
 {
-	glm::vec2 disp_lower = glm::vec2(0),disp_upper = glm::vec2(0);
-	float ext_lower,ext_upper;
+	// current uniform variables
+	SelectionSpliceKey current;
 	bool horizontal;
+
+	// target data
+	std::vector<SelectionSpliceKey> ssk;
+	float* transition_ref;
 };
 
 class SelectionSpliceGeometry
@@ -175,11 +185,11 @@ public:
 	~SelectionSpliceGeometry() {  }
 
 	// creation
-	uint8_t create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz);
+	uint8_t create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz,float* tref);
 	void load();
 
 	// modification
-	void modify_splash(uint8_t id,glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);
+	void add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue);
 
 	// draw
 	void render();
@@ -491,8 +501,6 @@ private:
 
 	// splashes
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
-	/*Buffer sh_buffer = Buffer();
-	Shader sh_shader = Shader();*/
 
 	// head selector
 	float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
@@ -510,6 +518,9 @@ private:
 	float anim_timing = .0f;
 	float dt_tshiftdown = .0f,dt_tnormalize = .0f;
 	bool speedup = true;
+
+	// remote
+	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
 
 	// predefinitions
 	typedef void (*interface_logic)(MainMenu&);
