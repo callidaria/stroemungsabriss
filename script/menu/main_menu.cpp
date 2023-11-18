@@ -14,10 +14,8 @@ uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,
 		bool hrz,float* tref)
 {
 	// write vertices
-	verts.push_back({ l,c,0 }),verts.push_back({ u,c,3 }),verts.push_back({ u,c,2 });
-	verts.push_back({ u,c,3 }),verts.push_back({ l,c,0 }),verts.push_back({ l,c,1 });
-
-	// set default 
+	verts.push_back({ c,0 }),verts.push_back({ c,3 }),verts.push_back({ c,2 });
+	verts.push_back({ c,3 }),verts.push_back({ c,0 }),verts.push_back({ c,1 });
 
 	// set initial geometry transition key
 	SelectionSpliceKey t_ssk;
@@ -50,7 +48,6 @@ void SelectionSpliceGeometry::load()
 	// compile shader
 	size_t vsize = sizeof(SpliceVertexGeometry);
 	shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
-	shader.def_irregular_attributeF("position",2,vsize,offsetof(SpliceVertexGeometry,position));
 	shader.def_irregular_attributeF("colour",3,vsize,offsetof(SpliceVertexGeometry,colour));
 	shader.def_irregular_attributeI("edge_id",1,vsize,offsetof(SpliceVertexGeometry,edge_id));
 	shader.upload_camera(Camera2D(1280.f,720.f));
@@ -73,7 +70,7 @@ void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,
 /*
 	TODO
 */
-void SelectionSpliceGeometry::render()
+void SelectionSpliceGeometry::update()
 {
 	// setup buffer & shader for draw
 	buffer.bind();
@@ -658,7 +655,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 			glm::vec2(SPLICE_TITLE_UPPER_START,720),SPLICE_TITLE_LOWER_SWIDTH,
 			SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false,&tkey_title);
 	splices_geometry.add_anim_key(sid,glm::vec2(SPLICE_TITLE_LOWER_START+SPLICE_TITLE_LOWER_MOD,0),
-			glm::vec2(SPLICE_TITLE_UPPER_START+SPLICE_TITLE_UPPER_MOD,0),
+			glm::vec2(SPLICE_TITLE_UPPER_START+SPLICE_TITLE_UPPER_MOD,720),
 			SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD,
 			SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD);
 
@@ -850,7 +847,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// splash render
 	tkey_title = mtransition;
-	splices_geometry.render();
+	splices_geometry.update();
 	/*sh_buffer.bind();
 	sh_shader.enable();
 

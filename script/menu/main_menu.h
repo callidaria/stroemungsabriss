@@ -154,7 +154,6 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 struct SpliceVertexGeometry
 {
-	glm::vec2 position;
 	glm::vec3 colour;
 	uint32_t edge_id;
 };
@@ -192,7 +191,7 @@ public:
 	void add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue);
 
 	// draw
-	void render();
+	void update();
 
 private:
 

@@ -1,6 +1,5 @@
 #version 330 core
 
-in vec3 position;
 in vec3 colour;
 in int edge_id;
 
@@ -29,6 +28,6 @@ void main()
 	vmod[is_hrz] = luext[is_upper]*efac;
 
 	// final vertex position
-	vec2 mpos = position.xy+lupos[is_upper];
+	vec2 mpos = lupos[is_upper];
 	gl_Position = proj*view*vec4(mpos.x+vmod.x,mpos.y-vmod.y,.0,1.);
 }
