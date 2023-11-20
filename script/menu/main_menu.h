@@ -184,7 +184,7 @@ public:
 	~SelectionSpliceGeometry() {  }
 
 	// creation
-	uint8_t create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz,float* tref);
+	uint8_t create_splice(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,bool hrz,float* tref);
 	void load();
 
 	// modification

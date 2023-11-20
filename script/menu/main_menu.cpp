@@ -4,13 +4,52 @@
 /**
  *		Selection Splice Geometry Implementation
  *
- * // TODO: extend
+ *  the selection splice geometry is a stilistical highlight for the UI.
+ *  it not only adds graphical flavour but sometimes also communicates to the user what the current selection is.
+ *
+ *  	here is some information on how this geometry can be defined:
+ *  following, an ascii representation of the splice
+ *  			 ___uwe__
+ *  			/  uc   /
+ *  		       /       /
+ *  		      /	      /
+ *  		     /	     /		^
+ *  		    /	    /		| direction (horizontal = false)
+ *  		   /	   /
+ *  		  /   lc  /
+ *  		 ___lwe___
+ *
+ *  	explanation:
+ *  lc: centerpoint of lower geometry
+ *  uc: centerpoint of upper geometry
+ *  uwe: full upper width extension at upper centerpoint
+ *  lwe: full lower width extension at lower centerpoint
+ *  	(!careful! the width extension shown here is double the definition length, def. from centerpoint to edge)
+ *  direction: automates the width extensions, so the orientation of the splice has to be predefined
+ *
+ *  	features of this implementation:
+ *  - splices can be created
+ *  - animation keys can be created, to transition in-between positional states by an external variable
+ *  - geometry can be drawn
 */
+// TODO: feature needed! the selection has to be modified in addition to static animation key states
+// 	this makes it possible to actually scroll a list with the selector & randomize style
 
 /*
-	TODO
+	create_splice(vec2,vec2,float,float,vec3,bool,float*) -> uint8_t !O(1)
+	purpose: add new splash to geometry complex
+	\param l: starting position of lower geometry centerpoint
+	\param u: starting position of upper geometry centerpoint
+	\param lw: starting width extension from lower geometry centerpoint
+	\param uw: starting height extension from upper geometry centerpoint
+	\param c: static vertex colour of the created splash
+	\param hrz: set to true should the orientation of the splice (not the width extension) be horizontal
+	\param tref: pointer to externly modified transition float:
+		- will be cast to integer to specify current key & successor key, disregarding float part.
+		- the fraction between key & successor key id will be interpreted as transition progress
+	\returns memory id the created splice can be referenced by
 */
-uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,
+uint8_t SelectionSpliceGeometry::create_splice(glm::vec2 l,glm::vec2 u,float lw,float uw,glm::vec3 c,
 		bool hrz,float* tref)
 {
 	// write vertices
@@ -37,7 +76,8 @@ uint8_t SelectionSpliceGeometry::create_splash(glm::vec2 l,glm::vec2 u,float lw,
 }
 
 /*
-	TODO
+	load() -> void !O(1)
+	purpose: upload splice geometry, compile shader & setup coordinate system
 */
 void SelectionSpliceGeometry::load()
 {
@@ -54,7 +94,14 @@ void SelectionSpliceGeometry::load()
 }
 
 /*
-	TODO
+	add_anim_key(uint8_t,vec2,vec2,float,float) -> void !O(1)
+	purpose: create transition key information for referenced splice geometry
+		this key will always be added at the end of the key list, creation chronology matters
+	\param id: memory id given at creation call, referencing the splice to add key to
+	\param ld: transition target for lower splice geometry centerpoint
+	\param ud: transition target for upper splice geometry centerpoint
+	\param le: transition target for lower width extension
+	\param ue: transition target for upper width extension
 */
 void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue)
 {
@@ -68,7 +115,9 @@ void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,
 }
 
 /*
-	TODO
+	update() -> void !O(n)
+	purpose: processing for all elements in splices list:
+		calculation of transition animation, uniform upload & geometry drawcalls
 */
 void SelectionSpliceGeometry::update()
 {
@@ -652,13 +701,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
 	// selection splash setup
-	splices_geometry.create_splash(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
+	uint8_t sid = splices_geometry.create_splice(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
 			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),0,0,SPLICE_HEAD_COLOUR,false,&tkey_head);
-	splices_geometry.create_splash(glm::vec2(0),glm::vec2(0,720),0,0,SPLICE_SELECTION_COLOUR,
+	sid = splices_geometry.create_splice(glm::vec2(0),glm::vec2(0,720),0,0,SPLICE_SELECTION_COLOUR,
 			true,&tkey_selection);
 
 	// setup title splash
-	uint8_t sid = splices_geometry.create_splash(glm::vec2(SPLICE_TITLE_LOWER_START,0),
+	sid = splices_geometry.create_splice(glm::vec2(SPLICE_TITLE_LOWER_START,0),
 			glm::vec2(SPLICE_TITLE_UPPER_START,720),SPLICE_TITLE_LOWER_SWIDTH,
 			SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false,&tkey_title);
 	splices_geometry.add_anim_key(sid,glm::vec2(SPLICE_TITLE_LOWER_START+SPLICE_TITLE_LOWER_MOD,0),
