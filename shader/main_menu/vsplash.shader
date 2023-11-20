@@ -28,6 +28,5 @@ void main()
 	vmod[is_hrz] = luext[is_upper]*efac;
 
 	// final vertex position
-	vec2 mpos = lupos[is_upper];
-	gl_Position = proj*view*vec4(mpos.x+vmod.x,mpos.y-vmod.y,.0,1.);
+	gl_Position = proj*view*vec4(lupos[is_upper].x+vmod.x,lupos[is_upper].y-vmod.y,.0,1.);
 }

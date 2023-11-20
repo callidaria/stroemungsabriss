@@ -15,6 +15,6 @@ void main()
 	final = pow(final,vec3(1.0/gamma));
 	gbuffer_colour = vec4(final,1.);
 
-	// pseudo normals
+	// pseudo normals (TODO)
 	gbuffer_normals = vec4(1.,.0,.0,1.);
 }

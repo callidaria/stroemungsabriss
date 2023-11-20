@@ -79,13 +79,20 @@ void SelectionSpliceGeometry::update()
 	// draw created splashes
 	for (uint8_t i=0;i<splices.size();i++) {
 
+		// find transition state & load geometry keys
+		// successor will only be stored as nkey should there be a successor otherwise ckey=nkey
+		// tgeom holds transition in-between ckey and nkey, which is irrelevant if ckey=nkey
+		bool sccr = (*splices[i].transition_ref+1)<splices[i].ssk.size();
+		float tgeom = fmod(*splices[i].transition_ref,1.f);
+		SelectionSpliceKey ckey = splices[i].ssk[*splices[i].transition_ref],
+			nkey = splices[i].ssk[*splices[i].transition_ref+sccr];
+
 		// transition uniform variables
-		SelectionSpliceKey ckey = splices[i].ssk[*splices[i].transition_ref];
-		splices[i].current.disp_lower = ckey.disp_lower;
-		splices[i].current.disp_upper = ckey.disp_upper;
-		splices[i].current.ext_lower = ckey.ext_lower;
-		splices[i].current.ext_upper = ckey.ext_upper;
-		// TODO: make this a fluid transition instead of jumping around
+		glm::vec2 vmult = glm::vec2(tgeom);
+		splices[i].current.disp_lower = ckey.disp_lower+(nkey.disp_lower-ckey.disp_lower)*vmult;
+		splices[i].current.disp_upper = ckey.disp_upper+(nkey.disp_upper-ckey.disp_upper)*vmult;
+		splices[i].current.ext_lower = ckey.ext_lower+(nkey.ext_lower-ckey.ext_lower)*tgeom;
+		splices[i].current.ext_upper = ckey.ext_upper+(nkey.ext_upper-ckey.ext_upper)*tgeom;
 
 		// uniform upload
 		shader.upload_vec2("lupos[0]",splices[i].current.disp_lower),
