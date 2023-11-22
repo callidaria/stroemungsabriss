@@ -103,7 +103,7 @@ void SelectionSpliceGeometry::load()
 	\param le: transition target for lower width extension
 	\param ue: transition target for upper width extension
 */
-void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue)
+uint8_t SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue)
 {
 	// key creation
 	SelectionSpliceKey t_ssk;
@@ -112,6 +112,22 @@ void SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,
 
 	// store key
 	splices[id].ssk.push_back(t_ssk);
+	return splices[id].ssk.size()-1;
+}
+
+/*
+	TODO
+*/
+void SelectionSpliceGeometry::modify_anim_key_arbit(uint8_t sid,uint8_t kid,glm::vec2 ld,glm::vec2 ud,
+		float le,float ue)
+{
+	// TODO:
+	// - first idea: maybe store modifications for all possible keys, doubling the memory needed for keys
+	// 	-> but this makes possible to calculate modifications once and apply every update
+	// - second idea: store modification as seperate key information, adding atop any key
+	// 	-> with this it is still possible to calculate once
+	// 	-> problem: the target animation will not transition the arbitrary modifications
+	// - third idea: maybe combine the first two i don't know
 }
 
 /*
@@ -692,21 +708,61 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 	\param ccbf: collection of basic cascabel features
 	TODO: extend documentation
 */
-MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,
-		float &progress,float pseq)
+MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
 	// asset load
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
-	// selection splash setup
-	uint8_t sid = splices_geometry.create_splice(glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,0),
-			glm::vec2(SPLICE_HEAD_ORIGIN_POSITION,720),0,0,SPLICE_HEAD_COLOUR,false,&tkey_head);
-	sid = splices_geometry.create_splice(glm::vec2(0),glm::vec2(0,720),0,0,SPLICE_SELECTION_COLOUR,
-			true,&tkey_selection);
+	/*
+	float dialogue_transition = ftransition*mdialogues.system_active();
+	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+lhead_translation_y
+			+ 720.f*dialogue_transition),
+			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+uhead_translation_y
+			- 360.f*dialogue_transition),
+			(lr_head_extend+SPLICE_HEAD_LOWER_WIDTH
+			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,
+			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH
+			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,true);
+	glDrawArrays(GL_TRIANGLES,6,6);
+	// TODO: define states for list-,dialoge-,disabled-mode & transition func in future splash class
 
-	// setup title splash
+	// selection splash upload & render
+	float ctransition = mtransition-ftransition;
+	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*ctransition,vrt_uwidth*ctransition,false);
+	glDrawArrays(GL_TRIANGLES,12,6);
+	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
+	*/
+
+	// setup head splice
+	// 1st key: splice disable in case the start screen is displayed
+	// 2nd key: underlining the parent menu options selected by the following splice
+	// 3rd key: list selection expansion, perfectly fitting list elements, to be modified at change
+	// 4th key: tilted splice underlining descriptions for dialogue options if opened
+	glm::vec2 lwr_stilt = glm::vec2(0,SPLICE_HEAD_LOWER_START+SPLICE_HEAD_ORIGIN_POSITION),
+		upr_stilt = glm::vec2(1280,SPLICE_HEAD_UPPER_START+SPLICE_HEAD_ORIGIN_POSITION);
+	float psdwidth = SPLICE_HEAD_MINIMUM_WIDTH+SPLICE_HEAD_ORIGIN_WIDTH;
+	uint8_t sid = splices_geometry.create_splice(lwr_stilt,upr_stilt,0,0,SPLICE_HEAD_COLOUR,true,&tkey_head);
+	splices_geometry.add_anim_key(sid,lwr_stilt,upr_stilt,SPLICE_HEAD_LOWER_WIDTH,SPLICE_HEAD_UPPER_WIDTH);
+	splices_geometry.add_anim_key(sid,glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),
+			glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),psdwidth,psdwidth);
+	splices_geometry.add_anim_key(sid,glm::vec2(0,1440),
+			glm::vec2(1440,0),psdwidth+100,psdwidth+100);
+	// TODO: let the compiler do the width & positional height tilt precalculation
+
+	// setup selection splice
+	// 1st key: splice disable, zero'd so the splice gets projected into scene when start is pressed
+	// 2nd key: vertical selection mode for main options
+	sid = splices_geometry.create_splice(glm::vec2(MENU_HALFSCREEN_UI,0),glm::vec2(MENU_HALFSCREEN_UI,0),
+			0,0,SPLICE_SELECTION_COLOUR,false,&tkey_selection);
+	splices_geometry.add_anim_key(sid,glm::vec2(MENU_HALFSCREEN_UI,0),glm::vec2(MENU_HALFSCREEN_UI,720),
+			10,150);
+	// TODO: this is a prototype setup to test functionality, not actually working right now
+
+	// setup title splice
+	// 1st key: start request screen stylesplice
+	// 2nd key: static title underline splice for the rest of the menu, after start request screen
 	sid = splices_geometry.create_splice(glm::vec2(SPLICE_TITLE_LOWER_START,0),
 			glm::vec2(SPLICE_TITLE_UPPER_START,720),SPLICE_TITLE_LOWER_SWIDTH,
 			SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false,&tkey_title);
@@ -902,8 +958,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	Frame::clear();
 
 	// splash render
+	tkey_head = mtransition+ftransition+mdialogues.system_active();
+	tkey_selection = mtransition-ftransition;
 	tkey_title = mtransition;
 	splices_geometry.update();
+	// TODO: try and break down reference variables to a single float
 	/*sh_buffer.bind();
 	sh_shader.enable();
 

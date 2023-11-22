@@ -188,7 +188,8 @@ public:
 	void load();
 
 	// modification
-	void add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue);
+	uint8_t add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue);
+	void modify_anim_key_arbit(uint8_t sid,uint8_t kid,glm::vec2 ld,glm::vec2 ud,float le,float ue);
 
 	// draw
 	void update();
