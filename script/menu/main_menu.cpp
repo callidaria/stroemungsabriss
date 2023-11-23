@@ -116,21 +116,6 @@ uint8_t SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 
 }
 
 /*
-	TODO
-*/
-void SelectionSpliceGeometry::modify_anim_key_arbit(uint8_t sid,uint8_t kid,glm::vec2 ld,glm::vec2 ud,
-		float le,float ue)
-{
-	// TODO:
-	// - first idea: maybe store modifications for all possible keys, doubling the memory needed for keys
-	// 	-> but this makes possible to calculate modifications once and apply every update
-	// - second idea: store modification as seperate key information, adding atop any key
-	// 	-> with this it is still possible to calculate once
-	// 	-> problem: the target animation will not transition the arbitrary modifications
-	// - third idea: maybe combine the first two i don't know
-}
-
-/*
 	update() -> void !O(n)
 	purpose: processing for all elements in splices list:
 		calculation of transition animation, uniform upload & geometry drawcalls
@@ -1054,11 +1039,19 @@ void MainMenu::update_list_grid(MenuList &ml)
 
 	// update selection splash geometry
 	if (tid!=vgrid_id) {
-		float htrans = -MENU_LIST_SCROLL_Y*vgrid_id;
-		lhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
+		float htrans = -MENU_LIST_SCROLL_Y*vgrid_id+SPLICE_HEAD_LOWER_START+SPLICE_HEAD_ORIGIN_POSITION;
+		splices_geometry.splices[0].ssk[2].disp_lower.y
+			= htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
+		splices_geometry.splices[0].ssk[2].disp_upper.y
+			= htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
+		splices_geometry.splices[0].ssk[2].ext_lower
+			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
+		splices_geometry.splices[0].ssk[2].ext_upper
+			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
+		/*lhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
 		uhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
 		lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
-			ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
+			ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);*/
 	}
 }
 
@@ -1137,7 +1130,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// reset
-	tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
+	//tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
 	tm.diff_popup = false,tm.shot_popup = false;
 }
 

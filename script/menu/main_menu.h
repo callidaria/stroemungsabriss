@@ -189,10 +189,14 @@ public:
 
 	// modification
 	uint8_t add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue);
-	void modify_anim_key_arbit(uint8_t sid,uint8_t kid,glm::vec2 ld,glm::vec2 ud,float le,float ue);
 
 	// draw
 	void update();
+
+public:
+
+	// data
+	std::vector<SelectionSplice> splices;
 
 private:
 
@@ -202,7 +206,7 @@ private:
 
 	// data
 	std::vector<SpliceVertexGeometry> verts;
-	std::vector<SelectionSplice> splices;
+
 };
 
 
@@ -480,7 +484,7 @@ public:
 	// selectors
 	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
 	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
-	float lhead_translation_y,uhead_translation_y;
+	//float lhead_translation_y,uhead_translation_y;
 
 	// memory for static continue
 	uint8_t dg_diffs,dg_continue;
@@ -503,8 +507,8 @@ private:
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
 
 	// head selector
-	float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
-		ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
+	/*float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
+		ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);*/
 
 	// index
 	uint16_t index_rsprite,index_ranim;
