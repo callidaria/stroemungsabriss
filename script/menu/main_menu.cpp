@@ -331,6 +331,13 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)
 
+
+/**
+ *	Start implementation of compiler logic pointers switched by command
+ *
+ *  TODO: expand
+*/
+
 /*
 	TODO
 */
@@ -700,61 +707,44 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
-	/*
-	float dialogue_transition = ftransition*mdialogues.system_active();
-	modify_splash(glm::vec2(0,SPLICE_HEAD_LOWER_START*inv_ftransition+lhead_translation_y
-			+ 720.f*dialogue_transition),
-			glm::vec2(0,SPLICE_HEAD_UPPER_START*inv_ftransition+uhead_translation_y
-			- 360.f*dialogue_transition),
-			(lr_head_extend+SPLICE_HEAD_LOWER_WIDTH
-			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,
-			(ur_head_extend+SPLICE_HEAD_UPPER_WIDTH
-			* (inv_ftransition+ftransition*mdialogues.system_active()))*mtransition,true);
-	glDrawArrays(GL_TRIANGLES,6,6);
-	// TODO: define states for list-,dialoge-,disabled-mode & transition func in future splash class
-
-	// selection splash upload & render
-	float ctransition = mtransition-ftransition;
-	modify_splash(vrt_lpos,vrt_upos,vrt_lwidth*ctransition,vrt_uwidth*ctransition,false);
-	glDrawArrays(GL_TRIANGLES,12,6);
-	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
-	*/
-
 	// setup head splice
 	// 1st key: splice disable in case the start screen is displayed
 	// 2nd key: underlining the parent menu options selected by the following splice
 	// 3rd key: list selection expansion, perfectly fitting list elements, to be modified at change
 	// 4th key: tilted splice underlining descriptions for dialogue options if opened
-	glm::vec2 lwr_stilt = glm::vec2(0,SPLICE_HEAD_LOWER_START+SPLICE_HEAD_ORIGIN_POSITION),
-		upr_stilt = glm::vec2(1280,SPLICE_HEAD_UPPER_START+SPLICE_HEAD_ORIGIN_POSITION);
-	float psdwidth = SPLICE_HEAD_MINIMUM_WIDTH+SPLICE_HEAD_ORIGIN_WIDTH;
-	uint8_t sid = splices_geometry.create_splice(lwr_stilt,upr_stilt,0,0,SPLICE_HEAD_COLOUR,true,&tkey_head);
-	splices_geometry.add_anim_key(sid,lwr_stilt,upr_stilt,SPLICE_HEAD_LOWER_WIDTH,SPLICE_HEAD_UPPER_WIDTH);
-	splices_geometry.add_anim_key(sid,glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),
-			glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),psdwidth,psdwidth);
-	splices_geometry.add_anim_key(sid,glm::vec2(0,1440),
-			glm::vec2(1440,0),psdwidth+100,psdwidth+100);
-	// TODO: let the compiler do the width & positional height tilt precalculation
+	uint8_t sid = splices_geometry.create_splice(
+			SPLICE_HEAD_LOWER_START,SPLICE_HEAD_UPPER_START,
+			0,0,
+			SPLICE_HEAD_COLOUR,true,&tkey_head);
+	splices_geometry.add_anim_key(sid,
+			SPLICE_HEAD_LOWER_START,SPLICE_HEAD_UPPER_START,
+			SPLICE_HEAD_LOWER_WIDTH,SPLICE_HEAD_UPPER_WIDTH);
+	splices_geometry.add_anim_key(sid,
+			glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),
+			SPLICE_HEAD_ORIGIN_WIDTH,SPLICE_HEAD_ORIGIN_WIDTH);
+	splices_geometry.add_anim_key(sid,
+			glm::vec2(0,1440),glm::vec2(1440,0),
+			SPLICE_HEAD_ORIGIN_WIDTH+100,SPLICE_HEAD_ORIGIN_WIDTH+100);
 
 	// setup selection splice
 	// 1st key: splice disable, zero'd so the splice gets projected into scene when start is pressed
 	// 2nd key: vertical selection mode for main options
-	sid = splices_geometry.create_splice(glm::vec2(MENU_HALFSCREEN_UI,0),glm::vec2(MENU_HALFSCREEN_UI,0),
-			0,0,SPLICE_SELECTION_COLOUR,false,&tkey_selection);
-	splices_geometry.add_anim_key(sid,glm::vec2(MENU_HALFSCREEN_UI,0),glm::vec2(MENU_HALFSCREEN_UI,720),
-			10,150);
-	// TODO: this is a prototype setup to test functionality, not actually working right now
+	sid = splices_geometry.create_splice(
+			glm::vec2(MENU_HALFSCREEN_UI,0),glm::vec2(MENU_HALFSCREEN_UI,0),
+			0,0,
+			SPLICE_SELECTION_COLOUR,false,&tkey_selection);
+	splices_geometry.add_anim_key(sid,glm::vec2(0,0),glm::vec2(0,720),0,0);
 
 	// setup title splice
 	// 1st key: start request screen stylesplice
 	// 2nd key: static title underline splice for the rest of the menu, after start request screen
-	sid = splices_geometry.create_splice(glm::vec2(SPLICE_TITLE_LOWER_START,0),
-			glm::vec2(SPLICE_TITLE_UPPER_START,720),SPLICE_TITLE_LOWER_SWIDTH,
-			SPLICE_TITLE_UPPER_SWIDTH,glm::vec3(.5f,0,0),false,&tkey_title);
-	splices_geometry.add_anim_key(sid,glm::vec2(SPLICE_TITLE_LOWER_START+SPLICE_TITLE_LOWER_MOD,0),
-			glm::vec2(SPLICE_TITLE_UPPER_START+SPLICE_TITLE_UPPER_MOD,720),
-			SPLICE_TITLE_LOWER_SWIDTH+SPLICE_TITLE_LWIDTH_MOD,
-			SPLICE_TITLE_UPPER_SWIDTH+SPLICE_TITLE_UWIDTH_MOD);
+	sid = splices_geometry.create_splice(
+			SPLICE_TITLE_LOWER_START,SPLICE_TITLE_UPPER_START,
+			SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,
+			SPLICE_TITLE_COLOUR,false,&tkey_title);
+	splices_geometry.add_anim_key(sid,
+			SPLICE_TITLE_LOWER_MOD,SPLICE_TITLE_UPPER_MOD,
+			SPLICE_TITLE_LWIDTH_MOD,SPLICE_TITLE_UWIDTH_MOD);
 
 	// load geometry for splices
 	splices_geometry.load();
@@ -860,7 +850,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// focus transition
 	Toolbox::transition_float_on_condition(ftransition,transition_delta,interface_logic_id);
-	inv_ftransition = 1.f-ftransition;
+	inv_ftransition = 1.f-ftransition,inv_mtransition = 1.f-mtransition;
 	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
 
 	// title rattle animation
@@ -1039,21 +1029,19 @@ void MainMenu::update_list_grid(MenuList &ml)
 
 	// update selection splash geometry
 	if (tid!=vgrid_id) {
-		float htrans = -MENU_LIST_SCROLL_Y*vgrid_id+SPLICE_HEAD_LOWER_START+SPLICE_HEAD_ORIGIN_POSITION;
+		float htrans = -MENU_LIST_SCROLL_Y*vgrid_id+SPLICE_HEAD_ORIGIN_POSITION;
 		splices_geometry.splices[0].ssk[2].disp_lower.y
 			= htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
 		splices_geometry.splices[0].ssk[2].disp_upper.y
 			= htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
 		splices_geometry.splices[0].ssk[2].ext_lower
-			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
+			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA),
 		splices_geometry.splices[0].ssk[2].ext_upper
-			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);
-		/*lhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
-		uhead_translation_y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
-		lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
-			ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);*/
+			= SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
 	}
 }
+// TODO: give each list their own grid id, so selection will be remembered, when going through subsequents
+// TODO: with the above mentioned """tech""" produce a geometry shadow of previous list selection in the bgr (mdc)
 
 /*
 	TODO
@@ -1098,7 +1086,6 @@ void interface_behaviour_macro(MainMenu &tm)
 	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
 	// TODO: compare linear transition with sinespeed transition implementation
 	// 		also relate the results of this todo to the ftransition in main render method
-	tm.inv_mtransition = 1.f-tm.mtransition;
 
 	// processing selection input
 	tm.vselect += tm.lrmv;
@@ -1113,24 +1100,10 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// selection splash update calculations
-	if (ch_select||req_transition) {
-
-		// selector dimensions
-		tm.vrt_lwidth = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
-			tm.vrt_uwidth = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
-		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]+glm::vec2(tm.mo_hwidth[tm.vselect],0);
-		tm.vrt_lpos = glm::vec2((vrt_cpos.x-MENU_HALFSCREEN_UI)
-				* SPLICE_OFFCENTER_MV+MENU_HALFSCREEN_UI,0);
-		glm::vec2 vrt_dir = vrt_cpos-tm.vrt_lpos;
-		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
-		tm.vrt_upos = glm::vec2(vrt_cpos.x+vrt_dir.x*vrt_extend_II,0);
-
-		// menu option text
+	if (ch_select||req_transition)
 		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
-	}
 
 	// reset
-	//tm.lhead_translation_y = 0,tm.uhead_translation_y = 0;
 	tm.diff_popup = false,tm.shot_popup = false;
 }
 

@@ -77,30 +77,31 @@ constexpr glm::vec3 HRZ_TITLE_TRANSITION = HRZ_TITLE_END-HRZ_TITLE_START;
 constexpr glm::vec3 VRT_TITLE_SCALESET = VRT_TITLE_END-glm::vec3(640,360,0);
 constexpr glm::vec3 HRZ_TITLE_SCALESET = HRZ_TITLE_END-glm::vec3(640,360,0);
 
-// title splice
-constexpr float SPLICE_TITLE_LOWER_START = 12.5f;
-constexpr float SPLICE_TITLE_UPPER_START = 510.f;
-constexpr float SPLICE_TITLE_LOWER_SWIDTH = 10.f;
-constexpr float SPLICE_TITLE_UPPER_SWIDTH = 100.f;
-constexpr float SPLICE_TITLE_LOWER_MOD = 150.f;
-constexpr float SPLICE_TITLE_UPPER_MOD = -485.f;
-constexpr float SPLICE_TITLE_LWIDTH_MOD = 40.f;
-constexpr float SPLICE_TITLE_UWIDTH_MOD = -85.f;
-
 // head splice
 constexpr float SPLICE_HEAD_ORIGIN_POSITION = MENU_LIST_SCROLL_START-MENU_LIST_HEAD_SIZE*.5f;
 constexpr float SPLICE_HEAD_MINIMUM_WIDTH = 4.f;
-constexpr float SPLICE_HEAD_ORIGIN_WIDTH = 15.f-SPLICE_HEAD_MINIMUM_WIDTH;
-constexpr float SPLICE_HEAD_LOWER_START = 520.f-SPLICE_HEAD_ORIGIN_POSITION;
-constexpr float SPLICE_HEAD_UPPER_START = 470.f-SPLICE_HEAD_ORIGIN_POSITION;
-constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_MINIMUM_WIDTH;
-constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH+SPLICE_HEAD_MINIMUM_WIDTH;
+constexpr float SPLICE_HEAD_ORIGIN_WIDTH = 15.f;
+constexpr float SPLICE_HEAD_ORIGIN_DELTA = SPLICE_HEAD_ORIGIN_WIDTH-SPLICE_HEAD_MINIMUM_WIDTH;
+constexpr glm::vec2 SPLICE_HEAD_LOWER_START = glm::vec2(0,520.f);
+constexpr glm::vec2 SPLICE_HEAD_UPPER_START = glm::vec2(1280,470.f);
+constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH;
+constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH;
 constexpr uint8_t SPLICE_HEAD_TILT_THRESHOLD = 10;
 constexpr uint8_t SPLICE_HEAD_TILT_DBTHRESHOLD = SPLICE_HEAD_TILT_THRESHOLD*2;
 constexpr glm::vec2 SPLICE_HEAD_TITLE_OFFSET = glm::vec2(100,685);
 
 // selection splice
 constexpr float SPLICE_OFFCENTER_MV = .33f;
+
+// title splice
+constexpr glm::vec2 SPLICE_TITLE_LOWER_START = glm::vec2(12.5f,0);
+constexpr glm::vec2 SPLICE_TITLE_UPPER_START = glm::vec2(510.f,720);
+constexpr float SPLICE_TITLE_LOWER_SWIDTH = 10.f;
+constexpr float SPLICE_TITLE_UPPER_SWIDTH = 100.f;
+constexpr glm::vec2 SPLICE_TITLE_LOWER_MOD = SPLICE_TITLE_LOWER_START+glm::vec2(150.f,0);
+constexpr glm::vec2 SPLICE_TITLE_UPPER_MOD = SPLICE_TITLE_UPPER_START-glm::vec2(485.f,0);
+constexpr float SPLICE_TITLE_LWIDTH_MOD = SPLICE_TITLE_LOWER_SWIDTH+40.f;
+constexpr float SPLICE_TITLE_UWIDTH_MOD = SPLICE_TITLE_UPPER_SWIDTH-85.f;
 
 // splice colours
 constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
@@ -443,11 +444,6 @@ private:
 	// system
 	void update_peripheral_annotations();
 
-	// splashes
-	/*void create_splash(std::vector<float> &sverts,glm::vec2 l,glm::vec2 u,glm::vec3 c);
-	void modify_splash(glm::vec2 lp,glm::vec2 up,float le,float ue,bool hrz);*/
-	// TODO: deepen the splash modification & creation implementation, gift them their own class
-
 public:
 
 	// engine
@@ -481,11 +477,6 @@ public:
 	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
 	float st_rot = .0f;
 
-	// selectors
-	glm::vec2 vrt_lpos = glm::vec2(0),vrt_upos = glm::vec2(0);
-	uint16_t vrt_lwidth = 0,vrt_uwidth = 0;
-	//float lhead_translation_y,uhead_translation_y;
-
 	// memory for static continue
 	uint8_t dg_diffs,dg_continue;
 	bool diff_popup = false,shot_popup = false;
@@ -505,10 +496,6 @@ private:
 
 	// splashes
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
-
-	// head selector
-	/*float lr_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH),
-		ur_head_extend = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_WIDTH);*/
 
 	// index
 	uint16_t index_rsprite,index_ranim;
