@@ -47,7 +47,6 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr float MENU_HALFSCREEN_UI = 1280.f*.5f;
 constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 11;
 
 // menu list positioning
@@ -87,10 +86,13 @@ constexpr glm::vec2 SPLICE_HEAD_UPPER_START = glm::vec2(1280,470.f);
 constexpr float SPLICE_HEAD_LOWER_WIDTH = 42.f-SPLICE_HEAD_ORIGIN_WIDTH;
 constexpr float SPLICE_HEAD_UPPER_WIDTH = 50.f-SPLICE_HEAD_ORIGIN_WIDTH;
 constexpr uint8_t SPLICE_HEAD_TILT_THRESHOLD = 10;
-constexpr uint8_t SPLICE_HEAD_TILT_DBTHRESHOLD = SPLICE_HEAD_TILT_THRESHOLD*2;
+constexpr uint8_t SPLICE_HEAD_TILT_DBTHRESHOLD = SPLICE_HEAD_TILT_THRESHOLD<<1;
 constexpr glm::vec2 SPLICE_HEAD_TITLE_OFFSET = glm::vec2(100,685);
+constexpr float SPLICE_HEAD_DLGDESC_QUAD = 1440.f;
+constexpr float SPLICE_HEAD_DLGDESC_WIDTH = 125.f;
 
 // selection splice
+constexpr glm::vec2 SPLICE_LOWER_CENTER = glm::vec2(1280.f*.5f,0);
 constexpr float SPLICE_OFFCENTER_MV = .33f;
 
 // title splice
@@ -126,7 +128,7 @@ constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 
 // menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
-constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE/2.f;
+constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE*.5f;
 constexpr glm::vec2 MENU_OPTIONS_CLEFT = glm::vec2(120,510)+glm::vec2(0,MENU_OPTIONS_HSIZE);
 constexpr glm::vec2 MENU_OPTIONS_CRIGHT = glm::vec2(1240,470)+glm::vec2(0,MENU_OPTIONS_HSIZE);
 constexpr glm::vec2 MENU_OPTIONS_CADDR = MENU_OPTIONS_CRIGHT-MENU_OPTIONS_CLEFT;
@@ -451,6 +453,7 @@ public:
 	bool request_close = false;
 
 	// interactables
+	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
 	MenuList ml_options = MenuList("./lvload/options.ldc");
 	MenuDialogue mdialogues;
 
@@ -458,6 +461,7 @@ public:
 	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
 	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
 	int8_t vgrid_id = 0;
+	uint8_t splice_head_id,splice_selection_id,head_mod_id;
 
 	// processed input
 	bool hit_a,hit_b;
@@ -469,7 +473,7 @@ public:
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
 	float ftransition = .0f,inv_ftransition;
-	float delta_tspeed;
+	float lext_selection = .0f,uext_selection = .0f;
 
 	// text
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
@@ -493,9 +497,6 @@ private:
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
-
-	// splashes
-	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
 
 	// index
 	uint16_t index_rsprite,index_ranim;
