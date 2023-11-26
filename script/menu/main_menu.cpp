@@ -1,5 +1,214 @@
 #include "main_menu.h"
 
+/**
+ *		LDC Compiler Implementation
+ *
+ *  TODO: enhance this documentation
+ * 
+ * 
+ * 		List Definition Code Language Design
+ * 
+ * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
+ * following expression are valid and will be handled by menu list interpreter:
+ * (the definitions are using <> to show where custom naming replaces "<contents>")
+ * 
+ * 
+ * 		GENERAL LANGUAGE FEATURES
+ * 
+ * 		:cluster <cluster_name>
+ * this statement marks the definition of a list, sublist or list entity collection
+ * any cluster can be referred to by name within the list definition file
+ * to define the main list use :cluster main
+ * 
+ * 		:logic <condition_list_size>
+ * setup of extern condition logic list to change viewability of entities with :condition command
+ * 
+ * 		:define <entity_name>
+ * define the name of the list entity, that will be shown alongside other list member entities
+ * 
+ * 		:describe
+ * 		<description>
+ * to add a description to the list entity, that will be shown when currently selected
+ * 
+ * 		:segment <segment_name>
+ * whereever a segment is called within the list defintion file, a dividing, stylized line will be
+ * drawn between the imperatively previous and following definition
+ * 
+ * 		:condition <condition_id>
+ * set a condition to activate list entity.
+ * the condition id will read the respective boolean from an extern condition list.
+ * 
+ * 
+ * 		BEHAVIOUR DEFINITIONS
+ * (ideally choose one of the following commands per :define)
+ * 
+ * 		:subsequent <cluster_name>
+ * confirming selection on this entity will load a sublist linked by it's cluster
+ * the list will then be shown under the heading of this list entities :define
+ * 
+ * 		:checkbox
+ * create a simple checkbox for this entity, used to choose between true or false states
+ * 
+ * 		:dropdown
+ * 		<fist_option>;<second_option>;<third_option>
+ * add a dropdown option list to this entity, holding selectable options divided by a ';'
+ * using :dropdown without defining options will still create a dropdown and the list can be
+ * assembled dynamically
+ * 
+ * 		:slider
+ * make this entity contain a horizontally adjustable slider
+ * 
+ * 		:return <output_value>
+ * selecting this entity stops list interaction immediately and returns given value
+ * 
+ * 
+ * The following implementation is the MenuList constructor, holding the language interpreter
+ * conforming to the above language definitions and statements.
+ *
+ * TODO: amend language definition since it was extracted from a more general usecase
+*/
+
+/*
+	TODO
+	NOTE: don't kill me for naming it "compile", i just wanted to be cute ok. i know it doesn't compile
+*/
+LDCProcessState LDCCompiler::compile(const char* path)
+{
+	// iterate definition file
+	std::ifstream file(path,std::ios::in);
+	std::vector<ListLanguageCommand> cmd_buffer;
+	while (!file.eof()) {
+
+		// skip until command
+		std::string line;
+		getline(file,line);
+		if (!line.rfind(':',0)) {
+
+			// translate command to handling logic address & store in command buffer
+			ListLanguageCommand llc;
+			size_t cmd_split = line.find(' ');
+			while (llc.id<LIST_LANGUAGE_COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
+				llc.id++;
+
+			// add command to command buffer & handle command attributes
+			llc.tail = line.erase(0,cmd_split+1);
+			out.push_back(llc);
+		} else out.back().buffer += line+' ';
+
+	// close ldc instruction file
+	} file.close();
+
+	// execute extracted commands
+	LDCProcessState state;
+	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state),state.cline++;
+	return state;
+}
+
+
+/**
+ *	Start Implementation of Compiler Logic Pointers switched by Command
+ *
+ *  TODO: expand
+*/
+
+/*
+	TODO
+*/
+void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	LDCCluster cluster;
+	cluster.id = cmd.tail;
+	state.clusters.push_back(cluster);
+}
+
+/*
+	TODO
+*/
+void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ state.condition_list = std::vector<bool>(stoi(cmd.tail)); }
+// FIXME: add protection due to usage of stoi
+
+/*
+	TODO
+*/
+void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	MenuListEntity entity;
+	entity.head = cmd.tail;
+	state.clusters.back().elist.push_back(entity);
+}
+
+/*
+	TODO
+*/
+void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ state.clusters.back().elist.back().description = cmd.buffer; }
+
+/*
+	TODO
+*/
+void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	MenuListSegment segment;
+	segment.position = ml.clusters.back().elist.size();
+	segment.title = cmd.tail;
+	state.clusters.back().slist.push_back(segment);
+}
+
+/*
+	TODO
+*/
+void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ state.clusters.back().elist.back().condition_id = stoi(cmd.tail); }
+
+/*
+	TODO
+*/
+void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	state.clusters.back().elist.back().child_name = cmd.tail;
+	state.clusters.back().parents.push_back(ml.clusters.back().elist.size()-1);
+}
+
+/*
+	TODO
+*/
+void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_CHECKBOX; }
+
+/*
+	TODO
+*/
+void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	std::stringstream bfss(cmd.buffer);
+	std::string ddoption;
+	while (getline(bfss,ddoption,';'))
+		state.clusters.back().elist.back().dropdown_options.push_back(ddoption);
+	state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
+}
+
+/*
+	TODO
+*/
+void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_SLIDER; }
+
+/*
+	TODO
+*/
+void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	state.clusters.back().elist.back().rval = stoi(cmd.tail);
+	state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_RETURN;
+}
+
+/*
+	TODO
+*/
+void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
+{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,state.cline); }
+
 
 /**
  *		Selection Splice Geometry Implementation
@@ -156,69 +365,9 @@ void SelectionSpliceGeometry::update()
 
 
 /**
- * 		Menu List Implementation with .ldc Language Interpreter
+ * 		Menu List Implementation
  * 
  * TODO: expand this segment documentation
- * 
- * 
- * 		List Definition Code Language Design
- * 
- * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
- * following expression are valid and will be handled by menu list interpreter:
- * (the definitions are using <> to show where custom naming replaces "<contents>")
- * 
- * 
- * 		GENERAL LANGUAGE FEATURES
- * 
- * 		:cluster <cluster_name>
- * this statement marks the definition of a list, sublist or list entity collection
- * any cluster can be referred to by name within the list definition file
- * to define the main list use :cluster main
- * 
- * 		:logic <condition_list_size>
- * setup of extern condition logic list to change viewability of entities with :condition command
- * 
- * 		:define <entity_name>
- * define the name of the list entity, that will be shown alongside other list member entities
- * 
- * 		:describe
- * 		<description>
- * to add a description to the list entity, that will be shown when currently selected
- * 
- * 		:segment <segment_name>
- * whereever a segment is called within the list defintion file, a dividing, stylized line will be
- * drawn between the imperatively previous and following definition
- * 
- * 		:condition <condition_id>
- * set a condition to activate list entity.
- * the condition id will read the respective boolean from an extern condition list.
- * 
- * 
- * 		BEHAVIOUR DEFINITIONS
- * (ideally choose one of the following commands per :define)
- * 
- * 		:subsequent <cluster_name>
- * confirming selection on this entity will load a sublist linked by it's cluster
- * the list will then be shown under the heading of this list entities :define
- * 
- * 		:checkbox
- * create a simple checkbox for this entity, used to choose between true or false states
- * 
- * 		:dropdown
- * 		<fist_option>;<second_option>;<third_option>
- * add a dropdown option list to this entity, holding selectable options divided by a ';'
- * using :dropdown without defining options will still create a dropdown and the list can be
- * assembled dynamically
- * 
- * 		:slider
- * make this entity contain a horizontally adjustable slider
- * 
- * 		:return <output_value>
- * selecting this entity stops list interaction immediately and returns given value
- * 
- * 
- * The following implementation is the MenuList constructor, holding the language interpreter
- * conforming to the above language definitions and statements.
 */
 
 /*
@@ -227,42 +376,11 @@ void SelectionSpliceGeometry::update()
 MenuList::MenuList(const char* path)
 	: fpath(path)
 {
-	// logic switch overhead
-	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
-		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
-		command_logic_segment,command_logic_condition,command_logic_subsequent,
-		command_logic_checkbox,command_logic_dropdown,command_logic_slider,
-		command_logic_return,command_logic_syntax_error
-	};
+	// execute definition code
+	LDCProcessState ldc_result = LDCCompiler::compile(path);
 
-	// iterate definition file
-	std::ifstream file(path,std::ios::in);
-	while (!file.eof()) {
-
-		// skip until command
-		std::string line;
-		getline(file,line);
-		if (!line.rfind(':',0)) {
-
-			// translate command to handling logic address & store in command buffer
-			ListLanguageCommand llc;
-			size_t cmd_split = line.find(' ');
-			while (llc.id<LIST_LANGUAGE_COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
-				llc.id++;
-
-			// add command to command buffer & handle command attributes
-			llc.tail = line.erase(0,cmd_split+1);
-			cmd_buffer.push_back(llc);
-		} else cmd_buffer.back().buffer += line+' ';
-	} file.close();
-
-	// execute commands
-	for (auto cmd : cmd_buffer) {
-		interpreter_behaviour[cmd.id](*this,cmd);
-		cline++;
-
-	// post-process list & visuals creation
-	} for (MenuListCluster &cluster : clusters) {
+	// visuals creation
+	} for (LDCCluster &cluster : ldc_result.clusters) {
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		uint8_t i_seg = 0;
 
@@ -330,108 +448,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 // TODO: transition between lists (background to foreground animation, tilt shift?)
 
 
-/**
- *	Start implementation of compiler logic pointers switched by command
- *
- *  TODO: expand
-*/
 
-/*
-	TODO
-*/
-void command_logic_cluster(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	MenuListCluster cluster;
-	cluster.id = cmd.tail;
-	ml.clusters.push_back(cluster);
-}
-
-/*
-	TODO
-*/
-void command_logic_logiclist(MenuList &ml,const ListLanguageCommand &cmd)
-{ ml.condition_list = std::vector<bool>(stoi(cmd.tail)); }
-
-/*
-	TODO
-*/
-void command_logic_define(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	MenuListEntity entity;
-	entity.head = cmd.tail;
-	ml.clusters.back().elist.push_back(entity);
-}
-
-/*
-	TODO
-*/
-void command_logic_describe(MenuList &ml,const ListLanguageCommand &cmd)
-{ ml.clusters.back().elist.back().description = cmd.buffer; }
-
-/*
-	TODO
-*/
-void command_logic_segment(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	MenuListSegment segment;
-	segment.position = ml.clusters.back().elist.size();
-	segment.title = cmd.tail;
-	ml.clusters.back().slist.push_back(segment);
-}
-
-/*
-	TODO
-*/
-void command_logic_condition(MenuList &ml,const ListLanguageCommand &cmd)
-{ ml.clusters.back().elist.back().condition_id = stoi(cmd.tail); }
-
-/*
-	TODO
-*/
-void command_logic_subsequent(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	ml.clusters.back().elist.back().child_name = cmd.tail;
-	ml.clusters.back().parents.push_back(ml.clusters.back().elist.size()-1);
-}
-
-/*
-	TODO
-*/
-void command_logic_checkbox(MenuList &ml,const ListLanguageCommand &cmd)
-{ ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_CHECKBOX; }
-
-/*
-	TODO
-*/
-void command_logic_dropdown(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	std::stringstream bfss(cmd.buffer);
-	std::string ddoption;
-	while (getline(bfss,ddoption,';'))
-		ml.clusters.back().elist.back().dropdown_options.push_back(ddoption);
-	ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
-}
-
-/*
-	TODO
-*/
-void command_logic_slider(MenuList &ml,const ListLanguageCommand &cmd)
-{ ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_SLIDER; }
-
-/*
-	TODO
-*/
-void command_logic_return(MenuList &ml,const ListLanguageCommand &cmd)
-{
-	ml.clusters.back().elist.back().rval = stoi(cmd.tail);
-	ml.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_RETURN;
-}
-
-/*
-	TODO
-*/
-void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd)
-{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",ml.fpath,ml.cline); }
 
 
 /**

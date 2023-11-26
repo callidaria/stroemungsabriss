@@ -152,6 +152,85 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 
 /**
+ *		LDC Compiler Definition
+*/
+
+struct ListLanguageCommand
+{
+	uint8_t id = 0;
+	std::string tail,buffer;
+};
+
+struct LDCEntity
+{
+	std::string head,description,child_name;
+	uint8_t child_id,condition_id = 0;
+	uint8_t etype;
+	std::vector<std::string> dropdown_options;
+	uint16_t rval;
+	bool jsegment = false;
+};
+// TODO: add multicondition support
+
+struct LDCSegment
+{
+	uint16_t position;
+	std::string title;
+};
+
+struct LDCCluster
+{
+	std::string id;
+	std::vector<LDCEntity> elist;
+	std::vector<LDCSegment> slist;
+};
+
+struct LDCProcessState
+{
+	const char* fpath;
+	uint32_t cline = 1;
+	std::vector<LDCCluster> clusters;
+	std::vector<bool> condition_list;
+};
+
+class LDCCompiler
+{
+public:
+
+	// code processing
+	static LDCProcessState compile(const char* path);
+};
+
+// command interpretation logic
+typedef command_logic_pass (const ListLanguageCommand&,LDCProcessState&);
+typedef void (*interpreter_logic)(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_cluster(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_logiclist(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_define(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_describe(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_segment(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_condition(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_checkbox(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_dropdown(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_slider(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_return(const ListLanguageCommand&,LDCProcessState&);
+static void command_logic_syntax_error(const ListLanguageCommand&,LDCProcessState&);
+
+const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+	"cluster","logic","define","describe","segment","condition",
+	"subsequent","checkbox","dropdown","slider","return",
+};
+interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
+	command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
+	command_logic_segment,command_logic_condition,command_logic_subsequent,
+	command_logic_checkbox,command_logic_dropdown,command_logic_slider,
+	command_logic_return,command_logic_syntax_error,
+};
+// TODO: decide if those should be local to the compile function
+
+
+/**
  *		Selection Splice Geometry Definition
 */
 
@@ -217,29 +296,6 @@ private:
  * 		MenuList Definiton
 */
 
-struct ListLanguageCommand
-{
-	uint8_t id = 0;
-	std::string tail,buffer;
-};
-
-struct MenuListEntity
-{
-	std::string head,description,child_name;
-	uint8_t child_id,condition_id = 0;
-	uint8_t etype;
-	std::vector<std::string> dropdown_options;
-	uint16_t rval;
-	bool jsegment = false;
-};
-// TODO: add multicondition support
-
-struct MenuListSegment
-{
-	uint16_t position;
-	std::string title;
-};
-
 struct MenuListCluster
 {
 	std::string id;
@@ -274,16 +330,11 @@ public:
 
 public:
 
-	// data
-	const char* fpath;
-	uint32_t cline = 1;
-
 	// listing
 	std::vector<MenuListCluster> clusters;
 
 	// interaction
 	uint8_t active_cluster_id = 0;
-	std::vector<bool> condition_list;
 
 private:
 
@@ -296,26 +347,7 @@ private:
 	// predefinitions
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
-	std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","logic","define","describe","segment","condition",
-		"subsequent","checkbox","dropdown","slider","return"
-	};
 };
-
-// command interpretation logic
-typedef void (*interpreter_logic)(MenuList&,const ListLanguageCommand&);
-static void command_logic_cluster(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_logiclist(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_define(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_describe(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_segment(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_condition(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_subsequent(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_checkbox(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_dropdown(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_slider(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_return(MenuList &ml,const ListLanguageCommand &cmd);
-static void command_logic_syntax_error(MenuList &ml,const ListLanguageCommand &cmd);
 
 
 /**
