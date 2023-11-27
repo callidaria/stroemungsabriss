@@ -70,10 +70,24 @@
 
 /*
 	TODO
-	NOTE: don't kill me for naming it "compile", i just wanted to be cute ok. i know it doesn't compile
+	NOTE: don't kill me for calling it "compile", i just wanted to be cute ok. i know it doesn't compile
 */
 LDCProcessState LDCCompiler::compile(const char* path)
 {
+	// logic id overhead
+	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+		"cluster","logic","define","describe","segment","condition","subsequent","checkbox","dropdown",
+		"slider","return",
+	};
+
+	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
+		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
+		command_logic_segment,command_logic_condition,command_logic_subsequent,
+		command_logic_checkbox,command_logic_dropdown,command_logic_slider,
+		command_logic_return,command_logic_syntax_error,
+	};
+	// TODO: decide if those should be local to the compile function
+
 	// iterate definition file
 	std::ifstream file(path,std::ios::in);
 	std::vector<ListLanguageCommand> cmd_buffer;
@@ -92,14 +106,17 @@ LDCProcessState LDCCompiler::compile(const char* path)
 
 			// add command to command buffer & handle command attributes
 			llc.tail = line.erase(0,cmd_split+1);
-			out.push_back(llc);
-		} else out.back().buffer += line+' ';
+			cmd_buffer.push_back(llc);
+		} else cmd_buffer.back().buffer += line+' ';
 
 	// close ldc instruction file
 	} file.close();
 
-	// execute extracted commands
+	// setup process state
 	LDCProcessState state;
+	state.fpath = path;
+
+	// execute extracted commands
 	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state),state.cline++;
 	return state;
 }
@@ -133,7 +150,7 @@ void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &sta
 */
 void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
-	MenuListEntity entity;
+	LDCEntity entity;
 	entity.head = cmd.tail;
 	state.clusters.back().elist.push_back(entity);
 }
@@ -149,8 +166,8 @@ void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &stat
 */
 void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
-	MenuListSegment segment;
-	segment.position = ml.clusters.back().elist.size();
+	LDCSegment segment;
+	segment.position = state.clusters.back().elist.size();
 	segment.title = cmd.tail;
 	state.clusters.back().slist.push_back(segment);
 }
@@ -167,7 +184,7 @@ void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &sta
 void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
 	state.clusters.back().elist.back().child_name = cmd.tail;
-	state.clusters.back().parents.push_back(ml.clusters.back().elist.size()-1);
+	state.clusters.back().parents.push_back(state.clusters.back().elist.size()-1);
 }
 
 /*
@@ -374,18 +391,21 @@ void SelectionSpliceGeometry::update()
 	TODO
 */
 MenuList::MenuList(const char* path)
-	: fpath(path)
 {
 	// execute definition code
 	LDCProcessState ldc_result = LDCCompiler::compile(path);
+	clusters = ldc_result.clusters;
 
 	// visuals creation
-	} for (LDCCluster &cluster : ldc_result.clusters) {
+	for (LDCCluster &cluster : clusters) {
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		uint8_t i_seg = 0;
 
+		// setup text list for current cluster
+		std::vector<Text> ctx_elist,ctx_slist;
+
 		// convert cluster name references to cluster id
-		for (auto pid : cluster.parents) {
+		for (uint16_t pid : cluster.parents) {
 			uint8_t i = 0;
 			while (clusters[i].id!=cluster.elist[pid].child_name&&i<clusters.size()) i++;
 			cluster.elist[pid].child_id = i;
@@ -401,16 +421,19 @@ MenuList::MenuList(const char* path)
 					+ MENU_LIST_SEGMENT_PUSH_X,MENU_LIST_SCROLL_START
 					- (cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
 				stext.load();
-			cluster.tx_slist.push_back(stext);
+			ctx_slist.push_back(stext);
 
 		// process cluster entities
-		} for (auto entity : cluster.elist) {
+		} for (LDCEntity entity : cluster.elist) {
 			vscroll -= MENU_LIST_SCROLL_Y*entity.jsegment;
 			Text etext = Text(st_font);
 			etext.add(entity.head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),etext.load();
-			cluster.tx_elist.push_back(etext);
+			ctx_elist.push_back(etext);
 			vscroll -= MENU_LIST_SCROLL_Y;
 		}
+
+		// add created text
+		tx_elist.push_back(ctx_elist),tx_slist.push_back(ctx_slist);
 	}
 }
 
@@ -422,7 +445,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 	// translate input
 	uint16_t gsel = lscroll+grid;
 	//gsel += clusters[active_cluster_id].elist[gsel].jsegment;
-	int16_t didx = clusters[active_cluster_id].elist.size()-(gsel+1);
+	int16_t didx = tx_elist[active_cluster_id].size()-(gsel+1);
 	grid += didx*(didx<0);
 	grid *= grid>0;
 	gsel = lscroll+grid;
@@ -438,17 +461,14 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 	back = !stall_back&&back;
 
 	// draw segments & entities
-	for (auto txs : clusters[active_cluster_id].tx_slist)
+	for (auto txs : tx_slist[active_cluster_id])
 		txs.prepare(),txs.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
 			txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
-	for (auto txe : clusters[active_cluster_id].tx_elist)
+	for (auto txe : tx_elist[active_cluster_id])
 		txe.prepare(),txe.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
 			txe.render(1024,glm::vec4(1));
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)
-
-
-
 
 
 /**

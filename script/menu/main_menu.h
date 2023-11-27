@@ -183,6 +183,7 @@ struct LDCCluster
 	std::string id;
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
+	std::vector<uint16_t> parents;
 };
 
 struct LDCProcessState
@@ -190,6 +191,8 @@ struct LDCProcessState
 	const char* fpath;
 	uint32_t cline = 1;
 	std::vector<LDCCluster> clusters;
+	// previously saved MenuListEntity* list to iterate parents, but memory issues made it break
+	// TODO: look into the original memory issue for the slightest of improvements
 	std::vector<bool> condition_list;
 };
 
@@ -202,32 +205,19 @@ public:
 };
 
 // command interpretation logic
-typedef command_logic_pass (const ListLanguageCommand&,LDCProcessState&);
 typedef void (*interpreter_logic)(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_cluster(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_logiclist(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_define(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_describe(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_segment(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_condition(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_checkbox(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_dropdown(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_slider(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_return(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_syntax_error(const ListLanguageCommand&,LDCProcessState&);
-
-const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-	"cluster","logic","define","describe","segment","condition",
-	"subsequent","checkbox","dropdown","slider","return",
-};
-interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
-	command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
-	command_logic_segment,command_logic_condition,command_logic_subsequent,
-	command_logic_checkbox,command_logic_dropdown,command_logic_slider,
-	command_logic_return,command_logic_syntax_error,
-};
-// TODO: decide if those should be local to the compile function
+static void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state);
 
 
 /**
@@ -296,27 +286,6 @@ private:
  * 		MenuList Definiton
 */
 
-struct MenuListCluster
-{
-	std::string id;
-	std::vector<MenuListEntity> elist;
-	std::vector<MenuListSegment> slist;
-
-	// previously saved MenuListEntity* list to iterate parents, but memory issues made it break
-	// TODO: look into the original memory issue for the slightest of improvements
-	std::vector<uint16_t> parents;
-
-	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
-	//		1) creation is complete and utter garbage trash
-	//		2) you instanciate a shader & buffer for each and every single element
-	//		3) every text element => list element has it's own load
-	//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
-	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
-	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
-	// anyway, here's the implementation for now...
-	std::vector<Text> tx_elist,tx_slist;
-};
-
 class MenuList
 {
 public:
@@ -330,16 +299,26 @@ public:
 
 public:
 
-	// listing
-	std::vector<MenuListCluster> clusters;
-
 	// interaction
+	std::vector<LDCCluster> clusters;
 	uint8_t active_cluster_id = 0;
+	// FIXME: interaction with condition list like this is a stupid idea written by an apebrain (me)
 
 private:
 
 	// buffer
 	std::vector<ListLanguageCommand> cmd_buffer;
+
+	// listing
+	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
+	//		1) creation is complete and utter garbage trash
+	//		2) you instanciate a shader & buffer for each and every single element
+	//		3) every text element => list element has it's own load
+	//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
+	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
+	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
+	// anyway, here's the implementation for now...
+	std::vector<std::vector<Text>> tx_elist,tx_slist;
 
 	// status
 	uint8_t lscroll = 0;
