@@ -164,7 +164,7 @@ struct ListLanguageCommand
 struct LDCEntity
 {
 	std::string head,description,child_name;
-	uint8_t child_id,condition_id = 0;
+	uint8_t child_id,condition_id = 0;		// FIXME: why don't link the lists through child?
 	uint8_t etype;
 	std::vector<std::string> dropdown_options;
 	uint16_t rval;

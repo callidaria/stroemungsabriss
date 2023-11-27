@@ -3,9 +3,10 @@
 /**
  *		LDC Compiler Implementation
  *
- *  TODO: enhance this documentation
- * 
- * 
+ * The LDC Compiler reads a menu list definition .ldc file and compiles it to a struct complex.
+ * This resulting complex can be used write an intern list logic, which was externally defined and compiled
+ * at load time.
+ *
  * 		List Definition Code Language Design
  * 
  * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
@@ -15,62 +16,66 @@
  * 
  * 		GENERAL LANGUAGE FEATURES
  * 
- * 		:cluster <cluster_name>
+ * 	:cluster <cluster_name>
  * this statement marks the definition of a list, sublist or list entity collection
  * any cluster can be referred to by name within the list definition file
  * to define the main list use :cluster main
  * 
- * 		:logic <condition_list_size>
+ * 	:logic <condition_list_size>
  * setup of extern condition logic list to change viewability of entities with :condition command
+ * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
  * 
- * 		:define <entity_name>
+ * 	:define <entity_name>
  * define the name of the list entity, that will be shown alongside other list member entities
  * 
- * 		:describe
- * 		<description>
+ * 	:describe
+ * 	<description>
  * to add a description to the list entity, that will be shown when currently selected
  * 
- * 		:segment <segment_name>
+ * 	:segment <segment_name>
  * whereever a segment is called within the list defintion file, a dividing, stylized line will be
  * drawn between the imperatively previous and following definition
+ * FIXME: segments are my problemchild, no matter the usage this will always break first
  * 
- * 		:condition <condition_id>
+ * 	:condition <condition_id>
  * set a condition to activate list entity.
  * the condition id will read the respective boolean from an extern condition list.
  * 
  * 
  * 		BEHAVIOUR DEFINITIONS
- * (ideally choose one of the following commands per :define)
+ * (ideally choose ONE of the following commands per :define)
  * 
- * 		:subsequent <cluster_name>
+ * 	:subsequent <cluster_name>
  * confirming selection on this entity will load a sublist linked by it's cluster
  * the list will then be shown under the heading of this list entities :define
  * 
- * 		:checkbox
- * create a simple checkbox for this entity, used to choose between true or false states
+ * 	:checkbox
+ * sign this entity to mark it switchable between true or false states
  * 
- * 		:dropdown
- * 		<fist_option>;<second_option>;<third_option>
- * add a dropdown option list to this entity, holding selectable options divided by a ';'
+ * 	:dropdown
+ * 	<fist_option>;<second_option>;<third_option>
+ * add a sublist/dropdown option to this entity, holding selectable options divided by a ';'
  * using :dropdown without defining options will still create a dropdown and the list can be
  * assembled dynamically
  * 
- * 		:slider
- * make this entity contain a horizontally adjustable slider
+ * 	:slider
+ * make this entity contain a changable floating point number to be adjusted by e.g. a slider
  * 
- * 		:return <output_value>
+ * 	:return <output_value>
  * selecting this entity stops list interaction immediately and returns given value
  * 
  * 
- * The following implementation is the MenuList constructor, holding the language interpreter
+ * The following implementation is the static compile function for LDC, holding the language interpreter
  * conforming to the above language definitions and statements.
- *
- * TODO: amend language definition since it was extracted from a more general usecase
+ * The compiler only has one feature: compile, because this is what it does.
 */
 
 /*
-	TODO
-	NOTE: don't kill me for calling it "compile", i just wanted to be cute ok. i know it doesn't compile
+	compile(const char*) -> LDCProcessState (static) !O(n)b
+	purpose: load .ldc files, break it up into a command buffer and compile it into a complex
+	\param path: path to .ldc file
+	\returns compiled struct complex to be used by UI feature
+	NOTE: don't kill me for calling it "compile", i just wanted to be cute ok. i kinda does compile though
 */
 LDCProcessState LDCCompiler::compile(const char* path)
 {
@@ -123,13 +128,22 @@ LDCProcessState LDCCompiler::compile(const char* path)
 
 
 /**
- *	Start Implementation of Compiler Logic Pointers switched by Command
+ *		Start Implementation of Compiler Logic Pointers switched by Command
  *
- *  TODO: expand
+ * Command ids from buffer, assembled at first compiler pass, jump to their processing logic by memory id.
+ *
+ * To define a new command, first add the command string without ':' to mlcmd list in LDCCompiler::compile,
+ * then create the logic below and add the function to interpreter_behaviour in LDCCompiler::compile.
+ * Finally increment LIST_LANGUAGE_COMMAND_COUNT constexpr in the header file.
+ *
+ * Features implemented according to the List Language Command language definition, established above the
+ * compiler implementation.
 */
 
 /*
-	TODO
+	command_logic_cluster(const ListLanguageCommand&,LDCProcessState&) -> (static,global) void !O(1)
+	purpose: open new cluster definition until next definition is opened. (cmd = :cluster)
+	conforming to: void* interpreter_logic
 */
 void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -139,14 +153,18 @@ void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state
 }
 
 /*
-	TODO
+	command_logic_logiclist(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: setup a boolean list, that can be interacted with to switch entity visibility (cmd = :logic)
+	conforming to: void* interpreter_logic
 */
 void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state)
 { state.condition_list = std::vector<bool>(stoi(cmd.tail)); }
 // FIXME: add protection due to usage of stoi
 
 /*
-	TODO
+	command_logic_define(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: add named list entity to currently opened cluster (cmd = :define)
+	conforming to: void* interpreter_logic
 */
 void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -156,13 +174,17 @@ void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state)
 }
 
 /*
-	TODO
+	command_logic_describe(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: add entity description (cmd = :describe)
+	conforming to: void* interpreter_logic
 */
 void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state)
 { state.clusters.back().elist.back().description = cmd.buffer; }
 
 /*
-	TODO
+	command_logic_segment(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: add a horrible segment that will cause problems in your logic later (cmd = :segment)
+	conforming to: void* interpreter_logic
 */
 void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -173,13 +195,18 @@ void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state
 }
 
 /*
-	TODO
+	command_logic_condition(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: define entity activation boolean reference in logic list by memory id (cmd = :condition)
+	conforming to: void* interpreter_logic
 */
 void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
 { state.clusters.back().elist.back().condition_id = stoi(cmd.tail); }
+// FIXME: add protection due to usage of stoi
 
 /*
-	TODO
+	command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: link subsequent cluster to transition to as entity action (cmd = :subsequent)
+	conforming to: void* interpreter_logic
 */
 void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -188,13 +215,17 @@ void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &st
 }
 
 /*
-	TODO
+	command_logic_checkbox(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: set boolean on/off functionality as entity action (cmd = :checkbox)
+	conforming to: void* interpreter_logic
 */
 void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state)
 { state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_CHECKBOX; }
 
 /*
-	TODO
+	command_logic_dropdown(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: create sublist index linked choices attached to entity (cmd = :dropdown)
+	conforming to: void* interpreter_logic
 */
 void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -206,13 +237,17 @@ void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &stat
 }
 
 /*
-	TODO
+	command_logic_slider(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: attach transformable float value to entity (cmd = :slider)
+	conforming to: void* interpreter_logic
 */
 void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state)
 { state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_SLIDER; }
 
 /*
-	TODO
+	command_logic_return(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: set finalizing entity with set value return (cmd = :return)
+	conforming to: void* interpreter_logic
 */
 void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
@@ -221,7 +256,9 @@ void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 }
 
 /*
-	TODO
+	command_logic_error(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: this method catches invalid syntax/commands and notifies the developer
+	conforming to: void* interpreter_logic
 */
 void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
 { printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,state.cline); }
