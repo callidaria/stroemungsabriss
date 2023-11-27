@@ -1,0 +1,22 @@
+:cluster challenge selection
+
+:define original
+:describe
+original mode:\n
+intended difficulty!\n
+WARNING: NOT AN EASY OR NORMAL MODE!
+
+:define master
+:describe
+master mode:\n
+you are either a seasoned danmaku veteran or original mode doesn't challenge you anymore
+
+:define grandmaster
+:describe
+grandmaster mode:
+don't make this choice without thinking, i know it sounds cool on paper, but ton't do it!
+
+:define headmaster
+:describe
+headmaster mode:\n
+you must be a robot or a mountain hermit to survive this

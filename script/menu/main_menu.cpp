@@ -225,6 +225,7 @@ void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 */
 void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
 { printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,state.cline); }
+// FIXME: line counter is broken, instructions are counted as line instead of real lines
 
 
 /**
@@ -480,13 +481,16 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 /*
 	TODO
 */
-uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const char*> options,
-		std::vector<const char*> descriptions,glm::vec2 center,float width,float height,
+uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,float width,float height,
 		uint8_t tsize,uint8_t dsize)
 {
+	// content information extraction
+	LDCProcessState ldc_result = LDCCompiler::compile(path);
+	size_t opcount = ldc_result.clusters[0].elist.size();
+
 	// setup dialogue data with list start position
 	SingularDialogueData dgd;
-	dgd.liststart_y = center.y+dsize*(options.size()>>1)+(dsize>>1)*(options.size()&1);
+	dgd.liststart_y = center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
 	dgd.option_size = dsize;
 
 	// precalculation & background vertices
@@ -514,31 +518,28 @@ uint8_t MenuDialogue::add_dialogue_window(const char* title,std::vector<const ch
 	// dialogue title text setup
 	dgd.tx_title = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			tsize,tsize));
-	dgd.tx_title.add(title,center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
+	dgd.tx_title.add(ldc_result.clusters[0].id.c_str(),
+			center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 	dgd.tx_title.load();
 
 	// dialogue option text setup
-	dgd.tx_options = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			dsize,dsize));
-	for (uint8_t i=0;i<options.size();i++)
-		dgd.tx_options.add(options[i],glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-				dgd.liststart_y-dsize*i));
-	dgd.tx_options.load();
-
-	// dialogue description text setup
-	dgd.tx_descriptions = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			25,25));
-	for (uint8_t i=0;i<descriptions.size();i++) {
-		dgd.tx_descriptions.add(descriptions[i],glm::vec2(1030,350-720*i),200.f,20.f);
-		dgd.description_length += strlen(descriptions[i]);
-	} dgd.tx_descriptions.load();
+	dgd.tx_options = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",dsize,dsize));
+	dgd.tx_descriptions = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25));
+	for (uint8_t i=0;i<opcount;i++) {
+		dgd.tx_options.add(ldc_result.clusters[0].elist[i].head.c_str(),
+				glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,dgd.liststart_y-dsize*i));
+		dgd.tx_descriptions.add(ldc_result.clusters[0].elist[i].description.c_str(),
+				glm::vec2(1030,350-720*i),200.f,20.f);
+		dgd.description_length += ldc_result.clusters[0].elist[i].description.length();
+	} dgd.tx_options.load(),dgd.tx_descriptions.load();
 
 	// additional data
-	dgd.max_options = options.size()-1;
+	dgd.max_options = opcount-1;
 	dgd.max_width = hwidth,dgd.max_height = hheight;
 	dg_data.push_back(dgd);
 	return dg_data.size()-1;
 }
+// TODO: add support for multiple dialogues based on the ldc cluster list
 
 /*
 	TODO
@@ -832,19 +833,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// dialogue setup
-	std::vector<const char*> dsc_diffs = {
-		"original mode:\nintended difficulty!\n WARNING: NOT AN EASY OR NORMAL MODE",
-		"master mode:\nyou are either a seasoned danmaku veteran or original mode doesn't challenge you anymore",
-		"grandmaster mode:\ndon't take this choice lightly, i know it sounds cool on paper but don't do it",
-		"headmaster mode:\nyou must be either a robot, or a mountain hermit to survive this"
-	}; std::vector<const char*> cnt_diffs = { "original","master","grandmaster","headmaster" };
-	std::vector<const char*> dsc_options = {
-		"continue from last save","switch savestate to continue from","return to main selection"
-	}; std::vector<const char*> cnt_options = { "continue","change run","back" };
-	dg_diffs = mdialogues.add_dialogue_window("challenge selection",cnt_diffs,dsc_diffs,
-			glm::vec2(670,310),320,140,30,25);
-	dg_continue = mdialogues.add_dialogue_window("continue?",cnt_options,dsc_options,
-			glm::vec2(640,360),320,250,30,25);
+	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
+	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
 	// TODO: add second confirmation popup dialogue in case grandmaster or headmaster is selected
 }

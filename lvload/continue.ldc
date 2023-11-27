@@ -1,0 +1,13 @@
+:cluster continue?
+
+:define continue
+:describe
+continue from last save
+
+:define change run
+:describe
+switch savestate to continue from
+
+:define back
+:describe
+return to main selection

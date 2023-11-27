@@ -385,8 +385,7 @@ public:
 	~MenuDialogue() {  }
 
 	// creation
-	uint8_t add_dialogue_window(const char* title,std::vector<const char*> options,
-			std::vector<const char*> descriptions,glm::vec2 center,float width,float height,
+	uint8_t add_dialogue_window(const char* path,glm::vec2 center,float width,float height,
 			uint8_t tsize,uint8_t dsize);
 	void load();
 
