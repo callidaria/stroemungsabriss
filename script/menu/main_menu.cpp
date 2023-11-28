@@ -163,8 +163,15 @@ void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state
 	conforming to: void* interpreter_logic
 */
 void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ state.condition_list = std::vector<bool>(stoi(cmd.tail)); }
-// FIXME: add protection due to usage of stoi
+{
+	try {
+		state.condition_list = std::vector<bool>(stoi(cmd.tail));
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state.fpath,"logic tail does not contain a valid number",cmd.line_number);
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state.fpath,"given number exceeds legal list range",cmd.line_number);
+	}
+}
 
 /*
 	command_logic_define(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -205,8 +212,15 @@ void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state
 	conforming to: void* interpreter_logic
 */
 void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ state.clusters.back().elist.back().condition_id = stoi(cmd.tail); }
-// FIXME: add protection due to usage of stoi
+{
+	try {
+		state.clusters.back().elist.back().condition_id = stoi(cmd.tail);
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state.fpath,"condition tail does not contain a valid number",cmd.line_number);
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state.fpath,"given number exceeds reasonable range",cmd.line_number);
+	}
+}
 
 /*
 	command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -266,7 +280,17 @@ void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 	conforming to: void* interpreter_logic
 */
 void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,cmd.line_number); }
+{ compiler_error_msg(state.fpath,"invalid command syntax",cmd.line_number); }
+
+/*
+	compiler_error_msg(const char*,const char*,uint16_t) -> void (static,global) !O(1)
+	purpose: print error message for any ldc compiler problems at runtime
+	\param path: file path holding the faulty statement
+	\param msg: readable message, notifying the user about their mistake
+	\param line_number: line number the error occured in for quick navigation
+*/
+void compiler_error_msg(const char* path,const char* msg,uint16_t line_number)
+{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",path,line_number,msg); }
 
 
 /**

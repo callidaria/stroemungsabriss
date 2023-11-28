@@ -218,6 +218,7 @@ static void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessStat
 static void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void compiler_error_msg(const char* path,const char* msg,uint16_t line_number);
 
 
 /**
