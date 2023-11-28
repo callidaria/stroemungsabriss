@@ -159,6 +159,7 @@ struct ListLanguageCommand
 {
 	uint8_t id = 0;
 	std::string tail,buffer;
+	uint16_t line_number;
 };
 
 struct LDCEntity
@@ -189,7 +190,6 @@ struct LDCCluster
 struct LDCProcessState
 {
 	const char* fpath;
-	uint32_t cline = 1;
 	std::vector<LDCCluster> clusters;
 	// previously saved MenuListEntity* list to iterate parents, but memory issues made it break
 	// TODO: look into the original memory issue for the slightest of improvements

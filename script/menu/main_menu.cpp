@@ -96,6 +96,7 @@ LDCProcessState LDCCompiler::compile(const char* path)
 	// iterate definition file
 	std::ifstream file(path,std::ios::in);
 	std::vector<ListLanguageCommand> cmd_buffer;
+	uint16_t line_number = 1;
 	while (!file.eof()) {
 
 		// skip until command
@@ -111,8 +112,12 @@ LDCProcessState LDCCompiler::compile(const char* path)
 
 			// add command to command buffer & handle command attributes
 			llc.tail = line.erase(0,cmd_split+1);
+			llc.line_number = line_number;
 			cmd_buffer.push_back(llc);
 		} else cmd_buffer.back().buffer += line+' ';
+
+		// incement line couninter
+		line_number++;
 
 	// close ldc instruction file
 	} file.close();
@@ -122,7 +127,7 @@ LDCProcessState LDCCompiler::compile(const char* path)
 	state.fpath = path;
 
 	// execute extracted commands
-	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state),state.cline++;
+	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state);
 	return state;
 }
 
@@ -261,8 +266,7 @@ void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 	conforming to: void* interpreter_logic
 */
 void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,state.cline); }
-// FIXME: line counter is broken, instructions are counted as line instead of real lines
+{ printf("\033[1;31msyntax error in %s:%i menu list definition code\033[0m\n",state.fpath,cmd.line_number); }
 
 
 /**
@@ -776,6 +780,16 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
+	// setup logic collection
+	interface_behaviour[INTERFACE_LOGIC_MACRO] = interface_behaviour_macro,
+	interface_behaviour[INTERFACE_LOGIC_OPTIONS] = interface_behaviour_options,
+	interface_behaviour[INTERFACE_LOGIC_EXTRAS] = interface_behaviour_extras,
+	interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_practice,
+	interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_load,
+	interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_continue,
+	interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_newgame;
+	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
+
 	// asset load
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
@@ -846,6 +860,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// load geometry for splices
 	splices_geometry.load();
 
+	// dialogue setup
+	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
+	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
+	mdialogues.load();
+	// TODO: add second confirmation popup dialogue in case grandmaster or headmaster is selected
+
 	// buffers
 	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
 			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
@@ -858,22 +878,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
-
-	// setup logic collection
-	interface_behaviour[INTERFACE_LOGIC_MACRO] = interface_behaviour_macro,
-		interface_behaviour[INTERFACE_LOGIC_OPTIONS] = interface_behaviour_options,
-		interface_behaviour[INTERFACE_LOGIC_EXTRAS] = interface_behaviour_extras,
-		interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_practice,
-		interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_load,
-		interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_continue,
-		interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_newgame;
-	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
-
-	// dialogue setup
-	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
-	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
-	mdialogues.load();
-	// TODO: add second confirmation popup dialogue in case grandmaster or headmaster is selected
 }
 
 /*
