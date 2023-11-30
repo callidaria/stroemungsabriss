@@ -551,60 +551,75 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 {
 	// content information extraction
 	LDCProcessState ldc_result = LDCCompiler::compile(path);
-	size_t opcount = ldc_result.clusters[0].elist.size();
 
-	// setup dialogue data with list start position
-	SingularDialogueData dgd;
-	dgd.liststart_y = center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
-	dgd.option_size = dsize;
+	// setup dialogue fonts
+	Font tfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",tsize,tsize);
+	Font ofont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",dsize,dsize);
+	Font dfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
+	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts
 
-	// precalculation & background vertices
-	float hwidth = width*.5f,hheight = height*.5f;
-	bgr_verts.push_back({ glm::vec2(center.x-hwidth,center.y-hheight),0 });
-	bgr_verts.push_back({ glm::vec2(center.x+hwidth,center.y+hheight),0 });
-	bgr_verts.push_back({ center,1 });
-	bgr_verts.push_back({ glm::vec2(center.x-hwidth,center.y-hheight),0 });
-	bgr_verts.push_back({ center,2 });
-	bgr_verts.push_back({ glm::vec2(center.x+hwidth,center.y+hheight),0 });
+	// process all clusters as dialogues
+	for (LDCCluster cluster : ldc_result.clusters) {
 
-	// selector vertices
-	uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
-	float xoffcenter = center.x-hwidth;
-	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos));
-	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y));
-	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y));
-	slc_verts.push_back(glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos));
-	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y-mdos));
-	slc_verts.push_back(glm::vec2(xoffcenter+hmdos,dgd.liststart_y));
-	// TODO: implement prototype selector style
-	//	first figure out the idea to make it look nice before blindly implementing
-	// TODO: implement choice description print & change list selector to background geometry
+		// store option count of current dialogue window
+		size_t opcount = cluster.elist.size();
 
-	// dialogue title text setup
-	dgd.tx_title = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			tsize,tsize));
-	dgd.tx_title.add(ldc_result.clusters[0].id.c_str(),
-			center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
-	dgd.tx_title.load();
+		// setup dialogue data with list start position
+		SingularDialogueData dgd;
+		dgd.liststart_y = center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
+		dgd.option_size = dsize;
 
-	// dialogue option text setup
-	dgd.tx_options = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",dsize,dsize));
-	dgd.tx_descriptions = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25));
-	for (uint8_t i=0;i<opcount;i++) {
-		dgd.tx_options.add(ldc_result.clusters[0].elist[i].head.c_str(),
-				glm::vec2(center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,dgd.liststart_y-dsize*i));
-		dgd.tx_descriptions.add(ldc_result.clusters[0].elist[i].description.c_str(),
-				glm::vec2(1030,350-720*i),200.f,20.f);
-		dgd.description_length += ldc_result.clusters[0].elist[i].description.length();
-	} dgd.tx_options.load(),dgd.tx_descriptions.load();
+		// precalculation & background vertices
+		float hwidth = width*.5f,hheight = height*.5f;
+		DialogueBackgroundGeometry t_dbg[] = {
+			{ glm::vec2(center.x-hwidth,center.y-hheight),0 },
+			{ glm::vec2(center.x+hwidth,center.y+hheight),0 },
+			{ center,1 },
+			{ glm::vec2(center.x-hwidth,center.y-hheight),0 },
+			{ center,2 },
+			{ glm::vec2(center.x+hwidth,center.y+hheight),0 }
+		}; bgr_verts.insert(std::end(bgr_verts),std::begin(t_dbg),std::end(t_dbg));
 
-	// additional data
-	dgd.max_options = opcount-1;
-	dgd.max_width = hwidth,dgd.max_height = hheight;
-	dg_data.push_back(dgd);
-	return dg_data.size()-1;
+		// selector vertices
+		uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
+		float xoffcenter = center.x-hwidth;
+		glm::vec2 t_sverts[] = {
+			glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos),
+			glm::vec2(xoffcenter+hmdos,dgd.liststart_y),
+			glm::vec2(xoffcenter-hmdos,dgd.liststart_y),
+			glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos),
+			glm::vec2(xoffcenter+hmdos,dgd.liststart_y-mdos),
+			glm::vec2(xoffcenter+hmdos,dgd.liststart_y)
+		}; slc_verts.insert(std::end(slc_verts),std::begin(t_sverts),std::end(t_sverts));
+		// TODO: implement prototype selector style
+		//	first figure out the idea to make it look nice before blindly implementing
+		// TODO: implement choice description print & change list selector to background geometry
+
+		// dialogue title text setup
+		dgd.tx_title = Text(tfont),dgd.tx_options = Text(ofont),dgd.tx_descriptions = Text(dfont);
+		dgd.tx_title.add(cluster.id.c_str(),center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
+		dgd.tx_title.load();
+
+		// dialogue option text setup
+		for (uint8_t i=0;i<opcount;i++) {
+			dgd.tx_options.add(
+					cluster.elist[i].head.c_str(),
+					glm::vec2(
+						center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
+						dgd.liststart_y-dsize*i));
+			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),
+					glm::vec2(1030,350-720*i),200.f,20.f);
+			dgd.description_length += cluster.elist[i].description.length();
+		} dgd.tx_options.load(),dgd.tx_descriptions.load();
+
+		// additional data
+		dgd.max_options = opcount-1;
+		dgd.max_width = hwidth,dgd.max_height = hheight;
+		dg_data.push_back(dgd);
+
+	// return parent id
+	} return dg_data.size()-ldc_result.clusters.size();
 }
-// TODO: add support for multiple dialogues based on the ldc cluster list
 
 /*
 	TODO
