@@ -585,6 +585,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts
 
 	// process all clusters as dialogues
+	uint8_t out = dg_data.size();
 	for (LDCCluster cluster : ldc_result.clusters) {
 
 		// store option count of current dialogue window
@@ -633,6 +634,13 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 
 		// dialogue option text setup
 		for (uint8_t i=0;i<opcount;i++) {
+
+			// action setup
+			//dgd.await.push_back();
+			//dgd.wait_value.push_back(out+cluster.elist[i].child_id);
+			// FIXME: this has a predeterminable size & will never be modified. use construct reserve
+
+			// information print setup
 			dgd.tx_options.add(
 					cluster.elist[i].head.c_str(),
 					glm::vec2(
@@ -649,7 +657,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		dg_data.push_back(dgd);
 
 	// return parent id
-	} return dg_data.size()-ldc_result.clusters.size();
+	} return out;
 }
 
 /*

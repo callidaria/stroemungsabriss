@@ -165,7 +165,7 @@ struct ListLanguageCommand
 struct LDCEntity
 {
 	std::string head,description,child_name;
-	uint8_t child_id,condition_id = 0;		// FIXME: why don't link the lists through child?
+	uint8_t child_id = 0,condition_id = 0;		// FIXME: why don't link the lists through child?
 	std::vector<float> attribs;
 	uint8_t etype;
 	std::vector<std::string> dropdown_options;
@@ -174,6 +174,7 @@ struct LDCEntity
 };
 // TODO: add multicondition support
 // TODO: cleanup this struct, it is multipurpose now and has to be defined more generally
+// TODO: the quality of this struct can be improved significantly, utilizing unions
 
 struct LDCSegment
 {
@@ -355,7 +356,7 @@ private:
 struct DialogueBackgroundGeometry
 {
 	glm::vec2 position;
-	uint32_t disp_id;		// TODO: change to 8-bit unsigned when successful
+	uint32_t disp_id;		// TODO: change to 8-bit unsigned
 };
 
 struct SingularDialogueData
@@ -373,6 +374,10 @@ struct SingularDialogueData
 
 	// index of selected option
 	int8_t sindex = 0,max_options;
+
+	// action tuple
+	std::vector<uint8_t> await;
+	std::vector<uint8_t> wait_value;
 
 	// text to display information to user
 	Text tx_title,tx_options,tx_descriptions;
