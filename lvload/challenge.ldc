@@ -29,6 +29,7 @@ you must be a robot or a mountain hermit to survive this
 :define i refuse
 :describe
 i have changed my mind and hereby revert my previous choice
+:floats -100 -100
 
 :define i accept
 :describe

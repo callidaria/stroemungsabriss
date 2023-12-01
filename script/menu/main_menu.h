@@ -47,7 +47,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 11;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 12;
 
 // menu list positioning
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
@@ -166,12 +166,14 @@ struct LDCEntity
 {
 	std::string head,description,child_name;
 	uint8_t child_id,condition_id = 0;		// FIXME: why don't link the lists through child?
+	std::vector<float> attribs;
 	uint8_t etype;
 	std::vector<std::string> dropdown_options;
 	uint16_t rval;
 	bool jsegment = false;
 };
 // TODO: add multicondition support
+// TODO: cleanup this struct, it is multipurpose now and has to be defined more generally
 
 struct LDCSegment
 {
@@ -210,6 +212,7 @@ static void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState
 static void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state);

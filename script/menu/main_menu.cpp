@@ -31,7 +31,11 @@
  * 	:describe
  * 	<description>
  * to add a description to the list entity, that will be shown when currently selected
- * 
+ *
+ * 	:floats (<float><space>)*
+ * add float constants to list entity, accessible for any reason, usage defined by logic
+ *
+ *
  * 	:segment <segment_name>
  * whereever a segment is called within the list defintion file, a dividing, stylized line will be
  * drawn between the imperatively previous and following definition
@@ -57,6 +61,7 @@
  * add a sublist/dropdown option to this entity, holding selectable options divided by a ';'
  * using :dropdown without defining options will still create a dropdown and the list can be
  * assembled dynamically
+ * TODO: add an option to escape buffer read by defining an end statement, else the full buffer will be dd
  * 
  * 	:slider
  * make this entity contain a changable floating point number to be adjusted by e.g. a slider
@@ -81,13 +86,13 @@ LDCProcessState LDCCompiler::compile(const char* path)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","logic","define","describe","segment","condition","subsequent","checkbox","dropdown",
-		"slider","return",
+		"cluster","logic","define","describe","floats","segment","condition","subsequent","checkbox",
+		"dropdown","slider","return",
 	};
 
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
-		command_logic_segment,command_logic_condition,command_logic_subsequent,
+		command_logic_attributes,command_logic_segment,command_logic_condition,command_logic_subsequent,
 		command_logic_checkbox,command_logic_dropdown,command_logic_slider,
 		command_logic_return,command_logic_syntax_error,
 	};
@@ -194,6 +199,25 @@ void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &stat
 { state.clusters.back().elist.back().description = cmd.buffer; }
 
 /*
+	command_logic_attributes(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	purpose: store constant attributes in entity
+	conforming to: void* interpreter_logic
+*/
+void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	try {
+		std::stringstream bfss(cmd.tail);
+		std::string attrib;
+		while (getline(bfss,attrib,' '))
+			state.clusters.back().elist.back().attribs.push_back(stof(attrib));
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state.fpath,"attribute tail should only contain float values",cmd.line_number);
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state.fpath,"at least one attribute is out of float range",cmd.line_number);
+	}
+}
+
+/*
 	command_logic_segment(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
 	purpose: add a horrible segment that will cause problems in your logic later (cmd = :segment)
 	conforming to: void* interpreter_logic
@@ -254,6 +278,8 @@ void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &stat
 		state.clusters.back().elist.back().dropdown_options.push_back(ddoption);
 	state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
 }
+// TODO: benchmark push back usage against doubled tail process + predefined list size for tail copy
+// 	this is also relevant for attributes/floats insertions
 
 /*
 	command_logic_slider(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -564,25 +590,30 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		// store option count of current dialogue window
 		size_t opcount = cluster.elist.size();
 
+		// on-demand translation handling through ldc floats command
+		glm::vec2 t_center = center;
+		if (cluster.elist[0].attribs.size()>1)
+			t_center.x += cluster.elist[0].attribs[0],t_center.y += cluster.elist[0].attribs[1];
+
 		// setup dialogue data with list start position
 		SingularDialogueData dgd;
-		dgd.liststart_y = center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
+		dgd.liststart_y = t_center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
 		dgd.option_size = dsize;
 
 		// precalculation & background vertices
 		float hwidth = width*.5f,hheight = height*.5f;
 		DialogueBackgroundGeometry t_dbg[] = {
-			{ glm::vec2(center.x-hwidth,center.y-hheight),0 },
-			{ glm::vec2(center.x+hwidth,center.y+hheight),0 },
-			{ center,1 },
-			{ glm::vec2(center.x-hwidth,center.y-hheight),0 },
-			{ center,2 },
-			{ glm::vec2(center.x+hwidth,center.y+hheight),0 }
+			{ glm::vec2(t_center.x-hwidth,t_center.y-hheight),0 },
+			{ glm::vec2(t_center.x+hwidth,t_center.y+hheight),0 },
+			{ t_center,1 },
+			{ glm::vec2(t_center.x-hwidth,t_center.y-hheight),0 },
+			{ t_center,2 },
+			{ glm::vec2(t_center.x+hwidth,t_center.y+hheight),0 }
 		}; bgr_verts.insert(std::end(bgr_verts),std::begin(t_dbg),std::end(t_dbg));
 
 		// selector vertices
 		uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
-		float xoffcenter = center.x-hwidth;
+		float xoffcenter = t_center.x-hwidth;
 		glm::vec2 t_sverts[] = {
 			glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos),
 			glm::vec2(xoffcenter+hmdos,dgd.liststart_y),
@@ -597,7 +628,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 
 		// dialogue title text setup
 		dgd.tx_title = Text(tfont),dgd.tx_options = Text(ofont),dgd.tx_descriptions = Text(dfont);
-		dgd.tx_title.add(cluster.id.c_str(),center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
+		dgd.tx_title.add(cluster.id.c_str(),t_center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 		dgd.tx_title.load();
 
 		// dialogue option text setup
@@ -605,7 +636,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			dgd.tx_options.add(
 					cluster.elist[i].head.c_str(),
 					glm::vec2(
-						center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
+						t_center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
 						dgd.liststart_y-dsize*i));
 			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),
 					glm::vec2(1030,350-720*i),200.f,20.f);
@@ -646,8 +677,7 @@ void MenuDialogue::load()
 	slc_buffer.upload_vertices(slc_verts);
 
 	// selector shader setup
-	slc_shader.compile("./shader/main_menu/vdlgselector.shader",
-			"./shader/main_menu/fdlgselector.shader");
+	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
 	slc_shader.def_attributeF("position",2,0,2);
 	slc_shader.upload_camera(cam2D);
 }
@@ -717,12 +747,13 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		// confirmation handling
 		dg_state = csdd->sindex*conf;
 
-		// description render
-		// write text
+		// write in-dialogue text
 		dg_data[id].tx_title.prepare();
 		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
 		dg_data[id].tx_options.prepare();
 		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
+
+		// show description of selected option
 		dg_data[id].tx_descriptions.prepare();
 		dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
 				glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
