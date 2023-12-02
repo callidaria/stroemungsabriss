@@ -60,12 +60,6 @@ constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
 
-// list entity types
-constexpr uint8_t LIST_ENTITY_TYPE_CHECKBOX = 1;
-constexpr uint8_t LIST_ENTITY_TYPE_DROPDOWN = 2;
-constexpr uint8_t LIST_ENTITY_TYPE_SLIDER = 3;
-constexpr uint8_t LIST_ENTITY_TYPE_RETURN = 4;
-
 // title position & transition destination
 constexpr glm::vec3 VRT_TITLE_START = glm::vec3(300,300,0);
 constexpr glm::vec3 VRT_TITLE_END = glm::vec3(100,250,0);
@@ -162,19 +156,37 @@ struct ListLanguageCommand
 	uint16_t line_number;
 };
 
+enum LDCEntityType
+{
+	UNDEFINED = 0,
+	CHECKBOX = 1,
+	DROPDOWN = 2,
+	SLIDER = 3,
+	RETURN = 4,
+	SUBSEQUENT = 5
+};
+
+struct LDCChildTuple
+{
+	uint8_t child_id;
+	std::string child_name;
+};
+
+union LDCEntityTypeData
+{
+	//std::vector<std::string> dropdown_options;
+	uint16_t rval;
+	struct LDCChildTuple child;
+};
+
 struct LDCEntity
 {
-	std::string head,description,child_name;
-	uint8_t child_id = 0,condition_id = 0;		// FIXME: why don't link the lists through child?
+	std::string head,description;
+	std::vector<uint8_t> condition_id;
 	std::vector<float> attribs;
-	uint8_t etype;
-	std::vector<std::string> dropdown_options;
-	uint16_t rval;
-	bool jsegment = false;
+	LDCEntityType etype = UNDEFINED;
+	LDCEntityTypeData tdata;
 };
-// TODO: add multicondition support
-// TODO: cleanup this struct, it is multipurpose now and has to be defined more generally
-// TODO: the quality of this struct can be improved significantly, utilizing unions
 
 struct LDCSegment
 {

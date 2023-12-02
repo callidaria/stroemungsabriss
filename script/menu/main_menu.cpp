@@ -89,7 +89,6 @@ LDCProcessState LDCCompiler::compile(const char* path)
 		"cluster","logic","define","describe","floats","segment","condition","subsequent","checkbox",
 		"dropdown","slider","return",
 	};
-
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
 		command_logic_attributes,command_logic_segment,command_logic_condition,command_logic_subsequent,
@@ -115,16 +114,16 @@ LDCProcessState LDCCompiler::compile(const char* path)
 			while (llc.id<LIST_LANGUAGE_COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
 				llc.id++;
 
-			// add command to command buffer & handle command attributes
+			// handle command attributes
 			llc.tail = line.erase(0,cmd_split+1);
 			llc.line_number = line_number;
+
+			// assemble command buffer
 			cmd_buffer.push_back(llc);
 		} else cmd_buffer.back().buffer += line+' ';
 
-		// incement line couninter
+		// incement line counter & finally close file
 		line_number++;
-
-	// close ldc instruction file
 	} file.close();
 
 	// setup process state

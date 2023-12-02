@@ -6,3 +6,4 @@ include/
 ccb/include/
 dat/precalc/*
 .vscode/
+*#
