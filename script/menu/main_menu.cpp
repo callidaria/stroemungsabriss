@@ -41,9 +41,9 @@
  * drawn between the imperatively previous and following definition
  * FIXME: segments are my problemchild, no matter the usage this will always break first
  * 
- * 	:condition <condition_id>
- * set a condition to activate list entity.
- * the condition id will read the respective boolean from an extern condition list.
+ * 	:condition (<condition_id><space>)*
+ * specify an amount of conditions to activate list entity.
+ * the condition ids will read the respective booleans from an extern condition list.
  * 
  * 
  * 		BEHAVIOUR DEFINITIONS
@@ -97,7 +97,7 @@ LDCProcessState LDCCompiler::compile(const char* path)
 	};
 	// TODO: decide if those should be local to the compile function
 
-	// iterate definition file
+	// first pass: extraction - iterate definition file
 	std::ifstream file(path,std::ios::in);
 	std::vector<ListLanguageCommand> cmd_buffer;
 	uint16_t line_number = 1;
@@ -130,9 +130,13 @@ LDCProcessState LDCCompiler::compile(const char* path)
 	LDCProcessState state;
 	state.fpath = path;
 
-	// execute extracted commands
+	// second pass: commands - execute extracted commands
 	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state);
-	return state;
+
+	// third pass: interpretation - temporary instruction data
+	for (auto cluster : state.clusters) {
+		// TODO: segment jump signing & child_name to child_id based on etype setting
+	} return state;
 }
 
 
@@ -208,7 +212,7 @@ void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessState &st
 		std::stringstream bfss(cmd.tail);
 		std::string attrib;
 		while (getline(bfss,attrib,' '))
-			state.clusters.back().elist.back().attribs.push_back(stof(attrib));
+			state.clusters.back().elist.back().fattribs.push_back(stof(attrib));
 	} catch (std::invalid_argument const &ex) {
 		compiler_error_msg(state.fpath,"attribute tail should only contain float values",cmd.line_number);
 	} catch (std::out_of_range const &ex) {
@@ -237,13 +241,14 @@ void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state
 void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
 	try {
-		state.clusters.back().elist.back().condition_id = stoi(cmd.tail);
+		state.clusters.back().elist.back().condition_id.push_back(stoi(cmd.tail));
 	} catch (std::invalid_argument const &ex) {
 		compiler_error_msg(state.fpath,"condition tail does not contain a valid number",cmd.line_number);
 	} catch (std::out_of_range const &ex) {
 		compiler_error_msg(state.fpath,"given number exceeds reasonable range",cmd.line_number);
 	}
 }
+// TODO: implement this as a row of logic ids instead of single definition
 
 /*
 	command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -254,6 +259,7 @@ void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &st
 {
 	state.clusters.back().elist.back().child_name = cmd.tail;
 	state.clusters.back().parents.push_back(state.clusters.back().elist.size()-1);
+	state.clusters.back().elist.back().etype = SUBSEQUENT;
 }
 
 /*
@@ -262,7 +268,7 @@ void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &st
 	conforming to: void* interpreter_logic
 */
 void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_CHECKBOX; }
+{ state.clusters.back().elist.back().etype = CHECKBOX; }
 
 /*
 	command_logic_dropdown(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -274,8 +280,8 @@ void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &stat
 	std::stringstream bfss(cmd.buffer);
 	std::string ddoption;
 	while (getline(bfss,ddoption,';'))
-		state.clusters.back().elist.back().dropdown_options.push_back(ddoption);
-	state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_DROPDOWN;
+		state.clusters.back().elist.back().cattribs.push_back(ddoption);
+	state.clusters.back().elist.back().etype = DROPDOWN;
 }
 // TODO: benchmark push back usage against doubled tail process + predefined list size for tail copy
 // 	this is also relevant for attributes/floats insertions
@@ -286,7 +292,7 @@ void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &stat
 	conforming to: void* interpreter_logic
 */
 void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_SLIDER; }
+{ state.clusters.back().elist.back().etype = SLIDER; }
 
 /*
 	command_logic_return(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -295,8 +301,8 @@ void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state)
 */
 void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
-	state.clusters.back().elist.back().rval = stoi(cmd.tail);
-	state.clusters.back().elist.back().etype = LIST_ENTITY_TYPE_RETURN;
+	state.clusters.back().elist.back().tdata = stoi(cmd.tail);
+	state.clusters.back().elist.back().etype = RETURN;
 }
 
 /*
@@ -499,7 +505,7 @@ MenuList::MenuList(const char* path)
 		for (uint16_t pid : cluster.parents) {
 			uint8_t i = 0;
 			while (clusters[i].id!=cluster.elist[pid].child_name&&i<clusters.size()) i++;
-			cluster.elist[pid].child_id = i;
+			cluster.elist[pid].tdata = i;
 
 		// process list segment heads
 		} for (uint8_t i=0;i<cluster.slist.size();i++) {
@@ -544,7 +550,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 
 	// switching list activation
 	if (conf&&clusters[active_cluster_id].elist[gsel].child_name.size())
-		active_cluster_id = clusters[active_cluster_id].elist[gsel].child_id;
+		active_cluster_id = clusters[active_cluster_id].elist[gsel].tdata;
 
 	// list navigation towards parent
 	bool stall_back = active_cluster_id;
@@ -592,8 +598,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 
 		// on-demand translation handling through ldc floats command
 		glm::vec2 t_center = center;
-		if (cluster.elist[0].attribs.size()>1)
-			t_center.x += cluster.elist[0].attribs[0],t_center.y += cluster.elist[0].attribs[1];
+		if (cluster.elist[0].fattribs.size()>1)
+			t_center.x += cluster.elist[0].fattribs[0],t_center.y += cluster.elist[0].fattribs[1];
 
 		// setup dialogue data with list start position
 		SingularDialogueData dgd;

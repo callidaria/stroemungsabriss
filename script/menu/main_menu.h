@@ -166,26 +166,15 @@ enum LDCEntityType
 	SUBSEQUENT = 5
 };
 
-struct LDCChildTuple
-{
-	uint8_t child_id;
-	std::string child_name;
-};
-
-union LDCEntityTypeData
-{
-	//std::vector<std::string> dropdown_options;
-	uint16_t rval;
-	struct LDCChildTuple child;
-};
-
 struct LDCEntity
 {
-	std::string head,description;
+	std::string head,description,child_name = "";
 	std::vector<uint8_t> condition_id;
-	std::vector<float> attribs;
 	LDCEntityType etype = UNDEFINED;
-	LDCEntityTypeData tdata;
+	uint16_t tdata;
+	std::vector<float> fattribs;
+	std::vector<std::string> cattribs;
+	bool jsegment = false;
 };
 
 struct LDCSegment
