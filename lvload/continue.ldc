@@ -11,3 +11,4 @@ switch savestate to continue from
 :define back
 :describe
 return to main selection
+:system_behaviour 1

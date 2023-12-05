@@ -47,7 +47,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 12;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 13;
 
 // menu list positioning
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
@@ -163,7 +163,8 @@ enum LDCEntityType
 	DROPDOWN = 2,
 	SLIDER = 3,
 	RETURN = 4,
-	SUBSEQUENT = 5
+	SUBSEQUENT = 5,
+	SYSTEM = 6
 };
 
 struct LDCEntity
@@ -176,6 +177,7 @@ struct LDCEntity
 	std::vector<std::string> cattribs;
 	bool jsegment = false;
 };
+// TODO: document the power of tdata storage and other byproducts of the recent (2023/12/04) structure change
 
 struct LDCSegment
 {
@@ -217,6 +219,7 @@ static void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessSt
 static void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state);
+static void command_logic_sysbehaviour(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state);
 static void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state);
@@ -376,7 +379,7 @@ struct SingularDialogueData
 	int8_t sindex = 0,max_options;
 
 	// action tuple
-	std::vector<bool> await;
+	std::vector<uint8_t> await;
 	std::vector<uint16_t> wait_value;
 
 	// text to display information to user
@@ -408,6 +411,7 @@ public:
 
 	// info
 	inline bool system_active() { return opening_ids.size()||active_ids.size()||closing_ids.size(); }
+	// FIXME: will be called a lot, so store result for minor optimization
 
 private:
 

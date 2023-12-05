@@ -47,6 +47,15 @@
  * 
  * 		BEHAVIOUR DEFINITIONS
  * (ideally choose ONE of the following commands per :define)
+ *
+ * 	:system_behaviour <behaviour_id>
+ * behaviour_ids:
+ * 	0 = no behaviour
+ * 	1 = terminate current list
+ * purpose:
+ * this will give the list option a system functionality, that will be executed when it is selected & confirmed.
+ * behaviour ids can be defined differently in custom logic, but it is highly discouraged due to possible
+ * confusion, when standard behaviour differs. individual checks into custom logic are generally avoided.
  * 
  * 	:subsequent <cluster_name>
  * confirming selection on this entity will load a sublist linked by it's cluster
@@ -85,13 +94,13 @@ LDCProcessState LDCCompiler::compile(const char* path)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","logic","define","describe","floats","segment","condition","subsequent","checkbox",
-		"dropdown","slider","return",
+		"cluster","logic","define","describe","floats","segment","condition","subsequent",
+		"system_behaviour","checkbox","dropdown","slider","return",
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
 		command_logic_attributes,command_logic_segment,command_logic_condition,command_logic_subsequent,
-		command_logic_checkbox,command_logic_dropdown,command_logic_slider,
+		command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,command_logic_slider,
 		command_logic_return,command_logic_syntax_error,
 	};
 	// TODO: decide if those should be local to the compile function
@@ -274,6 +283,21 @@ void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &st
 }
 
 /*
+	TODO
+*/
+void command_logic_sysbehaviour(const ListLanguageCommand &cmd,LDCProcessState &state)
+{
+	try {
+		state.clusters.back().elist.back().etype = SYSTEM;
+		state.clusters.back().elist.back().tdata = stoi(cmd.tail);
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state.fpath,"system command id not an interpretable number",cmd.line_number);
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state.fpath,"system command id out of reasonable defrange",cmd.line_number);
+	}
+}
+
+/*
 	command_logic_checkbox(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
 	purpose: set boolean on/off functionality as entity action (cmd = :checkbox)
 	conforming to: void* interpreter_logic
@@ -324,6 +348,7 @@ void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
 void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
 { compiler_error_msg(state.fpath,"invalid command syntax",cmd.line_number); }
 
+
 /*
 	compiler_error_msg(const char*,const char*,uint16_t) -> void (static,global) !O(1)
 	purpose: print error message for any ldc compiler problems at runtime
@@ -333,6 +358,7 @@ void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &
 */
 void compiler_error_msg(const char* path,const char* msg,uint16_t line_number)
 { printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",path,line_number,msg); }
+// FIXME: the way error output works is pure and utter garbage. line_number & path are predictable
 
 
 /**
@@ -646,7 +672,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		for (uint8_t i=0;i<opcount;i++) {
 
 			// action setup
-			dgd.await[i] = cluster.elist[i].etype==LDCEntityType::SUBSEQUENT;
+			dgd.await[i] = cluster.elist[i].etype-(uint8_t)LDCEntityType::RETURN;
 			dgd.wait_value[i] = cluster.elist[i].tdata;
 
 			// information print setup
@@ -762,8 +788,15 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 				? csdd->max_options : csdd->sindex;
 
 		// confirmation handling
-		if (dg_data[id].await[csdd->sindex]&&conf) open_dialogue(dg_data[id].wait_value[csdd->sindex]);
-		else dg_state = csdd->sindex*conf;
+		if (conf) {
+			switch (dg_data[id].await[csdd->sindex]) {
+				case 1: open_dialogue(dg_data[id].wait_value[csdd->sindex]);
+					break;
+				case 2: close_dialogue(id);
+					break;
+				default: dg_state = csdd->sindex;
+			}
+		}
 
 		// write in-dialogue text
 		dg_data[id].tx_title.prepare();
@@ -1296,12 +1329,11 @@ void interface_behaviour_continue(MainMenu &tm)
 		tm.shot_popup = true;
 	}
 
-	// TODO
+	// TODO: direction to run change menu list according to user input
+	// TODO: actually implement continue functionality
 
 	// closing behaviour
-	if (tm.mdialogues.dg_state==2) tm.mdialogues.close_dialogue(tm.dg_continue);
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active
-			&& tm.mdialogues.dg_state!=2;
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
 }
 
 /*
@@ -1315,8 +1347,9 @@ void interface_behaviour_newgame(MainMenu &tm)
 		tm.diff_popup = true;
 	}
 
-	// TODO
+	// TODO: preface runcreation with disclaimer that current run will be replaced by the new as main
+	// TODO: actually implement functionality of the menu option
 
 	// closing condition
-	tm.interface_logic_id *= !tm.hit_b;
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
 }
