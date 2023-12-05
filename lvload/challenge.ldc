@@ -2,13 +2,13 @@
 
 :define original
 :describe
-original mode:\n
-intended difficulty!\n
+original mode:
+intended difficulty!
 WARNING: NOT AN EASY OR NORMAL MODE!
 
 :define master
 :describe
-master mode:\n
+master mode:
 you are either a seasoned danmaku veteran or original mode doesn't challenge you anymore
 
 :define grandmaster
@@ -19,9 +19,16 @@ don't make this choice without thinking, i know it sounds cool on paper, but ton
 
 :define headmaster
 :describe
-headmaster mode:\n
-you must be a robot or a mountain hermit to survive this
-:subsequent credit warning
+ATTENTION:
+
+This setting is only for insane people,
+robots & mountain hermits!
+It requires perfection and nothing less.
+
+This is not a sightseeing difficulty,
+you wont be able to see any beautiful
+background pixels or cool animations
+with the given bullet density.
 
 
 :cluster credit warning

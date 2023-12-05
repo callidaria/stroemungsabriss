@@ -638,13 +638,16 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		dgd.tx_title.add(cluster.id.c_str(),t_center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 		dgd.tx_title.load();
 
+		// setup memory for jump action to subsequent dialogues
+		dgd.await.resize(opcount);
+		dgd.wait_value.resize(opcount);
+
 		// dialogue option text setup
 		for (uint8_t i=0;i<opcount;i++) {
 
 			// action setup
-			//dgd.await.push_back();
-			//dgd.wait_value.push_back(out+cluster.elist[i].child_id);
-			// FIXME: this has a predeterminable size & will never be modified. use construct reserve
+			dgd.await[i] = cluster.elist[i].etype==LDCEntityType::SUBSEQUENT;
+			dgd.wait_value[i] = cluster.elist[i].tdata;
 
 			// information print setup
 			dgd.tx_options.add(
@@ -652,8 +655,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 					glm::vec2(
 						t_center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
 						dgd.liststart_y-dsize*i));
-			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),
-					glm::vec2(1030,350-720*i),200.f,20.f);
+			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),
+					200.f,20.f);
 			dgd.description_length += cluster.elist[i].description.length();
 		} dgd.tx_options.load(),dgd.tx_descriptions.load();
 
@@ -759,7 +762,8 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 				? csdd->max_options : csdd->sindex;
 
 		// confirmation handling
-		dg_state = csdd->sindex*conf;
+		if (dg_data[id].await[csdd->sindex]&&conf) open_dialogue(dg_data[id].wait_value[csdd->sindex]);
+		else dg_state = csdd->sindex*conf;
 
 		// write in-dialogue text
 		dg_data[id].tx_title.prepare();

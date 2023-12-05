@@ -376,8 +376,8 @@ struct SingularDialogueData
 	int8_t sindex = 0,max_options;
 
 	// action tuple
-	std::vector<uint8_t> await;
-	std::vector<uint8_t> wait_value;
+	std::vector<bool> await;
+	std::vector<uint16_t> wait_value;
 
 	// text to display information to user
 	Text tx_title,tx_options,tx_descriptions;
