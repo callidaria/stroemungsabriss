@@ -39,7 +39,6 @@
  * 	:segment <segment_name>
  * whereever a segment is called within the list defintion file, a dividing, stylized line will be
  * drawn between the imperatively previous and following definition
- * FIXME: segments are my problemchild, no matter the usage this will always break first
  * 
  * 	:condition (<condition_id><space>)*
  * specify an amount of conditions to activate list entity.
@@ -131,14 +130,24 @@ LDCProcessState LDCCompiler::compile(const char* path)
 	state.fpath = path;
 
 	// second pass: commands - execute extracted commands
-	for (auto cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state);
+	for (ListLanguageCommand &cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state);
 
 	// third pass: interpretation - temporary instruction data
-	for (auto cluster : state.clusters) {
-		// TODO: segment jump signing & child_name to child_id based on etype setting
+	for (LDCCluster &cluster : state.clusters) {
+
+		// correlate child name to cluster id
+		for (uint16_t pid : cluster.parent_ids) {
+			uint8_t i = 0;
+			while (state.clusters[i].id!=cluster.elist[pid].child_name) i++;
+			cluster.elist[pid].tdata = i;
+
+		// set segment jump write
+		} for (LDCSegment &segment : cluster.slist)
+			cluster.elist[segment.position].jsegment = true;
+
+	// compiled list status
 	} return state;
 }
-
 
 /**
  *		Start Implementation of Compiler Logic Pointers switched by Command
@@ -241,14 +250,16 @@ void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state
 void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
 	try {
-		state.clusters.back().elist.back().condition_id.push_back(stoi(cmd.tail));
+		std::stringstream bfss(cmd.tail);
+		std::string lid;
+		while (getline(bfss,lid,' '))
+			state.clusters.back().elist.back().condition_id.push_back(stoi(lid));
 	} catch (std::invalid_argument const &ex) {
 		compiler_error_msg(state.fpath,"condition tail does not contain a valid number",cmd.line_number);
 	} catch (std::out_of_range const &ex) {
 		compiler_error_msg(state.fpath,"given number exceeds reasonable range",cmd.line_number);
 	}
 }
-// TODO: implement this as a row of logic ids instead of single definition
 
 /*
 	command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
@@ -258,7 +269,7 @@ void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &sta
 void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state)
 {
 	state.clusters.back().elist.back().child_name = cmd.tail;
-	state.clusters.back().parents.push_back(state.clusters.back().elist.size()-1);
+	state.clusters.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
 	state.clusters.back().elist.back().etype = SUBSEQUENT;
 }
 
@@ -498,25 +509,15 @@ MenuList::MenuList(const char* path)
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		uint8_t i_seg = 0;
 
-		// setup text list for current cluster
+		// setup text lists for current cluster
 		std::vector<Text> ctx_elist,ctx_slist;
 
-		// convert cluster name references to cluster id
-		for (uint16_t pid : cluster.parents) {
-			uint8_t i = 0;
-			while (clusters[i].id!=cluster.elist[pid].child_name&&i<clusters.size()) i++;
-			cluster.elist[pid].tdata = i;
-
-		// process list segment heads
-		} for (uint8_t i=0;i<cluster.slist.size();i++) {
-			cluster.elist[cluster.slist[i].position].jsegment
-				= cluster.slist[i].position<cluster.elist.size();
-
-			// write segment information in-between list elements
+		// write segment information in-between list elements
+		for (uint8_t i=0;i<cluster.slist.size();i++) {
 			Text stext = Text(st_font);
-			stext.add(cluster.slist[i].title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X
-					+ MENU_LIST_SEGMENT_PUSH_X,MENU_LIST_SCROLL_START
-					- (cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
+			stext.add(cluster.slist[i].title.c_str(),glm::vec2(
+					MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
+					MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
 				stext.load();
 			ctx_slist.push_back(stext);
 

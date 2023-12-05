@@ -188,17 +188,16 @@ struct LDCCluster
 	std::string id;
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
-	std::vector<uint16_t> parents;
+	std::vector<uint16_t> parent_ids;
 };
 
 struct LDCProcessState
 {
 	const char* fpath;
 	std::vector<LDCCluster> clusters;
-	// previously saved MenuListEntity* list to iterate parents, but memory issues made it break
-	// TODO: look into the original memory issue for the slightest of improvements
 	std::vector<bool> condition_list;
 };
+// TODO: exclude helper variables like LDCEntity::child_name and LDCCluster::parents from returned process state
 
 class LDCCompiler
 {
