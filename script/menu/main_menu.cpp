@@ -21,10 +21,6 @@
  * any cluster can be referred to by name within the list definition file
  * to define the main list use :cluster main
  * 
- * 	:logic <condition_list_size>
- * setup of extern condition logic list to change viewability of entities with :condition command
- * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
- * 
  * 	:define <entity_name>
  * define the name of the list entity, that will be shown alongside other list member entities
  * 
@@ -43,6 +39,7 @@
  * 	:condition (<condition_id><space>)*
  * specify an amount of conditions to activate list entity.
  * the condition ids will read the respective booleans from an extern condition list.
+ * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
  * 
  * 
  * 		BEHAVIOUR DEFINITIONS
@@ -84,30 +81,34 @@
 */
 
 /*
-	compile(const char*) -> LDCProcessState (static) !O(n)b
+	compile(const char*) -> vector<LDCCluster> (static) !O(n)b
 	purpose: load .ldc files, break it up into a command buffer and compile it into a complex
 	\param path: path to .ldc file
 	\returns compiled struct complex to be used by UI feature
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute ok. i kinda does compile though
 */
-LDCProcessState LDCCompiler::compile(const char* path)
+std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","logic","define","describe","floats","segment","condition","subsequent",
+		"cluster","define","describe","floats","segment","condition","subsequent",
 		"system_behaviour","checkbox","dropdown","slider","return",
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
-		command_logic_cluster,command_logic_logiclist,command_logic_define,command_logic_describe,
-		command_logic_attributes,command_logic_segment,command_logic_condition,command_logic_subsequent,
-		command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,command_logic_slider,
-		command_logic_return,command_logic_syntax_error,
+		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_attributes,
+		command_logic_segment,command_logic_condition,command_logic_subsequent,command_logic_sysbehaviour,
+		command_logic_checkbox,command_logic_dropdown,command_logic_slider,command_logic_return,
+		command_logic_syntax_error,
 	};
 	// TODO: decide if those should be local to the compile function
 
+	// setup process state
+	LDCProcessState state;
+	state.fpath = path;
+
 	// first pass: extraction - iterate definition file
-	std::ifstream file(path,std::ios::in);
 	std::vector<ListLanguageCommand> cmd_buffer;
+	std::ifstream file(path,std::ios::in);
 	uint16_t line_number = 1;
 	while (!file.eof()) {
 
@@ -134,12 +135,11 @@ LDCProcessState LDCCompiler::compile(const char* path)
 		line_number++;
 	} file.close();
 
-	// setup process state
-	LDCProcessState state;
-	state.fpath = path;
-
 	// second pass: commands - execute extracted commands
-	for (ListLanguageCommand &cmd : cmd_buffer) interpreter_behaviour[cmd.id](cmd,state);
+	for (ListLanguageCommand &cmd : cmd_buffer) {
+		state.cmd = &cmd;
+		interpreter_behaviour[cmd.id](state);
+	}
 
 	// third pass: interpretation - temporary instruction data
 	for (LDCCluster &cluster : state.clusters) {
@@ -155,7 +155,7 @@ LDCProcessState LDCCompiler::compile(const char* path)
 			cluster.elist[segment.position].jsegment = true;
 
 	// compiled list status
-	} return state;
+	} return state.clusters;
 }
 
 /**
@@ -172,147 +172,133 @@ LDCProcessState LDCCompiler::compile(const char* path)
 */
 
 /*
-	command_logic_cluster(const ListLanguageCommand&,LDCProcessState&) -> (static,global) void !O(1)
+	command_logic_cluster(LDCProcessState&) -> (static,global) void !O(1)
 	purpose: open new cluster definition until next definition is opened. (cmd = :cluster)
 	conforming to: void* interpreter_logic
 */
-void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_cluster(LDCProcessState &state)
 {
 	LDCCluster cluster;
-	cluster.id = cmd.tail;
+	cluster.id = state.cmd->tail;
 	state.clusters.push_back(cluster);
 }
 
 /*
-	command_logic_logiclist(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
-	purpose: setup a boolean list, that can be interacted with to switch entity visibility (cmd = :logic)
-	conforming to: void* interpreter_logic
-*/
-void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state)
-{
-	try {
-		state.condition_list = std::vector<bool>(stoi(cmd.tail));
-	} catch (std::invalid_argument const &ex) {
-		compiler_error_msg(state.fpath,"logic tail does not contain a valid number",cmd.line_number);
-	} catch (std::out_of_range const &ex) {
-		compiler_error_msg(state.fpath,"given number exceeds legal list range",cmd.line_number);
-	}
-}
-
-/*
-	command_logic_define(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_define(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: add named list entity to currently opened cluster (cmd = :define)
 	conforming to: void* interpreter_logic
 */
-void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_define(LDCProcessState &state)
 {
 	LDCEntity entity;
-	entity.head = cmd.tail;
+	entity.head = state.cmd->tail;
 	state.clusters.back().elist.push_back(entity);
 }
 
 /*
-	command_logic_describe(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_describe(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: add entity description (cmd = :describe)
 	conforming to: void* interpreter_logic
 */
-void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ state.clusters.back().elist.back().description = cmd.buffer; }
+void command_logic_describe(LDCProcessState &state)
+{ state.clusters.back().elist.back().description = state.cmd->buffer; }
 
 /*
-	command_logic_attributes(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_attributes(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: store constant attributes in entity
 	conforming to: void* interpreter_logic
 */
-void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_attributes(LDCProcessState &state)
 {
 	try {
-		std::stringstream bfss(cmd.tail);
+		std::stringstream bfss(state.cmd->tail);
 		std::string attrib;
 		while (getline(bfss,attrib,' '))
 			state.clusters.back().elist.back().fattribs.push_back(stof(attrib));
 	} catch (std::invalid_argument const &ex) {
-		compiler_error_msg(state.fpath,"attribute tail should only contain float values",cmd.line_number);
+		compiler_error_msg(state,"attribute tail should only contain float values");
 	} catch (std::out_of_range const &ex) {
-		compiler_error_msg(state.fpath,"at least one attribute is out of float range",cmd.line_number);
+		compiler_error_msg(state,"at least one attribute is out of float range");
 	}
 }
 
 /*
-	command_logic_segment(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_segment(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: add a horrible segment that will cause problems in your logic later (cmd = :segment)
 	conforming to: void* interpreter_logic
 */
-void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_segment(LDCProcessState &state)
 {
 	LDCSegment segment;
 	segment.position = state.clusters.back().elist.size();
-	segment.title = cmd.tail;
+	segment.title = state.cmd->tail;
 	state.clusters.back().slist.push_back(segment);
 }
 
 /*
-	command_logic_condition(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_condition(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: define entity activation boolean reference in logic list by memory id (cmd = :condition)
 	conforming to: void* interpreter_logic
 */
-void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_condition(LDCProcessState &state)
 {
 	try {
-		std::stringstream bfss(cmd.tail);
+		std::stringstream bfss(state.cmd->tail);
 		std::string lid;
 		while (getline(bfss,lid,' '))
 			state.clusters.back().elist.back().condition_id.push_back(stoi(lid));
 	} catch (std::invalid_argument const &ex) {
-		compiler_error_msg(state.fpath,"condition tail does not contain a valid number",cmd.line_number);
+		compiler_error_msg(state,"condition tail does not contain a valid number");
 	} catch (std::out_of_range const &ex) {
-		compiler_error_msg(state.fpath,"given number exceeds reasonable range",cmd.line_number);
+		compiler_error_msg(state,"given number exceeds reasonable range");
 	}
 }
 
 /*
-	command_logic_subsequent(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_subsequent(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: link subsequent cluster to transition to as entity action (cmd = :subsequent)
 	conforming to: void* interpreter_logic
 */
-void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_subsequent(LDCProcessState &state)
 {
-	state.clusters.back().elist.back().child_name = cmd.tail;
+	state.clusters.back().elist.back().child_name = state.cmd->tail;
 	state.clusters.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
 	state.clusters.back().elist.back().etype = SUBSEQUENT;
 }
 
 /*
-	TODO
+	command_logic_sysbehaviour(LDCProcessState&) -> void (static,global) !O(1)
+	purpose: read system command id according to predefinition in ldc documentation above when confirmed
+	conforming to: void* interpreter_logic
 */
-void command_logic_sysbehaviour(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_sysbehaviour(LDCProcessState &state)
 {
 	try {
 		state.clusters.back().elist.back().etype = SYSTEM;
-		state.clusters.back().elist.back().tdata = stoi(cmd.tail);
+		state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
 	} catch (std::invalid_argument const &ex) {
-		compiler_error_msg(state.fpath,"system command id not an interpretable number",cmd.line_number);
+		compiler_error_msg(state,"system command id not an interpretable number");
 	} catch (std::out_of_range const &ex) {
-		compiler_error_msg(state.fpath,"system command id out of reasonable defrange",cmd.line_number);
+		compiler_error_msg(state,"system command id out of reasonable defrange");
 	}
 }
 
 /*
-	command_logic_checkbox(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_checkbox(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: set boolean on/off functionality as entity action (cmd = :checkbox)
 	conforming to: void* interpreter_logic
 */
-void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_checkbox(LDCProcessState &state)
 { state.clusters.back().elist.back().etype = CHECKBOX; }
 
 /*
-	command_logic_dropdown(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_dropdown(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: create sublist index linked choices attached to entity (cmd = :dropdown)
 	conforming to: void* interpreter_logic
 */
-void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_dropdown(LDCProcessState &state)
 {
-	std::stringstream bfss(cmd.buffer);
+	std::stringstream bfss(state.cmd->buffer);
 	std::string ddoption;
 	while (getline(bfss,ddoption,';'))
 		state.clusters.back().elist.back().cattribs.push_back(ddoption);
@@ -322,32 +308,31 @@ void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &stat
 // 	this is also relevant for attributes/floats insertions
 
 /*
-	command_logic_slider(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_slider(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: attach transformable float value to entity (cmd = :slider)
 	conforming to: void* interpreter_logic
 */
-void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_slider(LDCProcessState &state)
 { state.clusters.back().elist.back().etype = SLIDER; }
 
 /*
-	command_logic_return(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_return(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: set finalizing entity with set value return (cmd = :return)
 	conforming to: void* interpreter_logic
 */
-void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state)
+void command_logic_return(LDCProcessState &state)
 {
-	state.clusters.back().elist.back().tdata = stoi(cmd.tail);
+	state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
 	state.clusters.back().elist.back().etype = RETURN;
 }
 
 /*
-	command_logic_error(const ListLanguageCommand&,LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_error(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: this method catches invalid syntax/commands and notifies the developer
 	conforming to: void* interpreter_logic
 */
-void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state)
-{ compiler_error_msg(state.fpath,"invalid command syntax",cmd.line_number); }
-
+void command_logic_syntax_error(LDCProcessState &state)
+{ compiler_error_msg(state,"invalid command syntax"); }
 
 /*
 	compiler_error_msg(const char*,const char*,uint16_t) -> void (static,global) !O(1)
@@ -356,9 +341,8 @@ void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &
 	\param msg: readable message, notifying the user about their mistake
 	\param line_number: line number the error occured in for quick navigation
 */
-void compiler_error_msg(const char* path,const char* msg,uint16_t line_number)
-{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",path,line_number,msg); }
-// FIXME: the way error output works is pure and utter garbage. line_number & path are predictable
+void compiler_error_msg(LDCProcessState &state,const char* msg)
+{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",state.fpath,state.cmd->line_number,msg); }
 
 
 /**
@@ -527,8 +511,7 @@ void SelectionSpliceGeometry::update()
 MenuList::MenuList(const char* path)
 {
 	// execute definition code
-	LDCProcessState ldc_result = LDCCompiler::compile(path);
-	clusters = ldc_result.clusters;
+	clusters = LDCCompiler::compile(path);
 
 	// visuals creation
 	for (LDCCluster &cluster : clusters) {
@@ -608,17 +591,17 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		uint8_t tsize,uint8_t dsize)
 {
 	// content information extraction
-	LDCProcessState ldc_result = LDCCompiler::compile(path);
+	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
 
 	// setup dialogue fonts
 	Font tfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",tsize,tsize);
 	Font ofont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",dsize,dsize);
 	Font dfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
-	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts
+	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts (mdc)
 
 	// process all clusters as dialogues
 	uint8_t out = dg_data.size();
-	for (LDCCluster cluster : ldc_result.clusters) {
+	for (LDCCluster &cluster : clusters) {
 
 		// store option count of current dialogue window
 		size_t opcount = cluster.elist.size();
@@ -626,7 +609,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		// on-demand translation handling through ldc floats command
 		glm::vec2 t_center = center;
 		if (cluster.elist[0].fattribs.size()>1)
-			t_center.x += cluster.elist[0].fattribs[0],t_center.y += cluster.elist[0].fattribs[1];
+			t_center += glm::vec2(cluster.elist[0].fattribs[0],cluster.elist[0].fattribs[1]);
 
 		// setup dialogue data with list start position
 		SingularDialogueData dgd;

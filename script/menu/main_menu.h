@@ -47,7 +47,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 13;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 12;
 
 // menu list positioning
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
@@ -187,45 +187,44 @@ struct LDCSegment
 
 struct LDCCluster
 {
-	std::string id;
+	std::string id = "";
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
 	std::vector<uint16_t> parent_ids;
 };
+// TODO: exclude helper variables like LDCEntity::child_name and LDCCluster::parents from returned clusters
 
 struct LDCProcessState
 {
 	const char* fpath;
+	ListLanguageCommand* cmd;
 	std::vector<LDCCluster> clusters;
-	std::vector<bool> condition_list;
 };
-// TODO: exclude helper variables like LDCEntity::child_name and LDCCluster::parents from returned process state
 
 class LDCCompiler
 {
 public:
 
 	// code processing
-	static LDCProcessState compile(const char* path);
+	static std::vector<LDCCluster> compile(const char* path);
 };
 
 // command interpretation logic
-typedef void (*interpreter_logic)(const ListLanguageCommand&,LDCProcessState&);
-static void command_logic_cluster(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_logiclist(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_define(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_describe(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_attributes(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_segment(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_condition(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_subsequent(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_sysbehaviour(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_checkbox(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_dropdown(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_slider(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_return(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void command_logic_syntax_error(const ListLanguageCommand &cmd,LDCProcessState &state);
-static void compiler_error_msg(const char* path,const char* msg,uint16_t line_number);
+typedef void (*interpreter_logic)(LDCProcessState&);
+static void command_logic_cluster(LDCProcessState &state);
+static void command_logic_define(LDCProcessState &state);
+static void command_logic_describe(LDCProcessState &state);
+static void command_logic_attributes(LDCProcessState &state);
+static void command_logic_segment(LDCProcessState &state);
+static void command_logic_condition(LDCProcessState &state);
+static void command_logic_subsequent(LDCProcessState &state);
+static void command_logic_sysbehaviour(LDCProcessState &state);
+static void command_logic_checkbox(LDCProcessState &state);
+static void command_logic_dropdown(LDCProcessState &state);
+static void command_logic_slider(LDCProcessState &state);
+static void command_logic_return(LDCProcessState &state);
+static void command_logic_syntax_error(LDCProcessState &state);
+static void compiler_error_msg(LDCProcessState &state,const char* msg);
 
 
 /**
@@ -314,10 +313,6 @@ public:
 
 private:
 
-	// buffer
-	std::vector<ListLanguageCommand> cmd_buffer;
-
-	// listing
 	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
 	//		1) creation is complete and utter garbage trash
 	//		2) you instanciate a shader & buffer for each and every single element
