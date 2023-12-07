@@ -374,13 +374,13 @@ struct SingularDialogueData
 	int8_t sindex = 0,max_options;
 
 	// action tuple
-	std::vector<uint8_t> await;
-	std::vector<uint16_t> wait_value;
+	std::vector<uint8_t> action_id;
+	std::vector<uint16_t> action_value;
 
 	// text to display information to user
-	Text tx_title,tx_options,tx_descriptions;
 	uint8_t option_size;
-	uint32_t description_length = 0;
+	Text tx_title,tx_options,tx_descriptions;
+	uint32_t title_length,option_length = 0,description_length = 0;
 };
 
 class MenuDialogue
@@ -404,10 +404,6 @@ public:
 	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void background_component(float transition_delta);
 
-	// info
-	inline bool system_active() { return opening_ids.size()||active_ids.size()||closing_ids.size(); }
-	// FIXME: will be called a lot, so store result for minor optimization
-
 private:
 
 	// render
@@ -415,9 +411,10 @@ private:
 
 public:
 
-	// data
-	std::vector<SingularDialogueData> dg_data;
+	// status
+	bool system_active = false;
 	uint8_t dg_state = 0;
+	std::vector<SingularDialogueData> dg_data;
 
 private:
 

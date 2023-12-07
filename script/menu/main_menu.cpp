@@ -497,6 +497,7 @@ void SelectionSpliceGeometry::update()
 		glDrawArrays(GL_TRIANGLES,i*6,6);
 	}
 }
+// TODO: head rotation transition between dialogue and main mode is snapping around and it looks terrible
 
 
 /**
@@ -646,17 +647,18 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		dgd.tx_title = Text(tfont),dgd.tx_options = Text(ofont),dgd.tx_descriptions = Text(dfont);
 		dgd.tx_title.add(cluster.id.c_str(),t_center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 		dgd.tx_title.load();
+		dgd.title_length = cluster.id.length();
 
 		// setup memory for jump action to subsequent dialogues
-		dgd.await.resize(opcount);
-		dgd.wait_value.resize(opcount);
+		dgd.action_id.resize(opcount);
+		dgd.action_value.resize(opcount);
 
 		// dialogue option text setup
 		for (uint8_t i=0;i<opcount;i++) {
 
 			// action setup
-			dgd.await[i] = cluster.elist[i].etype-(uint8_t)LDCEntityType::RETURN;
-			dgd.wait_value[i] = cluster.elist[i].tdata;
+			dgd.action_id[i] = cluster.elist[i].etype-(uint8_t)LDCEntityType::RETURN;
+			dgd.action_value[i] = cluster.elist[i].tdata;
 
 			// information print setup
 			dgd.tx_options.add(
@@ -666,6 +668,9 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 						dgd.liststart_y-dsize*i));
 			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),
 					200.f,20.f);
+
+			// calculate characters to draw for each text
+			dgd.option_length += cluster.elist[i].head.length();
 			dgd.description_length += cluster.elist[i].description.length();
 		} dgd.tx_options.load(),dgd.tx_descriptions.load();
 
@@ -707,6 +712,7 @@ void MenuDialogue::load()
 	slc_shader.def_attributeF("position",2,0,2);
 	slc_shader.upload_camera(cam2D);
 }
+// FIXME: define 2D coordinate system ONCE and include for ALL usages, this avoids a lot of useless matrix calc
 
 /*
 	TODO
@@ -738,6 +744,7 @@ void MenuDialogue::close_dialogue(uint8_t did)
 
 	// set dialogue info closed
 	dg_data[did].dg_active = false;
+	dg_data[did].sindex = 0;
 }
 
 /*
@@ -745,8 +752,9 @@ void MenuDialogue::close_dialogue(uint8_t did)
 */
 void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back)
 {
-	// reset dialogue state to default=0, representing no results this frame
+	// value resets & updates
 	dg_state = 0;
+	system_active = opening_ids.size()||active_ids.size()||closing_ids.size();
 
 	// check selector update conditions
 	// this does not include the render preparations, breaks if idling & opening simultaneously
@@ -772,8 +780,8 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 
 		// confirmation handling
 		if (conf) {
-			switch (dg_data[id].await[csdd->sindex]) {
-				case 1: open_dialogue(dg_data[id].wait_value[csdd->sindex]);
+			switch (dg_data[id].action_id[csdd->sindex]) {
+				case 1: open_dialogue(dg_data[id].action_value[csdd->sindex]);
 					break;
 				case 2: close_dialogue(id);
 					break;
@@ -781,17 +789,19 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 			}
 		}
 
-		// write in-dialogue text
-		dg_data[id].tx_title.prepare();
-		dg_data[id].tx_title.render(128,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
-		dg_data[id].tx_options.prepare();
-		dg_data[id].tx_options.render(128,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
-
 		// show description of selected option
 		dg_data[id].tx_descriptions.prepare();
 		dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
 				glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
 		dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
+	}
+
+	// write in-dialogue text
+	for (uint8_t id : active_ids) {
+		dg_data[id].tx_title.prepare();
+		dg_data[id].tx_title.render(dg_data[id].title_length,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
+		dg_data[id].tx_options.prepare();
+		dg_data[id].tx_options.render(dg_data[id].option_length,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
 	}
 
 	// setup selector draw
@@ -1107,7 +1117,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	splices_geometry.splices[splice_selection_id].ssk[0].ext_upper = uext_selection*curtain_trans;
 
 	// splash render
-	tkey_head = mtransition+ftransition+mdialogues.system_active();
+	tkey_head = mtransition+ftransition+mdialogues.system_active;
 	tkey_title = mtransition;
 	splices_geometry.update();
 	// TODO: try and break down reference variables to a single float
