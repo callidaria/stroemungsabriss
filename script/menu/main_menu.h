@@ -149,13 +149,6 @@ constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
  *		LDC Compiler Definition
 */
 
-struct ListLanguageCommand
-{
-	uint8_t id = 0;
-	std::string tail,buffer;
-	uint16_t line_number;
-};
-
 enum LDCEntityType
 {
 	UNDEFINED = 0,
@@ -167,17 +160,36 @@ enum LDCEntityType
 	SYSTEM = 6
 };
 
+struct ListLanguageCommand
+{
+	uint8_t id = 0;
+	std::string tail,buffer;
+	uint16_t line_number;
+};
+
+struct LDCSubsequentReferences
+{
+	std::vector<uint16_t> parent_ids;
+	std::vector<std::string> child_names;
+};
+
 struct LDCEntity
 {
-	std::string head,description,child_name = "";
+	// basic element data & availability state
+	std::string head,description;
 	std::vector<uint8_t> condition_id;
+
+	// element behaviour type, value of tdata switches meaning based on etype
 	LDCEntityType etype = UNDEFINED;
 	uint16_t tdata;
+
+	// storage for additional attributes
 	std::vector<float> fattribs;
 	std::vector<std::string> cattribs;
+
+	// segment behaviour (probably not the best solution and is subject to change)
 	bool jsegment = false;
 };
-// TODO: document the power of tdata storage and other byproducts of the recent (2023/12/04) structure change
 
 struct LDCSegment
 {
@@ -190,14 +202,18 @@ struct LDCCluster
 	std::string id = "";
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
-	std::vector<uint16_t> parent_ids;
 };
-// TODO: exclude helper variables like LDCEntity::child_name and LDCCluster::parents from returned clusters
 
 struct LDCProcessState
 {
+	// info
 	const char* fpath;
+
+	// working data
 	ListLanguageCommand* cmd;
+	std::vector<LDCSubsequentReferences> crefs;
+
+	// resulting data
 	std::vector<LDCCluster> clusters;
 };
 

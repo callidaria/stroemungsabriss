@@ -142,17 +142,17 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 	}
 
 	// third pass: interpretation - temporary instruction data
-	for (LDCCluster &cluster : state.clusters) {
+	for (uint16_t i=0;i<state.clusters.size();i++) {
 
 		// correlate child name to cluster id
-		for (uint16_t pid : cluster.parent_ids) {
-			uint8_t i = 0;
-			while (state.clusters[i].id!=cluster.elist[pid].child_name) i++;
-			cluster.elist[pid].tdata = i;
+		for (uint16_t j=0;j<state.crefs[i].parent_ids.size();j++) {
+			uint16_t k = 0;
+			while (state.clusters[k].id!=state.crefs[i].child_names[j]) k++;
+			state.clusters[i].elist[state.crefs[i].parent_ids[j]].tdata = k;
 
 		// set segment jump write
-		} for (LDCSegment &segment : cluster.slist)
-			cluster.elist[segment.position].jsegment = true;
+		} for (LDCSegment &segment : state.clusters[i].slist)
+			state.clusters[i].elist[segment.position].jsegment = true;
 
 	// compiled list status
 	} return state.clusters;
@@ -181,6 +181,7 @@ void command_logic_cluster(LDCProcessState &state)
 	LDCCluster cluster;
 	cluster.id = state.cmd->tail;
 	state.clusters.push_back(cluster);
+	state.crefs.push_back({{},{}});
 }
 
 /*
@@ -261,8 +262,8 @@ void command_logic_condition(LDCProcessState &state)
 */
 void command_logic_subsequent(LDCProcessState &state)
 {
-	state.clusters.back().elist.back().child_name = state.cmd->tail;
-	state.clusters.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
+	state.crefs.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
+	state.crefs.back().child_names.push_back(state.cmd->tail);
 	state.clusters.back().elist.back().etype = SUBSEQUENT;
 }
 
@@ -560,7 +561,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 	// FIXME: don't just update gsel variable. it's bad form i think
 
 	// switching list activation
-	if (conf&&clusters[active_cluster_id].elist[gsel].child_name.size())
+	if (conf&&clusters[active_cluster_id].elist[gsel].etype==SUBSEQUENT)
 		active_cluster_id = clusters[active_cluster_id].elist[gsel].tdata;
 
 	// list navigation towards parent
