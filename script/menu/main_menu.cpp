@@ -96,9 +96,9 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_attributes,
-		command_logic_segment,command_logic_condition,command_logic_subsequent,command_logic_sysbehaviour,
-		command_logic_checkbox,command_logic_dropdown,command_logic_slider,command_logic_return,
-		command_logic_syntax_error,
+		command_logic_segment,command_logic_condition,command_logic_subsequent,
+		command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,command_logic_slider,
+		command_logic_return,command_logic_syntax_error,
 	};
 	// TODO: decide if those should be local to the compile function
 
@@ -510,13 +510,15 @@ void SelectionSpliceGeometry::update()
 /*
 	TODO
 */
-MenuList::MenuList(const char* path)
+uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
-	clusters = LDCCompiler::compile(path);
+	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
+	uint8_t out = 0;
+	// TODO: implement correct id output after figuring out the dialogue structure
 
 	// visuals creation
-	for (LDCCluster &cluster : clusters) {
+	/*for (LDCCluster &cluster : clusters) {
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		uint8_t i_seg = 0;
 
@@ -543,7 +545,7 @@ MenuList::MenuList(const char* path)
 
 		// add created text
 		tx_elist.push_back(ctx_elist),tx_slist.push_back(ctx_slist);
-	}
+	}*/ return out;
 }
 
 /*
@@ -552,7 +554,7 @@ MenuList::MenuList(const char* path)
 void MenuList::update(int8_t &grid,bool conf,bool &back)
 {
 	// translate input
-	uint16_t gsel = lscroll+grid;
+	/*uint16_t gsel = lscroll+grid;
 	//gsel += clusters[active_cluster_id].elist[gsel].jsegment;
 	int16_t didx = tx_elist[active_cluster_id].size()-(gsel+1);
 	grid += didx*(didx<0);
@@ -575,7 +577,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 			txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
 	for (auto txe : tx_elist[active_cluster_id])
 		txe.prepare(),txe.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
-			txe.render(1024,glm::vec4(1));
+			txe.render(1024,glm::vec4(1));*/
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)
 
@@ -975,6 +977,9 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// load geometry for splices
 	splices_geometry.load();
 
+	// list setup
+	//mlists.define_list("./lvload/options.ldc");
+
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
@@ -1281,7 +1286,7 @@ void interface_behaviour_macro(MainMenu &tm)
 */
 void interface_behaviour_options(MainMenu &tm)
 {
-	tm.update_list_grid(tm.ml_options);
+	//tm.update_list_grid(tm.mlists);
 	tm.interface_logic_id *= !tm.hit_b;
 }
 

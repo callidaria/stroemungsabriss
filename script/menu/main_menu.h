@@ -314,8 +314,11 @@ class MenuList
 public:
 
 	// construction
-	MenuList(const char* path);
+	MenuList() {  }
 	~MenuList() {  }
+
+	// creation
+	uint8_t define_list(const char* path);
 
 	// draw
 	void update(int8_t &grid,bool conf,bool &back);
@@ -323,12 +326,20 @@ public:
 public:
 
 	// interaction
-	std::vector<LDCCluster> clusters;
 	uint8_t active_cluster_id = 0;
-	// FIXME: interaction with condition list like this is a stupid idea written by an apebrain (me)
+	//std::vector<bool> conditions;
 
 private:
 
+	// status
+	uint8_t lscroll = 0;
+
+	// data
+	//std::vector<LDCCluster> clusters;
+
+	// visuals
+	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
 	//		1) creation is complete and utter garbage trash
 	//		2) you instanciate a shader & buffer for each and every single element
@@ -338,13 +349,6 @@ private:
 	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
 	// anyway, here's the implementation for now...
 	std::vector<std::vector<Text>> tx_elist,tx_slist;
-
-	// status
-	uint8_t lscroll = 0;
-
-	// predefinitions
-	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 };
 
 
@@ -485,7 +489,7 @@ public:
 
 	// interactables
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
-	MenuList ml_options = MenuList("./lvload/options.ldc");
+	MenuList mlists;
 	MenuDialogue mdialogues;
 
 	// index
