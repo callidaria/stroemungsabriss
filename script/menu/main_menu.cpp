@@ -514,8 +514,7 @@ uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
 	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
-	uint8_t out = 0;
-	// TODO: implement correct id output after figuring out the dialogue structure
+	conditions.push_back(false),conditions.push_back(true);
 
 	// visuals creation
 	/*for (LDCCluster &cluster : clusters) {
@@ -545,7 +544,7 @@ uint8_t MenuList::define_list(const char* path)
 
 		// add created text
 		tx_elist.push_back(ctx_elist),tx_slist.push_back(ctx_slist);
-	}*/ return out;
+		}*/ //return 0;
 }
 
 /*
@@ -978,7 +977,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	splices_geometry.load();
 
 	// list setup
-	//mlists.define_list("./lvload/options.ldc");
+	mlists.define_list("./lvload/options.ldc");
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);

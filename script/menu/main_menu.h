@@ -327,7 +327,7 @@ public:
 
 	// interaction
 	uint8_t active_cluster_id = 0;
-	//std::vector<bool> conditions;
+	std::vector<bool> conditions;
 
 private:
 
@@ -335,7 +335,7 @@ private:
 	uint8_t lscroll = 0;
 
 	// data
-	//std::vector<LDCCluster> clusters;
+	std::vector<LDCCluster> clusters;
 
 	// visuals
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -348,7 +348,7 @@ private:
 	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
 	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
 	// anyway, here's the implementation for now...
-	std::vector<std::vector<Text>> tx_elist,tx_slist;
+	//std::vector<std::vector<Text>> tx_elist,tx_slist;
 };
 
 
