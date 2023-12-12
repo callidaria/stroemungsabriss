@@ -514,44 +514,80 @@ uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
 	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
-	conditions.push_back(false),conditions.push_back(true);
 
-	// visuals creation
-	/*for (LDCCluster &cluster : clusters) {
-		int32_t vscroll = MENU_LIST_SCROLL_START;
-		uint8_t i_seg = 0;
-
-		// setup text lists for current cluster
-		std::vector<Text> ctx_elist,ctx_slist;
+	// entity creation
+	for (LDCCluster &cluster : clusters) {
+		MenuListComplex t_mlc;
 
 		// write segment information in-between list elements
 		for (uint8_t i=0;i<cluster.slist.size();i++) {
 			Text stext = Text(st_font);
-			stext.add(cluster.slist[i].title.c_str(),glm::vec2(
-					MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
-					MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y)),
-				stext.load();
-			ctx_slist.push_back(stext);
+			stext.add(
+					cluster.slist[i].title.c_str(),
+					glm::vec2(
+						MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
+						MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y
+				)),stext.load();
+			t_mlc.tx_slist.push_back(stext);
+		}
 
-		// process cluster entities
-		} for (LDCEntity entity : cluster.elist) {
+		// process cluster entites
+		int32_t vscroll = MENU_LIST_SCROLL_START;
+		for (LDCEntity entity : cluster.elist) {
+
+			// dodge scroll to prevent segment override with list element
 			vscroll -= MENU_LIST_SCROLL_Y*entity.jsegment;
+
+			// fill in element list information
 			Text etext = Text(st_font);
 			etext.add(entity.head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),etext.load();
-			ctx_elist.push_back(etext);
+			t_mlc.tx_elist.push_back(etext);
+
+			// move cursor to write next element
 			vscroll -= MENU_LIST_SCROLL_Y;
 		}
 
-		// add created text
-		tx_elist.push_back(ctx_elist),tx_slist.push_back(ctx_slist);
-		}*/ //return 0;
+		// store resulting cluster
+		mlists.push_back(t_mlc);
+	} return 0;
 }
 
 /*
 	TODO
 */
-void MenuList::update(int8_t &grid,bool conf,bool &back)
+void MenuList::close_list(uint8_t id)
 {
+	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),id),active_ids.end());
+	// this will become more complex in the future it belongs in the cpp
+}
+// TODO: recurring pattern, this also happens in renderer btw, write a shortcut for that kind of id processing
+
+/*
+	TODO
+*/
+void MenuList::update(bool back)
+{
+	// update most recent list
+	if (active_ids.size()) {
+		if (back) {
+			close_list(active_ids.back());
+			return;
+		}
+	}
+
+	// draw lists
+	for (uint8_t id : active_ids) {
+		for (Text t : mlists[id].tx_slist)
+			t.prepare(),t.set_scroll(glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y)),
+				t.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
+		for (Text t : mlists[id].tx_elist)
+			t.prepare(),t.set_scroll(glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y)),
+				t.render(1024,glm::vec4(1));
+	}
+	// FIXME: colouring like this is for children and deserves to be killed (add multicolour for change annot)
+	// FIXME: always calling 1024 instances to be drawn, store text length in struct
+	// TODO: code transformation to background of parent lists (can be solved together with tilt shift TODO)
+
 	// translate input
 	/*uint16_t gsel = lscroll+grid;
 	//gsel += clusters[active_cluster_id].elist[gsel].jsegment;
@@ -568,15 +604,7 @@ void MenuList::update(int8_t &grid,bool conf,bool &back)
 	// list navigation towards parent
 	bool stall_back = active_cluster_id;
 	active_cluster_id *= !back;
-	back = !stall_back&&back;
-
-	// draw segments & entities
-	for (auto txs : tx_slist[active_cluster_id])
-		txs.prepare(),txs.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
-			txs.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
-	for (auto txe : tx_elist[active_cluster_id])
-		txe.prepare(),txe.set_scroll(glm::vec2(0,lscroll*MENU_LIST_SCROLL_Y)),
-			txe.render(1024,glm::vec4(1));*/
+	back = !stall_back&&back;*/
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)
 
@@ -1108,7 +1136,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
-	// update & draw dialogues
+	// update dialogues & lists
+	mlists.update(hit_b);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START MULTISAMPLED RENDER
@@ -1185,7 +1214,7 @@ void MainMenu::update_list_grid(MenuList &ml)
 	} else vgrid_id += udmv;
 
 	// process menu list input & render
-	ml.update(vgrid_id,hit_a,hit_b);
+	//ml.update(vgrid_id,hit_a,hit_b);
 
 	// update selection splash geometry
 	if (tid!=vgrid_id) {
@@ -1199,6 +1228,7 @@ void MainMenu::update_list_grid(MenuList &ml)
 }
 // TODO: give each list their own grid id, so selection will be remembered, when going through subsequents
 // TODO: with the above mentioned """tech""" produce a geometry shadow of previous list selection in the bgr (mdc)
+// TODO: generally, this is an awful outsourcing trick which needs to be removed. this logic belongs to MList
 
 /*
 	TODO
@@ -1277,7 +1307,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// reset
-	tm.diff_popup = false,tm.shot_popup = false;
+	tm.option_engage = false,tm.diff_popup = false,tm.shot_popup = false;
 }
 
 /*
@@ -1286,7 +1316,10 @@ void interface_behaviour_macro(MainMenu &tm)
 void interface_behaviour_options(MainMenu &tm)
 {
 	//tm.update_list_grid(tm.mlists);
-	tm.interface_logic_id *= !tm.hit_b;
+	if (!tm.option_engage) {
+		tm.mlists.open_list(0);
+		tm.option_engage = true;
+	} tm.interface_logic_id *= tm.mlists.system_active();
 }
 
 /*

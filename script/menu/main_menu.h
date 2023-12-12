@@ -309,6 +309,20 @@ private:
  * 		MenuList Definiton
 */
 
+struct MenuListComplex
+{
+	uint8_t lselect = 0,lscroll = 0;
+	std::vector<Text> tx_elist,tx_slist;
+};
+// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
+//		1) creation is complete and utter garbage trash
+//		2) you instanciate a shader & buffer for each and every single element
+//		3) every text element => list element has it's own load
+//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
+// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
+// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
+// anyway, here's the implementation for now...
+
 class MenuList
 {
 public:
@@ -317,38 +331,32 @@ public:
 	MenuList() {  }
 	~MenuList() {  }
 
-	// creation
+	// invokations
 	uint8_t define_list(const char* path);
+	inline void open_list(uint8_t id) { active_ids.push_back(id); }
+	void close_list(uint8_t id);
 
 	// draw
-	void update(int8_t &grid,bool conf,bool &back);
+	void update(bool back);
+
+	// info
+	inline bool system_active() { return active_ids.size(); }
 
 public:
 
 	// interaction
-	uint8_t active_cluster_id = 0;
+	bool lists_open = false;
 	std::vector<bool> conditions;
 
 private:
 
-	// status
-	uint8_t lscroll = 0;
-
 	// data
-	std::vector<LDCCluster> clusters;
+	std::vector<MenuListComplex> mlists;
+	std::vector<uint8_t> active_ids;
 
 	// visuals
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
-	// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
-	//		1) creation is complete and utter garbage trash
-	//		2) you instanciate a shader & buffer for each and every single element
-	//		3) every text element => list element has it's own load
-	//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
-	// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
-	// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
-	// anyway, here's the implementation for now...
-	//std::vector<std::vector<Text>> tx_elist,tx_slist;
 };
 
 
@@ -518,7 +526,7 @@ public:
 
 	// memory for static continue
 	uint8_t dg_diffs,dg_continue;
-	bool diff_popup = false,shot_popup = false;
+	bool option_engage = false,diff_popup = false,shot_popup = false;
 
 private:
 
