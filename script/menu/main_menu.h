@@ -119,6 +119,7 @@ constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
 constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
+constexpr glm::vec4 TEXT_SEGMENT_COLOUR = glm::vec4(.7f,.7f,.7f,1.f);
 
 // menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
@@ -309,19 +310,25 @@ private:
  * 		MenuList Definiton
 */
 
+struct MenuListEntity
+{
+	Text text;
+	size_t tlen;
+	glm::vec4 colour;
+};
+
+struct MenuListSegment
+{
+	Text text;
+	size_t tlen;
+};
+
 struct MenuListComplex
 {
-	uint8_t lselect = 0,lscroll = 0;
-	std::vector<Text> tx_elist,tx_slist;
+	uint8_t lselect,lscroll;
+	std::vector<MenuListEntity> entities;
+	std::vector<MenuListSegment> segments;
 };
-// TODO: this awful, horrible, trash, garbage, bullshit text implementation does four things:
-//		1) creation is complete and utter garbage trash
-//		2) you instanciate a shader & buffer for each and every single element
-//		3) every text element => list element has it's own load
-//		4) EVERY GODDAMN TEXT ELEMENT IS A SINGLE GODDAMN DRAWCALL!!!??!?!??!?!?!?
-// HOW COULD I HAVE WORKED WITH THIS UTTERLY STUPID TEXT REPRESENTATION FOR SO LONG!?!?!
-// handling text this way uses !!20MB!! yes right, !!20MB!! for the options list alone
-// anyway, here's the implementation for now...
 
 class MenuList
 {

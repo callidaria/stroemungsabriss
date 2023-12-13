@@ -517,31 +517,37 @@ uint8_t MenuList::define_list(const char* path)
 
 	// entity creation
 	for (LDCCluster &cluster : clusters) {
-		MenuListComplex t_mlc;
+		MenuListComplex t_mlc = {
+			0,0,
+			std::vector<MenuListEntity>(cluster.elist.size()),
+			std::vector<MenuListSegment>(cluster.slist.size()),
+		};
 
 		// write segment information in-between list elements
 		for (uint8_t i=0;i<cluster.slist.size();i++) {
-			Text stext = Text(st_font);
-			stext.add(
+			MenuListSegment t_segment = { Text(st_font),cluster.slist[i].title.length() };
+			t_segment.text.add(
 					cluster.slist[i].title.c_str(),
 					glm::vec2(
 						MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
 						MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y
-				)),stext.load();
-			t_mlc.tx_slist.push_back(stext);
+				)),t_segment.text.load();
+			t_mlc.segments[i] = t_segment;
 		}
 
 		// process cluster entites
 		int32_t vscroll = MENU_LIST_SCROLL_START;
-		for (LDCEntity entity : cluster.elist) {
+		for (uint16_t i=0;i<cluster.elist.size();i++) {
+			MenuListEntity t_entity = { Text(st_font),cluster.elist[i].head.length(),glm::vec4(1.f) };
 
 			// dodge scroll to prevent segment override with list element
-			vscroll -= MENU_LIST_SCROLL_Y*entity.jsegment;
+			vscroll -= MENU_LIST_SCROLL_Y*cluster.elist[i].jsegment;
 
 			// fill in element list information
-			Text etext = Text(st_font);
-			etext.add(entity.head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),etext.load();
-			t_mlc.tx_elist.push_back(etext);
+			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
+				t_entity.text.load();
+			t_mlc.entities[i] = t_entity;
+			// TODO: read colour from attributes & add discolour method
 
 			// move cursor to write next element
 			vscroll -= MENU_LIST_SCROLL_Y;
@@ -549,7 +555,7 @@ uint8_t MenuList::define_list(const char* path)
 
 		// store resulting cluster
 		mlists.push_back(t_mlc);
-	} return 0;
+	} return mlists.size()-1;
 }
 
 /*
@@ -575,17 +581,14 @@ void MenuList::update(bool back)
 		}
 	}
 
-	// draw lists
+	// draw active lists
 	for (uint8_t id : active_ids) {
-		for (Text t : mlists[id].tx_slist)
-			t.prepare(),t.set_scroll(glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y)),
-				t.render(1024,glm::vec4(.7f,.7f,.7f,1.f));
-		for (Text t : mlists[id].tx_elist)
-			t.prepare(),t.set_scroll(glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y)),
-				t.render(1024,glm::vec4(1));
+		glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
+		for (MenuListSegment &s : mlists[id].segments)
+			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+		for (MenuListEntity &e : mlists[id].entities)
+			e.text.prepare(),e.text.set_scroll(crr_scroll),e.text.render(e.tlen,e.colour);
 	}
-	// FIXME: colouring like this is for children and deserves to be killed (add multicolour for change annot)
-	// FIXME: always calling 1024 instances to be drawn, store text length in struct
 	// TODO: code transformation to background of parent lists (can be solved together with tilt shift TODO)
 
 	// translate input
