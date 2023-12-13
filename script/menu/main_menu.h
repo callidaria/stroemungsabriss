@@ -338,10 +338,13 @@ public:
 	MenuList() {  }
 	~MenuList() {  }
 
-	// invokations
+	// invokation
 	uint8_t define_list(const char* path);
+
+	// interaction
 	inline void open_list(uint8_t id) { active_ids.push_back(id); }
 	void close_list(uint8_t id);
+	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
 
 	// draw
 	void update(bool back);

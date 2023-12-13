@@ -546,11 +546,18 @@ uint8_t MenuList::define_list(const char* path)
 			// fill in element list information
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
 				t_entity.text.load();
-			t_mlc.entities[i] = t_entity;
-			// TODO: read colour from attributes & add discolour method
 
-			// move cursor to write next element
+			// custom entity colours from ldc float attributes
+			if (cluster.elist[i].fattribs.size()>3)
+				t_entity.colour = glm::vec4(
+					cluster.elist[i].fattribs[0],
+					cluster.elist[i].fattribs[1],
+					cluster.elist[i].fattribs[2],
+					cluster.elist[i].fattribs[3]);
+
+			// move cursor to write next element & store current information
 			vscroll -= MENU_LIST_SCROLL_Y;
+			t_mlc.entities[i] = t_entity;
 		}
 
 		// store resulting cluster
