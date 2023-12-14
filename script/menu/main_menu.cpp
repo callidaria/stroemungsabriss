@@ -518,7 +518,7 @@ uint8_t MenuList::define_list(const char* path)
 	// entity creation
 	for (LDCCluster &cluster : clusters) {
 		MenuListComplex t_mlc = {
-			0,0,
+			0,0,0,
 			std::vector<MenuListEntity>(cluster.elist.size()),
 			std::vector<MenuListSegment>(cluster.slist.size()),
 		};
@@ -561,6 +561,7 @@ uint8_t MenuList::define_list(const char* path)
 		}
 
 		// store resulting cluster
+		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;
 		mlists.push_back(t_mlc);
 	} return mlists.size()-1;
 }
@@ -578,14 +579,48 @@ void MenuList::close_list(uint8_t id)
 /*
 	TODO
 */
-void MenuList::update(bool back)
+uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd)
 {
 	// update most recent list
+	uint8_t out = 0;
 	if (active_ids.size()) {
+		MenuListComplex &crr = mlists[active_ids.back()];
+
+		// escape handling
 		if (back) {
 			close_list(active_ids.back());
-			return;
+			if (active_ids.size()) return mlists[active_ids.back()].lselect;
+			return 0;
 		}
+		// FIXME: bad dog, no bisquits
+
+		// set selection by rasterized mouse position
+		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
+		if (mperiph) {
+			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
+			crr.lselect = nselect*(nselect>0);
+			crr.lscroll += mscroll;
+		}
+
+		// update selection by directional input
+		else {
+			int8_t dt_select = crr.lselect+dir;
+			int8_t dt_scroll = crr.lscroll+dt_select*(dt_select<0)+(dt_select-7)*(dt_select>7);
+			crr.lselect = (dt_select<0) ? 0 : (dt_select>7) ? 7 : dt_select;
+			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
+		}
+		// TODO: grid id flooring to prevent segment selections (down for mouse, up for directionals)
+
+		// clamp selection to last element
+		uint16_t eindex = crr.lscroll+crr.lselect;
+		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
+
+		// selection geometry data manipulation
+		out = crr.lselect;
+		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll);
+
+		// confirmation handling
+		// TODO: confirmation switch subsequent/return
 	}
 
 	// draw active lists
@@ -595,20 +630,11 @@ void MenuList::update(bool back)
 			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
 		for (MenuListEntity &e : mlists[id].entities)
 			e.text.prepare(),e.text.set_scroll(crr_scroll),e.text.render(e.tlen,e.colour);
-	}
+	} return out;
 	// TODO: code transformation to background of parent lists (can be solved together with tilt shift TODO)
 
-	// translate input
-	/*uint16_t gsel = lscroll+grid;
-	//gsel += clusters[active_cluster_id].elist[gsel].jsegment;
-	int16_t didx = tx_elist[active_cluster_id].size()-(gsel+1);
-	grid += didx*(didx<0);
-	grid *= grid>0;
-	gsel = lscroll+grid;
-	// FIXME: don't just update gsel variable. it's bad form i think
-
 	// switching list activation
-	if (conf&&clusters[active_cluster_id].elist[gsel].etype==SUBSEQUENT)
+	/*if (conf&&clusters[active_cluster_id].elist[gsel].etype==SUBSEQUENT)
 		active_cluster_id = clusters[active_cluster_id].elist[gsel].tdata;
 
 	// list navigation towards parent
@@ -1147,7 +1173,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
 	// update dialogues & lists
-	mlists.update(hit_b);
+	bool rrnd = false;
+	uint8_t sd_grid = mlists.update(udmv,crd_mouse.y,0,hit_a,hit_b,m_ccbf->frame->mpref_peripheral,rrnd);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START MULTISAMPLED RENDER
@@ -1159,6 +1186,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	float curtain_trans = mtransition-ftransition;
 	splices_geometry.splices[splice_selection_id].ssk[0].ext_lower = lext_selection*curtain_trans,
 	splices_geometry.splices[splice_selection_id].ssk[0].ext_upper = uext_selection*curtain_trans;
+
+	// update selection splash geometry
+	if (rrnd) {
+		SelectionSpliceKey* t_ssk = &splices_geometry.splices[splice_head_id].ssk[head_mod_id];
+		float htrans = SPLICE_HEAD_ORIGIN_POSITION-MENU_LIST_SCROLL_Y*sd_grid;
+		t_ssk->disp_lower.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
+		t_ssk->disp_upper.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
+		t_ssk->ext_lower = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA),
+		t_ssk->ext_upper = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
+	}
 
 	// splash render
 	tkey_head = mtransition+ftransition+mdialogues.system_active;
@@ -1208,37 +1245,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
  * a collection of additional methods, helping with main menu logic
  * TODO: improve section documentation
 */
-
-/*
-	TODO
-*/
-void MainMenu::update_list_grid(MenuList &ml)
-{
-	// mouse grid selection
-	int8_t tid = vgrid_id;
-	if (m_ccbf->frame->mpref_peripheral) {
-		float org_delta = (MENU_LIST_SCROLL_START-crd_mouse.y);
-		vgrid_id = org_delta/MENU_LIST_SCROLL_Y;
-
-	// button delta selection
-	} else vgrid_id += udmv;
-
-	// process menu list input & render
-	//ml.update(vgrid_id,hit_a,hit_b);
-
-	// update selection splash geometry
-	if (tid!=vgrid_id) {
-		SelectionSpliceKey* t_ssk = &splices_geometry.splices[splice_head_id].ssk[head_mod_id];
-		float htrans = SPLICE_HEAD_ORIGIN_POSITION-MENU_LIST_SCROLL_Y*vgrid_id;
-		t_ssk->disp_lower.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
-		t_ssk->disp_upper.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
-		t_ssk->ext_lower = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA),
-		t_ssk->ext_upper = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
-	}
-}
-// TODO: give each list their own grid id, so selection will be remembered, when going through subsequents
-// TODO: with the above mentioned """tech""" produce a geometry shadow of previous list selection in the bgr (mdc)
-// TODO: generally, this is an awful outsourcing trick which needs to be removed. this logic belongs to MList
 
 /*
 	TODO

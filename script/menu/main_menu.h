@@ -326,6 +326,7 @@ struct MenuListSegment
 struct MenuListComplex
 {
 	uint8_t lselect,lscroll;
+	uint16_t full_range;
 	std::vector<MenuListEntity> entities;
 	std::vector<MenuListSegment> segments;
 };
@@ -347,7 +348,7 @@ public:
 	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
 
 	// draw
-	void update(bool back);
+	uint8_t update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd);
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
@@ -490,9 +491,6 @@ public:
 
 	// draw
 	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
-
-	// logic
-	void update_list_grid(MenuList &ml);
 
 private:
 
