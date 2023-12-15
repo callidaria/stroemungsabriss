@@ -312,6 +312,8 @@ private:
 
 struct MenuListEntity
 {
+	LDCEntityType etype;
+	uint16_t value;
 	Text text;
 	size_t tlen;
 	glm::vec4 colour;
@@ -319,6 +321,7 @@ struct MenuListEntity
 
 struct MenuListSegment
 {
+	uint16_t position;
 	Text text;
 	size_t tlen;
 };
@@ -358,6 +361,7 @@ public:
 	// interaction
 	bool lists_open = false;
 	std::vector<bool> conditions;
+	uint16_t status = 0;
 
 private:
 

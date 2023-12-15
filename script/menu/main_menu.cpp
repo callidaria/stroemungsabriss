@@ -520,12 +520,17 @@ uint8_t MenuList::define_list(const char* path)
 		MenuListComplex t_mlc = {
 			0,0,0,
 			std::vector<MenuListEntity>(cluster.elist.size()),
-			std::vector<MenuListSegment>(cluster.slist.size()),
+			std::vector<MenuListSegment>(cluster.slist.size())
 		};
 
 		// write segment information in-between list elements
 		for (uint8_t i=0;i<cluster.slist.size();i++) {
-			MenuListSegment t_segment = { Text(st_font),cluster.slist[i].title.length() };
+			MenuListSegment t_segment = {
+				cluster.slist[i].position,
+				Text(st_font),cluster.slist[i].title.length()
+			};
+
+			// setup segment render
 			t_segment.text.add(
 					cluster.slist[i].title.c_str(),
 					glm::vec2(
@@ -538,7 +543,10 @@ uint8_t MenuList::define_list(const char* path)
 		// process cluster entites
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
-			MenuListEntity t_entity = { Text(st_font),cluster.elist[i].head.length(),glm::vec4(1.f) };
+			MenuListEntity t_entity = {
+				cluster.elist[i].etype,cluster.elist[i].tdata,
+				Text(st_font),cluster.elist[i].head.length(),glm::vec4(1.f)
+			};
 
 			// dodge scroll to prevent segment override with list element
 			vscroll -= MENU_LIST_SCROLL_Y*cluster.elist[i].jsegment;
@@ -547,7 +555,7 @@ uint8_t MenuList::define_list(const char* path)
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
 				t_entity.text.load();
 
-			// custom entity colours from ldc float attributes
+			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
 				t_entity.colour = glm::vec4(
 					cluster.elist[i].fattribs[0],
@@ -588,6 +596,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// escape handling
 		if (back) {
+			rrnd = true;
 			close_list(active_ids.back());
 			if (active_ids.size()) return mlists[active_ids.back()].lselect;
 			return 0;
@@ -615,12 +624,17 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		uint16_t eindex = crr.lscroll+crr.lselect;
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
 
-		// selection geometry data manipulation
-		out = crr.lselect;
-		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll);
+		// TODO: calculate passed segment at current position & offset back selected entity id
 
 		// confirmation handling
-		// TODO: confirmation switch subsequent/return
+		if (conf&&crr.entities[crr.lselect].etype==SUBSEQUENT) {
+			open_list(crr.entities[crr.lselect].value);
+			rrnd = true;
+		} status = crr.entities[crr.lselect].value*(crr.entities[crr.lselect].etype==RETURN);
+
+		// selection geometry data manipulation
+		out = mlists[active_ids.back()].lselect;
+		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd;
 	}
 
 	// draw active lists
