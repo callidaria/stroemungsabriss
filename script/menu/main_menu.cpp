@@ -645,16 +645,6 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		for (MenuListEntity &e : mlists[id].entities)
 			e.text.prepare(),e.text.set_scroll(crr_scroll),e.text.render(e.tlen,e.colour);
 	} return out;
-	// TODO: code transformation to background of parent lists (can be solved together with tilt shift TODO)
-
-	// switching list activation
-	/*if (conf&&clusters[active_cluster_id].elist[gsel].etype==SUBSEQUENT)
-		active_cluster_id = clusters[active_cluster_id].elist[gsel].tdata;
-
-	// list navigation towards parent
-	bool stall_back = active_cluster_id;
-	active_cluster_id *= !back;
-	back = !stall_back&&back;*/
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)
 
