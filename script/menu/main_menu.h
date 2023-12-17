@@ -346,7 +346,7 @@ public:
 	uint8_t define_list(const char* path);
 
 	// interaction
-	inline void open_list(uint8_t id) { active_ids.push_back(id); }
+	void open_list(uint8_t id);
 	void close_list(uint8_t id);
 	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
 
@@ -368,6 +368,9 @@ private:
 	// data
 	std::vector<MenuListComplex> mlists;
 	std::vector<uint8_t> active_ids;
+
+	// triggers
+	bool tf_list_opened = false;
 
 	// visuals
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",

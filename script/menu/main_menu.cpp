@@ -577,6 +577,16 @@ uint8_t MenuList::define_list(const char* path)
 /*
 	TODO
 */
+void MenuList::open_list(uint8_t id)
+{
+	active_ids.push_back(id);
+	tf_list_opened = true;
+}
+// TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be dune kuro
+
+/*
+	TODO
+*/
 void MenuList::close_list(uint8_t id)
 {
 	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),id),active_ids.end());
@@ -634,7 +644,8 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// selection geometry data manipulation
 		out = mlists[active_ids.back()].lselect;
-		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd;
+		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd||tf_list_opened;
+		tf_list_opened = false;
 	}
 
 	// draw active lists
