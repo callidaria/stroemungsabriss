@@ -543,17 +543,19 @@ uint8_t MenuList::define_list(const char* path)
 		// process cluster entites
 		int32_t vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
-			MenuListEntity t_entity = {
-				cluster.elist[i].etype,cluster.elist[i].tdata,
-				Text(st_font),cluster.elist[i].head.length(),glm::vec4(1.f)
-			};
 
 			// dodge scroll to prevent segment override with list element
 			vscroll -= MENU_LIST_SCROLL_Y*cluster.elist[i].jsegment;
 
+			// create entity
+			MenuListEntity t_entity = {
+				glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1.f),
+				cluster.elist[i].etype,cluster.elist[i].tdata,
+				Text(st_font),cluster.elist[i].head.length()
+			};
+
 			// fill in element list information
-			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
-				t_entity.text.load();
+			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(0)),t_entity.text.load();
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
@@ -650,11 +652,14 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 	// draw active lists
 	for (uint8_t id : active_ids) {
+		glm::mat4 crr_rotate = glm::rotate(glm::mat4(1.f),glm::radians(rtt),glm::vec3(1,0,0));
 		glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
-		for (MenuListSegment &s : mlists[id].segments)
-			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-		for (MenuListEntity &e : mlists[id].entities)
-			e.text.prepare(),e.text.set_scroll(crr_scroll),e.text.render(e.tlen,e.colour);
+		/*for (MenuListSegment &s : mlists[id].segments)
+			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);*/
+		for (MenuListEntity &e : mlists[id].entities) {
+			glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0))*crr_rotate;
+			e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
+		} rtt+=4.f;
 	} return out;
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?)

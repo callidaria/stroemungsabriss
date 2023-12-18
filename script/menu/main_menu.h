@@ -312,11 +312,12 @@ private:
 
 struct MenuListEntity
 {
+	glm::vec3 position;
+	glm::vec4 colour;
 	LDCEntityType etype;
 	uint16_t value;
 	Text text;
 	size_t tlen;
-	glm::vec4 colour;
 };
 
 struct MenuListSegment
@@ -371,6 +372,7 @@ private:
 
 	// triggers
 	bool tf_list_opened = false;
+	float rtt = .0f;
 
 	// visuals
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
