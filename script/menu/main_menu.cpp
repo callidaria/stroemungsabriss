@@ -630,13 +630,14 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			crr.lselect = (dt_select<0) ? 0 : (dt_select>7) ? 7 : dt_select;
 			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
 		}
+
+		// protection for selected segments
+		//bool segment_protection = segment_selected(crr,crr.lscroll+crr.lselect);		
 		// TODO: grid id flooring to prevent segment selections (down for mouse, up for directionals)
 
 		// clamp selection to last element
 		uint16_t eindex = crr.lscroll+crr.lselect;
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
-
-		// TODO: calculate passed segment at current position & offset back selected entity id
 
 		// confirmation handling
 		if (conf&&crr.entities[crr.lselect].etype==SUBSEQUENT) {
@@ -651,18 +652,21 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	}
 
 	// draw active lists
-	for (uint8_t id : active_ids) {
-		glm::mat4 crr_rotate = glm::rotate(glm::mat4(1.f),glm::radians(rtt),glm::vec3(1,0,0));
+	//for (uint8_t id : active_ids) {
+	if (!active_ids.size()) return out;
+	uint8_t id = active_ids.back();
+		//glm::mat4 crr_rotate = glm::rotate(glm::mat4(1.f),glm::radians(rtt),glm::vec3(1,0,0));
 		glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
-		/*for (MenuListSegment &s : mlists[id].segments)
-			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);*/
+		for (MenuListSegment &s : mlists[id].segments)
+			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
 		for (MenuListEntity &e : mlists[id].entities) {
-			glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0))*crr_rotate;
+			glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));//*crr_rotate
 			e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
-		} rtt+=4.f;
-	} return out;
+		} //rtt+=4.f;
+	//} // write a routine to displace inactive menu lists in perspective
+	return out;
 }
-// TODO: transition between lists (background to foreground animation, tilt shift?)
+// TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
 
 
 /**
