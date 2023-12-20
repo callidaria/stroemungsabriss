@@ -631,19 +631,31 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
 		}
 
+		// find index of selected entity & check if selection intersects segment
+		uint16_t crr_select = crr.lscroll+crr.lselect;
+		uint8_t seg_passed = 0;
+		bool seg_select = false;
+		for (MenuListSegment &seg : crr.segments) {
+			if (crr_select<=seg.position) {
+				seg_select = crr_select==seg.position;
+				break;
+			} seg_passed++,crr_select--;
+		}
+
 		// protection for selected segments
-		//bool segment_protection = segment_selected(crr,crr.lscroll+crr.lselect);		
-		// TODO: grid id flooring to prevent segment selections (down for mouse, up for directionals)
+		if (seg_select) {
+			// TODO
+		}
 
 		// clamp selection to last element
 		uint16_t eindex = crr.lscroll+crr.lselect;
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
 
 		// confirmation handling
-		if (conf&&crr.entities[crr.lselect].etype==SUBSEQUENT) {
-			open_list(crr.entities[crr.lselect].value);
+		if (conf&&crr.entities[crr_select].etype==SUBSEQUENT) {
+			open_list(crr.entities[crr_select].value);
 			rrnd = true;
-		} status = crr.entities[crr.lselect].value*(crr.entities[crr.lselect].etype==RETURN);
+		} status = crr.entities[crr_select].value*(crr.entities[crr_select].etype==RETURN);
 
 		// selection geometry data manipulation
 		out = mlists[active_ids.back()].lselect;

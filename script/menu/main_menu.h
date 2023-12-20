@@ -357,11 +357,6 @@ public:
 	// info
 	inline bool system_active() { return active_ids.size(); }
 
-private:
-
-	// helpers
-	//bool segment_selected(MenuListComplex &c,uint8_t s);
-
 public:
 
 	// interaction
