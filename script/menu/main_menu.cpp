@@ -631,6 +631,10 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
 		}
 
+		// clamp selection to last element
+		uint16_t eindex = crr.lscroll+crr.lselect;
+		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
+
 		// find index of selected entity & check if selection intersects segment
 		uint16_t crr_select = crr.lscroll+crr.lselect;
 		uint8_t seg_passed = 0;
@@ -644,12 +648,10 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// protection for selected segments
 		if (seg_select) {
-			// TODO
+			int8_t dt_select = -1+2*(dir>0||mperiph||!seg_passed);
+			crr.lselect += dt_select,crr_select -= dt_select<0;
 		}
-
-		// clamp selection to last element
-		uint16_t eindex = crr.lscroll+crr.lselect;
-		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
+		// FIXME: probably breaks when scrolling is involved, selecting past scroll range when repelled
 
 		// confirmation handling
 		if (conf&&crr.entities[crr_select].etype==SUBSEQUENT) {
