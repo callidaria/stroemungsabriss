@@ -1,0 +1,70 @@
+:cluster main
+
+:segment North America
+
+:define Stage: Orphansnatchers
+:define Boss: Hotshot
+:define Stage: Spike's Casino Assault
+:define Boss: Master Spike
+:define Boss: Gustave the Gunslinger
+
+:segment South America
+
+:define Boss: Martha, Mother of Monkeys
+:define Stage: Favela Hunt
+:define Stage: Neon Tower of Babes
+:define Boss: Sinclair, Seller of Sacred Souls
+
+:segment Antarctica
+:define Stage: The Sad Sailor's Fleet
+:define Boss: Undergraduate Joanna
+
+:segment Africa
+
+:define Stage: Train Assault pt. I
+:define Boss: Butcher of the Pits
+:define Stage: Train Assault pt. II
+:define Stage: To the Rescue
+:define Stage: Train Assault pt. III
+:define Boss: Twin Tailed Basilisk
+:define Stage: Train Assault pt. IV
+:define Stage: The Smuggle
+
+:segment Europe
+
+:define Boss: Warorphan Lunare Laurel
+:define Boss: Aurora Gloria et Benedictus
+:define Boss: Clocktower
+:define Stage: Luftschiff Spielzeugparadies Chaosland
+:define Boss: Eberhardt Kindsgesicht
+:define Boss: Sad Sailor
+
+:segment The Pole
+:define Boss: Aurora Eleison
+:define Boss: Aurora Credo
+:define Boss: Aurora Agnus
+:define Boss: Matriarch Aurora Minerva
+:define Stage: Into the Unknown Depths Below
+:define Boss: Chessmaster Octagon
+:define Stage: Taking a Breath
+
+:segment Farther East
+:define Stage: Residence Voron
+:define Boss: The Assault
+:define Stage: Into the Unknown Heights Above
+:define Boss: Artyom, The Astral Adventurer
+:define Boss: Matriarch Lunare Laurel
+:define Stage: ...and Cross the Desert Too
+:define Boss: Poolparty Assassin, Gerhartt-Klausz
+:define Boss: Dancing Pilot
+
+:segment Japan
+:define Stage: Crossover
+:define Boss: Beehive Squad
+:define Stage: Cottonmind Arcade
+:define Stage: Cottonmind Arcade Rainbow Label
+:define Stage: Cottonmind Arcade White Label
+:define Boss: Cottonmind
+:define Stage: Tokio Emergency
+:define Boss: Flowergirl Yomi
+:define Boss: Matriarch Yomisama

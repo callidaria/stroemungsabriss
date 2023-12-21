@@ -542,8 +542,8 @@ public:
 	float st_rot = .0f;
 
 	// memory for static continue
-	uint8_t dg_diffs,dg_continue;
-	bool option_engage = false,diff_popup = false,shot_popup = false;
+	uint8_t ml_options,ml_stages,dg_diffs,dg_continue;
+	bool logic_setup = false;
 
 private:
 

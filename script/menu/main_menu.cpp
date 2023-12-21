@@ -516,6 +516,7 @@ uint8_t MenuList::define_list(const char* path)
 	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
 
 	// entity creation
+	uint8_t out = mlists.size();
 	for (LDCCluster &cluster : clusters) {
 		MenuListComplex t_mlc = {
 			0,0,0,
@@ -573,7 +574,7 @@ uint8_t MenuList::define_list(const char* path)
 		// store resulting cluster
 		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;
 		mlists.push_back(t_mlc);
-	} return mlists.size()-1;
+	} return out;
 }
 
 /*
@@ -619,7 +620,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
 		if (mperiph) {
 			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
-			crr.lselect = nselect*(nselect>0);
+			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
 			crr.lscroll += mscroll;
 		}
 
@@ -1079,7 +1080,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	splices_geometry.load();
 
 	// list setup
-	mlists.define_list("./lvload/options.ldc");
+	ml_options = mlists.define_list("./lvload/options.ldc");
+	ml_stages = mlists.define_list("./lvload/stages.ldc");
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
@@ -1361,7 +1363,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// reset
-	tm.option_engage = false,tm.diff_popup = false,tm.shot_popup = false;
+	tm.logic_setup = false;
 }
 
 /*
@@ -1370,9 +1372,9 @@ void interface_behaviour_macro(MainMenu &tm)
 void interface_behaviour_options(MainMenu &tm)
 {
 	//tm.update_list_grid(tm.mlists);
-	if (!tm.option_engage) {
-		tm.mlists.open_list(0);
-		tm.option_engage = true;
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_options);
+		tm.logic_setup = true;
 	} tm.interface_logic_id *= tm.mlists.system_active();
 }
 
@@ -1390,8 +1392,10 @@ void interface_behaviour_extras(MainMenu &tm)
 */
 void interface_behaviour_practice(MainMenu &tm)
 {
-	// TODO
-	tm.interface_logic_id *= !tm.hit_b;
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_stages);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -1409,9 +1413,9 @@ void interface_behaviour_load(MainMenu &tm)
 void interface_behaviour_continue(MainMenu &tm)
 {
 	// open dialogue for continuation request
-	if (!tm.shot_popup) {
+	if (!tm.logic_setup) {
 		tm.mdialogues.open_dialogue(tm.dg_continue);
-		tm.shot_popup = true;
+		tm.logic_setup = true;
 	}
 
 	// TODO: direction to run change menu list according to user input
@@ -1427,9 +1431,9 @@ void interface_behaviour_continue(MainMenu &tm)
 void interface_behaviour_newgame(MainMenu &tm)
 {
 	// opening difficulty popup dialogue when option first is chosen
-	if (!tm.diff_popup) {
+	if (!tm.logic_setup) {
 		tm.mdialogues.open_dialogue(tm.dg_diffs);
-		tm.diff_popup = true;
+		tm.logic_setup = true;
 	}
 
 	// TODO: preface runcreation with disclaimer that current run will be replaced by the new as main
