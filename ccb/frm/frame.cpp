@@ -149,6 +149,9 @@ void Frame::change_tmod(double goal,double rate)
 */
 void Frame::input(bool &running)
 {
+	// reset
+	mouse.mw = 0;
+
 	// process events and set input activity
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
@@ -215,7 +218,7 @@ void Frame::input(bool &running)
 		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
 				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
 		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
-				|| (m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN);
+				|| m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_MOUSEWHEEL;
 
 		/*if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
 			tline.pop_back();

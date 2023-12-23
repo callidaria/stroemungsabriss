@@ -618,10 +618,11 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// set selection by rasterized mouse position
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
+		std::cout << (int)crr.lscroll << ' ' << (unsigned int)mperiph << '\n';
 		if (mperiph) {
 			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
 			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
-			crr.lscroll += mscroll;
+			crr.lscroll += mscroll;//*((crr.lscroll>0||mscroll>0)&&(crr.lscroll<crr.full_range||mscroll<0));
 		}
 
 		// update selection by directional input
@@ -1214,7 +1215,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// update dialogues & lists
 	bool rrnd = false;
-	uint8_t sd_grid = mlists.update(udmv,crd_mouse.y,0,hit_a,hit_b,m_ccbf->frame->mpref_peripheral,rrnd);
+	uint8_t sd_grid = mlists.update(udmv,crd_mouse.y,m_ccbf->frame->mouse.mw,hit_a,hit_b,
+			m_ccbf->frame->mpref_peripheral,rrnd);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START MULTISAMPLED RENDER
