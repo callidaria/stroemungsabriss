@@ -217,7 +217,7 @@ void Frame::input(bool &running)
 		// update preferred peripheral
 		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
 				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
-		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&!m_fe.type==SDL_KEYDOWN)
+		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&m_fe.type!=SDL_KEYDOWN)
 				|| m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_MOUSEWHEEL;
 
 		/*if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)

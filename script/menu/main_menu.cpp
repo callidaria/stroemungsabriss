@@ -618,11 +618,10 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// set selection by rasterized mouse position
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
-		std::cout << (int)crr.lscroll << ' ' << (unsigned int)mperiph << '\n';
 		if (mperiph) {
 			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
 			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
-			crr.lscroll += mscroll;//*((crr.lscroll>0||mscroll>0)&&(crr.lscroll<crr.full_range||mscroll<0));
+			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)&&(crr.lscroll<(crr.full_range-7)||mscroll>0));
 		}
 
 		// update selection by directional input
@@ -654,6 +653,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			crr.lselect += dt_select,crr_select -= dt_select<0;
 		}
 		// FIXME: probably breaks when scrolling is involved, selecting past scroll range when repelled
+		// FIXME: one too many scroll, when selection tries to exceed last entity.
 
 		// confirmation handling
 		if (conf&&crr.entities[crr_select].etype==SUBSEQUENT) {
