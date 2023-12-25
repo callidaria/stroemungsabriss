@@ -605,10 +605,25 @@ uint8_t MenuList::define_list(SaveStates states)
 		// advance & write
 		vscroll -= MENU_LIST_SCROLL_Y;
 		mlc.entities[i] = mle;
-	} mlists.push_back(mlc);
+	}
+
+	// communicate possiblilty of empty save data
+	if (!states.saves.size()) {
+		std::string err_message = "no save data";
+		MenuListEntity decoy = {
+			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1,0,0,1),
+			LDCEntityType::UNDEFINED,0,
+			Text(st_font),err_message.length()
+		};
+		decoy.text.add(err_message.c_str(),glm::vec2(0)),decoy.text.load();
+		mlc.entities.push_back(decoy);
+		mlc.full_range = 0;
+	}
+
+	// output result
+	mlists.push_back(mlc);
 	return mlists.size()-1;
 }
-// TODO: handle empty state list & communicate missing data to user
 
 /*
 	TODO
