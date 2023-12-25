@@ -572,10 +572,43 @@ uint8_t MenuList::define_list(const char* path)
 		}
 
 		// store resulting cluster
-		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;
+		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;  // FIXME: ??possible to set this early
 		mlists.push_back(t_mlc);
 	} return out;
 }
+
+/*
+	TODO
+*/
+uint8_t MenuList::define_list(SaveStates states)
+{
+	// create singular complex without segments for a simple state list
+	MenuListComplex mlc = {
+		0,0,states.saves.size()-1,
+		std::vector<MenuListEntity>(states.saves.size()),{}
+	};
+
+	// iterate save data and create a state list with a proportionally linear relationship
+	int32_t vscroll = MENU_LIST_SCROLL_START;
+	for (uint16_t i=0;i<states.saves.size();i++) {
+		SaveData &state = states.saves[i];
+		MenuListEntity mle = {
+			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1.f),
+			LDCEntityType::RETURN,i,
+			Text(st_font),state.title.length()
+		};
+		// TODO: multicolour difficulties (normal=white,master=orange,grandmaster=red,headmaster=violet)
+
+		// write save title
+		mle.text.add(state.title.c_str(),glm::vec2(0)),mle.text.load();
+
+		// advance & write
+		vscroll -= MENU_LIST_SCROLL_Y;
+		mlc.entities[i] = mle;
+	} mlists.push_back(mlc);
+	return mlists.size()-1;
+}
+// TODO: handle empty state list & communicate missing data to user
 
 /*
 	TODO
@@ -1083,6 +1116,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// list setup
 	ml_options = mlists.define_list("./lvload/options.ldc");
 	ml_stages = mlists.define_list("./lvload/stages.ldc");
+	ml_saves = mlists.define_list(savestates);
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
@@ -1405,8 +1439,10 @@ void interface_behaviour_practice(MainMenu &tm)
 */
 void interface_behaviour_load(MainMenu &tm)
 {
-	// TODO
-	tm.interface_logic_id *= !tm.hit_b;
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_saves);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= !tm.hit_b;
 }
 
 /*
@@ -1444,3 +1480,4 @@ void interface_behaviour_newgame(MainMenu &tm)
 	// closing condition
 	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
 }
+// TODO: add a logic setup behaviour, that later leads into looped interface behaviour after one frame

@@ -10,6 +10,8 @@
 
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
+
+#include "../systems/savestates.h"
 #include "../world.h"
 
 #define COLOUR_COMPOSITION_NEO
@@ -330,7 +332,7 @@ struct MenuListSegment
 struct MenuListComplex
 {
 	uint8_t lselect,lscroll;
-	uint16_t full_range;
+	size_t full_range;
 	std::vector<MenuListEntity> entities;
 	std::vector<MenuListSegment> segments;
 };
@@ -345,6 +347,7 @@ public:
 
 	// invokation
 	uint8_t define_list(const char* path);
+	uint8_t define_list(SaveStates states);
 
 	// interaction
 	void open_list(uint8_t id);
@@ -542,7 +545,7 @@ public:
 	float st_rot = .0f;
 
 	// memory for static continue
-	uint8_t ml_options,ml_stages,dg_diffs,dg_continue;
+	uint8_t ml_options,ml_stages,ml_saves,dg_diffs,dg_continue;
 	bool logic_setup = false;
 
 private:
@@ -557,6 +560,9 @@ private:
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
+
+	// data
+	SaveStates savestates;
 
 	// index
 	uint16_t index_rsprite,index_ranim;
