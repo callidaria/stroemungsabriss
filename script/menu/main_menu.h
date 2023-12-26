@@ -335,6 +335,7 @@ struct MenuListComplex
 	size_t full_range;
 	std::vector<MenuListEntity> entities;
 	std::vector<MenuListSegment> segments;
+	Text description;
 };
 
 class MenuList
@@ -380,6 +381,7 @@ private:
 	// visuals
 	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
+	Font de_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
 };
 
 

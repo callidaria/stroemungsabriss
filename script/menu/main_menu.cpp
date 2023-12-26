@@ -354,8 +354,8 @@ void compiler_error_msg(LDCProcessState &state,const char* msg)
  *
  *  	here is some information on how this geometry can be defined:
  *  following, an ascii representation of the splice
- *  			 ___uwe__
- *  			/  uc   /
+ *					 ___uwe__
+ *					/  uc   /
  *  		       /       /
  *  		      /	      /
  *  		     /	     /		^
@@ -521,7 +521,8 @@ uint8_t MenuList::define_list(const char* path)
 		MenuListComplex t_mlc = {
 			0,0,0,
 			std::vector<MenuListEntity>(cluster.elist.size()),
-			std::vector<MenuListSegment>(cluster.slist.size())
+			std::vector<MenuListSegment>(cluster.slist.size()),
+			Text(de_font)
 		};
 
 		// write segment information in-between list elements
@@ -557,6 +558,7 @@ uint8_t MenuList::define_list(const char* path)
 
 			// fill in element list information
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(0)),t_entity.text.load();
+			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i));
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
@@ -572,6 +574,7 @@ uint8_t MenuList::define_list(const char* path)
 		}
 
 		// store resulting cluster
+		t_mlc.description.load();
 		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;  // FIXME: ??possible to set this early
 		mlists.push_back(t_mlc);
 	} return out;
@@ -652,6 +655,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 {
 	// update most recent list
 	uint8_t out = 0;
+	uint16_t crr_select = 0;
 	if (active_ids.size()) {
 		MenuListComplex &crr = mlists[active_ids.back()];
 
@@ -685,7 +689,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
 
 		// find index of selected entity & check if selection intersects segment
-		uint16_t crr_select = crr.lscroll+crr.lselect;
+		crr_select = crr.lscroll+crr.lselect;
 		uint8_t seg_passed = 0;
 		bool seg_select = false;
 		for (MenuListSegment &seg : crr.segments) {
@@ -728,6 +732,10 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
 		} //rtt+=4.f;
 	//} // write a routine to displace inactive menu lists in perspective
+
+		// description out
+		mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
+			mlists[id].description.render(1024,glm::vec4(1));
 	return out;
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
@@ -1354,7 +1362,6 @@ void MainMenu::update_peripheral_annotations()
 	tcap_dare = dmessage.length();
 	tx_dare.load();
 }
-
 
 /**
  * 		Start Implementation of Interface Behaviour
