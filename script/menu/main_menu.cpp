@@ -558,7 +558,7 @@ uint8_t MenuList::define_list(const char* path)
 
 			// fill in element list information
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(0)),t_entity.text.load();
-			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i));
+			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
@@ -673,7 +673,8 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		if (mperiph) {
 			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
 			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
-			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)&&(crr.lscroll<(crr.full_range-7)||mscroll>0));
+			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)
+					&& (crr.lscroll<((int16_t)crr.full_range-7)||mscroll>0));
 		}
 
 		// update selection by directional input
