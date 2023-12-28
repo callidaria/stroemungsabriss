@@ -336,6 +336,7 @@ struct MenuListComplex
 	std::vector<MenuListEntity> entities;
 	std::vector<MenuListSegment> segments;
 	Text description;
+	size_t dtlen;
 };
 
 class MenuList

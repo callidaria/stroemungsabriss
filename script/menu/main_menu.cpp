@@ -522,7 +522,7 @@ uint8_t MenuList::define_list(const char* path)
 			0,0,0,
 			std::vector<MenuListEntity>(cluster.elist.size()),
 			std::vector<MenuListSegment>(cluster.slist.size()),
-			Text(de_font)
+			Text(de_font),0
 		};
 
 		// write segment information in-between list elements
@@ -559,6 +559,7 @@ uint8_t MenuList::define_list(const char* path)
 			// fill in element list information
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(0)),t_entity.text.load();
 			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
+			t_mlc.dtlen += cluster.elist[i].description.length();
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
@@ -588,7 +589,8 @@ uint8_t MenuList::define_list(SaveStates states)
 	// create singular complex without segments for a simple state list
 	MenuListComplex mlc = {
 		0,0,states.saves.size()-1,
-		std::vector<MenuListEntity>(states.saves.size()),{}
+		std::vector<MenuListEntity>(states.saves.size()),{},
+		Text(st_font),0
 	};
 
 	// iterate save data and create a state list with a proportionally linear relationship
@@ -624,6 +626,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	}
 
 	// output result
+	mlc.description.load();
 	mlists.push_back(mlc);
 	return mlists.size()-1;
 }
@@ -736,7 +739,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// description out
 		mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
-			mlists[id].description.render(1024,glm::vec4(1));
+			mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
 	return out;
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
