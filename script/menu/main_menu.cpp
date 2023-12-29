@@ -1120,11 +1120,14 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 
 	// setup selection splice
 	// 1st key: splice disable, zero'd so the splice gets projected into scene when start is pressed
-	// 2nd key: vertical selection mode for main options
+	// 2nd key: tilted splice underlining descriptions for list options if selected
 	splice_selection_id = splices_geometry.create_splice(
 			SPLICE_LOWER_CENTER,glm::vec2(0,720.f),
 			0,0,
 			SPLICE_SELECTION_COLOUR,false,&tkey_selection);
+	splices_geometry.add_anim_key(splice_selection_id,
+			glm::vec2(0,-SPLICE_HEAD_DLGDESC_QUAD),glm::vec2(SPLICE_HEAD_DLGDESC_QUAD,720),
+			SPLICE_HEAD_DLGDESC_WIDTH,SPLICE_HEAD_DLGDESC_WIDTH);
 
 	// setup title splice
 	// 1st key: start request screen stylesplice
@@ -1302,9 +1305,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// splash render
 	tkey_head = mtransition+ftransition+mdialogues.system_active;
+	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active());
 	tkey_title = mtransition;
 	splices_geometry.update();
-	// TODO: try and break down reference variables to a single float
 	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
 	// draw dialogue selectors

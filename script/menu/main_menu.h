@@ -579,6 +579,7 @@ private:
 	float anim_timing = .0f;
 	float dt_tshiftdown = .0f,dt_tnormalize = .0f;
 	bool speedup = true;
+	float mlist_tsidebar = .0f;
 
 	// remote
 	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
