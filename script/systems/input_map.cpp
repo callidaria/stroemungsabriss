@@ -144,8 +144,8 @@ void InputMap::precalculate_all()
 */
 void InputMap::stick_to_dpad()
 {
-	input_val[IMP_REQUP] = input_val[IMP_REQUP]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
-	input_val[IMP_REQDOWN] = input_val[IMP_REQDOWN]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[IMP_REQUP] = input_val[IMP_REQUP]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[IMP_REQDOWN] = input_val[IMP_REQDOWN]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
 	input_val[IMP_REQLEFT] = input_val[IMP_REQLEFT]||*cnt_lraxis<-IMP_CONTROLLER_DEADZONE;
 	input_val[IMP_REQRIGHT] = input_val[IMP_REQRIGHT]||*cnt_lraxis>IMP_CONTROLLER_DEADZONE;
 }

@@ -1190,9 +1190,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			- m_ccbf->iMap->get_input_triggered(IMP_REQUP))*menu_action;
 	crd_mouse = glm::vec2(m_ccbf->frame->mouse.mxfr*1280.f,m_ccbf->frame->mouse.myfr*720.f);
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
-	// FIXME: as soon as the title screen has been passed, start press will become return request
-	// FIXME: why is vertical selector's left/right selection input bound to option list size?
-	// FIXME: up/down movement inverted with controller stick input for some reason
 
 	// timing
 	transition_delta = TRANSITION_SPEED*m_ccbf->frame->time_delta;
@@ -1204,7 +1201,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// focus transition
 	Toolbox::transition_float_on_condition(ftransition,transition_delta,interface_logic_id);
 	inv_ftransition = 1.f-ftransition,inv_mtransition = 1.f-mtransition;
-	// FIXME: transition to 1.f takes 2 frames while transition to .0f takes about 12?
 
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
@@ -1266,8 +1262,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		tx_mopts[i].render(strlen(main_options[i])*(inv_ftransition+(i==vselect)),opt_colour);
 	}
 	// TODO: differenciate between list- & free mode for head splice displacement
-	// TODO: also move active title to upper-left screen position while de-writing non-active
-	// FIXME: the splash targeting is not intersecting with the exact center of the option text
 	// FIXME: optimize before impending merge, when all the text transitions are done
 
 	// render titles
@@ -1412,11 +1406,11 @@ void interface_behaviour_macro(MainMenu &tm)
 
 		// change main option selector dimensions based on selected option
 		SelectionSpliceKey* t_ssk = &tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
-		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]+glm::vec2(tm.mo_hwidth[tm.vselect],0);
-		t_ssk->disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV
-				+ SPLICE_LOWER_CENTER.x,
-		tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
-		tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
+		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
+				+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
+		t_ssk->disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
+			tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+			tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
 
 		// project upper displacement position based on lower displacement
 		glm::vec2 vrt_dir = vrt_cpos-t_ssk->disp_lower;
