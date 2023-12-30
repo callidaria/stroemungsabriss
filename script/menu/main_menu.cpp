@@ -598,7 +598,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
-			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1.f),
+			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),diff_colours[state.diff],
 			LDCEntityType::RETURN,i,
 			Text(st_font),state.title.length()
 		};
@@ -708,7 +708,6 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			int8_t dt_select = -1+2*(dir>0||mperiph||!seg_passed);
 			crr.lselect += dt_select,crr_select -= dt_select<0;
 		}
-		// FIXME: probably breaks when scrolling is involved, selecting past scroll range when repelled
 		// FIXME: one too many scroll, when selection tries to exceed last entity.
 
 		// confirmation handling
@@ -724,22 +723,32 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	}
 
 	// draw active lists
-	//for (uint8_t id : active_ids) {
 	if (!active_ids.size()) return out;
 	uint8_t id = active_ids.back();
-		//glm::mat4 crr_rotate = glm::rotate(glm::mat4(1.f),glm::radians(rtt),glm::vec3(1,0,0));
-		glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
-		for (MenuListSegment &s : mlists[id].segments)
-			s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-		for (MenuListEntity &e : mlists[id].entities) {
-			glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));//*crr_rotate
-			e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
-		} //rtt+=4.f;
-	//} // write a routine to displace inactive menu lists in perspective
+	glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
+	for (MenuListSegment &s : mlists[id].segments)
+		s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+	for (MenuListEntity &e : mlists[id].entities) {
+		glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));//*crr_rotate
+		e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
 
-		// description out
-		mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
-			mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
+		// display entity state
+		switch (e.etype) {
+		case LDCEntityType::CHECKBOX:	// TODO
+			break;
+		case LDCEntityType::DROPDOWN:	// TODO
+			break;
+		case LDCEntityType::SLIDER:		// TODO
+			break;
+		default:break;
+		};
+	}
+	// TODO: write a routine to displace inactive menu lists in perspective (mdc)
+	// TODO: search for a more elegant solution to display entity states
+
+	// description out
+	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
+		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
 	return out;
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
@@ -1152,7 +1161,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
-	// TODO: add second confirmation popup dialogue in case grandmaster or headmaster is selected
 
 	// buffers
 	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
