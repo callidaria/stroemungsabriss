@@ -553,7 +553,7 @@ uint8_t MenuList::define_list(const char* path)
 			MenuListEntity t_entity = {
 				glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1.f),
 				cluster.elist[i].etype,cluster.elist[i].tdata,
-				Text(st_font),cluster.elist[i].head.length()
+				Text(st_font),cluster.elist[i].head.length(),{}
 			};
 
 			// fill in element list information
@@ -563,11 +563,19 @@ uint8_t MenuList::define_list(const char* path)
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
-				t_entity.colour = glm::vec4(
-					cluster.elist[i].fattribs[0],
-					cluster.elist[i].fattribs[1],
-					cluster.elist[i].fattribs[2],
-					cluster.elist[i].fattribs[3]);
+				t_entity.colour = glm::vec4(cluster.elist[i].fattribs[0],cluster.elist[i].fattribs[1],
+						cluster.elist[i].fattribs[2],cluster.elist[i].fattribs[3]);
+
+			// load dropdown options if applicable
+			if (cluster.elist[i].etype==LDCEntityType::DROPDOWN) {
+				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
+				t_entity.value = 0;
+				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
+					Text dd_text = Text(st_font);
+					dd_text.add(cluster.elist[i].cattribs[di].c_str(),glm::vec2(500,0)),dd_text.load();
+					t_entity.dd_options[di] = dd_text;
+				}
+			}
 
 			// move cursor to write next element & store current information
 			vscroll -= MENU_LIST_SCROLL_Y;
@@ -600,7 +608,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		MenuListEntity mle = {
 			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),diff_colours[state.diff],
 			LDCEntityType::RETURN,i,
-			Text(st_font),state.title.length()
+			Text(st_font),state.title.length(),{}
 		};
 		// TODO: multicolour difficulties (normal=white,master=orange,grandmaster=red,headmaster=violet)
 
@@ -736,11 +744,14 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		switch (e.etype) {
 		case LDCEntityType::CHECKBOX:	// TODO
 			break;
-		case LDCEntityType::DROPDOWN:	// TODO
+		case LDCEntityType::DROPDOWN:
+			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model);
+				e.dd_options[e.value].render(128,glm::vec4(1.f));
 			break;
 		case LDCEntityType::SLIDER:		// TODO
 			break;
-		default:break;
+		case LDCEntityType::SUBSEQUENT:	// TODO
+			break;
 		};
 	}
 	// TODO: write a routine to displace inactive menu lists in perspective (mdc)

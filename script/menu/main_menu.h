@@ -320,6 +320,7 @@ struct MenuListEntity
 	uint16_t value;
 	Text text;
 	size_t tlen;
+	std::vector<Text> dd_options;
 };
 
 struct MenuListSegment
