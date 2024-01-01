@@ -510,6 +510,21 @@ void SelectionSpliceGeometry::update()
 /*
 	TODO
 */
+MenuList::MenuList()
+{
+	// setup dropdown background
+	float ddbgr_vertices[] = {
+		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,720, MENU_LIST_ATTRIBUTE_COMBINE,720,
+		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,0, MENU_LIST_ATTRIBUTE_WTARGET,720
+	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
+	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
+	ddbgr_shader.def_attributeF("position",2,0,2);
+	ddbgr_shader.upload_camera(Camera2D(1280.f,720.f));
+}
+
+/*
+	TODO
+*/
 uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
@@ -572,7 +587,8 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.value = 0;
 				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
 					Text dd_text = Text(st_font);
-					dd_text.add(cluster.elist[i].cattribs[di].c_str(),glm::vec2(500,0)),dd_text.load();
+					dd_text.add(cluster.elist[i].cattribs[di].c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),
+						dd_text.load();
 					t_entity.dd_options[di] = dd_text;
 				}
 			}
@@ -728,6 +744,11 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		out = mlists[active_ids.back()].lselect;
 		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd||tf_list_opened;
 		tf_list_opened = false;
+
+		// draw dropdown background
+		ddbgr_buffer.bind();
+		ddbgr_shader.enable();
+		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 
 	// draw active lists
@@ -737,7 +758,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	for (MenuListSegment &s : mlists[id].segments)
 		s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
 	for (MenuListEntity &e : mlists[id].entities) {
-		glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));//*crr_rotate
+		glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));
 		e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
 
 		// display entity state

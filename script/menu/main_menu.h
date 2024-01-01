@@ -52,12 +52,16 @@ constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
 constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 12;
 
 // menu list positioning
+constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
 constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
 constexpr uint16_t MENU_LIST_SEGMENT_PUSH_X = 100;
-constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_OFFSET = 500;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_COMBINE = MENU_LIST_HEADPOS_X+MENU_LIST_ATTRIBUTE_OFFSET;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_WIDTH = 200;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_WTARGET = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_ATTRIBUTE_WIDTH;
 
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
@@ -345,7 +349,7 @@ class MenuList
 public:
 
 	// construction
-	MenuList() {  }
+	MenuList();
 	~MenuList() {  }
 
 	// invokation
@@ -371,6 +375,10 @@ public:
 	uint16_t status = 0;
 
 private:
+
+	// engine
+	Buffer ddbgr_buffer = Buffer();
+	Shader ddbgr_shader = Shader();
 
 	// data
 	std::vector<MenuListComplex> mlists;
