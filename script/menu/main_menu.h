@@ -386,6 +386,7 @@ private:
 
 	// triggers
 	bool tf_list_opened = false;
+	LDCEntityType subfunc_opened = LDCEntityType::UNDEFINED;
 	float rtt = .0f;
 
 	// visuals

@@ -686,6 +686,14 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	if (active_ids.size()) {
 		MenuListComplex &crr = mlists[active_ids.back()];
 
+		// escape or confirm when in options
+		if (crr.entities[crr_select].etype<LDCEntityType::RETURN
+				&& crr.entities[crr_select].etype>LDCEntityType::UNDEFINED) {
+			bool delta_open = subfunc_opened==LDCEntityType::UNDEFINED;
+			subfunc_opened = (LDCEntityType)(crr.entities[crr_select].etype*(conf&&!back));
+			back = back&&delta_open;
+		}
+
 		// escape handling
 		if (back) {
 			rrnd = true;
@@ -735,7 +743,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		// FIXME: one too many scroll, when selection tries to exceed last entity.
 
 		// confirmation handling
-		if (conf&&crr.entities[crr_select].etype==SUBSEQUENT) {
+		if (conf&&crr.entities[crr_select].etype==LDCEntityType::SUBSEQUENT) {
 			open_list(crr.entities[crr_select].value);
 			rrnd = true;
 		} status = crr.entities[crr_select].value*(crr.entities[crr_select].etype==RETURN);
@@ -746,9 +754,13 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		tf_list_opened = false;
 
 		// draw dropdown background
-		ddbgr_buffer.bind();
-		ddbgr_shader.enable();
-		glDrawArrays(GL_TRIANGLES,0,6);
+		switch (subfunc_opened) {
+		case LDCEntityType::DROPDOWN:
+			ddbgr_buffer.bind();
+			ddbgr_shader.enable();
+			glDrawArrays(GL_TRIANGLES,0,6);
+		default:break;
+		};
 	}
 
 	// draw active lists
