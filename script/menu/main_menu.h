@@ -374,6 +374,13 @@ public:
 	std::vector<bool> conditions;
 	uint16_t status = 0;
 
+	// data
+	std::vector<MenuListComplex> mlists;
+
+	// visuals	
+	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
+
 private:
 
 	// engine
@@ -381,7 +388,6 @@ private:
 	Shader ddbgr_shader = Shader();
 
 	// data
-	std::vector<MenuListComplex> mlists;
 	std::vector<uint8_t> active_ids;
 
 	// triggers
@@ -390,8 +396,6 @@ private:
 	float rtt = .0f;
 
 	// visuals
-	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 	Font de_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
 	glm::vec4 diff_colours[4]
 		= { glm::vec4(1),glm::vec4(1,.5f,0,1),glm::vec4(.75f,0,0,1),glm::vec4(.5f,0,1,1) };

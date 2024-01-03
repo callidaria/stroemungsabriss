@@ -1201,6 +1201,15 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	ml_stages = mlists.define_list("./lvload/stages.ldc");
 	ml_saves = mlists.define_list(savestates);
 
+	// add options for available screens
+	uint8_t max_displays = SDL_GetNumVideoDisplays();
+	mlists.mlists[ml_options].entities[2].dd_options.resize(max_displays);
+	for (uint8_t i=0;i<max_displays;i++) {
+		Text t_ddo = Text(mlists.st_font);
+		t_ddo.add(char(i),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),t_ddo.load();
+		mlists.mlists[ml_options].entities[2].dd_options[i] = t_ddo;
+	}
+
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
