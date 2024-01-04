@@ -325,6 +325,7 @@ struct MenuListEntity
 	Text text;
 	size_t tlen;
 	std::vector<Text> dd_options;
+	std::vector<size_t> dd_length;
 };
 
 struct MenuListSegment
@@ -377,10 +378,6 @@ public:
 	// data
 	std::vector<MenuListComplex> mlists;
 
-	// visuals	
-	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
-			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
-
 private:
 
 	// engine
@@ -397,6 +394,8 @@ private:
 
 	// visuals
 	Font de_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
+	Font st_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 	glm::vec4 diff_colours[4]
 		= { glm::vec4(1),glm::vec4(1,.5f,0,1),glm::vec4(.75f,0,0,1),glm::vec4(.5f,0,1,1) };
 };

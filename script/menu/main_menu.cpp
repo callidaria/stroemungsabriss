@@ -584,12 +584,14 @@ uint8_t MenuList::define_list(const char* path)
 			// load dropdown options if applicable
 			if (cluster.elist[i].etype==LDCEntityType::DROPDOWN) {
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
+				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
 				t_entity.value = 0;
 				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
 					Text dd_text = Text(st_font);
 					dd_text.add(cluster.elist[i].cattribs[di].c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),
 						dd_text.load();
 					t_entity.dd_options[di] = dd_text;
+					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
 				}
 			}
 
@@ -779,7 +781,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 			break;
 		case LDCEntityType::DROPDOWN:
 			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model);
-				e.dd_options[e.value].render(128,glm::vec4(1.f));
+				e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 			break;
 		case LDCEntityType::SLIDER:		// TODO
 			break;
@@ -1202,13 +1204,19 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	ml_saves = mlists.define_list(savestates);
 
 	// add options for available screens
-	uint8_t max_displays = SDL_GetNumVideoDisplays();
-	mlists.mlists[ml_options].entities[2].dd_options.resize(max_displays);
+	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
+			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
+	uint8_t max_displays = SDL_GetNumVideoDisplays(),flist = ml_options+2;
+	mlists.mlists[flist].entities[2].dd_options.resize(max_displays);
+	mlists.mlists[flist].entities[2].dd_length.resize(max_displays);
 	for (uint8_t i=0;i<max_displays;i++) {
-		Text t_ddo = Text(mlists.st_font);
-		t_ddo.add(char(i),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),t_ddo.load();
-		mlists.mlists[ml_options].entities[2].dd_options[i] = t_ddo;
+		Text t_ddo = Text(t_font);
+		t_ddo.add(("Monitor "+std::to_string(i)).c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),t_ddo.load();
+		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
+		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
 	}
+	// FIXME: ?? (char)i instead of std::to_string(i).c_str()
+	// TODO: this is far from a reliable implementation, that shall change in the future
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
