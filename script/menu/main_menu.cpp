@@ -803,11 +803,48 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 /**
  *		Start Implementation of Popup Dialogue for Main Menu:
  *
- * TODO: explain
+ * the MenuDialogue utilizes the ldc list language to display a dialogue window, prompting the player to
+ * make a choice. it is a secondary, attention-grabbing way to display a short list of options, that are meant
+ * to be answered as an immediate response to proceed, without the power of a full MenuList.
+ *
+ *		following, some explanations about the geometrical behaviour:
+ *
+ *				     __________fw___________
+ *									   ____.ur		
+ *					 ul._____----------   /		|
+ *				       /		        /		|
+ *				      /      .c       /			| fh
+ *				     /            __/.lr		|
+ *				 ll./______-------				|
+ *
+ *		what to learn from this beautiful drawing:
+ * the point c marks the parametrical center of the created dialogue. from there, the dimensions are applied.
+ * fw is the full parametrical width and fh is the full height.
+ * the points ur and ll are predictably placed. ur will be at c+(fw/2,fh/2) and ll at c-(fw/2,fh/2).
+ * ul and lr will be spanned over the points c, ur & ll, being placed pseudorandomly within a range for
+ * asthetic reasons.
+ * the dialogue selector scaling is based on the text size of the listed options.
+ *
+ *		how this feature works:
+ * - call add_dialogue_window() to create a new dialogue window and receive instance id back.
+ * - after creating all windows run load().
+ * - dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
+ * - insert update() into unaltered menu render stage.
+ * - insert background_component() into intersectionally inverting, anti-aliased menu render stage.
+ * - return from choice is stored in dg_state while the frame the choice was confirmed in.
+ * - modification of dialogue data list is possible from outside by directly modifying dg_data.
 */
 
 /*
-	TODO
+	add_dialogue_window(const char*,vec2,float,float,uint8_t,uint8_t) -> uint8_t !O(n)bm
+	purpose: create new callable dialogue window
+	\param path: path to list definition file written in ldc script language (as defined above)
+	\param center: central point of dialogue background, dialogue geometry will be spread from there
+	\param width: dialogue target spanning width (will not be reached on both sides)
+	\param height: dialogue target spanning height (will not be reached on both sides)
+	\param tsize: text size for dialogue options
+	\param dsize: text size for dialogue descriptions
+	\returns memory reference id for !root! dialogue. subsequents will always be stored in-order next
 */
 uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,float width,float height,
 		uint8_t tsize,uint8_t dsize)
@@ -905,7 +942,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 }
 
 /*
-	TODO
+	load() -> void !O(1)
+	purpose: compile shaders & setup dialogue buffers for background & selector
 */
 void MenuDialogue::load()
 {
@@ -936,7 +974,9 @@ void MenuDialogue::load()
 // FIXME: define 2D coordinate system ONCE and include for ALL usages, this avoids a lot of useless matrix calc
 
 /*
-	TODO
+	open_dialogue(uint8_t) -> void !O(1)m
+	purpose: declare referenced dialogue as currently opening
+	\param did: dialogue id
 */
 void MenuDialogue::open_dialogue(uint8_t did)
 {
@@ -954,7 +994,9 @@ void MenuDialogue::open_dialogue(uint8_t did)
 }
 
 /*
-	TODO
+	close_dialogue(uint8_t) -> void !O(1)m
+	purpose: declare referenced dialogue as currently closing and inactive
+	\param did: dialogue id
 */
 void MenuDialogue::close_dialogue(uint8_t did)
 {
@@ -969,7 +1011,13 @@ void MenuDialogue::close_dialogue(uint8_t did)
 }
 
 /*
-	TODO
+	update(int8_t,float,bool,bool,bool) -> void !O(n)b
+	purpose: handle inputs, update dialogue state & draw non-background components
+	\param imv: vertical key/button input to navigate list
+	\param mypos: y-axis component of mouse position for pointed selection
+	\param mperiph: preferred peripheral: true for mouse; false for keyboard/controller
+	\param conf: confirmation request
+	\param back: closing request
 */
 void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back)
 {
@@ -1040,7 +1088,9 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 // FIXME: (rare) flickering dialogue disappearance when closing dialogue (mdc)
 
 /*
-	TODO
+	background_component(float) -> void !O(n)b
+	purpose: draw parts of dialogue as inverted background components on intersection with geometry
+	\param transition_delta: delta of transition progress since last frame
 */
 void MenuDialogue::background_component(float transition_delta)
 {
@@ -1082,7 +1132,9 @@ void MenuDialogue::background_component(float transition_delta)
 }
 
 /*
-	TODO
+	draw_dialogue(uint8_t) -> void (private) !O(1)
+	purpose: generalization of upload & render call for any dialogue
+	\param id: dialogue id
 */
 void MenuDialogue::draw_dialogue(uint8_t id)
 {
