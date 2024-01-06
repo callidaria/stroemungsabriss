@@ -688,21 +688,13 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	if (active_ids.size()) {
 		MenuListComplex &crr = mlists[active_ids.back()];
 
-		// escape or confirm when in options
-		if (crr.entities[crr_select].etype<LDCEntityType::RETURN
-				&& crr.entities[crr_select].etype>LDCEntityType::UNDEFINED) {
-			bool delta_open = subfunc_opened==LDCEntityType::UNDEFINED;
-			subfunc_opened = (LDCEntityType)(crr.entities[crr_select].etype*(conf&&!back));
-			back = back&&delta_open;
-		}
-
 		// escape handling
-		if (back) {
+		if (back&&!subfunc_opened) {
 			rrnd = true;
 			close_list(active_ids.back());
 			if (active_ids.size()) return mlists[active_ids.back()].lselect;
 			return 0;
-		}
+		} else if (back&&subfunc_opened) subfunc_opened = false;
 		// FIXME: bad dog, no bisquits
 
 		// set selection by rasterized mouse position
@@ -748,7 +740,8 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		if (conf&&crr.entities[crr_select].etype==LDCEntityType::SUBSEQUENT) {
 			open_list(crr.entities[crr_select].value);
 			rrnd = true;
-		} status = crr.entities[crr_select].value*(crr.entities[crr_select].etype==RETURN);
+		} subfunc_opened = subfunc_opened||(conf&&crr.entities[crr_select].etype==LDCEntityType::DROPDOWN);
+		status = crr.entities[crr_select].value*(crr.entities[crr_select].etype==RETURN);
 
 		// selection geometry data manipulation
 		out = mlists[active_ids.back()].lselect;
@@ -756,13 +749,11 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		tf_list_opened = false;
 
 		// draw dropdown background
-		switch (subfunc_opened) {
-		case LDCEntityType::DROPDOWN:
+		if (subfunc_opened) {
 			ddbgr_buffer.bind();
 			ddbgr_shader.enable();
 			glDrawArrays(GL_TRIANGLES,0,6);
-		default:break;
-		};
+		}
 	}
 
 	// draw active lists
@@ -780,7 +771,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		case LDCEntityType::CHECKBOX:	// TODO
 			break;
 		case LDCEntityType::DROPDOWN:
-			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model);
+			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model),
 				e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 			break;
 		case LDCEntityType::SLIDER:		// TODO
@@ -1271,7 +1262,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: this is far from a reliable implementation, that shall change in the future
 
 	// dialogue setup
-	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(670,310),320,140,30,25);
+	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
 

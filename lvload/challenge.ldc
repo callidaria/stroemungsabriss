@@ -37,7 +37,7 @@ with the given bullet density.
 :define i refuse
 :describe
 i have changed my mind and hereby revert my previous choice
-:floats -100 -100
+:floats 300 -200
 
 :define i accept
 :describe

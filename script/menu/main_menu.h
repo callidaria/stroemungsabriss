@@ -388,8 +388,7 @@ private:
 	std::vector<uint8_t> active_ids;
 
 	// triggers
-	bool tf_list_opened = false;
-	LDCEntityType subfunc_opened = LDCEntityType::UNDEFINED;
+	bool tf_list_opened = false,subfunc_opened = false;
 	float rtt = .0f;
 
 	// visuals
