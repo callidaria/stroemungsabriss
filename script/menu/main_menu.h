@@ -57,6 +57,7 @@ constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
 constexpr uint16_t MENU_LIST_HEAD_SIZE = 30;
+constexpr uint16_t MENU_LIST_HEAD_HSIZE = MENU_LIST_HEAD_SIZE>>1;
 constexpr uint16_t MENU_LIST_SEGMENT_PUSH_X = 100;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_OFFSET = 500;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_COMBINE = MENU_LIST_HEADPOS_X+MENU_LIST_ATTRIBUTE_OFFSET;
@@ -350,12 +351,13 @@ class MenuList
 public:
 
 	// construction
-	MenuList();
+	MenuList() {  }
 	~MenuList() {  }
 
 	// invokation
 	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
+	void load();
 
 	// interaction
 	void open_list(uint8_t id);
@@ -381,11 +383,15 @@ public:
 private:
 
 	// engine
-	Buffer ddbgr_buffer = Buffer();
-	Shader ddbgr_shader = Shader();
+	Buffer ddbgr_buffer = Buffer(),slider_buffer = Buffer();
+	Shader ddbgr_shader = Shader(),slider_shader = Shader();
 
 	// data
 	std::vector<uint8_t> active_ids;
+	std::vector<float> slider_vertices;
+
+	// memory
+	uint32_t slider_range;
 
 	// triggers
 	bool tf_list_opened = false,subfunc_opened = false;
@@ -562,7 +568,7 @@ public:
 	float st_rot = .0f;
 
 	// memory for static continue
-	uint8_t ml_options,ml_stages,ml_saves,dg_diffs,dg_continue;
+	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue;
 	bool logic_setup = false;
 
 private:

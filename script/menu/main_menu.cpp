@@ -510,21 +510,6 @@ void SelectionSpliceGeometry::update()
 /*
 	TODO
 */
-MenuList::MenuList()
-{
-	// setup dropdown background
-	float ddbgr_vertices[] = {
-		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,720, MENU_LIST_ATTRIBUTE_COMBINE,720,
-		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,0, MENU_LIST_ATTRIBUTE_WTARGET,720
-	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
-	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
-	ddbgr_shader.def_attributeF("position",2,0,2);
-	ddbgr_shader.upload_camera(Camera2D(1280.f,720.f));
-}
-
-/*
-	TODO
-*/
 uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
@@ -558,7 +543,7 @@ uint8_t MenuList::define_list(const char* path)
 		}
 
 		// process cluster entites
-		int32_t vscroll = MENU_LIST_SCROLL_START;
+		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// dodge scroll to prevent segment override with list element
@@ -581,8 +566,9 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.colour = glm::vec4(cluster.elist[i].fattribs[0],cluster.elist[i].fattribs[1],
 						cluster.elist[i].fattribs[2],cluster.elist[i].fattribs[3]);
 
-			// load dropdown options if applicable
-			if (cluster.elist[i].etype==LDCEntityType::DROPDOWN) {
+			// load dropdown options
+			switch (cluster.elist[i].etype) {
+			case LDCEntityType::DROPDOWN:
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
 				t_entity.value = 0;
@@ -593,7 +579,22 @@ uint8_t MenuList::define_list(const char* path)
 					t_entity.dd_options[di] = dd_text;
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
 				}
-			}
+				break;
+
+			// load slider geometry
+			case LDCEntityType::SLIDER:
+				std::vector<float> t_vertices = {
+					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_SIZE+vscroll,0,
+					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1,
+					MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
+					MENU_LIST_ATTRIBUTE_WTARGET,-MENU_LIST_HEAD_SIZE+vscroll,0,
+					MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
+					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1
+				}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+				break;
+				// FIXME: really? we allocate per slider? that is really dumb and lazy!
+				// TODO: creating the new temporary vertex list and then concat is very slow and simple minded
+			};
 
 			// move cursor to write next element & store current information
 			vscroll -= MENU_LIST_SCROLL_Y;
@@ -655,6 +656,31 @@ uint8_t MenuList::define_list(SaveStates states)
 	mlc.description.load();
 	mlists.push_back(mlc);
 	return mlists.size()-1;
+}
+
+/*
+	TODO
+*/
+void MenuList::load()
+{
+	// setup dropdown background
+	Camera2D cam2D = Camera2D(1280.f,720.f);
+	float ddbgr_vertices[] = {
+		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,720, MENU_LIST_ATTRIBUTE_COMBINE,720,
+		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,0, MENU_LIST_ATTRIBUTE_WTARGET,720
+	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
+	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
+	ddbgr_shader.def_attributeF("position",2,0,2);
+	ddbgr_shader.upload_camera(Camera2D(1280.f,720.f));
+
+	// setup slider corpus
+	slider_buffer.bind(),slider_buffer.upload_vertices(slider_vertices);
+	slider_shader.compile("./shader/main_menu/vslider.shader","./shader/main_menu/fslider.shader");
+	slider_shader.def_attributeF("position",2,0,3);
+	slider_shader.def_attributeF("bmod",1,2,3);
+	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
+	slider_shader.upload_camera(Camera2D(1280.f,720.f));
+	slider_range = slider_vertices.size()/3;
 }
 
 /*
@@ -768,15 +794,20 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// display entity state
 		switch (e.etype) {
-		case LDCEntityType::CHECKBOX:	// TODO
+		case LDCEntityType::CHECKBOX:
+			// TODO
 			break;
 		case LDCEntityType::DROPDOWN:
 			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model),
 				e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 			break;
-		case LDCEntityType::SLIDER:		// TODO
+		case LDCEntityType::SLIDER:
+			slider_buffer.bind(),slider_shader.enable();
+			slider_shader.upload_float("scroll",crr_scroll.y);
+			glDrawArrays(GL_TRIANGLES,0,slider_range);
 			break;
-		case LDCEntityType::SUBSEQUENT:	// TODO
+		case LDCEntityType::SUBSEQUENT:
+			// TODO
 			break;
 		};
 	}
@@ -963,6 +994,7 @@ void MenuDialogue::load()
 	slc_shader.upload_camera(cam2D);
 }
 // FIXME: define 2D coordinate system ONCE and include for ALL usages, this avoids a lot of useless matrix calc
+// TODO: store info of defined dialogue background vertices and create only once to avoid multiple allocations
 
 /*
 	open_dialogue(uint8_t) -> void !O(1)m
@@ -1243,6 +1275,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 
 	// list setup
 	ml_options = mlists.define_list("./lvload/options.ldc");
+	ml_extras = mlists.define_list("./lvload/extras.ldc");
 	ml_stages = mlists.define_list("./lvload/stages.ldc");
 	ml_saves = mlists.define_list(savestates);
 
@@ -1257,7 +1290,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		t_ddo.add(("Monitor "+std::to_string(i)).c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),t_ddo.load();
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
-	}
+	} mlists.load();
 	// FIXME: ?? (char)i instead of std::to_string(i).c_str()
 	// TODO: this is far from a reliable implementation, that shall change in the future
 
@@ -1542,7 +1575,6 @@ void interface_behaviour_macro(MainMenu &tm)
 */
 void interface_behaviour_options(MainMenu &tm)
 {
-	//tm.update_list_grid(tm.mlists);
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_options);
 		tm.logic_setup = true;
@@ -1554,8 +1586,10 @@ void interface_behaviour_options(MainMenu &tm)
 */
 void interface_behaviour_extras(MainMenu &tm)
 {
-	// TODO
-	tm.interface_logic_id *= !tm.hit_b;
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_extras);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= tm.mlists.system_active();
 }
 
 /*
@@ -1566,7 +1600,7 @@ void interface_behaviour_practice(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_stages);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= !tm.hit_b;
+	} tm.interface_logic_id *= tm.mlists.system_active();
 }
 
 /*
@@ -1577,7 +1611,7 @@ void interface_behaviour_load(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_saves);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= !tm.hit_b;
+	} tm.interface_logic_id *= tm.mlists.system_active();
 }
 
 /*
