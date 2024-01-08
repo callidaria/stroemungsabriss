@@ -210,6 +210,7 @@ struct LDCCluster
 	std::string id = "";
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
+	uint16_t cnt_checkbox = 0,cnt_dropdown = 0,cnt_slider = 0;
 };
 
 struct LDCProcessState
@@ -319,7 +320,6 @@ private:
 
 struct MenuListEntity
 {
-	glm::vec3 position;
 	glm::vec4 colour;
 	LDCEntityType etype;
 	uint16_t value;
@@ -338,12 +338,20 @@ struct MenuListSegment
 
 struct MenuListComplex
 {
-	uint8_t lselect,lscroll;
+	// navigation
+	uint16_t lselect,lscroll;
 	size_t full_range;
+
+	// data
 	std::vector<MenuListEntity> entities;
 	std::vector<MenuListSegment> segments;
+
+	// text
 	Text description;
 	size_t dtlen;
+
+	// index
+	std::vector<uint16_t> checkbox_ids,dropdown_ids,slider_ids;
 };
 
 class MenuList
@@ -366,6 +374,7 @@ public:
 
 	// draw
 	uint8_t update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd);
+	void update_background_component();
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
@@ -392,6 +401,9 @@ private:
 
 	// memory
 	uint32_t slider_range;
+
+	// positioning
+	float crr_scroll = .0f;
 
 	// triggers
 	bool tf_list_opened = false,subfunc_opened = false;

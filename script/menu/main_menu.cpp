@@ -290,7 +290,10 @@ void command_logic_sysbehaviour(LDCProcessState &state)
 	conforming to: void* interpreter_logic
 */
 void command_logic_checkbox(LDCProcessState &state)
-{ state.clusters.back().elist.back().etype = CHECKBOX; }
+{
+	state.clusters.back().elist.back().etype = CHECKBOX;
+	state.clusters.back().cnt_checkbox++;
+}
 
 /*
 	command_logic_dropdown(LDCProcessState&) -> void (static,global) !O(1)
@@ -304,6 +307,7 @@ void command_logic_dropdown(LDCProcessState &state)
 	while (getline(bfss,ddoption,';'))
 		state.clusters.back().elist.back().cattribs.push_back(ddoption);
 	state.clusters.back().elist.back().etype = DROPDOWN;
+	state.clusters.back().cnt_dropdown++;
 }
 // TODO: benchmark push back usage against doubled tail process + predefined list size for tail copy
 // 	this is also relevant for attributes/floats insertions
@@ -314,7 +318,10 @@ void command_logic_dropdown(LDCProcessState &state)
 	conforming to: void* interpreter_logic
 */
 void command_logic_slider(LDCProcessState &state)
-{ state.clusters.back().elist.back().etype = SLIDER; }
+{
+	state.clusters.back().elist.back().etype = SLIDER;
+	state.clusters.back().cnt_slider++;
+}
 
 /*
 	command_logic_return(LDCProcessState&) -> void (static,global) !O(1)
@@ -522,7 +529,9 @@ uint8_t MenuList::define_list(const char* path)
 			0,0,0,
 			std::vector<MenuListEntity>(cluster.elist.size()),
 			std::vector<MenuListSegment>(cluster.slist.size()),
-			Text(de_font),0
+			Text(de_font),0,
+			std::vector<uint16_t>(cluster.cnt_checkbox),std::vector<uint16_t>(cluster.cnt_dropdown),
+			std::vector<uint16_t>(cluster.cnt_slider)
 		};
 
 		// write segment information in-between list elements
@@ -543,6 +552,7 @@ uint8_t MenuList::define_list(const char* path)
 		}
 
 		// process cluster entites
+		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
 		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
@@ -551,13 +561,13 @@ uint8_t MenuList::define_list(const char* path)
 
 			// create entity
 			MenuListEntity t_entity = {
-				glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1.f),
-				cluster.elist[i].etype,cluster.elist[i].tdata,
+				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,
 				Text(st_font),cluster.elist[i].head.length(),{}
 			};
 
 			// fill in element list information
-			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(0)),t_entity.text.load();
+			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
+				t_entity.text.load();
 			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
 			t_mlc.dtlen += cluster.elist[i].description.length();
 
@@ -574,11 +584,12 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.value = 0;
 				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
 					Text dd_text = Text(st_font);
-					dd_text.add(cluster.elist[i].cattribs[di].c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),
+					dd_text.add(cluster.elist[i].cattribs[di].c_str(),
+							glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,vscroll)),
 						dd_text.load();
 					t_entity.dd_options[di] = dd_text;
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
-				}
+				} t_mlc.dropdown_ids[head_dropdown] = i,head_dropdown++;
 				break;
 
 			// load slider geometry
@@ -591,6 +602,7 @@ uint8_t MenuList::define_list(const char* path)
 					MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
 					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1
 				}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+				t_mlc.slider_ids[head_slider] = i,head_slider++;
 				break;
 				// FIXME: really? we allocate per slider? that is really dumb and lazy!
 				// TODO: creating the new temporary vertex list and then concat is very slow and simple minded
@@ -617,7 +629,8 @@ uint8_t MenuList::define_list(SaveStates states)
 	MenuListComplex mlc = {
 		0,0,states.saves.size()-1,
 		std::vector<MenuListEntity>(states.saves.size()),{},
-		Text(st_font),0
+		Text(st_font),0,
+		{},{},{}
 	};
 
 	// iterate save data and create a state list with a proportionally linear relationship
@@ -625,11 +638,9 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
-			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),diff_colours[state.diff],
-			LDCEntityType::RETURN,i,
+			diff_colours[state.diff],LDCEntityType::RETURN,i,
 			Text(st_font),state.title.length(),{}
 		};
-		// TODO: multicolour difficulties (normal=white,master=orange,grandmaster=red,headmaster=violet)
 
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(0)),mle.text.load();
@@ -643,8 +654,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			glm::vec3(MENU_LIST_HEADPOS_X,vscroll,0),glm::vec4(1,0,0,1),
-			LDCEntityType::UNDEFINED,0,
+			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,
 			Text(st_font),err_message.length()
 		};
 		decoy.text.add(err_message.c_str(),glm::vec2(0)),decoy.text.load();
@@ -773,53 +783,48 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		out = mlists[active_ids.back()].lselect;
 		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd||tf_list_opened;
 		tf_list_opened = false;
-
-		// draw dropdown background
-		if (subfunc_opened) {
-			ddbgr_buffer.bind();
-			ddbgr_shader.enable();
-			glDrawArrays(GL_TRIANGLES,0,6);
-		}
 	}
 
 	// draw active lists
 	if (!active_ids.size()) return out;
 	uint8_t id = active_ids.back();
-	glm::vec2 crr_scroll = glm::vec2(0,mlists[id].lscroll*MENU_LIST_SCROLL_Y);
+	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
 	for (MenuListSegment &s : mlists[id].segments)
-		s.text.prepare(),s.text.set_scroll(crr_scroll),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : mlists[id].entities) {
-		glm::mat4 tx_model = glm::translate(glm::mat4(1.f),e.position+glm::vec3(crr_scroll,0));
-		e.text.prepare(),e.text.set_scroll(tx_model),e.text.render(e.tlen,e.colour);
-
-		// display entity state
-		switch (e.etype) {
-		case LDCEntityType::CHECKBOX:
-			// TODO
-			break;
-		case LDCEntityType::DROPDOWN:
-			e.dd_options[e.value].prepare(),e.dd_options[e.value].set_scroll(tx_model),
-				e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
-			break;
-		case LDCEntityType::SLIDER:
-			slider_buffer.bind(),slider_shader.enable();
-			slider_shader.upload_float("scroll",crr_scroll.y);
-			glDrawArrays(GL_TRIANGLES,0,slider_range);
-			break;
-		case LDCEntityType::SUBSEQUENT:
-			// TODO
-			break;
-		};
-	}
-	// TODO: write a routine to displace inactive menu lists in perspective (mdc)
-	// TODO: search for a more elegant solution to display entity states
+		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+	for (MenuListEntity &e : mlists[id].entities)
+		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
 	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
 		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
+
+	// write dropdown elements
+	for (uint16_t &ddi : mlists[id].dropdown_ids) {
+		MenuListEntity &e = mlists[id].entities[ddi];
+		e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
+	}
 	return out;
+	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
+
+/*
+	TODO
+*/
+void MenuList::update_background_component()
+{
+
+	// draw dropdown background
+	if (subfunc_opened) {
+		ddbgr_buffer.bind(),ddbgr_shader.enable();
+		glDrawArrays(GL_TRIANGLES,0,6);
+	}
+
+	// draw sliders
+	slider_buffer.bind(),slider_shader.enable();
+	slider_shader.upload_float("scroll",crr_scroll);
+	if (active_ids.size()) glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
+}
 
 
 /**
@@ -1287,7 +1292,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mlists.mlists[flist].entities[2].dd_length.resize(max_displays);
 	for (uint8_t i=0;i<max_displays;i++) {
 		Text t_ddo = Text(t_font);
-		t_ddo.add(("Monitor "+std::to_string(i)).c_str(),glm::vec2(MENU_LIST_ATTRIBUTE_OFFSET,0)),t_ddo.load();
+		t_ddo.add(
+				("Monitor "+std::to_string(i)).c_str(),
+				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)),
+			t_ddo.load();
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
 	} mlists.load();
@@ -1449,7 +1457,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	splices_geometry.update();
 	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
-	// draw dialogue selectors
+	// draw dialogue & list background components
+	mlists.update_background_component();
 	mdialogues.background_component(transition_delta);
 
 	// STOP MULTISAMPLED RENDER
