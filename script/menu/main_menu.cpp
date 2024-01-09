@@ -576,8 +576,16 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.colour = glm::vec4(cluster.elist[i].fattribs[0],cluster.elist[i].fattribs[1],
 						cluster.elist[i].fattribs[2],cluster.elist[i].fattribs[3]);
 
-			// load dropdown options
+			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
+			case LDCEntityType::CHECKBOX:
+				checkbox_vertices.resize(checkbox_vertices.size()+24);
+				// TODO: find a clever geometry to transform into active checkbox
+				t_mlc.checkbox_ids[head_checkbox] = i,head_checkbox++;
+				break;
+				// FIXME: similar issues apply as for slider implementation
+
+			// load dropdown options
 			case LDCEntityType::DROPDOWN:
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
@@ -594,14 +602,14 @@ uint8_t MenuList::define_list(const char* path)
 
 			// load slider geometry
 			case LDCEntityType::SLIDER:
-				std::vector<float> t_vertices = {
+				std::vector<float> ts_vertices = {
 					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_SIZE+vscroll,0,
 					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1,
 					MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
 					MENU_LIST_ATTRIBUTE_WTARGET,-MENU_LIST_HEAD_SIZE+vscroll,0,
 					MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
 					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1
-				}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+				}; slider_vertices.insert(slider_vertices.end(),ts_vertices.begin(),ts_vertices.end());
 				t_mlc.slider_ids[head_slider] = i,head_slider++;
 				break;
 				// FIXME: really? we allocate per slider? that is really dumb and lazy!
@@ -681,16 +689,23 @@ void MenuList::load()
 	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
 	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
 	ddbgr_shader.def_attributeF("position",2,0,2);
-	ddbgr_shader.upload_camera(Camera2D(1280.f,720.f));
+	ddbgr_shader.upload_camera(cam2D);
 
-	// setup slider corpus
+	// setup checkbox corpi
+	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
+	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
+	checkbox_shader.def_attributeF("position",2,0,3);
+	checkbox_shader.def_attributeF("bmod",1,2,3);
+	checkbox_shader.upload_int("is_active",false);
+	checkbox_shader.upload_camera(cam2D);
+
+	// setup slider corpi
 	slider_buffer.bind(),slider_buffer.upload_vertices(slider_vertices);
 	slider_shader.compile("./shader/main_menu/vslider.shader","./shader/main_menu/fslider.shader");
 	slider_shader.def_attributeF("position",2,0,3);
 	slider_shader.def_attributeF("bmod",1,2,3);
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
-	slider_shader.upload_camera(Camera2D(1280.f,720.f));
-	slider_range = slider_vertices.size()/3;
+	slider_shader.upload_camera(cam2D);
 }
 
 /*
@@ -794,15 +809,15 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 	for (MenuListEntity &e : mlists[id].entities)
 		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
-	// description out
-	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
-		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
-
 	// write dropdown elements
 	for (uint16_t &ddi : mlists[id].dropdown_ids) {
 		MenuListEntity &e = mlists[id].entities[ddi];
 		e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 	}
+
+	// description out
+	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
+		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
 	return out;
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 }
@@ -813,17 +828,22 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 */
 void MenuList::update_background_component()
 {
-
 	// draw dropdown background
 	if (subfunc_opened) {
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 
-	// draw sliders
-	slider_buffer.bind(),slider_shader.enable();
-	slider_shader.upload_float("scroll",crr_scroll);
-	if (active_ids.size()) glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
+	// draw checkboxes
+	if (active_ids.size()) {
+		checkbox_buffer.bind(),checkbox_shader.enable();
+		checkbox_shader.upload_float("scroll",crr_scroll);
+
+		// draw sliders
+		slider_buffer.bind(),slider_shader.enable();
+		slider_shader.upload_float("scroll",crr_scroll);
+		glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
+	}
 }
 
 

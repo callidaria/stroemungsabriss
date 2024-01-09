@@ -392,15 +392,12 @@ public:
 private:
 
 	// engine
-	Buffer ddbgr_buffer = Buffer(),slider_buffer = Buffer();
-	Shader ddbgr_shader = Shader(),slider_shader = Shader();
+	Buffer checkbox_buffer = Buffer(),ddbgr_buffer = Buffer(),slider_buffer = Buffer();
+	Shader checkbox_shader = Shader(),ddbgr_shader = Shader(),slider_shader = Shader();
 
 	// data
 	std::vector<uint8_t> active_ids;
-	std::vector<float> slider_vertices;
-
-	// memory
-	uint32_t slider_range;
+	std::vector<float> checkbox_vertices,slider_vertices;
 
 	// positioning
 	float crr_scroll = .0f;
