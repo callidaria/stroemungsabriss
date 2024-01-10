@@ -579,11 +579,9 @@ uint8_t MenuList::define_list(const char* path)
 			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
 			case LDCEntityType::CHECKBOX:
-				checkbox_vertices.resize(checkbox_vertices.size()+24);
-				// TODO: find a clever geometry to transform into active checkbox
+				create_checkbox(vscroll);
 				t_mlc.checkbox_ids[head_checkbox] = i,head_checkbox++;
 				break;
-				// FIXME: similar issues apply as for slider implementation
 
 			// load dropdown options
 			case LDCEntityType::DROPDOWN:
@@ -602,18 +600,9 @@ uint8_t MenuList::define_list(const char* path)
 
 			// load slider geometry
 			case LDCEntityType::SLIDER:
-				std::vector<float> ts_vertices = {
-					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_SIZE+vscroll,0,
-					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1,
-					MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
-					MENU_LIST_ATTRIBUTE_WTARGET,-MENU_LIST_HEAD_SIZE+vscroll,0,
-					MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
-					MENU_LIST_ATTRIBUTE_COMBINE,-MENU_LIST_HEAD_HSIZE+vscroll,1
-				}; slider_vertices.insert(slider_vertices.end(),ts_vertices.begin(),ts_vertices.end());
+				create_slider(vscroll);
 				t_mlc.slider_ids[head_slider] = i,head_slider++;
 				break;
-				// FIXME: really? we allocate per slider? that is really dumb and lazy!
-				// TODO: creating the new temporary vertex list and then concat is very slow and simple minded
 			};
 
 			// move cursor to write next element & store current information
@@ -696,7 +685,6 @@ void MenuList::load()
 	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
 	checkbox_shader.def_attributeF("position",2,0,3);
 	checkbox_shader.def_attributeF("bmod",1,2,3);
-	checkbox_shader.upload_int("is_active",false);
 	checkbox_shader.upload_camera(cam2D);
 
 	// setup slider corpi
@@ -838,6 +826,7 @@ void MenuList::update_background_component()
 	if (active_ids.size()) {
 		checkbox_buffer.bind(),checkbox_shader.enable();
 		checkbox_shader.upload_float("scroll",crr_scroll);
+		glDrawArrays(GL_TRIANGLES,0,12*mlists[active_ids.back()].checkbox_ids.size());
 
 		// draw sliders
 		slider_buffer.bind(),slider_shader.enable();
@@ -845,6 +834,61 @@ void MenuList::update_background_component()
 		glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
 	}
 }
+
+/*
+	TODO
+*/
+void MenuList::create_checkbox(float vscroll)
+{
+	// prepare lower-right corner with scroll
+	float ledge = vscroll-MENU_LIST_HEAD_SIZE;
+	std::vector<float> t_vertices = {
+
+		// upper triangle
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,
+		0,MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,1,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,
+
+		// lower triangle
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,1,
+
+		// left triangle
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,1,
+
+		// right triangle
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,1
+	}; checkbox_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+}
+// FIXME: similar issues apply as for slider implementation
+
+/*
+	TODO
+*/
+void MenuList::create_slider(float vscroll)
+{
+	float lcorner = vscroll-MENU_LIST_HEAD_SIZE;
+	float mcorner = vscroll-MENU_LIST_HEAD_HSIZE;
+	std::vector<float> t_vertices = {
+
+		// concave trimming
+		MENU_LIST_ATTRIBUTE_COMBINE,lcorner,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,mcorner,1,
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
+
+		// concave widening
+		MENU_LIST_ATTRIBUTE_WTARGET,lcorner,0,
+		MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,mcorner,1
+	}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+}
+// FIXME: really? we allocate per slider? that is really dumb and lazy!
+// TODO: creating the new temporary vertex list and then concat is very slow and simple minded
 
 
 /**

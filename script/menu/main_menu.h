@@ -63,6 +63,7 @@ constexpr uint16_t MENU_LIST_ATTRIBUTE_OFFSET = 500;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_COMBINE = MENU_LIST_HEADPOS_X+MENU_LIST_ATTRIBUTE_OFFSET;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_WIDTH = 200;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_WTARGET = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_ATTRIBUTE_WIDTH;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_QUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_SIZE;
 
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
@@ -378,6 +379,12 @@ public:
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
+
+private:
+
+	// geometry creation
+	void create_checkbox(float vscroll);
+	void create_slider(float vscroll);
 
 public:
 
