@@ -375,7 +375,7 @@ public:
 
 	// draw
 	uint8_t update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd);
-	void update_background_component();
+	void update_background_component(float anim_delta);
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
@@ -405,6 +405,8 @@ private:
 	// data
 	std::vector<uint8_t> active_ids;
 	std::vector<float> checkbox_vertices,slider_vertices;
+	bool checked = false;
+	float check_mod = .0f;
 
 	// positioning
 	float crr_scroll = .0f;
