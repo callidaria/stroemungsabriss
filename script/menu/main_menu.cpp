@@ -683,8 +683,9 @@ void MenuList::load()
 	// setup checkbox corpi
 	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
 	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
-	checkbox_shader.def_attributeF("position",2,0,3);
-	checkbox_shader.def_attributeF("bmod",1,2,3);
+	checkbox_shader.def_attributeF("position",2,0,4);
+	checkbox_shader.def_attributeF("bmod",2,2,4);
+	checkbox_shader.upload_float("qsize",MENU_LIST_HEAD_SIZE);
 	checkbox_shader.upload_camera(cam2D);
 
 	// setup slider corpi
@@ -845,24 +846,24 @@ void MenuList::create_checkbox(float vscroll)
 	std::vector<float> t_vertices = {
 
 		// upper triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,
-		0,MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,1,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,
-
-		// lower triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,1,
-
-		// left triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,1,
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,-.5f,.5f,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,0,
 
 		// right triangle
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,1
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,.5f,.5f,
+
+		// lower triangle
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,.5f,-.5f,
+
+		// left triangle
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,-.5f,-.5f
 	}; checkbox_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
 // FIXME: similar issues apply as for slider implementation
