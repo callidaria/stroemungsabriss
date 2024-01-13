@@ -64,6 +64,8 @@ constexpr uint16_t MENU_LIST_ATTRIBUTE_COMBINE = MENU_LIST_HEADPOS_X+MENU_LIST_A
 constexpr uint16_t MENU_LIST_ATTRIBUTE_WIDTH = 200;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_WTARGET = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_ATTRIBUTE_WIDTH;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_QUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_SIZE;
+constexpr uint16_t MENU_LIST_ATTRIBUTE_HQUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_HSIZE;
+constexpr uint8_t MENU_LIST_CHECKBOX_DRIFT_DIST = 2;
 
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
@@ -319,13 +321,31 @@ private:
  * 		MenuList Definiton
 */
 
+struct MLECheckboxComponent
+{
+	bool checked;
+	float check_mod;
+};
+
+union MLEComponentVariable
+{
+	MLECheckboxComponent checkbox;
+	float slider;
+};
+
 struct MenuListEntity
 {
+	// function
 	glm::vec4 colour;
 	LDCEntityType etype;
 	uint16_t value;
+
+	// representation
 	Text text;
 	size_t tlen;
+
+	// attribute component
+	MLEComponentVariable attribute;
 	std::vector<Text> dd_options;
 	std::vector<size_t> dd_length;
 };
@@ -405,8 +425,6 @@ private:
 	// data
 	std::vector<uint8_t> active_ids;
 	std::vector<float> checkbox_vertices,slider_vertices;
-	bool checked = false;
-	float check_mod = .0f;
 
 	// positioning
 	float crr_scroll = .0f;

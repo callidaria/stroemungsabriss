@@ -562,7 +562,7 @@ uint8_t MenuList::define_list(const char* path)
 			// create entity
 			MenuListEntity t_entity = {
 				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,
-				Text(st_font),cluster.elist[i].head.length(),{}
+				Text(st_font),cluster.elist[i].head.length(),
 			};
 
 			// fill in element list information
@@ -580,6 +580,7 @@ uint8_t MenuList::define_list(const char* path)
 			switch (cluster.elist[i].etype) {
 			case LDCEntityType::CHECKBOX:
 				create_checkbox(vscroll);
+				t_entity.attribute.checkbox = { false,.0f };
 				t_mlc.checkbox_ids[head_checkbox] = i,head_checkbox++;
 				break;
 
@@ -601,6 +602,7 @@ uint8_t MenuList::define_list(const char* path)
 			// load slider geometry
 			case LDCEntityType::SLIDER:
 				create_slider(vscroll);
+				t_entity.attribute.slider = .0f;
 				t_mlc.slider_ids[head_slider] = i,head_slider++;
 				break;
 			};
@@ -683,10 +685,8 @@ void MenuList::load()
 	// setup checkbox corpi
 	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
 	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
-	checkbox_shader.def_attributeF("position",2,0,6);
-	checkbox_shader.def_attributeF("bmod",2,2,6);
-	checkbox_shader.def_attributeF("drift_mod",2,4,6);
-	checkbox_shader.upload_float("qsize",MENU_LIST_HEAD_SIZE);
+	checkbox_shader.def_attributeF("position",2,0,4);
+	checkbox_shader.def_attributeF("drift_mod",2,2,4);
 	checkbox_shader.upload_camera(cam2D);
 
 	// setup slider corpi
@@ -778,12 +778,12 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		// FIXME: one too many scroll, when selection tries to exceed last entity.
 
 		// confirmation handling
-		if (conf&&crr.entities[crr_select].etype==LDCEntityType::SUBSEQUENT) {
-			open_list(crr.entities[crr_select].value);
-			rrnd = true;
-		} subfunc_opened = subfunc_opened||(conf&&crr.entities[crr_select].etype==LDCEntityType::DROPDOWN);
-		checked = (conf&&crr.entities[crr_select].etype==LDCEntityType::CHECKBOX) ? !checked : checked;
-		status = crr.entities[crr_select].value*(crr.entities[crr_select].etype==RETURN);
+		MenuListEntity &cs = crr.entities[crr_select];
+		if (conf&&cs.etype==LDCEntityType::SUBSEQUENT) open_list(cs.value),rrnd = true;
+		else if (conf&&cs.etype==LDCEntityType::CHECKBOX)
+			cs.attribute.checkbox.checked = !cs.attribute.checkbox.checked;
+		subfunc_opened = subfunc_opened||(conf&&cs.etype==LDCEntityType::DROPDOWN);
+		status = cs.value*(cs.etype==RETURN);
 
 		// selection geometry data manipulation
 		out = mlists[active_ids.back()].lselect;
@@ -799,6 +799,12 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
 	for (MenuListEntity &e : mlists[id].entities)
 		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
+
+	// draw dropdown background
+	if (subfunc_opened) {
+		ddbgr_buffer.bind(),ddbgr_shader.enable();
+		glDrawArrays(GL_TRIANGLES,0,6);
+	}
 
 	// write dropdown elements
 	for (uint16_t &ddi : mlists[id].dropdown_ids) {
@@ -819,19 +825,19 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 */
 void MenuList::update_background_component(float anim_delta)
 {
-	// draw dropdown background
-	if (subfunc_opened) {
-		ddbgr_buffer.bind(),ddbgr_shader.enable();
-		glDrawArrays(GL_TRIANGLES,0,6);
-	}
-
-	// draw checkboxes
-	if (active_ids.size()) {
-		Toolbox::transition_float_on_condition(check_mod,anim_delta,checked);
+	// prepare checkboxes
+	if (active_ids.size()&&!subfunc_opened) {
+		uint16_t id = active_ids.back();
 		checkbox_buffer.bind(),checkbox_shader.enable();
 		checkbox_shader.upload_float("scroll",crr_scroll);
-		checkbox_shader.upload_float("aprog",check_mod);
-		glDrawArrays(GL_TRIANGLES,0,12*mlists[active_ids.back()].checkbox_ids.size());
+
+		// iterate checkboxes
+		for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
+			MLEComponentVariable &cv = mlists[id].entities[mlists[id].checkbox_ids[i]].attribute;
+			Toolbox::transition_float_on_condition(cv.checkbox.check_mod,anim_delta,cv.checkbox.checked);
+			checkbox_shader.upload_float("aprog",cv.checkbox.check_mod);
+			glDrawArrays(GL_TRIANGLES,12*i,12);
+		}
 
 		// draw sliders
 		slider_buffer.bind(),slider_shader.enable();
@@ -839,6 +845,7 @@ void MenuList::update_background_component(float anim_delta)
 		glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
 	}
 }
+// FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
 
 /*
 	TODO
@@ -847,27 +854,28 @@ void MenuList::create_checkbox(float vscroll)
 {
 	// prepare lower-right corner with scroll
 	float ledge = vscroll-MENU_LIST_HEAD_SIZE;
+	float cedge = vscroll-MENU_LIST_HEAD_HSIZE;
 	std::vector<float> t_vertices = {
 
 		// upper triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,0,0,1,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,-.5f,.5f,0,1,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,0,0,1,
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,MENU_LIST_CHECKBOX_DRIFT_DIST,
+		MENU_LIST_ATTRIBUTE_HQUADRATIC,cedge,0,MENU_LIST_CHECKBOX_DRIFT_DIST,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,MENU_LIST_CHECKBOX_DRIFT_DIST,
 
 		// right triangle
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,0,1,0,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,0,0,1,0,
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,.5f,.5f,1,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,MENU_LIST_CHECKBOX_DRIFT_DIST,0,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,MENU_LIST_CHECKBOX_DRIFT_DIST,0,
+		MENU_LIST_ATTRIBUTE_HQUADRATIC,cedge,MENU_LIST_CHECKBOX_DRIFT_DIST,0,
 
 		// lower triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,0,0,-1,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,0,0,-1,
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,.5f,-.5f,0,-1,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,-MENU_LIST_CHECKBOX_DRIFT_DIST,
+		MENU_LIST_ATTRIBUTE_QUADRATIC,ledge,0,-MENU_LIST_CHECKBOX_DRIFT_DIST,
+		MENU_LIST_ATTRIBUTE_HQUADRATIC,cedge,0,-MENU_LIST_CHECKBOX_DRIFT_DIST,
 
 		// left triangle
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,0,-1,0,
-		MENU_LIST_ATTRIBUTE_COMBINE,ledge,0,0,-1,0,
-		MENU_LIST_ATTRIBUTE_QUADRATIC,vscroll,-.5f,-.5f,-1,0
+		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,-MENU_LIST_CHECKBOX_DRIFT_DIST,0,
+		MENU_LIST_ATTRIBUTE_COMBINE,ledge,-MENU_LIST_CHECKBOX_DRIFT_DIST,0,
+		MENU_LIST_ATTRIBUTE_HQUADRATIC,cedge,-MENU_LIST_CHECKBOX_DRIFT_DIST,0
 	}; checkbox_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
 // FIXME: similar issues apply as for slider implementation

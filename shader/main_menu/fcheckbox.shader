@@ -1,10 +1,10 @@
 #version 330 core
 
-in vec2 colour_mod;
+in vec3 dcolour;
 
 out vec4 outColour;
 
 void main()
 {
-	outColour = vec4(colour_mod*.7,.7,1);
+	outColour = vec4(dcolour,1.);
 }
