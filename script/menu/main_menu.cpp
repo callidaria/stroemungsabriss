@@ -586,6 +586,7 @@ uint8_t MenuList::define_list(const char* path)
 			// load dropdown options
 			case LDCEntityType::DROPDOWN:
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
+				t_entity.dd_colours.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
 				t_entity.value = 0;
 				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
@@ -594,6 +595,7 @@ uint8_t MenuList::define_list(const char* path)
 							glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,vscroll)),
 						dd_text.load();
 					t_entity.dd_options[di] = dd_text;
+					t_entity.dd_colours[di] = glm::vec4(1.f);
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
 				} t_mlc.dropdown_ids[head_dropdown] = i,head_dropdown++;
 				break;
@@ -740,9 +742,12 @@ void MenuList::close_list(uint8_t id)
 uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
 {
+	// early exit when no lists active
+	if (!active_ids.size()) return 0;
+
 	// update most recent list
 	uint8_t out = 0;
-	if (active_ids.size()&&!subfunc_opened) {
+	if (!subfunc_opened) {
 		crr_select = 0;
 		MenuListComplex &crr = mlists[active_ids.back()];
 
@@ -778,7 +783,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 		// find index of selected entity & check if selection intersects segment
 		crr_select = crr.lscroll+crr.lselect;
-		uint8_t seg_passed = 0;
+		seg_passed = 0;
 		bool seg_select = false;
 		for (MenuListSegment &seg : crr.segments) {
 			if (crr_select<=seg.position) {
@@ -807,12 +812,15 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		// confirmation handling
 		else if (conf) {
 			switch (ce.etype) {
+			case LDCEntityType::DROPDOWN:
+				subfunc_opened = true;
+				conf = false;
+				break;
 			case LDCEntityType::SUBSEQUENT: open_list(ce.value),rrnd = true;
 				break;
 			case LDCEntityType::CHECKBOX: ce.value = !ce.value;
 				break;
 			default:
-				subfunc_opened = ce.etype==LDCEntityType::DROPDOWN;
 				status = ce.value*(ce.etype==LDCEntityType::RETURN);
 			};
 		}
@@ -824,30 +832,28 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	}
 
 	// update attribute subfunctionality for dropdown options
-	else if (active_ids.size()&&subfunc_opened) {
-		MenuListEntity &e = mlists[active_ids.back()].entities[crr_select];
+	uint8_t id = active_ids.back();
+	if (subfunc_opened) {
+		MenuListEntity &e = mlists[id].entities[crr_select];
+		uint8_t cap_options = e.dd_options.size()-1;
+
+		// input handling for sublist
 		if (mperiph) {
-			// TODO
+			uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
+			int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y-seg_passed;
+			mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
+			e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1.f);
+			e.value = conf ? mshover : e.value;
 		} else {
-			uint8_t cap_options = e.dd_options.size()-1;
 			int8_t nvalue = e.value+vdir;
 			e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
 		}
+		// FIXME: segment selections on confirm misdirect sublist selections
+
+		// confirmation handling for current selection
 		subfunc_opened = !back&&!conf;
-	}
 
-	// draw active lists
-	if (!active_ids.size()) return out;
-	uint8_t id = active_ids.back();
-	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
-	for (MenuListSegment &s : mlists[id].segments)
-		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : mlists[id].entities)
-		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
-
-	// draw dropdown background
-	if (subfunc_opened) {
-		MenuListEntity &e = mlists[active_ids.back()].entities[crr_select];
+		// draw dropdown background
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
 		ddbgr_shader.upload_int("selection",mlists[id].lselect-e.value);
 		ddbgr_shader.upload_int("ddsize",e.dd_options.size()-1);
@@ -857,7 +863,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		for (uint8_t ddi=0;ddi<e.dd_options.size();ddi++) {
 			Text &ddtx = e.dd_options[ddi];
 			ddtx.prepare(),ddtx.set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(ddi-e.value)));
-			ddtx.render(e.dd_length[ddi],glm::vec4(1.f));
+			ddtx.render(e.dd_length[ddi],e.dd_colours[ddi]);
+			e.dd_colours[ddi] = glm::vec4(1.f);
 		}
 	}
 
@@ -868,6 +875,13 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 		}
 	}
+
+	// draw active lists
+	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
+	for (MenuListSegment &s : mlists[id].segments)
+		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+	for (MenuListEntity &e : mlists[id].entities)
+		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
 	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
@@ -1431,6 +1445,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
 	uint8_t max_displays = SDL_GetNumVideoDisplays(),flist = ml_options+2;
 	mlists.mlists[flist].entities[2].dd_options.resize(max_displays);
+	mlists.mlists[flist].entities[2].dd_colours.resize(max_displays);
 	mlists.mlists[flist].entities[2].dd_length.resize(max_displays);
 	for (uint8_t i=0;i<max_displays;i++) {
 		Text t_ddo = Text(t_font);
@@ -1439,6 +1454,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)),
 			t_ddo.load();
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
+		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
 	} mlists.load();
 	// FIXME: ?? (char)i instead of std::to_string(i).c_str()

@@ -339,6 +339,7 @@ struct MenuListEntity
 
 	// attribute component
 	std::vector<Text> dd_options;
+	std::vector<glm::vec4> dd_colours;
 	std::vector<size_t> dd_length;
 };
 
@@ -420,7 +421,7 @@ private:
 	std::vector<float> checkbox_vertices,slider_vertices;
 
 	// positioning
-	uint16_t crr_select = 0;
+	uint16_t crr_select = 0,seg_passed = 0;
 	float crr_scroll = .0f;
 
 	// triggers
