@@ -719,7 +719,7 @@ void MenuList::close_list(uint8_t id)
 /*
 	TODO
 */
-uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool back,
+uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
 {
 	// update most recent list
@@ -778,8 +778,12 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
-			int16_t nvalue = ce.value+hdir;
-			ce.value = (nvalue<0) ? 0 : (nvalue>100) ? 100 : nvalue;
+			if (ntconf&&mperiph&&mpos.x>MENU_LIST_ATTRIBUTE_COMBINE&&mpos.x<MENU_LIST_ATTRIBUTE_WTARGET)
+				ce.value = ((mpos.x-MENU_LIST_ATTRIBUTE_COMBINE)/MENU_LIST_ATTRIBUTE_WIDTH)*100;
+			else if (hdir) {
+				int16_t nvalue = ce.value+hdir;
+				ce.value = (nvalue<0) ? 0 : (nvalue>100) ? 100 : nvalue;
+			}
 		}
 
 		// confirmation handling
@@ -1522,7 +1526,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	bool rrnd = false;
 	uint8_t sd_grid = mlists.update(
 			udmv,m_ccbf->iMap->request(IMP_REQRIGHT)-m_ccbf->iMap->request(IMP_REQLEFT),
-			crd_mouse,m_ccbf->frame->mouse.mw,hit_a,hit_b,m_ccbf->frame->mpref_peripheral,rrnd);
+			crd_mouse,m_ccbf->frame->mouse.mw,
+			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
+			m_ccbf->frame->mpref_peripheral,rrnd);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 	// FIXME: request does not time input validity, work on input timing safety for unlocked update mode
 
