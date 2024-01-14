@@ -85,7 +85,7 @@
 	purpose: load .ldc files, break it up into a command buffer and compile it into a complex
 	\param path: path to .ldc file
 	\returns compiled struct complex to be used by UI feature
-	NOTE: don't kill me for calling it "compile", i just wanted to be cute ok. i kinda does compile though
+	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
 std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 {
@@ -561,7 +561,7 @@ uint8_t MenuList::define_list(const char* path)
 
 			// create entity
 			MenuListEntity t_entity = {
-				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,
+				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,0,
 				Text(st_font),cluster.elist[i].head.length(),
 			};
 
@@ -580,7 +580,6 @@ uint8_t MenuList::define_list(const char* path)
 			switch (cluster.elist[i].etype) {
 			case LDCEntityType::CHECKBOX:
 				create_checkbox(vscroll);
-				t_entity.attribute.checkbox = { false,.0f };
 				t_mlc.checkbox_ids[head_checkbox] = i,head_checkbox++;
 				break;
 
@@ -602,7 +601,6 @@ uint8_t MenuList::define_list(const char* path)
 			// load slider geometry
 			case LDCEntityType::SLIDER:
 				create_slider(vscroll);
-				t_entity.attribute.slider = .0f;
 				t_mlc.slider_ids[head_slider] = i,head_slider++;
 				break;
 			};
@@ -637,7 +635,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
-			diff_colours[state.diff],LDCEntityType::RETURN,i,
+			diff_colours[state.diff],LDCEntityType::RETURN,i,0,
 			Text(st_font),state.title.length(),{}
 		};
 
@@ -653,7 +651,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,
+			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,0,
 			Text(st_font),err_message.length()
 		};
 		decoy.text.add(err_message.c_str(),glm::vec2(0)),decoy.text.load();
@@ -721,7 +719,8 @@ void MenuList::close_list(uint8_t id)
 /*
 	TODO
 */
-uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd)
+uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool back,
+		bool mperiph,bool &rrnd)
 {
 	// update most recent list
 	uint8_t out = 0;
@@ -741,7 +740,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 		// set selection by rasterized mouse position
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
 		if (mperiph) {
-			int16_t nselect = (MENU_LIST_SCROLL_START-my)/MENU_LIST_SCROLL_Y;
+			int16_t nselect = (MENU_LIST_SCROLL_START-mpos.y)/MENU_LIST_SCROLL_Y;
 			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
 			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)
 					&& (crr.lscroll<((int16_t)crr.full_range-7)||mscroll>0));
@@ -749,7 +748,7 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 
 		// update selection by directional input
 		else {
-			int8_t dt_select = crr.lselect+dir;
+			int8_t dt_select = crr.lselect+vdir;
 			int8_t dt_scroll = crr.lscroll+dt_select*(dt_select<0)+(dt_select-7)*(dt_select>7);
 			crr.lselect = (dt_select<0) ? 0 : (dt_select>7) ? 7 : dt_select;
 			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
@@ -768,22 +767,33 @@ uint8_t MenuList::update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,
 				seg_select = crr_select==seg.position;
 				break;
 			} seg_passed++,crr_select--;
-		}
+		} MenuListEntity &ce = crr.entities[crr_select];
 
 		// protection for selected segments
 		if (seg_select) {
-			int8_t dt_select = -1+2*(dir>0||mperiph||!seg_passed);
+			int8_t dt_select = -1+2*(vdir>0||mperiph||!seg_passed);
 			crr.lselect += dt_select,crr_select -= dt_select<0;
 		}
 		// FIXME: one too many scroll, when selection tries to exceed last entity.
 
+		// slider manipulation by input
+		if (ce.etype==LDCEntityType::SLIDER) {
+			int16_t nvalue = ce.value+hdir;
+			ce.value = (nvalue<0) ? 0 : (nvalue>100) ? 100 : nvalue;
+		}
+
 		// confirmation handling
-		MenuListEntity &cs = crr.entities[crr_select];
-		if (conf&&cs.etype==LDCEntityType::SUBSEQUENT) open_list(cs.value),rrnd = true;
-		else if (conf&&cs.etype==LDCEntityType::CHECKBOX)
-			cs.attribute.checkbox.checked = !cs.attribute.checkbox.checked;
-		subfunc_opened = subfunc_opened||(conf&&cs.etype==LDCEntityType::DROPDOWN);
-		status = cs.value*(cs.etype==RETURN);
+		else if (conf) {
+			switch (ce.etype) {
+			case LDCEntityType::SUBSEQUENT: open_list(ce.value),rrnd = true;
+				break;
+			case LDCEntityType::CHECKBOX: ce.value = !ce.value;
+				break;
+			default:
+				subfunc_opened = subfunc_opened||ce.etype==LDCEntityType::DROPDOWN;
+				status = ce.value*(ce.etype==LDCEntityType::RETURN);
+			};
+		}
 
 		// selection geometry data manipulation
 		out = mlists[active_ids.back()].lselect;
@@ -833,16 +843,22 @@ void MenuList::update_background_component(float anim_delta)
 
 		// iterate checkboxes
 		for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
-			MLEComponentVariable &cv = mlists[id].entities[mlists[id].checkbox_ids[i]].attribute;
-			Toolbox::transition_float_on_condition(cv.checkbox.check_mod,anim_delta,cv.checkbox.checked);
-			checkbox_shader.upload_float("aprog",cv.checkbox.check_mod);
+			MenuListEntity &ce = mlists[id].entities[mlists[id].checkbox_ids[i]];
+			Toolbox::transition_float_on_condition(ce.anim_transition,anim_delta,ce.value);
+			checkbox_shader.upload_float("aprog",ce.anim_transition);
 			glDrawArrays(GL_TRIANGLES,12*i,12);
 		}
 
-		// draw sliders
+		// prepare sliders
 		slider_buffer.bind(),slider_shader.enable();
 		slider_shader.upload_float("scroll",crr_scroll);
-		glDrawArrays(GL_TRIANGLES,0,6*mlists[active_ids.back()].slider_ids.size());
+
+		// iterate sliders
+		for (uint16_t i=0;i<mlists[id].slider_ids.size();i++) {
+			MenuListEntity &ce = mlists[id].entities[mlists[id].slider_ids[i]];
+			slider_shader.upload_float("sval",ce.value*.01f);
+			glDrawArrays(GL_TRIANGLES,6*i,6);
+		}
 	}
 }
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
@@ -891,13 +907,13 @@ void MenuList::create_slider(float vscroll)
 	std::vector<float> t_vertices = {
 
 		// concave trimming
-		MENU_LIST_ATTRIBUTE_COMBINE,lcorner,0,
+		MENU_LIST_ATTRIBUTE_COMBINE-MENU_LIST_SLIDER_XPUSH,lcorner,0,
 		MENU_LIST_ATTRIBUTE_COMBINE,mcorner,1,
-		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,0,
+		MENU_LIST_ATTRIBUTE_COMBINE-MENU_LIST_SLIDER_XPUSH,vscroll,0,
 
 		// concave widening
-		MENU_LIST_ATTRIBUTE_WTARGET,lcorner,0,
-		MENU_LIST_ATTRIBUTE_WTARGET,vscroll,0,
+		MENU_LIST_ATTRIBUTE_WTARGET+MENU_LIST_SLIDER_XPUSH,lcorner,0,
+		MENU_LIST_ATTRIBUTE_WTARGET+MENU_LIST_SLIDER_XPUSH,vscroll,0,
 		MENU_LIST_ATTRIBUTE_COMBINE,mcorner,1
 	}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
@@ -1504,9 +1520,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// update dialogues & lists
 	bool rrnd = false;
-	uint8_t sd_grid = mlists.update(udmv,crd_mouse.y,m_ccbf->frame->mouse.mw,hit_a,hit_b,
-			m_ccbf->frame->mpref_peripheral,rrnd);
+	uint8_t sd_grid = mlists.update(
+			udmv,m_ccbf->iMap->request(IMP_REQRIGHT)-m_ccbf->iMap->request(IMP_REQLEFT),
+			crd_mouse,m_ccbf->frame->mouse.mw,hit_a,hit_b,m_ccbf->frame->mpref_peripheral,rrnd);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
+	// FIXME: request does not time input validity, work on input timing safety for unlocked update mode
 
 	// START MULTISAMPLED RENDER
 	FrameBuffer::close();

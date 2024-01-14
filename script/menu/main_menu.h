@@ -66,6 +66,7 @@ constexpr uint16_t MENU_LIST_ATTRIBUTE_WTARGET = MENU_LIST_ATTRIBUTE_COMBINE+MEN
 constexpr uint16_t MENU_LIST_ATTRIBUTE_QUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_SIZE;
 constexpr uint16_t MENU_LIST_ATTRIBUTE_HQUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_HSIZE;
 constexpr uint8_t MENU_LIST_CHECKBOX_DRIFT_DIST = 2;
+constexpr uint8_t MENU_LIST_SLIDER_XPUSH = 7;
 
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
@@ -191,8 +192,8 @@ struct LDCEntity
 	std::vector<uint8_t> condition_id;
 
 	// element behaviour type, value of tdata switches meaning based on etype
-	LDCEntityType etype = UNDEFINED;
-	uint16_t tdata;
+	LDCEntityType etype = LDCEntityType::UNDEFINED;
+	uint16_t tdata = 0;
 
 	// storage for additional attributes
 	std::vector<float> fattribs;
@@ -321,31 +322,19 @@ private:
  * 		MenuList Definiton
 */
 
-struct MLECheckboxComponent
-{
-	bool checked;
-	float check_mod;
-};
-
-union MLEComponentVariable
-{
-	MLECheckboxComponent checkbox;
-	float slider;
-};
-
 struct MenuListEntity
 {
 	// function
 	glm::vec4 colour;
 	LDCEntityType etype;
 	uint16_t value;
+	float anim_transition;
 
 	// representation
 	Text text;
 	size_t tlen;
 
 	// attribute component
-	MLEComponentVariable attribute;
 	std::vector<Text> dd_options;
 	std::vector<size_t> dd_length;
 };
@@ -394,7 +383,8 @@ public:
 	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
 
 	// draw
-	uint8_t update(int8_t dir,float my,int8_t mscroll,bool conf,bool back,bool mperiph,bool &rrnd);
+	uint8_t update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool back,
+			bool mperiph,bool &rrnd);
 	void update_background_component(float anim_delta);
 
 	// info
