@@ -673,11 +673,29 @@ void MenuList::load()
 	// setup dropdown background
 	Camera2D cam2D = Camera2D(1280.f,720.f);
 	float ddbgr_vertices[] = {
-		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,720, MENU_LIST_ATTRIBUTE_COMBINE,720,
-		MENU_LIST_ATTRIBUTE_COMBINE,0, MENU_LIST_ATTRIBUTE_WTARGET,0, MENU_LIST_ATTRIBUTE_WTARGET,720
+
+		// setup spanning
+		MENU_LIST_ATTRIBUTE_HTARGET,0,0,
+		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_ATTRIBUTE_THEIGHT,2,
+		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_ATTRIBUTE_THEIGHT,2,
+		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START,1,
+		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_SCROLL_START,1,
+		MENU_LIST_ATTRIBUTE_HTARGET,720,0,
+
+		// content box
+		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START,1,
+		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_ATTRIBUTE_THEIGHT,2,
+		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_SCROLL_START,1,
+		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_ATTRIBUTE_THEIGHT,2,
+		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_ATTRIBUTE_THEIGHT,2,
+		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_SCROLL_START,1
 	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
+
+	// dropdown shader setup
 	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
-	ddbgr_shader.def_attributeF("position",2,0,2);
+	ddbgr_shader.def_attributeF("position",2,0,3);
+	ddbgr_shader.def_attributeF("dmod",1,2,3);
+	ddbgr_shader.upload_int("jmp_dist",MENU_LIST_SCROLL_Y);
 	ddbgr_shader.upload_camera(cam2D);
 
 	// setup checkbox corpi
@@ -724,17 +742,17 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 {
 	// update most recent list
 	uint8_t out = 0;
-	uint16_t crr_select = 0;
-	if (active_ids.size()) {
+	if (active_ids.size()&&!subfunc_opened) {
+		crr_select = 0;
 		MenuListComplex &crr = mlists[active_ids.back()];
 
 		// escape handling
-		if (back&&!subfunc_opened) {
+		if (back) {
 			rrnd = true;
 			close_list(active_ids.back());
 			if (active_ids.size()) return mlists[active_ids.back()].lselect;
 			return 0;
-		} else if (back&&subfunc_opened) subfunc_opened = false;
+		}
 		// FIXME: bad dog, no bisquits
 
 		// set selection by rasterized mouse position
@@ -794,7 +812,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			case LDCEntityType::CHECKBOX: ce.value = !ce.value;
 				break;
 			default:
-				subfunc_opened = subfunc_opened||ce.etype==LDCEntityType::DROPDOWN;
+				subfunc_opened = ce.etype==LDCEntityType::DROPDOWN;
 				status = ce.value*(ce.etype==LDCEntityType::RETURN);
 			};
 		}
@@ -803,6 +821,19 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		out = mlists[active_ids.back()].lselect;
 		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd||tf_list_opened;
 		tf_list_opened = false;
+	}
+
+	// update attribute subfunctionality for dropdown options
+	else if (active_ids.size()&&subfunc_opened) {
+		MenuListEntity &e = mlists[active_ids.back()].entities[crr_select];
+		if (mperiph) {
+			// TODO
+		} else {
+			uint8_t cap_options = e.dd_options.size()-1;
+			int8_t nvalue = e.value+vdir;
+			e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
+		}
+		subfunc_opened = !back&&!conf;
 	}
 
 	// draw active lists
@@ -816,14 +847,26 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 	// draw dropdown background
 	if (subfunc_opened) {
+		MenuListEntity &e = mlists[active_ids.back()].entities[crr_select];
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
-		glDrawArrays(GL_TRIANGLES,0,6);
+		ddbgr_shader.upload_int("selection",mlists[id].lselect-e.value);
+		ddbgr_shader.upload_int("ddsize",e.dd_options.size()-1);
+		glDrawArrays(GL_TRIANGLES,0,12);
+
+		// write dropdown elements of selection
+		for (uint8_t ddi=0;ddi<e.dd_options.size();ddi++) {
+			Text &ddtx = e.dd_options[ddi];
+			ddtx.prepare(),ddtx.set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(ddi-e.value)));
+			ddtx.render(e.dd_length[ddi],glm::vec4(1.f));
+		}
 	}
 
 	// write dropdown elements
-	for (uint16_t &ddi : mlists[id].dropdown_ids) {
-		MenuListEntity &e = mlists[id].entities[ddi];
-		e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
+	else {
+		for (uint16_t &ddi : mlists[id].dropdown_ids) {
+			MenuListEntity &e = mlists[id].entities[ddi];
+			e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
+		}
 	}
 
 	// description out
@@ -922,6 +965,7 @@ void MenuList::create_slider(float vscroll)
 	}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
 // FIXME: really? we allocate per slider? that is really dumb and lazy!
+// FIXME: sliders, checkbox & dropdown boxing is slightly off-center
 // TODO: creating the new temporary vertex list and then concat is very slow and simple minded
 
 
