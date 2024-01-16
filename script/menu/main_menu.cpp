@@ -40,6 +40,10 @@
  * specify an amount of conditions to activate list entity.
  * the condition ids will read the respective booleans from an extern condition list.
  * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
+ *
+ *	:link <init_variable>
+ * link value result to initialization variable.
+ * // TODO: explain futher should this work out
  * 
  * 
  * 		BEHAVIOUR DEFINITIONS
@@ -91,12 +95,12 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","define","describe","floats","segment","condition","subsequent",
+		"cluster","define","describe","floats","segment","condition","link","subsequent",
 		"system_behaviour","checkbox","dropdown","slider","return",
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_attributes,
-		command_logic_segment,command_logic_condition,command_logic_subsequent,
+		command_logic_segment,command_logic_condition,command_logic_link,command_logic_subsequent,
 		command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,command_logic_slider,
 		command_logic_return,command_logic_syntax_error,
 	};
@@ -149,9 +153,15 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 			uint16_t k = 0;
 			while (state.clusters[k].id!=state.crefs[i].child_names[j]) k++;
 			state.clusters[i].elist[state.crefs[i].parent_ids[j]].tdata = k;
+		}
+
+		// correlate initialization variable name to serialization id
+		for (uint16_t j=0;j<state.srefs[i].vbound_ids.size();j++) {
+			// TODO: this warrants a rewrite of some initialization features
+		}
 
 		// set segment jump write
-		} for (LDCSegment &segment : state.clusters[i].slist)
+		for (LDCSegment &segment : state.clusters[i].slist)
 			state.clusters[i].elist[segment.position].jsegment = true;
 
 	// compiled list status
@@ -182,6 +192,7 @@ void command_logic_cluster(LDCProcessState &state)
 	cluster.id = state.cmd->tail;
 	state.clusters.push_back(cluster);
 	state.crefs.push_back({{},{}});
+	state.srefs.push_back({{},{}});
 }
 
 /*
@@ -253,6 +264,15 @@ void command_logic_condition(LDCProcessState &state)
 	} catch (std::out_of_range const &ex) {
 		compiler_error_msg(state,"given number exceeds reasonable range");
 	}
+}
+
+/*
+	TODO
+*/
+void command_logic_link(LDCProcessState &state)
+{
+	state.srefs.back().vbound_ids.push_back(state.clusters.back().elist.size()-1);
+	state.srefs.back().value_names.push_back(state.cmd->tail);
 }
 
 /*

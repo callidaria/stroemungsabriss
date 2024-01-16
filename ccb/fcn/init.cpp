@@ -22,7 +22,7 @@ Init::Init(const char* path)
 			trget << line << '\n';
 		} file = std::ifstream(path,std::ios::in); // read created file
 
-		// TODO: ??write default init file automatically based on descriptions in ml files
+		// TODO: ??write default init file automatically based on descriptions in .ldc files
 		// FIXME: autocreation through MenuList worked accidentally while testing? wtf?
 		// 		i do not know if this could be used to maybe optimize the init creation?
 	}

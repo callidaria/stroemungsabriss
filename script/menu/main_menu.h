@@ -49,7 +49,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 12;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 13;
 
 // menu list positioning
 constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
@@ -188,10 +188,17 @@ struct LDCSubsequentReferences
 	std::vector<std::string> child_names;
 };
 
+struct LDCSerializationReferences
+{
+	std::vector<uint16_t> vbound_ids;
+	std::vector<std::string> value_names;
+};
+
 struct LDCEntity
 {
 	// basic element data & availability state
 	std::string head,description;
+	uint16_t serialization_id = 0;
 	std::vector<uint8_t> condition_id;
 
 	// element behaviour type, value of tdata switches meaning based on etype
@@ -228,6 +235,7 @@ struct LDCProcessState
 	// working data
 	ListLanguageCommand* cmd;
 	std::vector<LDCSubsequentReferences> crefs;
+	std::vector<LDCSerializationReferences> srefs;
 
 	// resulting data
 	std::vector<LDCCluster> clusters;
@@ -249,6 +257,7 @@ static void command_logic_describe(LDCProcessState &state);
 static void command_logic_attributes(LDCProcessState &state);
 static void command_logic_segment(LDCProcessState &state);
 static void command_logic_condition(LDCProcessState &state);
+static void command_logic_link(LDCProcessState &state);
 static void command_logic_subsequent(LDCProcessState &state);
 static void command_logic_sysbehaviour(LDCProcessState &state);
 static void command_logic_checkbox(LDCProcessState &state);
