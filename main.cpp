@@ -40,10 +40,13 @@
 int main(int argc,char** argv)
 {
 	// INIT
-	Init init = Init("config.ini");
-	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
-			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
-			(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
+	Init("config.ini");
+	Frame f = Frame(
+			"黄泉先生",
+			Init::iConfig[InitVariable::FRAME_DISPLAY_ID],
+			Init::iConfig[InitVariable::FRAME_RESOLUTION_WIDTH],
+			Init::iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT],
+			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);
 	InputMap imap = InputMap(&f);
 
 	// AUDIO
