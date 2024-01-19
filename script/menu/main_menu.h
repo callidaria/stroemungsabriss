@@ -1,6 +1,7 @@
 #ifndef SRC_MENU_MAIN
 #define SRC_MENU_MAIN
 
+#include "../../ccb/fcn/init.h"
 #include "../../ccb/fcn/ccb_manager.h"
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"

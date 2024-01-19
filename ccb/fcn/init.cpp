@@ -47,12 +47,13 @@ Init::Init(const char* path)
 */
 uint32_t Init::find_iKey(const char* key)
 {
-	int out = 0;
-	while (out<INTEGER_KEY_LENGTH) {
+	uint32_t out = 0;
+	while (out<InitVariable::VARIABLE_KEY_LENGTH) {
 		if (!strcmp(key,iKeys[out])) break;
 		out++;
 	} return out;
 }
+// TODO: find out why default 0 is preventing the program from terminating setup process
 
 /*
 	read_cartesian(std::string) -> std::vector<uint32_t>

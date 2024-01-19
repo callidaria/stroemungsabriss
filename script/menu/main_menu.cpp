@@ -157,7 +157,8 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 
 		// correlate initialization variable name to serialization id
 		for (uint16_t j=0;j<state.srefs[i].vbound_ids.size();j++) {
-			// TODO: this warrants a rewrite of some initialization features
+			std::cout << state.fpath << ':' << state.srefs[i].value_names[j].c_str() << '\n';
+			std::cout << (unsigned int)Init::find_iKey(state.srefs[i].value_names[j].c_str()) << '\n';
 		}
 
 		// set segment jump write

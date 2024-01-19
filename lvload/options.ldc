@@ -32,6 +32,7 @@ Music, SFX and voices can be configured here.
 Choose language of written contents.
 :dropdown
 English;German;Natives
+:link iLanguageWrittenText
 
 :define Voiced Language
 :describe
@@ -39,6 +40,7 @@ Choose Language of voiced Contents.
 Natives lets each character speak in his own canonically correct language.
 :dropdown
 English;Natives;German
+:link iLanguageSpokenWord
 
 :segment Peripherals
 
@@ -47,6 +49,7 @@ English;Natives;German
 Force the preferred peripheral if you have trouble with dynamic Input switching.
 :dropdown
 Dynamic;Controller;Arcade Stick;Keyboard
+:link iForceInputStyle
 
 
 :cluster cframe
@@ -58,11 +61,13 @@ Dynamic;Controller;Arcade Stick;Keyboard
 Sometimes life has no (re-)solutions for your trouble.
 :dropdown
 1280x720;1600x900;1920x1080
+:link iCorrelateFrameResolution
 
 :define Fullscreen?
 :describe
 Have you tried turning it off and on again?
 :checkbox
+:link bFrameFullscreen
 
 :define Target Monitor
 :describe
@@ -70,6 +75,7 @@ Choose Monitor ID. If you don't know which ID is correct use trial and error,
 unless of course you are running Linux with i3, in that case good luck,
 this does nothing!
 :dropdown
+:link iFrameTargetMonitor
 
 
 :cluster cgfx
@@ -82,7 +88,7 @@ Choose between Vulkan & Opengl,
 depending on your preference and the settings you want to change.
 :dropdown
 Vulkan;OpenGL
-:condition 0
+:link iGraphicsLibraryExecutable
 
 :define Quality Preset
 :describe
@@ -90,6 +96,7 @@ Choose a template if you don't want to bother with technical details
 or you are missing the required knowledge.
 :dropdown
 Phenomenal;Good;Passable;Broken;Abominal;Userspecific
+:link iGraphicsPresetLevel
 
 
 :cluster caudio
@@ -98,18 +105,22 @@ Phenomenal;Good;Passable;Broken;Abominal;Userspecific
 :describe
 Too loud? Too low? You don't want to change your system Audio? Fine, do it here!
 :slider
+:link fAudioLevelMaster
 
 :define Voices Volume
 :describe
 Somehow we have casted someone annoying, here you can finally shut him up.
 :slider
+:link fAudioLevelVoices
 
 :define Music Volume
 :describe
 How dare you, the only direction of that slider is WAYYY UP!
 :slider
+:link fAudioLevelMusic
 
 :define Effects Volume
 :describe
 Volume of interaction sound and general SFX
 :slider
+:link fAudioLevelEffects
