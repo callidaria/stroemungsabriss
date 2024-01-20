@@ -7,3 +7,5 @@ ccb/include/
 dat/precalc/*
 .vscode/
 *#
+*~
+gmon.out

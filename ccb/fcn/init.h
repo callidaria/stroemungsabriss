@@ -8,18 +8,48 @@
 #include <vector>
 
 
-// key identification dictionaries
+// variable keymap
 inline std::vector<const char*> iKeys = {
-	"vFrameResolution","vFrameResolution","bFrameFullscreen","iFrameTargetMonitor"
+
+	"iFrameResolutionPreset",
+	"vFrameResolution","vFrameResolution",
+	"bFrameFullscreen",
+	"iFrameTargetMonitor",
+
+	"iGraphicsTargetLibrary",
+	"iGraphicsPresetLevel",
+
+	"iGeneralLanguageWrittenText",
+	"iGeneralLanguageSpokenWord",
+	"iGeneralForcePeripheral",
+
+	"fAudioMasterVolume",
+	"fAudioVoicesVolume",
+	"fAudioMusicVolume",
+	"fAudioEffectsVolume",
 };
 
 enum InitVariable
 {
-	FRAME_RESOLUTION_WIDTH,
-	FRAME_RESOLUTION_HEIGHT,
+	FRAME_RESOLUTION_PRESET,
+	FRAME_RESOLUTION_WIDTH,FRAME_RESOLUTION_HEIGHT,
 	FRAME_SET_FULLSCREEN,
 	FRAME_DISPLAY_ID,
-	VARIABLE_KEY_LENGTH
+
+	GRAPHICS_TARGET_LIBRARY,
+	GRAPHICS_PRESET_LEVEL,
+
+	GENERAL_TEXT_LANGUAGE,
+	GENERAL_VOICES_LANGUAGE,
+	GENERAL_PERIPHERAL_PREFERENCE,
+
+	AUDIO_VOLUME_MASTER,
+	AUDIO_VOLUME_VOICES,
+	AUDIO_VOLUME_MUSIC,
+	AUDIO_VOLUME_EFFECTS,
+
+	VARIABLE_ERROR,
+	VARIABLE_KEY_LENGTH = VARIABLE_ERROR
 };
 
 class Init

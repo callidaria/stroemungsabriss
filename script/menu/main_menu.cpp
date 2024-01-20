@@ -156,9 +156,14 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 		}
 
 		// correlate initialization variable name to serialization id
-		for (uint16_t j=0;j<state.srefs[i].vbound_ids.size();j++) {
-			std::cout << state.fpath << ':' << state.srefs[i].value_names[j].c_str() << '\n';
-			std::cout << (unsigned int)Init::find_iKey(state.srefs[i].value_names[j].c_str()) << '\n';
+		LDCSerializationReferences sref = state.srefs[i];
+		for (uint16_t j=0;j<sref.vbound_ids.size();j++) {
+			uint32_t ivar = Init::find_iKey(sref.value_names[j].c_str());
+			if (ivar==InitVariable::VARIABLE_ERROR) {
+				printf("%s: \033[31;1mvariable linking error.\033[0m referenced as \"\033[34;1m%s\033[0m\"\n",
+						state.fpath,sref.value_names[j].c_str());
+				continue;
+			} state.clusters[i].elist[sref.vbound_ids[j]].tdata = Init::iConfig[ivar];
 		}
 
 		// set segment jump write
@@ -609,7 +614,6 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_colours.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
-				t_entity.value = 0;
 				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
 					Text dd_text = Text(st_font);
 					dd_text.add(cluster.elist[i].cattribs[di].c_str(),

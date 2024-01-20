@@ -32,7 +32,7 @@ Music, SFX and voices can be configured here.
 Choose language of written contents.
 :dropdown
 English;German;Natives
-:link iLanguageWrittenText
+:link iGeneralLanguageWrittenText
 
 :define Voiced Language
 :describe
@@ -40,7 +40,7 @@ Choose Language of voiced Contents.
 Natives lets each character speak in his own canonically correct language.
 :dropdown
 English;Natives;German
-:link iLanguageSpokenWord
+:link iGeneralLanguageSpokenWord
 
 :segment Peripherals
 
@@ -49,7 +49,7 @@ English;Natives;German
 Force the preferred peripheral if you have trouble with dynamic Input switching.
 :dropdown
 Dynamic;Controller;Arcade Stick;Keyboard
-:link iForceInputStyle
+:link iGeneralForcePeripheral
 
 
 :cluster cframe
@@ -61,7 +61,7 @@ Dynamic;Controller;Arcade Stick;Keyboard
 Sometimes life has no (re-)solutions for your trouble.
 :dropdown
 1280x720;1600x900;1920x1080
-:link iCorrelateFrameResolution
+:link iFrameResolutionPreset
 
 :define Fullscreen?
 :describe
@@ -88,7 +88,7 @@ Choose between Vulkan & Opengl,
 depending on your preference and the settings you want to change.
 :dropdown
 Vulkan;OpenGL
-:link iGraphicsLibraryExecutable
+:link iGraphicsTargetLibrary
 
 :define Quality Preset
 :describe
@@ -105,22 +105,22 @@ Phenomenal;Good;Passable;Broken;Abominal;Userspecific
 :describe
 Too loud? Too low? You don't want to change your system Audio? Fine, do it here!
 :slider
-:link fAudioLevelMaster
+:link fAudioMasterVolume
 
 :define Voices Volume
 :describe
 Somehow we have casted someone annoying, here you can finally shut him up.
 :slider
-:link fAudioLevelVoices
+:link fAudioVoicesVolume
 
 :define Music Volume
 :describe
 How dare you, the only direction of that slider is WAYYY UP!
 :slider
-:link fAudioLevelMusic
+:link fAudioMusicVolume
 
 :define Effects Volume
 :describe
 Volume of interaction sound and general SFX
 :slider
-:link fAudioLevelEffects
+:link fAudioEffectsVolume
