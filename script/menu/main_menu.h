@@ -189,18 +189,13 @@ struct LDCSubsequentReferences
 	std::vector<std::string> child_names;
 };
 
-struct LDCSerializationReferences
-{
-	std::vector<uint16_t> vbound_ids;
-	std::vector<std::string> value_names;
-};
-
 struct LDCEntity
 {
 	// basic element data & availability state
 	std::string head,description;
 	uint16_t serialization_id = 0;
 	std::vector<uint8_t> condition_id;
+	uint16_t vlink = 0;
 
 	// element behaviour type, value of tdata switches meaning based on etype
 	LDCEntityType etype = LDCEntityType::UNDEFINED;
@@ -225,6 +220,7 @@ struct LDCCluster
 	std::string id = "";
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
+	std::vector<uint16_t> linked_ids;
 	uint16_t cnt_checkbox = 0,cnt_dropdown = 0,cnt_slider = 0;
 };
 
@@ -236,7 +232,7 @@ struct LDCProcessState
 	// working data
 	ListLanguageCommand* cmd;
 	std::vector<LDCSubsequentReferences> crefs;
-	std::vector<LDCSerializationReferences> srefs;
+	std::vector<std::vector<std::string>> srefs;
 
 	// resulting data
 	std::vector<LDCCluster> clusters;

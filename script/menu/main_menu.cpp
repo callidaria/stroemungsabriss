@@ -147,6 +147,7 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 
 	// third pass: interpretation - temporary instruction data
 	for (uint16_t i=0;i<state.clusters.size();i++) {
+		LDCCluster &cc = state.clusters[i];
 
 		// correlate child name to cluster id
 		for (uint16_t j=0;j<state.crefs[i].parent_ids.size();j++) {
@@ -156,14 +157,18 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 		}
 
 		// correlate initialization variable name to serialization id
-		LDCSerializationReferences sref = state.srefs[i];
-		for (uint16_t j=0;j<sref.vbound_ids.size();j++) {
-			uint32_t ivar = Init::find_iKey(sref.value_names[j].c_str());
+		for (uint16_t j=0;j<cc.linked_ids.size();j++) {
+			uint32_t ivar = Init::find_iKey(state.srefs[i][j].c_str());
 			if (ivar==InitVariable::VARIABLE_ERROR) {
 				printf("%s: \033[31;1mvariable linking error.\033[0m referenced as \"\033[34;1m%s\033[0m\"\n",
-						state.fpath,sref.value_names[j].c_str());
+						state.fpath,state.srefs[i][j].c_str());
 				continue;
-			} state.clusters[i].elist[sref.vbound_ids[j]].tdata = Init::iConfig[ivar];
+			}
+
+			// store id and original values for writing purposes & override held entity data
+			LDCEntity &ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
+			ce.vlink = ivar;
+			ce.tdata = Init::iConfig[ivar];
 		}
 
 		// set segment jump write
@@ -198,7 +203,7 @@ void command_logic_cluster(LDCProcessState &state)
 	cluster.id = state.cmd->tail;
 	state.clusters.push_back(cluster);
 	state.crefs.push_back({{},{}});
-	state.srefs.push_back({{},{}});
+	state.srefs.push_back({});
 }
 
 /*
@@ -277,8 +282,8 @@ void command_logic_condition(LDCProcessState &state)
 */
 void command_logic_link(LDCProcessState &state)
 {
-	state.srefs.back().vbound_ids.push_back(state.clusters.back().elist.size()-1);
-	state.srefs.back().value_names.push_back(state.cmd->tail);
+	state.clusters.back().linked_ids.push_back(state.clusters.back().elist.size()-1);
+	state.srefs.back().push_back(state.cmd->tail);
 }
 
 /*
@@ -749,7 +754,7 @@ void MenuList::open_list(uint8_t id)
 	active_ids.push_back(id);
 	tf_list_opened = true;
 }
-// TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be dune kuro
+// TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be done kuro
 
 /*
 	TODO
