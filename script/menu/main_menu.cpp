@@ -562,7 +562,7 @@ uint8_t MenuList::define_list(const char* path)
 			std::vector<MenuListSegment>(cluster.slist.size()),
 			Text(de_font),0,
 			std::vector<uint16_t>(cluster.cnt_checkbox),std::vector<uint16_t>(cluster.cnt_dropdown),
-			std::vector<uint16_t>(cluster.cnt_slider)
+			std::vector<uint16_t>(cluster.cnt_slider),cluster.linked_ids
 		};
 
 		// write segment information in-between list elements
@@ -592,7 +592,7 @@ uint8_t MenuList::define_list(const char* path)
 
 			// create entity
 			MenuListEntity t_entity = {
-				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,0,
+				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,cluster.elist[i].vlink,0,
 				Text(st_font),cluster.elist[i].head.length(),
 			};
 
@@ -659,7 +659,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		0,0,states.saves.size()-1,
 		std::vector<MenuListEntity>(states.saves.size()),{},
 		Text(st_font),0,
-		{},{},{}
+		{},{},{},{}
 	};
 
 	// iterate save data and create a state list with a proportionally linear relationship
@@ -667,7 +667,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
-			diff_colours[state.diff],LDCEntityType::RETURN,i,0,
+			diff_colours[state.diff],LDCEntityType::RETURN,i,0,0,
 			Text(st_font),state.title.length(),{}
 		};
 
@@ -683,7 +683,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,0,
+			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,0,0,
 			Text(st_font),err_message.length()
 		};
 		decoy.text.add(err_message.c_str(),glm::vec2(0)),decoy.text.load();
@@ -953,6 +953,19 @@ void MenuList::update_background_component(float anim_delta)
 	}
 }
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
+
+/*
+	TODO
+*/
+bool MenuList::linked_variables_changed(uint16_t list_id)
+{
+	bool out = false;
+	for (uint16_t id : mlists[list_id].link_ids) {
+		MenuListEntity ce = mlists[list_id].entities[id];
+		out = out||(ce.value!=Init::iConfig[ce.link_id]);
+	} return out;
+}
+// TODO: extract more information to display a list of changes later
 
 /*
 	TODO
@@ -1493,6 +1506,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
+	dg_optsave = mdialogues.add_dialogue_window("./lvload/savechanges.ldc",glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
 
 	// buffers
@@ -1779,7 +1793,13 @@ void interface_behaviour_options(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_options);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active();
+	}
+	if (!tm.mlists.system_active()) {
+		bool open_conf = false;
+		for (uint8_t i=1;i<5;i++) open_conf = open_conf||tm.mlists.linked_variables_changed(i);
+		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
+	}
+	tm.interface_logic_id *= tm.mlists.system_active()||tm.mdialogues.system_active;
 }
 
 /*

@@ -337,6 +337,7 @@ struct MenuListEntity
 	glm::vec4 colour;
 	LDCEntityType etype;
 	uint16_t value;
+	uint16_t link_id;
 	float anim_transition;
 
 	// representation
@@ -371,7 +372,7 @@ struct MenuListComplex
 	size_t dtlen;
 
 	// index
-	std::vector<uint16_t> checkbox_ids,dropdown_ids,slider_ids;
+	std::vector<uint16_t> checkbox_ids,dropdown_ids,slider_ids,link_ids;
 };
 
 class MenuList
@@ -399,6 +400,7 @@ public:
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
+	bool linked_variables_changed(uint16_t list_id);
 
 private:
 
@@ -605,7 +607,7 @@ public:
 	float st_rot = .0f;
 
 	// memory for static continue
-	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue;
+	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue,dg_optsave;
 	bool logic_setup = false;
 
 private:
