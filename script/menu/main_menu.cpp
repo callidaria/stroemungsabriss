@@ -1250,7 +1250,6 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 {
 	// value resets & updates
 	dg_state = 0;
-	system_active = opening_ids.size()||active_ids.size()||closing_ids.size();
 
 	// check selector update conditions
 	// this does not include the render preparations, breaks if idling & opening simultaneously
@@ -1657,7 +1656,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	}
 
 	// splash render
-	tkey_head = mtransition+ftransition+mdialogues.system_active;
+	tkey_head = mtransition+ftransition+mdialogues.system_active();
 	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active());
 	tkey_title = mtransition;
 	splices_geometry.update();
@@ -1782,7 +1781,7 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// reset
-	tm.logic_setup = false;
+	tm.logic_setup = 0;
 }
 
 /*
@@ -1790,17 +1789,25 @@ void interface_behaviour_macro(MainMenu &tm)
 */
 void interface_behaviour_options(MainMenu &tm)
 {
-	if (!tm.logic_setup) {
+	bool open_conf = false;
+	switch (tm.logic_setup) {
+	case 0:
 		tm.mlists.open_list(tm.ml_options);
-		tm.logic_setup = true;
-	}
-	if (!tm.mlists.system_active()) {
-		bool open_conf = false;
+		tm.logic_setup++;
+		break;
+	case 1:
+		tm.logic_setup += !tm.mlists.system_active();
+		break;
+	case 2:
 		for (uint8_t i=1;i<5;i++) open_conf = open_conf||tm.mlists.linked_variables_changed(i);
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
+		tm.logic_setup++;
+		break;
+	default:
+		tm.interface_logic_id *= tm.mdialogues.system_active();
 	}
-	tm.interface_logic_id *= tm.mlists.system_active()||tm.mdialogues.system_active;
 }
+
 
 /*
 	TODO

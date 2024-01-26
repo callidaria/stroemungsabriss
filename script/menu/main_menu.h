@@ -517,6 +517,9 @@ public:
 	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void background_component(float transition_delta);
 
+	// info
+	inline bool system_active() { return opening_ids.size()||active_ids.size()||closing_ids.size(); }
+
 private:
 
 	// render
@@ -525,7 +528,6 @@ private:
 public:
 
 	// status
-	bool system_active = false;
 	uint8_t dg_state = 0;
 	std::vector<SingularDialogueData> dg_data;
 
@@ -608,7 +610,7 @@ public:
 
 	// memory for static continue
 	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue,dg_optsave;
-	bool logic_setup = false;
+	uint8_t logic_setup = 0;
 
 private:
 
