@@ -769,6 +769,28 @@ void MenuList::close_list(uint8_t id)
 /*
 	TODO
 */
+void MenuList::write_attributes(uint8_t id)
+{
+	for (uint16_t lid : mlists[id].link_ids) {
+		MenuListEntity &e = mlists[id].entities[lid];
+		Init::iConfig[e.link_id] = e.value;
+	} Init::write_changes();
+}
+
+/*
+	TODO
+*/
+void MenuList::reset_attributes(uint8_t id)
+{
+	for (uint16_t lid : mlists[id].link_ids) {
+		MenuListEntity &e = mlists[id].entities[lid];
+		e.value = Init::iConfig[e.link_id];
+	}
+}
+
+/*
+	TODO
+*/
 uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
 {
@@ -1804,6 +1826,9 @@ void interface_behaviour_options(MainMenu &tm)
 		tm.logic_setup++;
 		break;
 	default:
+		if (tm.mdialogues.dg_state==0&&tm.hit_a) tm.mlists.write_attributes(tm.ml_options);
+		else if (tm.mdialogues.dg_state==1&&tm.hit_a) tm.mlists.reset_attributes(tm.ml_options);
+		// TODO: reopen list if back is selected
 		tm.interface_logic_id *= tm.mdialogues.system_active();
 	}
 }

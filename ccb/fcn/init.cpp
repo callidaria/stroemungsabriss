@@ -56,6 +56,15 @@ uint32_t Init::find_iKey(const char* key)
 // TODO: find out why default 0 is preventing the program from terminating setup process
 
 /*
+	TODO
+*/
+void Init::write_changes()
+{
+	// TODO: implement, find out how i did this "back then"
+	std::cout << "changes written (not really)\n";
+}
+
+/*
 	read_cartesian(std::string) -> std::vector<uint32_t>
 	val: raw value, possibly containing string1xstring2xstring3 pattern
 	returns: cartesian writing style gets converted into list of all factors.

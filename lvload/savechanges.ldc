@@ -3,12 +3,13 @@
 :define save changes
 :describe
 write changes and potentially restart program
+:system_behaviour 1
 
 :define restore previous
 :describe
 reset changes and proceed as if nothing happened
+:system_behaviour 1
 
 :define back
 :describe
 continue modifying options
-:system_behaviour 1

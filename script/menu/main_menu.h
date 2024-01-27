@@ -393,6 +393,10 @@ public:
 	void close_list(uint8_t id);
 	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
 
+	// serialization
+	void write_attributes(uint8_t id);
+	void reset_attributes(uint8_t id);
+
 	// draw
 	uint8_t update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 			bool mperiph,bool &rrnd);

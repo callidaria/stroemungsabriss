@@ -58,6 +58,7 @@ public:
 
 	Init(const char* path);
 	static uint32_t find_iKey(const char* key);
+	static void write_changes();
 
 private:
 
