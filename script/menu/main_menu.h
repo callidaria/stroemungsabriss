@@ -519,10 +519,8 @@ public:
 
 	// draw
 	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
-	void background_component(float transition_delta);
-
-	// info
-	inline bool system_active() { return opening_ids.size()||active_ids.size()||closing_ids.size(); }
+	void render();
+	void update_background_component(float transition_delta);
 
 private:
 
@@ -532,6 +530,7 @@ private:
 public:
 
 	// status
+	bool system_active = false;
 	uint8_t dg_state = 0;
 	std::vector<SingularDialogueData> dg_data;
 

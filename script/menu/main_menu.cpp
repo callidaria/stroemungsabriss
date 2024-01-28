@@ -1238,7 +1238,7 @@ void MenuDialogue::open_dialogue(uint8_t did)
 	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%50+25)*.01f;
 	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%50+25)*.01f;
 
-	// set dialogue info active
+	// set dialogue info active & reset state
 	dg_data[did].dg_active = true;
 }
 
@@ -1270,13 +1270,11 @@ void MenuDialogue::close_dialogue(uint8_t did)
 */
 void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back)
 {
-	// value resets & updates
+	// reset dialogue state & update if dialogue system is currently active
 	dg_state = 0;
+	system_active = opening_ids.size()||active_ids.size()||closing_ids.size();
 
 	// check selector update conditions
-	// this does not include the render preparations, breaks if idling & opening simultaneously
-	// excused for now due to the following if statement & exclusivity of open dialogue case
-	// it also adds input security when calling selection_component() every frame
 	if (active_ids.size()&&!opening_ids.size()) {
 		uint8_t id = active_ids.back();
 
@@ -1295,31 +1293,31 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
 				? csdd->max_options : csdd->sindex;
 
-		// confirmation handling
+		// confirmation condition & set dialogue response state
 		if (conf) {
+			dg_state = csdd->sindex;
+
+			// handle possible system behaviour attached to confirmed option
 			switch (dg_data[id].action_id[csdd->sindex]) {
 				case 1: open_dialogue(dg_data[id].action_value[csdd->sindex]);
 					break;
 				case 2: close_dialogue(id);
 					break;
-				default: dg_state = csdd->sindex;
 			}
 		}
-
-		// show description of selected option
-		dg_data[id].tx_descriptions.prepare();
-		dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
-				glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
-		dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
 	}
+}
+// FIXME: text tech results in ugly edge artifacts around letters after inverting to background (mdc)
+// FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
+// FIXME: (rare) flickering dialogue disappearance when closing dialogue (mdc)
 
-	// write in-dialogue text
-	for (uint8_t id : active_ids) {
-		dg_data[id].tx_title.prepare();
-		dg_data[id].tx_title.render(dg_data[id].title_length,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
-		dg_data[id].tx_options.prepare();
-		dg_data[id].tx_options.render(dg_data[id].option_length,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
-	}
+/*
+	TODO
+*/
+void MenuDialogue::render()
+{
+	// requirement, dialogue rendering can be skipped if system is currently inactive
+	if (!system_active) return;
 
 	// setup selector draw
 	slc_buffer.bind();
@@ -1330,17 +1328,32 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		slc_shader.upload_float("mv_select",dg_data[id].sindex*dg_data[id].option_size);
 		glDrawArrays(GL_TRIANGLES,id*6,6);
 	}
+
+	// requirement for title & description draw, any dialogue currently has to be in active selection
+	if (!active_ids.size()) return;
+	uint8_t id = active_ids.back();
+
+	// show description of selected option
+	dg_data[id].tx_descriptions.prepare();
+	dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
+			glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
+	dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
+
+	// write in-dialogue text
+	for (uint8_t id : active_ids) {
+		dg_data[id].tx_title.prepare();
+		dg_data[id].tx_title.render(dg_data[id].title_length,glm::vec4(DIALOGUE_HEAD_COLOUR,1.f));
+		dg_data[id].tx_options.prepare();
+		dg_data[id].tx_options.render(dg_data[id].option_length,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
+	}
 }
-// FIXME: text tech results in ugly edge artifacts around letters after inverting to background (mdc)
-// FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
-// FIXME: (rare) flickering dialogue disappearance when closing dialogue (mdc)
 
 /*
-	background_component(float) -> void !O(n)b
+	update_background_component(float) -> void !O(n)b
 	purpose: draw parts of dialogue as inverted background components on intersection with geometry
 	\param transition_delta: delta of transition progress since last frame
 */
-void MenuDialogue::background_component(float transition_delta)
+void MenuDialogue::update_background_component(float transition_delta)
 {
 	// setup draw
 	bgr_buffer.bind();
@@ -1602,6 +1615,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// peripheral switch for input request annotation
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
+	// component updates before interface behaviour & rendering
+	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
+
 	// START RENDER MENU BUFFER
 	fb_menu.bind();
 	Frame::clear();
@@ -1654,7 +1670,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			crd_mouse,m_ccbf->frame->mouse.mw,
 			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
 			m_ccbf->frame->mpref_peripheral,rrnd);
-	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
+	mdialogues.render();
 	// FIXME: request does not time input validity, work on input timing safety for unlocked update mode
 
 	// START MULTISAMPLED RENDER
@@ -1678,7 +1694,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	}
 
 	// splash render
-	tkey_head = mtransition+ftransition+mdialogues.system_active();
+	tkey_head = mtransition+ftransition+mdialogues.system_active;
 	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active());
 	tkey_title = mtransition;
 	splices_geometry.update();
@@ -1686,7 +1702,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// draw dialogue & list background components
 	mlists.update_background_component(transition_delta);
-	mdialogues.background_component(transition_delta);
+	mdialogues.update_background_component(transition_delta);
 
 	// STOP MULTISAMPLED RENDER
 	msaa.blit();
@@ -1813,23 +1829,36 @@ void interface_behaviour_options(MainMenu &tm)
 {
 	bool open_conf = false;
 	switch (tm.logic_setup) {
+
+	// setup stage
 	case 0:
 		tm.mlists.open_list(tm.ml_options);
 		tm.logic_setup++;
 		break;
+
+	// listing stage
 	case 1:
 		tm.logic_setup += !tm.mlists.system_active();
 		break;
+
+	// checking for changes & open confirmation dialogue on condition
 	case 2:
-		for (uint8_t i=1;i<5;i++) open_conf = open_conf||tm.mlists.linked_variables_changed(i);
+		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+			open_conf = open_conf||tm.mlists.linked_variables_changed(i);
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
 		tm.logic_setup++;
 		break;
+
+	// confirmation input handling
 	default:
-		if (tm.mdialogues.dg_state==0&&tm.hit_a) tm.mlists.write_attributes(tm.ml_options);
-		else if (tm.mdialogues.dg_state==1&&tm.hit_a) tm.mlists.reset_attributes(tm.ml_options);
-		// TODO: reopen list if back is selected
-		tm.interface_logic_id *= tm.mdialogues.system_active();
+		if (tm.mdialogues.dg_state==0&&tm.hit_a) {
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+				tm.mlists.write_attributes(i);
+		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+				tm.mlists.reset_attributes(i);
+		} else if (tm.hit_a) tm.logic_setup = 0;
+		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}
 }
 
