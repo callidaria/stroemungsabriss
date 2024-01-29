@@ -8,11 +8,14 @@
 #include <vector>
 
 
+constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
+
+
 // variable keymap
 inline std::vector<const char*> iKeys = {
 
 	"iFrameResolutionPreset",
-	"vFrameResolution","vFrameResolution",
+	"vFrameResolutionWidth","vFrameResolutionHeight",
 	"bFrameFullscreen",
 	"iFrameTargetMonitor",
 
@@ -68,6 +71,12 @@ public:
 
 	// constant collections
 	static inline uint32_t iConfig[InitVariable::VARIABLE_KEY_LENGTH];
+
+private:
+
+	// preset translation
+	static inline uint16_t resolutionWidthPresets[AMOUNT_RESOLUTION_PRESETS] = { 1280,1600,1920 };
+	static inline uint16_t resolutionHeightPresets[AMOUNT_RESOLUTION_PRESETS] = { 720,900,1080 };
 };
 
 #endif

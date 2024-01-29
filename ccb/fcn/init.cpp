@@ -33,9 +33,7 @@ Init::Init(const char* path)
 		std::string val;file >> val;
 		std::vector<uint32_t> ex = read_cartesian(val);
 		uint16_t j = find_iKey(rclh.c_str());
-		for (int i=0;i<ex.size();i++) {
-			iConfig[j+i] = ex[i];
-		}
+		for (int i=0;i<ex.size();i++) iConfig[j+i] = ex[i];
 	}
 }
 // FIXME: find a faster way to do this
@@ -60,8 +58,17 @@ uint32_t Init::find_iKey(const char* key)
 */
 void Init::write_changes()
 {
-	// TODO: implement, find out how i did this "back then"
-	std::cout << "changes written (not really)\n";
+	// handle frame resolution preset translation to vector
+	iConfig[InitVariable::FRAME_RESOLUTION_WIDTH]
+			= resolutionWidthPresets[iConfig[InitVariable::FRAME_RESOLUTION_PRESET]];
+	iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT]
+			= resolutionHeightPresets[iConfig[InitVariable::FRAME_RESOLUTION_PRESET]];
+
+	// write changes
+	std::ofstream chwrite("./config.ini",std::ios::out);
+	for (uint32_t i=0;i<InitVariable::VARIABLE_KEY_LENGTH;i++)
+		chwrite << iKeys[i] << ' ' << std::to_string(iConfig[i]) << '\n';
+	chwrite.close();
 }
 
 /*

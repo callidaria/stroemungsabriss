@@ -774,7 +774,7 @@ void MenuList::write_attributes(uint8_t id)
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
 		Init::iConfig[e.link_id] = e.value;
-	} Init::write_changes();
+	}
 }
 
 /*
@@ -787,6 +787,7 @@ void MenuList::reset_attributes(uint8_t id)
 		e.value = Init::iConfig[e.link_id];
 	}
 }
+// FIXME: when resetting dropdown values the dropdown selection stays, leading to incorrect text displacement
 
 /*
 	TODO
@@ -1854,6 +1855,7 @@ void interface_behaviour_options(MainMenu &tm)
 		if (tm.mdialogues.dg_state==0&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.write_attributes(i);
+			Init::write_changes();
 		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
@@ -1861,7 +1863,6 @@ void interface_behaviour_options(MainMenu &tm)
 		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}
 }
-
 
 /*
 	TODO
