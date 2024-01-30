@@ -785,9 +785,15 @@ void MenuList::reset_attributes(uint8_t id)
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
 		e.value = Init::iConfig[e.link_id];
+		if (e.etype==LDCEntityType::DROPDOWN) {
+			for (uint8_t i=0;i<e.dd_options.size();i++) {
+				e.dd_options[i].prepare();
+				e.dd_options[i].set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(i-e.value)));
+			}
+		}
 	}
 }
-// FIXME: when resetting dropdown values the dropdown selection stays, leading to incorrect text displacement
+// FIXME: general horribleness invoked by the dropdown displacement correction
 
 /*
 	TODO
