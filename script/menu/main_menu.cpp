@@ -802,6 +802,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		bool mperiph,bool &rrnd)
 {
 	// early exit when no lists active
+	instruction_mod = 0;
 	if (!active_ids.size()) return 0;
 
 	// update most recent list
@@ -849,7 +850,9 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 				seg_select = crr_select==seg.position;
 				break;
 			} seg_passed++,crr_select--;
-		} MenuListEntity &ce = crr.entities[crr_select];
+		}
+		MenuListEntity &ce = crr.entities[crr_select];
+		instruction_mod = (ce.etype-LDCEntityType::CHECKBOX)*(ce.etype<LDCEntityType::RETURN);
 
 		// protection for selected segments
 		if (seg_select) {
@@ -895,6 +898,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	if (subfunc_opened) {
 		MenuListEntity &e = mlists[id].entities[crr_select];
 		uint8_t cap_options = e.dd_options.size()-1;
+		instruction_mod = 0;
 
 		// input handling for sublist
 		if (mperiph) {
@@ -949,6 +953,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 }
 // TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
+// TODO: split update from render section
 
 /*
 	TODO
@@ -1642,6 +1647,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render input instructions
 	tx_instr.prepare();
+	tx_instr.set_scroll(glm::vec2(0,-(!!ftransition+mlists.instruction_mod)*720));
 	tx_instr.render(tcap_instr*mtransition,glm::vec4(1,.6f,0,1));
 
 	// render & transform main options
@@ -1762,41 +1768,69 @@ void MainMenu::update_peripheral_annotations()
 	// update shown preferred peripheral
 	cpref_peripheral = m_ccbf->frame->cpref_peripheral;
 
-	// title screen dare message
+	// clear instruction text
 	tx_dare.clear();
-	std::string reqbutton = (cpref_peripheral) ? m_ccbf->iMap->cnt_name[IMP_REQPAUSE]
-			: m_ccbf->iMap->key_name[IMP_REQCONFIRM];
-	std::string dmessage = "press ["+reqbutton+"] if you DARE";
-	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
-	tcap_dare = dmessage.length();
-	tx_dare.load();
-
-	// lower input instructions
 	tx_instr.clear();
-	std::string instr;
+
+	// assemble input instructions
+	std::string dmessage;
+	std::string instr[TEXT_INSTRUCTION_COUNT];
 	if (cpref_peripheral) {
 
-		// write message for controller input
-		instr = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
-				+ "  selection ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
+		// write messages for controller input
+		dmessage = "press ["+m_ccbf->iMap->cnt_name[IMP_REQPAUSE]+"] if you DARE";
+		instr[0] = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
 				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQRIGHT]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
+		instr[1] = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
+		instr[2] = "see options ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
+		instr[3] = "adjust slider ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
+				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQRIGHT]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
 				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
 	} else {
 
 		// write message for keyboard input
-		instr = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
-				+ "  selection ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
+		dmessage = "press ["+m_ccbf->iMap->key_name[IMP_REQCONFIRM]+"] if you DARE";
+		instr[0] = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
 				+ '/'+m_ccbf->iMap->key_name[IMP_REQRIGHT]+"]"
 				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
+		instr[1] = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
+		instr[2] = "see options ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
+		instr[3] = "adjust slider ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
+				+ '/'+m_ccbf->iMap->key_name[IMP_REQRIGHT]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
+				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
 	}
-	// TODO: join preferred peripheral conditions with dare message setup
-	// TODO: scroll through textlines based on selection/menustate/etype
+
+	// write dare message
+	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
+	tcap_dare = dmessage.length();
+	tx_dare.load();
 
 	// write input instructions
-	tx_instr.add(instr.c_str(),glm::vec2(400,30));
-	tcap_instr = instr.length();
+	for (uint8_t i=0;i<TEXT_INSTRUCTION_COUNT;i++) {
+		uint16_t estm = Text::estimate_textwidth(&fnt_reqt,instr[i])>>1;
+		tx_instr.add(instr[i].c_str(),glm::vec2(MATH_CENTER_GOLDEN-estm,30+i*720));
+		tcap_instr += instr[i].length();
+	}
 	tx_instr.load();
-	// TODO: center 1.61 by calculating wordwidth over entire instruction string and modifying x-axis
 }
 
 /**

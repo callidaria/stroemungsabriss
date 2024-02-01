@@ -130,6 +130,7 @@ constexpr glm::vec3 DIALOGUE_HEAD_COLOUR = glm::vec3(.75f,.75f,.0f);
 constexpr glm::vec3 DIALOGUE_OPTION_COLOUR = glm::vec3(.75f,.75f,.0f);
 
 // text attributes
+constexpr uint8_t TEXT_INSTRUCTION_COUNT = 4;
 constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
 constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
@@ -158,7 +159,9 @@ constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 
 // math constants
 constexpr double MATH_PI = 3.141592653;
+constexpr double MATH_CENTER_GOLDEN = 1280.0*.618;
 constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
+// TODO: relocate reusable math constants
 
 
 /**
@@ -418,6 +421,7 @@ public:
 	bool lists_open = false;
 	std::vector<bool> conditions;
 	uint16_t status = 0;
+	uint8_t instruction_mod = 0;
 
 	// data
 	std::vector<MenuListComplex> mlists;
@@ -634,7 +638,7 @@ private:
 
 	// index
 	uint16_t index_rsprite,index_ranim;
-	uint8_t tcap_dare,tcap_instr,tcap_version;
+	uint8_t tcap_dare,tcap_instr = 0,tcap_version;
 
 	// input
 	bool cpref_peripheral;
