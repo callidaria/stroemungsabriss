@@ -1633,12 +1633,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	interface_behaviour[interface_logic_id](*this);
 	running = !request_close;
 
-	// render text
+	// render dare message
 	tx_dare.prepare();
 	tx_dare.set_scroll(glm::vec2(title_action));
 	tx_dare.render(tcap_dare*inv_mtransition,TEXT_DARE_COLOUR);
 	tx_version.prepare();
 	tx_version.render(tcap_version*inv_mtransition,TEXT_VERSION_COLOUR);
+
+	// render input instructions
+	tx_instr.prepare();
+	tx_instr.render(tcap_instr*mtransition,glm::vec4(1,.6f,0,1));
 
 	// render & transform main options
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
@@ -1766,6 +1770,33 @@ void MainMenu::update_peripheral_annotations()
 	tx_dare.add(dmessage.c_str(),TEXT_DARE_POSITION);
 	tcap_dare = dmessage.length();
 	tx_dare.load();
+
+	// lower input instructions
+	tx_instr.clear();
+	std::string instr;
+	if (cpref_peripheral) {
+
+		// write message for controller input
+		instr = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
+				+ "  selection ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
+				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQRIGHT]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
+	} else {
+
+		// write message for keyboard input
+		instr = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
+				+ "  selection ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
+				+ '/'+m_ccbf->iMap->key_name[IMP_REQRIGHT]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
+	}
+	// TODO: join preferred peripheral conditions with dare message setup
+	// TODO: scroll through textlines based on selection/menustate/etype
+
+	// write input instructions
+	tx_instr.add(instr.c_str(),glm::vec2(400,30));
+	tcap_instr = instr.length();
+	tx_instr.load();
+	// TODO: center 1.61 by calculating wordwidth over entire instruction string and modifying x-axis
 }
 
 /**
@@ -1869,6 +1900,7 @@ void interface_behaviour_options(MainMenu &tm)
 		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}
 }
+// FIXME: when closing dialogue with universal back button, reset/store/back functionality breaks very hard
 
 /*
 	TODO

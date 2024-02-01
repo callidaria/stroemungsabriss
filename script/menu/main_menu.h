@@ -623,7 +623,8 @@ private:
 	FrameBuffer fb_menu,fb_nslice,fb_slice;
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
-	Text tx_dare = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25)),
+	Font fnt_reqt = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
+	Text tx_dare = Text(fnt_reqt),tx_instr = Text(fnt_reqt),
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
 	MSAA msaa;
@@ -633,7 +634,7 @@ private:
 
 	// index
 	uint16_t index_rsprite,index_ranim;
-	uint8_t tcap_dare,tcap_version;
+	uint8_t tcap_dare,tcap_instr,tcap_version;
 
 	// input
 	bool cpref_peripheral;
