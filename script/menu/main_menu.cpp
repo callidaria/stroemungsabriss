@@ -1567,7 +1567,14 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
+
+	// globe render target
+	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
+	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
+			"./res/terra/materials.png","./res/terra/emit.png",glm::vec3(0),1,glm::vec3(0),false);
+	gb_lights.add_sunlight({ glm::vec3(100,100,0),glm::vec3(1),1.f });
 }
+// FIXME: when using mouse & keyboard input simultaneously the transition can be stuck between states
 
 /*
 	render(FrameBuffer*,bool&,bool&) -> void (virtual) !O(1)
@@ -1629,6 +1636,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// component updates before interface behaviour & rendering
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
+
+	// render globe to target
+	/*m_ccbf->r3d->start_target(globe_target_id);
+	  m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);*/
 
 	// START RENDER MENU BUFFER
 	fb_menu.bind();
@@ -1742,6 +1753,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	fb_slice.s.upload_float("mtrans",mtransition);
 	fb_slice.render();
 	// FIXME: remove special treatment and transfer to a more controllable implementation
+
+	// draw globe buffer
+	//m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
+	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
