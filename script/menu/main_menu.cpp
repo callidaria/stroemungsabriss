@@ -668,11 +668,12 @@ uint8_t MenuList::define_list(SaveStates states)
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
 			diff_colours[state.diff],LDCEntityType::RETURN,i,0,0,
-			Text(st_font),state.title.length(),{}
+			Text(st_font),state.title.length()
 		};
 
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(0)),mle.text.load();
+		mle.tlen = state.title.length();
 
 		// advance & write
 		vscroll -= MENU_LIST_SCROLL_Y;
@@ -941,10 +942,9 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 	// draw active lists
 	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
-	for (MenuListSegment &s : mlists[id].segments)
-		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : mlists[id].entities)
-		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
+	for (MenuListSegment &s : mlists[id].segments) s.text.prepare(),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+	for (MenuListEntity &e : mlists[id].entities) e.text.prepare(),e.text.render(e.tlen,e.colour);
+	// FIXME: the savestate list is not displayed, everything else seems to work though
 
 	// description out
 	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
@@ -1569,10 +1569,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_slice.s.upload_int("menu_fb",2);
 
 	// globe render target
-	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
+	/*globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
 			"./res/terra/materials.png","./res/terra/emit.png",glm::vec3(0),1,glm::vec3(0),false);
-	gb_lights.add_sunlight({ glm::vec3(100,100,0),glm::vec3(1),1.f });
+		gb_lights.add_sunlight({ glm::vec3(100,100,0),glm::vec3(1),1.f });*/
 }
 // FIXME: when using mouse & keyboard input simultaneously the transition can be stuck between states
 
@@ -1756,7 +1756,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// draw globe buffer
 	//m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
-	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
+	//m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
