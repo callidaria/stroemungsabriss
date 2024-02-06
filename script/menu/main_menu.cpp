@@ -1945,11 +1945,10 @@ void interface_behaviour_options(MainMenu &tm)
 		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
-		} else if (tm.hit_a) tm.logic_setup = 0;
+		} else if (tm.hit_a||tm.hit_b) tm.logic_setup = 0;
 		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}
 }
-// FIXME: when closing dialogue with universal back button, reset/store/back functionality breaks very hard
 
 /*
 	TODO
