@@ -672,7 +672,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		};
 
 		// write save title
-		mle.text.add(state.title.c_str(),glm::vec2(0)),mle.text.load();
+		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
 		mle.tlen = state.title.length();
 
 		// advance & write
@@ -687,7 +687,7 @@ uint8_t MenuList::define_list(SaveStates states)
 			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,0,0,
 			Text(st_font),err_message.length()
 		};
-		decoy.text.add(err_message.c_str(),glm::vec2(0)),decoy.text.load();
+		decoy.text.add(err_message.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),decoy.text.load();
 		mlc.entities.push_back(decoy);
 		mlc.full_range = 0;
 	}
@@ -697,6 +697,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	mlists.push_back(mlc);
 	return mlists.size()-1;
 }
+// TODO: add descriptions of save files, to be shown as common menu list descriptions
 
 /*
 	TODO
