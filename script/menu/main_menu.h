@@ -653,11 +653,12 @@ private:
 	// remote
 	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
 
-	// globe scenen
+	// globe scene
+	FrameBuffer fb_globe;
 	uint8_t globe_target_id;
-	uint16_t rid_globe;
-	Camera3D gb_cam3D = Camera3D(glm::vec3(0,4,-4),glm::vec3(0,.00001f,0),1280.f,720.f,45.f);
-	Lighting gb_lights;
+	uint16_t rid_globe,rid_window_sprite;
+	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f);
+	Lighting gb_lights = Lighting();
 
 	// predefinitions
 	typedef void (*interface_logic)(MainMenu&);

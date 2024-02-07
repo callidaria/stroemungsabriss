@@ -1452,6 +1452,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// asset load
+	rid_window_sprite = ccbf->r2d->sl.size();
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
@@ -1570,10 +1571,18 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_slice.s.upload_int("menu_fb",2);
 
 	// globe render target
-	/*globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
-			"./res/terra/materials.png","./res/terra/emit.png",glm::vec3(0),1,glm::vec3(0),false);
-		gb_lights.add_sunlight({ glm::vec3(100,100,0),glm::vec3(1),1.f });*/
+			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
+	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
+	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
+	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
+	float pitch = 15.f,yaw = -110.f;
+	gb_cam3D.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
+			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
+	gb_cam3D.update();
+	// TODO: replace emission map with nighttime extrapolation in terra directory
+	// FIXME: resolve this hacky usage of camera
 }
 // FIXME: when using mouse & keyboard input simultaneously the transition can be stuck between states
 
@@ -1639,8 +1648,16 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// render globe to target
-	/*m_ccbf->r3d->start_target(globe_target_id);
-	  m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);*/
+	glEnable(GL_DEPTH_TEST),glDisable(GL_BLEND);
+	m_ccbf->r3d->start_target(globe_target_id);
+	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
+	glDisable(GL_DEPTH_TEST),glEnable(GL_BLEND);
+
+	// globe deferred shading
+	fb_globe.bind();
+	m_ccbf->frame->clear();
+	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
+	FrameBuffer::close();
 
 	// START RENDER MENU BUFFER
 	fb_menu.bind();
@@ -1756,8 +1773,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// draw globe buffer
-	//m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
-	//m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
+	m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
+	m_ccbf->r2d->s2d.upload_float("vFlip",0);
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
