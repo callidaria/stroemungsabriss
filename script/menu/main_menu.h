@@ -607,6 +607,7 @@ public:
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
 	float ftransition = .0f,inv_ftransition;
+	float globe_transition = .0f;
 	float lext_selection = .0f,uext_selection = .0f;
 
 	// text

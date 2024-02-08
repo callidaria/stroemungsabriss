@@ -943,9 +943,10 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 	// draw active lists
 	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
-	for (MenuListSegment &s : mlists[id].segments) s.text.prepare(),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : mlists[id].entities) e.text.prepare(),e.text.render(e.tlen,e.colour);
-	// FIXME: the savestate list is not displayed, everything else seems to work though
+	for (MenuListSegment &s : mlists[id].segments)
+		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
+	for (MenuListEntity &e : mlists[id].entities)
+		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
 	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
@@ -1773,10 +1774,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// draw globe buffer
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
-	m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
-	m_ccbf->r2d->s2d.upload_float("vFlip",0);
+	bool show_globe = interface_logic_id==INTERFACE_LOGIC_PRACTICE||interface_logic_id==INTERFACE_LOGIC_LOAD;
+	Toolbox::transition_float_on_condition(globe_transition,transition_delta,show_globe);
+	m_ccbf->r2d->sl[globe_target_id].scale(1.f,globe_transition);
+	if (show_globe) {
+		m_ccbf->r2d->prepare();
+		m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
+		m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
+		m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
+	}
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
