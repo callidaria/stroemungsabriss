@@ -540,36 +540,62 @@ void SelectionSpliceGeometry::update()
 
 
 /**
- * 		Menu List Implementation
+ *			Start Implementation of Vertical List for Main Menu:
  * 
- * TODO: expand this segment documentation
+ *	The Menu List interprets .ldc files and converts them into displayable lists with a variety of features.
+ *
+ *		The following enjoyable features are included:
+ *	It is possible to navigate through lists by choosing their linked entity.
+ *	Variables can be linked to entity attributes and be modified through multiple stylish representations:
+ *	-> sliders, dropdowns and checkboxes.
+ *	Loaded savestates are easily represented through Menu List, due to overload.
+ *
+ *		How 2 use:
+ *	First run define_list(...) to load list definition. (can be done through .ldc file or loaded savestates)
+ *	After completing all definitions, load() shall be executed.
+ *	Lists are closed by default. Should the necessity arise call open_list(...) to activate.
+ *	When the List is done being useful, just close it again by calling close_list(...).
+ *	If an Entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
+ *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
+ *	The update works by calling update(...) in the base render stage and the other component in the msaa stage.
+ *	Communication about any list being open at any given time can be requested through system_active().
+ *	Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
+ *
+ *	NOTE: this implementation is subject to change and public variables have not been checked for usefulness
 */
 
 /*
-	TODO
+	!O(n)bm .list entities /+load -> (public)
+	purpose: add lists to menu list complex collection based on .ldc definition file at given path
+	\param path: path to .ldc definition file
+	\returns memory index of first list added to menu list complex collection
 */
 uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
 	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
+	// FIXME: very expensive copy
 
 	// entity creation
 	uint8_t out = mlists.size();
 	for (LDCCluster &cluster : clusters) {
 		MenuListComplex t_mlc = {
-			0,0,0,
-			std::vector<MenuListEntity>(cluster.elist.size()),
-			std::vector<MenuListSegment>(cluster.slist.size()),
-			Text(de_font),0,
-			std::vector<uint16_t>(cluster.cnt_checkbox),std::vector<uint16_t>(cluster.cnt_dropdown),
-			std::vector<uint16_t>(cluster.cnt_slider),cluster.linked_ids
+			.full_range = cluster.elist.size()+cluster.slist.size()-1,
+			.entities = std::vector<MenuListEntity>(cluster.elist.size()),
+			.segments = std::vector<MenuListSegment>(cluster.slist.size()),
+			.description = Text(de_font),
+			.checkbox_ids = std::vector<uint16_t>(cluster.cnt_checkbox),
+			.dropdown_ids = std::vector<uint16_t>(cluster.cnt_dropdown),
+			.slider_ids = std::vector<uint16_t>(cluster.cnt_slider),
+			.link_ids = cluster.linked_ids
 		};
 
 		// write segment information in-between list elements
 		for (uint8_t i=0;i<cluster.slist.size();i++) {
 			MenuListSegment t_segment = {
-				cluster.slist[i].position,
-				Text(st_font),cluster.slist[i].title.length()
+				.position = cluster.slist[i].position,
+				.text = Text(st_font),
+				.tlen = cluster.slist[i].title.length()
 			};
 
 			// setup segment render
@@ -592,8 +618,11 @@ uint8_t MenuList::define_list(const char* path)
 
 			// create entity
 			MenuListEntity t_entity = {
-				glm::vec4(1.f),cluster.elist[i].etype,cluster.elist[i].tdata,cluster.elist[i].vlink,0,
-				Text(st_font),cluster.elist[i].head.length(),
+				.etype = cluster.elist[i].etype,
+				.value = cluster.elist[i].tdata,
+				.link_id = cluster.elist[i].vlink,
+				.text = Text(st_font),
+				.tlen = cluster.elist[i].head.length()
 			};
 
 			// fill in element list information
@@ -604,14 +633,18 @@ uint8_t MenuList::define_list(const char* path)
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
-				t_entity.colour = glm::vec4(cluster.elist[i].fattribs[0],cluster.elist[i].fattribs[1],
-						cluster.elist[i].fattribs[2],cluster.elist[i].fattribs[3]);
+				t_entity.colour = glm::vec4(
+						cluster.elist[i].fattribs[0],
+						cluster.elist[i].fattribs[1],
+						cluster.elist[i].fattribs[2],
+						cluster.elist[i].fattribs[3]
+					);
 
 			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
 			case LDCEntityType::CHECKBOX:
 				create_checkbox(vscroll);
-				t_mlc.checkbox_ids[head_checkbox] = i,head_checkbox++;
+				t_mlc.checkbox_ids[head_checkbox++] = i;
 				break;
 
 			// load dropdown options
@@ -627,39 +660,40 @@ uint8_t MenuList::define_list(const char* path)
 					t_entity.dd_options[di] = dd_text;
 					t_entity.dd_colours[di] = glm::vec4(1.f);
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
-				} t_mlc.dropdown_ids[head_dropdown] = i,head_dropdown++;
+				} t_mlc.dropdown_ids[head_dropdown++] = i;
 				break;
 
 			// load slider geometry
 			case LDCEntityType::SLIDER:
 				create_slider(vscroll);
-				t_mlc.slider_ids[head_slider] = i,head_slider++;
-				break;
+				t_mlc.slider_ids[head_slider++] = i;
 			};
 
 			// move cursor to write next element & store current information
 			vscroll -= MENU_LIST_SCROLL_Y;
 			t_mlc.entities[i] = t_entity;
+			// FIXME: avoid repeated direct copy
 		}
 
 		// store resulting cluster
 		t_mlc.description.load();
-		t_mlc.full_range = cluster.elist.size()+cluster.slist.size()-1;  // FIXME: ??possible to set this early
 		mlists.push_back(t_mlc);
 	} return out;
 }
 
 /*
-	TODO
+	!O(n)bm .save states /load -> (public)
+	purpose: define a single new list based on savestate data. one entry per savestate
+	\param states: savestate format, already loaded. not a path to the save file
+	\returns memory index of savestate list in menu list collection
 */
 uint8_t MenuList::define_list(SaveStates states)
 {
 	// create singular complex without segments for a simple state list
 	MenuListComplex mlc = {
-		0,0,states.saves.size()-1,
-		std::vector<MenuListEntity>(states.saves.size()),{},
-		Text(st_font),0,
-		{},{},{},{}
+		.full_range = states.saves.size()-1,
+		.entities = std::vector<MenuListEntity>(states.saves.size()),
+		.description = Text(st_font)
 	};
 
 	// iterate save data and create a state list with a proportionally linear relationship
@@ -667,15 +701,15 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
-			diff_colours[state.diff],LDCEntityType::RETURN,i,0,0,
-			Text(st_font),state.title.length()
+			.colour = diff_colours[state.diff],
+			.etype = LDCEntityType::RETURN,
+			.value = i,
+			.text = Text(st_font),
+			.tlen = state.title.length()
 		};
 
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
-		mle.tlen = state.title.length();
-
-		// advance & write
 		vscroll -= MENU_LIST_SCROLL_Y;
 		mlc.entities[i] = mle;
 	}
@@ -684,8 +718,10 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			glm::vec4(1,0,0,1),LDCEntityType::UNDEFINED,0,0,0,
-			Text(st_font),err_message.length()
+			.colour = glm::vec4(1,0,0,1),
+			.etype = LDCEntityType::UNDEFINED,
+			.text = Text(st_font),
+			.tlen = err_message.length()
 		};
 		decoy.text.add(err_message.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),decoy.text.load();
 		mlc.entities.push_back(decoy);
@@ -696,11 +732,14 @@ uint8_t MenuList::define_list(SaveStates states)
 	mlc.description.load();
 	mlists.push_back(mlc);
 	return mlists.size()-1;
+	// FIXME: copy again
 }
 // TODO: add descriptions of save files, to be shown as common menu list descriptions
+// TODO: add preview rotation for location referenced in each save state
 
 /*
-	TODO
+	!O(1) /load -> (public)
+	purpose: setup vertices & compile shaders for entity attribute visualization
 */
 void MenuList::load()
 {
@@ -747,9 +786,12 @@ void MenuList::load()
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
 	slider_shader.upload_camera(cam2D);
 }
+// FIXME: remove camera calculation. its just the standard coordinate system please!
 
 /*
-	TODO
+	!O(1)m /function -> (public)
+	purpose: transfer list referenced by given memory index into opening state
+	\param id: list index
 */
 void MenuList::open_list(uint8_t id)
 {
@@ -759,7 +801,9 @@ void MenuList::open_list(uint8_t id)
 // TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be done kuro
 
 /*
-	TODO
+	!O(n)m .amount of stored ids /function -> (public)
+	purpose: transfer list referenced by given memory index into closing state
+	\param id: list index
 */
 void MenuList::close_list(uint8_t id)
 {
@@ -769,7 +813,10 @@ void MenuList::close_list(uint8_t id)
 // TODO: recurring pattern, this also happens in renderer btw, write a shortcut for that kind of id processing
 
 /*
-	TODO
+	!O(n) .linked attributes /function -> (public)
+	purpose: write changed attributes in list to initialization, when linked successfully
+	\param id: id of list complex to write attributes of
+	NOTE: initalization write to file has to be performed seperately
 */
 void MenuList::write_attributes(uint8_t id)
 {
@@ -780,13 +827,18 @@ void MenuList::write_attributes(uint8_t id)
 }
 
 /*
-	TODO
+	!O(n2)bn .list entities .dropdown entities /function -> (public)
+	purpose: reset changed attributes in list to original state of initialization, when linked successfully
+	\param id: id of list complex to reset attributes of
+	NOTE: not possible with attributes, that are not linked. reset values rely on initalization memory
 */
 void MenuList::reset_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
 		e.value = Init::iConfig[e.link_id];
+
+		// reset visual displacement if entity has a dropdown attributes
 		if (e.etype==LDCEntityType::DROPDOWN) {
 			for (uint8_t i=0;i<e.dd_options.size();i++) {
 				e.dd_options[i].prepare();
@@ -798,7 +850,7 @@ void MenuList::reset_attributes(uint8_t id)
 // FIXME: general horribleness invoked by the dropdown displacement correction
 
 /*
-	TODO
+	TODO: will still be split probably
 */
 uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
@@ -958,7 +1010,9 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 // TODO: split update from render section
 
 /*
-	TODO
+	!O(n)e .amount of sliders and checkboxes /update -> (public)
+	purpose: draw section of inverted/multisampled background components
+	\param anim_delta: predefined and commonly used animation speed for all menu transitions
 */
 void MenuList::update_background_component(float anim_delta)
 {
@@ -988,23 +1042,29 @@ void MenuList::update_background_component(float anim_delta)
 		}
 	}
 }
+// FIXME: exchange if space with early exit return
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
 
 /*
-	TODO
+	!O(n) .linked attributes /+function -> (public)
+	purpose: check if linked variables of desired list have changed compared to initialization
+	\param list_id: memory index of list in question
+	\returns true if any linked attributes are not identical with initialization, else false
 */
 bool MenuList::linked_variables_changed(uint16_t list_id)
 {
 	bool out = false;
 	for (uint16_t id : mlists[list_id].link_ids) {
-		MenuListEntity ce = mlists[list_id].entities[id];
+		MenuListEntity &ce = mlists[list_id].entities[id];
 		out = out||(ce.value!=Init::iConfig[ce.link_id]);
 	} return out;
 }
 // TODO: extract more information to display a list of changes later
 
 /*
-	TODO
+	!O(1)m /+load -> (private)
+	purpose: store checkbox information
+	\param vscroll: current text scroll to align checkbox with it's corresponding entity
 */
 void MenuList::create_checkbox(float vscroll)
 {
@@ -1038,7 +1098,9 @@ void MenuList::create_checkbox(float vscroll)
 // FIXME: 6 float width is too heavy for this purpose
 
 /*
-	TODO
+	!O(1)m /+load -> (private)
+	purpose: store slider information
+	\param vscroll: current text scroll to align slider with it's corresponding entity
 */
 void MenuList::create_slider(float vscroll)
 {
@@ -1656,7 +1718,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// globe deferred shading
 	fb_globe.bind();
-	m_ccbf->frame->clear();
+	Frame::clear();
 	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
 	FrameBuffer::close();
 

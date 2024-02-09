@@ -337,15 +337,15 @@ private:
 struct MenuListEntity
 {
 	// function
-	glm::vec4 colour;
-	LDCEntityType etype;
-	uint16_t value;
-	uint16_t link_id;
-	float anim_transition;
+	glm::vec4 colour = glm::vec4(1.f);
+	LDCEntityType etype = LDCEntityType::UNDEFINED;
+	uint16_t value = 0;
+	uint16_t link_id = 0;
+	float anim_transition = .0f;
 
 	// representation
 	Text text;
-	size_t tlen;
+	size_t tlen = 0;
 
 	// attribute component
 	std::vector<Text> dd_options;
@@ -355,16 +355,16 @@ struct MenuListEntity
 
 struct MenuListSegment
 {
-	uint16_t position;
+	uint16_t position = 0;
 	Text text;
-	size_t tlen;
+	size_t tlen = 0;
 };
 
 struct MenuListComplex
 {
 	// navigation
-	uint16_t lselect,lscroll;
-	size_t full_range;
+	uint16_t lselect = 0,lscroll = 0;
+	size_t full_range = 0;
 
 	// data
 	std::vector<MenuListEntity> entities;
@@ -372,7 +372,7 @@ struct MenuListComplex
 
 	// text
 	Text description;
-	size_t dtlen;
+	size_t dtlen = 0;
 
 	// index
 	std::vector<uint16_t> checkbox_ids,dropdown_ids,slider_ids,link_ids;
