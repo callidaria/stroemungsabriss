@@ -91,7 +91,7 @@
 	\returns compiled struct complex to be used by UI feature
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
-std::vector<LDCCluster> LDCCompiler::compile(const char* path)
+void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
@@ -107,8 +107,10 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 	// TODO: decide if those should be local to the compile function
 
 	// setup process state
-	LDCProcessState state;
-	state.fpath = path;
+	LDCProcessState state = {
+		.fpath = path,
+		.clusters = rClusters
+	};
 
 	// first pass: extraction - iterate definition file
 	std::vector<ListLanguageCommand> cmd_buffer;
@@ -174,9 +176,7 @@ std::vector<LDCCluster> LDCCompiler::compile(const char* path)
 		// set segment jump write
 		for (LDCSegment &segment : state.clusters[i].slist)
 			state.clusters[i].elist[segment.position].jsegment = true;
-
-	// compiled list status
-	} return state.clusters;
+	}
 }
 
 /**
@@ -471,7 +471,7 @@ void SelectionSpliceGeometry::load()
 	shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
 	shader.def_irregular_attributeF("colour",3,vsize,offsetof(SpliceVertexGeometry,colour));
 	shader.def_irregular_attributeI("edge_id",1,vsize,offsetof(SpliceVertexGeometry,edge_id));
-	shader.upload_camera(Camera2D(1280.f,720.f));
+	shader.upload_camera(gCamera2D);
 }
 
 /*
@@ -557,11 +557,19 @@ void SelectionSpliceGeometry::update()
  *	When the List is done being useful, just close it again by calling close_list(...).
  *	If an Entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
  *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
- *	The update works by calling update(...) in the base render stage and the other component in the msaa stage.
+ *	The update works by calling update in the base render stage and the other component in the msaa stage.
  *	Communication about any list being open at any given time can be requested through system_active().
  *	Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
  *
  *	NOTE: this implementation is subject to change and public variables have not been checked for usefulness
+ *
+ *		TODO: features
+ *	- difficulty preview in sidebar
+ *	- optimize drawing, geometry and everything else that is very wrong here
+ *	- interpretation of globe rotation data in compiled ldc file data
+ *	- wiggly text shadow
+ *	- save state descriptions and rotation
+ *	- (mdc) fading between lists (tilt shift effect, smooth transition between background and foreground)
 */
 
 /*
@@ -573,13 +581,15 @@ void SelectionSpliceGeometry::update()
 uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
-	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
-	// FIXME: very expensive copy
+	std::vector<LDCCluster> clusters;
+	LDCCompiler::compile(path,clusters);
+	uint8_t out = mlists.size();
 
 	// entity creation
-	uint8_t out = mlists.size();
+	uint8_t lidx = out;
+	mlists.resize(out+clusters.size());
 	for (LDCCluster &cluster : clusters) {
-		MenuListComplex t_mlc = {
+		mlists[lidx] = {
 			.full_range = cluster.elist.size()+cluster.slist.size()-1,
 			.entities = std::vector<MenuListEntity>(cluster.elist.size()),
 			.segments = std::vector<MenuListSegment>(cluster.slist.size()),
@@ -605,7 +615,7 @@ uint8_t MenuList::define_list(const char* path)
 						MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
 						MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y
 				)),t_segment.text.load();
-			t_mlc.segments[i] = t_segment;
+			mlists[lidx].segments[i] = t_segment;
 		}
 
 		// process cluster entites
@@ -628,8 +638,9 @@ uint8_t MenuList::define_list(const char* path)
 			// fill in element list information
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
 				t_entity.text.load();
-			t_mlc.description.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
-			t_mlc.dtlen += cluster.elist[i].description.length();
+			mlists[lidx].description.add(
+					cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
+			mlists[lidx].dtlen += cluster.elist[i].description.length();
 
 			// custom entity colours as defined by ldc script
 			if (cluster.elist[i].fattribs.size()>3)
@@ -644,7 +655,7 @@ uint8_t MenuList::define_list(const char* path)
 			switch (cluster.elist[i].etype) {
 			case LDCEntityType::CHECKBOX:
 				create_checkbox(vscroll);
-				t_mlc.checkbox_ids[head_checkbox++] = i;
+				mlists[lidx].checkbox_ids[head_checkbox++] = i;
 				break;
 
 			// load dropdown options
@@ -660,24 +671,23 @@ uint8_t MenuList::define_list(const char* path)
 					t_entity.dd_options[di] = dd_text;
 					t_entity.dd_colours[di] = glm::vec4(1.f);
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
-				} t_mlc.dropdown_ids[head_dropdown++] = i;
+				} mlists[lidx].dropdown_ids[head_dropdown++] = i;
 				break;
 
 			// load slider geometry
 			case LDCEntityType::SLIDER:
 				create_slider(vscroll);
-				t_mlc.slider_ids[head_slider++] = i;
+				mlists[lidx].slider_ids[head_slider++] = i;
 			};
 
 			// move cursor to write next element & store current information
 			vscroll -= MENU_LIST_SCROLL_Y;
-			t_mlc.entities[i] = t_entity;
-			// FIXME: avoid repeated direct copy
+			mlists[lidx].entities[i] = t_entity;
 		}
 
 		// store resulting cluster
-		t_mlc.description.load();
-		mlists.push_back(t_mlc);
+		mlists[lidx].description.load();
+		lidx++;
 	} return out;
 }
 
@@ -732,10 +742,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	mlc.description.load();
 	mlists.push_back(mlc);
 	return mlists.size()-1;
-	// FIXME: copy again
 }
-// TODO: add descriptions of save files, to be shown as common menu list descriptions
-// TODO: add preview rotation for location referenced in each save state
 
 /*
 	!O(1) /load -> (public)
@@ -744,7 +751,6 @@ uint8_t MenuList::define_list(SaveStates states)
 void MenuList::load()
 {
 	// setup dropdown background
-	Camera2D cam2D = Camera2D(1280.f,720.f);
 	float ddbgr_vertices[] = {
 
 		// setup spanning
@@ -769,14 +775,14 @@ void MenuList::load()
 	ddbgr_shader.def_attributeF("position",2,0,3);
 	ddbgr_shader.def_attributeF("dmod",1,2,3);
 	ddbgr_shader.upload_int("jmp_dist",MENU_LIST_SCROLL_Y);
-	ddbgr_shader.upload_camera(cam2D);
+	ddbgr_shader.upload_camera(gCamera2D);
 
 	// setup checkbox corpi
 	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
 	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
 	checkbox_shader.def_attributeF("position",2,0,4);
 	checkbox_shader.def_attributeF("drift_mod",2,2,4);
-	checkbox_shader.upload_camera(cam2D);
+	checkbox_shader.upload_camera(gCamera2D);
 
 	// setup slider corpi
 	slider_buffer.bind(),slider_buffer.upload_vertices(slider_vertices);
@@ -784,9 +790,8 @@ void MenuList::load()
 	slider_shader.def_attributeF("position",2,0,3);
 	slider_shader.def_attributeF("bmod",1,2,3);
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
-	slider_shader.upload_camera(cam2D);
+	slider_shader.upload_camera(gCamera2D);
 }
-// FIXME: remove camera calculation. its just the standard coordinate system please!
 
 /*
 	!O(1)m /function -> (public)
@@ -1006,7 +1011,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	return out;
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 }
-// TODO: transition between lists (background to foreground animation, tilt shift?) (mdc)
 // TODO: split update from render section
 
 /*
@@ -1174,7 +1178,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		uint8_t tsize,uint8_t dsize)
 {
 	// content information extraction
-	std::vector<LDCCluster> clusters = LDCCompiler::compile(path);
+	std::vector<LDCCluster> clusters;
+	LDCCompiler::compile(path,clusters);
 
 	// setup dialogue fonts
 	Font tfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",tsize,tsize);
@@ -1260,6 +1265,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		dgd.max_options = opcount-1;
 		dgd.max_width = hwidth,dgd.max_height = hheight;
 		dg_data.push_back(dgd);
+		// FIXME: expensive allocation & copy for each entity
 
 	// return parent id
 	} return out;
@@ -1275,16 +1281,13 @@ void MenuDialogue::load()
 	bgr_buffer.bind();
 	bgr_buffer.upload_vertices(bgr_verts);
 
-	// coordinate system setup
-	Camera2D cam2D = Camera2D(1280.f,720.f);
-
 	// background shader setup
 	size_t vsize = sizeof(DialogueBackgroundGeometry);
 	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
 	bgr_shader.def_irregular_attributeF("position",2,vsize,offsetof(DialogueBackgroundGeometry,position));
 	bgr_shader.def_irregular_attributeI("disp_id",1,vsize,offsetof(DialogueBackgroundGeometry,disp_id));
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
-	bgr_shader.upload_camera(cam2D);
+	bgr_shader.upload_camera(gCamera2D);
 
 	// upload selector vertices
 	slc_buffer.bind();
@@ -1293,7 +1296,7 @@ void MenuDialogue::load()
 	// selector shader setup
 	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
 	slc_shader.def_attributeF("position",2,0,2);
-	slc_shader.upload_camera(cam2D);
+	slc_shader.upload_camera(gCamera2D);
 }
 // FIXME: define 2D coordinate system ONCE and include for ALL usages, this avoids a lot of useless matrix calc
 // TODO: store info of defined dialogue background vertices and create only once to avoid multiple allocations
@@ -1485,7 +1488,6 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 	// draw background geometry
 	glDrawArrays(GL_TRIANGLES,id*6,6);
 }
-// TODO: exactly define how many instances are rendered per text object (mdc)
 
 
 /**

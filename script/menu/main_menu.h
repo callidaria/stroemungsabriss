@@ -238,7 +238,7 @@ struct LDCProcessState
 	std::vector<std::vector<std::string>> srefs;
 
 	// resulting data
-	std::vector<LDCCluster> clusters;
+	std::vector<LDCCluster> &clusters;
 };
 
 class LDCCompiler
@@ -246,7 +246,7 @@ class LDCCompiler
 public:
 
 	// code processing
-	static std::vector<LDCCluster> compile(const char* path);
+	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
 };
 
 // command interpretation logic
