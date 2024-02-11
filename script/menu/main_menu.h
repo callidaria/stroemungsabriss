@@ -389,7 +389,7 @@ public:
 	// invokation
 	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
-	void load();
+	void load(Renderer2D* r2d);
 
 	// interaction
 	void open_list(uint8_t id);
@@ -429,16 +429,21 @@ public:
 private:
 
 	// engine
+	Renderer2D* m_r2d;
 	Buffer checkbox_buffer = Buffer(),ddbgr_buffer = Buffer(),slider_buffer = Buffer();
 	Shader checkbox_shader = Shader(),ddbgr_shader = Shader(),slider_shader = Shader();
 
 	// data
+	uint16_t rid_diffs;
 	std::vector<uint8_t> active_ids;
 	std::vector<float> checkbox_vertices,slider_vertices;
 
 	// positioning
 	uint16_t crr_select = 0,seg_passed = 0;
 	float crr_scroll = .0f;
+
+	// animation
+	float anim_prog = .0f;
 
 	// triggers
 	bool tf_list_opened = false,subfunc_opened = false;

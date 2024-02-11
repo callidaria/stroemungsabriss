@@ -569,6 +569,7 @@ void SelectionSpliceGeometry::update()
  *	- interpretation of globe rotation data in compiled ldc file data
  *	- wiggly text shadow
  *	- save state descriptions and rotation
+ *	- make globe preview part of menu list instead of handling it in main menu update
  *	- (mdc) fading between lists (tilt shift effect, smooth transition between background and foreground)
 */
 
@@ -747,8 +748,9 @@ uint8_t MenuList::define_list(SaveStates states)
 /*
 	!O(1) /load -> (public)
 	purpose: setup vertices & compile shaders for entity attribute visualization
+	\param r2d: reference to 2D renderer
 */
-void MenuList::load()
+void MenuList::load(Renderer2D* r2d)
 {
 	// setup dropdown background
 	float ddbgr_vertices[] = {
@@ -791,6 +793,11 @@ void MenuList::load()
 	slider_shader.def_attributeF("bmod",1,2,3);
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
 	slider_shader.upload_camera(gCamera2D);
+
+	// difficulty preview spritesheet
+	m_r2d = r2d;
+	rid_diffs = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
 }
 
 /*
@@ -1008,8 +1015,24 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	// description out
 	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
 		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
-	return out;
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
+
+	// difficulty prognosis text animation
+	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
+	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
+	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
+	glm::mat4 diff_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
+	diff_model = glm::scale(diff_model,glm::vec3(diff_scale,diff_scale,0));
+	diff_model = glm::rotate(diff_model,glm::radians(diff_rotation),glm::vec3(0,0,1));
+	m_r2d->al[rid_diffs+1].model = diff_model;
+	anim_prog += .02f;
+
+	// difficulty prognosis render
+	m_r2d->prepare();
+	m_r2d->render_state(rid_diffs,glm::vec2(0,4));
+	m_r2d->render_state(rid_diffs+1,glm::vec2(1,4));
+	return out;
+	// TODO: break apart difficulty prognosis text and belt colours
 }
 // TODO: split update from render section
 
@@ -1021,32 +1044,30 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 void MenuList::update_background_component(float anim_delta)
 {
 	// prepare checkboxes
-	if (active_ids.size()&&!subfunc_opened) {
-		uint16_t id = active_ids.back();
-		checkbox_buffer.bind(),checkbox_shader.enable();
-		checkbox_shader.upload_float("scroll",crr_scroll);
+	if (!active_ids.size()||subfunc_opened) return;
+	uint16_t id = active_ids.back();
+	checkbox_buffer.bind(),checkbox_shader.enable();
+	checkbox_shader.upload_float("scroll",crr_scroll);
 
-		// iterate checkboxes
-		for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
-			MenuListEntity &ce = mlists[id].entities[mlists[id].checkbox_ids[i]];
-			Toolbox::transition_float_on_condition(ce.anim_transition,anim_delta,ce.value);
-			checkbox_shader.upload_float("aprog",ce.anim_transition);
-			glDrawArrays(GL_TRIANGLES,12*i,12);
-		}
+	// iterate checkboxes
+	for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
+		MenuListEntity &ce = mlists[id].entities[mlists[id].checkbox_ids[i]];
+		Toolbox::transition_float_on_condition(ce.anim_transition,anim_delta,ce.value);
+		checkbox_shader.upload_float("aprog",ce.anim_transition);
+		glDrawArrays(GL_TRIANGLES,12*i,12);
+	}
 
-		// prepare sliders
-		slider_buffer.bind(),slider_shader.enable();
-		slider_shader.upload_float("scroll",crr_scroll);
+	// prepare sliders
+	slider_buffer.bind(),slider_shader.enable();
+	slider_shader.upload_float("scroll",crr_scroll);
 
-		// iterate sliders
-		for (uint16_t i=0;i<mlists[id].slider_ids.size();i++) {
-			MenuListEntity &ce = mlists[id].entities[mlists[id].slider_ids[i]];
-			slider_shader.upload_float("sval",ce.value*.01f);
-			glDrawArrays(GL_TRIANGLES,6*i,6);
-		}
+	// iterate sliders
+	for (uint16_t i=0;i<mlists[id].slider_ids.size();i++) {
+		MenuListEntity &ce = mlists[id].entities[mlists[id].slider_ids[i]];
+		slider_shader.upload_float("sval",ce.value*.01f);
+		glDrawArrays(GL_TRIANGLES,6*i,6);
 	}
 }
-// FIXME: exchange if space with early exit return
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
 
 /*
@@ -1612,7 +1633,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
-	} mlists.load();
+	} mlists.load(m_ccbf->r2d);
 	// FIXME: ?? (char)i instead of std::to_string(i).c_str()
 	// TODO: this is far from a reliable implementation, that shall change in the future
 
