@@ -566,10 +566,11 @@ void SelectionSpliceGeometry::update()
  *		TODO: features
  *	- difficulty preview in sidebar
  *	- optimize drawing, geometry and everything else that is very wrong here
- *	- interpretation of globe rotation data in compiled ldc file data
- *	- wiggly text shadow
+ *	- interpretation of globe rotation data in compiled .ldc file data
  *	- save state descriptions and rotation
  *	- make globe preview part of menu list instead of handling it in main menu update
+ *	- document fattribs/cattribs usage patterns for menu list as well as menu dialogue
+ *	- (mdc) wiggly text shadow
  *	- (mdc) fading between lists (tilt shift effect, smooth transition between background and foreground)
 */
 
@@ -643,14 +644,32 @@ uint8_t MenuList::define_list(const char* path)
 					cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
 			mlists[lidx].dtlen += cluster.elist[i].description.length();
 
-			// custom entity colours as defined by ldc script
-			if (cluster.elist[i].fattribs.size()>3)
-				t_entity.colour = glm::vec4(
-						cluster.elist[i].fattribs[0],
-						cluster.elist[i].fattribs[1],
-						cluster.elist[i].fattribs[2],
-						cluster.elist[i].fattribs[3]
-					);
+			// iterate through possible dropdown elements in character attribute space
+			bool element_mode = cluster.elist[i].etype==LDCEntityType::DROPDOWN;
+			uint8_t cai = 0;
+			while (element_mode&&cai<cluster.elist[i].cattribs.size()) {
+				element_mode = cluster.elist[i].cattribs[cai]!="end";
+				cai++;
+			}
+
+			// iterate additional commands in character attribute space
+			uint8_t fai = 0;
+			for (uint8_t j=cai;j<cluster.elist[i].cattribs.size();j++) {
+				if (cluster.elist[i].cattribs[j]=="cmd_colour") {
+					t_entity.colour = glm::vec4(
+							cluster.elist[i].fattribs[fai],
+							cluster.elist[i].fattribs[fai+1],
+							cluster.elist[i].fattribs[fai+2],
+							cluster.elist[i].fattribs[fai+3]
+						);
+				}
+				else if (cluster.elist[i].cattribs[j]=="cmd_grotation") {
+					// TODO: rotation representation
+				}
+				else {
+					printf("syntax error in character attribute commands");
+				}
+			}
 
 			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
@@ -664,7 +683,7 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_colours.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
-				for (uint8_t di=0;di<cluster.elist[i].cattribs.size();di++) {
+				for (uint8_t di=0;di<cai;di++) {
 					Text dd_text = Text(st_font);
 					dd_text.add(cluster.elist[i].cattribs[di].c_str(),
 							glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,vscroll)),
