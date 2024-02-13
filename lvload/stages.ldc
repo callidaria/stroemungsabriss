@@ -4,16 +4,16 @@
 :segment North America
 
 :define Stage: Orphansnatchers
-:strings diff_id
-:floats 2
+:strings diff_id grotation
+:floats 2 62 32 54 127 17 3
 
 :define Boss: Hotshot
-:strings diff_id
-:floats 2
+:strings diff_id grotation
+:floats 2 38 49 11 106 22 43
 
 :define Stage: Spike's Casino Assault
-:strings diff_id
-:floats 6
+:strings diff_id grotation
+:floats 6 38 46 17 118 45 1
 
 :define Boss: Master Spike
 :strings diff_id

@@ -346,6 +346,8 @@ struct MenuListEntity
 	// representation
 	float anim_transition = .0f;
 	uint8_t diff_preview = 0;
+	bool has_rotation = false;
+	glm::vec2 grotation = glm::vec2(0);
 	Text text;
 	size_t tlen = 0;
 
@@ -391,7 +393,7 @@ public:
 	// invokation
 	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
-	void load(Renderer2D* r2d);
+	void load(CascabelBaseFeature* ccbf,uint16_t wsid);
 
 	// interaction
 	void open_list(uint8_t id);
@@ -406,6 +408,7 @@ public:
 	uint8_t update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 			bool mperiph,bool &rrnd);
 	void update_background_component(float anim_delta);
+	void update_overlays();
 
 	// info
 	inline bool system_active() { return active_ids.size(); }
@@ -431,7 +434,7 @@ public:
 private:
 
 	// engine
-	Renderer2D* m_r2d;
+	CascabelBaseFeature* m_ccbf;
 	Buffer checkbox_buffer = Buffer(),ddbgr_buffer = Buffer(),slider_buffer = Buffer();
 	Shader checkbox_shader = Shader(),ddbgr_shader = Shader(),slider_shader = Shader();
 
@@ -446,6 +449,15 @@ private:
 
 	// animation
 	float anim_prog = .0f;
+
+	// globe scene
+	FrameBuffer fb_globe;
+	uint8_t globe_target_id;
+	uint16_t rid_globe,rid_window_sprite;
+	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f);
+	Lighting gb_lights = Lighting();
+	bool show_globe = false;
+	glm::vec2 globe_rotation = glm::vec2(0);
 
 	// triggers
 	bool tf_list_opened = false,subfunc_opened = false;
@@ -660,13 +672,6 @@ private:
 
 	// remote
 	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
-
-	// globe scene
-	FrameBuffer fb_globe;
-	uint8_t globe_target_id;
-	uint16_t rid_globe,rid_window_sprite;
-	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f);
-	Lighting gb_lights = Lighting();
 
 	// predefinitions
 	typedef void (*interface_logic)(MainMenu&);

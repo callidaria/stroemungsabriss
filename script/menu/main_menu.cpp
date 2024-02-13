@@ -682,7 +682,13 @@ uint8_t MenuList::define_list(const char* path)
 					t_entity.diff_preview = cluster.elist[i].fattribs[fai++];
 				}
 				else if (cluster.elist[i].cattribs[j]=="grotation") {
-					// TODO: rotation representation
+					t_entity.has_rotation = true;
+					t_entity.grotation = glm::vec2(
+							cluster.elist[i].fattribs[fai],
+							cluster.elist[i].fattribs[fai+3]
+						);
+					fai += 6;
+					// TODO: improve rotation precision beyond simple degree reading
 				}
 				else {
 					printf("syntax error in character attribute commands: %s\n",
@@ -789,7 +795,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	purpose: setup vertices & compile shaders for entity attribute visualization
 	\param r2d: reference to 2D renderer
 */
-void MenuList::load(Renderer2D* r2d)
+void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 {
 	// setup dropdown background
 	float ddbgr_vertices[] = {
@@ -834,9 +840,24 @@ void MenuList::load(Renderer2D* r2d)
 	slider_shader.upload_camera(gCamera2D);
 
 	// difficulty preview spritesheet
-	m_r2d = r2d;
-	rid_diffs = m_r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	m_ccbf = ccbf;
+	rid_diffs = m_ccbf->r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	m_ccbf->r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
+
+	// globe render target
+	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
+			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
+	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
+	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
+	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
+			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
+	float pitch = 15.f,yaw = -110.f;
+	gb_cam3D.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
+			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
+	gb_cam3D.update();
+	rid_window_sprite = wsid;
+	// TODO: replace emission map with nighttime extrapolation in terra directory
+	// FIXME: resolve this hacky usage of camera
 }
 
 /*
@@ -908,6 +929,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 {
 	// early exit when no lists active
 	instruction_mod = 0;
+	show_globe = false;
 	if (!active_ids.size()) return 0;
 
 	// update most recent list
@@ -1056,6 +1078,10 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 
+	// globe render setup
+	show_globe = mlists[id].entities[crr_select].has_rotation;
+	globe_rotation = mlists[id].entities[crr_select].grotation;
+
 	// difficulty prognosis text animation
 	if (!mlists[id].entities[crr_select].diff_preview) return out;
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
@@ -1064,14 +1090,14 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	glm::mat4 diff_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
 	diff_model = glm::scale(diff_model,glm::vec3(diff_scale,diff_scale,0));
 	diff_model = glm::rotate(diff_model,glm::radians(diff_rotation),glm::vec3(0,0,1));
-	m_r2d->al[rid_diffs+1].model = diff_model;
+	m_ccbf->r2d->al[rid_diffs+1].model = diff_model;
 	anim_prog += .02f;
 
 	// difficulty prognosis render
 	uint8_t rstate = mlists[id].entities[crr_select].diff_preview-1;
-	m_r2d->prepare();
-	m_r2d->render_state(rid_diffs,glm::vec2(0,rstate));
-	m_r2d->render_state(rid_diffs+1,glm::vec2(1,rstate));
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
+	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(1,rstate));
 	return out;
 	// TODO: break apart difficulty prognosis text and belt colours
 }
@@ -1110,6 +1136,41 @@ void MenuList::update_background_component(float anim_delta)
 	}
 }
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
+
+/*
+	TODO
+*/
+void MenuList::update_overlays()
+{
+	// early exit if globe render can be skipped
+	if (!show_globe) return;
+
+	// transform globe towards preview location
+	m_ccbf->r3d->pml[rid_globe].model = glm::rotate(
+			glm::rotate(glm::mat4(1),glm::radians(globe_rotation.x),glm::vec3(1,0,0)),
+			glm::radians(globe_rotation.y),glm::vec3(0,1,0)
+		);
+
+	// render globe to target
+	glEnable(GL_DEPTH_TEST),glDisable(GL_BLEND);
+	m_ccbf->r3d->start_target(globe_target_id);
+	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
+	glDisable(GL_DEPTH_TEST),glEnable(GL_BLEND);
+
+	// globe deferred shading
+	fb_globe.bind();
+	Frame::clear();
+	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
+	FrameBuffer::close();
+
+	// draw globe buffer
+	if (show_globe) {
+		m_ccbf->r2d->prepare();
+		m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
+		m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
+		m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
+	}
+}
 
 /*
 	!O(n) .linked attributes /+function -> (public)
@@ -1579,7 +1640,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// asset load
-	rid_window_sprite = ccbf->r2d->sl.size();
+	uint16_t rid_window_sprite = ccbf->r2d->sl.size();
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
@@ -1674,7 +1735,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
-	} mlists.load(m_ccbf->r2d);
+	} mlists.load(m_ccbf,rid_window_sprite);
 	// FIXME: ?? (char)i instead of std::to_string(i).c_str()
 	// TODO: this is far from a reliable implementation, that shall change in the future
 
@@ -1696,20 +1757,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
-
-	// globe render target
-	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
-			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
-	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
-	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
-	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
-	float pitch = 15.f,yaw = -110.f;
-	gb_cam3D.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
-			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
-	gb_cam3D.update();
-	// TODO: replace emission map with nighttime extrapolation in terra directory
-	// FIXME: resolve this hacky usage of camera
 }
 // FIXME: when using mouse & keyboard input simultaneously the transition can be stuck between states
 
@@ -1773,18 +1820,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// component updates before interface behaviour & rendering
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
-
-	// render globe to target
-	glEnable(GL_DEPTH_TEST),glDisable(GL_BLEND);
-	m_ccbf->r3d->start_target(globe_target_id);
-	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
-	glDisable(GL_DEPTH_TEST),glEnable(GL_BLEND);
-
-	// globe deferred shading
-	fb_globe.bind();
-	Frame::clear();
-	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
-	FrameBuffer::close();
 
 	// START RENDER MENU BUFFER
 	fb_menu.bind();
@@ -1888,7 +1923,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	MSAA::render();
 	FrameBuffer::close();
 
-	// render overlay
+	// render layers
 	fb_slice.prepare();
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,fb_nslice.tex);
@@ -1897,18 +1932,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	glActiveTexture(GL_TEXTURE0);
 	fb_slice.s.upload_float("mtrans",mtransition);
 	fb_slice.render();
+	mlists.update_overlays();
 	// FIXME: remove special treatment and transfer to a more controllable implementation
-
-	// draw globe buffer
-	bool show_globe = interface_logic_id==INTERFACE_LOGIC_PRACTICE||interface_logic_id==INTERFACE_LOGIC_LOAD;
-	Toolbox::transition_float_on_condition(globe_transition,transition_delta,show_globe);
-	m_ccbf->r2d->sl[globe_target_id].scale(1.f,globe_transition);
-	if (show_globe) {
-		m_ccbf->r2d->prepare();
-		m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
-		m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
-		m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
-	}
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
