@@ -1,70 +1,221 @@
 :cluster main
 
+
 :segment North America
 
 :define Stage: Orphansnatchers
+:strings diff_id
+:floats 2
+
 :define Boss: Hotshot
+:strings diff_id
+:floats 2
+
 :define Stage: Spike's Casino Assault
+:strings diff_id
+:floats 6
+
 :define Boss: Master Spike
+:strings diff_id
+:floats 7
+
 :define Boss: Gustave the Gunslinger
+:strings diff_id
+:floats 3
+
 
 :segment South America
 
-:define Boss: Martha, Mother of Monkeys
+:define Boss: Martha of the Miraculous Woodlands
+:strings diff_id
+:floats 8
+
 :define Stage: Favela Hunt
+:strings diff_id
+:floats 3
+
 :define Stage: Neon Tower of Babes
+:strings diff_id
+:floats 5
+
 :define Boss: Sinclair, Seller of Sacred Souls
+:strings diff_id
+:floats 4
+
 
 :segment Antarctica
+
 :define Stage: The Sad Sailor's Fleet
+:strings diff_id
+:floats 4
+
 :define Boss: Undergraduate Joanna
+:strings diff_id
+:floats 5
+
 
 :segment Africa
 
 :define Stage: Train Assault pt. I
+:strings diff_id
+:floats 5
+
 :define Boss: Butcher of the Pits
+:strings diff_id
+:floats 6
+
 :define Stage: Train Assault pt. II
+:strings diff_id
+:floats 5
+
 :define Stage: To the Rescue
+:strings diff_id
+:floats 5
+
 :define Stage: Train Assault pt. III
+:strings diff_id
+:floats 6
+
 :define Boss: Twin Tailed Basilisk
+:strings diff_id
+:floats 6
+
 :define Stage: Train Assault pt. IV
+:strings diff_id
+:floats 6
+
 :define Stage: The Smuggle
+:strings diff_id
+:floats 6
+
 
 :segment Europe
 
 :define Boss: Warorphan Lunare Laurel
-:define Boss: Aurora Gloria et Benedictus
-:define Boss: Clocktower
-:define Stage: Luftschiff Spielzeugparadies Chaosland
-:define Boss: Eberhardt Kindsgesicht
-:define Boss: Sad Sailor
+:strings diff_id
+:floats 7
 
-:segment The Pole
-:define Boss: Aurora Eleison
-:define Boss: Aurora Credo
-:define Boss: Aurora Agnus
-:define Boss: Matriarch Aurora Minerva
-:define Stage: Into the Unknown Depths Below
-:define Boss: Chessmaster Octagon
-:define Stage: Take a Deep Breath
+:define Boss: Aurora Gloria et Benedictus
+:strings diff_id
+:floats 10
+
+:define Boss: Clocktower
+:strings diff_id
+:floats 9
+
+:define Stage: Luftschiff Spielzeugparadies Chaosland
+:strings diff_id
+:floats 7
+
+:define Boss: Eberhardt Kindsgesicht
+:strings diff_id
+:floats 6
+
+:define Boss: Sad Sailor
+:strings diff_id
+:floats 8
+
 
 :segment Farther East
+
 :define Stage: Residence Voron
+:strings diff_id
+:floats 12
+
 :define Boss: The Assault
+:strings diff_id
+:floats 9
+
 :define Stage: Into the Unknown Heights Above
+:strings diff_id
+:floats 8
+
 :define Boss: Artyom, The Astral Adventurer
+:strings diff_id
+:floats 11
+
 :define Boss: Matriarch Lunare Laurel
+:strings diff_id
+:floats 16
+
 :define Stage: ...and Cross the Desert Too
+:strings diff_id
+:floats 8
+
 :define Boss: Poolparty Assassin, Gerhartt-Klausz
+:strings diff_id
+:floats 12
+
 :define Boss: Dancing Pilot
+:strings diff_id
+:floats 13
+
+
+:segment The Pole
+
+:define Boss: Aurora Eleison
+:strings diff_id
+:floats 11
+
+:define Boss: Aurora Credo
+:strings diff_id
+:floats 14
+
+:define Boss: Aurora Agnus
+:strings diff_id
+:floats 13
+
+:define Boss: Matriarch Aurora Minerva
+:strings diff_id
+:floats 15
+
+:define Stage: Into the Unknown Depths Below
+:strings diff_id
+:floats 12
+
+:define Boss: Chessmaster Octagon
+:strings diff_id
+:floats 14
+
+:define Stage: Take a Deep Breath
+:strings diff_id
+:floats 12
+
 
 :segment Japan
+
 :define Stage: Crossover
+:strings diff_id
+:floats 12
+
 :define Boss: Beehive Squad
+:strings diff_id
+:floats 10
+
 :define Stage: Cottonmind Arcade
+:strings diff_id
+:floats 8
+
 :define Stage: Cottonmind Arcade Rainbow Label
+:strings diff_id
+:floats 12
+
 :define Stage: Cottonmind Arcade White Label
+:strings diff_id
+:floats 15
+
 :define Boss: Cottonmind
+:strings diff_id
+:floats 10
+
 :define Stage: Tokio Emergency
+:strings diff_id
+:floats 12
+
 :define Boss: Flowergirl Yomi
+:strings diff_id
+:floats 15
+
 :define Boss: Matriarch Yomisama
+:strings diff_id
+:floats 16

@@ -31,6 +31,9 @@
  * 	:floats (<float><space>)*
  * add float constants to list entity, accessible for any reason, usage defined by logic
  *
+ *	:strings (<string><space>)*
+ * add string constant to list entity, accissible for any reason, usage defined by logic
+ *
  *
  * 	:segment <segment_name>
  * whereever a segment is called within the list defintion file, a dividing, stylized line will be
@@ -95,14 +98,14 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 {
 	// logic id overhead
 	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","define","describe","floats","segment","condition","link","subsequent",
+		"cluster","define","describe","floats","strings","segment","condition","link","subsequent",
 		"system_behaviour","checkbox","dropdown","slider","return",
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_attributes,
-		command_logic_segment,command_logic_condition,command_logic_link,command_logic_subsequent,
-		command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,command_logic_slider,
-		command_logic_return,command_logic_syntax_error,
+		command_logic_sattributes,command_logic_segment,command_logic_condition,command_logic_link,
+		command_logic_subsequent,command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,
+		command_logic_slider,command_logic_return,command_logic_syntax_error
 	};
 	// TODO: decide if those should be local to the compile function
 
@@ -243,6 +246,17 @@ void command_logic_attributes(LDCProcessState &state)
 	} catch (std::out_of_range const &ex) {
 		compiler_error_msg(state,"at least one attribute is out of float range");
 	}
+}
+
+/*
+	TODO
+*/
+void command_logic_sattributes(LDCProcessState &state)
+{
+	std::stringstream bfss(state.cmd->tail);
+	std::string attrib;
+	while (getline(bfss,attrib,' '))
+		state.clusters.back().elist.back().cattribs.push_back(attrib);
 }
 
 /*
@@ -648,28 +662,34 @@ uint8_t MenuList::define_list(const char* path)
 			bool element_mode = cluster.elist[i].etype==LDCEntityType::DROPDOWN;
 			uint8_t cai = 0;
 			while (element_mode&&cai<cluster.elist[i].cattribs.size()) {
-				element_mode = cluster.elist[i].cattribs[cai]!="end";
+				element_mode = cluster.elist[i].cattribs[cai]!="cmd";
 				cai++;
 			}
 
 			// iterate additional commands in character attribute space
 			uint8_t fai = 0;
 			for (uint8_t j=cai;j<cluster.elist[i].cattribs.size();j++) {
-				if (cluster.elist[i].cattribs[j]=="cmd_colour") {
+				if (cluster.elist[i].cattribs[j]=="colour") {
 					t_entity.colour = glm::vec4(
 							cluster.elist[i].fattribs[fai],
 							cluster.elist[i].fattribs[fai+1],
 							cluster.elist[i].fattribs[fai+2],
 							cluster.elist[i].fattribs[fai+3]
 						);
+					fai += 4;
 				}
-				else if (cluster.elist[i].cattribs[j]=="cmd_grotation") {
+				else if (cluster.elist[i].cattribs[j]=="diff_id") {
+					t_entity.diff_preview = cluster.elist[i].fattribs[fai++];
+				}
+				else if (cluster.elist[i].cattribs[j]=="grotation") {
 					// TODO: rotation representation
 				}
 				else {
-					printf("syntax error in character attribute commands");
+					printf("syntax error in character attribute commands: %s\n",
+						   cluster.elist[i].cattribs[j].c_str());
 				}
 			}
+			// FIXME: will break when actually combining commands and dropdown elements by offset 1
 
 			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
@@ -1037,6 +1057,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 
 	// difficulty prognosis text animation
+	if (!mlists[id].entities[crr_select].diff_preview) return out;
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
@@ -1047,9 +1068,10 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	anim_prog += .02f;
 
 	// difficulty prognosis render
+	uint8_t rstate = mlists[id].entities[crr_select].diff_preview-1;
 	m_r2d->prepare();
-	m_r2d->render_state(rid_diffs,glm::vec2(0,4));
-	m_r2d->render_state(rid_diffs+1,glm::vec2(1,4));
+	m_r2d->render_state(rid_diffs,glm::vec2(0,rstate));
+	m_r2d->render_state(rid_diffs+1,glm::vec2(1,rstate));
 	return out;
 	// TODO: break apart difficulty prognosis text and belt colours
 }

@@ -50,7 +50,7 @@ constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
 constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
 constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
 constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 13;
+constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 14;
 
 // menu list positioning
 constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
@@ -255,6 +255,7 @@ static void command_logic_cluster(LDCProcessState &state);
 static void command_logic_define(LDCProcessState &state);
 static void command_logic_describe(LDCProcessState &state);
 static void command_logic_attributes(LDCProcessState &state);
+static void command_logic_sattributes(LDCProcessState &state);
 static void command_logic_segment(LDCProcessState &state);
 static void command_logic_condition(LDCProcessState &state);
 static void command_logic_link(LDCProcessState &state);
@@ -341,9 +342,10 @@ struct MenuListEntity
 	LDCEntityType etype = LDCEntityType::UNDEFINED;
 	uint16_t value = 0;
 	uint16_t link_id = 0;
-	float anim_transition = .0f;
 
 	// representation
+	float anim_transition = .0f;
+	uint8_t diff_preview = 0;
 	Text text;
 	size_t tlen = 0;
 
