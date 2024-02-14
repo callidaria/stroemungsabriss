@@ -564,6 +564,17 @@ void SelectionSpliceGeometry::update()
  *	-> sliders, dropdowns and checkboxes.
  *	Loaded savestates are easily represented through Menu List, due to overload.
  *
+ *		Special definition rules:
+ *	To define a globe preview by rotation:
+ *		add "grotation" to strings component and add target coordinates (6 floats) to floats component
+ *	To define an abnormal text colouration:
+ *		add "colour" to strings component and add target colour vector (4 floats) to floats component
+ *	To define a challenge preview banner:
+ *		add "diff_id" to strings component and add difficulty id (1 unsigned 8-bit integer) to floats component
+ *		(difficulty ids: 1-6 student; 7-11 master; 12-14 grandmaster; 15-16 headmaster)
+ *	Should commands be required alongside dropdown elements:
+ *		first call :dropdown command and then prefix any further commands with "cmd" in strings component
+ *
  *		How 2 use:
  *	First run define_list(...) to load list definition. (can be done through .ldc file or loaded savestates)
  *	After completing all definitions, load() shall be executed.
@@ -572,16 +583,14 @@ void SelectionSpliceGeometry::update()
  *	If an Entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
  *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
  *	The update works by calling update in the base render stage and the other component in the msaa stage.
+ *	Finally, the last update_overlays(...) belongs right after joining all other framebuffers
  *	Communication about any list being open at any given time can be requested through system_active().
  *	Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
  *
- *	NOTE: this implementation is subject to change and public variables have not been checked for usefulness
- *
  *		TODO: features & optimization
  *	- optimize drawing, geometry and everything else that is very wrong here
- *	- document fattribs/cattribs usage patterns for menu list as well as menu dialogue
- *	- (mdc) wiggly text shadow
- *	- (mdc) fading between lists (tilt shift effect, smooth transition between background and foreground)
+ *	- wiggly text shadow
+ *	- fading between lists (tilt shift effect, smooth transition between background and foreground)
 */
 
 /*
@@ -1257,9 +1266,9 @@ void MenuList::create_slider(float vscroll)
 /**
  *		Start Implementation of Popup Dialogue for Main Menu:
  *
- * the MenuDialogue utilizes the ldc list language to display a dialogue window, prompting the player to
- * make a choice. it is a secondary, attention-grabbing way to display a short list of options, that are meant
- * to be answered as an immediate response to proceed, without the power of a full MenuList.
+ *	the MenuDialogue utilizes the ldc list language to display a dialogue window, prompting the player to
+ *	make a choice. it is a secondary, attention-grabbing way to display a short list of options, that are meant
+ *	to be answered as an immediate response to proceed, without the power of a full MenuList.
  *
  *		following, some explanations about the geometrical behaviour:
  *
@@ -1272,21 +1281,25 @@ void MenuList::create_slider(float vscroll)
  *				 ll./______-------				|
  *
  *		what to learn from this beautiful drawing:
- * the point c marks the parametrical center of the created dialogue. from there, the dimensions are applied.
- * fw is the full parametrical width and fh is the full height.
- * the points ur and ll are predictably placed. ur will be at c+(fw/2,fh/2) and ll at c-(fw/2,fh/2).
- * ul and lr will be spanned over the points c, ur & ll, being placed pseudorandomly within a range for
- * asthetic reasons.
- * the dialogue selector scaling is based on the text size of the listed options.
+ *	the point c marks the parametrical center of the created dialogue. from there, the dimensions are applied.
+ *	fw is the full parametrical width and fh is the full height.
+ *	the points ur and ll are predictably placed. ur will be at c+(fw/2,fh/2) and ll at c-(fw/2,fh/2).
+ *	ul and lr will be spanned over the points c, ur & ll, being placed pseudorandomly within a range for
+ *	asthetic reasons.
+ *	the dialogue selector scaling is based on the text size of the listed options.
+ *
+ *		Custom Definition Rules:
+ *	Just one rule (so far). to transform an ui component in 2D space:
+ *		use the first two float components of the first entity in the cluster as transformation vector
  *
  *		how this feature works:
- * - call add_dialogue_window() to create a new dialogue window and receive instance id back.
- * - after creating all windows run load().
- * - dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
- * - insert update() into unaltered menu render stage.
- * - insert background_component() into intersectionally inverting, anti-aliased menu render stage.
- * - return from choice is stored in dg_state while the frame the choice was confirmed in.
- * - modification of dialogue data list is possible from outside by directly modifying dg_data.
+ *	- call add_dialogue_window() to create a new dialogue window and receive instance id back.
+ *	- after creating all windows run load().
+ *	- dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
+ *	- insert update() into unaltered menu render stage.
+ *	- insert background_component() into intersectionally inverting, anti-aliased menu render stage.
+ *	- return from choice is stored in dg_state while the frame the choice was confirmed in.
+ *	- modification of dialogue data list is possible from outside by directly modifying dg_data.
 */
 
 /*
