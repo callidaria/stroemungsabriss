@@ -1,11 +1,20 @@
-*.s
-*.swp
-/*.ini
-lib/
-include/
-ccb/include/
-dat/precalc/*
-.vscode/
+# editors
 *#
 *~
+.vscode/
+*.swp
+
+# resources
+include/
+ccb/include/
+
+# precompute
+lib/
+dat/precalc/*
+*.s
+
+# local settings
+/*.ini
+
+# debug
 gmon.out

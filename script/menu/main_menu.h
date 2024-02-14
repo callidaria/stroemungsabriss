@@ -327,7 +327,6 @@ private:
 
 	// data
 	std::vector<SpliceVertexGeometry> verts;
-
 };
 
 

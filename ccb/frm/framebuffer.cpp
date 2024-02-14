@@ -57,7 +57,7 @@ void FrameBuffer::prepare()
 }
 
 /*
-	render_LIKE_A_FUCKING_IDIOT() -> void
+	render() -> void
 	purpose: draw buffer in combination with given shader manipulations
 */
 void FrameBuffer::render()

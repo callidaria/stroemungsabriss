@@ -63,8 +63,10 @@ public:
 	// queue interaction
 	inline void enable_update(uint16_t id) { particle_update_ids.push_back(id); }
 	inline void disable_update(uint16_t id) {
-		particle_update_ids.erase(std::remove(particle_update_ids.begin(),
-				particle_update_ids.end(),id),particle_update_ids.end());
+		particle_update_ids.erase(
+				std::remove(particle_update_ids.begin(),particle_update_ids.end(),id),
+				particle_update_ids.end()
+			);
 	}
 
 private:

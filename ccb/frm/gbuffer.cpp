@@ -5,7 +5,7 @@
 	w_res: g-buffer's x-axis resolution
 	h_res: g-buffer's y-axis resolution
 	purpose: create a g-buffer based on the given resolution
-	NOTE: contructing will immediately bind framebuffer for setup
+	NOTE: constructing will immediately bind framebuffer for setup
 */
 GBuffer::GBuffer(float wres,float hres)
 	: w_res(wres),h_res(hres)

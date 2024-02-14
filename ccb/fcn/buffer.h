@@ -31,12 +31,10 @@ public:
 	void upload_indices(float* is,size_t issize);
 
 	// inlined templates
-	//void upload_vertices(float* vertices,size_t vsize);
 	template<typename T> void upload_vertices(T* vertices,size_t vsize) {
 		glBindBuffer(GL_ARRAY_BUFFER,vbo);
 		glBufferData(GL_ARRAY_BUFFER,vsize,vertices,GL_STATIC_DRAW);
 	}
-	//void upload_vertices(std::vector<float> iv);
 	template<typename T> void upload_vertices(std::vector<T> iv) {
 		glBindBuffer(GL_ARRAY_BUFFER,vbo);
 		glBufferData(GL_ARRAY_BUFFER,iv.size()*sizeof(T),&iv[0],GL_STATIC_DRAW);

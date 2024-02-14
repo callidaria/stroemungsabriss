@@ -4,13 +4,13 @@
  *		LDC Compiler Implementation
  *
  * The LDC Compiler reads a menu list definition .ldc file and compiles it to a struct complex.
- * This resulting complex can be used write an intern list logic, which was externally defined and compiled
- * at load time.
+ * This resulting complex can be used to write an intern list logic, which will be externally defined and
+ * compiled at load time.
  *
  * 		List Definition Code Language Design
  * 
  * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
- * following expression are valid and will be handled by menu list interpreter:
+ * following expressions are valid and will be handled by menu list interpreter:
  * (the definitions are using <> to show where custom naming replaces "<contents>")
  * 
  * 
@@ -22,7 +22,7 @@
  * to define the main list use :cluster main
  * 
  * 	:define <entity_name>
- * define the name of the list entity, that will be shown alongside other list member entities
+ * define the name of the list entity
  * 
  * 	:describe
  * 	<description>
@@ -32,7 +32,7 @@
  * add float constants to list entity, accessible for any reason, usage defined by logic
  *
  *	:strings (<string><space>)*
- * add string constant to list entity, accissible for any reason, usage defined by logic
+ * add string constant to list entity, accessible for any reason, usage defined by logic
  *
  *
  * 	:segment <segment_name>
@@ -57,7 +57,8 @@
  * 	0 = no behaviour
  * 	1 = terminate current list
  * purpose:
- * this will give the list option a system functionality, that will be executed when it is selected & confirmed.
+ * this will attach a system functionality to the list entity, which will be executed when it is selected &
+ * confirmed.
  * behaviour ids can be defined differently in custom logic, but it is highly discouraged due to possible
  * confusion, when standard behaviour differs. individual checks into custom logic are generally avoided.
  * 
@@ -79,7 +80,7 @@
  * make this entity contain a changable floating point number to be adjusted by e.g. a slider
  * 
  * 	:return <output_value>
- * selecting this entity stops list interaction immediately and returns given value
+ * this entity returns given value on confirmation
  * 
  * 
  * The following implementation is the static compile function for LDC, holding the language interpreter
@@ -560,9 +561,9 @@ void SelectionSpliceGeometry::update()
  *
  *		The following enjoyable features are included:
  *	It is possible to navigate through lists by choosing their linked entity.
- *	Variables can be linked to entity attributes and be modified through multiple stylish representations:
+ *	Entity attributes can be linked to variables and modified through multiple stylish representations:
  *	-> sliders, dropdowns and checkboxes.
- *	Loaded savestates are easily represented through Menu List, due to overload.
+ *	Loaded savestates are easily represented through Menu List, due to function overload.
  *
  *		Special definition rules:
  *	To define a globe preview by rotation:
@@ -574,13 +575,14 @@ void SelectionSpliceGeometry::update()
  *		(difficulty ids: 1-6 student; 7-11 master; 12-14 grandmaster; 15-16 headmaster)
  *	Should commands be required alongside dropdown elements:
  *		first call :dropdown command and then prefix any further commands with "cmd" in strings component
+ *		NOTE: :dropdown has to be called before :strings cmd
  *
  *		How 2 use:
  *	First run define_list(...) to load list definition. (can be done through .ldc file or loaded savestates)
  *	After completing all definitions, load() shall be executed.
  *	Lists are closed by default. Should the necessity arise call open_list(...) to activate.
  *	When the List is done being useful, just close it again by calling close_list(...).
- *	If an Entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
+ *	If an entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
  *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
  *	The update works by calling update in the base render stage and the other component in the msaa stage.
  *	Finally, the last update_overlays(...) belongs right after joining all other framebuffers
@@ -639,7 +641,7 @@ uint8_t MenuList::define_list(const char* path)
 			mlists[lidx].segments[i] = t_segment;
 		}
 
-		// process cluster entites
+		// process cluster entities
 		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
 		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
@@ -1017,7 +1019,9 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 				subfunc_opened = true;
 				conf = false;
 				break;
-			case LDCEntityType::SUBSEQUENT: open_list(ce.value),rrnd = true;
+			case LDCEntityType::SUBSEQUENT:
+				open_list(ce.value);
+				rrnd = true;
 				break;
 			case LDCEntityType::CHECKBOX: ce.value = !ce.value;
 				break;
@@ -1113,7 +1117,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	return out;
 	// TODO: break apart difficulty prognosis text and belt colours
 }
-// TODO: split update from render section
 
 /*
 	!O(n)e .amount of sliders and checkboxes /update -> (public)
@@ -1437,7 +1440,6 @@ void MenuDialogue::load()
 	slc_shader.def_attributeF("position",2,0,2);
 	slc_shader.upload_camera(gCamera2D);
 }
-// FIXME: define 2D coordinate system ONCE and include for ALL usages, this avoids a lot of useless matrix calc
 // TODO: store info of defined dialogue background vertices and create only once to avoid multiple allocations
 
 /*
@@ -2211,4 +2213,3 @@ void interface_behaviour_newgame(MainMenu &tm)
 	// closing condition
 	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
 }
-// TODO: add a logic setup behaviour, that later leads into looped interface behaviour after one frame
