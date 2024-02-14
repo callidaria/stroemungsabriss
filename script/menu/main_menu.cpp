@@ -577,12 +577,8 @@ void SelectionSpliceGeometry::update()
  *
  *	NOTE: this implementation is subject to change and public variables have not been checked for usefulness
  *
- *		TODO: features
- *	- difficulty preview in sidebar
+ *		TODO: features & optimization
  *	- optimize drawing, geometry and everything else that is very wrong here
- *	- interpretation of globe rotation data in compiled .ldc file data
- *	- save state descriptions and rotation
- *	- make globe preview part of menu list instead of handling it in main menu update
  *	- document fattribs/cattribs usage patterns for menu list as well as menu dialogue
  *	- (mdc) wiggly text shadow
  *	- (mdc) fading between lists (tilt shift effect, smooth transition between background and foreground)
@@ -760,12 +756,19 @@ uint8_t MenuList::define_list(SaveStates states)
 			.colour = diff_colours[state.diff],
 			.etype = LDCEntityType::RETURN,
 			.value = i,
+			.has_rotation = true,
+			.grotation = glm::vec2(0),
 			.text = Text(st_font),
 			.tlen = state.title.length()
 		};
 
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
+		mlc.description.add(state.description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
+		mlc.dtlen += state.description.length();
+		// TODO: add correct global preview, when savestate is finally realized and allows such storage
+
+		// scroll list cursor
 		vscroll -= MENU_LIST_SCROLL_Y;
 		mlc.entities[i] = mle;
 	}
