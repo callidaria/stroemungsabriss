@@ -45,7 +45,6 @@ private:
 	Frame* m_frame;
 	Buffer splash_buffer = Buffer();
 	Shader splash_shader = Shader();
-	FrameBuffer game_fb;
 	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",
 			TEXT_DRAW_SPACE,TEXT_DRAW_SPACE);
 	Text mtext = Text(tfont),stext = Text(tfont);

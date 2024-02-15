@@ -54,7 +54,8 @@ uint32_t Init::find_iKey(const char* key)
 // TODO: find out why default 0 is preventing the program from terminating setup process
 
 /*
-	TODO
+	!O(n) .initialization variables /function -> (public)
+	purpose: write all variables back to config file
 */
 void Init::write_changes()
 {

@@ -27,7 +27,6 @@ public:
 
 	// write
 	void render();
-	void render(float mtransition);
 
 public:
 

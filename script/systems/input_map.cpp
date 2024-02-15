@@ -140,7 +140,8 @@ void InputMap::precalculate_all()
 }
 
 /*
-	TODO
+	!O(1) /update -> (public)
+	purpose: interpret stick input as if it happened on a dpad
 */
 void InputMap::stick_to_dpad()
 {
@@ -151,7 +152,11 @@ void InputMap::stick_to_dpad()
 }
 
 /*
-	TODO
+	!O(1)b /function -> (public)
+	purpose: get a readable representation of desired keyboard input by id
+	\param sc: sdl keyboard scancode of key in question
+	\returns string holding readable representation of key referenced by id (sic)
+	NOTE: this implementation handles keyboard mapping descriptions
 */
 std::string InputMap::get_input_name(SDL_Scancode sc)
 {
@@ -161,7 +166,12 @@ std::string InputMap::get_input_name(SDL_Scancode sc)
 }
 
 /*
-	TODO
+	!O(1)b /function -> (public)
+	purpose: get a readable representation of desired controller input by id
+	\param cb: button or axis id in question
+	\param axis: true if id referes to an controller axis
+	\returns string holding readable representation of controller button/axis referenced by id
+	NOTE: this implementation handles controller mapping descriptions
 */
 std::string InputMap::get_input_name(uint8_t cb,bool axis)
 { return axis ? axisnames[cb-4] : cntnames[cb]; }

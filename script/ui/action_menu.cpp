@@ -83,7 +83,11 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 
 	// sepia colourspace when paused
 	m_frame->clear();
-	game_fb->render(ptrans);
+	game_fb->prepare();
+	game_fb->s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
+	game_fb->s.upload_float("mtransition",ptrans);
+	game_fb->render();
+	// FIXME: this requires ratio to already be uploaded to game_fb shader
 
 	// selection splash modifications
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf

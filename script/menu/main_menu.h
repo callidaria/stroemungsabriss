@@ -71,6 +71,9 @@ constexpr uint16_t MENU_LIST_ATTRIBUTE_QUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+M
 constexpr uint16_t MENU_LIST_ATTRIBUTE_HQUADRATIC = MENU_LIST_ATTRIBUTE_COMBINE+MENU_LIST_HEAD_HSIZE;
 constexpr uint8_t MENU_LIST_CHECKBOX_DRIFT_DIST = 2;
 constexpr uint8_t MENU_LIST_SLIDER_XPUSH = 7;
+constexpr glm::vec2 MENU_LIST_DESC_POSITION = glm::vec2(1030,350);
+constexpr uint16_t MENU_LIST_DESC_BLOCKWIDTH = 200;
+constexpr uint8_t MENU_LIST_DESC_NLINEJMP = 20;
 
 // menu dialogue positioning
 constexpr float MENU_DIALOGUE_OFFSET_FACTOR = .9f;
@@ -136,6 +139,7 @@ constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 constexpr glm::vec4 TEXT_SEGMENT_COLOUR = glm::vec4(.7f,.7f,.7f,1.f);
+constexpr glm::vec4 TEXT_SAVE_ERROR_COLOUR = glm::vec4(1,0,0,1);
 
 // menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
@@ -158,8 +162,10 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 
 // math constants
+constexpr double MATH_CARTESIAN_WIDTH = 1280.0;
+constexpr double MATH_CARTESIAN_HEIGHT = 720.0;
 constexpr double MATH_PI = 3.141592653;
-constexpr double MATH_CENTER_GOLDEN = 1280.0*.618;
+constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_WIDTH*.618;
 constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 // TODO: relocate reusable math constants
 
@@ -254,7 +260,7 @@ typedef void (*interpreter_logic)(LDCProcessState&);
 static void command_logic_cluster(LDCProcessState &state);
 static void command_logic_define(LDCProcessState &state);
 static void command_logic_describe(LDCProcessState &state);
-static void command_logic_attributes(LDCProcessState &state);
+static void command_logic_fattributes(LDCProcessState &state);
 static void command_logic_sattributes(LDCProcessState &state);
 static void command_logic_segment(LDCProcessState &state);
 static void command_logic_condition(LDCProcessState &state);
@@ -472,22 +478,7 @@ private:
 
 
 /**
- * 		MenuDialogue Definition:
- * 
- * DialogueBackgroundGeometry
- * 	-> background vertex geometry information pattern
- * 
- * SingularDialogueData
- * 	-> information for each popup dialogue
- * 
- * MenuDialogue
- * 	-> main handler of popup dialogue system, creates dialogues and automates them
- * 
- * 
- * 		TODO QA
- * - trying to break opening/closing routine
- * - assessing animations, style, timing & randomizer ranges visually
- * - are background dimension manipulation ranges ok or should they be tweaked
+ * 		MenuDialogue Definition
 */
 
 struct DialogueBackgroundGeometry
@@ -573,12 +564,6 @@ private:
 
 /**
  * 		MainMenu Definition
- * 
- * 		TODO QA
- * 
- * - TRANSITION_SPEED modifier too fast/too slow?
- * - input satisfaction feedback
- * - aliasing recognition threshold & which technique preferred
 */
 
 class MainMenu : public UI

@@ -36,17 +36,17 @@
  *
  *
  * 	:segment <segment_name>
- * whereever a segment is called within the list defintion file, a dividing, stylized line will be
- * drawn between the imperatively previous and following definition
+ * whereever a segment is called within the list definition file, a list entry will be added, linked to
+ * the position it was created in, but unrelated to the actual entity list.
+ * this feature can be used to segment a list of entities into multiple parts, while not interrupting the list
+ * itself.
  * 
  * 	:condition (<condition_id><space>)*
  * specify an amount of conditions to activate list entity.
  * the condition ids will read the respective booleans from an extern condition list.
- * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
  *
  *	:link <init_variable>
- * link value result to initialization variable.
- * // TODO: explain futher should this work out
+ * link attribute value to initialization variable.
  * 
  * 
  * 		BEHAVIOUR DEFINITIONS
@@ -63,8 +63,7 @@
  * confusion, when standard behaviour differs. individual checks into custom logic are generally avoided.
  * 
  * 	:subsequent <cluster_name>
- * confirming selection on this entity will load a sublist linked by it's cluster
- * the list will then be shown under the heading of this list entities :define
+ * this entity will be linked to a sublist by it's clusters name.
  * 
  * 	:checkbox
  * sign this entity to mark it switchable between true or false states
@@ -89,10 +88,10 @@
 */
 
 /*
-	compile(const char*) -> vector<LDCCluster> (static) !O(n)b
+	!O(n)bm .defined entities from all clusters in file combined /function -> (static)
 	purpose: load .ldc files, break it up into a command buffer and compile it into a complex
 	\param path: path to .ldc file
-	\returns compiled struct complex to be used by UI feature
+	\param rClusters: reference to cluster list, the new clusters will be added into
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
 void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
@@ -103,7 +102,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		"system_behaviour","checkbox","dropdown","slider","return",
 	};
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
-		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_attributes,
+		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_fattributes,
 		command_logic_sattributes,command_logic_segment,command_logic_condition,command_logic_link,
 		command_logic_subsequent,command_logic_sysbehaviour,command_logic_checkbox,command_logic_dropdown,
 		command_logic_slider,command_logic_return,command_logic_syntax_error
@@ -231,11 +230,11 @@ void command_logic_describe(LDCProcessState &state)
 { state.clusters.back().elist.back().description = state.cmd->buffer; }
 
 /*
-	command_logic_attributes(LDCProcessState&) -> void (static,global) !O(1)
+	command_logic_fattributes(LDCProcessState&) -> void (static,global) !O(1)
 	purpose: store constant attributes in entity
 	conforming to: void* interpreter_logic
 */
-void command_logic_attributes(LDCProcessState &state)
+void command_logic_fattributes(LDCProcessState &state)
 {
 	try {
 		std::stringstream bfss(state.cmd->tail);
@@ -403,7 +402,7 @@ void compiler_error_msg(LDCProcessState &state,const char* msg)
  *		Selection Splice Geometry Implementation
  *
  *  the selection splice geometry is a stilistical highlight for the UI.
- *  it not only adds graphical flavour but sometimes also communicates to the user what the current selection is.
+ *  it not only adds graphical flavour, it can also be used to communicate selection to the user.
  *
  *  	here is some information on how this geometry can be defined:
  *  following, an ascii representation of the splice
@@ -593,6 +592,8 @@ void SelectionSpliceGeometry::update()
  *	- optimize drawing, geometry and everything else that is very wrong here
  *	- wiggly text shadow
  *	- fading between lists (tilt shift effect, smooth transition between background and foreground)
+ *
+ * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
 */
 
 /*
@@ -662,7 +663,11 @@ uint8_t MenuList::define_list(const char* path)
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
 				t_entity.text.load();
 			mlists[lidx].description.add(
-					cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
+					cluster.elist[i].description.c_str(),
+					MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_HEIGHT*i),
+					MENU_LIST_DESC_BLOCKWIDTH,
+					MENU_LIST_DESC_NLINEJMP
+				);
 			mlists[lidx].dtlen += cluster.elist[i].description.length();
 
 			// iterate through possible dropdown elements in character attribute space
@@ -775,7 +780,12 @@ uint8_t MenuList::define_list(SaveStates states)
 
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
-		mlc.description.add(state.description.c_str(),glm::vec2(1030,350-720*i),200.f,20.f);
+		mlc.description.add(
+				state.description.c_str(),
+				MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_HEIGHT*i),
+				MENU_LIST_DESC_BLOCKWIDTH,
+				MENU_LIST_DESC_NLINEJMP
+			);
 		mlc.dtlen += state.description.length();
 		// TODO: add correct global preview, when savestate is finally realized and allows such storage
 
@@ -788,7 +798,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			.colour = glm::vec4(1,0,0,1),
+			.colour = TEXT_SAVE_ERROR_COLOUR,
 			.etype = LDCEntityType::UNDEFINED,
 			.text = Text(st_font),
 			.tlen = err_message.length()
@@ -1054,7 +1064,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			int8_t nvalue = e.value+vdir;
 			e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
 		}
-		// FIXME: segment selections on confirm misdirect sublist selections
 
 		// confirmation handling for current selection
 		subfunc_opened = !back&&!conf;
@@ -1296,13 +1305,13 @@ void MenuList::create_slider(float vscroll)
  *		use the first two float components of the first entity in the cluster as transformation vector
  *
  *		how this feature works:
- *	- call add_dialogue_window() to create a new dialogue window and receive instance id back.
- *	- after creating all windows run load().
- *	- dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
- *	- insert update() into unaltered menu render stage.
- *	- insert background_component() into intersectionally inverting, anti-aliased menu render stage.
- *	- return from choice is stored in dg_state while the frame the choice was confirmed in.
- *	- modification of dialogue data list is possible from outside by directly modifying dg_data.
+ *	Call add_dialogue_window() to create a new dialogue window and receive instance id back.
+ *	After creating all windows run load().
+ *	Dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
+ *	Insert update() into unaltered menu render stage.
+ *	Insert background_component() into intersectionally inverting, anti-aliased menu render stage.
+ *	Return from choice is stored in dg_state while the frame the choice was confirmed in.
+ *	Modification of dialogue data list is possible from outside by directly modifying dg_data.
 */
 
 /*
@@ -1673,7 +1682,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 
 	// menu options text
 	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
-		uint32_t wwidth = fnt_mopts.calc_wordwidth(main_options[i]);
+		uint32_t wwidth = fnt_mopts.estimate_textwidth(main_options[i]);
 		mo_twidth[i] = wwidth,mo_hwidth[i] = wwidth*.5f;
 		mo_prog.x -= wwidth;
 	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
@@ -1770,6 +1779,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
+	fb_menu.s.upload_vec2(
+			"ratio",
+			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT])
+		);
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader");
 	fb_slice.s.upload_int("gbuffer_colour",0);
@@ -1880,7 +1893,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		tx_mopts[i].render(strlen(main_options[i])*(inv_ftransition+(i==vselect)),opt_colour);
 	}
 	// TODO: differenciate between list- & free mode for head splice displacement
-	// FIXME: optimize before impending merge, when all the text transitions are done
+	// FIXME: optimize when all the text transitions are done
 
 	// render titles
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
@@ -1934,7 +1947,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	msaa.blit();
 
 	// render menu
-	fb_menu.render(mtransition);
+	fb_menu.prepare();
+	fb_menu.s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
+	fb_menu.s.upload_float("mtransition",mtransition);
+	fb_menu.render();
+
+	// render anti-aliased splices
 	fb_slice.bind();
 	Frame::clear();
 	msaa.prepare();
@@ -1951,7 +1969,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	fb_slice.s.upload_float("mtrans",mtransition);
 	fb_slice.render();
 	mlists.update_overlays();
-	// FIXME: remove special treatment and transfer to a more controllable implementation
 
 	// finishing
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
@@ -1961,14 +1978,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
 	speedup = (speedup&&!shiftdown_over)||normalize_over;
 }
-
-
-/**
- * 		Menu Logic Functions
- * 
- * a collection of additional methods, helping with main menu logic
- * TODO: improve section documentation
-*/
 
 /*
 	TODO
@@ -2036,7 +2045,7 @@ void MainMenu::update_peripheral_annotations()
 
 	// write input instructions
 	for (uint8_t i=0;i<TEXT_INSTRUCTION_COUNT;i++) {
-		uint16_t estm = Text::estimate_textwidth(&fnt_reqt,instr[i])>>1;
+		uint16_t estm = fnt_reqt.estimate_textwidth(instr[i].c_str())>>1;
 		tx_instr.add(instr[i].c_str(),glm::vec2(MATH_CENTER_GOLDEN-estm,30+i*720));
 		tcap_instr += instr[i].length();
 	}
@@ -2213,3 +2222,7 @@ void interface_behaviour_newgame(MainMenu &tm)
 	// closing condition
 	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
 }
+
+// new issues:
+//	- input request annotation is not displayed for practice and extras listing, but works for all others?!?
+//	- refusal of difficulty should automatically close confirmation prompt

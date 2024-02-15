@@ -178,16 +178,3 @@ void Text::load_vertex() // !!no need to have this extra public vertex load func
 	buffer.bind();
 	buffer.upload_vertices(font.v,sizeof(font.v));
 }
-
-/*
-	TODO
-*/
-uint16_t Text::estimate_textwidth(Font* fnt,std::string val)
-{
-	uint16_t out = 0;
-	for (char c : val) {
-		uint8_t ssloc = fnt->get_spritesheet_location(c);
-		out += fnt->xa[ssloc]*(fnt->mw/83.0f);
-	}
-	return out;
-}

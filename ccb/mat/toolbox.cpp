@@ -132,7 +132,11 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> (public,static)
+	purpose: convert a boolean to a float with controlled delay
+	\param tval: reference of float, being transformed according to boolean
+	\param tspeed: controlled delay interval
+	\param cnd: boolean condition, defining target float value
 */
 void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
 {

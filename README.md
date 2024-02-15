@@ -72,7 +72,8 @@ To see the full documentation of engine go [here](doc/index.md)
 - dynamic player readable identification of requested buttons based on input mapping
 - automatic recognition of main input device between game controller and keyboard
 - improved menu navigation with instructional annotations
-- improved menu animations
+- improved menu splash animations
+- improved title speedup effect
 
 ### optimizations:
 - refactor/rewrite of main menu code (also menu listing and menu dialogue component)
@@ -80,6 +81,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - minimized on/off switching of depth testing
 - active texture reset call reduction by uniformly switching back after render
 - using inlines for small functions with trivial implementation and straight forward usage
+- optimized structure for input mapping
 
 ### fixes:
 - FIXED: globe location preview, faulty render & rotation changes
@@ -205,5 +207,5 @@ Worktime: 120h
 	+ 209: 44min
 	+ 215: 2h 28min
 	+ 199: 7h 34min
-	+ 16: 221h 2min
+	+ 16: 227h 8min
 - Total Code Lines: 15.823

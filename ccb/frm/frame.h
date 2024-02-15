@@ -14,16 +14,20 @@
 
 #define BUILDISSUE_OLD_SDL_VERSION
 
+constexpr uint16_t KEYBOARD_INPUT_RANGE = 285;
+constexpr uint8_t MOUSE_BUTTON_INPUT_RANGE = 5;
+constexpr uint8_t CONTROLLER_AXIS_INPUT_RANGE = 6;
+constexpr uint8_t CONTROLLER_BUTTON_INPUT_RANGE = 22;
 constexpr uint32_t AXIS_MOTION_RELEVANCE = 7000;
 
 struct Keyboard
 {
-	bool ka[285] = { false };
+	bool ka[KEYBOARD_INPUT_RANGE] = { false };
 };
 
 struct Mouse
 {
-	bool mb[5] = { false };
+	bool mb[MOUSE_BUTTON_INPUT_RANGE] = { false };
 	int32_t mx,my;
 	float mxfr,myfr;
 	int32_t mw;
@@ -31,8 +35,8 @@ struct Mouse
 
 struct XBox
 {
-	int32_t xba[6];
-	bool xbb[22] = { false };
+	int32_t xba[CONTROLLER_AXIS_INPUT_RANGE];
+	bool xbb[CONTROLLER_BUTTON_INPUT_RANGE] = { false };
 };
 
 class Frame

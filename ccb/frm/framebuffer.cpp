@@ -65,24 +65,3 @@ void FrameBuffer::render()
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }
-
-/*
-	render(float) -> void
-	ptrans: progression of menu's transformation animation after start was pressed
-	purpose: render menu transformation between two shader states
-	DEVELOPED EXCLUSIVELY FOR : yomisensei
-*/
-void FrameBuffer::render(float mtransition)
-{
-	// setup
-	s.enable();
-	buffer.bind();
-	glBindTexture(GL_TEXTURE_2D,tex);
-
-	// render
-	s.upload_vec2("ratio",glm::vec2(frw,frh)); // !!do not do this in update
-	s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
-	s.upload_float("mtransition",mtransition);
-	glDrawArrays(GL_TRIANGLES,0,6);
-}
-// FIXME: an extra implementation for this seems a little unelegant

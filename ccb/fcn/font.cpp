@@ -1,7 +1,7 @@
 #include "font.h"
 
 /*
-	TODO
+	will be restructured and thus documenting now is ill advised
 */
 Font::Font(const char* ff,const char* tf,float w,float h)
 	: tp(tf),mw(w)
@@ -58,9 +58,12 @@ uint8_t Font::get_spritesheet_location(char c)
 // FIXME: optimize please
 
 /*
-	TODO
+	!O(n) .characters in word /+function -> (public)
+	purpose: predict x-axis space taken up by given word written in this font
+	\param word: text up for space estimation
+	\returns screenwidth taken up by given word
 */
-uint32_t Font::calc_wordwidth(const char* word)
+uint32_t Font::estimate_textwidth(const char* word)
 {
 	uint32_t out_width = 0;
 	for (uint32_t i=0;i<strlen(word);i++) {

@@ -22,7 +22,7 @@ public:
 
 	// tools
 	uint8_t get_spritesheet_location(char c);
-	uint32_t calc_wordwidth(const char* word);
+	uint32_t estimate_textwidth(const char* word);
 
 public:
 

@@ -293,7 +293,6 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
 }
-// FIXME: opening the window will cause doubled controller load
 
 /*
 	get_screen(int8_t,SDL_Rect*) -> void

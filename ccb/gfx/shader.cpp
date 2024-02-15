@@ -2,9 +2,10 @@
 
 /*
 	compile(const char*,const char*) -> void
-	vsp: path to vertex shader code file
-	fsp: path to fragment shader code file
+	!O(1) /load -> (public)
 	purpose: compiles the given code files and creates a shader program for later usage
+	\param vsp: path to vertex shader code file
+	\param fsp: path to fragment shader code file
 */
 void Shader::compile(const char* vsp,const char* fsp)
 {
@@ -22,11 +23,11 @@ void Shader::compile(const char* vsp,const char* fsp)
 }
 
 /*
-	compile<dimension>(const char*,const char*) -> void
-	vspath: path to vertex shader code file
-	fspath: path to fragment shader code file
+	!O(1) /load -> (public)
 	purpose: standard compile process with common attribute setup
 		it is not necessary to compile first, these exist for most common shader structures
+	\param vspath: path to vertex shader code file
+	\param fspath: path to fragment shader code file
 */
 void Shader::compile2d(const char* vspath,const char* fspath)
 {
@@ -45,7 +46,12 @@ void Shader::compile3d(const char* vspath,const char* fspath)
 }
 
 /*
-	TODO
+	!O(1) /function -> (public)
+	purpose: define input pattern from array for shader integer variables, that are not uniform
+	\param vname: target variable name as referred to in shader code file
+	\param dim: dimension of variable -> 1 => int, 2 => ivec2, 3 => ivec3, 4 => ivec4
+	\param offset: offset in upload array pattern -> (int,int,INT,INT,int,int) => 2
+	\param cap: capacity of upload array pattern. how many ints belong to a single vertex
 */
 void Shader::def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
@@ -55,12 +61,12 @@ void Shader::def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t
 }
 
 /*
-	def_attributeF(const char*,uint8_t,uint8_t,uint8_t) -> void
-	vname: target variable name as referred to in shader code file
-	dim: dimension of variable -> 1 => float, 2 => vec2, 3 => vec3, 4 => vec4
-	offset: offset in upload array pattern -> (float,float,FLOAT,FLOAT,float,float) => 2
-	cap: capacity of upload array pattern. how many floats belong to a single vertex
+	!O(1) /function -> (public)
 	purpose: define input pattern from array for shader variables, that are not uniform
+	\param vname: target variable name as referred to in shader code file
+	\param dim: dimension of variable -> 1 => float, 2 => vec2, 3 => vec3, 4 => vec4
+	\param offset: offset in upload array pattern -> (float,float,FLOAT,FLOAT,float,float) => 2
+	\param cap: capacity of upload array pattern. how many floats belong to a single vertex
 */
 void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
@@ -72,7 +78,11 @@ void Shader::def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t
 // we shall implement a more dynamic method, to increase supported datatypes
 
 /*
-	TODO
+	!O(1) /function -> (public)
+	purpose: define an irregular integer attribute pattern for non-uniform shader variables
+	\param vsize: attribute size in vertex array pattern
+	\param osize: offset in vertex array pattern
+	NOTE: see previous attribute definitions for parameter descriptions
 */
 void Shader::def_irregular_attributeI(const char* vname,uint8_t dim,size_t vsize,size_t osize)
 {
@@ -81,7 +91,9 @@ void Shader::def_irregular_attributeI(const char* vname,uint8_t dim,size_t vsize
 }
 
 /*
-	TODO
+	!O(1) /function -> (public)
+	purpose: define an irregular float attribute pattern for non-uniform shader variables
+	NOTE: see previous attribute definitions for parameter descriptions
 */
 void Shader::def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize,size_t osize)
 {
@@ -94,7 +106,7 @@ void Shader::def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize
 	ibo: index buffer object to be used by shader and defined by layout pattern
 	vname, dim, offset, cap: same function as in def_attributeF
 	purpose: define input pattern of index buffer object for shader variables (not uniform)
-		!!! ibo needs to be bound first !!!
+	NOTE: !!! ibo needs to be bound first !!!
 */
 void Shader::def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
@@ -152,15 +164,17 @@ uint32_t Shader::compile_shader(const char* path,GLenum stype)
 }
 
 /*
-	TODO
+	!O(1) /function -> (private)
+	purpose: converts uniform name to attribute location in shader
+	\param name: variable name of uniform attrib
+	\returns numerical representation of the attribute referenced by given variable name
 */
 int32_t Shader::handle_attrib_location_by_name(const char* name)
 {
-	int attrib = glGetAttribLocation(m_shaderProgram,name);
+	int32_t attrib = glGetAttribLocation(m_shaderProgram,name);
 	glEnableVertexAttribArray(attrib);
 	return attrib;
 }
-// FIXME: find out if the return variable is indeed signed
 
 /*
 	upload_camera(Camera2D||Camera3D) -> void

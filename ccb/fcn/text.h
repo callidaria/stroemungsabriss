@@ -42,9 +42,6 @@ public:
 	void set_scroll(glm::vec2 scroll);
 	void set_scroll(glm::mat4 model) { sT.upload_matrix("model",model); }
 
-	// calculation
-	static uint16_t estimate_textwidth(Font* fnt,std::string val);
-
 private:
 
 	// helper
