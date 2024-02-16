@@ -412,11 +412,11 @@ public:
 	// draw
 	uint8_t update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 			bool mperiph,bool &rrnd);
-	void update_background_component(float anim_delta);
+	void render();
+	void update_background_component();
 	void update_overlays();
 
 	// info
-	inline bool system_active() { return active_ids.size(); }
 	bool linked_variables_changed(uint16_t list_id);
 
 private:
@@ -428,7 +428,7 @@ private:
 public:
 
 	// interaction
-	bool lists_open = false;
+	bool system_active = false;
 	std::vector<bool> conditions;
 	uint16_t status = 0;
 	uint8_t instruction_mod = 0;
@@ -533,7 +533,7 @@ public:
 	// draw
 	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void render();
-	void update_background_component(float transition_delta);
+	void update_background_component();
 
 private:
 
@@ -606,7 +606,6 @@ public:
 	glm::vec2 crd_mouse;
 
 	// animation
-	float transition_delta;
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
 	float ftransition = .0f,inv_ftransition;
@@ -622,6 +621,9 @@ public:
 	// memory for static continue
 	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue,dg_optsave;
 	uint8_t logic_setup = 0;
+
+	// global
+	inline static float transition_delta = .0f;
 
 private:
 

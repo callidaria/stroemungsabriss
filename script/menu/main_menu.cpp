@@ -585,7 +585,7 @@ void SelectionSpliceGeometry::update()
  *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
  *	The update works by calling update in the base render stage and the other component in the msaa stage.
  *	Finally, the last update_overlays(...) belongs right after joining all other framebuffers
- *	Communication about any list being open at any given time can be requested through system_active().
+ *	Communication about any list being open at any given time can be requested through .system_active.
  *	Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
  *
  *		TODO: features & optimization
@@ -892,7 +892,7 @@ void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 void MenuList::open_list(uint8_t id)
 {
 	active_ids.push_back(id);
-	tf_list_opened = true;
+	system_active = true,tf_list_opened = true;
 }
 // TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be done kuro
 
@@ -946,12 +946,13 @@ void MenuList::reset_attributes(uint8_t id)
 // FIXME: general horribleness invoked by the dropdown displacement correction
 
 /*
-	TODO: will still be split probably
+	TODO
 */
 uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
 {
 	// early exit when no lists active
+	system_active = active_ids.size();
 	instruction_mod = 0;
 	show_globe = false;
 	if (!active_ids.size()) return 0;
@@ -1046,27 +1047,44 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		tf_list_opened = false;
 	}
 
-	// update attribute subfunctionality for dropdown options
+	// update attribute subfunctionality for dropdown options if obsoletion check fails
 	uint8_t id = active_ids.back();
+	if (!subfunc_opened) return out;
+
+	// setup
+	MenuListEntity &e = mlists[id].entities[crr_select];
+	uint8_t cap_options = e.dd_options.size()-1;
+	instruction_mod = 0;
+
+	// input handling for sublist
+	if (mperiph) {
+		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
+		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y-seg_passed;
+		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
+		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1.f);
+		e.value = conf ? mshover : e.value;
+	} else {
+		int8_t nvalue = e.value+vdir;
+		e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
+	}
+
+	// confirmation handling for current selection
+	subfunc_opened = !back&&!conf;
+	return out;
+}
+
+/*
+	TODO
+*/
+void MenuList::render()
+{
+	// skip if no lists active
+	if (!system_active) return;
+	uint8_t id = active_ids.back();
+
+	// update attribute subfunctionality for dropdown options
 	if (subfunc_opened) {
 		MenuListEntity &e = mlists[id].entities[crr_select];
-		uint8_t cap_options = e.dd_options.size()-1;
-		instruction_mod = 0;
-
-		// input handling for sublist
-		if (mperiph) {
-			uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
-			int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y-seg_passed;
-			mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
-			e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1.f);
-			e.value = conf ? mshover : e.value;
-		} else {
-			int8_t nvalue = e.value+vdir;
-			e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
-		}
-
-		// confirmation handling for current selection
-		subfunc_opened = !back&&!conf;
 
 		// draw dropdown background
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
@@ -1108,7 +1126,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	globe_rotation = mlists[id].entities[crr_select].grotation;
 
 	// difficulty prognosis text animation
-	if (!mlists[id].entities[crr_select].diff_preview) return out;
+	if (!mlists[id].entities[crr_select].diff_preview) return;
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
@@ -1123,7 +1141,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
 	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(1,rstate));
-	return out;
 	// TODO: break apart difficulty prognosis text and belt colours
 }
 
@@ -1132,7 +1149,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	purpose: draw section of inverted/multisampled background components
 	\param anim_delta: predefined and commonly used animation speed for all menu transitions
 */
-void MenuList::update_background_component(float anim_delta)
+void MenuList::update_background_component()
 {
 	// prepare checkboxes
 	if (!active_ids.size()||subfunc_opened) return;
@@ -1143,7 +1160,7 @@ void MenuList::update_background_component(float anim_delta)
 	// iterate checkboxes
 	for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
 		MenuListEntity &ce = mlists[id].entities[mlists[id].checkbox_ids[i]];
-		Toolbox::transition_float_on_condition(ce.anim_transition,anim_delta,ce.value);
+		Toolbox::transition_float_on_condition(ce.anim_transition,MainMenu::transition_delta,ce.value);
 		checkbox_shader.upload_float("aprog",ce.anim_transition);
 		glDrawArrays(GL_TRIANGLES,12*i,12);
 	}
@@ -1578,12 +1595,14 @@ void MenuDialogue::render()
 }
 
 /*
-	update_background_component(float) -> void !O(n)b
+	!O(n)b .compiled amount of relevant ids in processing lists /update -> (public)
 	purpose: draw parts of dialogue as inverted background components on intersection with geometry
-	\param transition_delta: delta of transition progress since last frame
 */
-void MenuDialogue::update_background_component(float transition_delta)
+void MenuDialogue::update_background_component()
 {
+	// skip if no dialogue active
+	if (!system_active) return;
+
 	// setup draw
 	bgr_buffer.bind();
 	bgr_shader.enable();
@@ -1595,7 +1614,7 @@ void MenuDialogue::update_background_component(float transition_delta)
 		draw_dialogue(id);
 
 		// transition closing dialogues
-		dg_data[id].dgtrans -= transition_delta;
+		dg_data[id].dgtrans -= MainMenu::transition_delta;
 		if (dg_data[id].dgtrans<.0f) {
 			dg_data[id].dgtrans = .0f;
 			closing_ids.erase(closing_ids.begin()+i);
@@ -1612,7 +1631,7 @@ void MenuDialogue::update_background_component(float transition_delta)
 		draw_dialogue(id);
 
 		// transition opening dialogues
-		dg_data[id].dgtrans += transition_delta;
+		dg_data[id].dgtrans += MainMenu::transition_delta;
 		if (dg_data[id].dgtrans>1.f) {
 			dg_data[id].dgtrans = 1.f;
 			active_ids.push_back(id);
@@ -1850,6 +1869,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
 
 	// component updates before interface behaviour & rendering
+	bool rrnd = false;
+	uint8_t sd_grid = mlists.update(
+			udmv,m_ccbf->iMap->request(IMP_REQRIGHT)-m_ccbf->iMap->request(IMP_REQLEFT),
+			crd_mouse,m_ccbf->frame->mouse.mw,
+			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
+			m_ccbf->frame->mpref_peripheral,rrnd);
 	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START RENDER MENU BUFFER
@@ -1903,12 +1928,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
 
 	// update dialogues & lists
-	bool rrnd = false;
-	uint8_t sd_grid = mlists.update(
-			udmv,m_ccbf->iMap->request(IMP_REQRIGHT)-m_ccbf->iMap->request(IMP_REQLEFT),
-			crd_mouse,m_ccbf->frame->mouse.mw,
-			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
-			m_ccbf->frame->mpref_peripheral,rrnd);
+	mlists.render();
 	mdialogues.render();
 	// FIXME: request does not time input validity, work on input timing safety for unlocked update mode
 
@@ -1934,14 +1954,14 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// splash render
 	tkey_head = mtransition+ftransition+mdialogues.system_active;
-	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active());
+	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active);
 	tkey_title = mtransition;
 	splices_geometry.update();
 	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
 	// draw dialogue & list background components
-	mlists.update_background_component(transition_delta);
-	mdialogues.update_background_component(transition_delta);
+	mlists.update_background_component();
+	mdialogues.update_background_component();
 
 	// STOP MULTISAMPLED RENDER
 	msaa.blit();
@@ -2129,7 +2149,7 @@ void interface_behaviour_options(MainMenu &tm)
 
 	// listing stage
 	case 1:
-		tm.logic_setup += !tm.mlists.system_active();
+		tm.logic_setup += !tm.mlists.system_active;
 		break;
 
 	// checking for changes & open confirmation dialogue on condition
@@ -2162,7 +2182,7 @@ void interface_behaviour_extras(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_extras);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active();
+	} tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
@@ -2173,7 +2193,7 @@ void interface_behaviour_practice(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_stages);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active();
+	} tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
@@ -2184,7 +2204,7 @@ void interface_behaviour_load(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_saves);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active();
+	} tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
