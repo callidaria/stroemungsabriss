@@ -664,7 +664,7 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.text.load();
 			mlists[lidx].description.add(
 					cluster.elist[i].description.c_str(),
-					MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_HEIGHT*i),
+					MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_YRANGE*i),
 					MENU_LIST_DESC_BLOCKWIDTH,
 					MENU_LIST_DESC_NLINEJMP
 				);
@@ -782,7 +782,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
 		mlc.description.add(
 				state.description.c_str(),
-				MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_HEIGHT*i),
+				MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_YRANGE*i),
 				MENU_LIST_DESC_BLOCKWIDTH,
 				MENU_LIST_DESC_NLINEJMP
 			);
@@ -798,7 +798,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	if (!states.saves.size()) {
 		std::string err_message = "no save data";
 		MenuListEntity decoy = {
-			.colour = TEXT_SAVE_ERROR_COLOUR,
+			.colour = TEXT_ERROR_COLOUR,
 			.etype = LDCEntityType::UNDEFINED,
 			.text = Text(st_font),
 			.tlen = err_message.length()
@@ -935,11 +935,10 @@ void MenuList::reset_attributes(uint8_t id)
 		e.value = Init::iConfig[e.link_id];
 
 		// reset visual displacement if entity has a dropdown attributes
-		if (e.etype==LDCEntityType::DROPDOWN) {
-			for (uint8_t i=0;i<e.dd_options.size();i++) {
-				e.dd_options[i].prepare();
-				e.dd_options[i].set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(i-e.value)));
-			}
+		if (e.etype!=LDCEntityType::DROPDOWN) continue;
+		for (uint8_t i=0;i<e.dd_options.size();i++) {
+			e.dd_options[i].prepare();
+			e.dd_options[i].set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(i-e.value)));
 		}
 	}
 }
@@ -970,7 +969,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			if (active_ids.size()) return mlists[active_ids.back()].lselect;
 			return 0;
 		}
-		// FIXME: bad dog, no bisquits
 
 		// set selection by rasterized mouse position
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
@@ -1072,6 +1070,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	subfunc_opened = !back&&!conf;
 	return out;
 }
+// FIXME: bad dog, no bisquits!
+// FIXME: code & processing repitition due to update/render split
 
 /*
 	TODO
@@ -1356,7 +1356,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts (mdc)
 
 	// process all clusters as dialogues
-	uint8_t out = dg_data.size();
+	uint8_t out = dg_data.size(),cidx = out;
+	dg_data.resize(out+clusters.size());
 	for (LDCCluster &cluster : clusters) {
 
 		// store option count of current dialogue window
@@ -1368,7 +1369,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			t_center += glm::vec2(cluster.elist[0].fattribs[0],cluster.elist[0].fattribs[1]);
 
 		// setup dialogue data with list start position
-		SingularDialogueData dgd;
+		SingularDialogueData &dgd = dg_data[cidx++];
 		dgd.liststart_y = t_center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
 		dgd.option_size = dsize;
 
@@ -1432,8 +1433,6 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		// additional data
 		dgd.max_options = opcount-1;
 		dgd.max_width = hwidth,dgd.max_height = hheight;
-		dg_data.push_back(dgd);
-		// FIXME: expensive allocation & copy for each entity
 
 	// return parent id
 	} return out;
@@ -1776,14 +1775,24 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		Text t_ddo = Text(t_font);
 		t_ddo.add(
 				("Monitor "+std::to_string(i)).c_str(),
-				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)),
-			t_ddo.load();
+				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
+			),t_ddo.load();
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
-	} mlists.load(m_ccbf,rid_window_sprite);
-	// FIXME: ?? (char)i instead of std::to_string(i).c_str()
-	// TODO: this is far from a reliable implementation, that shall change in the future
+	}
+
+	// avoiding segfault should (for any mystical reason) no monitor be available
+	if (!max_displays) {
+		mlists.mlists[flist].entities[2].dd_options.push_back(Text(t_font));
+		mlists.mlists[flist].entities[2].dd_options.back().add(
+				"ERROR!",
+				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
+			),mlists.mlists[flist].entities[2].dd_options.back().load();
+		mlists.mlists[flist].entities[2].dd_colours.push_back(TEXT_ERROR_COLOUR);
+		mlists.mlists[flist].entities[2].dd_length.push_back(6);
+	}
+	mlists.load(m_ccbf,rid_window_sprite);
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
@@ -1819,18 +1828,31 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 */
 void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
-	// input
+	// button input
 	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
-	hit_a = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&!menu_action)
-			|| m_ccbf->iMap->get_input_triggered(IMP_REQFOCUS)||plmb
-			|| m_ccbf->iMap->get_input_triggered(IMP_REQCONFIRM),
-		hit_b = (m_ccbf->iMap->get_input_triggered(IMP_REQPAUSE)&&menu_action)
-			|| m_ccbf->iMap->get_input_triggered(IMP_REQBOMB)||prmb;
-	lrmv = ((m_ccbf->iMap->get_input_triggered(IMP_REQRIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
-			- (m_ccbf->iMap->get_input_triggered(IMP_REQLEFT)&&vselect>0))*menu_action;
-	udmv = (m_ccbf->iMap->get_input_triggered(IMP_REQDOWN)
-			- m_ccbf->iMap->get_input_triggered(IMP_REQUP))*menu_action;
-	crd_mouse = glm::vec2(m_ccbf->frame->mouse.mxfr*1280.f,m_ccbf->frame->mouse.myfr*720.f);
+	hit_a =
+			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
+			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
+			|| m_ccbf->iMap->get_input_triggered(InputID::CONFIRM)
+			|| plmb;
+	hit_b =
+			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
+			|| m_ccbf->iMap->get_input_triggered(InputID::BOMB)
+			|| prmb;
+
+	// directional input
+	lrmv = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
+			- (m_ccbf->iMap->get_input_triggered(InputID::LEFT)&&vselect>0))
+			* menu_action;
+	udmv = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
+			- m_ccbf->iMap->get_input_triggered(InputID::UP))
+			* menu_action;
+	crd_mouse = glm::vec2(
+			m_ccbf->frame->mouse.mxfr*MATH_CARTESIAN_XRANGE,
+			m_ccbf->frame->mouse.myfr*MATH_CARTESIAN_YRANGE
+		);
+
+	// input triggers
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 
 	// timing
@@ -1852,7 +1874,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// title shiftdown animation
 	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
-	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*MATH_OCTAPI))
+	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*SHIFTDOWN_OCTAPI))
 			: 1.f-sqrt(dt_tnormalize));
 
 	// combined title animation
@@ -1871,7 +1893,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// component updates before interface behaviour & rendering
 	bool rrnd = false;
 	uint8_t sd_grid = mlists.update(
-			udmv,m_ccbf->iMap->request(IMP_REQRIGHT)-m_ccbf->iMap->request(IMP_REQLEFT),
+			udmv,m_ccbf->iMap->request(InputID::RIGHT)-m_ccbf->iMap->request(InputID::LEFT),
 			crd_mouse,m_ccbf->frame->mouse.mw,
 			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
 			m_ccbf->frame->mpref_peripheral,rrnd);
@@ -2017,45 +2039,45 @@ void MainMenu::update_peripheral_annotations()
 	if (cpref_peripheral) {
 
 		// write messages for controller input
-		dmessage = "press ["+m_ccbf->iMap->cnt_name[IMP_REQPAUSE]+"] if you DARE";
-		instr[0] = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
-				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQRIGHT]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
-		instr[1] = "confirm ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
-		instr[2] = "see options ["+m_ccbf->iMap->cnt_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
-		instr[3] = "adjust slider ["+m_ccbf->iMap->cnt_name[IMP_REQLEFT]
-				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQRIGHT]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->cnt_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[IMP_REQBOMB]+"]";
+		dmessage = "press ["+m_ccbf->iMap->cnt_name[InputID::PAUSE]+"] if you DARE";
+		instr[0] = "confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
+				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+		instr[1] = "confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+		instr[2] = "see options ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+		instr[3] = "adjust slider ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
+				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
+				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
 	} else {
 
 		// write message for keyboard input
-		dmessage = "press ["+m_ccbf->iMap->key_name[IMP_REQCONFIRM]+"] if you DARE";
-		instr[0] = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
-				+ '/'+m_ccbf->iMap->key_name[IMP_REQRIGHT]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
-		instr[1] = "confirm ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
-		instr[2] = "see options ["+m_ccbf->iMap->key_name[IMP_REQFOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
-		instr[3] = "adjust slider ["+m_ccbf->iMap->key_name[IMP_REQLEFT]
-				+ '/'+m_ccbf->iMap->key_name[IMP_REQRIGHT]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[IMP_REQUP]
-				+ '/'+m_ccbf->iMap->key_name[IMP_REQDOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[IMP_REQBOMB]+"]";
+		dmessage = "press ["+m_ccbf->iMap->key_name[InputID::CONFIRM]+"] if you DARE";
+		instr[0] = "confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[InputID::LEFT]
+				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+		instr[1] = "confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+		instr[2] = "see options ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+		instr[3] = "adjust slider ["+m_ccbf->iMap->key_name[InputID::LEFT]
+				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
+				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
+				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
+				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
 	}
 
 	// write dare message

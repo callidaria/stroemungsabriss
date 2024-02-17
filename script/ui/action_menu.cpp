@@ -55,8 +55,8 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 {
 	// action menu open requests
-	bool pause = imap->input_val[IMP_REQPAUSE],details = imap->input_val[IMP_REQDETAILS];
-	bool down = imap->input_val[IMP_REQDOWN],up = imap->input_val[IMP_REQUP];
+	bool pause = imap->input_val[InputID::PAUSE],details = imap->input_val[InputID::DETAILS];
+	bool down = imap->input_val[InputID::DOWN],up = imap->input_val[InputID::UP];
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
 	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
 	bool req_infomenu = details&&!menu_trg&&!menu_sys;
@@ -79,7 +79,7 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
 
 	// close when quit selected and hit
-	running *= !(imap->request(IMP_REQFOCUS)&&msel==2&&menu_sys);
+	running *= !(imap->request(InputID::FOCUS)&&msel==2&&menu_sys);
 
 	// sepia colourspace when paused
 	m_frame->clear();

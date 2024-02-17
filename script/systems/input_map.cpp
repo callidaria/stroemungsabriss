@@ -18,7 +18,7 @@ InputMap::InputMap(Frame* frame)
 */
 void InputMap::map_keyboard()
 {
-	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) {
+	for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
 		key_actions[i] = &m_frame->kb.ka[kmap[i]];
 		key_name[i] = get_input_name(kmap[i]);
 	}
@@ -34,7 +34,7 @@ void InputMap::map_controller()
 	if (m_frame->xb.size()) {
 		cnt_lraxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX];
 		cnt_udaxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY];
-		for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) {
+		for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
 			cnt_actions[i] = caxis[i] ? (bool*)&m_frame->xb[0].xba[cmap[i]]
 					: &m_frame->xb[0].xbb[cmap[i]];
 			cnt_name[i] = get_input_name(cmap[i],caxis[i]);
@@ -44,7 +44,7 @@ void InputMap::map_controller()
 	// no controller input
 	else {
 		cnt_udaxis = &rpl_int;cnt_lraxis = &rpl_int;
-		for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) cnt_actions[i] = &rpl_bool;
+		for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) cnt_actions[i] = &rpl_bool;
 	}
 }
 // TODO: add option to change players controller when multiple are plugged in
@@ -68,7 +68,7 @@ void InputMap::update()
 */
 void InputMap::update_triggers()
 {
-	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++)
+	for (uint8_t i=0;i<InputID::MAX_INPUTS;i++)
 		input_trg[i] = input_val[i];
 }
 
@@ -83,8 +83,8 @@ glm::vec2 InputMap::req_vectorized_direction()
 	bool dz_caxis = (glm::abs(*cnt_lraxis)+glm::abs(*cnt_udaxis))>IMP_CONTROLLER_DEADZONE;
 	glm::vec2 dir = glm::vec2(*cnt_lraxis,*cnt_udaxis)*glm::vec2(dz_caxis);
 	dir = glm::vec2(dir.x/IMP_CONTROLLERCAP,-dir.y/IMP_CONTROLLERCAP);
-	glm::vec2 kdir = glm::vec2(*key_actions[IMP_REQRIGHT]-*key_actions[IMP_REQLEFT],
-		*key_actions[IMP_REQUP]-*key_actions[IMP_REQDOWN]);
+	glm::vec2 kdir = glm::vec2(*key_actions[InputID::RIGHT]-*key_actions[InputID::LEFT],
+		*key_actions[InputID::UP]-*key_actions[InputID::DOWN]);
 
 	// combine & unify direction speed
 	dir = glm::vec2(dir.x*!kdir.x+kdir.x*!!kdir.x,dir.y*!kdir.y+kdir.y*!!kdir.y);
@@ -125,7 +125,7 @@ void InputMap::precalculate_vector()
 */
 void InputMap::precalculate_dpad()
 {
-	for (uint8_t i=10;i<IMP_MAX_INPUTS;i++)
+	for (uint8_t i=10;i<InputID::MAX_INPUTS;i++)
 		precalculate(i);
 }
 
@@ -136,7 +136,7 @@ void InputMap::precalculate_dpad()
 void InputMap::precalculate_all()
 {
 	precalculate_vector();
-	for (uint8_t i=0;i<IMP_MAX_INPUTS;i++) precalculate(i);
+	for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) precalculate(i);
 }
 
 /*
@@ -145,10 +145,10 @@ void InputMap::precalculate_all()
 */
 void InputMap::stick_to_dpad()
 {
-	input_val[IMP_REQUP] = input_val[IMP_REQUP]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
-	input_val[IMP_REQDOWN] = input_val[IMP_REQDOWN]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
-	input_val[IMP_REQLEFT] = input_val[IMP_REQLEFT]||*cnt_lraxis<-IMP_CONTROLLER_DEADZONE;
-	input_val[IMP_REQRIGHT] = input_val[IMP_REQRIGHT]||*cnt_lraxis>IMP_CONTROLLER_DEADZONE;
+	input_val[InputID::UP] = input_val[InputID::UP]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[InputID::DOWN] = input_val[InputID::DOWN]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
+	input_val[InputID::LEFT] = input_val[InputID::LEFT]||*cnt_lraxis<-IMP_CONTROLLER_DEADZONE;
+	input_val[InputID::RIGHT] = input_val[InputID::RIGHT]||*cnt_lraxis>IMP_CONTROLLER_DEADZONE;
 }
 
 /*

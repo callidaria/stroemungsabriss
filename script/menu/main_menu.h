@@ -139,7 +139,7 @@ constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 constexpr glm::vec4 TEXT_SEGMENT_COLOUR = glm::vec4(.7f,.7f,.7f,1.f);
-constexpr glm::vec4 TEXT_SAVE_ERROR_COLOUR = glm::vec4(1,0,0,1);
+constexpr glm::vec4 TEXT_ERROR_COLOUR = glm::vec4(1,0,0,1);
 
 // menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
@@ -160,14 +160,7 @@ constexpr float ANIMATION_UPDATE_TIMEOUT = .01f;
 constexpr uint8_t RATTLE_THRESHOLD = 2;
 constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
-
-// math constants
-constexpr double MATH_CARTESIAN_WIDTH = 1280.0;
-constexpr double MATH_CARTESIAN_HEIGHT = 720.0;
-constexpr double MATH_PI = 3.141592653;
-constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_WIDTH*.618;
-constexpr double MATH_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
-// TODO: relocate reusable math constants
+constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 
 /**

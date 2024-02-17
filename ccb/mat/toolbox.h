@@ -22,7 +22,15 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+// math constants
+constexpr double MATH_CARTESIAN_XRANGE = 1280.f;
+constexpr double MATH_CARTESIAN_YRANGE = 720.f;
+constexpr double MATH_PI = 3.141592653;
+constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_XRANGE*.618;
+
+// toolbox constants
 constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
+
 
 // debug timing keys to record individual loadtimes for task sequences
 struct DebugLogKey

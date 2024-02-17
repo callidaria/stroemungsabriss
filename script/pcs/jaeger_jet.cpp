@@ -35,7 +35,7 @@ void JaegerJet::update()
 	// movement speed and direction based on shot and focus mode
 	glm::vec2 mvdir = m_ccbf->iMap->move_dir;
 	float mvspeed = !ddur*(4+(3*!(
-		m_ccbf->iMap->input_val[IMP_REQFOCUS]||m_ccbf->iMap->input_val[IMP_REQCHANGE])));
+		m_ccbf->iMap->input_val[InputID::FOCUS]||m_ccbf->iMap->input_val[InputID::CHANGE])));
 
 	// change position of player based on calculated movement direction
 	position += glm::vec3(m_ccbf->iMap->move_dir.x*mvspeed,m_ccbf->iMap->move_dir.y*mvspeed,0)
@@ -54,8 +54,8 @@ void JaegerJet::update()
 	treg[0] = position.x,treg[1] = position.y;
 
 	// run requested shot type or idle
-	uint8_t sidx = ((m_ccbf->iMap->input_val[IMP_REQWIDE]&&!m_ccbf->iMap->input_val[IMP_REQFOCUS])+2
-			* m_ccbf->iMap->input_val[IMP_REQFOCUS])*(m_ccbf->frame->time_delta>.1f);
+	uint8_t sidx = ((m_ccbf->iMap->input_val[InputID::WIDE]&&!m_ccbf->iMap->input_val[InputID::FOCUS])+2
+			* m_ccbf->iMap->input_val[InputID::FOCUS])*(m_ccbf->frame->time_delta>.1f);
 	rng_flib.at(sidx)(m_ccbf->bSys,treg);
 
 	// TODO: bombs
@@ -63,8 +63,8 @@ void JaegerJet::update()
 	// TODO: close quarters
 
 	// calculate player jet tilt
-	bool abs_right = m_ccbf->iMap->input_val[IMP_REQRIGHT];
-	bool abs_left = m_ccbf->iMap->input_val[IMP_REQLEFT];
+	bool abs_right = m_ccbf->iMap->input_val[InputID::RIGHT];
+	bool abs_left = m_ccbf->iMap->input_val[InputID::LEFT];
 	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*m_ccbf->frame->time_delta;
 	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*m_ccbf->frame->time_delta;
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
