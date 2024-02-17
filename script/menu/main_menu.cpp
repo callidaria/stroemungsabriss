@@ -1830,13 +1830,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// button input
 	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
-	hit_a =
-			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
+	hit_a = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
 			|| m_ccbf->iMap->get_input_triggered(InputID::CONFIRM)
 			|| plmb;
-	hit_b =
-			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
+	hit_b = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::BOMB)
 			|| prmb;
 
@@ -1847,12 +1845,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	udmv = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
 			- m_ccbf->iMap->get_input_triggered(InputID::UP))
 			* menu_action;
+
+	// mouse input
 	crd_mouse = glm::vec2(
 			m_ccbf->frame->mouse.mxfr*MATH_CARTESIAN_XRANGE,
 			m_ccbf->frame->mouse.myfr*MATH_CARTESIAN_YRANGE
 		);
-
-	// input triggers
 	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
 
 	// timing

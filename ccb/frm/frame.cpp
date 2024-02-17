@@ -186,7 +186,8 @@ void Frame::input(bool &running)
 		case SDL_CONTROLLERAXISMOTION:
 			motion = SDL_GameControllerGetAxis(m_gc[0],(SDL_GameControllerAxis)m_fe.caxis.axis);
 			xb[0].xba[m_fe.caxis.axis] = motion;
-			relevant_motion = (abs(motion)>AXIS_MOTION_RELEVANCE)||relevant_motion;
+			relevant_motion = (abs(motion)>Init::iConfig[InitVariable::GENERAL_PERIPHERAL_AXIS_DEADZONE])
+					|| relevant_motion;
 			break;
 		case SDL_CONTROLLERBUTTONDOWN: xb[0].xbb[m_fe.cbutton.button] = true;
 			break;

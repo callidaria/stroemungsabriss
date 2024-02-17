@@ -25,6 +25,8 @@ inline std::vector<const char*> iKeys = {
 	"iGeneralLanguageWrittenText",
 	"iGeneralLanguageSpokenWord",
 	"iGeneralForcePeripheral",
+	"iGeneralPeripheralAxisDeadzone",
+	"iGeneralPeripheralAxisRange",
 
 	"fAudioMasterVolume",
 	"fAudioVoicesVolume",
@@ -45,14 +47,16 @@ enum InitVariable
 	GENERAL_TEXT_LANGUAGE,
 	GENERAL_VOICES_LANGUAGE,
 	GENERAL_PERIPHERAL_PREFERENCE,
+	GENERAL_PERIPHERAL_AXIS_DEADZONE,
+	GENERAL_PERIPHERAL_AXIS_RANGE,
 
 	AUDIO_VOLUME_MASTER,
 	AUDIO_VOLUME_VOICES,
 	AUDIO_VOLUME_MUSIC,
 	AUDIO_VOLUME_EFFECTS,
 
-	VARIABLE_ERROR,
-	VARIABLE_KEY_LENGTH = VARIABLE_ERROR
+	VARIABLE_KEY_LENGTH,
+	VARIABLE_ERROR = VARIABLE_KEY_LENGTH
 };
 
 class Init

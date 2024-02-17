@@ -18,7 +18,6 @@ constexpr uint16_t KEYBOARD_INPUT_RANGE = 285;
 constexpr uint8_t MOUSE_BUTTON_INPUT_RANGE = 5;
 constexpr uint8_t CONTROLLER_AXIS_INPUT_RANGE = 6;
 constexpr uint8_t CONTROLLER_BUTTON_INPUT_RANGE = 22;
-constexpr uint32_t AXIS_MOTION_RELEVANCE = 7000;
 
 struct Keyboard
 {

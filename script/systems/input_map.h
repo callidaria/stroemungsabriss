@@ -5,12 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../../ccb/fcn/init.h"
 #include "../../ccb/frm/frame.h"
-
-// values
-constexpr uint16_t IMP_CONTROLLERCAP = 32767;
-constexpr uint16_t IMP_CONTROLLER_DEADZONE = 12000;
-// TODO: change deadzone in options
 
 
 enum InputID : uint8_t {

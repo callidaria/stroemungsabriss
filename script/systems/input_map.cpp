@@ -80,9 +80,13 @@ void InputMap::update_triggers()
 glm::vec2 InputMap::req_vectorized_direction()
 {
 	// calculate input directions separately
-	bool dz_caxis = (glm::abs(*cnt_lraxis)+glm::abs(*cnt_udaxis))>IMP_CONTROLLER_DEADZONE;
+	bool dz_caxis = (glm::abs(*cnt_lraxis)+glm::abs(*cnt_udaxis))
+			> Init::iConfig[GENERAL_PERIPHERAL_AXIS_DEADZONE];
 	glm::vec2 dir = glm::vec2(*cnt_lraxis,*cnt_udaxis)*glm::vec2(dz_caxis);
-	dir = glm::vec2(dir.x/IMP_CONTROLLERCAP,-dir.y/IMP_CONTROLLERCAP);
+	dir = glm::vec2(
+			dir.x/Init::iConfig[GENERAL_PERIPHERAL_AXIS_RANGE],
+			-dir.y/Init::iConfig[GENERAL_PERIPHERAL_AXIS_RANGE]
+		);
 	glm::vec2 kdir = glm::vec2(*key_actions[InputID::RIGHT]-*key_actions[InputID::LEFT],
 		*key_actions[InputID::UP]-*key_actions[InputID::DOWN]);
 
@@ -145,10 +149,11 @@ void InputMap::precalculate_all()
 */
 void InputMap::stick_to_dpad()
 {
-	input_val[InputID::UP] = input_val[InputID::UP]||*cnt_udaxis<-IMP_CONTROLLER_DEADZONE;
-	input_val[InputID::DOWN] = input_val[InputID::DOWN]||*cnt_udaxis>IMP_CONTROLLER_DEADZONE;
-	input_val[InputID::LEFT] = input_val[InputID::LEFT]||*cnt_lraxis<-IMP_CONTROLLER_DEADZONE;
-	input_val[InputID::RIGHT] = input_val[InputID::RIGHT]||*cnt_lraxis>IMP_CONTROLLER_DEADZONE;
+	int32_t deadzone = Init::iConfig[GENERAL_PERIPHERAL_AXIS_DEADZONE];
+	input_val[InputID::UP] = input_val[InputID::UP]||(*cnt_udaxis<-deadzone);
+	input_val[InputID::DOWN] = input_val[InputID::DOWN]||(*cnt_udaxis>deadzone);
+	input_val[InputID::LEFT] = input_val[InputID::LEFT]||(*cnt_lraxis<-deadzone);
+	input_val[InputID::RIGHT] = input_val[InputID::RIGHT]||(*cnt_lraxis>deadzone);
 }
 
 /*
