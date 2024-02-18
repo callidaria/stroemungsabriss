@@ -47,7 +47,7 @@ uint32_t Init::find_iKey(const char* key)
 {
 	uint32_t out = 0;
 	while (out<InitVariable::VARIABLE_KEY_LENGTH) {
-		if (!strcmp(key,iKeys[out])) break;
+		if (!strcmp(key,iKeys[out].name)) break;
 		out++;
 	} return out;
 }
@@ -68,7 +68,7 @@ void Init::write_changes()
 	// write changes
 	std::ofstream chwrite("./config.ini",std::ios::out);
 	for (uint32_t i=0;i<InitVariable::VARIABLE_KEY_LENGTH;i++)
-		chwrite << iKeys[i] << ' ' << std::to_string(iConfig[i]) << '\n';
+		chwrite << iKeys[i].name << ' ' << std::to_string(iConfig[i]) << '\n';
 	chwrite.close();
 }
 

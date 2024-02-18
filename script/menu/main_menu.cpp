@@ -1219,12 +1219,14 @@ void MenuList::update_overlays()
 	\param list_id: memory index of list in question
 	\returns true if any linked attributes are not identical with initialization, else false
 */
-bool MenuList::linked_variables_changed(uint16_t list_id)
+bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 {
 	bool out = false;
 	for (uint16_t id : mlists[list_id].link_ids) {
 		MenuListEntity &ce = mlists[list_id].entities[id];
-		out = out||(ce.value!=Init::iConfig[ce.link_id]);
+		bool changed = ce.value!=Init::iConfig[ce.link_id];
+		out = out||changed;
+		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
 	} return out;
 }
 // TODO: extract more information to display a list of changes later
@@ -1675,13 +1677,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
 	// setup logic collection
-	interface_behaviour[INTERFACE_LOGIC_MACRO] = interface_behaviour_macro,
-	interface_behaviour[INTERFACE_LOGIC_OPTIONS] = interface_behaviour_options,
-	interface_behaviour[INTERFACE_LOGIC_EXTRAS] = interface_behaviour_extras,
-	interface_behaviour[INTERFACE_LOGIC_PRACTICE] = interface_behaviour_practice,
-	interface_behaviour[INTERFACE_LOGIC_LOAD] = interface_behaviour_load,
-	interface_behaviour[INTERFACE_LOGIC_CONTINUE] = interface_behaviour_continue,
-	interface_behaviour[INTERFACE_LOGIC_NEWGAME] = interface_behaviour_newgame;
+	interface_behaviour[OptionLogicID::MACRO_EXIT] = interface_behaviour_macro,
+	interface_behaviour[OptionLogicID::OPTIONS] = interface_behaviour_options,
+	interface_behaviour[OptionLogicID::EXTRAS] = interface_behaviour_extras,
+	interface_behaviour[OptionLogicID::PRACTICE] = interface_behaviour_practice,
+	interface_behaviour[OptionLogicID::LOAD] = interface_behaviour_load,
+	interface_behaviour[OptionLogicID::CONTINUE] = interface_behaviour_continue,
+	interface_behaviour[OptionLogicID::NEWGAME] = interface_behaviour_newgame;
 	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
 
 	// asset load
@@ -1699,13 +1701,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	tcap_version = vmessage.length();
 
 	// menu options text
-	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
 		uint32_t wwidth = fnt_mopts.estimate_textwidth(main_options[i]);
 		mo_twidth[i] = wwidth,mo_hwidth[i] = wwidth*.5f;
 		mo_prog.x -= wwidth;
-	} mo_prog /= glm::vec2(MENU_MAIN_OPTION_COUNT);
+	} mo_prog /= glm::vec2(OptionLogicID::LOGIC_COUNT);
 	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_hwidth[0],0);
-	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
 		tx_mopts[i].add(main_options[i],glm::vec2(-mo_hwidth[i],0)),tx_mopts[i].load();
 		mo_cposition[i] = mo_cursor;
 		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
@@ -1839,7 +1841,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			|| prmb;
 
 	// directional input
-	lrmv = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<MENU_MAIN_OPTION_CAP)
+	lrmv = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(InputID::LEFT)&&vselect>0))
 			* menu_action;
 	udmv = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
@@ -1903,7 +1905,6 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// interface logic
 	interface_behaviour[interface_logic_id](*this);
-	running = !request_close;
 
 	// render dare message
 	tx_dare.prepare();
@@ -1918,7 +1919,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	tx_instr.render(tcap_instr*mtransition,glm::vec4(1,.6f,0,1));
 
 	// render & transform main options
-	for (uint8_t i=0;i<MENU_MAIN_OPTION_COUNT;i++) {
+	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
 		tx_mopts[i].prepare();
 		glm::mat4 opt_trans = glm::translate(glm::mat4(1.f),
 				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y,0));
@@ -2017,6 +2018,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
 			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
 	speedup = (speedup&&!shiftdown_over)||normalize_over;
+
+	// system
+	reboot = request_restart;
+	running = !request_close&&!request_restart;
 }
 
 /*
@@ -2105,7 +2110,7 @@ void interface_behaviour_macro(MainMenu &tm)
 {
 	// process macro selection
 	bool action_request = tm.hit_a&&tm.menu_action;
-	tm.request_close = (tm.vselect==MENU_MAIN_OPTION_EXIT)*action_request;
+	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*action_request;
 	tm.interface_logic_id = tm.vselect*action_request;
 
 	// menu transition
@@ -2124,7 +2129,7 @@ void interface_behaviour_macro(MainMenu &tm)
 		uint8_t out_id = tm.vselect;
 		while (tm.crd_mouse.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
 		while (tm.crd_mouse.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
-				&& out_id<MENU_MAIN_OPTION_CAP) out_id++;
+				&& out_id<OptionLogicID::OPTION_CAP) out_id++;
 		ch_select = ch_select||(out_id!=tm.vselect);
 		tm.vselect = out_id;
 	}
@@ -2175,7 +2180,7 @@ void interface_behaviour_options(MainMenu &tm)
 	// checking for changes & open confirmation dialogue on condition
 	case 2:
 		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-			open_conf = open_conf||tm.mlists.linked_variables_changed(i);
+			open_conf = open_conf||tm.mlists.linked_variables_changed(i,tm.queued_restart);
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
 		tm.logic_setup++;
 		break;
@@ -2186,9 +2191,11 @@ void interface_behaviour_options(MainMenu &tm)
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.write_attributes(i);
 			Init::write_changes();
+			tm.request_restart = tm.queued_restart;
 		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
+			tm.queued_restart = false;
 		} else if (tm.hit_a||tm.hit_b) tm.logic_setup = 0;
 		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}

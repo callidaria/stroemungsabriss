@@ -12,6 +12,8 @@
 
 #include <AL/alc.h>
 
+#include "../fcn/init.h"
+
 #define BUILDISSUE_OLD_SDL_VERSION
 
 constexpr uint16_t KEYBOARD_INPUT_RANGE = 285;

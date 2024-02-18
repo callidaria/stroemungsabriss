@@ -15,8 +15,6 @@
 #include "../systems/savestates.h"
 #include "../world.h"
 
-#define COLOUR_COMPOSITION_NEO
-
 // information
 constexpr uint8_t INFO_VERSION_RELEASE = 0;
 constexpr uint8_t INFO_VERSION_SUBRELEASE = 0;
@@ -24,36 +22,10 @@ constexpr uint8_t INFO_VERSION_DEVSTEP = 6;
 constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
-// menu options index constants
-constexpr uint8_t MENU_MAIN_OPTION_EXIT = 0;
-constexpr uint8_t MENU_MAIN_OPTION_OPTIONS = 1;
-constexpr uint8_t MENU_MAIN_OPTION_EXTRAS = 2;
-constexpr uint8_t MENU_MAIN_OPTION_PRACTICE = 3;
-constexpr uint8_t MENU_MAIN_OPTION_LOAD = 4;
-constexpr uint8_t MENU_MAIN_OPTION_CONTINUE = 5;
-constexpr uint8_t MENU_MAIN_OPTION_NEWGAME = 6;
-constexpr uint8_t MENU_MAIN_OPTION_COUNT = 7;
-
-// function pointer index constants
-constexpr uint8_t INTERFACE_LOGIC_MACRO = 0;
-constexpr uint8_t INTERFACE_LOGIC_OPTIONS = 1;
-constexpr uint8_t INTERFACE_LOGIC_EXTRAS = 2;
-constexpr uint8_t INTERFACE_LOGIC_PRACTICE = 3;
-constexpr uint8_t INTERFACE_LOGIC_LOAD = 4;
-constexpr uint8_t INTERFACE_LOGIC_CONTINUE = 5;
-constexpr uint8_t INTERFACE_LOGIC_NEWGAME = 6;
-constexpr uint8_t INTERFACE_LOGIC_COUNT = 7;
-
-// system constants
-constexpr uint8_t MENU_GBUFFER_COLOUR = 0;
-constexpr uint8_t MENU_GBUFFER_NORMALS = 1;
-constexpr uint8_t MENU_MAIN_OPTION_CAP = MENU_MAIN_OPTION_COUNT-1;
-constexpr uint8_t SPLICE_VERTEX_FLOAT_COUNT = 6;
-constexpr uint8_t DIALOGUEBGR_VERTEX_FLOAT_COUNT = 3;
+// system
 constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 14;
 
 // menu list positioning
-constexpr uint8_t MENU_LIST_GRID_RANGE = 7;
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
@@ -119,14 +91,8 @@ constexpr float SPLICE_TITLE_UWIDTH_MOD = SPLICE_TITLE_UPPER_SWIDTH-85.f;
 
 // splice colours
 constexpr glm::vec3 SPLICE_TITLE_COLOUR = glm::vec3(.5f,0,0);
-#ifdef COLOUR_COMPOSITION_NEO
 constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.75f,.4125f,0);
 constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0985f,.270f,.037f);
-#else
-constexpr glm::vec3 SPLICE_HEAD_COLOUR = glm::vec3(.5f,.5f,.0f);
-constexpr glm::vec3 SPLICE_SELECTION_COLOUR = glm::vec3(.0f,.5f,.5f);
-#endif
-// TODO: figure out colour scheme and if gamma correction in splice shader will be upheld
 
 // dialogue constants
 constexpr glm::vec3 DIALOGUE_HEAD_COLOUR = glm::vec3(.75f,.75f,.0f);
@@ -410,7 +376,7 @@ public:
 	void update_overlays();
 
 	// info
-	bool linked_variables_changed(uint16_t list_id);
+	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 private:
 
@@ -559,6 +525,18 @@ private:
  * 		MainMenu Definition
 */
 
+enum OptionLogicID {
+	MACRO_EXIT,
+	OPTIONS,
+	EXTRAS,
+	PRACTICE,
+	LOAD,
+	CONTINUE,
+	NEWGAME,
+	LOGIC_COUNT,
+	OPTION_CAP = LOGIC_COUNT-1
+};
+
 class MainMenu : public UI
 {
 public:
@@ -581,6 +559,7 @@ public:
 	// engine
 	CascabelBaseFeature* m_ccbf;
 	bool request_close = false;
+	bool request_restart = false;
 
 	// interactables
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
@@ -588,8 +567,8 @@ public:
 	MenuDialogue mdialogues;
 
 	// index
-	uint8_t interface_logic_id = INTERFACE_LOGIC_MACRO;
-	uint8_t vselect = MENU_MAIN_OPTION_COUNT-2,hselect = 0;
+	uint8_t interface_logic_id = OptionLogicID::MACRO_EXIT;
+	uint8_t vselect = OptionLogicID::LOGIC_COUNT-2,hselect = 0;
 	int8_t vgrid_id = 0;
 	uint8_t splice_head_id,splice_selection_id,head_mod_id;
 
@@ -607,11 +586,12 @@ public:
 
 	// text
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
-	glm::vec2 mo_cposition[MENU_MAIN_OPTION_COUNT];
-	float mo_twidth[MENU_MAIN_OPTION_COUNT],mo_hwidth[MENU_MAIN_OPTION_COUNT];
+	glm::vec2 mo_cposition[OptionLogicID::LOGIC_COUNT];
+	float mo_twidth[OptionLogicID::LOGIC_COUNT],mo_hwidth[OptionLogicID::LOGIC_COUNT];
 	float st_rot = .0f;
 
 	// memory for static continue
+	bool queued_restart = false;
 	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue,dg_optsave;
 	uint8_t logic_setup = 0;
 
@@ -629,7 +609,7 @@ private:
 	Font fnt_reqt = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
 	Text tx_dare = Text(fnt_reqt),tx_instr = Text(fnt_reqt),
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
-	std::vector<Text> tx_mopts = std::vector<Text>(MENU_MAIN_OPTION_COUNT,Text(fnt_mopts));
+	std::vector<Text> tx_mopts = std::vector<Text>(OptionLogicID::LOGIC_COUNT,Text(fnt_mopts));
 	MSAA msaa;
 
 	// data
@@ -654,8 +634,8 @@ private:
 
 	// predefinitions
 	typedef void (*interface_logic)(MainMenu&);
-	interface_logic interface_behaviour[INTERFACE_LOGIC_COUNT];
-	const char* main_options[MENU_MAIN_OPTION_COUNT]
+	interface_logic interface_behaviour[OptionLogicID::LOGIC_COUNT];
+	const char* main_options[OptionLogicID::LOGIC_COUNT]
 		= { "exit","options","extras","practice","load","continue","new game" };
 };
 

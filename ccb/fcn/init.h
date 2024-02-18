@@ -11,27 +11,32 @@
 constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
 
 
+struct InitVariableInfo {
+	const char* name;
+	const bool restart_system_on_change;
+};
+
 // variable keymap
-inline std::vector<const char*> iKeys = {
+const inline std::vector<InitVariableInfo> iKeys = {
 
-	"iFrameResolutionPreset",
-	"vFrameResolutionWidth","vFrameResolutionHeight",
-	"bFrameFullscreen",
-	"iFrameTargetMonitor",
+	{ "iFrameResolutionPreset",true },
+	{ "vFrameResolutionWidth",false },{ "vFrameResolutionHeight",false },
+	{ "bFrameFullscreen",true },
+	{ "iFrameTargetMonitor",true },
 
-	"iGraphicsTargetLibrary",
-	"iGraphicsPresetLevel",
+	{ "iGraphicsTargetLibrary",true },
+	{ "iGraphicsPresetLevel",false },
 
-	"iGeneralLanguageWrittenText",
-	"iGeneralLanguageSpokenWord",
-	"iGeneralForcePeripheral",
-	"iGeneralPeripheralAxisDeadzone",
-	"iGeneralPeripheralAxisRange",
+	{ "iGeneralLanguageWrittenText",false },
+	{ "iGeneralLanguageSpokenWord",false },
+	{ "iGeneralForcePeripheral",false },
+	{ "iGeneralPeripheralAxisDeadzone",false },
+	{ "iGeneralPeripheralAxisRange",false },
 
-	"fAudioMasterVolume",
-	"fAudioVoicesVolume",
-	"fAudioMusicVolume",
-	"fAudioEffectsVolume",
+	{ "fAudioMasterVolume",false },
+	{ "fAudioVoicesVolume",false },
+	{ "fAudioMusicVolume",false },
+	{ "fAudioEffectsVolume",false },
 };
 
 enum InitVariable
