@@ -69,11 +69,13 @@
  * sign this entity to mark it switchable between true or false states
  * 
  * 	:dropdown
- * 	<fist_option>;<second_option>;<third_option>
+ * 	<fist_option>;<second_option>;<third_option>;
  * add a sublist/dropdown option to this entity, holding selectable options divided by a ';'
  * using :dropdown without defining options will still create a dropdown and the list can be
- * assembled dynamically
- * TODO: add an option to escape buffer read by defining an end statement, else the full buffer will be dd
+ * assembled dynamically.
+ * the semicolon (;) after a sublist option confirms the option write. if the last semicolon is missing,
+ * the last option wont be written to the sublist.
+ * TODO: follow through, this might not fix the initial problem, but it fixes definition placement
  * 
  * 	:slider
  * make this entity contain a changable floating point number to be adjusted by e.g. a slider
@@ -875,13 +877,8 @@ void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
-	float pitch = 15.f,yaw = -110.f;
-	gb_cam3D.front = glm::normalize(glm::vec3(cos(glm::radians(pitch))*cos(glm::radians(yaw)),
-			sin(glm::radians(pitch)),cos(glm::radians(pitch))*sin(glm::radians(yaw))));
-	gb_cam3D.update();
 	rid_window_sprite = wsid;
 	// TODO: replace emission map with nighttime extrapolation in terra directory
-	// FIXME: resolve this hacky usage of camera
 }
 
 /*

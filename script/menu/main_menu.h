@@ -418,7 +418,7 @@ private:
 	FrameBuffer fb_globe;
 	uint8_t globe_target_id;
 	uint16_t rid_globe,rid_window_sprite;
-	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f);
+	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f,15.f,-110.f);
 	Lighting gb_lights = Lighting();
 	bool show_globe = false;
 	glm::vec2 globe_rotation = glm::vec2(0);
