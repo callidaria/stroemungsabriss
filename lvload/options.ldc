@@ -31,7 +31,7 @@ Music, SFX and voices can be configured here.
 :describe
 Choose language of written contents.
 :dropdown
-English;German;Natives
+English German Natives ;
 :link iGeneralLanguageWrittenText
 
 :define Voiced Language
@@ -39,7 +39,7 @@ English;German;Natives
 Choose Language of voiced Contents.
 Natives lets each character speak in his own canonically correct language.
 :dropdown
-English;Natives;German
+English Natives German ;
 :link iGeneralLanguageSpokenWord
 
 :segment Peripherals
@@ -48,7 +48,7 @@ English;Natives;German
 :describe
 Force the preferred peripheral if you have trouble with dynamic Input switching.
 :dropdown
-Dynamic;Controller;Arcade Stick;Keyboard
+Dynamic Controller Arcade Stick Keyboard ;
 :link iGeneralForcePeripheral
 
 
@@ -60,7 +60,7 @@ Dynamic;Controller;Arcade Stick;Keyboard
 :describe
 Sometimes life has no (re-)solutions for your trouble.
 :dropdown
-1280x720;1600x900;1920x1080
+1280x720 1600x900 1920x1080 ;
 :link iFrameResolutionPreset
 
 :define Fullscreen?
@@ -87,7 +87,7 @@ this does nothing!
 Choose between Vulkan & Opengl,
 depending on your preference and the settings you want to change.
 :dropdown
-Vulkan;OpenGL
+Vulkan OpenGL ;
 :link iGraphicsTargetLibrary
 
 :define Quality Preset
@@ -95,7 +95,7 @@ Vulkan;OpenGL
 Choose a template if you don't want to bother with technical details
 or you are missing the required knowledge.
 :dropdown
-Phenomenal;Good;Passable;Broken;Abominal;Userspecific
+Phenomenal Good Passable Broken Abominal Userspecific ;
 :link iGraphicsPresetLevel
 
 

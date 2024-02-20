@@ -69,13 +69,12 @@
  * sign this entity to mark it switchable between true or false states
  * 
  * 	:dropdown
- * 	<fist_option>;<second_option>;<third_option>;
- * add a sublist/dropdown option to this entity, holding selectable options divided by a ';'
+ * 	<fist_option> <second_option> <third_option> ;
+ * add a sublist/dropdown option to this entity, holding selectable options divided by a ' '
  * using :dropdown without defining options will still create a dropdown and the list can be
- * assembled dynamically.
- * the semicolon (;) after a sublist option confirms the option write. if the last semicolon is missing,
- * the last option wont be written to the sublist.
- * TODO: follow through, this might not fix the initial problem, but it fixes definition placement
+ * assembled later by directly writing elements into cattribs.
+ * the semicolon (;) after a sublist options forcefully ends the option write.
+ * if the last semicolon is missing, the last dropdown option definition lasts until next ldc command.
  * 
  * 	:slider
  * make this entity contain a changable floating point number to be adjusted by e.g. a slider
@@ -351,8 +350,10 @@ void command_logic_dropdown(LDCProcessState &state)
 {
 	std::stringstream bfss(state.cmd->buffer);
 	std::string ddoption;
-	while (getline(bfss,ddoption,';'))
+	while (getline(bfss,ddoption,' ')) {
+		if (ddoption[0]==';') break;
 		state.clusters.back().elist.back().cattribs.push_back(ddoption);
+	}
 	state.clusters.back().elist.back().etype = DROPDOWN;
 	state.clusters.back().cnt_dropdown++;
 }
@@ -675,10 +676,8 @@ uint8_t MenuList::define_list(const char* path)
 			// iterate through possible dropdown elements in character attribute space
 			bool element_mode = cluster.elist[i].etype==LDCEntityType::DROPDOWN;
 			uint8_t cai = 0;
-			while (element_mode&&cai<cluster.elist[i].cattribs.size()) {
-				element_mode = cluster.elist[i].cattribs[cai]!="cmd";
-				cai++;
-			}
+			while (element_mode&&cai<cluster.elist[i].cattribs.size())
+				element_mode = cluster.elist[i].cattribs[cai++]!="cmd";
 
 			// iterate additional commands in character attribute space
 			uint8_t fai = 0;
@@ -709,7 +708,6 @@ uint8_t MenuList::define_list(const char* path)
 						   cluster.elist[i].cattribs[j].c_str());
 				}
 			}
-			// FIXME: will break when actually combining commands and dropdown elements by offset 1
 
 			// load checkbox geometry
 			switch (cluster.elist[i].etype) {
@@ -2270,3 +2268,5 @@ void interface_behaviour_newgame(MainMenu &tm)
 // new issues:
 //	- input request annotation is not displayed for practice and extras listing, but works for all others?!?
 //	- refusal of difficulty should automatically close confirmation prompt
+//	- automatic restart is prevented when changing both restartable and non-restartable options?
+//		-> probably has something todo with the refusal to write but still storing visual changes?
