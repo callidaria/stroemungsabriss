@@ -928,16 +928,8 @@ void MenuList::reset_attributes(uint8_t id)
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
 		e.value = Init::iConfig[e.link_id];
-
-		// reset visual displacement if entity has a dropdown attributes
-		if (e.etype!=LDCEntityType::DROPDOWN) continue;
-		for (uint8_t i=0;i<e.dd_options.size();i++) {
-			e.dd_options[i].prepare();
-			e.dd_options[i].set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(i-e.value)));
-		}
 	}
 }
-// FIXME: general horribleness invoked by the dropdown displacement correction
 
 /*
 	TODO
@@ -1100,9 +1092,12 @@ void MenuList::render()
 	else {
 		for (uint16_t &ddi : mlists[id].dropdown_ids) {
 			MenuListEntity &e = mlists[id].entities[ddi];
-			e.dd_options[e.value].prepare(),e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
+			e.dd_options[e.value].prepare();
+			e.dd_options[e.value].set_scroll(glm::vec2(0,0));
+			e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
 		}
 	}
+	// TODO: in DIRE need of optimization once the text implementation is fixed!
 
 	// draw active lists
 	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
