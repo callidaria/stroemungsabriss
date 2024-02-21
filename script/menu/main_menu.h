@@ -128,35 +128,13 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
-#define NEO_GOTO_COMPUTE 1
+//#define NEO_GOTO_COMPUTE 1
+constexpr bool NEO_GOTO_COMPUTE = true;
 
 
 /**
  *		LDC Compiler Definition
 */
-
-static inline std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-
-	// definition
-	"cluster",
-	"define",
-	"describe",
-
-	// attribute
-	"floats",
-	"strings",
-	"segment",
-	"condition",
-	"link",
-
-	// behaviour
-	"subsequent",
-	"system_behaviour",
-	"checkbox",
-	"dropdown",
-	"slider",
-	"return"
-};
 
 enum LDCEntityType
 {
@@ -237,6 +215,18 @@ public:
 
 	// code processing
 	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
+
+private:
+
+	// command list
+	static inline std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+		// definitions
+		"cluster","define","describe",
+		// attributes
+		"floats","strings","segment","condition","link",
+		// behaviours
+		"subsequent","system_behaviour","checkbox","dropdown","slider","return"
+	};
 };
 
 // command interpretation logic

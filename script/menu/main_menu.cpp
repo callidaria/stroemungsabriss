@@ -98,13 +98,13 @@
 void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 {
 	// instruction label references
-#ifdef NEO_GOTO_COMPUTE
+//#ifdef NEO_GOTO_COMPUTE
 	static void* table_interpreter_logic[LIST_LANGUAGE_COMMAND_COUNT+2] = {
 		&&logic_cluster,&&logic_define,&&logic_describe,&&logic_floats,&&logic_strings,&&logic_segment,
 		&&logic_condition,&&logic_link,&&logic_subsequent,&&logic_sysbehaviour,&&logic_checkbox,
 		&&logic_dropdown,&&logic_slider,&&logic_return,&&logic_fault,&&logic_halt
 	};
-#endif
+//#endif
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_fattributes,
 		command_logic_sattributes,command_logic_segment,command_logic_condition,command_logic_link,
@@ -148,27 +148,26 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		line_number++;
 	} file.close();
 
-#ifdef NEO_GOTO_COMPUTE
-
 	// append halt instruction for compiler termination
 	cmd_buffer.push_back({ LIST_LANGUAGE_COMMAND_COUNT+1,"","",line_number });
 
 #define GOTO_STEP goto *table_interpreter_logic[cmd_buffer[++pc].id];
 	uint16_t pc = 0;
+	std::string attrib;
 	std::stringstream bfss;
 	goto *table_interpreter_logic[cmd_buffer[0].id];
+
+//#ifdef NEO_GOTO_COMPUTE
+
+	if (NEO_GOTO_COMPUTE) {
 logic_cluster:
-	LDCCluster cluster;
-	cluster.id = cmd_buffer[pc].tail;
-	state.clusters.push_back(cluster);
+	state.clusters.push_back({ .id = cmd_buffer[pc].tail });
 	state.crefs.push_back({{},{}});
 	state.srefs.push_back({});
 	GOTO_STEP;
 
 logic_define:
-	LDCEntity entity;
-	entity.head = cmd_buffer[pc].tail;
-	state.clusters.back().elist.push_back(entity);
+	state.clusters.back().elist.push_back({ .head = cmd_buffer[pc].tail });
 	GOTO_STEP;
 
 logic_describe:
@@ -178,7 +177,6 @@ logic_describe:
 logic_floats:
 	try {
 		bfss = std::stringstream(cmd_buffer[pc].tail);
-		std::string attrib;
 		while (getline(bfss,attrib,' '))
 			state.clusters.back().elist.back().fattribs.push_back(stof(attrib));
 	} catch (std::invalid_argument const &ex) {
@@ -190,24 +188,22 @@ logic_floats:
 
 logic_strings:
 	bfss = std::stringstream(cmd_buffer[pc].tail);
-	std::string attrib;
 	while (getline(bfss,attrib,' '))
 		state.clusters.back().elist.back().cattribs.push_back(attrib);
 	GOTO_STEP;
 
 logic_segment:
-	LDCSegment segment;
-	segment.position = state.clusters.back().elist.size();
-	segment.title = cmd_buffer[pc].tail;
-	state.clusters.back().slist.push_back(segment);
+	state.clusters.back().slist.push_back({
+		.position = state.clusters.back().elist.size(),
+		.title = cmd_buffer[pc].tail
+	});
 	GOTO_STEP;
 
 logic_condition:
 	try {
 		bfss = std::stringstream(cmd_buffer[pc].tail);
-		std::string lid;
-		while (getline(bfss,lid,' '))
-			state.clusters.back().elist.back().condition_id.push_back(stoi(lid));
+		while (getline(bfss,attrib,' '))
+			state.clusters.back().elist.back().condition_id.push_back(stoi(attrib));
 	} catch (std::invalid_argument const &ex) {
 		compiler_error_msg(state,"condition tail does not contain a valid number");
 	} catch (std::out_of_range const &ex) {
@@ -244,10 +240,9 @@ logic_checkbox:
 
 logic_dropdown:
 	bfss = std::stringstream(cmd_buffer[pc].buffer);
-	std::string ddoption;
-	while (getline(bfss,ddoption,' ')) {
-		if (ddoption[0]==';') break;
-		state.clusters.back().elist.back().cattribs.push_back(ddoption);
+	while (getline(bfss,attrib,' ')) {
+		if (attrib[0]==';') break;
+		state.clusters.back().elist.back().cattribs.push_back(attrib);
 	}
 	state.clusters.back().elist.back().etype = DROPDOWN;
 	state.clusters.back().cnt_dropdown++;
@@ -268,8 +263,10 @@ logic_fault:
 	GOTO_STEP;
 
 logic_halt:
+	{}
 
-#else
+	} else {
+//#else
 
 	// second pass: commands - execute extracted commands
 	for (ListLanguageCommand &cmd : cmd_buffer) {
@@ -277,7 +274,8 @@ logic_halt:
 		interpreter_behaviour[cmd.id](state);
 	}
 
-#endif
+	}
+//#endif
 
 	// third pass: interpretation - temporary instruction data
 	for (uint16_t i=0;i<state.clusters.size();i++) {
@@ -309,7 +307,6 @@ logic_halt:
 		for (LDCSegment &segment : state.clusters[i].slist)
 			state.clusters[i].elist[segment.position].jsegment = true;
 	}
-	std::cout << "third pass done but now the memfaults come (sic)\n";
 	// FIXME: the angry valgrind output should give the programmer some ideas what is to be fixed
 }
 
@@ -2395,3 +2392,4 @@ void interface_behaviour_newgame(MainMenu &tm)
 //	- refusal of difficulty should automatically close confirmation prompt
 //	- automatic restart is prevented when changing both restartable and non-restartable options?
 //		-> probably has something todo with the refusal to write but still storing visual changes?
+//	- when opening a list for the first time a memory leak occurs
