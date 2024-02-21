@@ -208,12 +208,8 @@ void Frame::input(bool &running)
 		case SDL_QUIT: running = false;
 			break;
 		}
-		// TODO: improve further, this seems really simple minded
-		// a quick look into the assembly translation of this will surely motivate due to rage
-		// maybe solve this by letting different events jump to different functions by pointer
-		// above solution may be frowned upon and extremely unsafe, but it's faster so there you go
-		// -> !compare translation though because functions would have to be static
 		// FIXME: switch input refuses to be read. conn ok but no prints
+		// FIXME: quit state never occurs, probably because click is evaluated before quit?
 
 		// update preferred peripheral
 		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)

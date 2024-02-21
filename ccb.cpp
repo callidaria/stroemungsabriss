@@ -31,9 +31,11 @@
 // windows compile predefinition
 #ifdef __WIN32__
 constexpr std::string path_mingw = "C:/MinGW/lib";
-constexpr std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lOpenAL32 -lpthread -pg";
+constexpr std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lOpenAL32 -lpthread -pg -O3";
 constexpr std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STATIC";
 #endif
+std::string cmp_linking = "-lGL -lGLEW -lSDL2 -lopenal -lpthread -lassimp";
+std::string cmp_extras = "-std=c++17 -pg -O3";
 
 // toolbox
 void write_selection();
@@ -138,7 +140,7 @@ int main(int argc,char* argv[])
 		// kill when exit request
 		if (inp=='e') { system("clear");break; }
 		else if (inp=='r') { system("./yomisensei");waiting=true; }
-		else if (inp=='b') { system("g++ main.cpp lib/* -o yomisensei -lGL -lGLEW -lSDL2 -lSDL2_net -lopenal -lassimp -lpthread -std=c++17 -pg");waiting=true; }
+		else if (inp=='b') { system(("g++ main.cpp lib/* -o yomisensei "+cmp_linking+" "+cmp_extras).c_str());waiting=true; }
 		else if (inp=='c') idx = 0;
 		else if (inp=='p') idx = proj_idx;
 
@@ -374,7 +376,7 @@ void assembly_analysis_mode(std::string path)
 		get_input_char();
 
 		// translate to assembly & prepare analysis output
-		system("g++ tmp_cmp.cpp -S -fverbose-asm");
+		system(("g++ tmp_cmp.cpp "+cmp_extras+" -S -fverbose-asm").c_str());
 		std::ifstream tmp_asm("tmp_cmp.s");
 		std::string asmline;
 		std::vector<std::string> clasms;
@@ -460,7 +462,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 			// compile source on demand
 			else if ((get_selected()&&found->d_type!=DT_DIR&&!update)||(!update&&comp_all&&found->d_type!=DT_DIR)) {
 				std::string out_file = get_outfile(found->d_name);
-				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" -std=c++17 -c").c_str());
+				system(("g++ "+dir_path+"/"+found->d_name+" -o lib/"+out_file+" "+cmp_extras+" -c").c_str());
 
 				// get subsequent classes related to recompiled object
 				uint16_t ifile = 0;
@@ -482,7 +484,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 					grind_includes(sout.substr(0,sout.length()-1)+'h',ifiles);
 
 					// compile current file related to main compile target
-					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" -std=c++17 -c").c_str());
+					system(("g++ "+ifiles[ifile].substr(0,ifiles[ifile].length()-1)+"cpp -o lib/"+sout+" "+cmp_extras+" -c").c_str());
 
 					ifile++;
 				} out = "compiled "+out_file;
@@ -511,7 +513,7 @@ std::string read_components(std::string &dir_path,uint8_t proj_idx,bool &comp_al
 						printf("compiling %s\n",cfound->d_name);
 
 						// compile file
-						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" -std=c++17 -c").c_str());
+						system(("g++ "+compile_dir+"/"+cfound->d_name+" -o lib/"+get_outfile(cfound->d_name)+" "+cmp_extras+" -c").c_str());
 					} cfound = readdir(cdir);
 				}
 
