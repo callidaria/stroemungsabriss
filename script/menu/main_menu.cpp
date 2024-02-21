@@ -97,11 +97,14 @@
 */
 void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 {
-	// logic id overhead
-	const std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		"cluster","define","describe","floats","strings","segment","condition","link","subsequent",
-		"system_behaviour","checkbox","dropdown","slider","return",
+	// instruction label references
+#ifdef NEO_GOTO_COMPUTE
+	static void* table_interpreter_logic[LIST_LANGUAGE_COMMAND_COUNT+2] = {
+		&&logic_cluster,&&logic_define,&&logic_describe,&&logic_floats,&&logic_strings,&&logic_segment,
+		&&logic_condition,&&logic_link,&&logic_subsequent,&&logic_sysbehaviour,&&logic_checkbox,
+		&&logic_dropdown,&&logic_slider,&&logic_return,&&logic_fault,&&logic_halt
 	};
+#endif
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_fattributes,
 		command_logic_sattributes,command_logic_segment,command_logic_condition,command_logic_link,
@@ -145,11 +148,136 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		line_number++;
 	} file.close();
 
+#ifdef NEO_GOTO_COMPUTE
+
+	// append halt instruction for compiler termination
+	cmd_buffer.push_back({ LIST_LANGUAGE_COMMAND_COUNT+1,"","",line_number });
+
+#define GOTO_STEP goto *table_interpreter_logic[cmd_buffer[++pc].id];
+	uint16_t pc = 0;
+	std::stringstream bfss;
+	goto *table_interpreter_logic[cmd_buffer[0].id];
+logic_cluster:
+	LDCCluster cluster;
+	cluster.id = cmd_buffer[pc].tail;
+	state.clusters.push_back(cluster);
+	state.crefs.push_back({{},{}});
+	state.srefs.push_back({});
+	GOTO_STEP;
+
+logic_define:
+	LDCEntity entity;
+	entity.head = cmd_buffer[pc].tail;
+	state.clusters.back().elist.push_back(entity);
+	GOTO_STEP;
+
+logic_describe:
+	state.clusters.back().elist.back().description = cmd_buffer[pc].buffer;
+	GOTO_STEP;
+
+logic_floats:
+	try {
+		bfss = std::stringstream(cmd_buffer[pc].tail);
+		std::string attrib;
+		while (getline(bfss,attrib,' '))
+			state.clusters.back().elist.back().fattribs.push_back(stof(attrib));
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state,"attribute tail should only contain float values");
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state,"at least one attribute is out of float range");
+	}
+	GOTO_STEP;
+
+logic_strings:
+	bfss = std::stringstream(cmd_buffer[pc].tail);
+	std::string attrib;
+	while (getline(bfss,attrib,' '))
+		state.clusters.back().elist.back().cattribs.push_back(attrib);
+	GOTO_STEP;
+
+logic_segment:
+	LDCSegment segment;
+	segment.position = state.clusters.back().elist.size();
+	segment.title = cmd_buffer[pc].tail;
+	state.clusters.back().slist.push_back(segment);
+	GOTO_STEP;
+
+logic_condition:
+	try {
+		bfss = std::stringstream(cmd_buffer[pc].tail);
+		std::string lid;
+		while (getline(bfss,lid,' '))
+			state.clusters.back().elist.back().condition_id.push_back(stoi(lid));
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state,"condition tail does not contain a valid number");
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state,"given number exceeds reasonable range");
+	}
+	GOTO_STEP;
+
+logic_link:
+	state.clusters.back().linked_ids.push_back(state.clusters.back().elist.size()-1);
+	state.srefs.back().push_back(cmd_buffer[pc].tail);
+	GOTO_STEP;
+
+logic_subsequent:
+	state.crefs.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
+	state.crefs.back().child_names.push_back(cmd_buffer[pc].tail);
+	state.clusters.back().elist.back().etype = SUBSEQUENT;
+	GOTO_STEP;
+
+logic_sysbehaviour:
+	try {
+		state.clusters.back().elist.back().etype = SYSTEM;
+		state.clusters.back().elist.back().tdata = stoi(cmd_buffer[pc].tail);
+	} catch (std::invalid_argument const &ex) {
+		compiler_error_msg(state,"system command id not an interpretable number");
+	} catch (std::out_of_range const &ex) {
+		compiler_error_msg(state,"system command id out of reasonable defrange");
+	}
+	GOTO_STEP;
+
+logic_checkbox:
+	state.clusters.back().elist.back().etype = CHECKBOX;
+	state.clusters.back().cnt_checkbox++;
+	GOTO_STEP;
+
+logic_dropdown:
+	bfss = std::stringstream(cmd_buffer[pc].buffer);
+	std::string ddoption;
+	while (getline(bfss,ddoption,' ')) {
+		if (ddoption[0]==';') break;
+		state.clusters.back().elist.back().cattribs.push_back(ddoption);
+	}
+	state.clusters.back().elist.back().etype = DROPDOWN;
+	state.clusters.back().cnt_dropdown++;
+	GOTO_STEP;
+
+logic_slider:
+	state.clusters.back().elist.back().etype = SLIDER;
+	state.clusters.back().cnt_slider++;
+	GOTO_STEP;
+
+logic_return:
+	state.clusters.back().elist.back().tdata = stoi(cmd_buffer[pc].tail);
+	state.clusters.back().elist.back().etype = RETURN;
+	GOTO_STEP;
+
+logic_fault:
+	compiler_error_msg(state,"invalid command syntax");
+	GOTO_STEP;
+
+logic_halt:
+
+#else
+
 	// second pass: commands - execute extracted commands
 	for (ListLanguageCommand &cmd : cmd_buffer) {
 		state.cmd = &cmd;
 		interpreter_behaviour[cmd.id](state);
 	}
+
+#endif
 
 	// third pass: interpretation - temporary instruction data
 	for (uint16_t i=0;i<state.clusters.size();i++) {
@@ -181,6 +309,8 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		for (LDCSegment &segment : state.clusters[i].slist)
 			state.clusters[i].elist[segment.position].jsegment = true;
 	}
+	std::cout << "third pass done but now the memfaults come (sic)\n";
+	// FIXME: the angry valgrind output should give the programmer some ideas what is to be fixed
 }
 
 /**

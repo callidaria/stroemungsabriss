@@ -128,10 +128,35 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
+#define NEO_GOTO_COMPUTE 1
+
 
 /**
  *		LDC Compiler Definition
 */
+
+static inline std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+
+	// definition
+	"cluster",
+	"define",
+	"describe",
+
+	// attribute
+	"floats",
+	"strings",
+	"segment",
+	"condition",
+	"link",
+
+	// behaviour
+	"subsequent",
+	"system_behaviour",
+	"checkbox",
+	"dropdown",
+	"slider",
+	"return"
+};
 
 enum LDCEntityType
 {
