@@ -214,7 +214,7 @@ class LDCCompiler
 public:
 
 	// code processing
-	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
+	static void compile(const char* path,std::vector<LDCCluster> &rClusters,bool gcompute);
 
 private:
 
@@ -370,7 +370,7 @@ public:
 	~MenuList() {  }
 
 	// invokation
-	uint8_t define_list(const char* path);
+	uint8_t define_list(const char* path,bool gcompute);
 	uint8_t define_list(SaveStates states);
 	void load(CascabelBaseFeature* ccbf,uint16_t wsid);
 

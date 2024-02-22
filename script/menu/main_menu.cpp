@@ -95,7 +95,7 @@
 	\param rClusters: reference to cluster list, the new clusters will be added into
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
-void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
+void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters,bool gcompute)
 {
 	// instruction label references
 //#ifdef NEO_GOTO_COMPUTE
@@ -148,6 +148,10 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		line_number++;
 	} file.close();
 
+//#ifdef NEO_GOTO_COMPUTE
+
+	if (gcompute) {
+
 	// append halt instruction for compiler termination
 	cmd_buffer.push_back({ LIST_LANGUAGE_COMMAND_COUNT+1,"","",line_number });
 
@@ -155,11 +159,8 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 	uint16_t pc = 0;
 	std::string attrib;
 	std::stringstream bfss;
-	goto *table_interpreter_logic[cmd_buffer[0].id];
+	goto *table_interpreter_logic[cmd_buffer[pc].id];
 
-//#ifdef NEO_GOTO_COMPUTE
-
-	if (NEO_GOTO_COMPUTE) {
 logic_cluster:
 	state.clusters.push_back({ .id = cmd_buffer[pc].tail });
 	state.crefs.push_back({{},{}});
@@ -732,11 +733,11 @@ void SelectionSpliceGeometry::update()
 	\param path: path to .ldc definition file
 	\returns memory index of first list added to menu list complex collection
 */
-uint8_t MenuList::define_list(const char* path)
+uint8_t MenuList::define_list(const char* path,bool gcompute)
 {
 	// execute definition code
 	std::vector<LDCCluster> clusters;
-	LDCCompiler::compile(path,clusters);
+	LDCCompiler::compile(path,clusters,gcompute);
 	uint8_t out = mlists.size();
 
 	// entity creation
@@ -1466,7 +1467,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 {
 	// content information extraction
 	std::vector<LDCCluster> clusters;
-	LDCCompiler::compile(path,clusters);
+	LDCCompiler::compile(path,clusters,true);
 
 	// setup dialogue fonts
 	Font tfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",tsize,tsize);
@@ -1878,10 +1879,25 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	splices_geometry.load();
 
 	// list setup
-	ml_options = mlists.define_list("./lvload/options.ldc");
-	ml_extras = mlists.define_list("./lvload/extras.ldc");
-	ml_stages = mlists.define_list("./lvload/stages.ldc");
+	ml_options = mlists.define_list("./lvload/options.ldc",true);
+	ml_extras = mlists.define_list("./lvload/extras.ldc",true);
+	ml_stages = mlists.define_list("./lvload/stages.ldc",true);
 	ml_saves = mlists.define_list(savestates);
+
+	// test goto solution
+	DebugLogData dld;
+	Toolbox::start_debug_logging(dld,"compiler runtime delta");
+	for (uint16_t i=0;i<100;i++) {
+		mlists.define_list("./lvload/extras.ldc",true);
+		mlists.define_list("./lvload/stages.ldc",true);
+	}
+	Toolbox::add_timekey(dld,"computational goto timing");
+	for (uint16_t i=0;i<100;i++) {
+		mlists.define_list("./lvload/extras.ldc",false);
+		mlists.define_list("./lvload/stages.ldc",false);
+	}
+	Toolbox::add_timekey(dld,"function pointer timing");
+	Toolbox::flush_debug_logging(dld);
 
 	// add options for available screens
 	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
