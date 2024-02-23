@@ -129,7 +129,7 @@ constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 //#define NEO_GOTO_COMPUTE 1
-constexpr bool NEO_GOTO_COMPUTE = true;
+//constexpr bool NEO_GOTO_COMPUTE = true;
 
 
 /**
@@ -214,7 +214,7 @@ class LDCCompiler
 public:
 
 	// code processing
-	static void compile(const char* path,std::vector<LDCCluster> &rClusters,bool gcompute);
+	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
 
 private:
 
@@ -370,7 +370,7 @@ public:
 	~MenuList() {  }
 
 	// invokation
-	uint8_t define_list(const char* path,bool gcompute);
+	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
 	void load(CascabelBaseFeature* ccbf,uint16_t wsid);
 

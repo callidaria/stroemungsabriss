@@ -95,16 +95,16 @@
 	\param rClusters: reference to cluster list, the new clusters will be added into
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
-void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters,bool gcompute)
+void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 {
 	// instruction label references
-//#ifdef NEO_GOTO_COMPUTE
+#ifdef NEO_GOTO_COMPUTE
 	static void* table_interpreter_logic[LIST_LANGUAGE_COMMAND_COUNT+2] = {
 		&&logic_cluster,&&logic_define,&&logic_describe,&&logic_floats,&&logic_strings,&&logic_segment,
 		&&logic_condition,&&logic_link,&&logic_subsequent,&&logic_sysbehaviour,&&logic_checkbox,
 		&&logic_dropdown,&&logic_slider,&&logic_return,&&logic_fault,&&logic_halt
 	};
-//#endif
+#else
 	interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
 		command_logic_cluster,command_logic_define,command_logic_describe,command_logic_fattributes,
 		command_logic_sattributes,command_logic_segment,command_logic_condition,command_logic_link,
@@ -112,6 +112,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters,bo
 		command_logic_slider,command_logic_return,command_logic_syntax_error
 	};
 	// TODO: decide if those should be local to the compile function
+#endif
 
 	// setup process state
 	LDCProcessState state = {
@@ -148,9 +149,9 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters,bo
 		line_number++;
 	} file.close();
 
-//#ifdef NEO_GOTO_COMPUTE
+#ifdef NEO_GOTO_COMPUTE
 
-	if (gcompute) {
+	//	if (gcompute) {
 
 	// append halt instruction for compiler termination
 	cmd_buffer.push_back({ LIST_LANGUAGE_COMMAND_COUNT+1,"","",line_number });
@@ -266,8 +267,8 @@ logic_fault:
 logic_halt:
 	{}
 
-	} else {
-//#else
+	//	} else {
+#else
 
 	// second pass: commands - execute extracted commands
 	for (ListLanguageCommand &cmd : cmd_buffer) {
@@ -275,8 +276,8 @@ logic_halt:
 		interpreter_behaviour[cmd.id](state);
 	}
 
-	}
-//#endif
+	//	}
+#endif
 
 	// third pass: interpretation - temporary instruction data
 	for (uint16_t i=0;i<state.clusters.size();i++) {
@@ -733,11 +734,11 @@ void SelectionSpliceGeometry::update()
 	\param path: path to .ldc definition file
 	\returns memory index of first list added to menu list complex collection
 */
-uint8_t MenuList::define_list(const char* path,bool gcompute)
+uint8_t MenuList::define_list(const char* path)
 {
 	// execute definition code
 	std::vector<LDCCluster> clusters;
-	LDCCompiler::compile(path,clusters,gcompute);
+	LDCCompiler::compile(path,clusters);
 	uint8_t out = mlists.size();
 
 	// entity creation
@@ -1467,7 +1468,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 {
 	// content information extraction
 	std::vector<LDCCluster> clusters;
-	LDCCompiler::compile(path,clusters,true);
+	LDCCompiler::compile(path,clusters);
 
 	// setup dialogue fonts
 	Font tfont = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",tsize,tsize);
@@ -1879,25 +1880,25 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	splices_geometry.load();
 
 	// list setup
-	ml_options = mlists.define_list("./lvload/options.ldc",true);
-	ml_extras = mlists.define_list("./lvload/extras.ldc",true);
-	ml_stages = mlists.define_list("./lvload/stages.ldc",true);
+	ml_options = mlists.define_list("./lvload/options.ldc");
+	ml_extras = mlists.define_list("./lvload/extras.ldc");
+	ml_stages = mlists.define_list("./lvload/stages.ldc");
 	ml_saves = mlists.define_list(savestates);
 
 	// test goto solution
-	DebugLogData dld;
+	/*DebugLogData dld;
 	Toolbox::start_debug_logging(dld,"compiler runtime delta");
 	for (uint16_t i=0;i<100;i++) {
-		mlists.define_list("./lvload/extras.ldc",true);
-		mlists.define_list("./lvload/stages.ldc",true);
+		mlists.define_list("./lvload/extras.ldc");
+		mlists.define_list("./lvload/stages.ldc");
 	}
 	Toolbox::add_timekey(dld,"computational goto timing");
 	for (uint16_t i=0;i<100;i++) {
-		mlists.define_list("./lvload/extras.ldc",false);
-		mlists.define_list("./lvload/stages.ldc",false);
+		mlists.define_list("./lvload/extras.ldc");
+		mlists.define_list("./lvload/stages.ldc");
 	}
 	Toolbox::add_timekey(dld,"function pointer timing");
-	Toolbox::flush_debug_logging(dld);
+	Toolbox::flush_debug_logging(dld);*/
 
 	// add options for available screens
 	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",

@@ -35,7 +35,7 @@ constexpr std::string cmp_winlinker = "-lSDL2 -lSDL2main -lglew32 -lopengl32 -lO
 constexpr std::string cmp_windef = "-DGLEW_STATIC -DSDL_MAIN_HANDLED -DSTB_IMAGE_STATIC";
 #endif
 std::string cmp_linking = "-lGL -lGLEW -lSDL2 -lopenal -lpthread -lassimp";
-std::string cmp_extras = "-std=c++17 -pg -O3";
+std::string cmp_extras = "-std=c++17 -pg -O3 -fno-gcse";
 
 // toolbox
 void write_selection();
