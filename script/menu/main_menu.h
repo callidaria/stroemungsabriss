@@ -128,8 +128,8 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
-//#define NEO_GOTO_COMPUTE 1
-//constexpr bool NEO_GOTO_COMPUTE = true;
+#define NEO_GOTO_COMPUTE 0
+#define CONVENTIONAL_SOLUTION_SWITCH 0
 
 
 /**
@@ -215,39 +215,9 @@ public:
 
 	// code processing
 	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
-
-private:
-
-	// command list
-	static inline std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
-		// definitions
-		"cluster","define","describe",
-		// attributes
-		"floats","strings","segment","condition","link",
-		// behaviours
-		"subsequent","system_behaviour","checkbox","dropdown","slider","return"
-	};
+	static inline void compiler_error_msg(LDCProcessState& state,const char* msg)
+		{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",state.fpath,state.cmd->line_number,msg); }
 };
-
-// command interpretation logic
-typedef void (*interpreter_logic)(LDCProcessState&);
-static void command_logic_cluster(LDCProcessState &state);
-static void command_logic_define(LDCProcessState &state);
-static void command_logic_describe(LDCProcessState &state);
-static void command_logic_fattributes(LDCProcessState &state);
-static void command_logic_sattributes(LDCProcessState &state);
-static void command_logic_segment(LDCProcessState &state);
-static void command_logic_condition(LDCProcessState &state);
-static void command_logic_link(LDCProcessState &state);
-static void command_logic_subsequent(LDCProcessState &state);
-static void command_logic_sysbehaviour(LDCProcessState &state);
-static void command_logic_checkbox(LDCProcessState &state);
-static void command_logic_dropdown(LDCProcessState &state);
-static void command_logic_slider(LDCProcessState &state);
-static void command_logic_return(LDCProcessState &state);
-static void command_logic_syntax_error(LDCProcessState &state);
-static void compiler_error_msg(LDCProcessState &state,const char* msg);
-
 
 /**
  *		Selection Splice Geometry Definition
