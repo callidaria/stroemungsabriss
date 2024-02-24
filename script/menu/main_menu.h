@@ -22,9 +22,6 @@ constexpr uint8_t INFO_VERSION_DEVSTEP = 6;
 constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
-// system
-constexpr uint8_t LIST_LANGUAGE_COMMAND_COUNT = 14;
-
 // menu list positioning
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
@@ -128,23 +125,36 @@ constexpr uint8_t RATTLE_THRESHOLD_RAGEADDR = 2;
 constexpr float SHIFTDOWN_ZOOM_INCREASE = .075f;
 constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
-#define NEO_GOTO_COMPUTE 0
-#define CONVENTIONAL_SOLUTION_SWITCH 0
-
 
 /**
  *		LDC Compiler Definition
 */
 
+enum LDCCommandID {
+
+	// definitions
+	CLUSTER,ENTITY,DESCRIPTION,
+
+	// attributes
+	FLOATS,STRINGS,SEGMENT,CONDITION,LINK,
+
+	// behaviours
+	CHILD,SYSBEHAVIOUR,CMD_CHECKBOX,CMD_DROPDOWN,CMD_SLIDER,CMD_RETURN,
+
+	// fault
+	SYNTAX_ERROR,
+	COMMAND_COUNT = SYNTAX_ERROR
+};
+
 enum LDCEntityType
 {
-	UNDEFINED = 0,
-	CHECKBOX = 1,
-	DROPDOWN = 2,
-	SLIDER = 3,
-	RETURN = 4,
-	SUBSEQUENT = 5,
-	SYSTEM = 6
+	UNDEFINED,
+	CHECKBOX,
+	DROPDOWN,
+	SLIDER,
+	RETURN,
+	SUBSEQUENT,
+	SYSTEM
 };
 
 struct ListLanguageCommand
@@ -200,8 +210,11 @@ struct LDCProcessState
 	// info
 	const char* fpath;
 
-	// working data
+	// address
 	ListLanguageCommand* cmd;
+	LDCCluster* c_cluster;
+
+	// working data
 	std::vector<LDCSubsequentReferences> crefs;
 	std::vector<std::vector<std::string>> srefs;
 

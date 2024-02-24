@@ -2,27 +2,32 @@
 
 
 /**
- *		Start Implementation of Compiler Logic Pointers switched by Command
+ *			Start Implementation of Compiler Logic Pointers switched by Command
  *
- * Command ids from buffer, assembled at first compiler pass, jump to their processing logic by memory id.
+ *	The following functions will only be called by LDCCompiler::compile and interpret different commands, which
+ *	have been identified beforehand and translated to a memory id pointing to one of those functions.
+ *	As a response, these commands change the compiler data and state according to their definition.
  *
- * To define a new command, first add the command string without ':' to mlcmd list in LDCCompiler::compile,
- * then create the logic below and add the function to interpreter_behaviour in LDCCompiler::compile.
- * Finally increment LIST_LANGUAGE_COMMAND_COUNT constexpr in the header file.
+ *		How to define a new command:
  *
- * Features implemented according to the List Language Command language definition, established above the
- * compiler implementation.
+ *	1. insert a command id descriptor in LDCCommandID enumerator in header file.
+ *	2. go to interpreter_behaviour definition in source file and insert a function conforming to the typedef.
+ *	3. implement that function depending on how the new command should work.
+ *	4. finally go to mlcmd definition and insert command syntax.
+ *	5. check if id descriptor, interpreter_behaviour function and command syntax have the same id.
+ *
+ *	The performance of this solution has been compared against a regular switch and computed gotos.
+ *	This approach was decisively faster that both other potential solutions.
 */
 
 
 typedef void (*interpreter_logic)(LDCProcessState&);
 
 /*
-	command_logic_cluster(LDCProcessState&) -> (static,global) void !O(1)
+	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: open new cluster definition until next definition is opened. (cmd = :cluster)
-	conforming to: void* interpreter_logic
 */
-void command_logic_cluster(LDCProcessState &state)
+void command_logic_cluster(LDCProcessState& state)
 {
 	LDCCluster cluster;
 	cluster.id = state.cmd->tail;
@@ -32,9 +37,8 @@ void command_logic_cluster(LDCProcessState &state)
 }
 
 /*
-	command_logic_define(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: add named list entity to currently opened cluster (cmd = :define)
-	conforming to: void* interpreter_logic
 */
 void command_logic_define(LDCProcessState &state)
 {
@@ -44,17 +48,15 @@ void command_logic_define(LDCProcessState &state)
 }
 
 /*
-	command_logic_describe(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: add entity description (cmd = :describe)
-	conforming to: void* interpreter_logic
 */
 void command_logic_describe(LDCProcessState &state)
 { state.clusters.back().elist.back().description = state.cmd->buffer; }
 
 /*
-	command_logic_fattributes(LDCProcessState&) -> void (static,global) !O(1)
-	purpose: store constant attributes in entity
-	conforming to: void* interpreter_logic
+	!O(n)mn .amount of float attributes /+load -> interpreter_logic (local,static)
+	purpose: store constant float attributes in entity (cmd = :floats)
 */
 void command_logic_fattributes(LDCProcessState &state)
 {
@@ -71,7 +73,8 @@ void command_logic_fattributes(LDCProcessState &state)
 }
 
 /*
-	TODO
+	!O(n)mn .amount of string attributes /+load -> interpreter_logic (local,static)
+	purpose: store constant string attributes in entity (cmd = :strings)
 */
 void command_logic_sattributes(LDCProcessState &state)
 {
@@ -82,9 +85,8 @@ void command_logic_sattributes(LDCProcessState &state)
 }
 
 /*
-	command_logic_segment(LDCProcessState&) -> void (static,global) !O(1)
-	purpose: add a horrible segment that will cause problems in your logic later (cmd = :segment)
-	conforming to: void* interpreter_logic
+	!O(1)m /+load -> interpreter_logic (local,static)
+	purpose: insert a named segment that seperates the list of entities (cmd = :segment)
 */
 void command_logic_segment(LDCProcessState &state)
 {
@@ -95,9 +97,8 @@ void command_logic_segment(LDCProcessState &state)
 }
 
 /*
-	command_logic_condition(LDCProcessState&) -> void (static,global) !O(1)
+	!O(n)mn .assigned conditions /+load -> interpreter_logic (local,static)
 	purpose: define entity activation boolean reference in logic list by memory id (cmd = :condition)
-	conforming to: void* interpreter_logic
 */
 void command_logic_condition(LDCProcessState &state)
 {
@@ -114,7 +115,8 @@ void command_logic_condition(LDCProcessState &state)
 }
 
 /*
-	TODO
+	!O(1)m /+load -> interpreter_logic (local,static)
+	purpose: link a global initialization variable to a list entity (cmd = :link)
 */
 void command_logic_link(LDCProcessState &state)
 {
@@ -123,9 +125,8 @@ void command_logic_link(LDCProcessState &state)
 }
 
 /*
-	command_logic_subsequent(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: link subsequent cluster to transition to as entity action (cmd = :subsequent)
-	conforming to: void* interpreter_logic
 */
 void command_logic_subsequent(LDCProcessState &state)
 {
@@ -135,14 +136,13 @@ void command_logic_subsequent(LDCProcessState &state)
 }
 
 /*
-	command_logic_sysbehaviour(LDCProcessState&) -> void (static,global) !O(1)
-	purpose: read system command id according to predefinition in ldc documentation above when confirmed
-	conforming to: void* interpreter_logic
+	!O(1) /+load -> interpreter_logic (local,static)
+	purpose: run system command id according to predefinition in ldc documentation (cmd = :system_behaviour)
 */
 void command_logic_sysbehaviour(LDCProcessState &state)
 {
 	try {
-		state.clusters.back().elist.back().etype = SYSTEM;
+		state.clusters.back().elist.back().etype = LDCEntityType::SYSTEM;
 		state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
 	} catch (std::invalid_argument const &ex) {
 		LDCCompiler::compiler_error_msg(state,"system command id not an interpretable number");
@@ -152,20 +152,18 @@ void command_logic_sysbehaviour(LDCProcessState &state)
 }
 
 /*
-	command_logic_checkbox(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: set boolean on/off functionality as entity action (cmd = :checkbox)
-	conforming to: void* interpreter_logic
 */
 void command_logic_checkbox(LDCProcessState &state)
 {
-	state.clusters.back().elist.back().etype = CHECKBOX;
+	state.clusters.back().elist.back().etype = LDCEntityType::CHECKBOX;
 	state.clusters.back().cnt_checkbox++;
 }
 
 /*
-	command_logic_dropdown(LDCProcessState&) -> void (static,global) !O(1)
+	!O(n)bnmn .dropdown options +1 /+load -> interpreter_logic (local,static)
 	purpose: create sublist index linked choices attached to entity (cmd = :dropdown)
-	conforming to: void* interpreter_logic
 */
 void command_logic_dropdown(LDCProcessState &state)
 {
@@ -175,45 +173,42 @@ void command_logic_dropdown(LDCProcessState &state)
 		if (ddoption[0]==';') break;
 		state.clusters.back().elist.back().cattribs.push_back(ddoption);
 	}
-	state.clusters.back().elist.back().etype = DROPDOWN;
+	state.clusters.back().elist.back().etype = LDCEntityType::DROPDOWN;
 	state.clusters.back().cnt_dropdown++;
 }
 // TODO: benchmark push back usage against doubled tail process + predefined list size for tail copy
 // 	this is also relevant for attributes/floats insertions
 
 /*
-	command_logic_slider(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: attach transformable float value to entity (cmd = :slider)
-	conforming to: void* interpreter_logic
 */
 void command_logic_slider(LDCProcessState &state)
 {
-	state.clusters.back().elist.back().etype = SLIDER;
+	state.clusters.back().elist.back().etype = LDCEntityType::SLIDER;
 	state.clusters.back().cnt_slider++;
 }
 
 /*
-	command_logic_return(LDCProcessState&) -> void (static,global) !O(1)
-	purpose: set finalizing entity with set value return (cmd = :return)
-	conforming to: void* interpreter_logic
+	!O(1) /+load -> interpreter_logic (local,static)
+	purpose: define finalizing entity with set value return (cmd = :return)
 */
 void command_logic_return(LDCProcessState &state)
 {
 	state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
-	state.clusters.back().elist.back().etype = RETURN;
+	state.clusters.back().elist.back().etype = LDCEntityType::RETURN;
 }
 
 /*
-	command_logic_error(LDCProcessState&) -> void (static,global) !O(1)
+	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: this method catches invalid syntax/commands and notifies the developer
-	conforming to: void* interpreter_logic
 */
 void command_logic_syntax_error(LDCProcessState &state)
 { LDCCompiler::compiler_error_msg(state,"invalid command syntax"); }
 
 
 // instruction handling references
-static interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = {
+static interpreter_logic interpreter_behaviour[LDCCommandID::COMMAND_COUNT+1] = {
 
 	// definitions
 	command_logic_cluster,command_logic_define,command_logic_describe,
@@ -231,7 +226,7 @@ static interpreter_logic interpreter_behaviour[LIST_LANGUAGE_COMMAND_COUNT+1] = 
 };
 
 // command syntax
-static std::string mlcmd[LIST_LANGUAGE_COMMAND_COUNT] = {
+static std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
 
 	// definitions
 	"cluster","define","describe",
@@ -362,7 +357,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 			// translate command to handling logic address & store in command buffer
 			ListLanguageCommand llc;
 			size_t cmd_split = line.find(' ');
-			while (llc.id<LIST_LANGUAGE_COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
+			while (llc.id<LDCCommandID::COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
 				llc.id++;
 
 			// handle command attributes
@@ -377,13 +372,22 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		line_number++;
 	} file.close();
 
-	// second pass: commands - execute extracted commands
+	// second pass: preallocate memory
+	/*uint16_t alloc_cluster = 0;
+	for (ListLanguageCommand &cmd : cmd_buffer) {
+		alloc_cluster += cmd.id==LDCCommandID::CLUSTER;
+	}
+	state.clusters.resize(alloc_cluster);
+	state.crefs.resize(alloc_cluster);
+	state.srefs.resize(alloc_cluster);*/
+
+	// third pass: execute commands
 	for (ListLanguageCommand &cmd : cmd_buffer) {
 		state.cmd = &cmd;
 		interpreter_behaviour[cmd.id](state);
 	}
 
-	// third pass: interpretation - temporary instruction data
+	// fourth pass: interpretation - temporary instruction data
 	for (uint16_t i=0;i<state.clusters.size();i++) {
 		LDCCluster &cc = state.clusters[i];
 
