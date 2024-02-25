@@ -16,6 +16,8 @@
  *	4. finally go to mlcmd definition and insert command syntax.
  *	5. check if id descriptor, interpreter_behaviour function and command syntax have the same id.
  *
+ *		Performance Statement:
+ *
  *	The performance of this solution has been compared against a regular switch and computed gotos.
  *	This approach was decisively faster that both other potential solutions.
 */
@@ -1671,6 +1673,194 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 
 
 /**
+ * 		Start Implementation of Interface Behaviour
+ * this section defines the static functions the renderer will point to for logic switching
+ * TODO: expand documentation of this section
+*/
+
+
+typedef void (*interface_logic)(MainMenu&);
+
+/*
+	TODO
+*/
+void interface_behaviour_macro(MainMenu &tm)
+{
+	// process macro selection
+	bool action_request = tm.hit_a&&tm.menu_action;
+	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*action_request;
+	tm.interface_logic_id = tm.vselect*action_request;
+
+	// menu transition
+	bool req_transition = tm.hit_a&&!tm.menu_action;
+	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
+	Toolbox::transition_float_on_condition(tm.mtransition,tm.transition_delta,tm.menu_action);
+	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
+	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
+	// TODO: compare linear transition with sinespeed transition implementation
+	// 		also relate the results of this todo to the ftransition in main render method
+
+	// processing selection input
+	tm.vselect += tm.lrmv;
+	bool ch_select = tm.lrmv!=0;
+	if (tm.m_ccbf->frame->mpref_peripheral) {
+		uint8_t out_id = tm.vselect;
+		while (tm.crd_mouse.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
+		while (tm.crd_mouse.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
+				&& out_id<OptionLogicID::OPTION_CAP) out_id++;
+		ch_select = ch_select||(out_id!=tm.vselect);
+		tm.vselect = out_id;
+	}
+
+	// selection splash update calculations
+	if (ch_select||req_transition) {
+
+		// change main option selector dimensions based on selected option
+		SelectionSpliceKey* t_ssk = &tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
+		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
+				+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
+		t_ssk->disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
+			tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+			tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
+
+		// project upper displacement position based on lower displacement
+		glm::vec2 vrt_dir = vrt_cpos-t_ssk->disp_lower;
+		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+		t_ssk->disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
+
+		// update randomized text rotation
+		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+	}
+
+	// reset
+	tm.logic_setup = 0;
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_options(MainMenu &tm)
+{
+	bool open_conf = false;
+	switch (tm.logic_setup) {
+
+	// setup stage
+	case 0:
+		tm.mlists.open_list(tm.ml_options);
+		tm.logic_setup++;
+		break;
+
+	// listing stage
+	case 1:
+		tm.logic_setup += !tm.mlists.system_active;
+		break;
+
+	// checking for changes & open confirmation dialogue on condition
+	case 2:
+		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+			open_conf = open_conf||tm.mlists.linked_variables_changed(i,tm.queued_restart);
+		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
+		tm.logic_setup++;
+		break;
+
+	// confirmation input handling
+	default:
+		if (tm.mdialogues.dg_state==0&&tm.hit_a) {
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+				tm.mlists.write_attributes(i);
+			Init::write_changes();
+			tm.request_restart = tm.queued_restart;
+		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+				tm.mlists.reset_attributes(i);
+			tm.queued_restart = false;
+		} else if (tm.hit_a||tm.hit_b) tm.logic_setup = 0;
+		tm.interface_logic_id *= tm.mdialogues.system_active;
+	}
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_extras(MainMenu &tm)
+{
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_extras);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= tm.mlists.system_active;
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_practice(MainMenu &tm)
+{
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_stages);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= tm.mlists.system_active;
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_load(MainMenu &tm)
+{
+	if (!tm.logic_setup) {
+		tm.mlists.open_list(tm.ml_saves);
+		tm.logic_setup = true;
+	} tm.interface_logic_id *= tm.mlists.system_active;
+}
+
+/*
+	// TODO
+*/
+void interface_behaviour_continue(MainMenu &tm)
+{
+	// open dialogue for continuation request
+	if (!tm.logic_setup) {
+		tm.mdialogues.open_dialogue(tm.dg_continue);
+		tm.logic_setup = true;
+	}
+
+	// TODO: direction to run change menu list according to user input
+	// TODO: actually implement continue functionality
+
+	// closing behaviour
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
+}
+
+/*
+	TODO
+*/
+void interface_behaviour_newgame(MainMenu &tm)
+{
+	// opening difficulty popup dialogue when option first is chosen
+	if (!tm.logic_setup) {
+		tm.mdialogues.open_dialogue(tm.dg_diffs);
+		tm.logic_setup = true;
+	}
+
+	// TODO: preface runcreation with disclaimer that current run will be replaced by the new as main
+	// TODO: actually implement functionality of the menu option
+
+	// closing condition
+	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
+}
+
+
+interface_logic interface_behaviour[] = {
+	interface_behaviour_macro,
+	interface_behaviour_options,
+	interface_behaviour_extras,
+	interface_behaviour_practice,
+	interface_behaviour_load,
+	interface_behaviour_continue,
+	interface_behaviour_newgame
+} const;
+
+
+/**
  * 		The real menu implementation starts here!
  * 
  * TODO: expand this segment documentation
@@ -1686,16 +1876,6 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
-	// setup logic collection
-	interface_behaviour[OptionLogicID::MACRO_EXIT] = interface_behaviour_macro,
-	interface_behaviour[OptionLogicID::OPTIONS] = interface_behaviour_options,
-	interface_behaviour[OptionLogicID::EXTRAS] = interface_behaviour_extras,
-	interface_behaviour[OptionLogicID::PRACTICE] = interface_behaviour_practice,
-	interface_behaviour[OptionLogicID::LOAD] = interface_behaviour_load,
-	interface_behaviour[OptionLogicID::CONTINUE] = interface_behaviour_continue,
-	interface_behaviour[OptionLogicID::NEWGAME] = interface_behaviour_newgame;
-	// TODO: a lot of performance and translation testing necessary to analyze the flipsides
-
 	// asset load
 	uint16_t rid_window_sprite = ccbf->r2d->sl.size();
 	index_ranim = ccbf->r2d->al.size();
@@ -1775,21 +1955,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	ml_extras = mlists.define_list("./lvload/extras.ldc");
 	ml_stages = mlists.define_list("./lvload/stages.ldc");
 	ml_saves = mlists.define_list(savestates);
-
-	// test goto solution
-	/*DebugLogData dld;
-	Toolbox::start_debug_logging(dld,"compiler runtime delta");
-	for (uint16_t i=0;i<100;i++) {
-		mlists.define_list("./lvload/extras.ldc");
-		mlists.define_list("./lvload/stages.ldc");
-	}
-	Toolbox::add_timekey(dld,"computational goto timing");
-	for (uint16_t i=0;i<100;i++) {
-		mlists.define_list("./lvload/extras.ldc");
-		mlists.define_list("./lvload/stages.ldc");
-	}
-	Toolbox::add_timekey(dld,"function pointer timing");
-	Toolbox::flush_debug_logging(dld);*/
 
 	// add options for available screens
 	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
@@ -2122,178 +2287,6 @@ void MainMenu::update_peripheral_annotations()
 	tx_instr.load();
 }
 
-/**
- * 		Start Implementation of Interface Behaviour
- * this section defines the static functions the renderer will point to for logic switching
- * TODO: expand documentation of this section
-*/
-
-/*
-	TODO
-*/
-void interface_behaviour_macro(MainMenu &tm)
-{
-	// process macro selection
-	bool action_request = tm.hit_a&&tm.menu_action;
-	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*action_request;
-	tm.interface_logic_id = tm.vselect*action_request;
-
-	// menu transition
-	bool req_transition = tm.hit_a&&!tm.menu_action;
-	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
-	Toolbox::transition_float_on_condition(tm.mtransition,tm.transition_delta,tm.menu_action);
-	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
-	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
-	// TODO: compare linear transition with sinespeed transition implementation
-	// 		also relate the results of this todo to the ftransition in main render method
-
-	// processing selection input
-	tm.vselect += tm.lrmv;
-	bool ch_select = tm.lrmv!=0;
-	if (tm.m_ccbf->frame->mpref_peripheral) {
-		uint8_t out_id = tm.vselect;
-		while (tm.crd_mouse.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
-		while (tm.crd_mouse.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
-				&& out_id<OptionLogicID::OPTION_CAP) out_id++;
-		ch_select = ch_select||(out_id!=tm.vselect);
-		tm.vselect = out_id;
-	}
-
-	// selection splash update calculations
-	if (ch_select||req_transition) {
-
-		// change main option selector dimensions based on selected option
-		SelectionSpliceKey* t_ssk = &tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
-		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
-				+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
-		t_ssk->disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
-			tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
-			tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
-
-		// project upper displacement position based on lower displacement
-		glm::vec2 vrt_dir = vrt_cpos-t_ssk->disp_lower;
-		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
-		t_ssk->disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
-
-		// update randomized text rotation
-		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
-	}
-
-	// reset
-	tm.logic_setup = 0;
-}
-
-/*
-	TODO
-*/
-void interface_behaviour_options(MainMenu &tm)
-{
-	bool open_conf = false;
-	switch (tm.logic_setup) {
-
-	// setup stage
-	case 0:
-		tm.mlists.open_list(tm.ml_options);
-		tm.logic_setup++;
-		break;
-
-	// listing stage
-	case 1:
-		tm.logic_setup += !tm.mlists.system_active;
-		break;
-
-	// checking for changes & open confirmation dialogue on condition
-	case 2:
-		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-			open_conf = open_conf||tm.mlists.linked_variables_changed(i,tm.queued_restart);
-		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
-		tm.logic_setup++;
-		break;
-
-	// confirmation input handling
-	default:
-		if (tm.mdialogues.dg_state==0&&tm.hit_a) {
-			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-				tm.mlists.write_attributes(i);
-			Init::write_changes();
-			tm.request_restart = tm.queued_restart;
-		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
-			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-				tm.mlists.reset_attributes(i);
-			tm.queued_restart = false;
-		} else if (tm.hit_a||tm.hit_b) tm.logic_setup = 0;
-		tm.interface_logic_id *= tm.mdialogues.system_active;
-	}
-}
-
-/*
-	TODO
-*/
-void interface_behaviour_extras(MainMenu &tm)
-{
-	if (!tm.logic_setup) {
-		tm.mlists.open_list(tm.ml_extras);
-		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
-}
-
-/*
-	TODO
-*/
-void interface_behaviour_practice(MainMenu &tm)
-{
-	if (!tm.logic_setup) {
-		tm.mlists.open_list(tm.ml_stages);
-		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
-}
-
-/*
-	TODO
-*/
-void interface_behaviour_load(MainMenu &tm)
-{
-	if (!tm.logic_setup) {
-		tm.mlists.open_list(tm.ml_saves);
-		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
-}
-
-/*
-	// TODO
-*/
-void interface_behaviour_continue(MainMenu &tm)
-{
-	// open dialogue for continuation request
-	if (!tm.logic_setup) {
-		tm.mdialogues.open_dialogue(tm.dg_continue);
-		tm.logic_setup = true;
-	}
-
-	// TODO: direction to run change menu list according to user input
-	// TODO: actually implement continue functionality
-
-	// closing behaviour
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
-}
-
-/*
-	TODO
-*/
-void interface_behaviour_newgame(MainMenu &tm)
-{
-	// opening difficulty popup dialogue when option first is chosen
-	if (!tm.logic_setup) {
-		tm.mdialogues.open_dialogue(tm.dg_diffs);
-		tm.logic_setup = true;
-	}
-
-	// TODO: preface runcreation with disclaimer that current run will be replaced by the new as main
-	// TODO: actually implement functionality of the menu option
-
-	// closing condition
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
-}
 
 // new issues:
 //	- input request annotation is not displayed for practice and extras listing, but works for all others?!?
@@ -2301,3 +2294,4 @@ void interface_behaviour_newgame(MainMenu &tm)
 //	- automatic restart is prevented when changing both restartable and non-restartable options?
 //		-> probably has something todo with the refusal to write but still storing visual changes?
 //	- when opening a list for the first time a memory leak occurs
+//	- reduce detail of globe preview texture to improve menu load times

@@ -631,19 +631,8 @@ private:
 	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
 
 	// predefinitions
-	typedef void (*interface_logic)(MainMenu&);
-	interface_logic interface_behaviour[OptionLogicID::LOGIC_COUNT];
 	const char* main_options[OptionLogicID::LOGIC_COUNT]
 		= { "exit","options","extras","practice","load","continue","new game" };
 };
-
-// predefinition interface behaviour logic
-static void interface_behaviour_macro(MainMenu &tm);
-static void interface_behaviour_options(MainMenu &tm);
-static void interface_behaviour_extras(MainMenu &tm);
-static void interface_behaviour_practice(MainMenu &tm);
-static void interface_behaviour_load(MainMenu &tm);
-static void interface_behaviour_continue(MainMenu &tm);
-static void interface_behaviour_newgame(MainMenu &tm);
 
 #endif
