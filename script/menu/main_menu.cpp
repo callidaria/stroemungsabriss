@@ -210,7 +210,7 @@ void command_logic_syntax_error(LDCProcessState &state)
 
 
 // instruction handling references
-static interpreter_logic interpreter_behaviour[LDCCommandID::COMMAND_COUNT+1] = {
+const interpreter_logic interpreter_behaviour[LDCCommandID::COMMAND_COUNT+1] = {
 
 	// definitions
 	command_logic_cluster,command_logic_define,command_logic_describe,
@@ -228,7 +228,7 @@ static interpreter_logic interpreter_behaviour[LDCCommandID::COMMAND_COUNT+1] = 
 };
 
 // command syntax
-static std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
+const std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
 
 	// definitions
 	"cluster","define","describe",
@@ -887,8 +887,8 @@ void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 
 	// difficulty preview spritesheet
 	m_ccbf = ccbf;
-	rid_diffs = m_ccbf->r2d->add(glm::vec2(950,550),250,50,"./res/menu/est_diff.png",16,2,30,0);
-	m_ccbf->r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/est_diff.png",16,2,30,0);
+	rid_diffs = m_ccbf->r2d->add(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
+	m_ccbf->r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
 
 	// globe render target
 	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
@@ -1152,7 +1152,7 @@ void MenuList::render()
 	uint8_t rstate = mlists[id].entities[crr_select].diff_preview-1;
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
-	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(1,rstate));
+	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(0,rstate));
 	// TODO: break apart difficulty prognosis text and belt colours
 }
 
@@ -1849,7 +1849,7 @@ void interface_behaviour_newgame(MainMenu &tm)
 }
 
 
-interface_logic interface_behaviour[] = {
+const interface_logic interface_behaviour[] = {
 	interface_behaviour_macro,
 	interface_behaviour_options,
 	interface_behaviour_extras,
@@ -1857,7 +1857,7 @@ interface_logic interface_behaviour[] = {
 	interface_behaviour_load,
 	interface_behaviour_continue,
 	interface_behaviour_newgame
-} const;
+};
 
 
 /**
