@@ -402,17 +402,16 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 
 		// correlate initialization variable name to serialization id
 		for (uint16_t j=0;j<cc.linked_ids.size();j++) {
-			uint32_t ivar = Init::find_iKey(state.srefs[i][j].c_str());
-			if (ivar==InitVariable::VARIABLE_ERROR) {
+			LDCEntity &ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
+			ce.vlink = Init::find_iKey(state.srefs[i][j].c_str());
+			if (ce.vlink==InitVariable::VARIABLE_ERROR) {
 				printf("%s: \033[31;1mvariable linking error.\033[0m referenced as \"\033[34;1m%s\033[0m\"\n",
 						state.fpath,state.srefs[i][j].c_str());
 				continue;
 			}
 
-			// store id and original values for writing purposes & override held entity data
-			LDCEntity &ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
-			ce.vlink = ivar;
-			ce.tdata = Init::iConfig[ivar];
+			// override held entity data with global variable if comparable
+			ce.tdata = Init::iConfig[ce.vlink];
 		}
 
 		// set segment jump write
@@ -935,6 +934,7 @@ void MenuList::write_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
+		if (e.link_id == InitVariable::VARIABLE_ERROR) continue;
 		Init::iConfig[e.link_id] = e.value;
 	}
 }
@@ -949,6 +949,7 @@ void MenuList::reset_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
+		if (e.link_id == InitVariable::VARIABLE_ERROR) continue;
 		e.value = Init::iConfig[e.link_id];
 	}
 }
@@ -1236,6 +1237,7 @@ bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 	bool out = false;
 	for (uint16_t id : mlists[list_id].link_ids) {
 		MenuListEntity &ce = mlists[list_id].entities[id];
+		if (ce.link_id == InitVariable::VARIABLE_ERROR) continue;
 		bool changed = ce.value!=Init::iConfig[ce.link_id];
 		out = out||changed;
 		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
