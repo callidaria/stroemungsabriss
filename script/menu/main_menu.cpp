@@ -2294,4 +2294,3 @@ void MainMenu::update_peripheral_annotations()
 //	- automatic restart is prevented when changing both restartable and non-restartable options?
 //		-> probably has something todo with the refusal to write but still storing visual changes?
 //	- when opening a list for the first time a memory leak occurs
-//	- reduce detail of globe preview texture to improve menu load times
