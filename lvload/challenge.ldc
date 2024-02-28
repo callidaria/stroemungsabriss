@@ -38,6 +38,7 @@ with the given bullet density.
 :describe
 i have changed my mind and hereby revert my previous choice
 :floats 300 -200
+:system_behaviour 1
 
 :define i accept
 :describe

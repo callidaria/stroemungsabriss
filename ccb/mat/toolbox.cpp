@@ -142,6 +142,10 @@ void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
 {
 	tval += tspeed*(cnd-!cnd);
 	tval = (tval<.0f) ? .0f : (tval>1.f) ? 1.f : tval;
+	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
+	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
+	// TODO: compare linear transition with sinespeed transition implementation
+	// 		also relate the results of this todo to the ftransition in main render method
 }
 // TODO: optimize further (!use assembly translation as guide!)
 // TODO: maybe even set some bounds to enhance the transition range possibilities

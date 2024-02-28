@@ -928,7 +928,7 @@ void MenuList::close_list(uint8_t id)
 	!O(n) .linked attributes /function -> (public)
 	purpose: write changed attributes in list to initialization, when linked successfully
 	\param id: id of list complex to write attributes of
-	NOTE: initalization write to file has to be performed seperately
+	NOTE: initalization write to file has to be performed seperately to avoid repetition
 */
 void MenuList::write_attributes(uint8_t id)
 {
@@ -977,6 +977,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			rrnd = true;
 			close_list(active_ids.back());
 			if (active_ids.size()) return mlists[active_ids.back()].lselect;
+			system_active = false;
 			return 0;
 		}
 
@@ -1012,7 +1013,9 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			} seg_passed++,crr_select--;
 		}
 		MenuListEntity &ce = crr.entities[crr_select];
-		instruction_mod = (ce.etype-LDCEntityType::CHECKBOX)*(ce.etype<LDCEntityType::RETURN);
+
+		// modify input instructions based on selection
+		instruction_mod = (ce.etype==LDCEntityType::DROPDOWN)+2*(ce.etype==LDCEntityType::SLIDER);
 
 		// protection for selected segments
 		if (seg_select) {
@@ -1241,7 +1244,9 @@ bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 		bool changed = ce.value!=Init::iConfig[ce.link_id];
 		out = out||changed;
 		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
-	} return out;
+		std::cout << (int)reload << '\n';
+	} std::cout << '\n';
+	return out;
 }
 // TODO: extract more information to display a list of changes later
 
@@ -1697,10 +1702,6 @@ void interface_behaviour_macro(MainMenu &tm)
 	bool req_transition = tm.hit_a&&!tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
 	Toolbox::transition_float_on_condition(tm.mtransition,tm.transition_delta,tm.menu_action);
-	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
-	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
-	// TODO: compare linear transition with sinespeed transition implementation
-	// 		also relate the results of this todo to the ftransition in main render method
 
 	// processing selection input
 	tm.vselect += tm.lrmv;
@@ -1759,8 +1760,10 @@ void interface_behaviour_options(MainMenu &tm)
 
 	// checking for changes & open confirmation dialogue on condition
 	case 2:
-		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++) {
 			open_conf = open_conf||tm.mlists.linked_variables_changed(i,tm.queued_restart);
+			std::cout << (int)tm.queued_restart << '\n';
+		}
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
 		tm.logic_setup++;
 		break;
@@ -1776,7 +1779,10 @@ void interface_behaviour_options(MainMenu &tm)
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
 			tm.queued_restart = false;
-		} else if (tm.hit_a||tm.hit_b) tm.logic_setup = 0;
+		} else if (tm.hit_a||tm.hit_b) {
+			tm.logic_setup = 0;
+			tm.queued_restart = false;
+		}
 		tm.interface_logic_id *= tm.mdialogues.system_active;
 	}
 }
@@ -2107,7 +2113,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// render input instructions
 	tx_instr.prepare();
-	tx_instr.set_scroll(glm::vec2(0,-(!!ftransition+mlists.instruction_mod)*720));
+	tx_instr.set_scroll(glm::vec2(0,-(!!ftransition+mlists.instruction_mod)*MATH_CARTESIAN_YRANGE));
 	tx_instr.render(tcap_instr*mtransition,glm::vec4(1,.6f,0,1));
 
 	// render & transform main options
@@ -2229,6 +2235,10 @@ void MainMenu::update_peripheral_annotations()
 	tx_instr.clear();
 
 	// assemble input instructions
+	//	instr[0]: instructions for main horizontal selection
+	//	instr[1]: instructions for main vertical selection
+	//	instr[2]: instructions for dropdown expansion when selected, confirmation leads to instr[1]
+	//	instr[3]: instructions for slider adjustment when selected
 	std::string dmessage;
 	std::string instr[TEXT_INSTRUCTION_COUNT];
 	if (cpref_peripheral) {
@@ -2283,7 +2293,7 @@ void MainMenu::update_peripheral_annotations()
 	// write input instructions
 	for (uint8_t i=0;i<TEXT_INSTRUCTION_COUNT;i++) {
 		uint16_t estm = fnt_reqt.estimate_textwidth(instr[i].c_str())>>1;
-		tx_instr.add(instr[i].c_str(),glm::vec2(MATH_CENTER_GOLDEN-estm,30+i*720));
+		tx_instr.add(instr[i].c_str(),glm::vec2(MATH_CENTER_GOLDEN-estm,30+i*MATH_CARTESIAN_YRANGE));
 		tcap_instr += instr[i].length();
 	}
 	tx_instr.load();
@@ -2291,8 +2301,6 @@ void MainMenu::update_peripheral_annotations()
 
 
 // new issues:
-//	- input request annotation is not displayed for practice and extras listing, but works for all others?!?
-//	- refusal of difficulty should automatically close confirmation prompt
 //	- automatic restart is prevented when changing both restartable and non-restartable options?
 //		-> probably has something todo with the refusal to write but still storing visual changes?
-//	- when opening a list for the first time a memory leak occurs
+//	- memory leak when going into option menu sublists?
