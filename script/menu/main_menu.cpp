@@ -1244,8 +1244,7 @@ bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 		bool changed = ce.value!=Init::iConfig[ce.link_id];
 		out = out||changed;
 		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
-		std::cout << (int)reload << '\n';
-	} std::cout << '\n';
+	}
 	return out;
 }
 // TODO: extract more information to display a list of changes later
@@ -1760,10 +1759,8 @@ void interface_behaviour_options(MainMenu &tm)
 
 	// checking for changes & open confirmation dialogue on condition
 	case 2:
-		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++) {
-			open_conf = open_conf||tm.mlists.linked_variables_changed(i,tm.queued_restart);
-			std::cout << (int)tm.queued_restart << '\n';
-		}
+		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+			open_conf = tm.mlists.linked_variables_changed(i,tm.queued_restart)||open_conf;
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
 		tm.logic_setup++;
 		break;
@@ -2301,6 +2298,4 @@ void MainMenu::update_peripheral_annotations()
 
 
 // new issues:
-//	- automatic restart is prevented when changing both restartable and non-restartable options?
-//		-> probably has something todo with the refusal to write but still storing visual changes?
 //	- memory leak when going into option menu sublists?
