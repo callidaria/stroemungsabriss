@@ -792,7 +792,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		MenuListEntity mle = {
 			.colour = diff_colours[state.diff],
 			.etype = LDCEntityType::RETURN,
-			.value = i,
+			.value = i+1,
 			.has_rotation = true,
 			.grotation = glm::vec2(0),
 			.text = Text(st_font),
@@ -1815,11 +1815,13 @@ void interface_behaviour_load(MainMenu &tm)
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_saves);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
+	}
+	if (tm.mlists.status) tm.m_ccbf->ld.push(tm.savestates.saves[tm.mlists.status-1].ld_inst);
+	tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
-	// TODO
+	TODO
 */
 void interface_behaviour_continue(MainMenu &tm)
 {
@@ -1835,14 +1837,14 @@ void interface_behaviour_continue(MainMenu &tm)
 		tm.m_ccbf->ld.push(tm.savestates.saves[0].ld_inst);
 		break;
 	case 2:
-		std::cout << "TODO: switch profiles\n";
+		tm.mdialogues.close_dialogue(tm.dg_continue);
+		tm.interface_logic_id = OptionLogicID::LOAD;
+		tm.logic_setup = false;
 		break;
 	}
-	// TODO: direction to run change menu list according to user input
-	// FIXME: return works based on entity id instead of return value
 
 	// closing behaviour
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;
+	tm.interface_logic_id *= tm.mdialogues.system_active;
 }
 
 /*
