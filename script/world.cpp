@@ -14,7 +14,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/fbv_menu.shader","./shader/fbf_menu.shader",false);
+			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader",false);
 	rtarget_id = eref->r3d->add_target(eref->frame);
 }
 
@@ -68,6 +68,7 @@ void World::load(float &progress,float ldsplit)
 	m_ccbf->r2d->load(&m_setRigs->cam2D[active_cam2D],progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&m_setRigs->lighting);
 	m_ccbf->pSys->load();
 	progress = org_progress+ldsplit;
 }

@@ -70,8 +70,10 @@ void Worldbuilder::load_menu()
 	m_world->add_ui(main_menu);
 	m_world->load(progress,.25f);
 }
+
 void Worldbuilder::load_casino()
 {
+	std::cout << "loading: spike's casino\n";
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs,progress,.5f);
 	m_world->add_ui(action_menu);
@@ -82,8 +84,10 @@ void Worldbuilder::load_casino()
 	progress = 1.0f;
 	// TODO: dynamification of camera and ui (etc...) picker
 }
+
 void Worldbuilder::load_cards()
 {
+	std::cout << "loading: card games\n";
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs,progress,.5f);
 	m_world->add_ui(action_menu);
@@ -93,10 +97,13 @@ void Worldbuilder::load_cards()
 	m_world->load(progress,.21f);
 	progress = 1.0f;
 }
+
 void Worldbuilder::load_airfield()
 { std::cout << "loading: airfield scene\n"; }
+
 void Worldbuilder::load_dpilot()
 {
+	std::cout << "loading: dancing pilot duel\n";
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
 	progress += .2f;

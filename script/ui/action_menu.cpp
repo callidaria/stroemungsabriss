@@ -52,7 +52,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top
 	!! DISCLAIMER: has to be run after game board components, but before all other ui using bb !!
 */
-void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
+void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// action menu open requests
 	bool pause = imap->input_val[InputID::PAUSE],details = imap->input_val[InputID::DETAILS];
@@ -84,10 +84,14 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	// sepia colourspace when paused
 	m_frame->clear();
 	game_fb->prepare();
+	game_fb->s.upload_vec2(
+			"ratio",
+			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH,Init::iConfig[FRAME_RESOLUTION_HEIGHT]])
+		);
 	game_fb->s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
 	game_fb->s.upload_float("mtransition",ptrans);
 	game_fb->render();
-	// FIXME: this requires ratio to already be uploaded to game_fb shader
+	// FIXME: this requires ratio to already be uploaded to game_fb shader at load time
 
 	// selection splash modifications
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf

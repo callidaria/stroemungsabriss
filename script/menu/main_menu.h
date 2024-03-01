@@ -556,6 +556,7 @@ public:
 
 	// engine
 	CascabelBaseFeature* m_ccbf;
+	SaveStates savestates;
 	bool request_close = false;
 	bool request_restart = false;
 
@@ -609,9 +610,6 @@ private:
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(OptionLogicID::LOGIC_COUNT,Text(fnt_mopts));
 	MSAA msaa;
-
-	// data
-	SaveStates savestates;
 
 	// index
 	uint16_t index_rsprite,index_ranim;

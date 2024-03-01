@@ -1828,8 +1828,17 @@ void interface_behaviour_continue(MainMenu &tm)
 		tm.logic_setup = true;
 	}
 
+	// processing dialogue response
+	switch (tm.mdialogues.dg_state) {
+	case 1:
+		tm.m_ccbf->ld.push(tm.savestates.saves[0].ld_inst);
+		break;
+	case 2:
+		std::cout << "TODO: switch profiles\n";
+		break;
+	}
 	// TODO: direction to run change menu list according to user input
-	// TODO: actually implement continue functionality
+	// FIXME: return works based on entity id instead of return value
 
 	// closing behaviour
 	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_continue].dg_active;

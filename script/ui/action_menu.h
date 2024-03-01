@@ -37,7 +37,7 @@ public:
 	~ActionMenu() {  }
 
 	// runtime interactions
-	void render(FrameBuffer* game_fb,uint32_t &running,bool &reboot);
+	void render(FrameBuffer* game_fb,bool &running,bool &reboot);
 
 private:
 

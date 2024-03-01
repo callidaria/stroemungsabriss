@@ -3,10 +3,12 @@
 :define continue
 :describe
 continue from last save
+:return 1
 
 :define change run
 :describe
 switch savestate to continue from
+:return 2
 
 :define back
 :describe
