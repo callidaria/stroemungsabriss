@@ -461,7 +461,7 @@ struct SingularDialogueData
 	int8_t sindex = 0,max_options;
 
 	// action tuple
-	std::vector<uint8_t> action_id;
+	std::vector<LDCEntityType> action_id;
 	std::vector<uint16_t> action_value;
 
 	// text to display information to user

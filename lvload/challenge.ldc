@@ -5,11 +5,13 @@
 original mode:
 intended difficulty!
 WARNING: NOT AN EASY OR NORMAL MODE!
+:return 1
 
 :define master
 :describe
 master mode:
 you are either a seasoned danmaku veteran or original mode doesn't challenge you anymore
+:return 1
 
 :define grandmaster
 :describe
@@ -43,3 +45,4 @@ i have changed my mind and hereby revert my previous choice
 :define i accept
 :describe
 i acknowledge this challenge as impossible and welcome death with open arms
+:return 1

@@ -1433,7 +1433,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		for (uint8_t i=0;i<opcount;i++) {
 
 			// action setup
-			dgd.action_id[i] = cluster.elist[i].etype-(uint8_t)LDCEntityType::RETURN;
+			dgd.action_id[i] = cluster.elist[i].etype;
 			dgd.action_value[i] = cluster.elist[i].tdata;
 
 			// information print setup
@@ -1505,6 +1505,7 @@ void MenuDialogue::open_dialogue(uint8_t did)
 
 	// set dialogue info active & reset state
 	dg_data[did].dg_active = true;
+	system_active = true;
 }
 
 /*
@@ -1559,16 +1560,16 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 				? csdd->max_options : csdd->sindex;
 
 		// confirmation condition & set dialogue response state
-		if (conf) {
-			dg_state = csdd->sindex;
+		if (!conf) return;
+		dg_state = csdd->action_value[csdd->sindex]*(csdd->action_id[csdd->sindex]==LDCEntityType::RETURN);
 
-			// handle possible system behaviour attached to confirmed option
-			switch (dg_data[id].action_id[csdd->sindex]) {
-				case 1: open_dialogue(dg_data[id].action_value[csdd->sindex]);
-					break;
-				case 2: close_dialogue(id);
-					break;
-			}
+		// handle possible system behaviour attached to confirmed option
+		switch (dg_data[id].action_id[csdd->sindex]) {
+		case LDCEntityType::SUBSEQUENT: open_dialogue(dg_data[id].action_value[csdd->sindex]);
+			break;
+		case LDCEntityType::SYSTEM:close_dialogue(id);
+			break;
+			// TODO: this assumes all system behaviours simply close the dialogue
 		}
 	}
 }
@@ -1849,17 +1850,36 @@ void interface_behaviour_continue(MainMenu &tm)
 */
 void interface_behaviour_newgame(MainMenu &tm)
 {
+	switch (tm.logic_setup) {
+
 	// opening difficulty popup dialogue when option first is chosen
-	if (!tm.logic_setup) {
+	case 0:
 		tm.mdialogues.open_dialogue(tm.dg_diffs);
-		tm.logic_setup = true;
+		tm.logic_setup++;
+
+	// switch to confirmation dialogue
+	case 1:
+		tm.logic_setup += tm.mdialogues.dg_state==1;
+		break;
+
+	// open confirmation dialogue
+	case 2:
+		std::cout << "transition\n";
+		tm.mdialogues.close_dialogue(tm.dg_diffs);
+		tm.mdialogues.close_dialogue(tm.dg_diffs+1);
+		tm.mdialogues.open_dialogue(tm.dg_diffs+2);
+		tm.logic_setup++;
+
+	// wait for confirmation
+	case 3:
+		if (tm.mdialogues.dg_state==1) {
+			std::cout << "TODO: create new save file\n";
+			tm.mdialogues.close_dialogue(tm.dg_diffs+2);
+		}
+		break;
+		// TODO: actually implement functionality of the menu option in the future
 	}
-
-	// TODO: preface runcreation with disclaimer that current run will be replaced by the new as main
-	// TODO: actually implement functionality of the menu option
-
-	// closing condition
-	tm.interface_logic_id *= tm.mdialogues.dg_data[tm.dg_diffs].dg_active;
+	tm.interface_logic_id *= tm.mdialogues.system_active;
 }
 
 
@@ -2002,6 +2022,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
+	mdialogues.add_dialogue_window("./lvload/newgame.ldc",glm::vec2(640,360),320,250,30,25);
 	dg_continue = mdialogues.add_dialogue_window("./lvload/continue.ldc",glm::vec2(640,360),320,250,30,25);
 	dg_optsave = mdialogues.add_dialogue_window("./lvload/savechanges.ldc",glm::vec2(640,360),320,250,30,25);
 	mdialogues.load();
