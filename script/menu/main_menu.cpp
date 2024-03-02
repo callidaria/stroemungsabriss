@@ -1701,7 +1701,6 @@ void interface_behaviour_macro(MainMenu &tm)
 	// menu transition
 	bool req_transition = tm.hit_a&&!tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
-	Toolbox::transition_float_on_condition(tm.mtransition,tm.transition_delta,tm.menu_action);
 
 	// processing selection input
 	tm.vselect += tm.lrmv;
@@ -2089,7 +2088,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
 			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
-	// focus transition
+	// transitions
+	Toolbox::transition_float_on_condition(mtransition,transition_delta,menu_action);
 	Toolbox::transition_float_on_condition(ftransition,transition_delta,interface_logic_id);
 	inv_ftransition = 1.f-ftransition,inv_mtransition = 1.f-mtransition;
 
