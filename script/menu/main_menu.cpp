@@ -242,7 +242,7 @@ const std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
 
 
 /**
- *		LDC Compiler Implementation
+ *			LDC Compiler Implementation
  *
  * The LDC Compiler reads a menu list definition .ldc file and compiles it to a struct complex.
  * This resulting complex can be used to write an intern list logic, which will be externally defined and
@@ -382,6 +382,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 	state.clusters.resize(alloc_cluster);
 	state.crefs.resize(alloc_cluster);
 	state.srefs.resize(alloc_cluster);*/
+	// TODO: something like this to reduce push_back usage in third compiler pass
 
 	// third pass: execute commands
 	for (ListLanguageCommand &cmd : cmd_buffer) {
@@ -417,8 +418,8 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		// set segment jump write
 		for (LDCSegment &segment : state.clusters[i].slist)
 			state.clusters[i].elist[segment.position].jsegment = true;
+		// TODO: can be done during interpretation
 	}
-	// FIXME: the angry valgrind output should give the programmer some ideas what is to be fixed
 }
 
 
@@ -668,11 +669,13 @@ uint8_t MenuList::define_list(const char* path)
 
 		// process cluster entities
 		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
+		uint16_t prev_segments = 0;
 		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// dodge scroll to prevent segment override with list element
 			vscroll -= MENU_LIST_SCROLL_Y*cluster.elist[i].jsegment;
+			prev_segments += cluster.elist[i].jsegment;
 
 			// create entity
 			MenuListEntity t_entity = {
@@ -680,7 +683,8 @@ uint8_t MenuList::define_list(const char* path)
 				.value = cluster.elist[i].tdata,
 				.link_id = cluster.elist[i].vlink,
 				.text = Text(st_font),
-				.tlen = cluster.elist[i].head.length()
+				.tlen = cluster.elist[i].head.length(),
+				.prev_segments = prev_segments
 			};
 
 			// fill in element list information
@@ -999,7 +1003,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		}
 
 		// clamp selection to last element
-		uint16_t eindex = crr.lscroll+crr.lselect;
+		/*uint16_t eindex = crr.lscroll+crr.lselect;
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
 
 		// find index of selected entity & check if selection intersects segment
@@ -1011,7 +1015,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 				seg_select = crr_select==seg.position;
 				break;
 			} seg_passed++,crr_select--;
-		}
+		}*/
 		MenuListEntity &ce = crr.entities[crr_select];
 
 		// modify input instructions based on selection
@@ -1865,7 +1869,6 @@ void interface_behaviour_newgame(MainMenu &tm)
 
 	// open confirmation dialogue
 	case 2:
-		std::cout << "transition\n";
 		tm.mdialogues.close_dialogue(tm.dg_diffs);
 		tm.mdialogues.close_dialogue(tm.dg_diffs+1);
 		tm.mdialogues.open_dialogue(tm.dg_diffs+2);

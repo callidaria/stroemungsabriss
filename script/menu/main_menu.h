@@ -186,7 +186,7 @@ struct LDCEntity
 	std::vector<float> fattribs;
 	std::vector<std::string> cattribs;
 
-	// segment behaviour (probably not the best solution and is subject to change)
+	// segment behaviour
 	bool jsegment = false;
 };
 
@@ -312,6 +312,7 @@ struct MenuListEntity
 	glm::vec2 grotation = glm::vec2(0);
 	Text text;
 	size_t tlen = 0;
+	uint16_t prev_segments = 0;
 
 	// attribute component
 	std::vector<Text> dd_options;

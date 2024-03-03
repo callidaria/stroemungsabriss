@@ -103,7 +103,11 @@
 :strings diff_id
 :floats 9
 
-:define Stage: Luftschiff Spielzeugparadies Chaosland
+:define Stage: Wunderzirkus Chaosland
+:strings diff_id
+:floats 5
+
+:define Stage: Luftschiff Spielzeugparadies
 :strings diff_id
 :floats 7
 
