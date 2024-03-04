@@ -669,22 +669,22 @@ uint8_t MenuList::define_list(const char* path)
 
 		// process cluster entities
 		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
-		uint16_t prev_segments = 0;
+		uint16_t grid_position = 0;
 		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// dodge scroll to prevent segment override with list element
-			vscroll -= MENU_LIST_SCROLL_Y*cluster.elist[i].jsegment;
-			prev_segments += cluster.elist[i].jsegment;
+			grid_position += cluster.elist[i].jsegment;
+			float vscroll = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*grid_position;
 
 			// create entity
 			MenuListEntity t_entity = {
 				.etype = cluster.elist[i].etype,
 				.value = cluster.elist[i].tdata,
 				.link_id = cluster.elist[i].vlink,
+				.grid_position = grid_position,
 				.text = Text(st_font),
-				.tlen = cluster.elist[i].head.length(),
-				.prev_segments = prev_segments
+				.tlen = cluster.elist[i].head.length()
 			};
 
 			// fill in element list information
@@ -764,7 +764,7 @@ uint8_t MenuList::define_list(const char* path)
 			};
 
 			// move cursor to write next element & store current information
-			vscroll -= MENU_LIST_SCROLL_Y;
+			grid_position++;
 			mlists[lidx].entities[i] = t_entity;
 		}
 
@@ -1002,8 +1002,11 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
 		}
 
+		uint16_t selected = crr.lscroll+crr.lselect;
+		std::cout << (unsigned int)crr.entities[selected].grid_position << '\n';
+
 		// clamp selection to last element
-		/*uint16_t eindex = crr.lscroll+crr.lselect;
+		uint16_t eindex = crr.lscroll+crr.lselect;
 		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
 
 		// find index of selected entity & check if selection intersects segment
@@ -1015,7 +1018,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 				seg_select = crr_select==seg.position;
 				break;
 			} seg_passed++,crr_select--;
-		}*/
+		}
+		
 		MenuListEntity &ce = crr.entities[crr_select];
 
 		// modify input instructions based on selection

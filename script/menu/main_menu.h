@@ -306,13 +306,13 @@ struct MenuListEntity
 	uint16_t link_id = 0;
 
 	// representation
+	uint16_t grid_position = 0;
 	float anim_transition = .0f;
 	uint8_t diff_preview = 0;
 	bool has_rotation = false;
 	glm::vec2 grotation = glm::vec2(0);
 	Text text;
 	size_t tlen = 0;
-	uint16_t prev_segments = 0;
 
 	// attribute component
 	std::vector<Text> dd_options;
