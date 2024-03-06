@@ -639,7 +639,6 @@ uint8_t MenuList::define_list(const char* path)
 	mlists.resize(out+clusters.size());
 	for (LDCCluster &cluster : clusters) {
 		mlists[lidx] = {
-			.full_range = cluster.elist.size()+cluster.slist.size()-1,
 			.entities = std::vector<MenuListEntity>(cluster.elist.size()),
 			.segments = std::vector<MenuListSegment>(cluster.slist.size()),
 			.description = Text(de_font),
@@ -784,7 +783,6 @@ uint8_t MenuList::define_list(SaveStates states)
 {
 	// create singular complex without segments for a simple state list
 	MenuListComplex mlc = {
-		.full_range = states.saves.size()-1,
 		.entities = std::vector<MenuListEntity>(states.saves.size()),
 		.description = Text(st_font)
 	};
@@ -797,6 +795,7 @@ uint8_t MenuList::define_list(SaveStates states)
 			.colour = diff_colours[state.diff],
 			.etype = LDCEntityType::RETURN,
 			.value = i+1,
+			.grid_position = i,
 			.has_rotation = true,
 			.grotation = glm::vec2(0),
 			.text = Text(st_font),
@@ -830,7 +829,6 @@ uint8_t MenuList::define_list(SaveStates states)
 		};
 		decoy.text.add(err_message.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),decoy.text.load();
 		mlc.entities.push_back(decoy);
-		mlc.full_range = 0;
 	}
 
 	// output result
@@ -980,12 +978,36 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		if (back) {
 			rrnd = true;
 			close_list(active_ids.back());
-			if (active_ids.size()) return mlists[active_ids.back()].lselect;
+			if (active_ids.size()) return calculate_grid_position();
 			system_active = false;
 			return 0;
 		}
 
+		// selection by rasterized mouse position
+		int32_t selected = crr.select_id;
+		if (mperiph) {
+			// TODO
+		}
+
+		// selection by directional input
+		else {
+
+			// apply vertical input direction to list selection
+			selected += vdir;
+			selected = (selected<0) ? 0 : (selected>=crr.entities.size()) ? crr.entities.size()-1 : selected;
+
+			// adjust list scroll
+			int32_t delta = crr.entities[selected].grid_position-crr.lscroll;
+			crr.lscroll += std::max(delta-7,0)+std::min(delta,0);
+		}
+
+		// override selection & check for changes
+		rrnd = rrnd||tf_list_opened||(crr.select_id!=selected);
+		crr.select_id = selected;
+		MenuListEntity& ce = crr.entities[selected];
+
 		// set selection by rasterized mouse position
+		/*
 		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
 		if (mperiph) {
 			int16_t nselect = (MENU_LIST_SCROLL_START-mpos.y)/MENU_LIST_SCROLL_Y;
@@ -993,44 +1015,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)
 					&& (crr.lscroll<((int16_t)crr.full_range-7)||mscroll>0));
 		}
-
-		// update selection by directional input
-		else {
-			int8_t dt_select = crr.lselect+vdir;
-			int8_t dt_scroll = crr.lscroll+dt_select*(dt_select<0)+(dt_select-7)*(dt_select>7);
-			crr.lselect = (dt_select<0) ? 0 : (dt_select>7) ? 7 : dt_select;
-			crr.lscroll = (dt_scroll<0) ? 0 : dt_scroll;
-		}
-
-		uint16_t selected = crr.lscroll+crr.lselect;
-		std::cout << (unsigned int)crr.entities[selected].grid_position << '\n';
-
-		// clamp selection to last element
-		uint16_t eindex = crr.lscroll+crr.lselect;
-		crr.lselect -= (eindex-crr.full_range)*(eindex>crr.full_range);
-
-		// find index of selected entity & check if selection intersects segment
-		crr_select = crr.lscroll+crr.lselect;
-		seg_passed = 0;
-		bool seg_select = false;
-		for (MenuListSegment &seg : crr.segments) {
-			if (crr_select<=seg.position) {
-				seg_select = crr_select==seg.position;
-				break;
-			} seg_passed++,crr_select--;
-		}
-		
-		MenuListEntity &ce = crr.entities[crr_select];
-
-		// modify input instructions based on selection
-		instruction_mod = (ce.etype==LDCEntityType::DROPDOWN)+2*(ce.etype==LDCEntityType::SLIDER);
-
-		// protection for selected segments
-		if (seg_select) {
-			int8_t dt_select = -1+2*(vdir>0||mperiph||!seg_passed);
-			crr.lselect += dt_select,crr_select -= dt_select<0;
-		}
-		// FIXME: one too many scroll, when selection tries to exceed last entity.
+		*/
 
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
@@ -1061,8 +1046,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		}
 
 		// selection geometry data manipulation
-		out = mlists[active_ids.back()].lselect;
-		rrnd = (crr.lselect!=cmp_select)||(crr.lscroll!=cmp_scroll)||rrnd||tf_list_opened;
+		out = calculate_grid_position();
 		tf_list_opened = false;
 	}
 
@@ -1077,11 +1061,12 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 	// input handling for sublist
 	if (mperiph) {
-		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
+		// TODO
+		/*uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
 		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y-seg_passed;
 		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
 		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1.f);
-		e.value = conf ? mshover : e.value;
+		e.value = conf ? mshover : e.value;*/
 	} else {
 		int8_t nvalue = e.value+vdir;
 		e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
@@ -1109,7 +1094,7 @@ void MenuList::render()
 
 		// draw dropdown background
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
-		ddbgr_shader.upload_int("selection",mlists[id].lselect-e.value);
+		ddbgr_shader.upload_int("selection",calculate_grid_position()-e.value);
 		ddbgr_shader.upload_int("ddsize",e.dd_options.size()-1);
 		glDrawArrays(GL_TRIANGLES,0,12);
 
@@ -1235,6 +1220,15 @@ void MenuList::update_overlays()
 		m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
 		m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
 	}
+}
+
+/*
+	TODO
+*/
+uint8_t MenuList::calculate_grid_position()
+{
+	MenuListComplex& crr = mlists[active_ids.back()];
+	return crr.entities[crr.select_id].grid_position-crr.lscroll;
 }
 
 /*
@@ -2338,3 +2332,4 @@ void MainMenu::update_peripheral_annotations()
 
 // new issues:
 //	- memory leak when going into option menu sublists?
+//	- once again restore decides not to work again, this time without any appearant cause

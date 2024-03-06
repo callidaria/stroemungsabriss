@@ -330,8 +330,7 @@ struct MenuListSegment
 struct MenuListComplex
 {
 	// navigation
-	uint16_t lselect = 0,lscroll = 0;
-	size_t full_range = 0;
+	uint16_t lscroll = 0,select_id = 0;
 
 	// data
 	std::vector<MenuListEntity> entities;
@@ -375,6 +374,7 @@ public:
 	void update_overlays();
 
 	// info
+	uint8_t calculate_grid_position();
 	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 private:
