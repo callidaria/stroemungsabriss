@@ -967,12 +967,11 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	instruction_mod = 0;
 	show_globe = false;
 	if (!active_ids.size()) return 0;
+	MenuListComplex &crr = mlists[active_ids.back()];
 
 	// update most recent list
 	uint8_t out = 0;
 	if (!subfunc_opened) {
-		crr_select = 0;
-		MenuListComplex &crr = mlists[active_ids.back()];
 
 		// escape handling
 		if (back) {
@@ -1019,6 +1018,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
+			instruction_mod = 2;
+
 			if (ntconf&&mperiph&&mpos.x>MENU_LIST_ATTRIBUTE_COMBINE&&mpos.x<MENU_LIST_ATTRIBUTE_WTARGET)
 				ce.value = ((mpos.x-MENU_LIST_ATTRIBUTE_COMBINE)/MENU_LIST_ATTRIBUTE_WIDTH)*100;
 			else if (hdir) {
@@ -1045,6 +1046,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 			};
 		}
 
+		else instruction_mod = ce.etype==LDCEntityType::DROPDOWN;
+
 		// selection geometry data manipulation
 		out = calculate_grid_position();
 		tf_list_opened = false;
@@ -1055,9 +1058,8 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	if (!subfunc_opened) return out;
 
 	// setup
-	MenuListEntity &e = mlists[id].entities[crr_select];
+	MenuListEntity &e = crr.entities[crr.select_id];
 	uint8_t cap_options = e.dd_options.size()-1;
-	instruction_mod = 0;
 
 	// input handling for sublist
 	if (mperiph) {
@@ -1086,11 +1088,11 @@ void MenuList::render()
 {
 	// skip if no lists active
 	if (!system_active) return;
-	uint8_t id = active_ids.back();
+	MenuListComplex& crr = mlists[active_ids.back()];
 
 	// update attribute subfunctionality for dropdown options
 	if (subfunc_opened) {
-		MenuListEntity &e = mlists[id].entities[crr_select];
+		MenuListEntity &e = crr.entities[crr.select_id];
 
 		// draw dropdown background
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
@@ -1109,8 +1111,8 @@ void MenuList::render()
 
 	// write dropdown elements
 	else {
-		for (uint16_t &ddi : mlists[id].dropdown_ids) {
-			MenuListEntity &e = mlists[id].entities[ddi];
+		for (uint16_t &ddi : crr.dropdown_ids) {
+			MenuListEntity &e = crr.entities[ddi];
 			e.dd_options[e.value].prepare();
 			e.dd_options[e.value].set_scroll(glm::vec2(0,0));
 			e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
@@ -1119,23 +1121,23 @@ void MenuList::render()
 	// TODO: in DIRE need of optimization once the text implementation is fixed!
 
 	// draw active lists
-	crr_scroll = mlists[id].lscroll*MENU_LIST_SCROLL_Y;
-	for (MenuListSegment &s : mlists[id].segments)
+	crr_scroll = crr.lscroll*MENU_LIST_SCROLL_Y;
+	for (MenuListSegment &s : crr.segments)
 		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : mlists[id].entities)
+	for (MenuListEntity &e : crr.entities)
 		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
-	mlists[id].description.prepare(),mlists[id].description.set_scroll(glm::vec2(0,crr_select*720.f)),
-		mlists[id].description.render(mlists[id].dtlen,glm::vec4(1));
+	crr.description.prepare(),crr.description.set_scroll(glm::vec2(0,crr.select_id*720.f)),
+		crr.description.render(crr.dtlen,glm::vec4(1));
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 
 	// globe render setup
-	show_globe = mlists[id].entities[crr_select].has_rotation;
-	globe_rotation = mlists[id].entities[crr_select].grotation;
+	show_globe = crr.entities[crr.select_id].has_rotation;
+	globe_rotation = crr.entities[crr.select_id].grotation;
 
 	// difficulty prognosis text animation
-	if (!mlists[id].entities[crr_select].diff_preview) return;
+	if (!crr.entities[crr.select_id].diff_preview) return;
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
@@ -1146,7 +1148,7 @@ void MenuList::render()
 	anim_prog += .02f;
 
 	// difficulty prognosis render
-	uint8_t rstate = mlists[id].entities[crr_select].diff_preview-1;
+	uint8_t rstate = crr.entities[crr.select_id].diff_preview-1;
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
 	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(0,rstate));

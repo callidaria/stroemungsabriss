@@ -407,7 +407,6 @@ private:
 	std::vector<float> checkbox_vertices,slider_vertices;
 
 	// positioning
-	uint16_t crr_select = 0,seg_passed = 0;
 	float crr_scroll = .0f;
 
 	// animation
