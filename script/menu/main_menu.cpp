@@ -1765,16 +1765,26 @@ void interface_behaviour_options(MainMenu &tm)
 
 	// confirmation input handling
 	default:
-		if (tm.mdialogues.dg_state==0&&tm.hit_a) {
+
+		// handle writing changes
+		if (tm.mdialogues.dg_state==1&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.write_attributes(i);
 			Init::write_changes();
 			tm.request_restart = tm.queued_restart;
-		} else if (tm.mdialogues.dg_state==1&&tm.hit_a) {
+			tm.mdialogues.close_dialogue(tm.dg_optsave);
+		}
+
+		// handle settings reset
+		else if (tm.mdialogues.dg_state==2&&tm.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
 			tm.queued_restart = false;
-		} else if (tm.hit_a||tm.hit_b) {
+			tm.mdialogues.close_dialogue(tm.dg_optsave);
+		}
+
+		// handle universal abort request
+		else if (tm.hit_a||tm.hit_b) {
 			tm.logic_setup = 0;
 			tm.queued_restart = false;
 		}
@@ -2328,4 +2338,3 @@ void MainMenu::update_peripheral_annotations()
 
 // new issues:
 //	- memory leak when going into option menu sublists?
-//	- once again restore decides not to work, this time without any appearant cause
