@@ -1053,19 +1053,16 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 	// update attribute subfunctionality for dropdown options if obsoletion check fails
 	uint8_t id = active_ids.back();
 	if (!subfunc_opened) return out;
-
-	// setup
 	MenuListEntity &e = crr.entities[crr.select_id];
-	uint8_t cap_options = e.dd_options.size()-1;
 
 	// input handling for sublist
+	uint8_t cap_options = e.dd_options.size()-1;
 	if (mperiph) {
-		// TODO
-		/*uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(crr_select-e.value);
-		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y-seg_passed;
+		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(e.grid_position-crr.lscroll-e.value);
+		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y;
 		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
-		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1.f);
-		e.value = conf ? mshover : e.value;*/
+		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1);
+		e.value = conf ? mshover : e.value;
 	} else {
 		int8_t nvalue = e.value+vdir;
 		e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
@@ -2331,4 +2328,4 @@ void MainMenu::update_peripheral_annotations()
 
 // new issues:
 //	- memory leak when going into option menu sublists?
-//	- once again restore decides not to work again, this time without any appearant cause
+//	- once again restore decides not to work, this time without any appearant cause
