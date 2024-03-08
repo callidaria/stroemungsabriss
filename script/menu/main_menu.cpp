@@ -959,7 +959,7 @@ void MenuList::reset_attributes(uint8_t id)
 /*
 	TODO
 */
-uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
+int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
 		bool mperiph,bool &rrnd)
 {
 	// early exit when no lists active
@@ -970,7 +970,7 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 	MenuListComplex &crr = mlists[active_ids.back()];
 
 	// update most recent list
-	uint8_t out = 0;
+	int8_t out = 0;
 	if (!subfunc_opened) {
 
 		// escape handling
@@ -985,7 +985,15 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		// selection by rasterized mouse position
 		int32_t selected = crr.select_id;
 		if (mperiph) {
-			// TODO
+
+			// rasterize mouse selection
+			int32_t max_scroll = crr.entities.back().grid_position-7;
+			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)&&(crr.lscroll<max_scroll||mscroll>0));
+			int32_t mraster = crr.lscroll+(MENU_LIST_SCROLL_START-mpos.y)/MENU_LIST_SCROLL_Y;
+
+			// correlate entity with rasterized selection
+			while (selected<(crr.entities.size()-1)&&mraster>crr.entities[selected].grid_position) selected++;
+			while (selected>0&&mraster<crr.entities[selected].grid_position) selected--;
 		}
 
 		// selection by directional input
@@ -1004,17 +1012,6 @@ uint8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,b
 		rrnd = rrnd||tf_list_opened||(crr.select_id!=selected);
 		crr.select_id = selected;
 		MenuListEntity& ce = crr.entities[selected];
-
-		// set selection by rasterized mouse position
-		/*
-		uint8_t cmp_select = crr.lselect,cmp_scroll = crr.lscroll;
-		if (mperiph) {
-			int16_t nselect = (MENU_LIST_SCROLL_START-mpos.y)/MENU_LIST_SCROLL_Y;
-			crr.lselect = (nselect<7) ? nselect*(nselect>0) : 7;
-			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)
-					&& (crr.lscroll<((int16_t)crr.full_range-7)||mscroll>0));
-		}
-		*/
 
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
@@ -2122,7 +2119,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// component updates before interface behaviour & rendering
 	bool rrnd = false;
-	uint8_t sd_grid = mlists.update(
+	int8_t sd_grid = mlists.update(
 			udmv,m_ccbf->iMap->request(InputID::RIGHT)-m_ccbf->iMap->request(InputID::LEFT),
 			crd_mouse,m_ccbf->frame->mouse.mw,
 			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
