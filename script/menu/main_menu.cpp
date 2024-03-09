@@ -34,8 +34,8 @@ void command_logic_cluster(LDCProcessState& state)
 	LDCCluster cluster;
 	cluster.id = state.cmd->tail;
 	state.clusters.push_back(cluster);
-	state.crefs.push_back({{},{}});
-	state.srefs.push_back({});
+	state.refs_children.push_back({{},{}});
+	state.refs_links.push_back({});
 }
 
 /*
@@ -46,6 +46,7 @@ void command_logic_define(LDCProcessState &state)
 {
 	LDCEntity entity;
 	entity.head = state.cmd->tail;
+	entity.jsegment = state.jnext, state.jnext = false;
 	state.clusters.back().elist.push_back(entity);
 }
 
@@ -96,6 +97,7 @@ void command_logic_segment(LDCProcessState &state)
 	segment.position = state.clusters.back().elist.size();
 	segment.title = state.cmd->tail;
 	state.clusters.back().slist.push_back(segment);
+	state.jnext = true;
 }
 
 /*
@@ -123,7 +125,7 @@ void command_logic_condition(LDCProcessState &state)
 void command_logic_link(LDCProcessState &state)
 {
 	state.clusters.back().linked_ids.push_back(state.clusters.back().elist.size()-1);
-	state.srefs.back().push_back(state.cmd->tail);
+	state.refs_links.back().push_back(state.cmd->tail);
 }
 
 /*
@@ -132,8 +134,8 @@ void command_logic_link(LDCProcessState &state)
 */
 void command_logic_subsequent(LDCProcessState &state)
 {
-	state.crefs.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
-	state.crefs.back().child_names.push_back(state.cmd->tail);
+	state.refs_children.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
+	state.refs_children.back().child_names.push_back(state.cmd->tail);
 	state.clusters.back().elist.back().etype = SUBSEQUENT;
 }
 
@@ -244,89 +246,88 @@ const std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
 /**
  *			LDC Compiler Implementation
  *
- * The LDC Compiler reads a menu list definition .ldc file and compiles it to a struct complex.
- * This resulting complex can be used to write an intern list logic, which will be externally defined and
- * compiled at load time.
+ *	The LDC Compiler reads a menu list definition .ldc file and compiles it as a struct complex.
+ *	This resulting complex can be used to write an intern list logic, which will be externally defined and
+ *	compiled at load time.
  *
- * 		List Definition Code Language Design
- * 
- * prefix ':' marks a definition statement in ldc, the following expression until ' ' or '\n'
- * following expressions are valid and will be handled by menu list interpreter:
- * (the definitions are using <> to show where custom naming replaces "<contents>")
- * 
- * 
- * 		GENERAL LANGUAGE FEATURES
- * 
- * 	:cluster <cluster_name>
- * this statement marks the definition of a list, sublist or list entity collection
- * any cluster can be referred to by name within the list definition file
- * to define the main list use :cluster main
- * 
- * 	:define <entity_name>
- * define the name of the list entity
- * 
- * 	:describe
- * 	<description>
- * to add a description to the list entity, that will be shown when currently selected
+ *		List Definition Code (LDC) Language Design
  *
- * 	:floats (<float><space>)*
- * add float constants to list entity, accessible for any reason, usage defined by logic
- *
- *	:strings (<string><space>)*
- * add string constant to list entity, accessible for any reason, usage defined by logic
+ *	prefix ':' marks the following string until ' ' or '\n' as command expression within LDC definition below.
+ *	following expressions are valid and will be handled by menu list interpreter:
+ *	(the definitions are using <> to show where custom naming replaces "<contents>")
  *
  *
- * 	:segment <segment_name>
- * whereever a segment is called within the list definition file, a list entry will be added, linked to
- * the position it was created in, but unrelated to the actual entity list.
- * this feature can be used to segment a list of entities into multiple parts, while not interrupting the list
- * itself.
- * 
- * 	:condition (<condition_id><space>)*
- * specify an amount of conditions to activate list entity.
- * the condition ids will read the respective booleans from an extern condition list.
+ *		GENERAL LANGUAGE FEATURES (WARNING: usage of regex ahead)
  *
- *	:link <init_variable>
- * link attribute value to initialization variable.
- * 
- * 
- * 		BEHAVIOUR DEFINITIONS
- * (ideally choose ONE of the following commands per :define)
+ *	 :cluster <cluster_name>
+ *	This statement marks the definition of a list, sublist or simply a list entity collection.
+ *	Any cluster can be referred to by name within the list definition file.
  *
- * 	:system_behaviour <behaviour_id>
- * behaviour_ids:
- * 	0 = no behaviour
- * 	1 = terminate current list
- * purpose:
- * this will attach a system functionality to the list entity, which will be executed when it is selected &
- * confirmed.
- * behaviour ids can be defined differently in custom logic, but it is highly discouraged due to possible
- * confusion, when standard behaviour differs. individual checks into custom logic are generally avoided.
- * 
- * 	:subsequent <cluster_name>
- * this entity will be linked to a sublist by it's clusters name.
- * 
- * 	:checkbox
- * sign this entity to mark it switchable between true or false states
- * 
- * 	:dropdown
- * 	<fist_option> <second_option> <third_option> ;
- * add a sublist/dropdown option to this entity, holding selectable options divided by a ' '
- * using :dropdown without defining options will still create a dropdown and the list can be
- * assembled later by directly writing elements into cattribs.
- * the semicolon (;) after a sublist options forcefully ends the option write.
- * if the last semicolon is missing, the last dropdown option definition lasts until next ldc command.
- * 
- * 	:slider
- * make this entity contain a changable floating point number to be adjusted by e.g. a slider
- * 
- * 	:return <output_value>
- * this entity returns given value on confirmation
- * 
- * 
- * The following implementation is the static compile function for LDC, holding the language interpreter
- * conforming to the above language definitions and statements.
- * The compiler only has one feature: compile, because this is what it does.
+ *	 :define <entity_name>
+ *	Define a new list entity by name.
+ *	Definition space of this entity lasts until next :cluster or :define call.
+ *
+ *	 :describe
+ *	 <description>
+ *	Add a description to the list entity.
+ *	TODO: add possible escape behaviour to mark end of description in buffer ?(char ';')?
+ *
+ *	 :floats (<float> )*
+ *	Attach float constants to the list entity, accessible for any reason, usage defined by logic.
+ *
+ *	 :strings (<string> )*
+ *	Attach string constants to the list entity, accessible for any reason, usage defined by logic.
+ *
+ *	 :segment <segment_name>
+ *	Whereever a segment is called within the list definition file, a list entry will be added, linked to
+ *	the position it was created at, but unrelated to the actual entity list.
+ *	This feature can be used to segment a list of entities into multiple parts, while not interrupting the list
+ *	itself.
+ *
+ *	 :condition (<condition_id> )*
+ *	Specify an amount of conditions to activate list entity.
+ *	The condition ids will read the respective booleans from an extern condition array.
+ *
+ *	 :link <init_variable>
+ *	Link attribute value to initialization variable.
+ *
+ *
+ *		BEHAVIOUR DEFINITIONS
+ *	(ideally choose ONE of the following commands per entity definition)
+ *
+ *	 :system_behaviour <behaviour_id>
+ *	behaviour_ids:
+ *	 0 :<=> no behaviour
+ *	 1 :<=> terminate current list
+ *	purpose:
+ *	This will attach system functionality id to the list entity.
+ *	Behaviour ids can be defined differently in custom logic, but it is highly discouraged due to possible
+ *	confusion, when standard behaviour differs.
+ *	Individual checks into custom logic are generally avoided by programmers due to naïveté.
+ *
+ *	 :subsequent <cluster_name>
+ *	This entity will be linked to a sublist by it's clusters name.
+ *
+ *	 :checkbox
+ *	Sign this entity to be switchable between true or false states.
+ *
+ *	 :dropdown
+ *	 (<sublist_option> )* ;
+ *	Add a sublist dropdown to this entity.
+ *	Using :dropdown without defining options will still create a sublist and the list can be filled later by
+ *	directly writing elements into LDCEntity::cattribs component.
+ *	The semicolon (" ;") after a sublist option forcefully ends the option declaration.
+ *
+ *	 :slider
+ *	Attach an adjustable floating point number to this entity.
+ *
+ *	 :return <output_value>
+ *	This entity returns the given value on confirmation.
+ *
+ *
+ *	The following implementation is the static compile function for LDC, holding the language interpreter,
+ *	conforming to the above language definitions and statements.
+ *	The compiler only has one feature: compile, because this is what it does.
 */
 
 
@@ -359,8 +360,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 			// translate command to handling logic address & store in command buffer
 			ListLanguageCommand llc;
 			size_t cmd_split = line.find(' ');
-			while (llc.id<LDCCommandID::COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id])
-				llc.id++;
+			while (llc.id<LDCCommandID::COMMAND_COUNT&&line.substr(1,cmd_split-1)!=mlcmd[llc.id]) llc.id++;
 
 			// handle command attributes
 			llc.tail = line.erase(0,cmd_split+1);
@@ -368,11 +368,13 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 
 			// assemble command buffer
 			cmd_buffer.push_back(llc);
-		} else cmd_buffer.back().buffer += line+' ';
+		}
+		else cmd_buffer.back().buffer += line+' ';
 
 		// incement line counter & finally close file
 		line_number++;
-	} file.close();
+	}
+	file.close();
 
 	// second pass: preallocate memory
 	/*uint16_t alloc_cluster = 0;
@@ -395,30 +397,27 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		LDCCluster &cc = state.clusters[i];
 
 		// correlate child name to cluster id
-		for (uint16_t j=0;j<state.crefs[i].parent_ids.size();j++) {
+		for (uint16_t j=0;j<state.refs_children[i].parent_ids.size();j++) {
 			uint16_t k = 0;
-			while (state.clusters[k].id!=state.crefs[i].child_names[j]) k++;
-			state.clusters[i].elist[state.crefs[i].parent_ids[j]].tdata = k;
+			while (state.clusters[k].id!=state.refs_children[i].child_names[j]) k++;
+			state.clusters[i].elist[state.refs_children[i].parent_ids[j]].tdata = k;
 		}
 
 		// correlate initialization variable name to serialization id
 		for (uint16_t j=0;j<cc.linked_ids.size();j++) {
 			LDCEntity &ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
-			ce.vlink = Init::find_iKey(state.srefs[i][j].c_str());
-			if (ce.vlink==InitVariable::VARIABLE_ERROR) {
+
+			// find variable and check for errors
+			ce.serialization_id = Init::find_iKey(state.refs_links[i][j].c_str());
+			if (ce.serialization_id==InitVariable::VARIABLE_ERROR) {
 				printf("%s: \033[31;1mvariable linking error.\033[0m referenced as \"\033[34;1m%s\033[0m\"\n",
-						state.fpath,state.srefs[i][j].c_str());
+						state.fpath,state.refs_links[i][j].c_str());
 				continue;
 			}
 
 			// override held entity data with global variable if comparable
-			ce.tdata = Init::iConfig[ce.vlink];
+			ce.tdata = Init::iConfig[ce.serialization_id];
 		}
-
-		// set segment jump write
-		for (LDCSegment &segment : state.clusters[i].slist)
-			state.clusters[i].elist[segment.position].jsegment = true;
-		// TODO: can be done during interpretation
 	}
 }
 
@@ -494,6 +493,7 @@ uint8_t SelectionSpliceGeometry::create_splice(glm::vec2 l,glm::vec2 u,float lw,
 	// return id of created selection splice
 	return splices.size()-1;
 }
+// TODO: system relying on predetermined state "horizontal" is very error prone. find a more adaptive solution
 
 /*
 	load() -> void !O(1)
@@ -669,7 +669,6 @@ uint8_t MenuList::define_list(const char* path)
 		// process cluster entities
 		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
 		uint16_t grid_position = 0;
-		float vscroll = MENU_LIST_SCROLL_START;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// dodge scroll to prevent segment override with list element
@@ -680,7 +679,7 @@ uint8_t MenuList::define_list(const char* path)
 			MenuListEntity t_entity = {
 				.etype = cluster.elist[i].etype,
 				.value = cluster.elist[i].tdata,
-				.link_id = cluster.elist[i].vlink,
+				.link_id = cluster.elist[i].serialization_id,
 				.grid_position = grid_position,
 				.text = Text(st_font),
 				.tlen = cluster.elist[i].head.length()
@@ -690,7 +689,7 @@ uint8_t MenuList::define_list(const char* path)
 			t_entity.text.add(cluster.elist[i].head.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),
 				t_entity.text.load();
 			mlists[lidx].description.add(
-					cluster.elist[i].description.c_str(),
+					cluster.elist[i].description,
 					MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_YRANGE*i),
 					MENU_LIST_DESC_BLOCKWIDTH,
 					MENU_LIST_DESC_NLINEJMP
@@ -760,6 +759,7 @@ uint8_t MenuList::define_list(const char* path)
 			case LDCEntityType::SLIDER:
 				create_slider(vscroll);
 				mlists[lidx].slider_ids[head_slider++] = i;
+				break;
 			};
 
 			// move cursor to write next element & store current information
@@ -805,7 +805,7 @@ uint8_t MenuList::define_list(SaveStates states)
 		// write save title
 		mle.text.add(state.title.c_str(),glm::vec2(MENU_LIST_HEADPOS_X,vscroll)),mle.text.load();
 		mlc.description.add(
-				state.description.c_str(),
+				state.description,
 				MENU_LIST_DESC_POSITION-glm::vec2(0,MATH_CARTESIAN_YRANGE*i),
 				MENU_LIST_DESC_BLOCKWIDTH,
 				MENU_LIST_DESC_NLINEJMP
@@ -1030,7 +1030,6 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 			switch (ce.etype) {
 			case LDCEntityType::DROPDOWN:
 				subfunc_opened = true;
-				conf = false;
 				break;
 			case LDCEntityType::SUBSEQUENT:
 				open_list(ce.value);
@@ -1048,22 +1047,24 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 		// selection geometry data manipulation
 		out = calculate_grid_position();
 		tf_list_opened = false;
+		return out;
 	}
 
-	// update attribute subfunctionality for dropdown options if obsoletion check fails
-	uint8_t id = active_ids.back();
-	if (!subfunc_opened) return out;
-	MenuListEntity &e = crr.entities[crr.select_id];
-
 	// input handling for sublist
+	MenuListEntity &e = crr.entities[crr.select_id];
 	uint8_t cap_options = e.dd_options.size()-1;
+
+	// handle mouse input
 	if (mperiph) {
 		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(e.grid_position-crr.lscroll-e.value);
 		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y;
 		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
 		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1);
 		e.value = conf ? mshover : e.value;
-	} else {
+	}
+
+	// handle directional input
+	else {
 		int8_t nvalue = e.value+vdir;
 		e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
 	}
@@ -1210,12 +1211,10 @@ void MenuList::update_overlays()
 	FrameBuffer::close();
 
 	// draw globe buffer
-	if (show_globe) {
-		m_ccbf->r2d->prepare();
-		m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
-		m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
-		m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
-	}
+	m_ccbf->r2d->prepare();
+	m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
+	m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
+	m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
 }
 
 /*
@@ -1223,7 +1222,7 @@ void MenuList::update_overlays()
 */
 uint8_t MenuList::calculate_grid_position()
 {
-	MenuListComplex& crr = mlists[active_ids.back()];
+	const MenuListComplex& crr = mlists[active_ids.back()];
 	return crr.entities[crr.select_id].grid_position-crr.lscroll;
 }
 
@@ -1440,7 +1439,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 					glm::vec2(
 						t_center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
 						dgd.liststart_y-dsize*i));
-			dgd.tx_descriptions.add(cluster.elist[i].description.c_str(),glm::vec2(1030,350-720*i),
+			dgd.tx_descriptions.add(cluster.elist[i].description,glm::vec2(1030,350-720*i),
 					200.f,20.f);
 
 			// calculate characters to draw for each text
@@ -1595,13 +1594,13 @@ void MenuDialogue::render()
 
 	// requirement for title & description draw, any dialogue currently has to be in active selection
 	if (!active_ids.size()) return;
-	uint8_t id = active_ids.back();
+	uint8_t cid = active_ids.back();
 
 	// show description of selected option
-	dg_data[id].tx_descriptions.prepare();
-	dg_data[id].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
-			glm::vec3(.0f,720.f*dg_data[id].sindex,.0f)));
-	dg_data[id].tx_descriptions.render(dg_data[id].description_length,glm::vec4(1.f));
+	dg_data[cid].tx_descriptions.prepare();
+	dg_data[cid].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
+			glm::vec3(.0f,720.f*dg_data[cid].sindex,.0f)));
+	dg_data[cid].tx_descriptions.render(dg_data[cid].description_length,glm::vec4(1.f));
 
 	// write in-dialogue text
 	for (uint8_t id : active_ids) {
@@ -2335,6 +2334,5 @@ void MainMenu::update_peripheral_annotations()
 	tx_instr.load();
 }
 
-
 // new issues:
-//	- memory leak when going into option menu sublists?
+//	- when scrolling mouse selection onto a segment, segments can be selected?

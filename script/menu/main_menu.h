@@ -130,6 +130,7 @@ constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
  *		LDC Compiler Definition
 */
 
+// mapped enumeration of all possible LDC language commands
 enum LDCCommandID {
 
 	// definitions
@@ -146,6 +147,7 @@ enum LDCCommandID {
 	COMMAND_COUNT = SYNTAX_ERROR
 };
 
+// enumeration of possible list entity states as defined by LDC language
 enum LDCEntityType
 {
 	UNDEFINED,
@@ -157,6 +159,7 @@ enum LDCEntityType
 	SYSTEM
 };
 
+// extracted command data from .ldc file
 struct ListLanguageCommand
 {
 	uint8_t id = 0;
@@ -164,19 +167,20 @@ struct ListLanguageCommand
 	uint16_t line_number;
 };
 
+// sublist references, linking child id per parent
 struct LDCSubsequentReferences
 {
 	std::vector<uint16_t> parent_ids;
 	std::vector<std::string> child_names;
 };
 
+// list entity data
 struct LDCEntity
 {
 	// basic element data & availability state
 	std::string head,description;
 	uint16_t serialization_id = 0;
 	std::vector<uint8_t> condition_id;
-	uint16_t vlink = 0;
 
 	// element behaviour type, value of tdata switches meaning based on etype
 	LDCEntityType etype = LDCEntityType::UNDEFINED;
@@ -190,44 +194,53 @@ struct LDCEntity
 	bool jsegment = false;
 };
 
+// list segmentation data
 struct LDCSegment
 {
 	uint16_t position;
 	std::string title;
 };
 
+// parent structure for list content, forming the list itself
 struct LDCCluster
 {
+	// info
 	std::string id = "";
+
+	// list content
 	std::vector<LDCEntity> elist;
 	std::vector<LDCSegment> slist;
+
+	// precalculation
 	std::vector<uint16_t> linked_ids;
 	uint16_t cnt_checkbox = 0,cnt_dropdown = 0,cnt_slider = 0;
 };
 
+// compiler data
 struct LDCProcessState
 {
 	// info
 	const char* fpath;
 
-	// address
+	// processing
 	ListLanguageCommand* cmd;
-	LDCCluster* c_cluster;
+	bool jnext = false;
 
 	// working data
-	std::vector<LDCSubsequentReferences> crefs;
-	std::vector<std::vector<std::string>> srefs;
+	std::vector<LDCSubsequentReferences> refs_children;
+	std::vector<std::vector<std::string>> refs_links;
 
 	// resulting data
-	std::vector<LDCCluster> &clusters;
+	std::vector<LDCCluster>& clusters;
 };
 
+// static compiler component
 class LDCCompiler
 {
 public:
 
 	// code processing
-	static void compile(const char* path,std::vector<LDCCluster> &rClusters);
+	static void compile(const char* path,std::vector<LDCCluster>& rClusters);
 	static inline void compiler_error_msg(LDCProcessState& state,const char* msg)
 		{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",state.fpath,state.cmd->line_number,msg); }
 };
