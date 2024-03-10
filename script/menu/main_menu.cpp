@@ -347,6 +347,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 	};
 
 	// first pass: extraction - iterate definition file
+	// all commands will be written to command list after extraction for further processing
 	std::vector<ListLanguageCommand> cmd_buffer;
 	std::ifstream file(path,std::ios::in);
 	uint16_t line_number = 1;
@@ -377,6 +378,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 	file.close();
 
 	// second pass: preallocate memory
+	// tbd - this will be an optimization measure in the future to prevent push_back usage
 	/*uint16_t alloc_cluster = 0;
 	for (ListLanguageCommand &cmd : cmd_buffer) {
 		alloc_cluster += cmd.id==LDCCommandID::CLUSTER;
@@ -387,6 +389,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 	// TODO: something like this to reduce push_back usage in third compiler pass
 
 	// third pass: execute commands
+	// command list will be iterated and command id will instigate jump to related processes
 	for (ListLanguageCommand &cmd : cmd_buffer) {
 		state.cmd = &cmd;
 		interpreter_behaviour[cmd.id](state);
@@ -397,11 +400,14 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 		LDCCluster &cc = state.clusters[i];
 
 		// correlate child name to cluster id
+		// iteration over all stored parent ids, cutting the check for all entities without children
+		// then finding iteration over all cluster ids until child of the current parent has been found
 		for (uint16_t j=0;j<state.refs_children[i].parent_ids.size();j++) {
 			uint16_t k = 0;
 			while (state.clusters[k].id!=state.refs_children[i].child_names[j]) k++;
 			state.clusters[i].elist[state.refs_children[i].parent_ids[j]].tdata = k;
 		}
+		// FIXME: isn't this unsafe? would there be a memory leak if no names match the referenced name?
 
 		// correlate initialization variable name to serialization id
 		for (uint16_t j=0;j<cc.linked_ids.size();j++) {
@@ -425,11 +431,12 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
 /**
  *		Selection Splice Geometry Implementation
  *
- *  the selection splice geometry is a stilistical highlight for the UI.
- *  it not only adds graphical flavour, it can also be used to communicate selection to the user.
+ *  The selection splice geometry is a stilistical highlight for the UI.
+ *  It not only adds graphical flavour, it can also be used to communicate selection to the user.
  *
- *  	here is some information on how this geometry can be defined:
- *  following, an ascii representation of the splice
+ *		Here is some information on how this geometry can be defined:
+ *  ...following, an ascii representation of the splice.
+ *
  *					 ___uwe__
  *					/  uc   /
  *  		       /       /
@@ -440,22 +447,22 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
  *  		  /   lc  /
  *  		 ___lwe___
  *
- *  	explanation:
+ *  	Explanation:
  *  lc: centerpoint of lower geometry
  *  uc: centerpoint of upper geometry
  *  uwe: full upper width extension at upper centerpoint
  *  lwe: full lower width extension at lower centerpoint
- *  	(!careful! the width extension shown here is double the definition length, def. from centerpoint to edge)
+ *  	(!CAREFUL: the width extension shown here is double the definition length. centerpoint to edge)
  *  direction: automates the width extensions, so the orientation of the splice has to be predefined
  *
- *  	features of this implementation:
+ *  	Features of this implementation:
  *  - splices can be created
  *  - animation keys can be created, to transition in-between positional states by an external variable
  *  - geometry can be drawn
 */
 
 /*
-	create_splice(vec2,vec2,float,float,vec3,bool,float*) -> uint8_t !O(1)
+	!O(1)m /+load -> (public)
 	purpose: add new splash to geometry complex
 	\param l: starting position of lower geometry centerpoint
 	\param u: starting position of upper geometry centerpoint
@@ -472,31 +479,33 @@ uint8_t SelectionSpliceGeometry::create_splice(glm::vec2 l,glm::vec2 u,float lw,
 		bool hrz,float* tref)
 {
 	// write vertices
-	verts.push_back({ c,0 }),verts.push_back({ c,3 }),verts.push_back({ c,2 });
-	verts.push_back({ c,3 }),verts.push_back({ c,0 }),verts.push_back({ c,1 });
+	size_t vs = verts.size();
+	verts.resize(vs+6);
+	verts[vs] = { c,0 }, verts[vs+1] = { c,3 }, verts[vs+2] = { c,2 },
+	verts[vs+3] = { c,3 }, verts[vs+4] = { c,0 }, verts[vs+5] = { c,1 };
 
-	// set initial geometry transition key
-	SelectionSpliceKey t_ssk;
-	t_ssk.disp_lower = l,t_ssk.disp_upper = u;
-	t_ssk.ext_lower = lw,t_ssk.ext_upper = uw;
+	// write initial splice data
+	SelectionSplice splice = {
+		.current = {
+			.disp_lower = l,
+			.disp_upper = u,
+			.ext_lower = lw,
+			.ext_upper = uw
+		},
+		.ssk = { splice.current },
+		.transition_ref = tref,
+		.horizontal = hrz
+	};
 
-	// copy initial information to current state & first transition key
-	SelectionSplice splice;
-	splice.current = t_ssk;
-	splice.ssk.push_back(t_ssk);
-
-	// write additional splice information
-	splice.horizontal = hrz;
-	splice.transition_ref = tref;
+	// store & return id of created selection splice
 	splices.push_back(splice);
-
-	// return id of created selection splice
 	return splices.size()-1;
 }
 // TODO: system relying on predetermined state "horizontal" is very error prone. find a more adaptive solution
+// TODO: aesthetics - pseudoshadow shader for text intersection
 
 /*
-	load() -> void !O(1)
+	!O(1) /load -> (public)
 	purpose: upload splice geometry, compile shader & setup coordinate system
 */
 void SelectionSpliceGeometry::load()
@@ -514,7 +523,7 @@ void SelectionSpliceGeometry::load()
 }
 
 /*
-	add_anim_key(uint8_t,vec2,vec2,float,float) -> void !O(1)
+	!O(1)m /+load -> (public)
 	purpose: create transition key information for referenced splice geometry
 		this key will always be added at the end of the key list, creation chronology matters
 	\param id: memory id given at creation call, referencing the splice to add key to
@@ -522,21 +531,25 @@ void SelectionSpliceGeometry::load()
 	\param ud: transition target for upper splice geometry centerpoint
 	\param le: transition target for lower width extension
 	\param ue: transition target for upper width extension
+	\returns memory id the created animation key can be referenced by
 */
 uint8_t SelectionSpliceGeometry::add_anim_key(uint8_t id,glm::vec2 ld,glm::vec2 ud,float le,float ue)
 {
 	// key creation
-	SelectionSpliceKey t_ssk;
-	t_ssk.disp_lower = ld,t_ssk.disp_upper = ud;
-	t_ssk.ext_lower = le,t_ssk.ext_upper = ue;
+	SelectionSpliceKey t_ssk = {
+		.disp_lower = ld,
+		.disp_upper = ud,
+		.ext_lower = le,
+		.ext_upper = ue
+	};
 
-	// store key
+	// store key & return id
 	splices[id].ssk.push_back(t_ssk);
 	return splices[id].ssk.size()-1;
 }
 
 /*
-	update() -> void !O(n)
+	!O(n) .every splice geometry /update -> (public)
 	purpose: processing for all elements in splices list:
 		calculation of transition animation, uniform upload & geometry drawcalls
 */
@@ -576,6 +589,7 @@ void SelectionSpliceGeometry::update()
 	}
 }
 // TODO: head rotation transition between dialogue and main mode is snapping around and it looks terrible
+// FIXME: single draw calls for each splice is slow, take care of this in the performance update
 
 
 /**
@@ -1151,7 +1165,7 @@ void MenuList::render()
 }
 
 /*
-	!O(n)e .amount of sliders and checkboxes /update -> (public)
+	!O(n) .amount of sliders and checkboxes /update -> (public)
 	purpose: draw section of inverted/multisampled background components
 	\param anim_delta: predefined and commonly used animation speed for all menu transitions
 */

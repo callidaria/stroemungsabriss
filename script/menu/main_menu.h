@@ -249,29 +249,33 @@ public:
  *		Selection Splice Geometry Definition
 */
 
+// vertex pattern for GPU upload
 struct SpliceVertexGeometry
 {
 	glm::vec3 colour;
 	uint32_t edge_id;
 };
 
+// animation target key for splice transition
 struct SelectionSpliceKey
 {
 	glm::vec2 disp_lower,disp_upper;
 	float ext_lower,ext_upper;
 };
 
+// splice data
 struct SelectionSplice
 {
-	// current uniform variables
+	// uniform & animation keys
 	SelectionSpliceKey current;
-	bool horizontal;
-
-	// target data
 	std::vector<SelectionSpliceKey> ssk;
+
+	// data
 	float* transition_ref;
+	bool horizontal;
 };
 
+// collective selection splice component
 class SelectionSpliceGeometry
 {
 public:
