@@ -127,6 +127,23 @@ constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
 
 
 /**
+ *		Utility
+*/
+
+struct ProcessedMenuInput {
+
+	// processed input
+	bool hit_a = false,hit_b = false;
+	int8_t dir_horz = 0,dir_vert = 0;
+	glm::vec2 mouse_cartesian = glm::vec2(0);
+	Mouse* mouse;
+
+	// preferred peripherals
+	bool* mouse_preferred_peripheral,controller_preferred_peripheral = false;
+};
+
+
+/**
  *		LDC Compiler Definition
 */
 
@@ -384,8 +401,9 @@ public:
 	void reset_attributes(uint8_t id);
 
 	// draw
-	int8_t update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
-			bool mperiph,bool &rrnd);
+	int8_t update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd);
+		/*int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
+		  bool mperiph,bool &rrnd);*/
 	void render();
 	void update_background_component();
 	void update_overlays();
@@ -505,7 +523,8 @@ public:
 	void close_dialogue(uint8_t did);
 
 	// draw
-	void update(int8_t imv,float mypos,bool mperiph,bool conf,bool back);
+	void update(ProcessedMenuInput& input);
+		//int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void render();
 	void update_background_component();
 
@@ -581,17 +600,13 @@ public:
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
 	MenuList mlists;
 	MenuDialogue mdialogues;
+	ProcessedMenuInput input;
 
 	// index
 	uint8_t interface_logic_id = OptionLogicID::MACRO_EXIT;
 	uint8_t vselect = OptionLogicID::LOGIC_COUNT-2,hselect = 0;
 	int8_t vgrid_id = 0;
 	uint8_t splice_head_id,splice_selection_id,head_mod_id;
-
-	// processed input
-	bool hit_a,hit_b;
-	int8_t lrmv,udmv;
-	glm::vec2 crd_mouse;
 
 	// animation
 	bool menu_action = false;
@@ -632,10 +647,6 @@ private:
 	uint16_t index_rsprite,index_ranim;
 	uint8_t tcap_dare,tcap_instr = 0,tcap_version;
 
-	// input
-	bool cpref_peripheral;
-	bool trg_lmb = false,trg_rmb = false;
-
 	// animation
 	float anim_timing = .0f;
 	float dt_tshiftdown = .0f,dt_tnormalize = .0f;
@@ -644,6 +655,9 @@ private:
 
 	// remote
 	float tkey_head = .0f,tkey_selection = .0f,tkey_title = .0f;
+
+	// triggers
+	bool trg_lmb = false,trg_rmb = false;
 
 	// predefinitions
 	const char* main_options[OptionLogicID::LOGIC_COUNT]

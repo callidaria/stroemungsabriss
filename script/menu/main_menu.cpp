@@ -635,6 +635,7 @@ void SelectionSpliceGeometry::update()
  * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
 */
 
+
 /*
 	!O(n)bm .list entities /+load -> (public)
 	purpose: add lists to menu list complex collection based on .ldc definition file at given path
@@ -973,8 +974,9 @@ void MenuList::reset_attributes(uint8_t id)
 /*
 	TODO
 */
-int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
-		bool mperiph,bool &rrnd)
+int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
+	//int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
+	//	bool mperiph,bool &rrnd)
 {
 	// early exit when no lists active
 	system_active = active_ids.size();
@@ -988,7 +990,7 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 	if (!subfunc_opened) {
 
 		// escape handling
-		if (back) {
+		if (input.hit_b) {
 			rrnd = true;
 			close_list(active_ids.back());
 			if (active_ids.size()) return calculate_grid_position();
@@ -998,12 +1000,13 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 
 		// selection by rasterized mouse position
 		int32_t selected = crr.select_id;
-		if (mperiph) {
+		if (*input.mouse_preferred_peripheral) {
 
 			// rasterize mouse selection
 			int32_t max_scroll = crr.entities.back().grid_position-7;
-			crr.lscroll -= mscroll*((crr.lscroll>0||mscroll<0)&&(crr.lscroll<max_scroll||mscroll>0));
-			int32_t mraster = crr.lscroll+(MENU_LIST_SCROLL_START-mpos.y)/MENU_LIST_SCROLL_Y;
+			crr.lscroll -= input.mouse->mw
+					* ((crr.lscroll>0||input.mouse->mw<0)&&(crr.lscroll<max_scroll||input.mouse->mw>0));
+			int32_t mraster = crr.lscroll+(MENU_LIST_SCROLL_START-input.mouse_cartesian.y)/MENU_LIST_SCROLL_Y;
 
 			// correlate entity with rasterized selection
 			while (selected<(crr.entities.size()-1)&&mraster>crr.entities[selected].grid_position) selected++;
@@ -1014,7 +1017,7 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 		else {
 
 			// apply vertical input direction to list selection
-			selected += vdir;
+			selected += input.dir_vert;
 			selected = (selected<0) ? 0 : (selected>=crr.entities.size()) ? crr.entities.size()-1 : selected;
 
 			// adjust list scroll
@@ -1030,17 +1033,24 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
 			instruction_mod = 2;
+			int8_t nt_hdir = iMap->request(InputID::RIGHT)-iMap->request(InputID::LEFT);
 
-			if (ntconf&&mperiph&&mpos.x>MENU_LIST_ATTRIBUTE_COMBINE&&mpos.x<MENU_LIST_ATTRIBUTE_WTARGET)
-				ce.value = ((mpos.x-MENU_LIST_ATTRIBUTE_COMBINE)/MENU_LIST_ATTRIBUTE_WIDTH)*100;
-			else if (hdir) {
-				int16_t nvalue = ce.value+hdir;
+			// slider modification
+			if (input.mouse->mb[0]
+					&& *input.mouse_preferred_peripheral
+					&& input.mouse_cartesian.x>MENU_LIST_ATTRIBUTE_COMBINE
+					&& input.mouse_cartesian.x<MENU_LIST_ATTRIBUTE_WTARGET
+				)
+				ce.value = ((input.mouse_cartesian.x-MENU_LIST_ATTRIBUTE_COMBINE)/MENU_LIST_ATTRIBUTE_WIDTH)
+						* 100;
+			else if (nt_hdir) {
+				int16_t nvalue = ce.value+nt_hdir;
 				ce.value = (nvalue<0) ? 0 : (nvalue>100) ? 100 : nvalue;
 			}
 		}
 
 		// confirmation handling
-		else if (conf) {
+		else if (input.hit_a) {
 			switch (ce.etype) {
 			case LDCEntityType::DROPDOWN:
 				subfunc_opened = true;
@@ -1069,22 +1079,22 @@ int8_t MenuList::update(int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bo
 	uint8_t cap_options = e.dd_options.size()-1;
 
 	// handle mouse input
-	if (mperiph) {
+	if (*input.mouse_preferred_peripheral) {
 		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(e.grid_position-crr.lscroll-e.value);
-		int8_t mshover = (box_start-mpos.y)/MENU_LIST_SCROLL_Y;
+		int8_t mshover = (box_start-input.mouse_cartesian.y)/MENU_LIST_SCROLL_Y;
 		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
 		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1);
-		e.value = conf ? mshover : e.value;
+		e.value = input.hit_a ? mshover : e.value;
 	}
 
 	// handle directional input
 	else {
-		int8_t nvalue = e.value+vdir;
+		int8_t nvalue = e.value+input.dir_vert;
 		e.value = (nvalue<0) ? 0 : (nvalue>cap_options) ? cap_options : nvalue;
 	}
 
 	// confirmation handling for current selection
-	subfunc_opened = !back&&!conf;
+	subfunc_opened = !input.hit_a&&!input.hit_b;
 	return out;
 }
 // FIXME: bad dog, no bisquits!
@@ -1545,7 +1555,7 @@ void MenuDialogue::close_dialogue(uint8_t did)
 	\param conf: confirmation request
 	\param back: closing request
 */
-void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool back)
+void MenuDialogue::update(ProcessedMenuInput& input)
 {
 	// reset dialogue state & update if dialogue system is currently active
 	dg_state = 0;
@@ -1556,7 +1566,7 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		uint8_t id = active_ids.back();
 
 		// close dialogue on request & skip selection update
-		if (back) {
+		if (input.hit_b) {
 			close_dialogue(id);
 			return;
 		}
@@ -1565,13 +1575,13 @@ void MenuDialogue::update(int8_t imv,float mypos,bool mperiph,bool conf,bool bac
 		// this can result in a recursive dialogue interaction (filo principle)
 		// starting with selection
 		SingularDialogueData* csdd = &dg_data[id];
-		if (!mperiph) csdd->sindex += imv;
-		else csdd->sindex = (mypos-csdd->liststart_y)/csdd->option_size*-1;
+		if (!*input.mouse_preferred_peripheral) csdd->sindex += input.dir_vert;
+		else csdd->sindex = (input.mouse_cartesian.y-csdd->liststart_y)/csdd->option_size*-1;
 		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
 				? csdd->max_options : csdd->sindex;
 
 		// confirmation condition & set dialogue response state
-		if (!conf) return;
+		if (!input.hit_a) return;
 		dg_state = csdd->action_value[csdd->sindex]*(csdd->action_id[csdd->sindex]==LDCEntityType::RETURN);
 
 		// handle possible system behaviour attached to confirmed option
@@ -1705,21 +1715,21 @@ typedef void (*interface_logic)(MainMenu&);
 void interface_behaviour_macro(MainMenu &tm)
 {
 	// process macro selection
-	bool action_request = tm.hit_a&&tm.menu_action;
+	bool action_request = tm.input.hit_a&&tm.menu_action;
 	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*action_request;
 	tm.interface_logic_id = tm.vselect*action_request;
 
 	// menu transition
-	bool req_transition = tm.hit_a&&!tm.menu_action;
-	tm.menu_action = (tm.menu_action||tm.hit_a)&&!tm.hit_b;
+	bool req_transition = tm.input.hit_a&&!tm.menu_action;
+	tm.menu_action = (tm.menu_action||tm.input.hit_a)&&!tm.input.hit_b;
 
 	// processing selection input
-	tm.vselect += tm.lrmv;
-	bool ch_select = tm.lrmv!=0;
-	if (tm.m_ccbf->frame->mpref_peripheral) {
+	tm.vselect += tm.input.dir_horz;
+	bool ch_select = tm.input.dir_horz!=0;
+	if (*tm.input.mouse_preferred_peripheral) {
 		uint8_t out_id = tm.vselect;
-		while (tm.crd_mouse.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
-		while (tm.crd_mouse.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
+		while (tm.input.mouse_cartesian.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
+		while (tm.input.mouse_cartesian.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
 				&& out_id<OptionLogicID::OPTION_CAP) out_id++;
 		ch_select = ch_select||(out_id!=tm.vselect);
 		tm.vselect = out_id;
@@ -1780,7 +1790,7 @@ void interface_behaviour_options(MainMenu &tm)
 	default:
 
 		// handle writing changes
-		if (tm.mdialogues.dg_state==1&&tm.hit_a) {
+		if (tm.mdialogues.dg_state==1&&tm.input.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.write_attributes(i);
 			Init::write_changes();
@@ -1789,7 +1799,7 @@ void interface_behaviour_options(MainMenu &tm)
 		}
 
 		// handle settings reset
-		else if (tm.mdialogues.dg_state==2&&tm.hit_a) {
+		else if (tm.mdialogues.dg_state==2&&tm.input.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
 			tm.queued_restart = false;
@@ -1797,7 +1807,7 @@ void interface_behaviour_options(MainMenu &tm)
 		}
 
 		// handle universal abort request
-		else if (tm.hit_a||tm.hit_b) {
+		else if (tm.input.hit_a||tm.input.hit_b) {
 			tm.logic_setup = 0;
 			tm.queued_restart = false;
 		}
@@ -1931,6 +1941,11 @@ const interface_logic interface_behaviour[] = {
 MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
+	// pointers
+	input.mouse = &m_ccbf->frame->mouse;
+	input.mouse_preferred_peripheral = &m_ccbf->frame->mpref_peripheral;
+	// TODO: this proves it! mouse has to be part of input mapping at once!
+
 	// asset load
 	uint16_t rid_window_sprite = ccbf->r2d->sl.size();
 	index_ranim = ccbf->r2d->al.size();
@@ -2078,24 +2093,24 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// button input
 	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
-	hit_a = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
+	input.hit_a = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
 			|| m_ccbf->iMap->get_input_triggered(InputID::CONFIRM)
 			|| plmb;
-	hit_b = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
+	input.hit_b = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::BOMB)
 			|| prmb;
 
 	// directional input
-	lrmv = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
+	input.dir_horz = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(InputID::LEFT)&&vselect>0))
 			* menu_action;
-	udmv = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
+	input.dir_vert = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
 			- m_ccbf->iMap->get_input_triggered(InputID::UP))
 			* menu_action;
 
 	// mouse input
-	crd_mouse = glm::vec2(
+	input.mouse_cartesian = glm::vec2(
 			m_ccbf->frame->mouse.mxfr*MATH_CARTESIAN_XRANGE,
 			m_ccbf->frame->mouse.myfr*MATH_CARTESIAN_YRANGE
 		);
@@ -2105,8 +2120,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	transition_delta = TRANSITION_SPEED*m_ccbf->frame->time_delta;
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
 	anim_timing += m_ccbf->frame->time_delta;
-	dt_tshiftdown += m_ccbf->frame->time_delta*speedup,
-			dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
+	dt_tshiftdown += m_ccbf->frame->time_delta*speedup, dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
 
 	// transitions
 	Toolbox::transition_float_on_condition(mtransition,transition_delta,menu_action);
@@ -2116,8 +2130,11 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// title rattle animation
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
 		rattle_countermove = rattle_mobility/2;
-	glm::vec3 title_action = glm::vec3((rand()%rattle_mobility-rattle_countermove)*anim_go,
-			(rand()%rattle_mobility-rattle_countermove)*anim_go,0);
+	glm::vec3 title_action = glm::vec3(
+			(rand()%rattle_mobility-rattle_countermove)*anim_go,
+			(rand()%rattle_mobility-rattle_countermove)*anim_go,
+			0
+		);
 
 	// title shiftdown animation
 	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
@@ -2135,16 +2152,20 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 
 	// peripheral switch for input request annotation
-	if (cpref_peripheral!=m_ccbf->frame->cpref_peripheral) update_peripheral_annotations();
+	if (input.controller_preferred_peripheral!=m_ccbf->frame->cpref_peripheral)
+		update_peripheral_annotations();
 
 	// component updates before interface behaviour & rendering
 	bool rrnd = false;
-	int8_t sd_grid = mlists.update(
+	int8_t sd_grid = mlists.update(input,m_ccbf->iMap,rrnd);
+		/*
 			udmv,m_ccbf->iMap->request(InputID::RIGHT)-m_ccbf->iMap->request(InputID::LEFT),
 			crd_mouse,m_ccbf->frame->mouse.mw,
 			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
-			m_ccbf->frame->mpref_peripheral,rrnd);
-	mdialogues.update(udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
+			m_ccbf->frame->mpref_peripheral,
+		*/
+	mdialogues.update(input);
+		//udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START RENDER MENU BUFFER
 	fb_menu.bind();
@@ -2277,7 +2298,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 void MainMenu::update_peripheral_annotations()
 {
 	// update shown preferred peripheral
-	cpref_peripheral = m_ccbf->frame->cpref_peripheral;
+	input.controller_preferred_peripheral = m_ccbf->frame->cpref_peripheral;
 
 	// clear instruction text
 	tx_dare.clear();
@@ -2290,7 +2311,7 @@ void MainMenu::update_peripheral_annotations()
 	//	instr[3]: instructions for slider adjustment when selected
 	std::string dmessage;
 	std::string instr[TEXT_INSTRUCTION_COUNT];
-	if (cpref_peripheral) {
+	if (input.controller_preferred_peripheral) {
 
 		// write messages for controller input
 		dmessage = "press ["+m_ccbf->iMap->cnt_name[InputID::PAUSE]+"] if you DARE";
