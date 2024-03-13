@@ -132,7 +132,8 @@ constexpr double SHIFTDOWN_OCTAPI = MATH_PI/(2.0*TITLE_SHIFTDOWN_TIMEOUT);
  *		Utility
 */
 
-struct ProcessedMenuInput {
+struct ProcessedMenuInput
+{
 
 	// processed input
 	bool hit_a = false,hit_b = false;
@@ -153,7 +154,8 @@ struct ProcessedMenuInput {
 */
 
 // mapped enumeration of all possible LDC language commands
-enum LDCCommandID {
+enum LDCCommandID
+{
 
 	// definitions
 	CLUSTER,ENTITY,DESCRIPTION,
@@ -481,17 +483,23 @@ private:
  * 		MenuDialogue Definition
 */
 
+// vertex structure for dialogue background
 struct DialogueBackgroundGeometry
 {
 	glm::vec2 position;
 	uint32_t disp_id;		// TODO: change to 8-bit unsigned
 };
 
+// tuple pairing confirmation behaviour and value of dialogue entity
+struct DialogueActionTuple
+{
+	LDCEntityType type;
+	uint16_t value;
+};
+
+// all required data for a menu dialogue
 struct SingularDialogueData
 {
-	// interaction state of the dialogue
-	bool dg_active = false;
-
 	// list height, approximate dialogue dimensions and vertex expansion targets
 	float liststart_y;
 	float max_width,max_height;
@@ -500,19 +508,20 @@ struct SingularDialogueData
 	// progression of transition .0f = fully closed (no render) 1.f = fully active (input ready)
 	float dgtrans = .0f;
 
-	// index of selected option
-	int8_t sindex = 0,max_options;
+	// selection
+	int8_t sindex = 0;
+	uint8_t max_options;
 
-	// action tuple
-	std::vector<LDCEntityType> action_id;
-	std::vector<uint16_t> action_value;
+	// entity values
+	std::vector<DialogueActionTuple> action;
 
 	// text to display information to user
 	uint8_t option_size;
 	Text tx_title,tx_options,tx_descriptions;
-	uint32_t title_length,option_length = 0,description_length = 0;
+	size_t title_length,option_length = 0,description_length = 0;
 };
 
+// collective menu dialogue component
 class MenuDialogue
 {
 public:
@@ -544,8 +553,7 @@ public:
 
 	// status
 	bool system_active = false;
-	uint8_t dg_state = 0;
-	std::vector<SingularDialogueData> dg_data;
+	uint8_t status = 0;
 
 private:
 
@@ -554,6 +562,7 @@ private:
 	Shader bgr_shader = Shader(),slc_shader = Shader();
 
 	// data
+	std::vector<SingularDialogueData> dg_data;
 	std::vector<DialogueBackgroundGeometry> bgr_verts;
 	std::vector<glm::vec2> slc_verts;
 

@@ -1357,7 +1357,7 @@ uint8_t MenuList::calculate_grid_position()
 
 
 /**
- *		Start Implementation of Popup Dialogue for Main Menu
+ *			Start Implementation of Popup Dialogue for Main Menu
  *
  *	The MenuDialogue utilizes the LDC list language to display a dialogue window, prompting the player to
  *	make a choice.
@@ -1395,7 +1395,7 @@ uint8_t MenuList::calculate_grid_position()
  *	- Dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
  *	- Insert update() into unaltered menu render stage.
  *	- Insert background_component() into intersectionally inverting, anti-aliased menu render stage.
- *	- Return from choice is stored in dg_state while the frame the choice was confirmed in.
+ *	- Return from choice is stored in status while the frame the choice was confirmed in.
  *	- Modification of dialogue data list is possible from outside by directly modifying dg_data.
 */
 
@@ -1425,8 +1425,9 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 
 	// process all clusters as dialogues
 	uint8_t out = dg_data.size(),cidx = out;
+	float hwidth = width*.5f,hheight = height*.5f;
 	dg_data.resize(out+clusters.size());
-	for (LDCCluster &cluster : clusters) {
+	for (LDCCluster& cluster : clusters) {
 
 		// store option count of current dialogue window
 		size_t opcount = cluster.elist.size();
@@ -1437,12 +1438,21 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			t_center += glm::vec2(cluster.elist[0].fattribs[0],cluster.elist[0].fattribs[1]);
 
 		// setup dialogue data with list start position
-		SingularDialogueData &dgd = dg_data[cidx++];
-		dgd.liststart_y = t_center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1);
-		dgd.option_size = dsize;
+		dg_data[cidx] = {
+			.liststart_y = t_center.y+dsize*(opcount>>1)+(dsize>>1)*(opcount&1),
+			.max_width = hwidth,
+			.max_height = hheight,
+			.max_options = (uint8_t)(opcount-1),
+			.action = std::vector<DialogueActionTuple>(opcount),
+			.option_size = dsize,
+			.tx_title = Text(tfont),
+			.tx_options = Text(ofont),
+			.tx_descriptions = Text(dfont),
+			.title_length = cluster.id.length()
+		};
+		SingularDialogueData& dgd = dg_data[cidx++];
 
 		// precalculation & background vertices
-		float hwidth = width*.5f,hheight = height*.5f;
 		DialogueBackgroundGeometry t_dbg[] = {
 			{ glm::vec2(t_center.x-hwidth,t_center.y-hheight),0 },
 			{ glm::vec2(t_center.x+hwidth,t_center.y+hheight),0 },
@@ -1451,6 +1461,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			{ t_center,2 },
 			{ glm::vec2(t_center.x+hwidth,t_center.y+hheight),0 }
 		}; bgr_verts.insert(std::end(bgr_verts),std::begin(t_dbg),std::end(t_dbg));
+		// FIXME: performance, repeated insert where predictable
 
 		// selector vertices
 		uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
@@ -1468,21 +1479,18 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 		// TODO: implement choice description print & change list selector to background geometry
 
 		// dialogue title text setup
-		dgd.tx_title = Text(tfont),dgd.tx_options = Text(ofont),dgd.tx_descriptions = Text(dfont);
-		dgd.tx_title.add(cluster.id.c_str(),t_center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
+		dgd.tx_title.add(cluster.id.c_str(),
+				t_center+glm::vec2(0,hheight*MENU_DIALOGUE_OFFSET_FACTOR));
 		dgd.tx_title.load();
-		dgd.title_length = cluster.id.length();
-
-		// setup memory for jump action to subsequent dialogues
-		dgd.action_id.resize(opcount);
-		dgd.action_value.resize(opcount);
 
 		// dialogue option text setup
 		for (uint8_t i=0;i<opcount;i++) {
 
 			// action setup
-			dgd.action_id[i] = cluster.elist[i].etype;
-			dgd.action_value[i] = cluster.elist[i].tdata;
+			dgd.action[i] = {
+				.type = cluster.elist[i].etype,
+				.value = cluster.elist[i].tdata
+			};
 
 			// information print setup
 			dgd.tx_options.add(
@@ -1496,14 +1504,12 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			// calculate characters to draw for each text
 			dgd.option_length += cluster.elist[i].head.length();
 			dgd.description_length += cluster.elist[i].description.length();
-		} dgd.tx_options.load(),dgd.tx_descriptions.load();
-
-		// additional data
-		dgd.max_options = opcount-1;
-		dgd.max_width = hwidth,dgd.max_height = hheight;
+		}
+		dgd.tx_options.load(),dgd.tx_descriptions.load();
+	}
 
 	// return parent id
-	} return out;
+	return out;
 }
 
 /*
@@ -1551,8 +1557,7 @@ void MenuDialogue::open_dialogue(uint8_t did)
 	dg_data[did].dim_width = dg_data[did].max_width-dg_data[did].max_width*(rand()%50+25)*.01f;
 	dg_data[did].dim_height = dg_data[did].max_height-dg_data[did].max_height*(rand()%50+25)*.01f;
 
-	// set dialogue info active & reset state
-	dg_data[did].dg_active = true;
+	// system must be active now
 	system_active = true;
 }
 
@@ -1568,8 +1573,7 @@ void MenuDialogue::close_dialogue(uint8_t did)
 	active_ids.erase(std::remove(active_ids.begin(),active_ids.end(),did),active_ids.end());
 	closing_ids.push_back(did);
 
-	// set dialogue info closed
-	dg_data[did].dg_active = false;
+	// reset selection after close
 	dg_data[did].sindex = 0;
 }
 
@@ -1581,41 +1585,39 @@ void MenuDialogue::close_dialogue(uint8_t did)
 void MenuDialogue::update(ProcessedMenuInput& input)
 {
 	// reset dialogue state & update if dialogue system is currently active
-	dg_state = 0;
+	status = 0;
 	system_active = opening_ids.size()||active_ids.size()||closing_ids.size();
 
 	// check selector update conditions
-	if (active_ids.size()&&!opening_ids.size()) {
-		uint8_t id = active_ids.back();
+	if (!active_ids.size()||opening_ids.size()) return;
+	uint8_t id = active_ids.back();
 
-		// close dialogue on request & skip selection update
-		if (input.hit_b) {
-			close_dialogue(id);
-			return;
-		}
-
-		// update interactions, input will act upon the last element of idle dialogues
-		// this can result in a recursive dialogue interaction (filo principle)
-		// starting with selection
-		SingularDialogueData* csdd = &dg_data[id];
-		if (!*input.mouse_preferred_peripheral) csdd->sindex += input.dir_vert;
-		else csdd->sindex = (input.mouse_cartesian.y-csdd->liststart_y)/csdd->option_size*-1;
-		csdd->sindex = (csdd->sindex<0) ? 0 : (csdd->sindex>csdd->max_options)
-				? csdd->max_options : csdd->sindex;
-
-		// confirmation condition & set dialogue response state
-		if (!input.hit_a) return;
-		dg_state = csdd->action_value[csdd->sindex]*(csdd->action_id[csdd->sindex]==LDCEntityType::RETURN);
-
-		// handle possible system behaviour attached to confirmed option
-		switch (dg_data[id].action_id[csdd->sindex]) {
-		case LDCEntityType::SUBSEQUENT: open_dialogue(dg_data[id].action_value[csdd->sindex]);
-			break;
-		case LDCEntityType::SYSTEM:close_dialogue(id);
-			break;
-			// TODO: this assumes all system behaviours simply close the dialogue
-		}
+	// close dialogue on request & skip selection update
+	if (input.hit_b) {
+		close_dialogue(id);
+		return;
 	}
+
+	// update interactions, input will act upon the last element of idle dialogues
+	// this can result in a recursive dialogue interaction (filo principle)
+	// starting with selection
+	SingularDialogueData& dgd = dg_data[id];
+	if (!*input.mouse_preferred_peripheral) dgd.sindex += input.dir_vert;
+	else dgd.sindex = (input.mouse_cartesian.y-dgd.liststart_y)/dgd.option_size*-1;
+	dgd.sindex = (dgd.sindex<0) ? 0 : (dgd.sindex>dgd.max_options)
+			? dgd.max_options : dgd.sindex;
+
+	// confirmation condition & set dialogue response state
+	if (!input.hit_a) return;
+	switch (dgd.action[dgd.sindex].type) {
+	case LDCEntityType::RETURN: status = dgd.action[dgd.sindex].value;
+		break;
+	case LDCEntityType::SUBSEQUENT: open_dialogue(dgd.action[dgd.sindex].value);
+		break;
+	case LDCEntityType::SYSTEM:close_dialogue(id);
+		break;
+	}
+	// TODO: this assumes all system behaviours simply close the dialogue
 }
 // FIXME: text tech results in ugly edge artifacts around letters after inverting to background (mdc)
 // FIXME: avoid constant draw recalling, maybe better performance with triangle crunching (mdc)
@@ -1642,13 +1644,12 @@ void MenuDialogue::render()
 
 	// requirement for title & description draw, any dialogue currently has to be in active selection
 	if (!active_ids.size()) return;
-	uint8_t cid = active_ids.back();
+	SigularDialogueData& dgd = dg_data[active_ids.back()];
 
 	// show description of selected option
-	dg_data[cid].tx_descriptions.prepare();
-	dg_data[cid].tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),
-			glm::vec3(.0f,720.f*dg_data[cid].sindex,.0f)));
-	dg_data[cid].tx_descriptions.render(dg_data[cid].description_length,glm::vec4(1.f));
+	dgd.tx_descriptions.prepare();
+	dgd.tx_descriptions.set_scroll(glm::translate(glm::mat4(1.f),glm::vec3(.0f,720.f*dgd.sindex,.0f)));
+	dgd.tx_descriptions.render(dgd.description_length,glm::vec4(1.f));
 
 	// write in-dialogue text
 	for (uint8_t id : active_ids) {
@@ -1657,6 +1658,7 @@ void MenuDialogue::render()
 		dg_data[id].tx_options.prepare();
 		dg_data[id].tx_options.render(dg_data[id].option_length,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
 	}
+	// FIXME: current dialogue gets drawn twice!
 }
 
 /*
@@ -1683,7 +1685,8 @@ void MenuDialogue::update_background_component()
 		if (dg_data[id].dgtrans<.0f) {
 			dg_data[id].dgtrans = .0f;
 			closing_ids.erase(closing_ids.begin()+i);
-		} else i++;
+		}
+		else i++;
 	}
 
 	// draw idle dialogues
@@ -1701,7 +1704,8 @@ void MenuDialogue::update_background_component()
 			dg_data[id].dgtrans = 1.f;
 			active_ids.push_back(id);
 			opening_ids.erase(opening_ids.begin()+i);
-		} else i++;
+		}
+		else i++;
 	}
 }
 
@@ -1814,7 +1818,7 @@ void interface_behaviour_options(MainMenu &tm)
 	default:
 
 		// handle writing changes
-		if (tm.mdialogues.dg_state==1&&tm.input.hit_a) {
+		if (tm.mdialogues.status==1&&tm.input.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.write_attributes(i);
 			Init::write_changes();
@@ -1823,7 +1827,7 @@ void interface_behaviour_options(MainMenu &tm)
 		}
 
 		// handle settings reset
-		else if (tm.mdialogues.dg_state==2&&tm.input.hit_a) {
+		else if (tm.mdialogues.status==2&&tm.input.hit_a) {
 			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 				tm.mlists.reset_attributes(i);
 			tm.queued_restart = false;
@@ -1886,7 +1890,7 @@ void interface_behaviour_continue(MainMenu &tm)
 	}
 
 	// processing dialogue response
-	switch (tm.mdialogues.dg_state) {
+	switch (tm.mdialogues.status) {
 	case 1:
 		tm.m_ccbf->ld.push(tm.savestates.saves[0].ld_inst);
 		break;
@@ -1915,7 +1919,7 @@ void interface_behaviour_newgame(MainMenu &tm)
 
 	// switch to confirmation dialogue
 	case 1:
-		tm.logic_setup += tm.mdialogues.dg_state==1;
+		tm.logic_setup += tm.mdialogues.status==1;
 		break;
 
 	// open confirmation dialogue
@@ -1927,7 +1931,7 @@ void interface_behaviour_newgame(MainMenu &tm)
 
 	// wait for confirmation
 	case 3:
-		if (tm.mdialogues.dg_state==1) {
+		if (tm.mdialogues.status==1) {
 			std::cout << "TODO: create new save file\n";
 			tm.mdialogues.close_dialogue(tm.dg_diffs+2);
 		}
