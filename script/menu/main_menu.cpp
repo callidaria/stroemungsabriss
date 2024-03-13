@@ -593,46 +593,55 @@ void SelectionSpliceGeometry::update()
 
 
 /**
- *			Start Implementation of Vertical List for Main Menu:
+ *			Start Implementation of Vertical List for Main Menu
  * 
- *	The Menu List interprets .ldc files and converts them into displayable lists with a variety of features.
+ *	The Menu List transforms .ldc files into displayable lists with a variety of features:
+ *	- It is possible to navigate through lists by choosing their linked entity.
+ *	- Entity attributes can be linked to variables and modified through multiple stylish representations
+ *		-> sliders, dropdowns and checkboxes.
+ *	- Loaded savestates are easily represented through Menu List, due to function overload.
+ *	- entities can hold their own preview information
+ *		-> location on globe map & difficulty prognosis
  *
- *		The following enjoyable features are included:
- *	It is possible to navigate through lists by choosing their linked entity.
- *	Entity attributes can be linked to variables and modified through multiple stylish representations:
- *	-> sliders, dropdowns and checkboxes.
- *	Loaded savestates are easily represented through Menu List, due to function overload.
+ *		Metaprogramming of List Behaviour
  *
- *		Special definition rules:
- *	To define a globe preview by rotation:
- *		add "grotation" to strings component and add target coordinates (6 floats) to floats component
- *	To define an abnormal text colouration:
- *		add "colour" to strings component and add target colour vector (4 floats) to floats component
- *	To define a challenge preview banner:
- *		add "diff_id" to strings component and add difficulty id (1 unsigned 8-bit integer) to floats component
- *		(difficulty ids: 1-6 student; 7-11 master; 12-14 grandmaster; 15-16 headmaster)
+ *	Through the placement of commands into constant string attributes through :strings in LDC language,
+ *	special menu features can be activated to display further information.
+ *	Following the definition of additional features the MenuList provides, unrelated to common LDC functionality.
+ *
+ *		Special definition rules
+ *
+ *	- define a globe preview by rotation:
+ *	 add "grotation" to strings component and add target coordinates (6 floats) to floats component
+ *	- define an abnormal text colouration:
+ *	 add "colour" to strings component and add target colour vector (4 floats) to floats component
+ *	- define a challenge preview banner:
+ *	 add "diff_id" to strings component and add difficulty id (1 unsigned 8-bit integer) to floats component
+ *	 (difficulty ids: 1-6 student; 7-11 master; 12-14 grandmaster; 15-16 headmaster)
+ *
  *	Should commands be required alongside dropdown elements:
- *		first call :dropdown command and then prefix any further commands with "cmd" in strings component
- *		NOTE: :dropdown has to be called before :strings cmd
+ *	 first call :dropdown command and then prefix any further commands with "cmd" in strings component
+ *	 NOTE: :dropdown has to be called before :strings cmd
  *
- *		How 2 use:
- *	First run define_list(...) to load list definition. (can be done through .ldc file or loaded savestates)
- *	After completing all definitions, load() shall be executed.
- *	Lists are closed by default. Should the necessity arise call open_list(...) to activate.
- *	When the List is done being useful, just close it again by calling close_list(...).
- *	If an entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
- *	Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
- *	The update works by calling update in the base render stage and the other component in the msaa stage.
- *	Finally, the last update_overlays(...) belongs right after joining all other framebuffers
- *	Communication about any list being open at any given time can be requested through .system_active.
- *	Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
+ *		MenuList Features
  *
- *		TODO: features & optimization
+ *	- First run define_list(...) to load list definition. (can be done through .ldc file or loaded savestates)
+ *	- After completing all definitions, load() shall be executed.
+ *	- Lists are closed by default. Should the necessity arise call open_list(...) to activate.
+ *	- When the List is done being useful, just close it again by calling close_list(...).
+ *	- If an entity is supposed to stand out for some reason, it can be recoloured by calling discolour(...).
+ *	- Finalize variable modification with write_attributes(...)/reset_attributes(...), depending on circumstance.
+ *	- The update works by calling update in the base render stage and the other component in the msaa stage.
+ *	- Finally, the last update_overlays(...) belongs right after joining all other framebuffers
+ *	- Communication about any list being open at any given time can be requested through .system_active.
+ *	- Also the result of linked_variables_changed(...) informs the user about potentially changed attributes.
+ *
+ *		TODO: features & optimization:
+ *
  *	- optimize drawing, geometry and everything else that is very wrong here
  *	- wiggly text shadow
  *	- fading between lists (tilt shift effect, smooth transition between background and foreground)
- *
- * TODO: add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
+ *	- add an option to define what will be shown if the condition wasn't met (greyed,???,gfx replacements)
 */
 
 
@@ -826,7 +835,7 @@ uint8_t MenuList::define_list(SaveStates states)
 				MENU_LIST_DESC_NLINEJMP
 			);
 		mlc.dtlen += state.description.length();
-		// TODO: add correct global preview, when savestate is finally realized and allows such storage
+		// TODO: add correct global preview, when savestate is finally realized and allows for such storage
 
 		// scroll list cursor
 		vscroll -= MENU_LIST_SCROLL_Y;
@@ -853,11 +862,11 @@ uint8_t MenuList::define_list(SaveStates states)
 }
 
 /*
-	!O(1) /load -> (public)
+	!O(1)m /load -> (public)
 	purpose: setup vertices & compile shaders for entity attribute visualization
-	\param r2d: reference to 2D renderer
+	\param ccbf: pointer to basic engine features
 */
-void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
+void MenuList::load(CascabelBaseFeature* ccbf)
 {
 	// setup dropdown background
 	float ddbgr_vertices[] = {
@@ -913,7 +922,6 @@ void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
-	rid_window_sprite = wsid;
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -925,7 +933,7 @@ void MenuList::load(CascabelBaseFeature* ccbf,uint16_t wsid)
 void MenuList::open_list(uint8_t id)
 {
 	active_ids.push_back(id);
-	system_active = true,tf_list_opened = true;
+	system_active = true, tf_list_opened = true;
 }
 // TODO: this will increase in complexity and also will be a recurring pattern. etc, do what must be done kuro
 
@@ -945,7 +953,9 @@ void MenuList::close_list(uint8_t id)
 	!O(n) .linked attributes /function -> (public)
 	purpose: write changed attributes in list to initialization, when linked successfully
 	\param id: id of list complex to write attributes of
-	NOTE: initalization write to file has to be performed seperately to avoid repetition
+	NOTE: initalization write to file has to be performed seperately to avoid repetition, like so:
+		for (auto id : list_id) write_attributes(id);
+		Init::write_changes();
 */
 void MenuList::write_attributes(uint8_t id)
 {
@@ -957,7 +967,7 @@ void MenuList::write_attributes(uint8_t id)
 }
 
 /*
-	!O(n2)bn .list entities .dropdown entities /function -> (public)
+	!O(n)bn .list entities /function -> (public)
 	purpose: reset changed attributes in list to original state of initialization, when linked successfully
 	\param id: id of list complex to reset attributes of
 	NOTE: not possible with attributes, that are not linked. reset values rely on initalization memory
@@ -972,11 +982,14 @@ void MenuList::reset_attributes(uint8_t id)
 }
 
 /*
-	TODO
+	~O(n)b .furthest possible selection difference /update -> (public)
+	purpose: update menu list state & selection values
+	\param input: processed input for all main menu interactions
+	\param iMap: input mapping for additional features beyond previous structure (will replace input later)
+	\param rrnd: reference to boolean value, telling the selection splices to rerandomize geometry
+	\returns selection mapped to grid position after applying scroll, this determines the splice position
 */
 int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
-	//int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
-	//	bool mperiph,bool &rrnd)
 {
 	// early exit when no lists active
 	system_active = active_ids.size();
@@ -1101,7 +1114,8 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 // FIXME: code & processing repitition due to update/render split
 
 /*
-	TODO
+	!O(n)b .amount of different list entries /update -> (public)
+	purpose: draw menu list entity components: text, dropdown & challenge preview
 */
 void MenuList::render()
 {
@@ -1176,8 +1190,7 @@ void MenuList::render()
 
 /*
 	!O(n) .amount of sliders and checkboxes /update -> (public)
-	purpose: draw section of inverted/multisampled background components
-	\param anim_delta: predefined and commonly used animation speed for all menu transitions
+	purpose: draw section of inverted/multisampled background components: sliders & checkboxes
 */
 void MenuList::update_background_component()
 {
@@ -1209,7 +1222,8 @@ void MenuList::update_background_component()
 // FIXME: single drawcalls for every slider and checkbox seems like a horrible idea
 
 /*
-	TODO
+	!O(1)b /update -> (public)
+	purpose: draw location preview on globe
 */
 void MenuList::update_overlays()
 {
@@ -1242,18 +1256,10 @@ void MenuList::update_overlays()
 }
 
 /*
-	TODO
-*/
-uint8_t MenuList::calculate_grid_position()
-{
-	const MenuListComplex& crr = mlists[active_ids.back()];
-	return crr.entities[crr.select_id].grid_position-crr.lscroll;
-}
-
-/*
-	!O(n) .linked attributes /+function -> (public)
+	!O(n)bn .linked attributes /+function -> (public)
 	purpose: check if linked variables of desired list have changed compared to initialization
 	\param list_id: memory index of list in question
+	\param reload: reference, to be overwritten as true, should a changed value require program restart
 	\returns true if any linked attributes are not identical with initialization, else false
 */
 bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
@@ -1332,48 +1338,63 @@ void MenuList::create_slider(float vscroll)
 // FIXME: sliders, checkbox & dropdown boxing is slightly off-center
 // TODO: creating the new temporary vertex list and then concat is very slow and simple minded
 
+/*
+	!O(1) /+function -> (private)
+	purpose: map grid position of selected entity to view space list grid
+	\returns position in view space grid
+*/
+uint8_t MenuList::calculate_grid_position()
+{
+	const MenuListComplex& crr = mlists[active_ids.back()];
+	return crr.entities[crr.select_id].grid_position-crr.lscroll;
+}
+
 
 /**
- *		Start Implementation of Popup Dialogue for Main Menu:
+ *		Start Implementation of Popup Dialogue for Main Menu
  *
- *	the MenuDialogue utilizes the ldc list language to display a dialogue window, prompting the player to
- *	make a choice. it is a secondary, attention-grabbing way to display a short list of options, that are meant
- *	to be answered as an immediate response to proceed, without the power of a full MenuList.
+ *	The MenuDialogue utilizes the LDC list language to display a dialogue window, prompting the player to
+ *	make a choice.
+ *	It is a secondary, attention-grabbing way to display a short list of options, that are meant to be
+ *	answered as an immediate response to proceed, without the power of a full MenuList.
  *
- *		following, some explanations about the geometrical behaviour:
+ *		Following, some explanations about the geometrical behaviour
  *
  *				     __________fw___________
- *									   ____.ur		
+ *									   ____.ur
  *					 ul._____----------   /		|
  *				       /		        /		|
  *				      /      .c       /			| fh
  *				     /            __/.lr		|
  *				 ll./______-------				|
  *
- *		what to learn from this beautiful drawing:
- *	the point c marks the parametrical center of the created dialogue. from there, the dimensions are applied.
+ *		...what we can learn from this beautiful drawing:
+ *
+ *	The point c marks the parametrical center of the created dialogue. from there, the dimensions are applied.
  *	fw is the full parametrical width and fh is the full height.
- *	the points ur and ll are predictably placed. ur will be at c+(fw/2,fh/2) and ll at c-(fw/2,fh/2).
+ *	The points ur and ll are predictably placed. ur will be at c+(fw/2,fh/2) and ll at c-(fw/2,fh/2).
  *	ul and lr will be spanned over the points c, ur & ll, being placed pseudorandomly within a range for
  *	asthetic reasons.
- *	the dialogue selector scaling is based on the text size of the listed options.
+ *	The dialogue selector scaling is based on the text size of the listed options.
  *
- *		Custom Definition Rules:
- *	Just one rule (so far). to transform an ui component in 2D space:
- *		use the first two float components of the first entity in the cluster as transformation vector
+ *		Custom Definition Rules
  *
- *		how this feature works:
- *	Call add_dialogue_window() to create a new dialogue window and receive instance id back.
- *	After creating all windows run load().
- *	Dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
- *	Insert update() into unaltered menu render stage.
- *	Insert background_component() into intersectionally inverting, anti-aliased menu render stage.
- *	Return from choice is stored in dg_state while the frame the choice was confirmed in.
- *	Modification of dialogue data list is possible from outside by directly modifying dg_data.
+ *	- Just one rule (so far). To transform an ui component in 2D space use the first two float components
+ *	 of the first entity in the cluster as transformation vector.
+ *
+ *		Features
+ *
+ *	- Call add_dialogue_window() to create a new dialogue window and receive instance id back.
+ *	- After creating all windows run load().
+ *	- Dialogues are closed by default. to begin opening/closing process run open_dialogue()/close_dialogue().
+ *	- Insert update() into unaltered menu render stage.
+ *	- Insert background_component() into intersectionally inverting, anti-aliased menu render stage.
+ *	- Return from choice is stored in dg_state while the frame the choice was confirmed in.
+ *	- Modification of dialogue data list is possible from outside by directly modifying dg_data.
 */
 
 /*
-	add_dialogue_window(const char*,vec2,float,float,uint8_t,uint8_t) -> uint8_t !O(n)bm
+	!O(n)bnmn .clusters in loaded .ldc file /+load -> (public)
 	purpose: create new callable dialogue window
 	\param path: path to list definition file written in ldc script language (as defined above)
 	\param center: central point of dialogue background, dialogue geometry will be spread from there
@@ -1480,7 +1501,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 }
 
 /*
-	load() -> void !O(1)
+	!O(1) /load -> (public)
 	purpose: compile shaders & setup dialogue buffers for background & selector
 */
 void MenuDialogue::load()
@@ -1509,7 +1530,7 @@ void MenuDialogue::load()
 // TODO: store info of defined dialogue background vertices and create only once to avoid multiple allocations
 
 /*
-	open_dialogue(uint8_t) -> void !O(1)m
+	!O(n)m .active and closing ids /function -> (public)
 	purpose: declare referenced dialogue as currently opening
 	\param did: dialogue id
 */
@@ -1530,7 +1551,7 @@ void MenuDialogue::open_dialogue(uint8_t did)
 }
 
 /*
-	close_dialogue(uint8_t) -> void !O(1)m
+	!O(n)m .active and opening ids /function -> (public)
 	purpose: declare referenced dialogue as currently closing and inactive
 	\param did: dialogue id
 */
@@ -1547,13 +1568,9 @@ void MenuDialogue::close_dialogue(uint8_t did)
 }
 
 /*
-	update(int8_t,float,bool,bool,bool) -> void !O(n)b
+	!O(1)b /update -> (public)
 	purpose: handle inputs, update dialogue state & draw non-background components
-	\param imv: vertical key/button input to navigate list
-	\param mypos: y-axis component of mouse position for pointed selection
-	\param mperiph: preferred peripheral: true for mouse; false for keyboard/controller
-	\param conf: confirmation request
-	\param back: closing request
+	\param input: reference to processed input relevant to main menu
 */
 void MenuDialogue::update(ProcessedMenuInput& input)
 {
@@ -1599,7 +1616,8 @@ void MenuDialogue::update(ProcessedMenuInput& input)
 // FIXME: (rare) flickering dialogue disappearance when closing dialogue (mdc)
 
 /*
-	TODO
+	!O(n)b .active ids /update -> (public)
+	purpose: draw menu dialogues with selectors and entity text
 */
 void MenuDialogue::render()
 {
@@ -1636,8 +1654,8 @@ void MenuDialogue::render()
 }
 
 /*
-	!O(n)b .compiled amount of relevant ids in processing lists /update -> (public)
-	purpose: draw parts of dialogue as inverted background components on intersection with geometry
+	!O(n)bm .compiled amount of relevant ids in processing lists /update -> (public)
+	purpose: draw & update parts of dialogue as inverted background components on intersection with geometry
 */
 void MenuDialogue::update_background_component()
 {
@@ -1682,7 +1700,7 @@ void MenuDialogue::update_background_component()
 }
 
 /*
-	draw_dialogue(uint8_t) -> void (private) !O(1)
+	!O(1) /update -> (public)
 	purpose: generalization of upload & render call for any dialogue
 	\param id: dialogue id
 */
@@ -1947,7 +1965,6 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: this proves it! mouse has to be part of input mapping at once!
 
 	// asset load
-	uint16_t rid_window_sprite = ccbf->r2d->sl.size();
 	index_ranim = ccbf->r2d->al.size();
 	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
 
@@ -2054,7 +2071,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		mlists.mlists[flist].entities[2].dd_colours.push_back(TEXT_ERROR_COLOUR);
 		mlists.mlists[flist].entities[2].dd_length.push_back(6);
 	}
-	mlists.load(m_ccbf,rid_window_sprite);
+	mlists.load(m_ccbf);
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
@@ -2158,14 +2175,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// component updates before interface behaviour & rendering
 	bool rrnd = false;
 	int8_t sd_grid = mlists.update(input,m_ccbf->iMap,rrnd);
-		/*
-			udmv,m_ccbf->iMap->request(InputID::RIGHT)-m_ccbf->iMap->request(InputID::LEFT),
-			crd_mouse,m_ccbf->frame->mouse.mw,
-			hit_a,m_ccbf->frame->mouse.mb[0],hit_b,
-			m_ccbf->frame->mpref_peripheral,
-		*/
 	mdialogues.update(input);
-		//udmv,crd_mouse.y,m_ccbf->frame->mpref_peripheral,hit_a,hit_b);
 
 	// START RENDER MENU BUFFER
 	fb_menu.bind();

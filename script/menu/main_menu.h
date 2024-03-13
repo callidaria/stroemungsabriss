@@ -141,6 +141,9 @@ struct ProcessedMenuInput {
 	// preferred peripherals
 	bool* mouse_preferred_peripheral,controller_preferred_peripheral = false;
 };
+// TODO: make those feature a base functionality of input mapping.
+//	triggered & cartesian mouse clicks are BASIC FUNCTIONALITY!
+//	also triggered directional input is a MUST HAVE! this will NOT be the last time we need user input!
 
 
 /**
@@ -261,6 +264,7 @@ public:
 	static inline void compiler_error_msg(LDCProcessState& state,const char* msg)
 		{ printf("\033[1;31mldc compiler error\033[0m in %s:%i %s\n",state.fpath,state.cmd->line_number,msg); }
 };
+
 
 /**
  *		Selection Splice Geometry Definition
@@ -389,7 +393,7 @@ public:
 	// invokation
 	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
-	void load(CascabelBaseFeature* ccbf,uint16_t wsid);
+	void load(CascabelBaseFeature* ccbf);
 
 	// interaction
 	void open_list(uint8_t id);
@@ -402,14 +406,11 @@ public:
 
 	// draw
 	int8_t update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd);
-		/*int8_t vdir,int8_t hdir,glm::vec2 mpos,int8_t mscroll,bool conf,bool ntconf,bool back,
-		  bool mperiph,bool &rrnd);*/
 	void render();
 	void update_background_component();
 	void update_overlays();
 
 	// info
-	uint8_t calculate_grid_position();
 	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 private:
@@ -417,6 +418,9 @@ private:
 	// geometry creation
 	void create_checkbox(float vscroll);
 	void create_slider(float vscroll);
+
+	// calculation
+	uint8_t calculate_grid_position();
 
 public:
 
@@ -450,7 +454,7 @@ private:
 	// globe scene
 	FrameBuffer fb_globe;
 	uint8_t globe_target_id;
-	uint16_t rid_globe,rid_window_sprite;
+	uint16_t rid_globe;
 	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f,15.f,-110.f);
 	Lighting gb_lights = Lighting();
 	bool show_globe = false;
@@ -524,7 +528,6 @@ public:
 
 	// draw
 	void update(ProcessedMenuInput& input);
-		//int8_t imv,float mypos,bool mperiph,bool conf,bool back);
 	void render();
 	void update_background_component();
 
