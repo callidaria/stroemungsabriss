@@ -1013,6 +1013,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 
 		// selection by rasterized mouse position
 		int32_t selected = crr.select_id;
+		uint16_t t_scroll = crr.lscroll;
 		if (*input.mouse_preferred_peripheral) {
 
 			// rasterize mouse selection
@@ -1039,7 +1040,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 		}
 
 		// override selection & check for changes
-		rrnd = rrnd||tf_list_opened||(crr.select_id!=selected);
+		rrnd = rrnd||tf_list_opened||(crr.select_id!=selected)||(t_scroll!=crr.lscroll);
 		crr.select_id = selected;
 		MenuListEntity& ce = crr.entities[selected];
 
@@ -2378,6 +2379,3 @@ void MainMenu::update_peripheral_annotations()
 	}
 	tx_instr.load();
 }
-
-// new issues:
-//	- when scrolling mouse selection onto a segment, segments can be selected?
