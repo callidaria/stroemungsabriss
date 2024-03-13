@@ -686,13 +686,13 @@ uint8_t MenuList::define_list(const char* path)
 					glm::vec2(
 						MENU_LIST_HEADPOS_X+MENU_LIST_SEGMENT_PUSH_X,
 						MENU_LIST_SCROLL_START-(cluster.slist[i].position+i)*MENU_LIST_SCROLL_Y
-				)),t_segment.text.load();
+				)), t_segment.text.load();
 			mlists[lidx].segments[i] = t_segment;
 		}
 
 		// process cluster entities
-		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
 		uint16_t grid_position = 0;
+		uint16_t head_checkbox = 0,head_dropdown = 0,head_slider = 0;
 		for (uint16_t i=0;i<cluster.elist.size();i++) {
 
 			// dodge scroll to prevent segment override with list element
@@ -701,10 +701,10 @@ uint8_t MenuList::define_list(const char* path)
 
 			// create entity
 			MenuListEntity t_entity = {
+				.grid_position = grid_position,
 				.etype = cluster.elist[i].etype,
 				.value = cluster.elist[i].tdata,
 				.link_id = cluster.elist[i].serialization_id,
-				.grid_position = grid_position,
 				.text = Text(st_font),
 				.tlen = cluster.elist[i].head.length()
 			};
@@ -768,6 +768,8 @@ uint8_t MenuList::define_list(const char* path)
 				t_entity.dd_options.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_colours.resize(cluster.elist[i].cattribs.size());
 				t_entity.dd_length.resize(cluster.elist[i].cattribs.size());
+
+				// write dropdown element text
 				for (uint8_t di=0;di<cai;di++) {
 					Text dd_text = Text(st_font);
 					dd_text.add(cluster.elist[i].cattribs[di].c_str(),
@@ -776,7 +778,8 @@ uint8_t MenuList::define_list(const char* path)
 					t_entity.dd_options[di] = dd_text;
 					t_entity.dd_colours[di] = glm::vec4(1.f);
 					t_entity.dd_length[di] = cluster.elist[i].cattribs[di].length();
-				} mlists[lidx].dropdown_ids[head_dropdown++] = i;
+				}
+				mlists[lidx].dropdown_ids[head_dropdown++] = i;
 				break;
 
 			// load slider geometry
@@ -816,10 +819,10 @@ uint8_t MenuList::define_list(SaveStates states)
 	for (uint16_t i=0;i<states.saves.size();i++) {
 		SaveData &state = states.saves[i];
 		MenuListEntity mle = {
+			.grid_position = i,
 			.colour = diff_colours[state.diff],
 			.etype = LDCEntityType::RETURN,
-			.value = i+1,
-			.grid_position = i,
+			.value = (uint16_t)(i+1),
 			.has_rotation = true,
 			.grotation = glm::vec2(0),
 			.text = Text(st_font),
@@ -961,7 +964,7 @@ void MenuList::write_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
-		if (e.link_id == InitVariable::VARIABLE_ERROR) continue;
+		if (e.link_id==InitVariable::VARIABLE_ERROR) continue;
 		Init::iConfig[e.link_id] = e.value;
 	}
 }
@@ -976,10 +979,34 @@ void MenuList::reset_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
 		MenuListEntity &e = mlists[id].entities[lid];
-		if (e.link_id == InitVariable::VARIABLE_ERROR) continue;
+		if (e.link_id==InitVariable::VARIABLE_ERROR) continue;
 		e.value = Init::iConfig[e.link_id];
 	}
 }
+
+/*
+	!O(n)bn .linked attributes /+function -> (public)
+	purpose: check if linked variables of desired list have changed compared to initialization
+	\param list_id: memory index of list in question
+	\param reload: reference, to be overwritten as true, should a changed value require program restart
+	\returns true if any linked attributes are not identical with initialization, else false
+*/
+bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
+{
+	// iterate all linked variables
+	bool out = false;
+	for (uint16_t id : mlists[list_id].link_ids) {
+		MenuListEntity &ce = mlists[list_id].entities[id];
+		if (ce.link_id==InitVariable::VARIABLE_ERROR) continue;
+
+		// check for changes against linked initialization variable
+		bool changed = ce.value!=Init::iConfig[ce.link_id];
+		out = out||changed;
+		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
+	}
+	return out;
+}
+// TODO: extract more information to display a list of changes later
 
 /*
 	~O(n)b .furthest possible selection difference /update -> (public)
@@ -1017,7 +1044,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 		if (*input.mouse_preferred_peripheral) {
 
 			// rasterize mouse selection
-			int32_t max_scroll = crr.entities.back().grid_position-7;
+			int32_t max_scroll = crr.entities.back().grid_position-MENU_LIST_NEUTRAL_GRIDRANGE;
 			crr.lscroll -= input.mouse->mw
 					* ((crr.lscroll>0||input.mouse->mw<0)&&(crr.lscroll<max_scroll||input.mouse->mw>0));
 			int32_t mraster = crr.lscroll+(MENU_LIST_SCROLL_START-input.mouse_cartesian.y)/MENU_LIST_SCROLL_Y;
@@ -1036,7 +1063,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 
 			// adjust list scroll
 			int32_t delta = crr.entities[selected].grid_position-crr.lscroll;
-			crr.lscroll += std::max(delta-7,0)+std::min(delta,0);
+			crr.lscroll += std::max(delta-MENU_LIST_NEUTRAL_GRIDRANGE,0)+std::min(delta,0);
 		}
 
 		// override selection & check for changes
@@ -1097,7 +1124,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 		uint16_t box_start = MENU_LIST_SCROLL_START-MENU_LIST_SCROLL_Y*(e.grid_position-crr.lscroll-e.value);
 		int8_t mshover = (box_start-input.mouse_cartesian.y)/MENU_LIST_SCROLL_Y;
 		mshover = (mshover<0) ? 0 : (mshover>cap_options) ? cap_options : mshover;
-		e.dd_colours[mshover] = glm::vec4(0,.7f,.7f,1);
+		e.dd_colours[mshover] = TEXT_DIALOGUE_HOVER_COLOUR;
 		e.value = input.hit_a ? mshover : e.value;
 	}
 
@@ -1111,7 +1138,6 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 	subfunc_opened = !input.hit_a&&!input.hit_b;
 	return out;
 }
-// FIXME: bad dog, no bisquits!
 // FIXME: code & processing repitition due to update/render split
 
 /*
@@ -1162,8 +1188,8 @@ void MenuList::render()
 		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
-	crr.description.prepare(),crr.description.set_scroll(glm::vec2(0,crr.select_id*720.f)),
-		crr.description.render(crr.dtlen,glm::vec4(1));
+	crr.description.prepare(),crr.description.set_scroll(glm::vec2(0,crr.select_id*720.f));
+	crr.description.render(crr.dtlen,glm::vec4(1));
 	// FIXME: calculating scroll matrix twice due to braindead individual scroll on text
 
 	// globe render setup
@@ -1186,8 +1212,8 @@ void MenuList::render()
 	m_ccbf->r2d->prepare();
 	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
 	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(0,rstate));
-	// TODO: break apart difficulty prognosis text and belt colours
 }
+// TODO: animate dropdown opening
 
 /*
 	!O(n) .amount of sliders and checkboxes /update -> (public)
@@ -1197,13 +1223,13 @@ void MenuList::update_background_component()
 {
 	// prepare checkboxes
 	if (!active_ids.size()||subfunc_opened) return;
-	uint16_t id = active_ids.back();
+	MenuListComplex& crr = mlists[active_ids.back()];
 	checkbox_buffer.bind(),checkbox_shader.enable();
 	checkbox_shader.upload_float("scroll",crr_scroll);
 
 	// iterate checkboxes
-	for (uint16_t i=0;i<mlists[id].checkbox_ids.size();i++) {
-		MenuListEntity &ce = mlists[id].entities[mlists[id].checkbox_ids[i]];
+	for (uint16_t i=0;i<crr.checkbox_ids.size();i++) {
+		MenuListEntity& ce = crr.entities[crr.checkbox_ids[i]];
 		Toolbox::transition_float_on_condition(ce.anim_transition,MainMenu::transition_delta,ce.value);
 		checkbox_shader.upload_float("aprog",ce.anim_transition);
 		glDrawArrays(GL_TRIANGLES,12*i,12);
@@ -1214,8 +1240,8 @@ void MenuList::update_background_component()
 	slider_shader.upload_float("scroll",crr_scroll);
 
 	// iterate sliders
-	for (uint16_t i=0;i<mlists[id].slider_ids.size();i++) {
-		MenuListEntity &ce = mlists[id].entities[mlists[id].slider_ids[i]];
+	for (uint16_t i=0;i<crr.slider_ids.size();i++) {
+		MenuListEntity &ce = crr.entities[crr.slider_ids[i]];
 		slider_shader.upload_float("sval",ce.value*.01f);
 		glDrawArrays(GL_TRIANGLES,6*i,6);
 	}
@@ -1255,27 +1281,6 @@ void MenuList::update_overlays()
 	m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
 	m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
 }
-
-/*
-	!O(n)bn .linked attributes /+function -> (public)
-	purpose: check if linked variables of desired list have changed compared to initialization
-	\param list_id: memory index of list in question
-	\param reload: reference, to be overwritten as true, should a changed value require program restart
-	\returns true if any linked attributes are not identical with initialization, else false
-*/
-bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
-{
-	bool out = false;
-	for (uint16_t id : mlists[list_id].link_ids) {
-		MenuListEntity &ce = mlists[list_id].entities[id];
-		if (ce.link_id == InitVariable::VARIABLE_ERROR) continue;
-		bool changed = ce.value!=Init::iConfig[ce.link_id];
-		out = out||changed;
-		reload = reload||(iKeys[ce.link_id].restart_system_on_change&&changed);
-	}
-	return out;
-}
-// TODO: extract more information to display a list of changes later
 
 /*
 	!O(1)m /+load -> (private)

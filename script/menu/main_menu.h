@@ -23,6 +23,7 @@ constexpr char INFO_VERSION_MODE_SUFFIX = 'c';
 // MODI: c = "development", t = "QA build", p = "polishing", R = "release"
 
 // menu list positioning
+constexpr uint8_t MENU_LIST_NEUTRAL_GRIDRANGE = 7;
 constexpr uint16_t MENU_LIST_HEADPOS_X = 250;
 constexpr uint16_t MENU_LIST_SCROLL_START = 515;
 constexpr uint16_t MENU_LIST_SCROLL_Y = 45;
@@ -103,6 +104,7 @@ constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
 constexpr glm::vec4 TEXT_SEGMENT_COLOUR = glm::vec4(.7f,.7f,.7f,1.f);
 constexpr glm::vec4 TEXT_ERROR_COLOUR = glm::vec4(1,0,0,1);
+constexpr glm::vec4 TEXT_DIALOGUE_HOVER_COLOUR = glm::vec4(0,.7f,.7f,1.f);
 
 // menu option text translation scope
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
@@ -335,22 +337,25 @@ private:
  * 		MenuList Definiton
 */
 
+// data for each list entity
 struct MenuListEntity
 {
 	// function
-	glm::vec4 colour = glm::vec4(1.f);
+	uint16_t grid_position = 0;
+	glm::vec4 colour = glm::vec4(1.f);					// TODO: obsoletion through text feature
 	LDCEntityType etype = LDCEntityType::UNDEFINED;
 	uint16_t value = 0;
 	uint16_t link_id = 0;
 
-	// representation
-	uint16_t grid_position = 0;
+	// visuals
 	float anim_transition = .0f;
 	uint8_t diff_preview = 0;
 	bool has_rotation = false;
 	glm::vec2 grotation = glm::vec2(0);
+
+	// text
 	Text text;
-	size_t tlen = 0;
+	size_t tlen = 0;									// TODO: obsoletion through text feature
 
 	// attribute component
 	std::vector<Text> dd_options;
@@ -358,6 +363,7 @@ struct MenuListEntity
 	std::vector<size_t> dd_length;
 };
 
+// data for visual list segmentation
 struct MenuListSegment
 {
 	uint16_t position = 0;
@@ -365,6 +371,7 @@ struct MenuListSegment
 	size_t tlen = 0;
 };
 
+// list structure
 struct MenuListComplex
 {
 	// navigation
@@ -382,6 +389,7 @@ struct MenuListComplex
 	std::vector<uint16_t> checkbox_ids,dropdown_ids,slider_ids,link_ids;
 };
 
+// collective menu list component
 class MenuList
 {
 public:
@@ -399,19 +407,18 @@ public:
 	void open_list(uint8_t id);
 	void close_list(uint8_t id);
 	inline void discolour(uint8_t cid,uint16_t eid,glm::vec4 col) { mlists[cid].entities[eid].colour = col; }
+	// TODO: obsoletion through text feature
 
 	// serialization
 	void write_attributes(uint8_t id);
 	void reset_attributes(uint8_t id);
+	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 	// draw
 	int8_t update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd);
 	void render();
 	void update_background_component();
 	void update_overlays();
-
-	// info
-	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 private:
 
@@ -447,22 +454,19 @@ private:
 
 	// positioning
 	float crr_scroll = .0f;
-
-	// animation
 	float anim_prog = .0f;
 
 	// globe scene
-	FrameBuffer fb_globe;
-	uint8_t globe_target_id;
 	uint16_t rid_globe;
+	uint8_t globe_target_id;
+	FrameBuffer fb_globe;
 	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f,15.f,-110.f);
 	Lighting gb_lights = Lighting();
 	bool show_globe = false;
 	glm::vec2 globe_rotation = glm::vec2(0);
 
-	// triggers
-	bool tf_list_opened = false,subfunc_opened = false;
-	float rtt = .0f;
+	// states
+	bool tf_list_opened = false, subfunc_opened = false;
 
 	// visuals
 	Font de_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
