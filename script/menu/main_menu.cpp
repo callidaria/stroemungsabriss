@@ -8,7 +8,7 @@
  *	have been identified beforehand and translated to a memory id pointing to one of those functions.
  *	As a response, these commands change the compiler data and state according to their definition.
  *
- *		How to define a new command:
+ *		How to define a new command
  *
  *	1. insert a command id descriptor in LDCCommandID enumerator in header file.
  *	2. go to interpreter_behaviour definition in source file and insert a function conforming to the typedef.
@@ -16,7 +16,7 @@
  *	4. finally go to mlcmd definition and insert command syntax.
  *	5. check if id descriptor, interpreter_behaviour function and command syntax have the same id.
  *
- *		Performance Statement:
+ *		Performance Statement
  *
  *	The performance of this solution has been compared against a regular switch and computed gotos.
  *	This approach was decisively faster that both other potential solutions.
@@ -1644,7 +1644,7 @@ void MenuDialogue::render()
 
 	// requirement for title & description draw, any dialogue currently has to be in active selection
 	if (!active_ids.size()) return;
-	SigularDialogueData& dgd = dg_data[active_ids.back()];
+	SingularDialogueData& dgd = dg_data[active_ids.back()];
 
 	// show description of selected option
 	dgd.tx_descriptions.prepare();
@@ -1658,7 +1658,6 @@ void MenuDialogue::render()
 		dg_data[id].tx_options.prepare();
 		dg_data[id].tx_options.render(dg_data[id].option_length,glm::vec4(DIALOGUE_OPTION_COLOUR,1.f));
 	}
-	// FIXME: current dialogue gets drawn twice!
 }
 
 /*
@@ -1729,16 +1728,18 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 
 
 /**
- * 		Start Implementation of Interface Behaviour
- * this section defines the static functions the renderer will point to for logic switching
- * TODO: expand documentation of this section
+ *			Start Implementation of Interface Behaviour
+ *
+ *	this section defines the static functions the renderer will point to for logic switching
+ *	TODO: expand documentation of this section
 */
 
 
 typedef void (*interface_logic)(MainMenu&);
 
 /*
-	TODO
+	~O(n)b .amount of horizontal selection if mouse input /+function -> interface_logic (local,static)
+	purpose: handle macro menu logic in case no main option was chosen or start menu is displayed
 */
 void interface_behaviour_macro(MainMenu &tm)
 {
@@ -1788,7 +1789,8 @@ void interface_behaviour_macro(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: handle options menu, check for changes after exit and write or reset based on user input
 */
 void interface_behaviour_options(MainMenu &tm)
 {
@@ -1844,7 +1846,8 @@ void interface_behaviour_options(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: handle extras selection and display in the future
 */
 void interface_behaviour_extras(MainMenu &tm)
 {
@@ -1855,7 +1858,8 @@ void interface_behaviour_extras(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: handle practice scenario display and selection
 */
 void interface_behaviour_practice(MainMenu &tm)
 {
@@ -1866,7 +1870,8 @@ void interface_behaviour_practice(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: handle savestate display and load based on users choice
 */
 void interface_behaviour_load(MainMenu &tm)
 {
@@ -1879,7 +1884,8 @@ void interface_behaviour_load(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: question certainty of user to continue last load and proceed with reasonable response
 */
 void interface_behaviour_continue(MainMenu &tm)
 {
@@ -1906,7 +1912,8 @@ void interface_behaviour_continue(MainMenu &tm)
 }
 
 /*
-	TODO
+	!O(1)b /+function -> interface_logic (local,static)
+	purpose: initiate dialogue sequence to create a new game based on users difficulty preferences
 */
 void interface_behaviour_newgame(MainMenu &tm)
 {
@@ -1942,6 +1949,7 @@ void interface_behaviour_newgame(MainMenu &tm)
 }
 
 
+// menu state references
 const interface_logic interface_behaviour[] = {
 	interface_behaviour_macro,
 	interface_behaviour_options,
@@ -1950,6 +1958,17 @@ const interface_logic interface_behaviour[] = {
 	interface_behaviour_load,
 	interface_behaviour_continue,
 	interface_behaviour_newgame
+};
+
+// option display names
+const char* main_options[OptionLogicID::LOGIC_COUNT] = {
+	"exit",
+	"options",
+	"extras",
+	"practice",
+	"load",
+	"continue",
+	"new game"
 };
 
 
@@ -1976,7 +1995,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 
 	// asset load
 	index_ranim = ccbf->r2d->al.size();
-	index_rsprite = ccbm->add_lv("lvload/main_menu.ccb");
+	ccbm->add_lv("lvload/main_menu.ccb");
 
 	// version annotation text setup
 	std::string vmessage = "yomisensei by callidaria. danmaku v"

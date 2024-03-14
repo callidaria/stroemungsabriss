@@ -575,7 +575,9 @@ private:
  * 		MainMenu Definition
 */
 
-enum OptionLogicID {
+// enumeration of interface behaviours changed by main horizontal option list
+enum OptionLogicID
+{
 	MACRO_EXIT,
 	OPTIONS,
 	EXTRAS,
@@ -587,6 +589,7 @@ enum OptionLogicID {
 	OPTION_CAP = LOGIC_COUNT-1
 };
 
+// main menu component
 class MainMenu : public UI
 {
 public:
@@ -609,29 +612,28 @@ public:
 	// engine
 	CascabelBaseFeature* m_ccbf;
 	SaveStates savestates;
-	bool request_close = false;
-	bool request_restart = false;
+	bool request_close = false, request_restart = false;
+	ProcessedMenuInput input;
 
 	// interactables
 	SelectionSpliceGeometry splices_geometry = SelectionSpliceGeometry();
 	MenuList mlists;
 	MenuDialogue mdialogues;
-	ProcessedMenuInput input;
 
 	// index
 	uint8_t interface_logic_id = OptionLogicID::MACRO_EXIT;
-	uint8_t vselect = OptionLogicID::LOGIC_COUNT-2,hselect = 0;
-	int8_t vgrid_id = 0;
+	uint8_t vselect = OptionLogicID::LOGIC_COUNT-2;
 	uint8_t splice_head_id,splice_selection_id,head_mod_id;
+	uint8_t ml_options,ml_extras,ml_stages,ml_saves;
+	uint8_t dg_diffs,dg_continue,dg_optsave;
 
-	// animation
+	// general animation
 	bool menu_action = false;
 	float mtransition = .0f,inv_mtransition;
 	float ftransition = .0f,inv_ftransition;
-	float globe_transition = .0f;
 	float lext_selection = .0f,uext_selection = .0f;
 
-	// text
+	// macro options menu
 	glm::vec2 mo_prog = MENU_OPTIONS_CADDR;
 	glm::vec2 mo_cposition[OptionLogicID::LOGIC_COUNT];
 	float mo_twidth[OptionLogicID::LOGIC_COUNT],mo_hwidth[OptionLogicID::LOGIC_COUNT];
@@ -639,10 +641,9 @@ public:
 
 	// memory for static continue
 	bool queued_restart = false;
-	uint8_t ml_options,ml_extras,ml_stages,ml_saves,dg_diffs,dg_continue,dg_optsave;
 	uint8_t logic_setup = 0;
 
-	// global
+	// globals
 	inline static float transition_delta = .0f;
 
 private:
@@ -651,17 +652,19 @@ private:
 	CCBManager* m_ccbm;
 	World* m_world;
 	FrameBuffer fb_menu,fb_nslice,fb_slice;
+	MSAA msaa;
+
+	// text
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_OPTIONS_TSIZE,MENU_OPTIONS_TSIZE);
 	Font fnt_reqt = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",25,25);
 	Text tx_dare = Text(fnt_reqt),tx_instr = Text(fnt_reqt),
 		tx_version = Text(Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",15,15));
 	std::vector<Text> tx_mopts = std::vector<Text>(OptionLogicID::LOGIC_COUNT,Text(fnt_mopts));
-	MSAA msaa;
+	uint8_t tcap_dare,tcap_instr = 0,tcap_version;
 
 	// index
-	uint16_t index_rsprite,index_ranim;
-	uint8_t tcap_dare,tcap_instr = 0,tcap_version;
+	uint16_t index_ranim;
 
 	// animation
 	float anim_timing = .0f;
@@ -674,10 +677,6 @@ private:
 
 	// triggers
 	bool trg_lmb = false,trg_rmb = false;
-
-	// predefinitions
-	const char* main_options[OptionLogicID::LOGIC_COUNT]
-		= { "exit","options","extras","practice","load","continue","new game" };
 };
 
 #endif
