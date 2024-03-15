@@ -596,11 +596,11 @@ public:
 
 	// construction
 	MainMenu() {  }
-	MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq);
+	MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float& progress,float pseq);
 	~MainMenu() {  }
 
 	// draw
-	virtual void render(FrameBuffer* game_fb,bool &running,bool &reboot);
+	virtual void render(FrameBuffer* game_fb,bool& running,bool& reboot);
 
 private:
 

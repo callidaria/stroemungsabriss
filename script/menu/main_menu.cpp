@@ -1730,8 +1730,27 @@ void MenuDialogue::draw_dialogue(uint8_t id)
 /**
  *			Start Implementation of Interface Behaviour
  *
- *	this section defines the static functions the renderer will point to for logic switching
- *	TODO: expand documentation of this section
+ *	This section defines the static functions the menu update will point to for logic switching.
+ *	The variable interface_logic_id will be modified according to the activated OptionLogicID.
+ *	Then, due to exact correlation with memory index, this variable will switch to appropriate mode handling.
+ *
+ *		Modes
+ *
+ *	A menu mode describes a certain sub-behaviour of the MainMenu.
+ *	In default mode (interface_behaviour_macro) at index = 0 the user is supposed to choose a sub-mode to
+ *	proceed selection in.
+ *	As a result the interface behaviour (now macro) changes into the desired mode for the next update cycle.
+ *
+ *		Adding / Removing modes
+ *
+ *	When modifying MainMenu it might be necessary to add or remove menu modes:
+ *	1a (addition). create static function among the following implementations, which handles mode logic.
+ *	1b (removal). remove function which handles logic of undesired mode.
+ *	2. go to interface_behaviour array and add/remove function pointer to list.
+ *	3. go to main_options array and add/remove display name.
+ *	4. visit OptionLogicID in header file and adjust mode enumeration.
+ *	4+. make sure OptionLogicID enumeration, interface_behaviour and main_options are aligned by index.
+ *	NOTE: the behaviour at index = 0 has to stay the default behaviour for start menus.
 */
 
 
@@ -1741,7 +1760,7 @@ typedef void (*interface_logic)(MainMenu&);
 	~O(n)b .amount of horizontal selection if mouse input /+function -> interface_logic (local,static)
 	purpose: handle macro menu logic in case no main option was chosen or start menu is displayed
 */
-void interface_behaviour_macro(MainMenu &tm)
+void interface_behaviour_macro(MainMenu& tm)
 {
 	// process macro selection
 	bool action_request = tm.input.hit_a&&tm.menu_action;
@@ -1765,27 +1784,24 @@ void interface_behaviour_macro(MainMenu &tm)
 	}
 
 	// selection splash update calculations
-	if (ch_select||req_transition) {
-
-		// change main option selector dimensions based on selected option
-		SelectionSpliceKey* t_ssk = &tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
-		glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
-				+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
-		t_ssk->disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
-			tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
-			tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
-
-		// project upper displacement position based on lower displacement
-		glm::vec2 vrt_dir = vrt_cpos-t_ssk->disp_lower;
-		float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
-		t_ssk->disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
-
-		// update randomized text rotation
-		tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
-	}
-
-	// reset
 	tm.logic_setup = 0;
+	if (!ch_select&&!req_transition) return;
+
+	// change main option selector dimensions based on selected option
+	SelectionSpliceKey& t_ssk = tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
+	glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
+			+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
+	t_ssk.disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
+		tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+		tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
+
+	// project upper displacement position based on lower displacement
+	glm::vec2 vrt_dir = vrt_cpos-t_ssk.disp_lower;
+	float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+	t_ssk.disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
+
+	// update randomized text rotation
+	tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
 }
 
 /*
