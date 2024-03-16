@@ -1762,30 +1762,42 @@ typedef void (*interface_logic)(MainMenu&);
 */
 void interface_behaviour_macro(MainMenu& tm)
 {
-	// process macro selection
-	bool action_request = tm.input.hit_a&&tm.menu_action;
-	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*action_request;
-	tm.interface_logic_id = tm.vselect*action_request;
-
 	// menu transition
-	bool req_transition = tm.input.hit_a&&!tm.menu_action;
+	bool no_transition = !tm.input.hit_a||tm.menu_action;
 	tm.menu_action = (tm.menu_action||tm.input.hit_a)&&!tm.input.hit_b;
 
-	// processing selection input
-	tm.vselect += tm.input.dir_horz;
-	bool ch_select = tm.input.dir_horz!=0;
+	// early exit: processing selection input
+	if (!tm.menu_action) return;
+	uint8_t t_select = tm.vselect;
+
+	// mouse input
+	// iterative approximation of mouse selection
 	if (*tm.input.mouse_preferred_peripheral) {
-		uint8_t out_id = tm.vselect;
-		while (tm.input.mouse_cartesian.x<(tm.mo_cposition[out_id].x-tm.mo_prog.x)&&out_id>0) out_id--;
-		while (tm.input.mouse_cartesian.x>(tm.mo_cposition[out_id].x+tm.mo_twidth[out_id]+tm.mo_prog.x)
-				&& out_id<OptionLogicID::OPTION_CAP) out_id++;
-		ch_select = ch_select||(out_id!=tm.vselect);
-		tm.vselect = out_id;
+		while (
+				t_select>0
+				&& tm.input.mouse_cartesian.x<(tm.mo_cposition[t_select].x-tm.mo_prog.x)
+			) t_select--;
+		while (
+				t_select<OptionLogicID::OPTION_CAP
+				&& tm.input.mouse_cartesian.x>(tm.mo_cposition[t_select].x+tm.mo_twidth[t_select]+tm.mo_prog.x)
+			) t_select++;
 	}
 
-	// selection splash update calculations
+	// directional input
+	else t_select += tm.input.dir_horz;
+
+	// detect selection change, then write those changes
+	bool no_changes = tm.vselect==t_select;
+	tm.vselect = t_select;
+
+	// confirmation
+	bool confirmation = tm.input.hit_a&&no_transition;
+	tm.request_close = (tm.vselect==OptionLogicID::MACRO_EXIT)*confirmation;
+	tm.interface_logic_id = tm.vselect*confirmation;
+
+	// early exit: selection splash update calculations
 	tm.logic_setup = 0;
-	if (!ch_select&&!req_transition) return;
+	if (no_changes&&no_transition) return;
 
 	// change main option selector dimensions based on selected option
 	SelectionSpliceKey& t_ssk = tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
@@ -1811,20 +1823,21 @@ void interface_behaviour_macro(MainMenu& tm)
 void interface_behaviour_options(MainMenu &tm)
 {
 	bool open_conf = false;
-	switch (tm.logic_setup) {
 
-	// setup stage
+	// switch through option editing stages
+	// open list
+	switch (tm.logic_setup) {
 	case 0:
 		tm.mlists.open_list(tm.ml_options);
 		tm.logic_setup++;
 		break;
 
-	// listing stage
+	// keep alive until list closes, then advance to next stage
 	case 1:
 		tm.logic_setup += !tm.mlists.system_active;
 		break;
 
-	// checking for changes & open confirmation dialogue on condition
+	// check for changes & open confirmation dialogue on condition
 	case 2:
 		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
 			open_conf = tm.mlists.linked_variables_changed(i,tm.queued_restart)||open_conf;
@@ -1832,7 +1845,7 @@ void interface_behaviour_options(MainMenu &tm)
 		tm.logic_setup++;
 		break;
 
-	// confirmation input handling
+	// potential final stage: handle all possible dialogue responses
 	default:
 
 		// handle writing changes
@@ -1867,10 +1880,14 @@ void interface_behaviour_options(MainMenu &tm)
 */
 void interface_behaviour_extras(MainMenu &tm)
 {
+	// open list of extra content
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_extras);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
+	}
+
+	// keep alive as long as extras list is active
+	tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
@@ -1879,10 +1896,14 @@ void interface_behaviour_extras(MainMenu &tm)
 */
 void interface_behaviour_practice(MainMenu &tm)
 {
+	// open list of practice scenarios
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_stages);
 		tm.logic_setup = true;
-	} tm.interface_logic_id *= tm.mlists.system_active;
+	}
+
+	// keep alive as long as practice list is active
+	tm.interface_logic_id *= tm.mlists.system_active;
 }
 
 /*
@@ -1891,11 +1912,16 @@ void interface_behaviour_practice(MainMenu &tm)
 */
 void interface_behaviour_load(MainMenu &tm)
 {
+	// open list of savestates
 	if (!tm.logic_setup) {
 		tm.mlists.open_list(tm.ml_saves);
 		tm.logic_setup = true;
 	}
+
+	// push selected load instruction on confirm
 	if (tm.mlists.status) tm.m_ccbf->ld.push(tm.savestates.saves[tm.mlists.status-1].ld_inst);
+
+	// keep alive as long as save list is active
 	tm.interface_logic_id *= tm.mlists.system_active;
 }
 
@@ -1903,7 +1929,7 @@ void interface_behaviour_load(MainMenu &tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: question certainty of user to continue last load and proceed with reasonable response
 */
-void interface_behaviour_continue(MainMenu &tm)
+void interface_behaviour_continue(MainMenu& tm)
 {
 	// open dialogue for continuation request
 	if (!tm.logic_setup) {
@@ -1911,16 +1937,18 @@ void interface_behaviour_continue(MainMenu &tm)
 		tm.logic_setup = true;
 	}
 
-	// processing dialogue response
+	// processing continue dialogue response
+	// response: continue instruction
 	switch (tm.mdialogues.status) {
 	case 1:
 		tm.m_ccbf->ld.push(tm.savestates.saves[0].ld_inst);
 		break;
+
+	// response: change run, therefore transition to load mode
 	case 2:
 		tm.mdialogues.close_dialogue(tm.dg_continue);
 		tm.interface_logic_id = OptionLogicID::LOAD;
 		tm.logic_setup = false;
-		break;
 	}
 
 	// closing behaviour
@@ -1931,7 +1959,7 @@ void interface_behaviour_continue(MainMenu &tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: initiate dialogue sequence to create a new game based on users difficulty preferences
 */
-void interface_behaviour_newgame(MainMenu &tm)
+void interface_behaviour_newgame(MainMenu& tm)
 {
 	switch (tm.logic_setup) {
 

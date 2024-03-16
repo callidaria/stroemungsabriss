@@ -612,7 +612,7 @@ public:
 	// engine
 	CascabelBaseFeature* m_ccbf;
 	SaveStates savestates;
-	bool request_close = false, request_restart = false;
+	bool request_close = false,request_restart = false;
 	ProcessedMenuInput input;
 
 	// interactables
