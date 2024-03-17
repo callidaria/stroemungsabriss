@@ -2016,17 +2016,30 @@ const char* main_options[OptionLogicID::LOGIC_COUNT] = {
 
 
 /**
- *			Implementation UI: MainMenu component
+ *			Implementation UI: MainMenu Component
  *
- *	TODO
+ *	Starting interaction of the user with the program.
+ *
+ *		Progression
+ *
+ *	1) start menu, setting the mood, displaying the version and imploring the user to engage.
+ *	2) macro selection of straight forward menu options.
+ *	3) depending on the selected macro option proceed with user dialogue.
+ *
+ *		Style Statement
+ *
+ *	There are a lot of style improvements still waiting to be done, as well as tweaks to the current style.
+ *
+ *		Performance Statement
+ *
+ *	Everything here is still quite unoptimized, including most of the used components.
+ *	Anyways this will be done later alongside with improving visuals.
 */
 
+
 /*
-	constructor(CCBManager*,CascabelBaseFeature*,World*,float&,float)
+	!O(n)bm .logic + display count /load -> UI (public)
 	purpose: setup menu environment, populate with lists and define input possibilities
-	\param ccbm: cascabel manager used to load environment and level loader files
-	\param ccbf: collection of basic cascabel features
-	TODO: extend documentation
 */
 MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float& progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
@@ -2145,7 +2158,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		t_ddo.add(
 				("Monitor "+std::to_string(i)).c_str(),
 				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
-			),t_ddo.load();
+			), t_ddo.load();
 		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
 		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
 		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
@@ -2157,7 +2170,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		mlists.mlists[flist].entities[2].dd_options.back().add(
 				"ERROR!",
 				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
-			),mlists.mlists[flist].entities[2].dd_options.back().load();
+			), mlists.mlists[flist].entities[2].dd_options.back().load();
 		mlists.mlists[flist].entities[2].dd_colours.push_back(TEXT_ERROR_COLOUR);
 		mlists.mlists[flist].entities[2].dd_length.push_back(6);
 	}
@@ -2187,11 +2200,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 }
 
 /*
-	render(FrameBuffer*,bool&,bool&) -> void (virtual) !O(1)
+	!O(n)bn .macro logic /update -> UI::render (public)
 	purpose: render the main menu, calculate geometry and process interactions
-	\param game_fb: deferred shaded game scene framebuffer
-	\param running: is application still running?
-	\param reboot: will be rebooting with new settings after game closed?
 */
 void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 {
@@ -2408,7 +2418,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 }
 
 /*
-	TODO
+	!O(1)bm /function -> (private)
+	purpose: change instruction annotation for user when input peripheral has been changed, while playing
 */
 void MainMenu::update_peripheral_annotations()
 {
