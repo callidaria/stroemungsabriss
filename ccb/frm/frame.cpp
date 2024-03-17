@@ -209,7 +209,6 @@ void Frame::input(bool &running)
 			break;
 		}
 		// FIXME: switch input refuses to be read. conn ok but no prints
-		// FIXME: quit state never occurs, probably because click is evaluated before quit?
 
 		// update preferred peripheral
 		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)

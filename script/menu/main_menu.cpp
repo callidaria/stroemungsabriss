@@ -2413,7 +2413,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 
 	// system
 	reboot = request_restart;
-	running = !request_close&&!request_restart;
+	running = running&&!request_close&&!request_restart;
 }
 
 /*
