@@ -52,11 +52,11 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 		ptrans ~= 0.0f: renders game sepia filtered and the menu is placed on top
 	!! DISCLAIMER: has to be run after game board components, but before all other ui using bb !!
 */
-void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
+void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
 	// action menu open requests
-	bool pause = imap->input_val[IMP_REQPAUSE],details = imap->input_val[IMP_REQDETAILS];
-	bool down = imap->input_val[IMP_REQDOWN],up = imap->input_val[IMP_REQUP];
+	bool pause = imap->input_val[InputID::PAUSE],details = imap->input_val[InputID::DETAILS];
+	bool down = imap->input_val[InputID::DOWN],up = imap->input_val[InputID::UP];
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
 	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
 	bool req_infomenu = details&&!menu_trg&&!menu_sys;
@@ -79,11 +79,19 @@ void ActionMenu::render(FrameBuffer* game_fb,uint32_t &running,bool &reboot)
 	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
 
 	// close when quit selected and hit
-	running *= !(imap->request(IMP_REQFOCUS)&&msel==2&&menu_sys);
+	running *= !(imap->request(InputID::FOCUS)&&msel==2&&menu_sys);
 
 	// sepia colourspace when paused
 	m_frame->clear();
-	game_fb->render(ptrans);
+	game_fb->prepare();
+	game_fb->s.upload_vec2(
+			"ratio",
+			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH,Init::iConfig[FRAME_RESOLUTION_HEIGHT]])
+		);
+	game_fb->s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
+	game_fb->s.upload_float("mtransition",ptrans);
+	game_fb->render();
+	// FIXME: this requires ratio to already be uploaded to game_fb shader at load time
 
 	// selection splash modifications
 	uint16_t strans = TEXT_YPOSITION_SYS*menu_sys+TEXT_YPOSITION_INFO*menu_inf

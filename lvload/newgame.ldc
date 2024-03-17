@@ -1,0 +1,11 @@
+:cluster are you sure?
+
+:define create new save
+:describe
+this will create a new save file and prefer that safe over others when saving and loading
+:return 1
+
+:define refuse
+:describe
+cancel save creation
+:system_behaviour 1

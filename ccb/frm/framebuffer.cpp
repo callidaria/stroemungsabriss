@@ -62,29 +62,6 @@ void FrameBuffer::prepare()
 */
 void FrameBuffer::render()
 {
-	prepare();
-
-	// draw
 	glBindTexture(GL_TEXTURE_2D,tex);
-	glDrawArrays(GL_TRIANGLES,0,6);
-}
-
-/*
-	render(float) -> void
-	ptrans: progression of menu's transformation animation after start was pressed
-	purpose: render menu transformation between two shader states
-	DEVELOPED EXCLUSIVELY FOR : yomisensei
-*/
-void FrameBuffer::render(float ptrans)
-{
-	// setup
-	s.enable();
-	buffer.bind();
-	glBindTexture(GL_TEXTURE_2D,tex);
-
-	// render
-	s.upload_vec2("fres",glm::vec2(frw,frh)); // !!do not do this in update
-	s.upload_float("vgnt",0.44f+(float)(rand()%21)*0.001f);
-	s.upload_float("ptrans",ptrans);
 	glDrawArrays(GL_TRIANGLES,0,6);
 }

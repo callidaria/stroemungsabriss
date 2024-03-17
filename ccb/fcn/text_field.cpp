@@ -11,9 +11,9 @@ void TextField::render(Frame* frame,Camera2D* cam2d,glm::vec4 col)
 	bool hover = false;
 	if (frame->mouse.mxfr>=m_bpos.x&&frame->mouse.mxfr<=m_bpos.x+m_width
 		&&frame->mouse.myfr>=m_bpos.y&&frame->mouse.myfr<=m_bpos.y+m_height) {
-		if (frame->mouse.mcl) input_active = true;
+		if (frame->mouse.mb[0]) input_active = true;
 		hover = true;
-	} else { if (frame->mouse.mcl) input_active = false; }
+	} else { if (frame->mouse.mb[0]) input_active = false; }
 	if (frame->event_active&&input_active) { // !!evil branching ...also avoid frame pointer here
 		for (int i=0;i<285;i++) { // ??maybe not iterate through all ascii instances for the alphabet
 			if (frame->m_fe.type==SDL_KEYDOWN&&frame->m_fe.key.keysym.scancode==i) {

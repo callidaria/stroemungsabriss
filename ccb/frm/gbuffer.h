@@ -9,29 +9,39 @@
 
 #include "../mat/toolbox.h"
 
-constexpr uint8_t CCB_GBUFFER_COMPONENT_COUNT = 4;
-
 class GBuffer
 {
 public:
 
 	// construction
-	GBuffer() {  }
-	GBuffer(float w_res,float h_res);
+	GBuffer(float w_res=1280.f,float h_res=720.f);
 	~GBuffer() {  }
+
+	// creation
+	void add_colour_component(bool fcomp=false);
+	uint8_t add_depth_component();
+	void finalize_buffer();
 
 	// bind
 	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,buffer); }
 
 public:
 
+	// attributes
+	float w_res,h_res;
+
 	// component textures
-	uint32_t t_colour,t_position,t_normals,t_materials,t_depth;
+	std::vector<uint32_t> t_colour_components;
+	std::vector<uint32_t> t_value_components;
 
 private:
 
 	// content
 	uint32_t buffer;
+	std::vector<uint32_t> def_colour_components;
+
+	// attributes
+	bool has_depth = false;
 };
 
 #endif

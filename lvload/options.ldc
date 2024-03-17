@@ -1,0 +1,126 @@
+:cluster main
+
+:define Game
+:describe
+Gameplay specifics, input, languages and many more little tweaks
+for you to optimize your experience.
+:subsequent cgame
+
+:define Frame
+:describe
+Adjust resolution, monitor configurations and screen settings.
+:subsequent cframe
+
+:define Graphics
+:describe
+If this game is not beautiful enough for your taste, or your computer
+is from the 80s, then you can adjust performace and GFX here.
+:subsequent cgfx
+
+:define Audio
+:describe
+Music, SFX and voices can be configured here.
+:subsequent caudio
+
+
+:cluster cgame
+
+:segment Language
+
+:define Text Language
+:describe
+Choose language of written contents.
+:dropdown
+English German Natives ;
+:link iGeneralLanguageWrittenText
+
+:define Voiced Language
+:describe
+Choose Language of voiced Contents.
+Natives lets each character speak in his own canonically correct language.
+:dropdown
+English Natives German ;
+:link iGeneralLanguageSpokenWord
+
+:segment Peripherals
+
+:define Input Style
+:describe
+Force the preferred peripheral if you have trouble with dynamic Input switching.
+:dropdown
+Dynamic Controller Arcade Stick Keyboard ;
+:link iGeneralForcePeripheral
+
+
+:cluster cframe
+
+:segment Display
+
+:define Screen Resolution
+:describe
+Sometimes life has no (re-)solutions for your trouble.
+:dropdown
+1280x720 1600x900 1920x1080 ;
+:link iFrameResolutionPreset
+
+:define Fullscreen?
+:describe
+Have you tried turning it off and on again?
+:checkbox
+:link bFrameFullscreen
+
+:define Target Monitor
+:describe
+Choose Monitor ID. If you don't know which ID is correct use trial and error,
+unless of course you are running Linux with i3, in that case good luck,
+this does nothing!
+:dropdown
+:link iFrameTargetMonitor
+
+
+:cluster cgfx
+
+:segment GPU
+
+:define Graphics Library
+:describe
+Choose between Vulkan & Opengl,
+depending on your preference and the settings you want to change.
+:dropdown
+Vulkan OpenGL ;
+:link iGraphicsTargetLibrary
+
+:define Quality Preset
+:describe
+Choose a template if you don't want to bother with technical details
+or you are missing the required knowledge.
+:dropdown
+Phenomenal Good Passable Broken Abominal Userspecific ;
+:link iGraphicsPresetLevel
+
+
+:cluster caudio
+
+:define Master Audio
+:describe
+Too loud? Too low? You don't want to change your system Audio? Fine, do it here!
+:slider
+:link fAudioMasterVolume
+
+:define Voices Volume
+:describe
+Somehow we have casted someone annoying, here you can finally shut him up.
+:slider
+:link fAudioVoicesVolume
+
+:define Music Volume
+:describe
+How dare you, the only direction of that slider is WAYYY UP!
+:slider
+:link fAudioMusicVolume
+
+:define Effects Volume
+:describe
+Volume of interaction sound and general SFX
+:slider
+:link fAudioEffectsVolume

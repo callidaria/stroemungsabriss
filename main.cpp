@@ -32,8 +32,6 @@
 #include "script/systems/input_map.h"
 #include "script/systems/worldbuilder.h"
 
-#include "script/menu/menu.h"
-
 #include "script/world.h"
 
 #define MVMT_SPEED 4
@@ -42,10 +40,13 @@
 int main(int argc,char** argv)
 {
 	// INIT
-	Init init = Init("config.ini");
-	Frame f = Frame("黄泉先生",init.rINT(init.FRAME_DISPLAY_ID),
-			init.rINT(init.FRAME_RESOLUTION_WIDTH),init.rINT(init.FRAME_RESOLUTION_HEIGHT),
-			(SDL_WindowFlags)init.rINT(init.FRAME_SET_FULLSCREEN));
+	Init("config.ini");
+	Frame f = Frame(
+			"黄泉先生",
+			Init::iConfig[InitVariable::FRAME_DISPLAY_ID],
+			Init::iConfig[InitVariable::FRAME_RESOLUTION_WIDTH],
+			Init::iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT],
+			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);
 	InputMap imap = InputMap(&f);
 
 	// AUDIO
@@ -81,8 +82,7 @@ int main(int argc,char** argv)
 #endif
 
 	// MAIN LOOP
-	uint32_t run = 1;
-	bool reboot = false;
+	bool run = true,reboot = false;
 	while (run) {
 
 		// process loading requests
@@ -92,13 +92,18 @@ int main(int argc,char** argv)
 		f.vsync(60);
 		f.calc_time_delta();
 		f.input(run);
+		Frame::clear();
 
 		// input mapping
 		imap.update();
 		imap.precalculate_all();
+		imap.stick_to_dpad();
 
 		// render scene
 		world.render(run,reboot);
+
+		// debrief
+		imap.update_triggers();
 
 		// developer tools in debug mode
 #if BUILD_DEV_MODE

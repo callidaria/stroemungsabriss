@@ -13,6 +13,7 @@ public:
 	Camera3D(float w_res,float h_res);
 	Camera3D(glm::vec3 cp,float w_res,float h_res,float fov);
 	Camera3D(glm::vec3 cp,glm::vec3 front,float w_res,float h_res,float fov);
+	Camera3D(glm::vec3 cp,float w_res,float h_res,float fov,float pitch,float yaw);
 
 	// calculations
 	inline void update() { view3D = glm::lookAt(pos,pos+front,up); }

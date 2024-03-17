@@ -12,25 +12,32 @@
 
 #include <AL/alc.h>
 
+#include "../fcn/init.h"
+
 #define BUILDISSUE_OLD_SDL_VERSION
+
+constexpr uint16_t KEYBOARD_INPUT_RANGE = 285;
+constexpr uint8_t MOUSE_BUTTON_INPUT_RANGE = 5;
+constexpr uint8_t CONTROLLER_AXIS_INPUT_RANGE = 6;
+constexpr uint8_t CONTROLLER_BUTTON_INPUT_RANGE = 22;
 
 struct Keyboard
 {
-	bool ka[285] = { false };	// list of keyboard scan results
+	bool ka[KEYBOARD_INPUT_RANGE] = { false };
 };
 
 struct Mouse
 {
-	bool mcl = false,mcr = false;	// mouse button requests
-	int32_t mx,my;					// mouse positions x,y
-	float mxfr,myfr;				// mouse position x,y scaled to absolute range
-	int32_t mw;						// mouse wheel movements
+	bool mb[MOUSE_BUTTON_INPUT_RANGE] = { false };
+	int32_t mx,my;
+	float mxfr,myfr;
+	int32_t mw;
 };
 
 struct XBox
 {
-	int xba[6];					// controller axis tilts
-	bool xbb[16] = { false };	// controller button requests
+	int32_t xba[CONTROLLER_AXIS_INPUT_RANGE];
+	bool xbb[CONTROLLER_BUTTON_INPUT_RANGE] = { false };
 };
 
 class Frame
@@ -59,7 +66,7 @@ public:
 	void change_tmod(double goal,double rate);
 
 	// controlling
-	void input(uint32_t &running);
+	void input(bool &running);
 
 	// termination
 	void vanish();
@@ -88,6 +95,7 @@ public:
 	int w_res,h_res;
 	bool event_active = false;
 	double time_mod = 1.0,time_delta = 0;
+	bool cpref_peripheral = false,mpref_peripheral = false;
 
 	// input
 	std::vector<SDL_GameController*> m_gc;
@@ -96,7 +104,7 @@ public:
 	Mouse mouse;
 	std::vector<XBox> xb;
 	std::string tline = "";
-	bool controller_remap = true;
+	bool controller_remap = false;
 
 private:
 

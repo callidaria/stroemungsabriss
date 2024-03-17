@@ -69,15 +69,23 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### features:
 - render to multiple subscreens within the main window
-
-### fixes:
-- FIXED: globe location preview, faulty render & rotation changes
+- dynamic player readable identification of requested buttons based on input mapping
+- automatic recognition of main input device between game controller and keyboard
+- improved menu navigation with instructional annotations
+- improved menu splash animations
+- improved title speedup effect
 
 ### optimizations:
+- refactor/rewrite of main menu code (also menu listing and menu dialogue component)
+- optimization of globe preview render
 - writing geometry directly to vertex array, instead of copying from respective object pre-load
 - minimized on/off switching of depth testing
 - active texture reset call reduction by uniformly switching back after render
 - using inlines for small functions with trivial implementation and straight forward usage
+- optimized structure for input mapping
+
+### fixes:
+- FIXED: globe location preview, faulty render & rotation changes
 
 <br>
 
@@ -197,8 +205,9 @@ Worktime: 120h
 ## Trivia
 - Total Worktime: 785h 17min
 - Elapsed Worktime After v0.0.5:
-    + 209: 44min
-    + 215: 2h 28min
+	+ 209: 44min
+	+ 215: 2h 28min
 	+ 199: 7h 34min
 	+ 192: 7h 4min
-- Total Code Lines: 15.823
+	+ 16: 295h 20min
+- Total Code Lines: 17.743

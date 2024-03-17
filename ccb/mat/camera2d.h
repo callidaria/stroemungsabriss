@@ -16,4 +16,7 @@ public:
 	glm::mat4 view2D,proj2D;
 };
 
+static Camera2D gCamera2D = Camera2D(1280.f,720.f);
+// TODO: relocate
+
 #endif

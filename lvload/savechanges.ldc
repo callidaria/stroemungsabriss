@@ -1,0 +1,16 @@
+:cluster settings modified
+
+:define save changes
+:describe
+write changes and potentially restart program
+:return 1
+
+:define restore previous
+:describe
+reset changes and proceed as if nothing happened
+:return 2
+
+:define back
+:describe
+continue modifying options
+:system_behaviour 1

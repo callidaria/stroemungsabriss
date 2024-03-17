@@ -42,3 +42,18 @@ Camera3D::Camera3D(glm::vec3 cp,glm::vec3 in_front,float w_res,float h_res,float
 	view3D = glm::lookAt(pos,front,up);
 	proj3D = glm::perspective(glm::radians(fov),w_res/h_res,0.1f,10000.0f);
 }
+
+/*
+	!O(1) /load -> (public)
+	purpose: create a perspective 3D camera over pitch and yaw values
+	\param pitch: camera pitch tilt
+	\param yaw: camera yaw tilt
+*/
+Camera3D::Camera3D(glm::vec3 cp,float w_res,float h_res,float fov,float pitch,float yaw)
+	: pos(cp)
+{
+	float rad_pitch = glm::radians(pitch),rad_yaw = glm::radians(yaw);
+	front = glm::normalize(glm::vec3(cos(rad_pitch)*cos(rad_yaw),sin(rad_pitch),cos(rad_pitch)*sin(rad_yaw)));
+	view3D = glm::lookAt(pos,pos+front,up);
+	proj3D = glm::perspective(glm::radians(fov),w_res/h_res,.1f,10000.f);
+}

@@ -7,41 +7,85 @@
 #include <cstring>
 #include <vector>
 
-#define INTEGER_KEY_LENGTH 4
-// TODO: change to constexpr
+
+constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
+
+
+struct InitVariableInfo {
+	const char* name;
+	const bool restart_system_on_change;
+};
+
+// variable keymap
+const inline std::vector<InitVariableInfo> iKeys = {
+
+	{ "iFrameResolutionPreset",true },
+	{ "vFrameResolutionWidth",false },{ "vFrameResolutionHeight",false },
+	{ "bFrameFullscreen",true },
+	{ "iFrameTargetMonitor",true },
+
+	{ "iGraphicsTargetLibrary",true },
+	{ "iGraphicsPresetLevel",false },
+
+	{ "iGeneralLanguageWrittenText",false },
+	{ "iGeneralLanguageSpokenWord",false },
+	{ "iGeneralForcePeripheral",false },
+	{ "iGeneralPeripheralAxisDeadzone",false },
+	{ "iGeneralPeripheralAxisRange",false },
+
+	{ "fAudioMasterVolume",false },
+	{ "fAudioVoicesVolume",false },
+	{ "fAudioMusicVolume",false },
+	{ "fAudioEffectsVolume",false },
+};
+
+enum InitVariable
+{
+	FRAME_RESOLUTION_PRESET,
+	FRAME_RESOLUTION_WIDTH,FRAME_RESOLUTION_HEIGHT,
+	FRAME_SET_FULLSCREEN,
+	FRAME_DISPLAY_ID,
+
+	GRAPHICS_TARGET_LIBRARY,
+	GRAPHICS_PRESET_LEVEL,
+
+	GENERAL_TEXT_LANGUAGE,
+	GENERAL_VOICES_LANGUAGE,
+	GENERAL_PERIPHERAL_PREFERENCE,
+	GENERAL_PERIPHERAL_AXIS_DEADZONE,
+	GENERAL_PERIPHERAL_AXIS_RANGE,
+
+	AUDIO_VOLUME_MASTER,
+	AUDIO_VOLUME_VOICES,
+	AUDIO_VOLUME_MUSIC,
+	AUDIO_VOLUME_EFFECTS,
+
+	VARIABLE_KEY_LENGTH,
+	VARIABLE_ERROR = VARIABLE_KEY_LENGTH
+};
 
 class Init
 {
-
 public:
 
 	Init(const char* path);
-
-	uint32_t rINT(uint32_t id);
+	static uint32_t find_iKey(const char* key);
+	static void write_changes();
 
 private:
 
-	uint32_t find_iKey(const char* key);
 	std::vector<uint32_t> read_cartesian(std::string val);
 
 public:
 
-	// keys
-	const uint32_t FRAME_RESOLUTION_WIDTH = 0;
-	const uint32_t FRAME_RESOLUTION_HEIGHT = 1;
-	const uint32_t FRAME_SET_FULLSCREEN = 2;
-	const uint32_t FRAME_DISPLAY_ID = 3;
+	// constant collections
+	static inline uint32_t iConfig[InitVariable::VARIABLE_KEY_LENGTH];
 
 private:
 
-	// key identification dictionaries
-	std::vector<const char*> iKeys = { "vFrameResolution","vFrameResolution","bFrameFullscreen",
-		"iFrameTargetMonitor" };
-	// TODO: generate this list automatically, when reading the file
-
-	// constant collections
-	uint32_t iConfig[INTEGER_KEY_LENGTH];
-
+	// preset translation
+	static inline uint16_t resolutionWidthPresets[AMOUNT_RESOLUTION_PRESETS] = { 1280,1600,1920 };
+	static inline uint16_t resolutionHeightPresets[AMOUNT_RESOLUTION_PRESETS] = { 720,900,1080 };
 };
 
 #endif

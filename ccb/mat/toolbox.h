@@ -22,7 +22,15 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+// math constants
+constexpr double MATH_CARTESIAN_XRANGE = 1280.f;
+constexpr double MATH_CARTESIAN_YRANGE = 720.f;
+constexpr double MATH_PI = 3.141592653;
+constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_XRANGE*.618;
+
+// toolbox constants
 constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
+
 
 // debug timing keys to record individual loadtimes for task sequences
 struct DebugLogKey
@@ -51,6 +59,7 @@ public:
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
 	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
+	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
 	// timing debug
 	static void start_debug_logging(DebugLogData &dld,const char* tname);

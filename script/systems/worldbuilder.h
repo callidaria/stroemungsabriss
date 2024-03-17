@@ -11,7 +11,7 @@
 #include "../scenes/casino_spike.h"
 #include "../scenes/casino_table.h"
 
-#include "../menu/menu.h"
+#include "../menu/main_menu.h"
 #include "../ui/action_menu.h"
 #include "../struct/feature_base.h"
 #include "../pcs/jaeger_jet.h"

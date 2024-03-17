@@ -1,0 +1,48 @@
+:cluster challenge selection
+
+:define original
+:describe
+original mode:
+intended difficulty!
+WARNING: NOT AN EASY OR NORMAL MODE!
+:return 1
+
+:define master
+:describe
+master mode:
+you are either a seasoned danmaku veteran or original mode doesn't challenge you anymore
+:return 1
+
+:define grandmaster
+:describe
+grandmaster mode:
+don't make this choice without thinking, i know it sounds cool on paper, but ton't do it!
+:subsequent credit warning
+
+:define headmaster
+:describe
+ATTENTION:
+
+This setting is only for insane people,
+robots & mountain hermits!
+It requires perfection and nothing less.
+
+This is not a sightseeing difficulty,
+you wont be able to see any beautiful
+background pixels or cool animations
+with the given bullet density.
+:subsequent credit warning
+
+
+:cluster credit warning
+
+:define i refuse
+:describe
+i have changed my mind and hereby revert my previous choice
+:floats 300 -200
+:system_behaviour 1
+
+:define i accept
+:describe
+i acknowledge this challenge as impossible and welcome death with open arms
+:return 1

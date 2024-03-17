@@ -8,7 +8,7 @@ out vec4 outColour;
 uniform samplerCube irradiance_map;
 
 // sampling settings
-uniform int source_resolution = 1024;
+uniform int source_resolution = 1024;		// FIXME: obsolete
 uniform float roughness = .0;
 uniform int sample_count = 2048;
 
@@ -26,7 +26,7 @@ void main()
 
 	// precalculations
 	float asq = pow(roughness,4.0);
-	float rmaptex = (4.0*MATH_PI)/(6.0*pow(source_resolution,2.0));
+	float rmaptex = (4.0*MATH_PI)/(6.0*pow(source_resolution,2.0));		// FIXME: obsolete
 	float lodmod = .5*float(roughness!=0.0);
 
 	// iterate through samples

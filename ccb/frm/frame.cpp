@@ -147,58 +147,79 @@ void Frame::change_tmod(double goal,double rate)
 	tinput (false): defines if text input mode is enabled
 	purpose: processes keyboard, controller and mouse input
 */
-void Frame::input(uint32_t &running)
+void Frame::input(bool &running)
 {
-	// FIXME: this is loopcode. make it work as such !!branches!!
+	// reset
+	mouse.mw = 0;
+
+	// process events and set input activity
 	event_active = false;
 	while (SDL_PollEvent(&m_fe)) {
 		event_active = true;
-		running = m_fe.type!=SDL_QUIT; // exit the program when closing is requested
+		bool relevant_motion = false;
 
-		// read keyboard input
-		if (m_fe.type==SDL_KEYDOWN) kb.ka[m_fe.key.keysym.scancode] = true;
-		if (m_fe.type==SDL_KEYUP) kb.ka[m_fe.key.keysym.scancode] = false;
-		if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
-			tline.pop_back();
-		if (m_fe.type==SDL_TEXTINPUT) tline+=m_fe.text.text;
+		// switch input handling (not my favourite necessarily)
+		int32_t motion;
+		switch (m_fe.type)
+		{
 
-		// read mouse input
-		SDL_GetMouseState(&mouse.mx,&mouse.my);
-		mouse.mxfr = (float)mouse.mx/w_res; // ??make those optional
-		mouse.myfr = (float)(h_res-mouse.my)/h_res;
-		// !!fix on move cancellation && carry boolean when button released
-		if (m_fe.type==SDL_MOUSEBUTTONDOWN) { // ??breakdown to boolean equasion
-			mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT;
-			mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT;
-		} if (m_fe.type==SDL_MOUSEBUTTONUP) { // !!not the practical way
-			mouse.mcl = m_fe.button.button!=SDL_BUTTON_LEFT;
-			mouse.mcr = m_fe.button.button!=SDL_BUTTON_RIGHT;
-		}
-		/*mouse.mcl = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_LEFT)
-				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_LEFT);
-		mouse.mcr = (m_fe.type==SDL_MOUSEBUTTONDOWN&&m_fe.button.button==SDL_BUTTON_RIGHT)
-				||(m_fe.type==SDL_MOUSEBUTTONUP&&m_fe.button.button!=SDL_BUTTON_RIGHT);*/
-		/*mouse.mcl = m_fe.button.button==SDL_BUTTON_LEFT&&m_fe.type==SDL_MOUSEBUTTONDOWN;
-		mouse.mcr = m_fe.button.button==SDL_BUTTON_RIGHT&&m_fe.type==SDL_MOUSEBUTTONDOWN;*/
-		mouse.mw = m_fe.wheel.y;
+		// keyboard input
+		case SDL_KEYDOWN: kb.ka[m_fe.key.keysym.scancode] = true;
+			break;
+		case SDL_KEYUP: kb.ka[m_fe.key.keysym.scancode] = false;
+			break;
 
-		// check for controller plug-in
-		if (m_fe.type==SDL_JOYDEVICEADDED||m_fe.type==SDL_JOYDEVICEREMOVED) {
+		// mouse input
+		case SDL_MOUSEMOTION:
+			SDL_GetMouseState(&mouse.mx,&mouse.my);
+			mouse.mxfr = (float)mouse.mx/w_res;
+			mouse.myfr = (float)(h_res-mouse.my)/h_res;
+			break;
+		case SDL_MOUSEBUTTONDOWN: mouse.mb[m_fe.button.button-1] = true;
+			break;
+		case SDL_MOUSEBUTTONUP: mouse.mb[m_fe.button.button-1] = false;
+			break;
+		case SDL_MOUSEWHEEL: mouse.mw = m_fe.wheel.y;
+			break;
+
+		// controller input
+		case SDL_CONTROLLERAXISMOTION:
+			motion = SDL_GameControllerGetAxis(m_gc[0],(SDL_GameControllerAxis)m_fe.caxis.axis);
+			xb[0].xba[m_fe.caxis.axis] = motion;
+			relevant_motion = (abs(motion)>Init::iConfig[InitVariable::GENERAL_PERIPHERAL_AXIS_DEADZONE])
+					|| relevant_motion;
+			break;
+		case SDL_CONTROLLERBUTTONDOWN: xb[0].xbb[m_fe.cbutton.button] = true;
+			break;
+		case SDL_CONTROLLERBUTTONUP: xb[0].xbb[m_fe.cbutton.button] = false;
+			break;
+		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
+		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers while a&b is exchanged
+
+		// controller hotswapping
+		case SDL_JOYDEVICEADDED:
+		case SDL_JOYDEVICEREMOVED:
 			kill_controllers();
 			load_controllers();
 			controller_remap = true;
-		}
+			break;
 
-		// read controller input
-		for (int i=0;i<m_gc.size();i++) {
-			for (int j=0;j<6;j++)
-				xb.at(i).xba[j] = SDL_GameControllerGetAxis(m_gc.at(i),(SDL_GameControllerAxis)j);
-			for (int j=0;j<16;j++)
-				xb.at(i).xbb[j] = SDL_GameControllerGetButton(m_gc.at(i),(SDL_GameControllerButton)j);
+		// window close request
+		case SDL_QUIT: running = false;
+			break;
 		}
-		// face buttons have the default xbox layout so for sony it is X=A,O=B,sq=X and delta=Y
-		// results in SDL_CONTROLLER_BUTTON_* const for nintendo controllers having exchanged a&b recognition
-		// switch input refuses to be read. conn ok but no prints
+		// FIXME: switch input refuses to be read. conn ok but no prints
+
+		// update preferred peripheral
+		cpref_peripheral = (cpref_peripheral||m_fe.type==SDL_CONTROLLERBUTTONDOWN||relevant_motion)
+				&& !(m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_KEYDOWN);
+		mpref_peripheral = (mpref_peripheral&&!cpref_peripheral&&m_fe.type!=SDL_KEYDOWN)
+				|| m_fe.type==SDL_MOUSEMOTION||m_fe.type==SDL_MOUSEBUTTONDOWN||m_fe.type==SDL_MOUSEWHEEL;
+
+		/*if (m_fe.type==SDL_KEYDOWN&&m_fe.key.keysym.sym==SDLK_BACKSPACE&&tline.length()>0)
+			tline.pop_back();
+		if (m_fe.type==SDL_TEXTINPUT) tline += m_fe.text.text;*/
+		// TODO: make this code happen sensibly within this new input processing implementation
 	}
 }
 
@@ -306,5 +327,5 @@ void Frame::load_controllers()
 void Frame::kill_controllers()
 {
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i));
-	m_gc.clear();
+	m_gc.clear(),xb.clear();
 }

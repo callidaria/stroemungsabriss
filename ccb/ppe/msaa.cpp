@@ -72,34 +72,6 @@ void MSAA::blit()
 }
 
 /*
-	render() -> void
-	purpose: render multisampled buffer to msaa canvas
-*/
-void MSAA::render()
-{
-	prepare();
-	glDrawArrays(GL_TRIANGLES,0,6);
-}
-
-/*
-	render(GLuint) -> void
-	ovltex: overlay texture to be combined with base texture
-	purpose: render base combined with overlay texture if base texture has colour length > 0
-*/
-void MSAA::render(GLuint ovltex)
-{
-	// prepare & upload overlay texture
-	prepare();
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,ovltex);
-	sfb.upload_int("overlay",1);
-
-	// draw
-	glDrawArrays(GL_TRIANGLES,0,6);
-	glActiveTexture(GL_TEXTURE0);
-}
-
-/*
 	prepare() -> void
 	purpose: used to prepare all render methods
 */

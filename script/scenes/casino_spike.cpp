@@ -59,6 +59,9 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
 	} oheights[0] = 5.5f,oheights[1] = 7,oheights[2] = 6.5f,oheights[3] = 6;
 	progress += sseq;
+	m_ccbf->r3d->upload_target_static_lighting(0,&set_rigs->lighting);
+	// TODO: structurize again and again until this shit makes any sense!
+	//	maybe approaching a worldly stage lighting is the wrong idea & privatize lights for scenes
 
 	// lighting maps
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);

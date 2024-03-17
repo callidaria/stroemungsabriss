@@ -135,6 +135,26 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 }
 
 /*
+	!O(1)b /+function -> (public,static)
+	purpose: convert a boolean to a float with controlled delay
+	\param tval: reference of float, being transformed according to boolean
+	\param tspeed: controlled delay interval
+	\param cnd: boolean condition, defining target float value
+*/
+void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
+{
+	tval += tspeed*(cnd-!cnd);
+	tval = (tval<.0f) ? .0f : (tval>1.f) ? 1.f : tval;
+	/*uint8_t tmin = (mtransition<.0f),tmax = (mtransition>1.f);
+	mtransition = mtransition-(mtransition-1.f)*tmax+abs(mtransition)*tmin;*/
+	// TODO: compare linear transition with sinespeed transition implementation
+	// 		also relate the results of this todo to the ftransition in main render method
+}
+// TODO: optimize further (!use assembly translation as guide!)
+// TODO: maybe even set some bounds to enhance the transition range possibilities
+// TODO: i feel like this implementation lacks wit
+
+/*
 	start_debug_logging(DebugLogData&,const char*) -> void
 	purpose: start time difference debug recording
 	\param dld: variable holding runtime debug data, such as recording keys & their string id

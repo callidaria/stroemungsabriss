@@ -22,7 +22,7 @@ Init::Init(const char* path)
 			trget << line << '\n';
 		} file = std::ifstream(path,std::ios::in); // read created file
 
-		// TODO: ??write default init file automatically based on descriptions in ml files
+		// TODO: ??write default init file automatically based on descriptions in .ldc files
 		// FIXME: autocreation through MenuList worked accidentally while testing? wtf?
 		// 		i do not know if this could be used to maybe optimize the init creation?
 	}
@@ -33,20 +33,10 @@ Init::Init(const char* path)
 		std::string val;file >> val;
 		std::vector<uint32_t> ex = read_cartesian(val);
 		uint16_t j = find_iKey(rclh.c_str());
-		for (int i=0;i<ex.size();i++) {
-			iConfig[j+i] = ex[i];
-		}
+		for (int i=0;i<ex.size();i++) iConfig[j+i] = ex[i];
 	}
 }
 // FIXME: find a faster way to do this
-
-/*
-	rINT(uint32_t) -> uint32_t
-	id: key id to get value by
-	returns: value according to given key id. Use key macros to identify values.
-*/
-uint32_t Init::rINT(uint32_t id)
-{ return iConfig[id]; }
 
 /*
 	find_iKey(const char*) -> uint32_t
@@ -55,11 +45,30 @@ uint32_t Init::rINT(uint32_t id)
 */
 uint32_t Init::find_iKey(const char* key)
 {
-	int out = 0;
-	while (out<INTEGER_KEY_LENGTH) {
-		if (!strcmp(key,iKeys[out])) break;
+	uint32_t out = 0;
+	while (out<InitVariable::VARIABLE_KEY_LENGTH) {
+		if (!strcmp(key,iKeys[out].name)) break;
 		out++;
 	} return out;
+}
+
+/*
+	!O(n) .initialization variables /function -> (public)
+	purpose: write all variables back to config file
+*/
+void Init::write_changes()
+{
+	// handle frame resolution preset translation to vector
+	iConfig[InitVariable::FRAME_RESOLUTION_WIDTH]
+			= resolutionWidthPresets[iConfig[InitVariable::FRAME_RESOLUTION_PRESET]];
+	iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT]
+			= resolutionHeightPresets[iConfig[InitVariable::FRAME_RESOLUTION_PRESET]];
+
+	// write changes
+	std::ofstream chwrite("./config.ini",std::ios::out);
+	for (uint32_t i=0;i<InitVariable::VARIABLE_KEY_LENGTH;i++)
+		chwrite << iKeys[i].name << ' ' << std::to_string(iConfig[i]) << '\n';
+	chwrite.close();
 }
 
 /*

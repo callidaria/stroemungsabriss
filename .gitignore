@@ -1,7 +1,19 @@
-*.s
-/*.ini
-lib/
+# editors
+*#
+*~
+.vscode/
+*.swp
+
+# resources
 include/
 ccb/include/
+
+# precompute
+lib/
 dat/precalc/*
-.vscode/
+
+# local settings
+/*.ini
+
+# debug
+gmon.out

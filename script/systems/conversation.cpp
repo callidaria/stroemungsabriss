@@ -138,7 +138,7 @@ void Conversation::input(bool cnf,bool up,bool down)
 	if (!input_blocked) {
 
 		// interpret lmb as confirmation & save current decision id to detect changes later
-		cnf = cnf||m_frame->mouse.mcl;
+		cnf = cnf||m_frame->mouse.mb[0];
 		uint8_t lf_decision = decision_id;
 
 		// block input & complete filling when text not ready
