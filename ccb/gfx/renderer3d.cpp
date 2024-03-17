@@ -368,13 +368,13 @@ void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].dbuffer.prepare();
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_COLOUR]);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[GBufferComponentID::COLOUR]);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_POSITION]);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[GBufferComponentID::POSITION]);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_NORMALS]);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[GBufferComponentID::NORMALS]);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[R3D_GBUFFER_MATERIALS]);
+	glBindTexture(GL_TEXTURE_2D,rtargets[id].gbuffer.t_colour_components[GBufferComponentID::MATERIALS]);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D,shadow_map);
 	glActiveTexture(GL_TEXTURE0);

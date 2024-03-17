@@ -338,7 +338,7 @@ const std::string mlcmd[LDCCommandID::COMMAND_COUNT] = {
 	\param rClusters: reference to cluster list, the new clusters will be added into
 	NOTE: don't kill me for calling it "compile", i just wanted to be cute & it kinda does compile ok
 */
-void LDCCompiler::compile(const char* path,std::vector<LDCCluster> &rClusters)
+void LDCCompiler::compile(const char* path,std::vector<LDCCluster>& rClusters)
 {
 	// setup process state
 	LDCProcessState state = {
@@ -1264,10 +1264,10 @@ void MenuList::update_overlays()
 		);
 
 	// render globe to target
-	glEnable(GL_DEPTH_TEST),glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST), glDisable(GL_BLEND);
 	m_ccbf->r3d->start_target(globe_target_id);
-	m_ccbf->r3d->prepare_pmesh(gb_cam3D),m_ccbf->r3d->render_pmsh(rid_globe);
-	glDisable(GL_DEPTH_TEST),glEnable(GL_BLEND);
+	m_ccbf->r3d->prepare_pmesh(gb_cam3D), m_ccbf->r3d->render_pmsh(rid_globe);
+	glDisable(GL_DEPTH_TEST), glEnable(GL_BLEND);
 
 	// globe deferred shading
 	fb_globe.bind();
@@ -1290,8 +1290,7 @@ void MenuList::update_overlays()
 void MenuList::create_checkbox(float vscroll)
 {
 	// prepare lower-right corner with scroll
-	float ledge = vscroll-MENU_LIST_HEAD_SIZE;
-	float cedge = vscroll-MENU_LIST_HEAD_HSIZE;
+	float ledge = vscroll-MENU_LIST_HEAD_SIZE, cedge = vscroll-MENU_LIST_HEAD_HSIZE;
 	std::vector<float> t_vertices = {
 
 		// upper triangle
@@ -1313,7 +1312,8 @@ void MenuList::create_checkbox(float vscroll)
 		MENU_LIST_ATTRIBUTE_COMBINE,vscroll,-MENU_LIST_CHECKBOX_DRIFT_DIST,0,
 		MENU_LIST_ATTRIBUTE_COMBINE,ledge,-MENU_LIST_CHECKBOX_DRIFT_DIST,0,
 		MENU_LIST_ATTRIBUTE_HQUADRATIC,cedge,-MENU_LIST_CHECKBOX_DRIFT_DIST,0
-	}; checkbox_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+	};
+	checkbox_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
 // FIXME: similar issues apply as for slider implementation
 // FIXME: 6 float width is too heavy for this purpose
@@ -1325,8 +1325,7 @@ void MenuList::create_checkbox(float vscroll)
 */
 void MenuList::create_slider(float vscroll)
 {
-	float lcorner = vscroll-MENU_LIST_HEAD_SIZE;
-	float mcorner = vscroll-MENU_LIST_HEAD_HSIZE;
+	float lcorner = vscroll-MENU_LIST_HEAD_SIZE, mcorner = vscroll-MENU_LIST_HEAD_HSIZE;
 	std::vector<float> t_vertices = {
 
 		// concave trimming
@@ -1338,7 +1337,8 @@ void MenuList::create_slider(float vscroll)
 		MENU_LIST_ATTRIBUTE_WTARGET+MENU_LIST_SLIDER_XPUSH,lcorner,0,
 		MENU_LIST_ATTRIBUTE_WTARGET+MENU_LIST_SLIDER_XPUSH,vscroll,0,
 		MENU_LIST_ATTRIBUTE_COMBINE,mcorner,1
-	}; slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
+	};
+	slider_vertices.insert(slider_vertices.end(),t_vertices.begin(),t_vertices.end());
 }
 // FIXME: really? we allocate per slider? that is really dumb and lazy!
 // FIXME: sliders, checkbox & dropdown boxing is slightly off-center
@@ -1604,8 +1604,7 @@ void MenuDialogue::update(ProcessedMenuInput& input)
 	SingularDialogueData& dgd = dg_data[id];
 	if (!*input.mouse_preferred_peripheral) dgd.sindex += input.dir_vert;
 	else dgd.sindex = (input.mouse_cartesian.y-dgd.liststart_y)/dgd.option_size*-1;
-	dgd.sindex = (dgd.sindex<0) ? 0 : (dgd.sindex>dgd.max_options)
-			? dgd.max_options : dgd.sindex;
+	dgd.sindex = (dgd.sindex<0) ? 0 : (dgd.sindex>dgd.max_options) ? dgd.max_options : dgd.sindex;
 
 	// confirmation condition & set dialogue response state
 	if (!input.hit_a) return;
@@ -1819,7 +1818,7 @@ void interface_behaviour_macro(MainMenu& tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: handle options menu, check for changes after exit and write or reset based on user input
 */
-void interface_behaviour_options(MainMenu &tm)
+void interface_behaviour_options(MainMenu& tm)
 {
 	bool open_conf = false;
 
@@ -1877,7 +1876,7 @@ void interface_behaviour_options(MainMenu &tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: handle extras selection and display in the future
 */
-void interface_behaviour_extras(MainMenu &tm)
+void interface_behaviour_extras(MainMenu& tm)
 {
 	// open list of extra content
 	if (!tm.logic_setup) {
@@ -1893,7 +1892,7 @@ void interface_behaviour_extras(MainMenu &tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: handle practice scenario display and selection
 */
-void interface_behaviour_practice(MainMenu &tm)
+void interface_behaviour_practice(MainMenu& tm)
 {
 	// open list of practice scenarios
 	if (!tm.logic_setup) {
@@ -1909,7 +1908,7 @@ void interface_behaviour_practice(MainMenu &tm)
 	!O(1)b /+function -> interface_logic (local,static)
 	purpose: handle savestate display and load based on users choice
 */
-void interface_behaviour_load(MainMenu &tm)
+void interface_behaviour_load(MainMenu& tm)
 {
 	// open list of savestates
 	if (!tm.logic_setup) {

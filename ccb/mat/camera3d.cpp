@@ -44,7 +44,10 @@ Camera3D::Camera3D(glm::vec3 cp,glm::vec3 in_front,float w_res,float h_res,float
 }
 
 /*
-	TODO
+	!O(1) /load -> (public)
+	purpose: create a perspective 3D camera over pitch and yaw values
+	\param pitch: camera pitch tilt
+	\param yaw: camera yaw tilt
 */
 Camera3D::Camera3D(glm::vec3 cp,float w_res,float h_res,float fov,float pitch,float yaw)
 	: pos(cp)

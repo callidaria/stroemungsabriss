@@ -51,7 +51,6 @@ uint32_t Init::find_iKey(const char* key)
 		out++;
 	} return out;
 }
-// TODO: find out why default 0 is preventing the program from terminating setup process
 
 /*
 	!O(n) .initialization variables /function -> (public)

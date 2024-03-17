@@ -3,8 +3,8 @@
 /*
 	!O(1) /load -> (public)
 	purpose: create a g-buffer based on the given resolution
-	\param w_res: g-buffer's x-axis resolution
-	\param h_res: g-buffer's y-axis resolution
+	\param wres: g-buffer's x-axis resolution
+	\param hres: g-buffer's y-axis resolution
 	NOTE: constructing will immediately bind framebuffer for setup
 */
 GBuffer::GBuffer(float wres,float hres)
