@@ -102,11 +102,14 @@ constexpr glm::vec2 TEXT_DARE_POSITION = glm::vec2(450,250);
 constexpr glm::vec4 TEXT_DARE_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec2 TEXT_VERSION_POSITION = glm::vec2(650,20);
 constexpr glm::vec4 TEXT_VERSION_COLOUR = glm::vec4(.25f,0,.75f,1);
+constexpr glm::vec3 TEXT_OPTIONS_COLOUR = glm::vec3(.5f,1,.5f);
+constexpr glm::vec4 TEXT_INSTRUCTION_COLOUR = glm::vec4(1,.6f,0,1);
 constexpr glm::vec4 TEXT_SEGMENT_COLOUR = glm::vec4(.7f,.7f,.7f,1.f);
 constexpr glm::vec4 TEXT_ERROR_COLOUR = glm::vec4(1,0,0,1);
 constexpr glm::vec4 TEXT_DIALOGUE_HOVER_COLOUR = glm::vec4(0,.7f,.7f,1.f);
 
 // menu option text translation scope
+constexpr uint8_t MENU_OPTIONS_HEADINGS_COUNT = 5;
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
 constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE*.5f;
 constexpr glm::vec2 MENU_OPTIONS_CLEFT = glm::vec2(120,510)+glm::vec2(0,MENU_OPTIONS_HSIZE);

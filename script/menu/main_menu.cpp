@@ -1400,7 +1400,7 @@ uint8_t MenuList::calculate_grid_position()
 */
 
 /*
-	!O(n)bnmn .clusters in loaded .ldc file /+load -> (public)
+	!O(n)bnmn .clusters in loaded ldc file /+load -> (public)
 	purpose: create new callable dialogue window
 	\param path: path to list definition file written in ldc script language (as defined above)
 	\param center: central point of dialogue background, dialogue geometry will be spread from there
@@ -1801,15 +1801,14 @@ void interface_behaviour_macro(MainMenu& tm)
 
 	// change main option selector dimensions based on selected option
 	SelectionSpliceKey& t_ssk = tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
-	glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]
-			+ glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
-	t_ssk.disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x,
-		tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
-		tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
+	glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]+glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
+	t_ssk.disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x;
+	tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+	tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
 
 	// project upper displacement position based on lower displacement
 	glm::vec2 vrt_dir = vrt_cpos-t_ssk.disp_lower;
-	float vrt_extend_II = (720.f-vrt_cpos.y)/vrt_dir.y;
+	float vrt_extend_II = (MATH_CARTESIAN_YRANGE-vrt_cpos.y)/vrt_dir.y;
 	t_ssk.disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
 
 	// update randomized text rotation
@@ -1839,7 +1838,7 @@ void interface_behaviour_options(MainMenu &tm)
 
 	// check for changes & open confirmation dialogue on condition
 	case 2:
-		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
+		for (uint8_t i=tm.ml_options+1;i<tm.ml_options+MENU_OPTIONS_HEADINGS_COUNT;i++)
 			open_conf = tm.mlists.linked_variables_changed(i,tm.queued_restart)||open_conf;
 		if (open_conf) tm.mdialogues.open_dialogue(tm.dg_optsave);
 		tm.logic_setup++;
@@ -2017,9 +2016,9 @@ const char* main_options[OptionLogicID::LOGIC_COUNT] = {
 
 
 /**
- * 		The real menu implementation starts here!
- * 
- * TODO: expand this segment documentation
+ *			Implementation UI: MainMenu component
+ *
+ *	TODO
 */
 
 /*
@@ -2029,7 +2028,7 @@ const char* main_options[OptionLogicID::LOGIC_COUNT] = {
 	\param ccbf: collection of basic cascabel features
 	TODO: extend documentation
 */
-MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float &progress,float pseq)
+MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float& progress,float pseq)
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
 	// pointers
@@ -2042,29 +2041,33 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	ccbm->add_lv("lvload/main_menu.ccb");
 
 	// version annotation text setup
-	std::string vmessage = "yomisensei by callidaria. danmaku v"
-			+ std::to_string(INFO_VERSION_RELEASE)+'.'+std::to_string(INFO_VERSION_SUBRELEASE)+'.'
-			+ std::to_string(INFO_VERSION_DEVSTEP)+INFO_VERSION_MODE_SUFFIX
+	std::string vmessage =
+			"yomisensei by callidaria. danmaku v"+std::to_string(INFO_VERSION_RELEASE)
+			+ '.'+std::to_string(INFO_VERSION_SUBRELEASE)
+			+ '.'+std::to_string(INFO_VERSION_DEVSTEP)+INFO_VERSION_MODE_SUFFIX
 			+ " - running on cascabel base (OpenGL)";
-	tx_version.add(vmessage.c_str(),TEXT_VERSION_POSITION);
-	tx_version.load();
+	tx_version.add(vmessage.c_str(),TEXT_VERSION_POSITION),tx_version.load();
 	tcap_version = vmessage.length();
-
-	// menu options text
-	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
-		uint32_t wwidth = fnt_mopts.estimate_textwidth(main_options[i]);
-		mo_twidth[i] = wwidth,mo_hwidth[i] = wwidth*.5f;
-		mo_prog.x -= wwidth;
-	} mo_prog /= glm::vec2(OptionLogicID::LOGIC_COUNT);
-	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_hwidth[0],0);
-	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
-		tx_mopts[i].add(main_options[i],glm::vec2(-mo_hwidth[i],0)),tx_mopts[i].load();
-		mo_cposition[i] = mo_cursor;
-		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
-	}
 
 	// peripheral sensitive input request annotations
 	update_peripheral_annotations();
+
+	// main menu options text
+	// store text widths in lookup & estimate spacing between words
+	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
+		uint32_t wwidth = fnt_mopts.estimate_textwidth(main_options[i]);
+		mo_twidth[i] = wwidth, mo_hwidth[i] = wwidth*.5f;
+		mo_prog.x -= wwidth;
+	}
+	mo_prog /= glm::vec2(OptionLogicID::LOGIC_COUNT);
+
+	// write options text and store resulting positions
+	glm::vec2 mo_cursor = MENU_OPTIONS_CLEFT+glm::vec2(mo_hwidth[0],0);
+	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
+		tx_mopts[i].add(main_options[i],glm::vec2(-mo_hwidth[i],0)), tx_mopts[i].load();
+		mo_cposition[i] = mo_cursor;
+		mo_cursor += mo_prog+glm::vec2(mo_twidth[i],0);
+	}
 
 	// setup head splice
 	// 1st key: splice disable in case the start screen is displayed
@@ -2074,27 +2077,37 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	splice_head_id = splices_geometry.create_splice(
 			SPLICE_HEAD_LOWER_START,SPLICE_HEAD_UPPER_START,
 			0,0,
-			SPLICE_HEAD_COLOUR,true,&tkey_head);
-	splices_geometry.add_anim_key(splice_head_id,
+			SPLICE_HEAD_COLOUR,true,&tkey_head
+		);
+	splices_geometry.add_anim_key(
+			splice_head_id,
 			SPLICE_HEAD_LOWER_START,SPLICE_HEAD_UPPER_START,
-			SPLICE_HEAD_LOWER_WIDTH,SPLICE_HEAD_UPPER_WIDTH);
-	head_mod_id = splices_geometry.add_anim_key(splice_head_id,
+			SPLICE_HEAD_LOWER_WIDTH,SPLICE_HEAD_UPPER_WIDTH
+		);
+	head_mod_id = splices_geometry.add_anim_key(
+			splice_head_id,
 			glm::vec2(0,SPLICE_HEAD_ORIGIN_POSITION),glm::vec2(1280,SPLICE_HEAD_ORIGIN_POSITION),
-			SPLICE_HEAD_ORIGIN_WIDTH,SPLICE_HEAD_ORIGIN_WIDTH);
-	splices_geometry.add_anim_key(splice_head_id,
+			SPLICE_HEAD_ORIGIN_WIDTH,SPLICE_HEAD_ORIGIN_WIDTH
+		);
+	splices_geometry.add_anim_key(
+			splice_head_id,
 			glm::vec2(0,SPLICE_HEAD_DLGDESC_QUAD),glm::vec2(SPLICE_HEAD_DLGDESC_QUAD,0),
-			SPLICE_HEAD_DLGDESC_WIDTH,SPLICE_HEAD_DLGDESC_WIDTH);
+			SPLICE_HEAD_DLGDESC_WIDTH,SPLICE_HEAD_DLGDESC_WIDTH
+		);
 
 	// setup selection splice
 	// 1st key: splice disable, zero'd so the splice gets projected into scene when start is pressed
 	// 2nd key: tilted splice underlining descriptions for list options if selected
 	splice_selection_id = splices_geometry.create_splice(
-			SPLICE_LOWER_CENTER,glm::vec2(0,720.f),
+		SPLICE_LOWER_CENTER,glm::vec2(0,MATH_CARTESIAN_YRANGE),
 			0,0,
-			SPLICE_SELECTION_COLOUR,false,&tkey_selection);
-	splices_geometry.add_anim_key(splice_selection_id,
+			SPLICE_SELECTION_COLOUR,false,&tkey_selection
+		);
+	splices_geometry.add_anim_key(
+			splice_selection_id,
 			glm::vec2(0,-SPLICE_HEAD_DLGDESC_QUAD),glm::vec2(SPLICE_HEAD_DLGDESC_QUAD,720),
-			SPLICE_HEAD_DLGDESC_WIDTH,SPLICE_HEAD_DLGDESC_WIDTH);
+			SPLICE_HEAD_DLGDESC_WIDTH,SPLICE_HEAD_DLGDESC_WIDTH
+		);
 
 	// setup title splice
 	// 1st key: start request screen stylesplice
@@ -2102,12 +2115,13 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	uint8_t sid = splices_geometry.create_splice(
 			SPLICE_TITLE_LOWER_START,SPLICE_TITLE_UPPER_START,
 			SPLICE_TITLE_LOWER_SWIDTH,SPLICE_TITLE_UPPER_SWIDTH,
-			SPLICE_TITLE_COLOUR,false,&tkey_title);
-	splices_geometry.add_anim_key(sid,
+			SPLICE_TITLE_COLOUR,false,&tkey_title
+		);
+	splices_geometry.add_anim_key(
+			sid,
 			SPLICE_TITLE_LOWER_MOD,SPLICE_TITLE_UPPER_MOD,
-			SPLICE_TITLE_LWIDTH_MOD,SPLICE_TITLE_UWIDTH_MOD);
-
-	// load geometry for splices
+			SPLICE_TITLE_LWIDTH_MOD,SPLICE_TITLE_UWIDTH_MOD
+		);
 	splices_geometry.load();
 
 	// list setup
@@ -2117,12 +2131,15 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	ml_saves = mlists.define_list(savestates);
 
 	// add options for available screens
+	// allocate memory
 	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
-	uint8_t max_displays = SDL_GetNumVideoDisplays(),flist = ml_options+2;
+	uint8_t max_displays = SDL_GetNumVideoDisplays(), flist = ml_options+2;
 	mlists.mlists[flist].entities[2].dd_options.resize(max_displays);
 	mlists.mlists[flist].entities[2].dd_colours.resize(max_displays);
 	mlists.mlists[flist].entities[2].dd_length.resize(max_displays);
+
+	// write dropdown text for all found monitors
 	for (uint8_t i=0;i<max_displays;i++) {
 		Text t_ddo = Text(t_font);
 		t_ddo.add(
@@ -2160,17 +2177,14 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
-	fb_menu.s.upload_vec2(
-			"ratio",
-			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT])
-		);
+	fb_menu.s.upload_vec2("ratio",
+			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
 }
-// FIXME: when using mouse & keyboard input simultaneously the transition can be stuck between states
 
 /*
 	render(FrameBuffer*,bool&,bool&) -> void (virtual) !O(1)
@@ -2179,23 +2193,27 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	\param running: is application still running?
 	\param reboot: will be rebooting with new settings after game closed?
 */
-void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
+void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 {
 	// button input
 	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
-	input.hit_a = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
+	input.hit_a =
+			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
 			|| m_ccbf->iMap->get_input_triggered(InputID::CONFIRM)
 			|| plmb;
-	input.hit_b = (m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
+	input.hit_b =
+			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::BOMB)
 			|| prmb;
 
 	// directional input
-	input.dir_horz = ((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
+	input.dir_horz =
+			((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
 			- (m_ccbf->iMap->get_input_triggered(InputID::LEFT)&&vselect>0))
 			* menu_action;
-	input.dir_vert = (m_ccbf->iMap->get_input_triggered(InputID::DOWN)
+	input.dir_vert =
+			(m_ccbf->iMap->get_input_triggered(InputID::DOWN)
 			- m_ccbf->iMap->get_input_triggered(InputID::UP))
 			* menu_action;
 
@@ -2204,22 +2222,30 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 			m_ccbf->frame->mouse.mxfr*MATH_CARTESIAN_XRANGE,
 			m_ccbf->frame->mouse.myfr*MATH_CARTESIAN_YRANGE
 		);
-	trg_lmb = m_ccbf->frame->mouse.mb[0],trg_rmb = m_ccbf->frame->mouse.mb[2];
+	trg_lmb = m_ccbf->frame->mouse.mb[0], trg_rmb = m_ccbf->frame->mouse.mb[2];
 
 	// timing
 	transition_delta = TRANSITION_SPEED*m_ccbf->frame->time_delta;
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
 	anim_timing += m_ccbf->frame->time_delta;
+
+	// speedup animation advancement checking
 	dt_tshiftdown += m_ccbf->frame->time_delta*speedup, dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
+	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
+			normalize_over = dt_tnormalize>TITLE_NORMALIZATION_TIMEOUT;
+	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
+			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
+	speedup = (speedup&&!shiftdown_over)||normalize_over;
 
 	// transitions
 	Toolbox::transition_float_on_condition(mtransition,transition_delta,menu_action);
 	Toolbox::transition_float_on_condition(ftransition,transition_delta,interface_logic_id);
-	inv_ftransition = 1.f-ftransition,inv_mtransition = 1.f-mtransition;
+	inv_ftransition = 1.f-ftransition, inv_mtransition = 1.f-mtransition;
 
-	// title rattle animation
+	// title animation
+	// primitive rattling
 	uint8_t rattle_mobility = RATTLE_THRESHOLD+RATTLE_THRESHOLD_RAGEADDR*menu_action,
-		rattle_countermove = rattle_mobility/2;
+		rattle_countermove = rattle_mobility>>1;
 	glm::vec3 title_action = glm::vec3(
 			(rand()%rattle_mobility-rattle_countermove)*anim_go,
 			(rand()%rattle_mobility-rattle_countermove)*anim_go,
@@ -2227,18 +2253,26 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 		);
 
 	// title shiftdown animation
-	dt_tshiftdown *= menu_action,dt_tnormalize *= menu_action,speedup = speedup||!menu_action;
-	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE*((speedup) ? sqrt(sin(dt_tshiftdown*SHIFTDOWN_OCTAPI))
-			: 1.f-sqrt(dt_tnormalize));
+	dt_tshiftdown *= menu_action, dt_tnormalize *= menu_action, speedup = speedup||!menu_action;
+	float tshift = 1.f+SHIFTDOWN_ZOOM_INCREASE
+			* ((speedup) ? sqrt(sin(dt_tshiftdown*SHIFTDOWN_OCTAPI)) : 1.f-sqrt(dt_tnormalize));
 
-	// combined title animation
+	// combining title animations
 	glm::vec3 vrt_position = VRT_TITLE_START+VRT_TITLE_TRANSITION*mtransition+title_action,
 		hrz_position = HRZ_TITLE_START+HRZ_TITLE_TRANSITION*mtransition+title_action;
-	glm::mat4 vrt_scale = glm::translate(glm::scale(glm::translate(glm::mat4(1),
-			-VRT_TITLE_SCALESET),glm::vec3(tshift)),VRT_TITLE_SCALESET),
-		hrz_scale = glm::translate(glm::scale(glm::translate(glm::mat4(1),
-			-HRZ_TITLE_SCALESET),glm::vec3(tshift)),HRZ_TITLE_SCALESET);
-	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale;
+	glm::mat4 vrt_scale = glm::translate(
+			glm::scale(
+				glm::translate(glm::mat4(1),-VRT_TITLE_SCALESET),
+				glm::vec3(tshift)
+			),VRT_TITLE_SCALESET
+		),
+	hrz_scale = glm::translate(
+			glm::scale(
+				glm::translate(glm::mat4(1),-HRZ_TITLE_SCALESET),
+				glm::vec3(tshift)
+			),HRZ_TITLE_SCALESET
+		);
+	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
 	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 
 	// peripheral switch for input request annotation
@@ -2250,11 +2284,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	int8_t sd_grid = mlists.update(input,m_ccbf->iMap,rrnd);
 	mdialogues.update(input);
 
-	// START RENDER MENU BUFFER
+	// start render
+	// prepare menu buffer
 	fb_menu.bind();
 	Frame::clear();
 
-	// interface logic
+	// point towards interface logic
 	interface_behaviour[interface_logic_id](*this);
 
 	// render dare message
@@ -2267,14 +2302,14 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	// render input instructions
 	tx_instr.prepare();
 	tx_instr.set_scroll(glm::vec2(0,-(!!ftransition+mlists.instruction_mod)*MATH_CARTESIAN_YRANGE));
-	tx_instr.render(tcap_instr*mtransition,glm::vec4(1,.6f,0,1));
+	tx_instr.render(tcap_instr*mtransition,TEXT_INSTRUCTION_COLOUR);
 
 	// render & transform main options
 	for (uint8_t i=0;i<OptionLogicID::LOGIC_COUNT;i++) {
 		tx_mopts[i].prepare();
 		glm::mat4 opt_trans = glm::translate(glm::mat4(1.f),
 				glm::vec3(mo_cposition[i].x+mo_hwidth[i],mo_cposition[i].y,0));
-		glm::vec4 opt_colour = glm::vec4(.5f,1.f,.5f,mtransition);
+		glm::vec4 opt_colour = glm::vec4(TEXT_OPTIONS_COLOUR,mtransition);
 
 		// let currently selected option react to the players choice
 		if (i==vselect) {
@@ -2304,38 +2339,40 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	mdialogues.render();
 	// FIXME: request does not time input validity, work on input timing safety for unlocked update mode
 
-	// START MULTISAMPLED RENDER
+	// multisampling
+	// prepare msaa framebuffer for geometry section
 	FrameBuffer::close();
 	msaa.bind();
 	Frame::clear();
 
 	// curtain animation for main option selector splice
-	float curtain_trans = mtransition-ftransition;
-	splices_geometry.splices[splice_selection_id].ssk[0].ext_lower = lext_selection*curtain_trans,
-	splices_geometry.splices[splice_selection_id].ssk[0].ext_upper = uext_selection*curtain_trans;
+	float curtain_transition = mtransition-ftransition;
+	SelectionSplice& css = splices_geometry.splices[splice_selection_id];
+	css.ssk[0].ext_lower = lext_selection*curtain_transition;
+	css.ssk[0].ext_upper = uext_selection*curtain_transition;
 
 	// update selection splash geometry
 	if (rrnd) {
-		SelectionSpliceKey* t_ssk = &splices_geometry.splices[splice_head_id].ssk[head_mod_id];
+		SelectionSpliceKey& csk = splices_geometry.splices[splice_head_id].ssk[head_mod_id];
 		float htrans = SPLICE_HEAD_ORIGIN_POSITION-MENU_LIST_SCROLL_Y*sd_grid;
-		t_ssk->disp_lower.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
-		t_ssk->disp_upper.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD),
-		t_ssk->ext_lower = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA),
-		t_ssk->ext_upper = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
+		csk.disp_lower.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
+		csk.disp_upper.y = htrans+(rand()%SPLICE_HEAD_TILT_DBTHRESHOLD-SPLICE_HEAD_TILT_THRESHOLD);
+		csk.ext_lower = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
+		csk.ext_upper = SPLICE_HEAD_MINIMUM_WIDTH+rand()%((uint16_t)SPLICE_HEAD_ORIGIN_DELTA);
 	}
+	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
 	// splash render
 	tkey_head = mtransition+ftransition+mdialogues.system_active;
 	Toolbox::transition_float_on_condition(tkey_selection,transition_delta,mlists.system_active);
 	tkey_title = mtransition;
 	splices_geometry.update();
-	// FIXME: splash dimensions to prevent aesthetically unfortunate proportions
 
 	// draw dialogue & list background components
 	mlists.update_background_component();
 	mdialogues.update_background_component();
 
-	// STOP MULTISAMPLED RENDER
+	// finalize multisampling
 	msaa.blit();
 
 	// render menu
@@ -2362,13 +2399,8 @@ void MainMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	fb_slice.render();
 	mlists.update_overlays();
 
-	// finishing
-	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
-			normalize_over = dt_tnormalize>TITLE_NORMALIZATION_TIMEOUT;
+	// framerate irrelevance through animation stall
 	anim_timing -= ANIMATION_UPDATE_TIMEOUT*anim_go;
-	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
-			dt_tnormalize -= TITLE_NORMALIZATION_TIMEOUT*normalize_over;
-	speedup = (speedup&&!shiftdown_over)||normalize_over;
 
 	// system
 	reboot = request_restart;
@@ -2398,19 +2430,23 @@ void MainMenu::update_peripheral_annotations()
 
 		// write messages for controller input
 		dmessage = "press ["+m_ccbf->iMap->cnt_name[InputID::PAUSE]+"] if you DARE";
-		instr[0] = "confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+		instr[0] =
+				"confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
 				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
 				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
-		instr[1] = "confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+		instr[1] =
+				"confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
 				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
-		instr[2] = "see options ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
+		instr[2] =
+				"see options ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
 				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
-		instr[3] = "adjust slider ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
+		instr[3] =
+				"adjust slider ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
 				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
 				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
@@ -2419,19 +2455,23 @@ void MainMenu::update_peripheral_annotations()
 
 		// write message for keyboard input
 		dmessage = "press ["+m_ccbf->iMap->key_name[InputID::CONFIRM]+"] if you DARE";
-		instr[0] = "confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+		instr[0] =
+				"confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->key_name[InputID::LEFT]
 				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
 				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
-		instr[1] = "confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+		instr[1] =
+				"confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
 				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
-		instr[2] = "see options ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
+		instr[2] =
+				"see options ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
 				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
 				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
-		instr[3] = "adjust slider ["+m_ccbf->iMap->key_name[InputID::LEFT]
+		instr[3] =
+				"adjust slider ["+m_ccbf->iMap->key_name[InputID::LEFT]
 				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
 				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
 				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
