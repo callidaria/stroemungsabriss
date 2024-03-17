@@ -110,6 +110,7 @@ constexpr glm::vec4 TEXT_DIALOGUE_HOVER_COLOUR = glm::vec4(0,.7f,.7f,1.f);
 
 // menu option text translation scope
 constexpr uint8_t MENU_OPTIONS_HEADINGS_COUNT = 5;
+constexpr uint8_t MENU_OPTIONS_MONITOR_LISTING = 2;
 constexpr float MENU_OPTIONS_TSIZE = 35.f;
 constexpr float MENU_OPTIONS_HSIZE = MENU_OPTIONS_TSIZE*.5f;
 constexpr glm::vec2 MENU_OPTIONS_CLEFT = glm::vec2(120,510)+glm::vec2(0,MENU_OPTIONS_HSIZE);

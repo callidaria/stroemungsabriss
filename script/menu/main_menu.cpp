@@ -42,7 +42,7 @@ void command_logic_cluster(LDCProcessState& state)
 	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: add named list entity to currently opened cluster (cmd = :define)
 */
-void command_logic_define(LDCProcessState &state)
+void command_logic_define(LDCProcessState& state)
 {
 	LDCEntity entity;
 	entity.head = state.cmd->tail;
@@ -54,23 +54,23 @@ void command_logic_define(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: add entity description (cmd = :describe)
 */
-void command_logic_describe(LDCProcessState &state)
+void command_logic_describe(LDCProcessState& state)
 { state.clusters.back().elist.back().description = state.cmd->buffer; }
 
 /*
 	!O(n)mn .amount of float attributes /+load -> interpreter_logic (local,static)
 	purpose: store constant float attributes in entity (cmd = :floats)
 */
-void command_logic_fattributes(LDCProcessState &state)
+void command_logic_fattributes(LDCProcessState& state)
 {
 	try {
 		std::stringstream bfss(state.cmd->tail);
 		std::string attrib;
 		while (getline(bfss,attrib,' '))
 			state.clusters.back().elist.back().fattribs.push_back(stof(attrib));
-	} catch (std::invalid_argument const &ex) {
+	} catch (std::invalid_argument const& ex) {
 		LDCCompiler::compiler_error_msg(state,"attribute tail should only contain float values");
-	} catch (std::out_of_range const &ex) {
+	} catch (std::out_of_range const& ex) {
 		LDCCompiler::compiler_error_msg(state,"at least one attribute is out of float range");
 	}
 }
@@ -79,7 +79,7 @@ void command_logic_fattributes(LDCProcessState &state)
 	!O(n)mn .amount of string attributes /+load -> interpreter_logic (local,static)
 	purpose: store constant string attributes in entity (cmd = :strings)
 */
-void command_logic_sattributes(LDCProcessState &state)
+void command_logic_sattributes(LDCProcessState& state)
 {
 	std::stringstream bfss(state.cmd->tail);
 	std::string attrib;
@@ -91,7 +91,7 @@ void command_logic_sattributes(LDCProcessState &state)
 	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: insert a named segment that seperates the list of entities (cmd = :segment)
 */
-void command_logic_segment(LDCProcessState &state)
+void command_logic_segment(LDCProcessState& state)
 {
 	LDCSegment segment;
 	segment.position = state.clusters.back().elist.size();
@@ -104,16 +104,16 @@ void command_logic_segment(LDCProcessState &state)
 	!O(n)mn .assigned conditions /+load -> interpreter_logic (local,static)
 	purpose: define entity activation boolean reference in logic list by memory id (cmd = :condition)
 */
-void command_logic_condition(LDCProcessState &state)
+void command_logic_condition(LDCProcessState& state)
 {
 	try {
 		std::stringstream bfss(state.cmd->tail);
 		std::string lid;
 		while (getline(bfss,lid,' '))
 			state.clusters.back().elist.back().condition_id.push_back(stoi(lid));
-	} catch (std::invalid_argument const &ex) {
+	} catch (std::invalid_argument const& ex) {
 		LDCCompiler::compiler_error_msg(state,"condition tail does not contain a valid number");
-	} catch (std::out_of_range const &ex) {
+	} catch (std::out_of_range const& ex) {
 		LDCCompiler::compiler_error_msg(state,"given number exceeds reasonable range");
 	}
 }
@@ -122,7 +122,7 @@ void command_logic_condition(LDCProcessState &state)
 	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: link a global initialization variable to a list entity (cmd = :link)
 */
-void command_logic_link(LDCProcessState &state)
+void command_logic_link(LDCProcessState& state)
 {
 	state.clusters.back().linked_ids.push_back(state.clusters.back().elist.size()-1);
 	state.refs_links.back().push_back(state.cmd->tail);
@@ -132,7 +132,7 @@ void command_logic_link(LDCProcessState &state)
 	!O(1)m /+load -> interpreter_logic (local,static)
 	purpose: link subsequent cluster to transition to as entity action (cmd = :subsequent)
 */
-void command_logic_subsequent(LDCProcessState &state)
+void command_logic_subsequent(LDCProcessState& state)
 {
 	state.refs_children.back().parent_ids.push_back(state.clusters.back().elist.size()-1);
 	state.refs_children.back().child_names.push_back(state.cmd->tail);
@@ -143,14 +143,14 @@ void command_logic_subsequent(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: run system command id according to predefinition in ldc documentation (cmd = :system_behaviour)
 */
-void command_logic_sysbehaviour(LDCProcessState &state)
+void command_logic_sysbehaviour(LDCProcessState& state)
 {
 	try {
 		state.clusters.back().elist.back().etype = LDCEntityType::SYSTEM;
 		state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
-	} catch (std::invalid_argument const &ex) {
+	} catch (std::invalid_argument const& ex) {
 		LDCCompiler::compiler_error_msg(state,"system command id not an interpretable number");
-	} catch (std::out_of_range const &ex) {
+	} catch (std::out_of_range const& ex) {
 		LDCCompiler::compiler_error_msg(state,"system command id out of reasonable defrange");
 	}
 }
@@ -159,7 +159,7 @@ void command_logic_sysbehaviour(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: set boolean on/off functionality as entity action (cmd = :checkbox)
 */
-void command_logic_checkbox(LDCProcessState &state)
+void command_logic_checkbox(LDCProcessState& state)
 {
 	state.clusters.back().elist.back().etype = LDCEntityType::CHECKBOX;
 	state.clusters.back().cnt_checkbox++;
@@ -169,7 +169,7 @@ void command_logic_checkbox(LDCProcessState &state)
 	!O(n)bnmn .dropdown options +1 /+load -> interpreter_logic (local,static)
 	purpose: create sublist index linked choices attached to entity (cmd = :dropdown)
 */
-void command_logic_dropdown(LDCProcessState &state)
+void command_logic_dropdown(LDCProcessState& state)
 {
 	std::stringstream bfss(state.cmd->buffer);
 	std::string ddoption;
@@ -187,7 +187,7 @@ void command_logic_dropdown(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: attach transformable float value to entity (cmd = :slider)
 */
-void command_logic_slider(LDCProcessState &state)
+void command_logic_slider(LDCProcessState& state)
 {
 	state.clusters.back().elist.back().etype = LDCEntityType::SLIDER;
 	state.clusters.back().cnt_slider++;
@@ -197,7 +197,7 @@ void command_logic_slider(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: define finalizing entity with set value return (cmd = :return)
 */
-void command_logic_return(LDCProcessState &state)
+void command_logic_return(LDCProcessState& state)
 {
 	state.clusters.back().elist.back().tdata = stoi(state.cmd->tail);
 	state.clusters.back().elist.back().etype = LDCEntityType::RETURN;
@@ -207,7 +207,7 @@ void command_logic_return(LDCProcessState &state)
 	!O(1) /+load -> interpreter_logic (local,static)
 	purpose: this method catches invalid syntax/commands and notifies the developer
 */
-void command_logic_syntax_error(LDCProcessState &state)
+void command_logic_syntax_error(LDCProcessState& state)
 { LDCCompiler::compiler_error_msg(state,"invalid command syntax"); }
 
 
@@ -390,7 +390,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster>& rClusters)
 
 	// third pass: execute commands
 	// command list will be iterated and command id will instigate jump to related processes
-	for (ListLanguageCommand &cmd : cmd_buffer) {
+	for (ListLanguageCommand& cmd : cmd_buffer) {
 		state.cmd = &cmd;
 		interpreter_behaviour[cmd.id](state);
 	}
@@ -411,7 +411,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster>& rClusters)
 
 		// correlate initialization variable name to serialization id
 		for (uint16_t j=0;j<cc.linked_ids.size();j++) {
-			LDCEntity &ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
+			LDCEntity& ce = state.clusters[i].elist[state.clusters[i].linked_ids[j]];
 
 			// find variable and check for errors
 			ce.serialization_id = Init::find_iKey(state.refs_links[i][j].c_str());
@@ -661,7 +661,7 @@ uint8_t MenuList::define_list(const char* path)
 	// entity creation
 	uint8_t lidx = out;
 	mlists.resize(out+clusters.size());
-	for (LDCCluster &cluster : clusters) {
+	for (LDCCluster& cluster : clusters) {
 		mlists[lidx] = {
 			.entities = std::vector<MenuListEntity>(cluster.elist.size()),
 			.segments = std::vector<MenuListSegment>(cluster.slist.size()),
@@ -817,7 +817,7 @@ uint8_t MenuList::define_list(SaveStates states)
 	// iterate save data and create a state list with a proportionally linear relationship
 	int32_t vscroll = MENU_LIST_SCROLL_START;
 	for (uint16_t i=0;i<states.saves.size();i++) {
-		SaveData &state = states.saves[i];
+		SaveData& state = states.saves[i];
 		MenuListEntity mle = {
 			.grid_position = i,
 			.colour = diff_colours[state.diff],
@@ -889,7 +889,8 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 		MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_ATTRIBUTE_THEIGHT,2,
 		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_ATTRIBUTE_THEIGHT,2,
 		MENU_LIST_ATTRIBUTE_WTARGET,MENU_LIST_SCROLL_START,1
-	}; ddbgr_buffer.bind(),ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
+	};
+	ddbgr_buffer.bind(), ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
 
 	// dropdown shader setup
 	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
@@ -906,7 +907,7 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	checkbox_shader.upload_camera(gCamera2D);
 
 	// setup slider corpi
-	slider_buffer.bind(),slider_buffer.upload_vertices(slider_vertices);
+	slider_buffer.bind(), slider_buffer.upload_vertices(slider_vertices);
 	slider_shader.compile("./shader/main_menu/vslider.shader","./shader/main_menu/fslider.shader");
 	slider_shader.def_attributeF("position",2,0,3);
 	slider_shader.def_attributeF("bmod",1,2,3);
@@ -963,7 +964,7 @@ void MenuList::close_list(uint8_t id)
 void MenuList::write_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
-		MenuListEntity &e = mlists[id].entities[lid];
+		MenuListEntity& e = mlists[id].entities[lid];
 		if (e.link_id==InitVariable::VARIABLE_ERROR) continue;
 		Init::iConfig[e.link_id] = e.value;
 	}
@@ -978,7 +979,7 @@ void MenuList::write_attributes(uint8_t id)
 void MenuList::reset_attributes(uint8_t id)
 {
 	for (uint16_t lid : mlists[id].link_ids) {
-		MenuListEntity &e = mlists[id].entities[lid];
+		MenuListEntity& e = mlists[id].entities[lid];
 		if (e.link_id==InitVariable::VARIABLE_ERROR) continue;
 		e.value = Init::iConfig[e.link_id];
 	}
@@ -996,7 +997,7 @@ bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 	// iterate all linked variables
 	bool out = false;
 	for (uint16_t id : mlists[list_id].link_ids) {
-		MenuListEntity &ce = mlists[list_id].entities[id];
+		MenuListEntity& ce = mlists[list_id].entities[id];
 		if (ce.link_id==InitVariable::VARIABLE_ERROR) continue;
 
 		// check for changes against linked initialization variable
@@ -1023,7 +1024,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 	instruction_mod = 0;
 	show_globe = false;
 	if (!active_ids.size()) return 0;
-	MenuListComplex &crr = mlists[active_ids.back()];
+	MenuListComplex& crr = mlists[active_ids.back()];
 
 	// update most recent list
 	int8_t out = 0;
@@ -1116,7 +1117,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 	}
 
 	// input handling for sublist
-	MenuListEntity &e = crr.entities[crr.select_id];
+	MenuListEntity& e = crr.entities[crr.select_id];
 	uint8_t cap_options = e.dd_options.size()-1;
 
 	// handle mouse input
@@ -1152,7 +1153,7 @@ void MenuList::render()
 
 	// update attribute subfunctionality for dropdown options
 	if (subfunc_opened) {
-		MenuListEntity &e = crr.entities[crr.select_id];
+		MenuListEntity& e = crr.entities[crr.select_id];
 
 		// draw dropdown background
 		ddbgr_buffer.bind(),ddbgr_shader.enable();
@@ -1162,7 +1163,7 @@ void MenuList::render()
 
 		// write dropdown elements of selection
 		for (uint8_t ddi=0;ddi<e.dd_options.size();ddi++) {
-			Text &ddtx = e.dd_options[ddi];
+			Text& ddtx = e.dd_options[ddi];
 			ddtx.prepare(),ddtx.set_scroll(glm::vec2(0,-MENU_LIST_SCROLL_Y*(ddi-e.value)));
 			ddtx.render(e.dd_length[ddi],e.dd_colours[ddi]);
 			e.dd_colours[ddi] = glm::vec4(1.f);
@@ -1171,8 +1172,8 @@ void MenuList::render()
 
 	// write dropdown elements
 	else {
-		for (uint16_t &ddi : crr.dropdown_ids) {
-			MenuListEntity &e = crr.entities[ddi];
+		for (uint16_t& ddi : crr.dropdown_ids) {
+			MenuListEntity& e = crr.entities[ddi];
 			e.dd_options[e.value].prepare();
 			e.dd_options[e.value].set_scroll(glm::vec2(0,0));
 			e.dd_options[e.value].render(e.dd_length[e.value],glm::vec4(1.f));
@@ -1182,9 +1183,9 @@ void MenuList::render()
 
 	// draw active lists
 	crr_scroll = crr.lscroll*MENU_LIST_SCROLL_Y;
-	for (MenuListSegment &s : crr.segments)
+	for (MenuListSegment& s : crr.segments)
 		s.text.prepare(),s.text.set_scroll(glm::vec2(0,crr_scroll)),s.text.render(s.tlen,TEXT_SEGMENT_COLOUR);
-	for (MenuListEntity &e : crr.entities)
+	for (MenuListEntity& e : crr.entities)
 		e.text.prepare(),e.text.set_scroll(glm::vec2(0,crr_scroll)),e.text.render(e.tlen,e.colour);
 
 	// description out
@@ -1241,7 +1242,7 @@ void MenuList::update_background_component()
 
 	// iterate sliders
 	for (uint16_t i=0;i<crr.slider_ids.size();i++) {
-		MenuListEntity &ce = crr.entities[crr.slider_ids[i]];
+		MenuListEntity& ce = crr.entities[crr.slider_ids[i]];
 		slider_shader.upload_float("sval",ce.value*.01f);
 		glDrawArrays(GL_TRIANGLES,6*i,6);
 	}
@@ -1424,8 +1425,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 	// FIXME: if my font implementation wouldn't be that ass i could just use variable sized texts (mdc)
 
 	// process all clusters as dialogues
-	uint8_t out = dg_data.size(),cidx = out;
-	float hwidth = width*.5f,hheight = height*.5f;
+	uint8_t out = dg_data.size(), cidx = out;
+	float hwidth = width*.5f, hheight = height*.5f;
 	dg_data.resize(out+clusters.size());
 	for (LDCCluster& cluster : clusters) {
 
@@ -1460,11 +1461,12 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			{ glm::vec2(t_center.x-hwidth,t_center.y-hheight),0 },
 			{ t_center,2 },
 			{ glm::vec2(t_center.x+hwidth,t_center.y+hheight),0 }
-		}; bgr_verts.insert(std::end(bgr_verts),std::begin(t_dbg),std::end(t_dbg));
+		};
+		bgr_verts.insert(std::end(bgr_verts),std::begin(t_dbg),std::end(t_dbg));
 		// FIXME: performance, repeated insert where predictable
 
 		// selector vertices
-		uint8_t mdos = dsize*.8f,hmdos = mdos>>1;
+		uint8_t mdos = dsize*.8f, hmdos = mdos>>1;
 		float xoffcenter = t_center.x-hwidth;
 		glm::vec2 t_sverts[] = {
 			glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos),
@@ -1473,7 +1475,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			glm::vec2(xoffcenter-hmdos,dgd.liststart_y-mdos),
 			glm::vec2(xoffcenter+hmdos,dgd.liststart_y-mdos),
 			glm::vec2(xoffcenter+hmdos,dgd.liststart_y)
-		}; slc_verts.insert(std::end(slc_verts),std::begin(t_sverts),std::end(t_sverts));
+		};
+		slc_verts.insert(std::end(slc_verts),std::begin(t_sverts),std::end(t_sverts));
 		// TODO: implement prototype selector style
 		//	first figure out the idea to make it look nice before blindly implementing
 		// TODO: implement choice description print & change list selector to background geometry
@@ -1497,7 +1500,8 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 					cluster.elist[i].head.c_str(),
 					glm::vec2(
 						t_center.x-hwidth*MENU_DIALOGUE_OFFSET_FACTOR,
-						dgd.liststart_y-dsize*i));
+						dgd.liststart_y-dsize*i)
+				);
 			dgd.tx_descriptions.add(cluster.elist[i].description,glm::vec2(1030,350-720*i),
 					200.f,20.f);
 
@@ -1505,7 +1509,7 @@ uint8_t MenuDialogue::add_dialogue_window(const char* path,glm::vec2 center,floa
 			dgd.option_length += cluster.elist[i].head.length();
 			dgd.description_length += cluster.elist[i].description.length();
 		}
-		dgd.tx_options.load(),dgd.tx_descriptions.load();
+		dgd.tx_options.load(), dgd.tx_descriptions.load();
 	}
 
 	// return parent id
@@ -1802,7 +1806,7 @@ void interface_behaviour_macro(MainMenu& tm)
 	SelectionSpliceKey& t_ssk = tm.splices_geometry.splices[tm.splice_selection_id].ssk[0];
 	glm::vec2 vrt_cpos = tm.mo_cposition[tm.vselect]+glm::vec2(tm.mo_hwidth[tm.vselect],-MENU_OPTIONS_HSIZE);
 	t_ssk.disp_lower.x = (vrt_cpos.x-SPLICE_LOWER_CENTER.x)*SPLICE_OFFCENTER_MV+SPLICE_LOWER_CENTER.x;
-	tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect],
+	tm.lext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
 	tm.uext_selection = rand()%(uint16_t)tm.mo_hwidth[tm.vselect];
 
 	// project upper displacement position based on lower displacement
@@ -1848,8 +1852,7 @@ void interface_behaviour_options(MainMenu& tm)
 
 		// handle writing changes
 		if (tm.mdialogues.status==1&&tm.input.hit_a) {
-			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-				tm.mlists.write_attributes(i);
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++) tm.mlists.write_attributes(i);
 			Init::write_changes();
 			tm.request_restart = tm.queued_restart;
 			tm.mdialogues.close_dialogue(tm.dg_optsave);
@@ -1857,8 +1860,7 @@ void interface_behaviour_options(MainMenu& tm)
 
 		// handle settings reset
 		else if (tm.mdialogues.status==2&&tm.input.hit_a) {
-			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++)
-				tm.mlists.reset_attributes(i);
+			for (uint8_t i=tm.ml_options+1;i<tm.ml_options+5;i++) tm.mlists.reset_attributes(i);
 			tm.queued_restart = false;
 			tm.mdialogues.close_dialogue(tm.dg_optsave);
 		}
@@ -2146,32 +2148,31 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// allocate memory
 	Font t_font = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",
 			MENU_LIST_HEAD_SIZE,MENU_LIST_HEAD_SIZE);
-	uint8_t max_displays = SDL_GetNumVideoDisplays(), flist = ml_options+2;
-	mlists.mlists[flist].entities[2].dd_options.resize(max_displays);
-	mlists.mlists[flist].entities[2].dd_colours.resize(max_displays);
-	mlists.mlists[flist].entities[2].dd_length.resize(max_displays);
+	uint8_t max_displays = SDL_GetNumVideoDisplays();
+	MenuListEntity& cmle = mlists.mlists[ml_options+2].entities[MENU_OPTIONS_MONITOR_LISTING];
+	cmle.dd_options.resize(max_displays);
+	cmle.dd_colours.resize(max_displays);
+	cmle.dd_length.resize(max_displays);
 
 	// write dropdown text for all found monitors
 	for (uint8_t i=0;i<max_displays;i++) {
 		Text t_ddo = Text(t_font);
-		t_ddo.add(
-				("Monitor "+std::to_string(i)).c_str(),
-				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
-			), t_ddo.load();
-		mlists.mlists[flist].entities[2].dd_options[i] = t_ddo;
-		mlists.mlists[flist].entities[2].dd_colours[i] = glm::vec4(1.f);
-		mlists.mlists[flist].entities[2].dd_length[i] = 8+(i>9)+(i>99);
+		t_ddo.add(("Monitor "+std::to_string(i)).c_str(),
+				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)),
+			t_ddo.load();
+		cmle.dd_options[i] = t_ddo;
+		cmle.dd_colours[i] = glm::vec4(1.f);
+		cmle.dd_length[i] = 8+(i>9)+(i>99);
 	}
 
 	// avoiding segfault should (for any mystical reason) no monitor be available
 	if (!max_displays) {
-		mlists.mlists[flist].entities[2].dd_options.push_back(Text(t_font));
-		mlists.mlists[flist].entities[2].dd_options.back().add(
-				"ERROR!",
-				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)
-			), mlists.mlists[flist].entities[2].dd_options.back().load();
-		mlists.mlists[flist].entities[2].dd_colours.push_back(TEXT_ERROR_COLOUR);
-		mlists.mlists[flist].entities[2].dd_length.push_back(6);
+		cmle.dd_options.push_back(Text(t_font));
+		cmle.dd_options.back().add("ERROR!",
+				glm::vec2(MENU_LIST_ATTRIBUTE_COMBINE,MENU_LIST_SCROLL_START-3*MENU_LIST_SCROLL_Y)),
+			cmle.dd_options.back().load();
+		cmle.dd_colours.push_back(TEXT_ERROR_COLOUR);
+		cmle.dd_length.push_back(6);
 	}
 	mlists.load(m_ccbf);
 
