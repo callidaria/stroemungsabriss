@@ -65,7 +65,12 @@ To see the full documentation of engine go [here](doc/index.md)
 
 <br>
 
-## v0.0.6 DEV
+## v0.0.7 DEV
+
+### optimizations:
+- removed unnecessary calculations from montecarlo shader
+
+## v0.0.6 [UNX]
 
 ### features:
 - render to multiple subscreens within the main window
@@ -88,9 +93,11 @@ To see the full documentation of engine go [here](doc/index.md)
 - FIXED: globe location preview, faulty render & rotation changes
 - FIXED: vsync refresh rate inaccuracies
 
+Worktime: 320h 17min
+
 <br>
 
-## v0.0.5 [UNX]
+## v0.0.5
 
 ### features:
 - import & interpolate mesh animations
@@ -204,12 +211,7 @@ Worktime: 120h
 <br>
 
 ## Trivia
-- Total Worktime: 785h 17min
-- Elapsed Worktime After v0.0.5:
-	+ 209: 44min
-	+ 215: 2h 28min
-	+ 199: 7h 34min
-	+ 192: 7h 4min
-	+ 16: 295h 20min
-	+ 171: 7h 7min
-- Total Code Lines: 17.743
+- Total Worktime: 1105h 34min
+- Worktime v0.0.7:
+  + 281: 30min
+- Total Code Lines: 17.485

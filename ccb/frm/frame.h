@@ -102,7 +102,7 @@ public:
 	// properties
 	int w_res,h_res;
 	bool event_active = false;
-	double time_mod = 1.0,time_delta = 0;
+	double time_mod = 1.,time_delta = 0;
 	bool cpref_peripheral = false,mpref_peripheral = false;
 
 	// input
@@ -128,7 +128,7 @@ private:
 	std::chrono::steady_clock::time_point past_ticks,curr_ticks = std::chrono::steady_clock::now(),
 			last_out = std::chrono::steady_clock::now();
 	uint32_t fps = 0,temp_fps = 0;
-	double time_mod = 1.,time_delta = .0,time_delta_nmod = .0;
+	double time_delta_nmod = .0;
 	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
 	double stalled_time = .0;
 };
