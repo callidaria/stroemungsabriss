@@ -75,13 +75,6 @@ void Frame::clear(float cr,float cg,float cb)
 // TODO: add method to skip depth buffer clear
 
 /*
-	update() -> void
-	purpose: swaps frame information
-*/
-void Frame::update()
-{ SDL_GL_SwapWindow(m_frame); }
-
-/*
 	calc_time_delta() -> void
 	purpose: calculate time delta to disconnect frame from update and make physics timebased
 */
@@ -92,15 +85,6 @@ void Frame::calc_time_delta()
 	time_delta_nmod = (curr_ticks-past_ticks).count()*CONVERSION_MULT_SECONDS;
 	time_delta = time_delta_nmod*time_mod;
 }
-
-/*
-	set_tmod(float) -> void
-	tmod: new value of time modificator to
-	purpose: directly set the value of the time modificator to the given value
-*/
-void Frame::set_tmod(double tmod)
-{ time_mod = tmod; }
-// TODO: remove direct setter
 
 /*
 	change_tmod(float,float) -> void
@@ -346,26 +330,3 @@ void Frame::kill_controllers()
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i));
 	m_gc.clear(),xb.clear();
 }
-
-/*
-	input_start() -> void
-	purpose: activate/deactivate text input mode
-*/
-void Frame::input_start()
-{ SDL_StartTextInput(); }
-void Frame::input_stop()
-{ SDL_StopTextInput(); }
-
-/*
-	get_time_delta() -> float
-	returns: time delta between render updates to disconnect physics from non-synced fps counts
-*/
-double Frame::get_time_delta()
-{ return time_delta; }
-
-/*
-	create_new_context() -> SDL_GLContext
-	\returns new render context for the current thread this was called by
-*/
-SDL_GLContext Frame::create_new_context()
-{ return SDL_GL_CreateContext(m_frame); }
