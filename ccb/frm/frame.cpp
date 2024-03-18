@@ -75,44 +75,11 @@ void Frame::clear(float cr,float cg,float cb)
 // TODO: add method to skip depth buffer clear
 
 /*
-	print_fps() -> void
-	purpose: prints current fps and uts into cascabel console or terminal
+	update() -> void
+	purpose: swaps frame information
 */
-void Frame::print_fps()
-{
-	fps++;
-	if (1000<=SDL_GetTicks()-past_ticks) {
-		past_ticks = SDL_GetTicks();
-		printf("\rFPS: %i    TIME MOD: %f",fps,time_mod);
-		fflush(stdout);
-		fps = 0;
-	}
-}
-
-/*
-	vsync(uint8_t) -> void
-	max_frames (60): maximum frames per second
-	purpose: capping frames per second to given value
-	!! DEPRECATED: PLEASE KILL BRANCHING, THIS IS PATHETIC LOOPCODE !!
-*/
-void Frame::vsync(uint8_t max_frames)
-{
-	// count continue
-	past_ticks = current_ticks;
-	current_ticks = SDL_GetTicks();
-	temp_fps++;
-
-	// reset after running second is completed
-	if (current_ticks-lO>=1000) {
-		lO = current_ticks;
-		fps = temp_fps;
-		temp_fps = 0;
-	}
-
-	// delay while counting second
-	if (current_ticks-past_ticks<1000/max_frames)
-		SDL_Delay(1000/max_frames-SDL_GetTicks()+past_ticks);
-}
+void Frame::update()
+{ SDL_GL_SwapWindow(m_frame); }
 
 /*
 	calc_time_delta() -> void
@@ -120,17 +87,20 @@ void Frame::vsync(uint8_t max_frames)
 */
 void Frame::calc_time_delta()
 {
-	// circle ticks
-	time_pticks = time_cticks;
-#ifdef BUILDISSUE_OLD_SDL_VERSION
-	time_cticks = SDL_GetTicks();
-#else
-	time_cticks = SDL_GetTicks64();
-#endif
-
-	// calculate time delta
-	time_delta = ((time_cticks-time_pticks)/1000.0)*time_mod;
+	past_ticks = curr_ticks;
+	curr_ticks = std::chrono::steady_clock::now();
+	time_delta_nmod = (curr_ticks-past_ticks).count()*CONVERSION_MULT_SECONDS;
+	time_delta = time_delta_nmod*time_mod;
 }
+
+/*
+	set_tmod(float) -> void
+	tmod: new value of time modificator to
+	purpose: directly set the value of the time modificator to the given value
+*/
+void Frame::set_tmod(double tmod)
+{ time_mod = tmod; }
+// TODO: remove direct setter
 
 /*
 	change_tmod(float,float) -> void
@@ -140,6 +110,51 @@ void Frame::calc_time_delta()
 */
 void Frame::change_tmod(double goal,double rate)
 { time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
+
+/*
+	!O(1)b /load -> (public)
+	purpose: enable GPU vsync (adaptive if possible)
+*/
+void Frame::gpu_vsync_on()
+{
+	if (SDL_GL_SetSwapInterval(-1)==-1) {
+		printf("\033[1;31madaptive vsync not supported\033[0m\n");
+		SDL_GL_SetSwapInterval(1);
+	}
+}
+
+/*
+	!O(1)b /update -> (public)
+	purpose: capping frames per second to given value
+	NOTE: calc_time_delta() has to be run before, but within the same frame (updates clock progress)
+*/
+void Frame::cpu_vsync()
+{
+	if (time_delta_nmod<rate_delta) {
+		double lft_delta = rate_delta-time_delta_nmod;
+		std::this_thread::sleep_for(
+				std::chrono::milliseconds((uint32_t)(lft_delta*CONVERSION_THRES_MILLISECONDS)));
+		stalled_time += lft_delta;
+	}
+}
+// FIXME: stall precision looses about 2 frames
+// FIXME: still a problem with doubled refresh rate for some unknown reason
+
+/*
+	!O(1)b /update -> (public)
+	purpose: prints current fps and uts into cascabel console or terminal
+*/
+void Frame::print_fps()
+{
+	fps++;
+	if (CONVERSION_THRES_NANOSECONDS<=(std::chrono::steady_clock::now()-last_out).count()) {
+		last_out = std::chrono::steady_clock::now();
+		printf("\r%ifps -> processing: %fs,  tmod: %f",fps,1.-stalled_time,time_mod);
+		fflush(stdout);
+		fps = 0,stalled_time = 0;
+	}
+}
+// FIXME: NEGATIVE?!?!?!? PROCESSING TIME?!
 
 /*
 	input(uint32_t&,bool) -> void
@@ -249,6 +264,7 @@ void Frame::vanish()
 */
 void Frame::init()
 {
+
 	// sdl setup
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
@@ -269,6 +285,7 @@ void Frame::init()
 void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
 		SDL_WindowFlags fs)
 {
+
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
@@ -329,3 +346,26 @@ void Frame::kill_controllers()
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc.at(i));
 	m_gc.clear(),xb.clear();
 }
+
+/*
+	input_start() -> void
+	purpose: activate/deactivate text input mode
+*/
+void Frame::input_start()
+{ SDL_StartTextInput(); }
+void Frame::input_stop()
+{ SDL_StopTextInput(); }
+
+/*
+	get_time_delta() -> float
+	returns: time delta between render updates to disconnect physics from non-synced fps counts
+*/
+double Frame::get_time_delta()
+{ return time_delta; }
+
+/*
+	create_new_context() -> SDL_GLContext
+	\returns new render context for the current thread this was called by
+*/
+SDL_GLContext Frame::create_new_context()
+{ return SDL_GL_CreateContext(m_frame); }

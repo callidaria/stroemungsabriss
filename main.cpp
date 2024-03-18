@@ -47,6 +47,8 @@ int main(int argc,char** argv)
 			Init::iConfig[InitVariable::FRAME_RESOLUTION_WIDTH],
 			Init::iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT],
 			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);
+	//Frame::gpu_vsync_on();
+	f.set_refresh_rate(60);
 	InputMap imap = InputMap(&f);
 
 	// AUDIO
@@ -89,8 +91,9 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.vsync(60);
 		f.calc_time_delta();
+		f.cpu_vsync();
+		f.print_fps();
 		f.input(run);
 		Frame::clear();
 

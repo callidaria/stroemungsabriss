@@ -86,6 +86,7 @@ To see the full documentation of engine go [here](doc/index.md)
 
 ### fixes:
 - FIXED: globe location preview, faulty render & rotation changes
+- FIXED: vsync refresh rate inaccuracies
 
 <br>
 
@@ -210,4 +211,5 @@ Worktime: 120h
 	+ 199: 7h 34min
 	+ 192: 7h 4min
 	+ 16: 295h 20min
+	+ 171: 7h 7min
 - Total Code Lines: 17.743
