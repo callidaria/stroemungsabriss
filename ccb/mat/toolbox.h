@@ -23,8 +23,6 @@
 #include "../../include/stb_image_write.h"
 #endif
 
-#define CALIBRA_DEBUG_OUTPUT_LOAD
-
 // conversion
 constexpr uint32_t CONVERSION_THRES_MILLISECONDS = 1000;
 constexpr uint32_t CONVERSION_THRES_MICROSECONDS = 1000000;

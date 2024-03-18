@@ -112,7 +112,7 @@ void Frame::change_tmod(double goal,double rate)
 { time_mod += rate*(goal>time_mod)-rate*(goal<time_mod); }
 
 /*
-	gpu_vsync_on() -> void (static) !O(1)b
+	!O(1)b /load -> (public)
 	purpose: enable GPU vsync (adaptive if possible)
 */
 void Frame::gpu_vsync_on()
@@ -124,16 +124,16 @@ void Frame::gpu_vsync_on()
 }
 
 /*
-	cpu_vsync() -> void !O(1)b
+	!O(1)b /update -> (public)
 	purpose: capping frames per second to given value
-	\note calc_time_delta() has to be run before, but within the same frame (updates clock progress)
+	NOTE: calc_time_delta() has to be run before, but within the same frame (updates clock progress)
 */
 void Frame::cpu_vsync()
 {
 	if (time_delta_nmod<rate_delta) {
 		double lft_delta = rate_delta-time_delta_nmod;
-		std::this_thread::sleep_for(std::chrono::milliseconds(
-				(uint32_t)(lft_delta*CONVERSION_THRES_MILLISECONDS)));
+		std::this_thread::sleep_for(
+				std::chrono::milliseconds((uint32_t)(lft_delta*CONVERSION_THRES_MILLISECONDS)));
 		stalled_time += lft_delta;
 	}
 }
@@ -141,7 +141,7 @@ void Frame::cpu_vsync()
 // FIXME: still a problem with doubled refresh rate for some unknown reason
 
 /*
-	print_fps() -> void
+	!O(1)b /update -> (public)
 	purpose: prints current fps and uts into cascabel console or terminal
 */
 void Frame::print_fps()
@@ -243,10 +243,6 @@ void Frame::vanish()
 */
 void Frame::init()
 {
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	DebugLogData dld;
-	Toolbox::start_debug_logging(dld,"Window Initialization");
-#endif
 
 	// sdl setup
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -257,11 +253,6 @@ void Frame::init()
 	SDL_StopTextInput();
 	//SDL_ShowCursor(SDL_DISABLE);
 	// TODO: dynamically hide the cursor, when controller input is mainly used
-
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	Toolbox::add_timekey(dld,"SDL Settings");
-	Toolbox::flush_debug_logging(dld);
-#endif
 }
 
 /*
@@ -273,19 +264,11 @@ void Frame::init()
 void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
 		SDL_WindowFlags fs)
 {
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	DebugLogData dld;
-	Toolbox::start_debug_logging(dld,"OpenGL Setup");
-#endif
 
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
 	m_context = create_new_context();
-
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	Toolbox::add_timekey(dld,"Window Creation");
-#endif
 
 	// opengl setup
 	glewInit();
@@ -299,19 +282,10 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glViewport(0,0,width,height);
 
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	Toolbox::add_timekey(dld,"OpenGL Initialization");
-#endif
-
 	// openal setup
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
-
-#ifdef CALIBRA_DEBUG_OUTPUT_LOAD
-	Toolbox::add_timekey(dld,"Audio Setup");
-	Toolbox::flush_debug_logging(dld);
-#endif
 }
 
 /*
