@@ -30,7 +30,7 @@ void DPilot::update(glm::vec2 pPos)
 
 		// movement
 		ePos = glm::vec2(!mv_stage)
-			* glm::vec2(615+ph_fcount,650+dir_mult*20000/(ph_fcount/2-100*dir_mult)+50)
+			* glm::vec2(615+ph_fcount,650+dir_mult*20000/(ph_fcount>>1-100*dir_mult)+50)
 			+ glm::vec2(mv_stage)*glm::vec2(615+ph_fcount,650+ph_fcount*ph_fcount/2400-150);
 		bool ex_ovfl = ph_fcount<-600||ph_fcount>600;
 		bool mult_swap = ph_fcount*dir_mult>1;
@@ -142,8 +142,9 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
 				* ((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		spray_counter--;
-		cd_direction = rand()%2+3+30*(spray_counter<1);
-	} // FIXME: same issue with rand() as in function above.
+		cd_direction = (rand()&1)+30*(spray_counter<1)+3;
+	}
+	// FIXME: same issue with rand() as in function above.
 
 	// counter ticks and reset
 	spray_counter += !spray_counter*30;
