@@ -63,7 +63,7 @@ private:
 	// animation
 	int16_t ph_fcount = 0,spray_counter = 0;
 	int8_t dir_mult = 1,mv_stage = 0;
-	uint8_t cd_flare = rand()%3+4,cd_direction = rand()%2+3,cd_flares = 0,cd_mines = 0;
+	uint8_t cd_flare = rand()%3+4,cd_direction = (rand()&1)+3,cd_flares = 0,cd_mines = 0;
 };
 
 #endif

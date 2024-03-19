@@ -339,7 +339,7 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	uint8_t split_ticks = POT/(hpswap.dest_pos.size()+2);  // ticks after scaling is reversed
 	uint8_t aprog = hpswap.dest_pos.size()*((hpswap.anim_tick+split_ticks)/POT);
-	std::string pprefix = (hpswap.anim_tick>=POT)?std::to_string(hpswap.hpbar_itr+1)+'/':"";
+	std::string pprefix = (hpswap.anim_tick>=POT) ? std::to_string(hpswap.hpbar_itr+1)+'/' : "";
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
 	hpswap.phcnt.load();
@@ -347,7 +347,7 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 
 	// zoom scroll phase counter at increment
 	uint8_t mticks = hpswap.anim_tick%split_ticks;		// animation ticks after last revert
-	bool upscale = (hpswap.anim_tick/split_ticks)%2;	// distiguishing up and downscale phases
+	bool upscale = (hpswap.anim_tick/split_ticks)&1;	// distiguishing up and downscale phases
 	float zmscale = .5f*(((float)mticks/split_ticks)*(-2*upscale+1)+upscale);
 
 	// upload scroll towards expectation

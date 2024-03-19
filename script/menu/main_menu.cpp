@@ -1815,7 +1815,7 @@ void interface_behaviour_macro(MainMenu& tm)
 	t_ssk.disp_upper.x = vrt_cpos.x+vrt_dir.x*vrt_extend_II;
 
 	// update randomized text rotation
-	tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()%2)*2-1));
+	tm.st_rot = glm::radians((float)(rand()%MENU_OPTIONS_RDEG_THRES)*-((rand()&1)*2-1));
 }
 
 /*

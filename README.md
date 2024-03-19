@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.7 DEV
 
 ### optimizations:
+- bitwise operations replacing some division and modulo operators
 - removed unnecessary calculations from montecarlo shader
 
 ## v0.0.6 [UNX]
@@ -214,4 +215,5 @@ Worktime: 120h
 - Total Worktime: 1105h 34min
 - Worktime v0.0.7:
   + 281: 30min
+  + 258: 29min
 - Total Code Lines: 17.485
