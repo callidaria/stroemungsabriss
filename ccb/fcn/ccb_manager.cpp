@@ -96,7 +96,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		int ti = index[i_lv]+i_rf;
 		m_r2d->sl[ti].model
 				= glm::translate(m_r2d->sl[ti].model,glm::vec3(deltamv.x,deltamv.y,0));
-		linpr[i_lv].m_pos[i_rf] += deltamv;
+		linpr[i_lv].sprite_data[i_rf].position += deltamv;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	}
 
@@ -112,8 +112,8 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		deltascl += (m_frame->mouse.myfr-mlf.y)*0.001f;
 		int ti = index[i_lv]+i_rf;
 		m_r2d->sl[ti].scale_arbit(deltascl,deltascl);
-		linpr[i_lv].m_width[i_rf]=tmp_wscale*deltascl;
-		linpr[i_lv].m_height[i_rf]=tmp_hscale*deltascl;
+		linpr[i_lv].sprite_data[i_rf].width = tmp_wscale*deltascl;
+		linpr[i_lv].sprite_data[i_rf].height = tmp_hscale*deltascl;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	}
 
@@ -137,8 +137,10 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 				if (m_frame->tline[i]==' ') { 
 					args.push_back(tmp);
 					tmp = "";
-				} else tmp.push_back(m_frame->tline[i]);
-			} args.push_back(tmp);
+				}
+				else tmp.push_back(m_frame->tline[i]);
+			}
+			args.push_back(tmp);
 
 			// program termination recognition
 			if (args[0]=="exit") running = false;
@@ -174,8 +176,8 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 					// save delta scaling variables & input arguments
 					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 					i_lv = std::stoi(args[1]);i_rf = std::stoi(args[2]);
-					tmp_wscale = linpr[i_lv].m_width[i_rf];
-					tmp_hscale = linpr[i_lv].m_height[i_rf];
+					tmp_wscale = linpr[i_lv].sprite_data[i_rf].width;
+					tmp_hscale = linpr[i_lv].sprite_data[i_rf].height;
 				}
 			}
 

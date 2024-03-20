@@ -12,11 +12,35 @@
  *		ATTENTION SHOPPERS
  *	THIS FILE IS WORK IN PROGRESS! FEATURES WILL BE ADDED IN THE FUTURE.
  *	PLEASE DONT JUDGE OR RELY ON THIS CODE. THANK YOU!
- * */
+*/
+
+enum CCBArgs {
+	COMMAND,
+	POS_X,POS_Y,
+	WIDTH,HEIGHT,
+	TEXPATH,
+	REPEAT,
+	COUNT,
+	FRAMES,
+	TICKS,
+	ARGUMENT_COUNT
+};
+
+struct InterpreterSpriteData {
+	glm::vec2 position;
+	float width,height;
+	const char* texpath;
+};
+
+struct InterpreterAnimData {
+	glm::vec2 position;
+	float width,height;
+	const char* texpath;
+	uint8_t row,column,frames,ticks;
+};
 
 class CCBLInterpreter
 {
-
 public:
 
 	CCBLInterpreter(Renderer2D* r2d,const char* path);
@@ -37,10 +61,8 @@ private:
 public:
 
 	// object information
-	std::vector<glm::vec2> m_pos,a_pos;
-	std::vector<float> m_width,a_width,m_height,a_height,a_row,a_column,a_frames,a_ts;
-	std::vector<const char*> m_tex,a_tex;
-	int spritesCount;
+	std::vector<InterpreterSpriteData> sprite_data;
+	std::vector<InterpreterAnimData> anim_data;
 };
 
 #endif
