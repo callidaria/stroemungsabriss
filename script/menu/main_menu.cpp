@@ -516,7 +516,7 @@ void SelectionSpliceGeometry::load()
 
 	// compile shader
 	size_t vsize = sizeof(SpliceVertexGeometry);
-	shader.compile("./shader/main_menu/vsplash.shader","./shader/main_menu/fsplash.shader");
+	shader.compile("./shader/menu/splash.vs","./shader/menu/splash.fs");
 	shader.def_irregular_attributeF("colour",3,vsize,offsetof(SpliceVertexGeometry,colour));
 	shader.def_irregular_attributeI("edge_id",1,vsize,offsetof(SpliceVertexGeometry,edge_id));
 	shader.upload_camera(gCamera2D);
@@ -893,7 +893,7 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	ddbgr_buffer.bind(), ddbgr_buffer.upload_vertices(ddbgr_vertices,sizeof(ddbgr_vertices));
 
 	// dropdown shader setup
-	ddbgr_shader.compile("./shader/main_menu/vddbgr.shader","./shader/main_menu/fddbgr.shader");
+	ddbgr_shader.compile("./shader/menu/dropdown.vs","./shader/menu/dropdown.fs");
 	ddbgr_shader.def_attributeF("position",2,0,3);
 	ddbgr_shader.def_attributeF("dmod",1,2,3);
 	ddbgr_shader.upload_int("jmp_dist",MENU_LIST_SCROLL_Y);
@@ -901,14 +901,14 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 
 	// setup checkbox corpi
 	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
-	checkbox_shader.compile("./shader/main_menu/vcheckbox.shader","./shader/main_menu/fcheckbox.shader");
+	checkbox_shader.compile("./shader/menu/checkbox.vs","./shader/menu/checkbox.fs");
 	checkbox_shader.def_attributeF("position",2,0,4);
 	checkbox_shader.def_attributeF("drift_mod",2,2,4);
 	checkbox_shader.upload_camera(gCamera2D);
 
 	// setup slider corpi
 	slider_buffer.bind(), slider_buffer.upload_vertices(slider_vertices);
-	slider_shader.compile("./shader/main_menu/vslider.shader","./shader/main_menu/fslider.shader");
+	slider_shader.compile("./shader/menu/slider.vs","./shader/menu/slider.fs");
 	slider_shader.def_attributeF("position",2,0,3);
 	slider_shader.def_attributeF("bmod",1,2,3);
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
@@ -1528,7 +1528,7 @@ void MenuDialogue::load()
 
 	// background shader setup
 	size_t vsize = sizeof(DialogueBackgroundGeometry);
-	bgr_shader.compile("./shader/main_menu/vdialogue.shader","./shader/main_menu/fdialogue.shader");
+	bgr_shader.compile("./shader/menu/dialogue.vs","./shader/menu/dialogue.fs");
 	bgr_shader.def_irregular_attributeF("position",2,vsize,offsetof(DialogueBackgroundGeometry,position));
 	bgr_shader.def_irregular_attributeI("disp_id",1,vsize,offsetof(DialogueBackgroundGeometry,disp_id));
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
@@ -1539,7 +1539,7 @@ void MenuDialogue::load()
 	slc_buffer.upload_vertices(slc_verts);
 
 	// selector shader setup
-	slc_shader.compile("./shader/main_menu/vdlgselector.shader","./shader/main_menu/fdlgselector.shader");
+	slc_shader.compile("./shader/menu/dialogue_selector.vs","./shader/menu/dialogue_selector.fs");
 	slc_shader.def_attributeF("position",2,0,2);
 	slc_shader.upload_camera(gCamera2D);
 }
@@ -2189,11 +2189,11 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/main_menu/fbf_mainmenu.shader");
+			"./shader/standard/framebuffer.vs","./shader/menu/fb_mainmenu.fs");
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/main_menu/fbf_splash.shader");
+			"./shader/standard/framebuffer.vs","./shader/menu/fb_invert.fs");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
