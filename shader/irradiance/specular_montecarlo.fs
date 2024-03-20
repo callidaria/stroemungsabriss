@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 TexCoords;
+in vec3 Position;
 
 out vec4 outColour;
 
@@ -17,7 +17,7 @@ const float MATH_PI = 3.141592653;
 void main()
 {
 	// handling hemisphere normals & tangents
-	vec3 normals = normalize(TexCoords);
+	vec3 normals = normalize(Position);
 	bool flipped = abs(normals.z)<.9;
 	vec3 up = vec3(int(!flipped),0,int(flipped));
 	vec3 ntangent = normalize(cross(up,normals));

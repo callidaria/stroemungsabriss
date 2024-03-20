@@ -925,7 +925,7 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
 	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false);
+			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",false);
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -2184,16 +2184,16 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mdialogues.load();
 
 	// buffers
-	msaa = MSAA("./shader/fbv_standard.shader","./shader/fbf_standard.shader",
+	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",
 			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
 	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader");
+			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/main_menu/fbf_mainmenu.shader");
+			"./shader/standard/framebuffer.vs","./shader/main_menu/fbf_mainmenu.shader");
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/fbv_standard.shader","./shader/main_menu/fbf_splash.shader");
+			"./shader/standard/framebuffer.vs","./shader/main_menu/fbf_splash.shader");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);

@@ -233,7 +233,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	gbuffer.finalize_buffer();
 
 	// deferred shading buffer setup
-	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/fbv_standard.shader",
+	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/standard/framebuffer.vs",
 			"./shader/gbf_lighting.shader",false);
 	cbuffer.s.upload_int("gbuffer_colour",0);
 	cbuffer.s.upload_int("gbuffer_position",1);
@@ -249,7 +249,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 
 	// transparency buffer
 	FrameBuffer tbuffer = FrameBuffer(frame->w_res,frame->h_res,
-			"./shader/fbv_standard.shader","./shader/fbf_standard.shader",false,true);
+			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",false,true);
 
 	// store & return
 	rtargets.push_back({ gbuffer,cbuffer,tbuffer });
