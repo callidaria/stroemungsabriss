@@ -29,23 +29,27 @@ Init::Init(const char* path)
 
 	// extract values from config file
 	while (!file.eof()) {
-		std::string rclh;file >> rclh;
-		std::string val;file >> val;
-		std::vector<uint32_t> ex = read_cartesian(val);
+		std::string rclh; file >> rclh;
+		std::string val; file >> val;
 		uint16_t j = find_iKey(rclh.c_str());
-		for (int i=0;i<ex.size();i++) iConfig[j+i] = ex[i];
+		if (j!=InitVariable::VARIABLE_ERROR) {
+			uint32_t ex = stoi(val);
+			iConfig[j] = ex;
+		}
 	}
 }
 // FIXME: find a faster way to do this
+// TODO: implement a more stable solution and use error checking for message return
+// TODO: try/catch stoi exceptions
 
 /*
 	find_iKey(const char*) -> uint32_t
 	key: key string as referenced by in menu list file destinations
 	returns: converts string form of key into the key id integer and returns it
 */
-uint32_t Init::find_iKey(const char* key)
+uint16_t Init::find_iKey(const char* key)
 {
-	uint32_t out = 0;
+	uint16_t out = 0;
 	while (out<InitVariable::VARIABLE_KEY_LENGTH) {
 		if (!strcmp(key,iKeys[out].name)) break;
 		out++;
@@ -69,32 +73,6 @@ void Init::write_changes()
 	for (uint32_t i=0;i<InitVariable::VARIABLE_KEY_LENGTH;i++)
 		chwrite << iKeys[i].name << ' ' << std::to_string(iConfig[i]) << '\n';
 	chwrite.close();
-}
-
-/*
-	read_cartesian(std::string) -> std::vector<uint32_t>
-	val: raw value, possibly containing string1xstring2xstring3 pattern
-	returns: cartesian writing style gets converted into list of all factors.
-		example: string1xstring2xstring3
-			-> { string1, string2, string3 } as std::vector<uint32_t>
-		the x contained in the string marks the seperation of contained values.
-*/
-std::vector<uint32_t> Init::read_cartesian(std::string val)
-{
-	std::string proc;
-	std::vector<std::string> raw_out;
-	for (int i=0;i<val.size();i++) {
-		if (val[i]=='x') {
-			raw_out.push_back(proc);
-			proc = "";
-		} else proc += val[i];
-	} raw_out.push_back(proc);
-	std::vector<uint32_t> out;
-	for (int i=0;i<raw_out.size();i++) {
-		if (raw_out[i].size()>0) out.push_back(std::stoi(raw_out[i]));
-		// FIXME: delete check and find out why it was necessary
-	}
-	return out;
 }
 
 // FIXME: OUTDATED WRITING & CONCEPTS! UPDATE THIS IN THE FUTURE

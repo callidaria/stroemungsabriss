@@ -314,11 +314,9 @@ void Frame::get_screen(int8_t screen,SDL_Rect* dim_screen)
 void Frame::load_controllers()
 {
 	uint8_t gcc = 0;
-	while (SDL_IsGameController(gcc)) {
-		m_gc.push_back(SDL_GameControllerOpen(gcc));
-		xb.push_back(XBox());
-		gcc++;
-	} printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
+	m_gc.resize(SDL_NumJoysticks()), xb.resize(SDL_NumJoysticks());
+	while (SDL_IsGameController(gcc)) m_gc[gcc] = SDL_GameControllerOpen(gcc), gcc++;
+	printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
 }
 
 /*
