@@ -31,7 +31,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	hpbuffer.add_buffer();
 
 	// compile hpbar shader
-	shp.compile("shader/fbv_healthbar.shader","shader/fbf_healthbar.shader");
+	shp.compile("./shader/healthbar/bar.vs","./shader/healthbar/bar.fs");
 	shp.def_attributeF("position",2,0,3);
 	shp.def_attributeF("edge_id",1,2,3);
 
@@ -63,7 +63,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	brdbuffer.add_buffer();
 
 	// compile border shader
-	sborder.compile("shader/fbv_hpborder.shader","shader/fbf_hpborder.shader");
+	sborder.compile("./shader/healthbar/border.vs","./shader/healthbar/border.fs");
 	sborder.def_attributeF("position",2,0,3);
 	sborder.def_attributeF("edge_id",1,2,3);
 
@@ -90,7 +90,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	splcbuffer.add_buffer();
 
 	// compile splice shader
-	ssplice.compile("shader/fbv_hpsplice.shader","shader/fbf_hpsplice.shader");
+	ssplice.compile("./shader/healthbar/splice.vs","./shader/healthbar/splice.fs");
 	ssplice.def_attributeF("position",2,0,3);
 	ssplice.def_attributeF("edge_id",1,2,3);
 

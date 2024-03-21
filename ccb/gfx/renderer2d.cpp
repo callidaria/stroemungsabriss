@@ -76,7 +76,7 @@ void Renderer2D::load(float &progress,float pseq)
 	buffer.upload_vertices(vertices),buffer.upload_elements(elements);
 
 	// compile shader
-	s2d.compile2d("shader/vertex2d.shader","shader/fragment2d.shader");
+	s2d.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 
 	// load textures
 	for (int i=0;i<sl.size();i++) sl.at(i).texture(),progress += ptarget;

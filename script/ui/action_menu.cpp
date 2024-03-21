@@ -14,7 +14,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 	float sverts[] = { 0,-25,0, 1280,0,2, 0,0,1, 1280,0,2, 0,-25,0, 1280,-25,3, };
 	splash_buffer.bind();
 	splash_buffer.upload_vertices(sverts,sizeof(sverts));
-	splash_shader.compile("shader/fbv_lselect.shader","shader/fbf_lselect.shader");
+	splash_shader.compile("./shader/ui/select.vs","./shader/ui/select.fs");
 	splash_shader.def_attributeF("position",2,0,3);
 	splash_shader.def_attributeF("index",1,2,3);
 	splash_shader.upload_camera(Camera2D(1280,720));

@@ -30,7 +30,7 @@ public:
 
 		// FIXME: shookz there's no greyscale shader!
 		fb = FrameBuffer(f->w_res,f->h_res,"./shader/standard/framebuffer.vs","./shader/post/greyscale.fs", false);
-		blm = FrameBuffer(fr->w_res,f->h_res,"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs", false);
+		blm = FrameBuffer(fr->w_res,f->h_res,"./shader/standard/framebuffer.vs","./shader/standard/direct.fs", false);
 		blr = Blur(f);
 	}
 	void bloom() { fb.bind(); f->clear(0.0f,0.0f,0.0f); }

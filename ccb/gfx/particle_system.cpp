@@ -75,7 +75,7 @@ void ParticleSystem::load()
 	buffer.upload_vertices(verts);
 
 	// compile shader
-	shader.compile("./shader/vertex_particle.shader","./shader/standard/framebuffer.fs");
+	shader.compile("./shader/obj/particle.vs","./shader/standard/direct.fs");
 	shader.def_attributeF("position",3,0,5);
 	shader.def_attributeF("texCoords",2,3,5);
 	buffer.bind_index();

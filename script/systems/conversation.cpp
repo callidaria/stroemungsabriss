@@ -31,7 +31,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	};
 	slct_buffer.bind();
 	slct_buffer.upload_vertices(sfield_verts,sizeof(sfield_verts));
-	slct_shader.compile("./shader/fbv_lselect.shader","./shader/fbf_lselect.shader");
+	slct_shader.compile("./shader/ui/select.vs","./shader/ui/select.fs");
 	slct_shader.def_attributeF("position",2,0,3);
 	slct_shader.def_attributeF("index",1,2,3);
 	slct_shader.upload_camera(cam2D);
@@ -49,7 +49,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	// conversation mood visualizations
 	mood_buffer.bind();
 	mood_buffer.upload_vertices(moodconv_verts);
-	mood_shader.compile2d("./shader/vertex_mood.shader","./shader/fragment_mood.shader");
+	mood_shader.compile2d("./shader/ui/portrait.vs","./shader/standard/direct.fs");
 	mood_shader.upload_camera(cam2D);
 
 	// load character spritesheets & define protag name
@@ -65,8 +65,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	bgr_buffer.upload_vertices(tfield_verts,sizeof(tfield_verts));
 
 	// background shader
-	bgr_shader.compile("./shader/cnv_background_vertex.shader",
-			"./shader/cnv_background_fragment.shader");
+	bgr_shader.compile("./shader/ui/conversation.vs","./shader/ui/conversation.vs");
 	bgr_shader.def_attributeF("position",2,0,3);
 	bgr_shader.def_attributeF("edge_id",1,2,3);
 	bgr_shader.upload_camera(cam2D);

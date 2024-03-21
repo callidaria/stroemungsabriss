@@ -42,7 +42,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 	// upload card vertices
 	bfr.bind();
 	bfr.upload_vertices(cverts);
-	sdr.compile("./shader/vertex_cards.shader","./shader/fragment_cards.shader");
+	sdr.compile("./shader/obj/card.vs","./shader/obj/card.fs");
 	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);

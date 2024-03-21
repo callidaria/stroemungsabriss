@@ -925,7 +925,7 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
 	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
 	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",false);
+			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false);
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -2184,10 +2184,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mdialogues.load();
 
 	// buffers
-	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",
+	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",
 			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
 	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs");
+			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/standard/framebuffer.vs","./shader/menu/fb_mainmenu.fs");
 	fb_menu.s.upload_vec2("ratio",

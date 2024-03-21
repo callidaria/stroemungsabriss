@@ -166,7 +166,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// load meshes
 	buffer.bind();
 	buffer.upload_vertices(v_mesh);
-	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
+	s3d.compile3d("./shader/obj/mesh.vs","./shader/obj/mesh.fs");
 	for (auto im : ml) im.texture();
 	s3d.upload_int("tex",0),s3d.upload_int("sm",1),s3d.upload_int("emit",2),s3d.upload_int("nmap",3);
 	s3d.upload_camera(cam3d);
@@ -174,7 +174,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// load instances
 	ibuffer.bind();
 	ibuffer.upload_vertices(v_instance);
-	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
+	is3d.compile3d("./shader/obj/instance.vs","./shader/obj/mesh.fs");
 	ibuffer.bind_index();
 	is3d.def_indexF(ibuffer.iebo,"offset",3,0,R3D_INDEX_REPEAT),
 			is3d.def_indexF(ibuffer.iebo,"rotation_sin",3,3,R3D_INDEX_REPEAT),
@@ -187,7 +187,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// load animations
 	abuffer.bind();
 	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
-	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
+	as3d.compile("./shader/obj/animation.vs","./shader/obj/physical.fs");
 	as3d.def_attributeF("position",3,0,ANIMATION_MAP_REPEAT),
 			as3d.def_attributeF("texCoords",2,3,ANIMATION_MAP_REPEAT),
 			as3d.def_attributeF("normals",3,5,ANIMATION_MAP_REPEAT),
@@ -202,7 +202,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	// load physical based meshes
 	pbuffer.bind();
 	pbuffer.upload_vertices(v_pbm);
-	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
+	pbms.compile3d("./shader/obj/mesh.vs","./shader/obj/physical.fs");
 	for (auto im : pml) im.texture();
 	pbms.upload_int("colour_map",0),pbms.upload_int("normal_map",1),
 			pbms.upload_int("material_map",2),pbms.upload_int("emission_map",3);
@@ -210,7 +210,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 
 	// compile shadow shader
 	Buffer::unbind();
-	shs.compile("./shader/fbv_shadow.shader","./shader/fbf_shadow.shader");
+	shs.compile("./shader/lighting/shadow.vs","./shader/lighting/shadow.fs");
 	shs.def_attributeF("position",3,0,3);
 }
 // TODO: vertex batches have to be cleaned manually now due to list write at add() call
@@ -234,7 +234,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 
 	// deferred shading buffer setup
 	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/standard/framebuffer.vs",
-			"./shader/gbf_lighting.shader",false);
+			"./shader/lighting/pbr.fs",false);
 	cbuffer.s.upload_int("gbuffer_colour",0);
 	cbuffer.s.upload_int("gbuffer_position",1);
 	cbuffer.s.upload_int("gbuffer_normals",2);
@@ -249,7 +249,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 
 	// transparency buffer
 	FrameBuffer tbuffer = FrameBuffer(frame->w_res,frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/standard/framebuffer.fs",false,true);
+			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false,true);
 
 	// store & return
 	rtargets.push_back({ gbuffer,cbuffer,tbuffer });

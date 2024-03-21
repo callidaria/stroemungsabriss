@@ -62,8 +62,9 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 	init_buffer();
 
 	// shader compile
-	s.compile("shader/vertex_skybox.shader","shader/fragment_skybox.shader");
+	s.compile("./shader/old/skybox.vs","./shader/old/skybox.fs");
 	s.def_attributeF("position",3,0,3);
+	// FIXME: skybox relies on forward rendering concept, while in reality we run a deferred system now
 
 	// cubemap textures
 	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);
