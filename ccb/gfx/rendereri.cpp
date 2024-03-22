@@ -73,7 +73,7 @@ void RendererI::load(float &progress,float pseq)
 	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
 	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
 	// we could make instanced_anim the only instanced object or find a different solution??
-	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
+	sI.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
 	buffer.bind_index();
 	sI.def_indexF(buffer.iebo,"offset",2,0,6);
 	sI.def_indexF(buffer.iebo,"rotation_sin",1,2,6);

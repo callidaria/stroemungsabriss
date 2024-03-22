@@ -12,9 +12,10 @@ public:
 	Blur(Frame* fr)
 		: f(fr)
 	{
-		b0=FrameBuffer(f->w_res,f->h_res,"shader/fbv_hblur.shader","shader/fbf_blur.shader", false);
-		b1=FrameBuffer(f->w_res,f->h_res,"shader/fbv_wblur.shader","shader/fbf_blur.shader", false);
+		b0 = FrameBuffer(f->w_res,f->h_res,"./shader/post/blur_vertical.vs","./shader/post/blur.fs", false);
+		b1 = FrameBuffer(f->w_res,f->h_res,"./shader/post/blur_horizontal.vs","./shader/post/blur.fs", false);
 	}
+	// FIXME: blur fragments are extremely inefficient. they need to be optimized when used
 	void blur() { b0.bind(); f->clear(0.0f,0.0f,0.0f); }
 	void stop() { b0.close(); }
 	void render()

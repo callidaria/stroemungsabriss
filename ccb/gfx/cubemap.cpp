@@ -19,13 +19,13 @@ Cubemap::Cubemap(const char* path)
 	glGenRenderbuffers(1,&cmrbo);
 
 	// shader compile
-	approx_irr.compile("./shader/vapprox_irradiance.shader","./shader/fapprox_irradiance.shader");
+	approx_irr.compile("./shader/standard/skybox.vs","./shader/irradiance/approx.fs");
 	approx_irr.def_attributeF("position",3,0,3);
-	approx_ref.compile("./shader/vcubed_irradiance.shader","./shader/fspec_montecarlo.shader");
+	approx_ref.compile("./shader/standard/skybox.vs","./shader/irradiance/specular_montecarlo.fs");
 	approx_ref.def_attributeF("position",3,0,3);
-	irrs.compile("./shader/virradiance_map.shader","./shader/firradiance_map.shader");
+	irrs.compile("./shader/standard/projection.vs","./shader/irradiance/map.fs");
 	irrs.def_attributeF("position",3,0,3);
-	s.compile("./shader/vcubed_irradiance.shader","./shader/fcubed_irradiance.shader");
+	s.compile("./shader/standard/skybox.vs","./shader/irradiance/cubemap.fs");
 	s.def_attributeF("position",3,0,3);
 	s.upload_int("irradiance_map",0);
 
@@ -62,8 +62,9 @@ Cubemap::Cubemap(std::vector<const char*> tp) // !!description && maybe stack ?
 	init_buffer();
 
 	// shader compile
-	s.compile("shader/vertex_skybox.shader","shader/fragment_skybox.shader");
+	s.compile("./shader/old/skybox.vs","./shader/old/skybox.fs");
 	s.def_attributeF("position",3,0,3);
+	// FIXME: skybox relies on forward rendering concept, while in reality we run a deferred system now
 
 	// cubemap textures
 	glBindTexture(GL_TEXTURE_CUBE_MAP,irradiance_map);

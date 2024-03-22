@@ -120,7 +120,7 @@ void Text::load()
 {
 	// setup
 	load_vertex();
-	sT.compile2d("shader/vertex_text.shader","shader/fragment_text.shader");
+	sT.compile2d("./shader/obj/text.vs","./shader/obj/text.fs");
 	buffer.bind_index();
 
 	// index upload mapping

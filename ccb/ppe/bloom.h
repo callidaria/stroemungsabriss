@@ -26,11 +26,12 @@ public:
 		buffer = Buffer();
 		buffer.bind();
 		buffer.upload_vertices(verts,sizeof(verts));
-		sfb.compile2d("shader/fbv_standard.shader","shader/fbf_bloom.shader");
+		sfb.compile2d("./shader/standard/framebuffer.vs","./shader/post/bloom.fs");
 
-		fb=FrameBuffer(f->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_greyscale.shader", false);
-		blm=FrameBuffer(fr->w_res,f->h_res,"shader/fbv_standard.shader","shader/fbf_standard.shader", false);
-		blr=Blur(f);
+		// FIXME: shookz there's no greyscale shader!
+		fb = FrameBuffer(f->w_res,f->h_res,"./shader/standard/framebuffer.vs","./shader/post/greyscale.fs", false);
+		blm = FrameBuffer(fr->w_res,f->h_res,"./shader/standard/framebuffer.vs","./shader/standard/direct.fs", false);
+		blr = Blur(f);
 	}
 	void bloom() { fb.bind(); f->clear(0.0f,0.0f,0.0f); }
 	void stop() { fb.close(); }

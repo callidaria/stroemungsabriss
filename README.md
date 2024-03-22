@@ -71,6 +71,9 @@ To see the full documentation of engine go [here](doc/index.md)
 - bitwise operations replacing some division and modulo operators
 - removed unnecessary calculations from montecarlo shader
 
+### fixes:
+- FIXED: unbelievable naming & navigation mess in shader directory
+
 ## v0.0.6 [UNX]
 
 ### features:
@@ -216,4 +219,5 @@ Worktime: 120h
 - Worktime v0.0.7:
   + 281: 30min
   + 258: 29min
+  + 238: 4h 45min
 - Total Code Lines: 17.485
