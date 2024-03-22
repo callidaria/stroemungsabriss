@@ -140,7 +140,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);
 	Shader ld_shader = Shader();
-	ld_shader.compile2d("./shader/standard/canvas.vs","./shader/loader/bar.fs");
+	ld_shader.compile2d("./shader/loader/bar.vs","./shader/loader/bar.fs");
 	ld_shader.upload_camera(cam2D);
 
 	// bar borders setup

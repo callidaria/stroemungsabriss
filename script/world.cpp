@@ -14,7 +14,7 @@ World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
 
 	// framebuffer setup
 	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/fb_mainmenu.fs");
+			"./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	rtarget_id = eref->r3d->add_target(eref->frame);
 }
 

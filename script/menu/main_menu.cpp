@@ -2189,11 +2189,11 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
 			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs");
 	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/fb_mainmenu.fs");
+			"./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
 	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/fb_invert.fs");
+			"./shader/standard/framebuffer.vs","./shader/menu/overlay.fs");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);

@@ -23,7 +23,7 @@ Cubemap::Cubemap(const char* path)
 	approx_irr.def_attributeF("position",3,0,3);
 	approx_ref.compile("./shader/standard/skybox.vs","./shader/irradiance/specular_montecarlo.fs");
 	approx_ref.def_attributeF("position",3,0,3);
-	irrs.compile("./shader/standard/cube.vs","./shader/irradiance/map.fs");
+	irrs.compile("./shader/standard/projection.vs","./shader/irradiance/map.fs");
 	irrs.def_attributeF("position",3,0,3);
 	s.compile("./shader/standard/skybox.vs","./shader/irradiance/cubemap.fs");
 	s.def_attributeF("position",3,0,3);
