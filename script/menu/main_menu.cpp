@@ -519,7 +519,7 @@ void SelectionSpliceGeometry::load()
 	shader.compile("./shader/menu/splash.vs","./shader/menu/splash.fs");
 	shader.def_irregular_attributeF("colour",3,vsize,offsetof(SpliceVertexGeometry,colour));
 	shader.def_irregular_attributeI("edge_id",1,vsize,offsetof(SpliceVertexGeometry,edge_id));
-	shader.upload_camera(gCamera2D);
+	shader.upload_camera();
 }
 
 /*
@@ -897,14 +897,14 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	ddbgr_shader.def_attributeF("position",2,0,3);
 	ddbgr_shader.def_attributeF("dmod",1,2,3);
 	ddbgr_shader.upload_int("jmp_dist",MENU_LIST_SCROLL_Y);
-	ddbgr_shader.upload_camera(gCamera2D);
+	ddbgr_shader.upload_camera();
 
 	// setup checkbox corpi
 	checkbox_buffer.bind(),checkbox_buffer.upload_vertices(checkbox_vertices);
 	checkbox_shader.compile("./shader/menu/checkbox.vs","./shader/menu/checkbox.fs");
 	checkbox_shader.def_attributeF("position",2,0,4);
 	checkbox_shader.def_attributeF("drift_mod",2,2,4);
-	checkbox_shader.upload_camera(gCamera2D);
+	checkbox_shader.upload_camera();
 
 	// setup slider corpi
 	slider_buffer.bind(), slider_buffer.upload_vertices(slider_vertices);
@@ -912,7 +912,7 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	slider_shader.def_attributeF("position",2,0,3);
 	slider_shader.def_attributeF("bmod",1,2,3);
 	slider_shader.upload_float("max_disp",MENU_LIST_ATTRIBUTE_WIDTH);
-	slider_shader.upload_camera(gCamera2D);
+	slider_shader.upload_camera();
 
 	// difficulty preview spritesheet
 	m_ccbf = ccbf;
@@ -1532,7 +1532,7 @@ void MenuDialogue::load()
 	bgr_shader.def_irregular_attributeF("position",2,vsize,offsetof(DialogueBackgroundGeometry,position));
 	bgr_shader.def_irregular_attributeI("disp_id",1,vsize,offsetof(DialogueBackgroundGeometry,disp_id));
 	bgr_shader.upload_vec2("displace[0]",glm::vec2(0));
-	bgr_shader.upload_camera(gCamera2D);
+	bgr_shader.upload_camera();
 
 	// upload selector vertices
 	slc_buffer.bind();
@@ -1541,7 +1541,7 @@ void MenuDialogue::load()
 	// selector shader setup
 	slc_shader.compile("./shader/menu/dialogue_selector.vs","./shader/menu/dialogue_selector.fs");
 	slc_shader.def_attributeF("position",2,0,2);
-	slc_shader.upload_camera(gCamera2D);
+	slc_shader.upload_camera();
 }
 // TODO: store info of defined dialogue background vertices and create only once to avoid multiple allocations
 

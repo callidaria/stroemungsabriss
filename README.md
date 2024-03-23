@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.7 DEV
 
 ### optimizations:
+- global coordinate system, no more recalculation of 2D camera
 - bitwise operations replacing some division and modulo operators
 - removed unnecessary calculations from montecarlo shader
 
@@ -220,4 +221,5 @@ Worktime: 120h
   + 281: 30min
   + 258: 29min
   + 238: 4h 45min
+  + 295: 44min
 - Total Code Lines: 17.485

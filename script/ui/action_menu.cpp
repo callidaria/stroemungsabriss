@@ -17,7 +17,7 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 	splash_shader.compile("./shader/ui/select.vs","./shader/ui/select.fs");
 	splash_shader.def_attributeF("position",2,0,3);
 	splash_shader.def_attributeF("index",1,2,3);
-	splash_shader.upload_camera(Camera2D(1280,720));
+	splash_shader.upload_camera();
 	progress += sseq;
 
 	// add menu text
@@ -28,7 +28,6 @@ ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float ps
 	mtext.add("hitlist",glm::vec2(2240,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE));
 	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE));
 	mtext.add("world order",glm::vec2(2240,TEXT_YPOSITION_INFO-3*ACT_TEXT_SIZE));
-	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	mtext.load();
 	progress += sseq;
 

@@ -84,7 +84,7 @@ void Renderer2D::load(float &progress,float pseq)
 	s2d.upload_int("tex",0);
 
 	// coordinate system
-	s2d.upload_camera(Camera2D(1280.0f,720.0f));
+	s2d.upload_camera();
 }
 // TODO: add sensible memory management features
 

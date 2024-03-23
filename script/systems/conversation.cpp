@@ -34,7 +34,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	slct_shader.compile("./shader/ui/select.vs","./shader/ui/select.fs");
 	slct_shader.def_attributeF("position",2,0,3);
 	slct_shader.def_attributeF("index",1,2,3);
-	slct_shader.upload_camera(cam2D);
+	slct_shader.upload_camera();
 
 	// compile conversation visualization vertices
 	std::vector<float> protag_verts
@@ -50,7 +50,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	mood_buffer.bind();
 	mood_buffer.upload_vertices(moodconv_verts);
 	mood_shader.compile2d("./shader/ui/portrait.vs","./shader/standard/direct.fs");
-	mood_shader.upload_camera(cam2D);
+	mood_shader.upload_camera();
 
 	// load character spritesheets & define protag name
 	charManager->load_spritesheets();
@@ -68,7 +68,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	bgr_shader.compile("./shader/ui/conversation.vs","./shader/ui/conversation.vs");
 	bgr_shader.def_attributeF("position",2,0,3);
 	bgr_shader.def_attributeF("edge_id",1,2,3);
-	bgr_shader.upload_camera(cam2D);
+	bgr_shader.upload_camera();
 	bgr_shader.upload_int("scene_tex",0);
 	manipulate_background_edges();
 
