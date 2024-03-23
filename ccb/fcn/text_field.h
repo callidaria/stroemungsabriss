@@ -18,7 +18,7 @@ public:
 	TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* tp,glm::vec2 bpos,float width,float height);
 
 	// draw
-	void render(Frame* frame,Camera2D* cam2d,glm::vec4 col);
+	void render(Frame* frame,glm::vec4 col);
 
 private:
 

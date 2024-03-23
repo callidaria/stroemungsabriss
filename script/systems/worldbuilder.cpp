@@ -131,7 +131,6 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 {
 	// visualization setup
 	SDL_GLContext context = ccbf->frame->create_new_context();
-	Camera2D cam2D = Camera2D(1280.0f,720.0f);
 
 	// loading bar setup
 	std::vector<float> ld_canvas
@@ -141,7 +140,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	ld_buffer.upload_vertices(ld_canvas);
 	Shader ld_shader = Shader();
 	ld_shader.compile2d("./shader/loader/bar.vs","./shader/loader/bar.fs");
-	ld_shader.upload_camera(cam2D);
+	ld_shader.upload_camera();
 
 	// bar borders setup
 	float x_lft = 528.0f,x_rgt = 1232.0f,y_dwn = 42.0f,y_up = 57.0f,brd_offset = 4;
@@ -156,7 +155,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	Shader brd_shader = Shader();
 	brd_shader.compile("./shader/standard/direct.vs","./shader/loader/border.fs");
 	brd_shader.def_attributeF("position",2,0,2);
-	brd_shader.upload_camera(cam2D);
+	brd_shader.upload_camera();
 
 	// render loop
 	while (*loading) {

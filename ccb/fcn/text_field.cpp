@@ -6,7 +6,7 @@ TextField::TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* bp,glm:
 	rinst = m_r2d->add(bpos,width,height,bp,3,1,30,0);
 	txt = Text(*fnt);
 }
-void TextField::render(Frame* frame,Camera2D* cam2d,glm::vec4 col)
+void TextField::render(Frame* frame,glm::vec4 col)
 {
 	bool hover = false;
 	if (frame->mouse.mxfr>=m_bpos.x&&frame->mouse.mxfr<=m_bpos.x+m_width

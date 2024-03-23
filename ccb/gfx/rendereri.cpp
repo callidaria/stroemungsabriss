@@ -86,7 +86,7 @@ void RendererI::load(float &progress,float pseq)
 	sI.upload_int("tex",0);
 
 	// coordinate system
-	sI.upload_camera(Camera2D(1280.0f,720.0f));
+	sI.upload_camera();
 }
 
 /*

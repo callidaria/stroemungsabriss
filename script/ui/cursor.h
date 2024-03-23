@@ -25,7 +25,6 @@ private:
 	// cascabel
 	Frame* pFrame;
 	Renderer2D* pR2D;
-	Camera2D cam2D = Camera2D(1280.0f,720.0f);
 
 	// draw
 	uint16_t rindex;

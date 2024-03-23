@@ -1,17 +1,17 @@
 #include "ccb_manager.h"
 
 /*
-	constructor(Frame*,Renderer2D*,Camera2D*)
+	constructor(Frame*,Renderer2D*)
 	frame: frame entity, handling the relevant input for dev console
 	r2d: renderer to handle loaded & added 2D entities
 	cam2d: reference to 2D camera defining the coordinate system and perspective for renderer
 	purpose: build a manager instance, for later usage of developer console and level loading
 */
-CCBManager::CCBManager(Frame* frame,Renderer2D* r2d,Camera2D* cam2d)
-	: m_frame(frame),m_r2d(r2d),m_cam2d(cam2d)
+CCBManager::CCBManager(Frame* frame,Renderer2D* r2d)
+	: m_frame(frame),m_r2d(r2d)
 {
 	// create developer mode label
-	m_r2d->add(glm::vec2(1230,690),40,20,"res/dev.png");
+	m_r2d->add(glm::vec2(1230,690),40,20,"./res/dev.png");
 
 	// create developer console greetings and initial setup
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));

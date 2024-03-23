@@ -177,15 +177,10 @@ int32_t Shader::handle_attrib_location_by_name(const char* name)
 }
 
 /*
-	upload_camera(Camera2D||Camera3D) -> void
-	cam2d||cam3d: camera to upload as uniform to shader program
+	upload_camera(Camera3D) -> void
+	cam3d: camera to upload as uniform to shader program
 	purpose: upload relevant camera matrices
 */
-void Shader::upload_camera(Camera2D cam2d)
-{
-	upload_matrix("view",cam2d.view2D);
-	upload_matrix("proj",cam2d.proj2D);
-}
 void Shader::upload_camera(Camera3D cam3d)
 {
 	upload_matrix("view",cam3d.view3D);

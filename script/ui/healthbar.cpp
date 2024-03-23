@@ -18,9 +18,6 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	hpswap.max_width = width;
 	hpswap.max_height = height;
 
-	// projection into coordinate system
-	Camera2D tc2d = Camera2D(1280.0f,720.0f);
-
 	// vertices hpbar
 	float hpverts[] = {
 		pos.x,pos.y,0, pos.x,pos.y+height,3, pos.x,pos.y+height,1,
@@ -48,8 +45,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_indexF(hpbuffer.iebo,"target",1,9,PT_REPEAT);
 
 	// 2D projection hpbar
-	shp.upload_matrix("view",tc2d.view2D);
-	shp.upload_matrix("proj",tc2d.proj2D);
+	shp.upload_camera();
 
 	// vertices border
 	float brdverts[] = {
@@ -80,8 +76,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_indexF(brdbuffer.iebo,"target",1,9,BRD_REPEAT);
 
 	// 2D projection border
-	sborder.upload_matrix("view",tc2d.view2D);
-	sborder.upload_matrix("proj",tc2d.proj2D);  // TODO: write camera upload in shader
+	sborder.upload_camera();
 
 	// vertices indexed splice
 	float splcverts[] = { pos.x,pos.y,0, pos.x,pos.y+height,1, };
@@ -101,8 +96,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.def_indexF(splcbuffer.iebo,"spread",1,4,SL_REPEAT);
 
 	// 2D projection splice
-	ssplice.upload_matrix("view",tc2d.view2D);
-	ssplice.upload_matrix("proj",tc2d.proj2D);
+	ssplice.upload_camera();
 
 	// calculate render specifications
 	uint8_t t_index = 0;
@@ -336,7 +330,6 @@ void Healthbar::count_phases(HBState &frdy,HPBarSwap &hpswap)
 	hpswap.anim_tick += POT*(hpswap.hpbar_itr>0);
 
 	// increase phase counter
-	Camera2D tc2d = Camera2D(1280.0f,720.0f);
 	uint8_t split_ticks = POT/(hpswap.dest_pos.size()+2);  // ticks after scaling is reversed
 	uint8_t aprog = hpswap.dest_pos.size()*((hpswap.anim_tick+split_ticks)/POT);
 	std::string pprefix = (hpswap.anim_tick>=POT) ? std::to_string(hpswap.hpbar_itr+1)+'/' : "";

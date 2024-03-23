@@ -59,17 +59,15 @@ int main(int argc,char** argv)
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	ParticleSystem psys = ParticleSystem();
-	Camera2D cam2d = Camera2D(1280.0f,720.0f);
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	// LOADERS
-	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
+	CCBManager ccbm = CCBManager(&f,&r2d);
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
-	StageSetup set_rigs = { {  },{  },Lighting() };
+	StageSetup set_rigs = { {  },Lighting() };
 
 	// BUILD SET
 	World world = World(&eref,&set_rigs);
-	set_rigs.cam2D.push_back(cam2d);
 	set_rigs.cam3D.push_back(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
 	set_rigs.cam3D.push_back(Camera3D(1280.0f,720.0f));
 	set_rigs.cam3D.push_back(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));

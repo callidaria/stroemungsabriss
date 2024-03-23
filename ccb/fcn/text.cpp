@@ -112,7 +112,7 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 }
 
 /*
-	load(Camera2D*) -> void
+	load() -> void
 	c: camera and mainly coordinate system to render text vertices in relation to
 	purpose: upload to buffer as well as compile and setup shader
 */
@@ -129,10 +129,9 @@ void Text::load()
 	sT.def_indexF(buffer.iebo,"bounds",2,4,8);
 	sT.def_indexF(buffer.iebo,"cursor",2,6,8);
 	sT.upload_float("wdt",font.mw);
-	sT.upload_camera(Camera2D(1280.0f,720.0f));
+	sT.upload_camera();
 	texture();
 }
-// FIXME: don't calculate a new camera every time you load a new text. it's always the same one!
 
 /*
 	prepare() -> void
