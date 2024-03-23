@@ -313,7 +313,7 @@ void Renderer3D::switch_target_transparency(uint8_t id)
 	\param cam3D: camera to draw scene in perspective to
 	\param lighting: pointer to lighting containing the simulated dynamic lights
 */
-void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
+void Renderer3D::render_target(uint8_t id,Camera3D& cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].dbuffer.prepare();

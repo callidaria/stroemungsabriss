@@ -42,8 +42,6 @@ struct CascabelBaseFeature {
 
 // refers to all set utility used to visualize the scene
 struct StageSetup {
-	std::vector<Camera2D> cam2D;
-	std::vector<Camera3D> cam3D;
 	Lighting lighting;
 };
 

@@ -1,6 +1,7 @@
 #ifndef SCR_STRUCTURES_PLAYING_CARDS
 #define SCR_STRUCTURES_PLAYING_CARDS
 
+#include "../../ccb/core.h"
 #include "../../ccb/gfx/shader.h"
 #include "../../ccb/gfx/mesh.h"
 #include "../../ccb/gfx/renderer3d.h"

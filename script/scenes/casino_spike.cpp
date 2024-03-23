@@ -9,6 +9,9 @@
 CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
+	// camera setup
+	Core::gCamera3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
+
 	// object loading
 	float sseq = pseq/3.0f;
 	index_p3D = m_ccbf->r3d->add_physical("./res/casino/test_floor.obj",
@@ -94,8 +97,12 @@ void CasinoSpike::render()
 	cp_pos.y -= m_ccbf->frame->kb.ka[SDL_SCANCODE_F]*.05f;
 
 	// camera update
-	m_setRigs->cam3D[0].pos = cp_pos,m_setRigs->cam3D[0].front = cp_dir;
-	m_setRigs->cam3D[0].update();
+	Core::gCamera3D.pos = cp_pos, Core::gCamera3D.front = cp_dir;
+	Core::gCamera3D.update();
+
+	// camera update
+	/*m_setRigs->cam3D[0].pos = cp_pos, m_setRigs->cam3D[0].front = cp_dir;
+	m_setRigs->cam3D[0].update();*/
 
 	// update physics
 	for (uint8_t i=0;i<4;i++) {
@@ -108,22 +115,22 @@ void CasinoSpike::render()
 	}
 
 	// render flooring
-	m_ccbf->r3d->prepare(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->prepare(Core::gCamera3D);
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+9);
 
 	// render physical based objects
-	m_ccbf->r3d->prepare_pmesh(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->prepare_pmesh(Core::gCamera3D);
 	for (uint8_t i=0;i<6;i++) {
 		m_ccbf->r3d->pbms.upload_float("tex_repeat",texture_repeat[i]);
 		m_ccbf->r3d->render_pmsh(index_p3D+i);
 	}
 
 	// animation render
-	m_ccbf->r3d->prepare_anim(m_setRigs->cam3D[0]);
+	m_ccbf->r3d->prepare_anim(Core::gCamera3D);
 	m_ccbf->r3d->render_anim(0);
 	m_ccbf->r3d->render_anim(1);
 
 	// render irradiance
-	irradiance_map.prepare(m_setRigs->cam3D[0]);
+	irradiance_map.prepare(Core::gCamera3D);
 	irradiance_map.render_irradiance();
 }

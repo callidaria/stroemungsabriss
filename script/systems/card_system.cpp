@@ -11,12 +11,14 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 		std::vector<Currency> curr_path)
 	: m_ccbf(ccbf),m_setRigs(set_rigs)
 {
+	// camera setup
+	Core::gCamera3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
+
 	// background objects
 	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
 
-	set_rigs->cam3D[3].view3D
-		= glm::rotate(set_rigs->cam3D[3].view3D,glm::radians(45.0f),glm::vec3(1,0,0));
+	Core::gCamera3D.view3D = glm::rotate(Core::gCamera3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
 	pcards = new PlayingCards(ccbf,set_rigs,set_rigs->lighting.sunlights[0].position);
 	ccbf->r3d->register_geometry(pcards);
 
@@ -445,12 +447,12 @@ void CardSystem::update()
 void CardSystem::render()
 {
 	// render background
-	m_ccbf->r3d->prepare(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->prepare(Core::gCamera3D);
 	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
 	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
-	m_ccbf->r3d->prepare_inst(m_setRigs->cam3D[3]);
+	m_ccbf->r3d->prepare_inst(Core::gCamera3D);
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
 		m_ccbf->r3d->inst_counts[ir3d_index+i] = currency_spawn[i];
 		m_ccbf->r3d->render_inst(ir3d_index+i);
@@ -577,8 +579,7 @@ void CardSystem::create_card(glm::vec2 tex_id,bool deck_id)
 glm::vec3 CardSystem::get_card_screen_space(uint8_t id)
 {
 	glm::vec3 card_pos = get_position(id)-glm::vec3(CARD_HWIDTH,0,0);
-	glm::vec4 clip_space = m_setRigs->cam3D[3].proj3D
-			* m_setRigs->cam3D[3].view3D*glm::vec4(card_pos,1);
+	glm::vec4 clip_space = Core::gCamera3D.proj3D*Core::gCamera3D.view3D*glm::vec4(card_pos,1);
 	return glm::vec3(clip_space)/glm::vec3(clip_space.w);
 }
 

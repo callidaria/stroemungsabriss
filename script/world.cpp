@@ -67,7 +67,7 @@ void World::load(float &progress,float ldsplit)
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
 	m_ccbf->r2d->load(progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
-	m_ccbf->r3d->load(m_setRigs->cam3D[active_cam3D],progress,pr_progress);
+	m_ccbf->r3d->load(Core::gCamera3D,progress,pr_progress);
 	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&m_setRigs->lighting);
 	m_ccbf->pSys->load();
 	progress = org_progress+ldsplit;
@@ -101,13 +101,13 @@ void World::render(bool &running,bool &reboot)
 	m_ccbf->r3d->switch_target_transparency(rtarget_id);
 
 	// render particles
-	m_ccbf->pSys->update(m_setRigs->cam3D[0],m_ccbf->frame->time_delta);
-	m_ccbf->pSys->auto_render(m_setRigs->cam3D[0]);
+	m_ccbf->pSys->update(Core::gCamera3D,m_ccbf->frame->time_delta);
+	m_ccbf->pSys->auto_render(Core::gCamera3D);
 
 	// run deferred shading
 	glDisable(GL_DEPTH_TEST);
 	game_fb.bind();
-	m_ccbf->r3d->render_target(rtarget_id,m_setRigs->cam3D[active_cam3D],&m_setRigs->lighting);
+	m_ccbf->r3d->render_target(rtarget_id,Core::gCamera3D,&m_setRigs->lighting);
 
 	// render bullets
 	m_ccbf->bSys->render();

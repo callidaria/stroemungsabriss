@@ -60,7 +60,7 @@ public:
 	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
 	void start_target(uint8_t id);
 	void switch_target_transparency(uint8_t id);
-	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
+	void render_target(uint8_t id,Camera3D& cam3D,Lighting* lighting);
 
 	// preparations
 	void prepare();

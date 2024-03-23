@@ -1,6 +1,7 @@
 #ifndef SCR_SCENES_CASINO_SPIKE
 #define SCR_SCENES_CASINO_SPIKE
 
+#include "../../ccb/core.h"
 #include "../../ccb/gfx/cubemap.h"
 
 #include "../struct/feature_base.h"

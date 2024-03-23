@@ -47,7 +47,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);
 	sdr.def_attributeF("texID",1,8,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.upload_camera(set_rigs->cam3D[3]);
+	sdr.upload_camera(Core::gCamera3D);
 
 	// load card game texture
 	glGenTextures(1,&tex);
@@ -93,7 +93,7 @@ void PlayingCards::render()
 	bfr.bind();
 	bfr.upload_indices(rqueue);
 	sdr.upload_matrix("light_trans",m_ccbf->r3d->scam_projection);
-	sdr.upload_camera(m_setRigs->cam3D[3]);
+	sdr.upload_camera(Core::gCamera3D);
 
 	// draw cards
 	glActiveTexture(GL_TEXTURE0);

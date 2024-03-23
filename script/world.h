@@ -6,6 +6,7 @@
 #include <vector>
 
 // engine
+#include "../ccb/core.h"
 #include "../ccb/frm/frame.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/frm/gbuffer.h"
@@ -50,7 +51,7 @@ public:
 public:
 
 	// public indices
-	uint8_t active_daui = 0,active_cam2D = 0,active_cam3D = 0;
+	uint8_t active_daui = 0;
 
 private:
 
