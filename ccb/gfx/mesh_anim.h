@@ -19,8 +19,25 @@
 #include "shader.h"
 
 // ranges
-constexpr uint8_t ANIMATION_MAP_REPEAT = 19;
 constexpr uint8_t BONE_INFLUENCE_STACK_RANGE = 4;
+
+// animation vertex mapping
+enum AnimVID {
+	POSITION_X,POSITION_Y,POSITION_Z,
+	TCOORD_X,TCOORD_Y,
+	NORMALS_X,NORMALS_Y,NORMALS_Z,
+	TANGENT_X,TANGENT_Y,TANGENT_Z,
+	BONE0,BONE1,BONE2,BONE3,
+	WEIGHT0,WEIGHT1,WEIGHT2,WEIGHT3,
+	VERTEX_VALUE_COUNT
+};
+
+// information about animation mix between keys
+struct AnimationSubkeyTransition {
+	float position_mix;
+	float scale_mix;
+	float rotation_mix;
+};
 
 // rotary joints for animation information
 struct ColladaJoint {
@@ -29,19 +46,37 @@ struct ColladaJoint {
 	std::vector<uint16_t> children;
 };
 
-// structure of keys throughout animations
-struct JointKeys {
+// position keys
+struct AnimationPositionKey {
+	glm::vec3 position;
+	double duration;
+};
+
+// scaling keys
+struct AnimationScaleKey {
+	glm::vec3 scale;
+	double duration;
+};
+
+// rotations keys
+struct AnimationRotationKey {
+	glm::quat rotation;
+	double duration;
+};
+
+// object joints
+struct Joint {
 	uint16_t joint_id;
-	std::vector<double> dur_positions,dur_scales,dur_rotations;
-	std::vector<glm::vec3> key_positions,key_scales;
-	std::vector<glm::quat> key_rotations;
+	std::vector<AnimationPositionKey> position_keys;
+	std::vector<AnimationScaleKey> scale_keys;
+	std::vector<AnimationRotationKey> rotation_keys;
+	uint16_t crr_position = 0,crr_scale = 0,crr_rotation = 0;
 };
 
 // structure of animation data
 struct ColladaAnimationData {
 	double duration;
-	std::vector<JointKeys> joints;
-	std::vector<uint16_t> crr_position,crr_scale,crr_rotation;
+	std::vector<Joint> joints;
 };
 
 class MeshAnimation
@@ -81,7 +116,7 @@ private:
 		{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 	// animation
-	float advance_animation(uint16_t &crr_index,std::vector<double> keys);
+	//AnimationSubkeyTransition advance_animation(uint16_t &crr_index,std::vector<?>& keys);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,uint16_t jid,

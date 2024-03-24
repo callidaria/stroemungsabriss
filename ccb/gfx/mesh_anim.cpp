@@ -38,7 +38,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
 	// calculate element array offset before pushing to vertex list
-	uint32_t eoffset = vl.size()/ANIMATION_MAP_REPEAT;
+	uint32_t eoffset = vl.size()/AnimVID::VERTEX_VALUE_COUNT;
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -71,78 +71,98 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 					vweight[cweight.mVertexId][cwidx] = cweight.mWeight;
 			}
 		}
+	}
 
 	// assemble vertex array
-	} for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
+	size_t t_vls = vl.size();
+	vl.resize(t_vls+cmesh->mNumVertices*AnimVID::VERTEX_VALUE_COUNT);
+	for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
+		uint32_t r = t_vls+i*AnimVID::VERTEX_VALUE_COUNT;
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
-		vl.push_back(position.x),vl.push_back(position.y),vl.push_back(position.z);
+		vl[r+AnimVID::POSITION_X] = position.x;
+		vl[r+AnimVID::POSITION_Y] = position.y;
+		vl[r+AnimVID::POSITION_Z] = position.z;
 
 		// extract texture coordinates
 		aiVector3D tex_coords = cmesh->mTextureCoords[0][i];
-		vl.push_back(tex_coords.x),vl.push_back(tex_coords.y);
+		vl[r+AnimVID::TCOORD_X] = tex_coords.x;
+		vl[r+AnimVID::TCOORD_Y] = tex_coords.y;
 
 		// extract normals
 		aiVector3D normals = cmesh->mNormals[i];
-		vl.push_back(normals.x),vl.push_back(normals.y),vl.push_back(normals.z);
+		vl[r+AnimVID::NORMALS_X] = normals.x;
+		vl[r+AnimVID::NORMALS_Y] = normals.y;
+		vl[r+AnimVID::NORMALS_Z] = normals.z;
 
 		// tangent for normal mapping
 		aiVector3D tangent = cmesh->mTangents[i];
-		vl.push_back(tangent.x),vl.push_back(tangent.y),vl.push_back(tangent.z);
+		vl[r+AnimVID::TANGENT_X] = tangent.x;
+		vl[r+AnimVID::TANGENT_Y] = tangent.y;
+		vl[r+AnimVID::TANGENT_Z] = tangent.z;
 
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
 
 		// insert influencing bone indices & relating weights
-		vl.push_back(vbindex[i][0]),vl.push_back(vbindex[i][1]),
-				vl.push_back(vbindex[i][2]),vl.push_back(vbindex[i][3]);
-		vl.push_back(vrip_weight.x),vl.push_back(vrip_weight.y),
-				vl.push_back(vrip_weight.z),vl.push_back(vrip_weight.w);
+		vl[r+AnimVID::BONE0] = vbindex[i][0], vl[r+AnimVID::BONE1] = vbindex[i][1],
+				vl[r+AnimVID::BONE2] = vbindex[i][2], vl[r+AnimVID::BONE3] = vbindex[i][3];
+		vl[r+AnimVID::WEIGHT0] = vrip_weight.x, vl[r+AnimVID::WEIGHT1] = vrip_weight.y,
+				vl[r+AnimVID::WEIGHT2] = vrip_weight.z, vl[r+AnimVID::WEIGHT3] = vrip_weight.w;
+	}
 
 	// assemble element array
-	} for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
+	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
 		for (uint32_t j=0;j<face.mNumIndices;j++) el.push_back(eoffset+face.mIndices[j]);
 		size += face.mNumIndices;
+	}
 
 	// extract animations
-	} for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
+	size_t t_size_anims = anims.size();
+	anims.resize(t_size_anims+dae_file->mNumAnimations);
+	for (uint32_t i=0;i<dae_file->mNumAnimations;i++) {
 		aiAnimation* canim = dae_file->mAnimations[i];
-		ColladaAnimationData proc;
-		proc.duration = canim->mDuration/canim->mTicksPerSecond;
+
+		// memory allocation for new animation
+		anims[t_size_anims+i] = {
+			.duration = canim->mDuration/canim->mTicksPerSecond,
+			.joints = std::vector<Joint>(dae_file->mAnimations[i]->mNumChannels)
+		};
 
 		// process all related bone keys
 		for (uint32_t j=0;j<dae_file->mAnimations[i]->mNumChannels;j++) {
 			aiNodeAnim* cnanim = canim->mChannels[j];
-			JointKeys cjkey;
+			Joint& cjkey = anims[t_size_anims+i].joints[j];
 
-			// correlate bone string id with object from joint tree
-			bool found = false;
-			cjkey.joint_id = get_joint_id(cnanim->mNodeName.C_Str());
+			// correlate bone string id & allocate memory
+			cjkey = {
+				.joint_id = get_joint_id(cnanim->mNodeName.C_Str()),
+				.position_keys = std::vector<AnimationPositionKey>(cnanim->mNumPositionKeys),
+				.scale_keys = std::vector<AnimationScaleKey>(cnanim->mNumScalingKeys),
+				.rotation_keys = std::vector<AnimationRotationKey>(cnanim->mNumRotationKeys)
+			};
 
-			// add key information
+			// add position key informations
 			for (uint32_t k=0;k<cnanim->mNumPositionKeys;k++) {
-				cjkey.dur_positions.push_back(cnanim->mPositionKeys[k].mTime/canim->mTicksPerSecond);
-				cjkey.key_positions.push_back(glmify(cnanim->mPositionKeys[k].mValue));
-			} for (uint32_t k=0;k<cnanim->mNumScalingKeys;k++) {
-				cjkey.dur_scales.push_back(cnanim->mScalingKeys[k].mTime/canim->mTicksPerSecond);
-				cjkey.key_scales.push_back(glmify(cnanim->mScalingKeys[k].mValue));
-			} for (uint32_t k=0;k<cnanim->mNumRotationKeys;k++) {
-				cjkey.dur_rotations.push_back(cnanim->mRotationKeys[k].mTime/canim->mTicksPerSecond);
-				cjkey.key_rotations.push_back(glmify(cnanim->mRotationKeys[k].mValue));
+				cjkey.position_keys[k].position = glmify(cnanim->mPositionKeys[k].mValue);
+				cjkey.position_keys[k].duration = cnanim->mPositionKeys[k].mTime/canim->mTicksPerSecond;
 			}
 
-			// add joint to animation & add animation to list
-			proc.joints.push_back(cjkey);
-		}
+			// add scaling key informations
+			for (uint32_t k=0;k<cnanim->mNumScalingKeys;k++) {
+				cjkey.scale_keys[k].scale = glmify(cnanim->mScalingKeys[k].mValue);
+				cjkey.scale_keys[k].duration = cnanim->mScalingKeys[k].mTime/canim->mTicksPerSecond;
+			}
 
-		// initialize keyframe counter lists and store animation data
-		proc.crr_position = std::vector<uint16_t>(proc.joints.size(),0);
-		proc.crr_scale = std::vector<uint16_t>(proc.joints.size(),0);
-		proc.crr_rotation = std::vector<uint16_t>(proc.joints.size(),0);
-		anims.push_back(proc);
+			// add rotation key informations
+			for (uint32_t k=0;k<cnanim->mNumRotationKeys;k++) {
+				cjkey.rotation_keys[k].rotation = glmify(cnanim->mRotationKeys[k].mValue);
+				cjkey.rotation_keys[k].duration = cnanim->mRotationKeys[k].mTime/canim->mTicksPerSecond;
+			}
+		}
 	}
 
 	// vertex offset
@@ -189,17 +209,42 @@ void MeshAnimation::interpolate(double dt)
 		auto joint = anim->joints[i];
 
 		// determine transformation keyframes
-		float pprog = advance_animation(anim->crr_position[i],joint.dur_positions);
+		// advance position keys
+		while (joint.position_keys[joint.crr_position+1].duration<avx) joint.crr_position++;
+		joint.crr_position *= joint.crr_position<joint.position_keys.size()
+				&& joint.position_keys[joint.crr_position].duration<avx;
+		float pprog = (avx-joint.position_keys[joint.crr_position].duration)
+				/ (joint.position_keys[joint.crr_position+1].duration
+				- joint.position_keys[joint.crr_position].duration);
+
+		// advance scaling keys
+		while (joint.scale_keys[joint.crr_scale+1].duration<avx) joint.crr_scale++;
+		joint.crr_scale *= joint.crr_scale<joint.scale_keys.size()
+				&& joint.scale_keys[joint.crr_scale].duration<avx;
+		float sprog = (avx-joint.scale_keys[joint.crr_scale].duration)
+				/ (joint.scale_keys[joint.crr_scale+1].duration
+				- joint.scale_keys[joint.crr_scale].duration);
+
+		// advance rotation keys
+		while (joint.rotation_keys[joint.crr_rotation+1].duration<avx) joint.crr_rotation++;
+		joint.crr_rotation *= joint.crr_rotation<joint.rotation_keys.size()
+				&& joint.rotation_keys[joint.crr_rotation].duration<avx;
+		float rprog = (avx-joint.rotation_keys[joint.crr_rotation].duration)
+				/ (joint.rotation_keys[joint.crr_rotation+1].duration
+				- joint.rotation_keys[joint.crr_rotation].duration);
+		// TODO: code repitition, this can be improved i believe
+
+		/*float pprog = advance_animation(anim->crr_position[i],joint.dur_positions);
 		float rprog = advance_animation(anim->crr_rotation[i],joint.dur_rotations);
-		float sprog = advance_animation(anim->crr_scale[i],joint.dur_scales);
+		float sprog = advance_animation(anim->crr_scale[i],joint.dur_scales);*/
 
 		// smooth interpolation between keyframes
-		glm::vec3 tip = glm::mix(joint.key_positions[anim->crr_position[i]],
-				joint.key_positions[anim->crr_position[i]+1],pprog);
-		glm::quat rip = glm::slerp(joint.key_rotations[anim->crr_rotation[i]],
-				joint.key_rotations[anim->crr_rotation[i]+1],rprog);
-		glm::vec3 sip = glm::mix(joint.key_scales[anim->crr_scale[i]],
-				joint.key_scales[anim->crr_scale[i]+1],sprog);
+		glm::vec3 tip = glm::mix(joint.position_keys[joint.crr_position].position,
+				joint.position_keys[joint.crr_position+1].position,pprog);
+		glm::vec3 sip = glm::mix(joint.scale_keys[joint.crr_scale].scale,
+				joint.scale_keys[joint.crr_scale+1].scale,sprog);
+		glm::quat rip = glm::slerp(joint.rotation_keys[joint.crr_rotation].rotation,
+				joint.rotation_keys[joint.crr_rotation+1].rotation,rprog);
 
 		// combine translation matrices
 		joints[joint.joint_id].trans = glm::translate(glm::mat4(1),tip)*glm::toMat4(rip)
@@ -298,12 +343,12 @@ uint16_t MeshAnimation::get_joint_id(std::string jname)
 	\param keys: key timing list for advancement comparison & interpolation
 	\returns 0 <= n <= 1, where n describes the interpolation mixing between current & next key
 */
-float MeshAnimation::advance_animation(uint16_t &crr_index,std::vector<double> keys)
+/*float MeshAnimation::advance_animation(uint16_t& crr_index,std::vector<double> keys)
 {
 	while (keys[crr_index+1]<avx) crr_index++;
 	crr_index *= crr_index<keys.size()&&keys[crr_index]<avx;
 	return (avx-keys[crr_index])/(keys[crr_index+1]-keys[crr_index]);
-}
+}*/
 
 /*
 	rc_print_joint_tree(ostream&,vector<ColladaJoint>,uint16_t,uint8_t)
