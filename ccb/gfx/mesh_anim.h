@@ -32,13 +32,6 @@ enum AnimVID {
 	VERTEX_VALUE_COUNT
 };
 
-// information about animation mix between keys
-struct AnimationSubkeyTransition {
-	float position_mix;
-	float scale_mix;
-	float rotation_mix;
-};
-
 // rotary joints for animation information
 struct ColladaJoint {
 	std::string id,uniform_location;
@@ -114,9 +107,6 @@ private:
 		{ return glm::quat(iquat.w,iquat.x,iquat.y,iquat.z); }
 	static inline glm::mat4 glmify(aiMatrix4x4 imat4)
 		{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
-
-	// animation
-	//AnimationSubkeyTransition advance_animation(uint16_t &crr_index,std::vector<?>& keys);
 
 	// system
 	static void rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,uint16_t jid,

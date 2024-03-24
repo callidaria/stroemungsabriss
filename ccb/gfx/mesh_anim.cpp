@@ -113,10 +113,18 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 				vl[r+AnimVID::WEIGHT2] = vrip_weight.z, vl[r+AnimVID::WEIGHT3] = vrip_weight.w;
 	}
 
+	// allocate memory for element array
+	size_t mem_size = 0;
+	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
+		for (uint32_t j=0;j<cmesh->mFaces[i].mNumIndices;j++) mem_size++;
+	}
+	size_t mem_index = el.size();
+	el.resize(mem_index+mem_size);
+
 	// assemble element array
 	for (uint32_t i=0;i<cmesh->mNumFaces;i++) {
 		aiFace face = cmesh->mFaces[i];
-		for (uint32_t j=0;j<face.mNumIndices;j++) el.push_back(eoffset+face.mIndices[j]);
+		for (uint32_t j=0;j<face.mNumIndices;j++) el[mem_index++] = eoffset+face.mIndices[j];
 		size += face.mNumIndices;
 	}
 
@@ -234,10 +242,6 @@ void MeshAnimation::interpolate(double dt)
 				- joint.rotation_keys[joint.crr_rotation].duration);
 		// TODO: code repitition, this can be improved i believe
 
-		/*float pprog = advance_animation(anim->crr_position[i],joint.dur_positions);
-		float rprog = advance_animation(anim->crr_rotation[i],joint.dur_rotations);
-		float sprog = advance_animation(anim->crr_scale[i],joint.dur_scales);*/
-
 		// smooth interpolation between keyframes
 		glm::vec3 tip = glm::mix(joint.position_keys[joint.crr_position].position,
 				joint.position_keys[joint.crr_position+1].position,pprog);
@@ -292,21 +296,22 @@ uint16_t MeshAnimation::rc_get_joint_count(aiNode* joint)
 */
 void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
 {
-	// get joint name & convert initial transformation matrix
-	ColladaJoint out;
-	out.id = joint->mName.C_Str();
-	out.trans = glmify(joint->mTransformation);
-
 	// save joints place in memory and increase
-	uint16_t memory_id = joint_count;
-	out.uniform_location = "joint_transform["+std::to_string(memory_id)+"]";
-	joint_count++;
+	uint16_t memory_id = joint_count++;
 
-	// recursively process children joints & output results
+	// get joint name & convert initial transformation matrix
+	joints[memory_id] = {
+		.id = joint->mName.C_Str(),
+		.uniform_location = "joint_transform["+std::to_string(memory_id)+"]",
+		.trans = glmify(joint->mTransformation),
+		.children = std::vector<uint16_t>(joint->mNumChildren)
+	};
+
+	// recursively process children joints
 	for (uint16_t i=0;i<joint->mNumChildren;i++) {
-		out.children.push_back(joint_count);
+		joints[memory_id].children[i] = joint_count;
 		rc_assemble_joint_hierarchy(joint->mChildren[i],joint_count);
-	} joints[memory_id] = out;
+	}
 }
 
 /*
@@ -335,20 +340,6 @@ uint16_t MeshAnimation::get_joint_id(std::string jname)
 	while (jname!=joints[i].id) i++;
 	return i;
 }
-
-/*
-	advance_animation(uint16_t&,vector<double>) -> float (private) !O(1)
-	purpose: update animation key index based on animation time advancement
-	\param crr_index: current key index, to be advanced by this method
-	\param keys: key timing list for advancement comparison & interpolation
-	\returns 0 <= n <= 1, where n describes the interpolation mixing between current & next key
-*/
-/*float MeshAnimation::advance_animation(uint16_t& crr_index,std::vector<double> keys)
-{
-	while (keys[crr_index+1]<avx) crr_index++;
-	crr_index *= crr_index<keys.size()&&keys[crr_index]<avx;
-	return (avx-keys[crr_index])/(keys[crr_index+1]-keys[crr_index]);
-}*/
 
 /*
 	rc_print_joint_tree(ostream&,vector<ColladaJoint>,uint16_t,uint8_t)
