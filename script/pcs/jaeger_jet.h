@@ -25,14 +25,6 @@ public:
 
 private:
 
-	// ranged functions
-	static void jet_wait(BulletSystem* bsys,int32_t* treg);
-	static void jet_wide(BulletSystem* bsys,int32_t* treg);
-	static void jet_focus(BulletSystem* bsys,int32_t* treg);
-	static void jet_scientific(BulletSystem* bsys,int32_t* treg);
-
-private:
-
 	// render information
 	CascabelBaseFeature* m_ccbf;
 	uint16_t index_r2D,index_r3D;
@@ -42,16 +34,7 @@ private:
 	int8_t ddur = 0;
 
 	// animation
-	float tilt = 0;
-
-	// ranged method list
-	/*
-		func(BulletSystem*,int32_t*) -> void
-			=> func(bsys,treg) -> void
-		bsys: bullet system used to spawn player projectiles
-		treg: register holding information to save beyond static method
-	*/
-	std::vector<void(*)(BulletSystem*,int32_t*)> rng_flib;
+	float tilt = .0f;
 };
 
 #endif
