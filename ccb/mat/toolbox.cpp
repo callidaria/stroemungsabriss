@@ -10,7 +10,7 @@
 	\param rot: direct modification of vertex rotation around the object's origin point#
 	\returns amount of written vertices (vertices NOT values)
 */
-uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
 {
 	// setup vertex information lists
@@ -29,19 +29,29 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 
 		else {
 
 			// check value prefix
+			// position prefix
 			if (strcmp(lh,"v")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				verts.push_back(p);
-			} else if (strcmp(lh,"vt")==0) {
+			}
+
+			// texture coordinate prefix
+			else if (strcmp(lh,"vt")==0) {
 				glm::vec2 p;
 				fscanf(file,"%f %f\n",&p.x,&p.y);
 				uv.push_back(p);
-			} else if (strcmp(lh,"vn")==0) {
+			}
+
+			// normals prefix
+			else if (strcmp(lh,"vn")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				norm.push_back(p);
-			} else if(strcmp(lh,"f")==0) {
+			}
+
+			// faces prefix
+			else if(strcmp(lh,"f")==0) {
 
 				// read element node for current triangle
 				unsigned int vi[3],ui[3],ni[3];
@@ -93,12 +103,13 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 
 		rotate_vector(tn,rot);
 
 		// save data to buffer vector
-		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z),
-				ov.push_back(tu.x),ov.push_back(tu.y),
-				ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z),
-				ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
+		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z);
+		ov.push_back(tu.x),ov.push_back(tu.y);
+		ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z);
+		ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
 		out++;
-	} return out;
+	}
+	return out;
 }
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
 
@@ -330,11 +341,12 @@ void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 	ls: element list input to add generated elements to
 	purpose: generate buffer elements based on object list index
 */
-void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
+void Toolbox::generate_elements(uint16_t i,std::vector<uint32_t>& ls)
 {
-	ls.push_back(i*4);ls.push_back(i*4+2);ls.push_back(i*4+1);	// map first triangle
-	ls.push_back(i*4+2);ls.push_back(i*4);ls.push_back(i*4+3);	// map second triangle
+	ls.push_back(i*4), ls.push_back(i*4+2), ls.push_back(i*4+1);  // map first triangle
+	ls.push_back(i*4+2), ls.push_back(i*4), ls.push_back(i*4+3);  // map second triangle
 }
+// TODO: change element storage
 
 /*
 	set_texture_parameter_linear_mipmap() -> void (static)

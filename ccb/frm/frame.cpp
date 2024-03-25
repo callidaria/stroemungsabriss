@@ -318,6 +318,7 @@ void Frame::load_controllers()
 	while (SDL_IsGameController(gcc)) m_gc[gcc] = SDL_GameControllerOpen(gcc), gcc++;
 	printf("\033[0;34mcontrollers: %i plugged in\033[0m\n",gcc);
 }
+// TODO: decide if an array should be used instead
 
 /*
 	kill_controllers() -> void

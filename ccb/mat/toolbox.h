@@ -61,7 +61,7 @@ class Toolbox
 public:
 
 	// loader
-	static uint32_t load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+	static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 			float scl,glm::vec3 rot);
 
 	// math helper
@@ -86,7 +86,7 @@ public:
 	static void load_texture(uint32_t tex,const char* path,float bias,bool corrected=false);
 	static void load_texture_unfiltered(uint32_t tex,const char* path,bool corrected=false);
 	static void load_texture_repeat(uint32_t tex,const char* path,bool corrected=false);
-	static void generate_elements(uint16_t i,std::vector<unsigned int> &ls);
+	static void generate_elements(uint16_t i,std::vector<uint32_t>& ls);
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
