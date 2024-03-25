@@ -38,7 +38,7 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 	bone_offsets = std::vector<glm::mat4>(joint_count,glm::mat4());
 
 	// calculate element array offset before pushing to vertex list
-	uint32_t eoffset = vl.size()/AnimVID::VERTEX_VALUE_COUNT;
+	uint32_t eoffset = vl.size()/ANIM_VERTEX_REPEAT;
 
 	// assemble bone influence weights
 	uint8_t veindex[cmesh->mNumVertices] = { 0 };
@@ -75,42 +75,42 @@ MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipno
 
 	// assemble vertex array
 	size_t t_vls = vl.size();
-	vl.resize(t_vls+cmesh->mNumVertices*AnimVID::VERTEX_VALUE_COUNT);
+	vl.resize(t_vls+cmesh->mNumVertices*ANIM_VERTEX_REPEAT);
 	for (uint32_t i=0;i<cmesh->mNumVertices;i++) {
-		uint32_t r = t_vls+i*AnimVID::VERTEX_VALUE_COUNT;
+		uint32_t r = t_vls+i*ANIM_VERTEX_REPEAT;
 
 		// extract vertex positions
 		aiVector3D position = cmesh->mVertices[i];
-		vl[r+AnimVID::POSITION_X] = position.x;
-		vl[r+AnimVID::POSITION_Y] = position.y;
-		vl[r+AnimVID::POSITION_Z] = position.z;
+		vl[r+ANIM_POSITION_X] = position.x;
+		vl[r+ANIM_POSITION_Y] = position.y;
+		vl[r+ANIM_POSITION_Z] = position.z;
 
 		// extract texture coordinates
 		aiVector3D tex_coords = cmesh->mTextureCoords[0][i];
-		vl[r+AnimVID::TCOORD_X] = tex_coords.x;
-		vl[r+AnimVID::TCOORD_Y] = tex_coords.y;
+		vl[r+ANIM_TCOORD_X] = tex_coords.x;
+		vl[r+ANIM_TCOORD_Y] = tex_coords.y;
 
 		// extract normals
 		aiVector3D normals = cmesh->mNormals[i];
-		vl[r+AnimVID::NORMALS_X] = normals.x;
-		vl[r+AnimVID::NORMALS_Y] = normals.y;
-		vl[r+AnimVID::NORMALS_Z] = normals.z;
+		vl[r+ANIM_NORMALS_X] = normals.x;
+		vl[r+ANIM_NORMALS_Y] = normals.y;
+		vl[r+ANIM_NORMALS_Z] = normals.z;
 
 		// tangent for normal mapping
 		aiVector3D tangent = cmesh->mTangents[i];
-		vl[r+AnimVID::TANGENT_X] = tangent.x;
-		vl[r+AnimVID::TANGENT_Y] = tangent.y;
-		vl[r+AnimVID::TANGENT_Z] = tangent.z;
+		vl[r+ANIM_TANGENT_X] = tangent.x;
+		vl[r+ANIM_TANGENT_Y] = tangent.y;
+		vl[r+ANIM_TANGENT_Z] = tangent.z;
 
 		// correct weight array after simplification
 		glm::vec4 vrip_weight = glm::vec4(vweight[i][0],vweight[i][1],vweight[i][2],vweight[i][3]);
 		glm::normalize(vrip_weight);
 
 		// insert influencing bone indices & relating weights
-		vl[r+AnimVID::BONE0] = vbindex[i][0], vl[r+AnimVID::BONE1] = vbindex[i][1],
-				vl[r+AnimVID::BONE2] = vbindex[i][2], vl[r+AnimVID::BONE3] = vbindex[i][3];
-		vl[r+AnimVID::WEIGHT0] = vrip_weight.x, vl[r+AnimVID::WEIGHT1] = vrip_weight.y,
-				vl[r+AnimVID::WEIGHT2] = vrip_weight.z, vl[r+AnimVID::WEIGHT3] = vrip_weight.w;
+		vl[r+ANIM_BONE0] = vbindex[i][0], vl[r+ANIM_BONE1] = vbindex[i][1],
+				vl[r+ANIM_BONE2] = vbindex[i][2], vl[r+ANIM_BONE3] = vbindex[i][3];
+		vl[r+ANIM_WEIGHT0] = vrip_weight.x, vl[r+ANIM_WEIGHT1] = vrip_weight.y,
+				vl[r+ANIM_WEIGHT2] = vrip_weight.z, vl[r+ANIM_WEIGHT3] = vrip_weight.w;
 	}
 
 	// allocate memory for element array

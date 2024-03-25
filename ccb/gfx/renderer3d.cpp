@@ -52,12 +52,26 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,v_instance,imofs));
 
 	// create related index upload pattern
-	std::vector<float> cmesh_index;
+	std::vector<float> temp = std::vector<float>(dcap*INST_VERTEX_REPEAT);
 	for (uint16_t i=0;i<dcap;i++) {
-		cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),
-		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
-		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
-	} mesh_indices.push_back(cmesh_index);
+		uint32_t r = i*INST_VERTEX_REPEAT;
+
+		// write offset
+		temp[r+INST_POSITION_X] = -10000;
+		temp[r+INST_POSITION_Y] = -10000;
+		temp[r+INST_POSITION_Z] = -10000;
+
+		// write sine rotation
+		temp[r+INST_SINROT_X] = 0;
+		temp[r+INST_SINROT_Y] = 0;
+		temp[r+INST_SINROT_Z] = 0;
+
+		// write cosine rotation
+		temp[r+INST_COSROT_X] = 1;
+		temp[r+INST_COSROT_Y] = 1;
+		temp[r+INST_COSROT_Z] = 1;
+	}
+	mesh_indices.push_back(temp);
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
@@ -188,12 +202,12 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	abuffer.bind();
 	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
-	as3d.def_attributeF("position",3,0,AnimVID::VERTEX_VALUE_COUNT),
-			as3d.def_attributeF("texCoords",2,3,AnimVID::VERTEX_VALUE_COUNT),
-			as3d.def_attributeF("normals",3,5,AnimVID::VERTEX_VALUE_COUNT),
-			as3d.def_attributeF("tangent",3,8,AnimVID::VERTEX_VALUE_COUNT),
-			as3d.def_attributeF("boneIndex",4,11,AnimVID::VERTEX_VALUE_COUNT),
-			as3d.def_attributeF("boneWeight",4,15,AnimVID::VERTEX_VALUE_COUNT);
+	as3d.def_attributeF("position",3,0,ANIM_VERTEX_REPEAT),
+			as3d.def_attributeF("texCoords",2,3,ANIM_VERTEX_REPEAT),
+			as3d.def_attributeF("normals",3,5,ANIM_VERTEX_REPEAT),
+			as3d.def_attributeF("tangent",3,8,ANIM_VERTEX_REPEAT),
+			as3d.def_attributeF("boneIndex",4,11,ANIM_VERTEX_REPEAT),
+			as3d.def_attributeF("boneWeight",4,15,ANIM_VERTEX_REPEAT);
 	for (auto am : mal) am.texture();
 	as3d.upload_int("colour_map",0),as3d.upload_int("normal_map",1),
 			as3d.upload_int("material_map",2),as3d.upload_int("emission_map",3);
