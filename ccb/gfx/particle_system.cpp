@@ -28,35 +28,40 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 		bool loop,glm::vec3 opos,float scl,glm::vec3 ddir,double spwn_timeout,uint32_t count)
 {
 	// entity creation and data
-	ParticleEntity pentity;
-	pentity.panim = panim;
-	pentity.rows = rows;
-	pentity.cols = cols;
-	pentity.cframes = acnt-1;
-	pentity.anim_duration = dur;
-	pentity.loop_anim = loop;
-	pentity.origin_pos = opos;
-	pentity.scale = scl;
-	pentity.curr_pos = std::vector<glm::vec3>(count,opos);
-	pentity.curr_aloc = std::vector<glm::vec2>(count);
-	pentity.drive_dir = std::vector<glm::vec3>(count,ddir);
-	pentity.dists = std::vector<float>(count);
-	pentity.queue_order = std::vector<uint32_t>(count);
-	std::iota(pentity.queue_order.begin(),pentity.queue_order.end(),0);
-	pentity.count = count;
-	pentity.spwn_timeout = spwn_timeout;
+	ParticleEntity pentity = {
+		.panim = panim,
+		.rows = rows,
+		.cols = cols,
+		.cframes = acnt-1,
+		.anim_duration = dur,
+		.loop_anim = loop,
+		.origin_pos = opos,
+		.scale = scl,
+		.curr_pos = std::vector<glm::vec3>(count,opos),
+		.drive_dir = std::vector<glm::vec3>(count,ddir),
+		.curr_aloc = std::vector<glm::vec2>(count),
+		.indices = std::vector<float>(count*PARTICLE_SYSTEM_INDEX_RANGE),
+		.count = count,
+		.spwn_timeout = spwn_timeout,
+		.anim_timing = std::vector<float>(count),
+		.dists = std::vector<float>(count),
+		.queue_order = std::vector<uint32_t>(count)
+	};
 
-	// setup gpu data
+	// particle queue order
+	std::iota(pentity.queue_order.begin(),pentity.queue_order.end(),0);
+	// TODO: replace iota with something more readable & controllable than modern c++ lingo
+
+	// create texture
 	glGenTextures(1,&pentity.texture);
-	pentity.indices = std::vector<float>(count*PARTICLE_SYSTEM_INDEX_RANGE);
-	pentity.anim_timing = std::vector<float>(count);
 
 	// add vertex information
-	float hs = scl/2.0f;
+	float hs = scl*.5f;
 	std::vector<float> arverts = {
 		-hs,-hs+scl,0,0.0f,0.0f, -hs+scl,-hs,0,1.0f,1.0f, -hs+scl,-hs+scl,0,1.0f,0.0f,
 		-hs+scl,-hs,0,1.0f,1.0f, -hs,-hs+scl,0,0.0f,0.0f, -hs,-hs,0,0.0f,1.0f
-	}; verts.insert(verts.end(),arverts.begin(),arverts.end());
+	};
+	verts.insert(verts.end(),arverts.begin(),arverts.end());
 	// TODO: find out the correct way to handle memory insert in this circumstance
 
 	// save entity

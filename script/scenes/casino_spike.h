@@ -25,7 +25,7 @@ private:
 	StageSetup* m_setRigs;
 	Cubemap irradiance_map = Cubemap("./res/irradiance_map.hdr");
 	uint16_t index_r3D,index_p3D;
-	std::vector<uint8_t> texture_repeat;
+	uint8_t texture_repeat[6] = { 1,1,10,4,1,1 };
 
 	// physics
 	float oheights[4] = { 0 },ospeed[4] = { 0 };
