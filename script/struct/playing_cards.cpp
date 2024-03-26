@@ -10,43 +10,67 @@
 PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sorg)
 	: m_ccbf(ccbf),m_setRigs(set_rigs),shadow_dir(-glm::normalize(sorg))
 {
-	// card visualization setup
-	/*float cverts[] = {
-
-		// card front
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0, -CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,0,
-		CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0, CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,0,
-		CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,0, -CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,0,
-
-		// card back
-		CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1, CARD_HWIDTH,0,CARD_HHEIGHT,0,1,0,1,0,1,
-		-CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1, -CARD_HWIDTH,0,CARD_HHEIGHT,1,1,0,1,0,1,
-		-CARD_HWIDTH,0,-CARD_HHEIGHT,1,0,0,1,0,1, CARD_HWIDTH,0,-CARD_HHEIGHT,0,0,0,1,0,1,
-	};*/
-
-	// load card vertices & mirror for backsides
-	std::vector<float> overts,cverts;
+	// load card vertices
+	std::vector<float> overts;
 	Toolbox::load_object("./res/card.obj",overts,glm::vec3(0),1,glm::vec3(0));
-	for (uint32_t i=0;i<overts.size();i+=TOOLBOX_OBJECT_LOAD_REPEAT) {
-		cverts.push_back(overts[i]);cverts.push_back(overts[i+1]);cverts.push_back(overts[i+2]);
-		cverts.push_back(overts[i+3]);cverts.push_back(-overts[i+4]);
-		cverts.push_back(overts[i+5]);cverts.push_back(overts[i+6]);cverts.push_back(overts[i+7]);
-		cverts.push_back(0);
-	} for (uint32_t i=0;i<overts.size();i+=TOOLBOX_OBJECT_LOAD_REPEAT) {
-		cverts.push_back(-overts[i]);cverts.push_back(overts[i+1]);cverts.push_back(overts[i+2]);
-		cverts.push_back(overts[i+3]);cverts.push_back(overts[i+4]);
-		cverts.push_back(overts[i+5]);cverts.push_back(overts[i+6]);cverts.push_back(overts[i+7]);
-		cverts.push_back(1);
+
+	// convert card object vertices into the format compatible with card shader
+	// memory allocation
+	size_t vertsize = overts.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
+	std::vector<float> cverts = std::vector<float>(vertsize*CARD_VERTEX_REPEAT);
+
+	// front side
+	for (uint32_t i=0;i<vertsize;i++) {
+		uint32_t k0 = i*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
+
+		// correlate position
+		cverts[k0+CARD_POSITION_X] = overts[k1];
+		cverts[k0+CARD_POSITION_Y] = overts[k1+1];
+		cverts[k0+CARD_POSITION_Z] = overts[k1+2];
+
+		// correlate texture coordinates
+		cverts[k0+CARD_TCOORD_X] = overts[i+3];
+		cverts[k0+CARD_TCOORD_Y] = -overts[i+4];
+
+		// correlate normals
+		cverts[k0+CARD_NORMALS_X] = overts[i+5];
+		cverts[k0+CARD_NORMALS_Y] = overts[i+6];
+		cverts[k0+CARD_NORMALS_Z] = overts[i+7];
+
+		// add frontside identifier
+		cverts[k0+CARD_SIDES] = 0;
+	}
+
+	// back side
+	for (uint32_t i=0;i<vertsize;i++) {
+		uint32_t k0 = i*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
+
+		// correlate position
+		cverts[k0+CARD_POSITION_X] = -overts[k1];
+		cverts[k0+CARD_POSITION_Y] = overts[k1+1];
+		cverts[k0+CARD_POSITION_Z] = overts[k1+2];
+
+		// correlate texture coordinates
+		cverts[k0+CARD_TCOORD_X] = overts[i+3];
+		cverts[k0+CARD_TCOORD_Y] = overts[i+4];
+
+		// correlate normals
+		cverts[k0+CARD_NORMALS_X] = overts[i+5];
+		cverts[k0+CARD_NORMALS_Y] = overts[i+6];
+		cverts[k0+CARD_NORMALS_Z] = overts[i+7];
+
+		// add frontside identifier
+		cverts[k0+CARD_SIDES] = 1;
 	}
 
 	// upload card vertices
 	bfr.bind();
 	bfr.upload_vertices(cverts);
 	sdr.compile("./shader/vertex_cards.shader","./shader/fragment_cards.shader");
-	sdr.def_attributeF("position",3,0,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("texCoords",2,3,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("normals",3,5,CARDSYSTEM_UPLOAD_REPEAT);
-	sdr.def_attributeF("texID",1,8,CARDSYSTEM_UPLOAD_REPEAT);
+	sdr.def_attributeF("position",3,CARD_POSITION_X,CARD_VERTEX_REPEAT);
+	sdr.def_attributeF("texCoords",2,CARD_TCOORD_X,CARD_VERTEX_REPEAT);
+	sdr.def_attributeF("normals",3,CARD_NORMALS_X,CARD_VERTEX_REPEAT);
+	sdr.def_attributeF("texID",1,CARD_SIDES,CARD_VERTEX_REPEAT);
 	sdr.upload_camera(Core::gCamera3D);
 
 	// load card game texture

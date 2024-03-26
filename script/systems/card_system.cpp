@@ -452,11 +452,12 @@ void CardSystem::render()
 	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
-	m_ccbf->r3d->prepare_inst(Core::gCamera3D);
+	/*m_ccbf->r3d->prepare_inst(Core::gCamera3D);
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
 		m_ccbf->r3d->inst_counts[ir3d_index+i] = currency_spawn[i];
 		m_ccbf->r3d->render_inst(ir3d_index+i);
-	}
+	}*/
+	// FIXME: something something 3D instance renderer something something
 
 	// draw cards
 	pcards->render();
