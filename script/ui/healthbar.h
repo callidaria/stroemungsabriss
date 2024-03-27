@@ -42,7 +42,9 @@ constexpr float RED_DISCONSPLC = .1f;			// despawn reduction of disconnected spl
 // states of healthbar
 enum HBState
 {
+	PREPARATION,
 	FILLING,		// in the process of filling
+	PREP_SPLICE,
 	SPLICING,		// splice animation between nano bars
 	PHASE_COUNT,	// counting up phases
 	READY,			// healthbar ready and damagable
@@ -93,25 +95,6 @@ private:
 	// animations
 	void floating_nanobars();
 
-	// calculators
-	static void fill_hpbar(HBState &frdy,HPBarSwap &hpswap);
-	static void splice_hpbar(HBState &frdy,HPBarSwap &hpswap);
-	static void count_phases(HBState &frdy,HPBarSwap &hpswap);
-	static void ready_hpbar(HBState &frdy,HPBarSwap &hpswap);
-	static void reset_hpbar(HBState &frdy,HPBarSwap &hpswap);
-	static void signal_clear(HBState &frdy,HPBarSwap &hpswap);
-
-private:
-
-	/*
-		func(uint8_t&,HPBarSwap&) -> void
-			=> func(frdy,hpswap) -> void
-		frdy: state counter, represeting the current fill_switch index
-		hpswap: struct containing nanobar and upload information
-	*/
-	std::vector<void(*)(HBState&,HPBarSwap&)> fill_switch
-			= { fill_hpbar,splice_hpbar,count_phases,ready_hpbar,reset_hpbar,signal_clear };
-
 private:
 
 	// cascabel
@@ -120,7 +103,7 @@ private:
 
 	// status
 	HPBarSwap hpswap;
-	HBState frdy = HBState::FILLING;
+	uint8_t frdy = 0;
 };
 
 #endif
