@@ -10,6 +10,9 @@
 
 #include "feature_base.h"
 
+// count
+constexpr uint8_t CSYS_CARD_COUNT = 112;
+
 // positioning
 constexpr float CARDSYSTEM_CARD_WIDTH = 2.25f;
 constexpr float CARDSYSTEM_CARD_HEIGHT = 3.5f;
@@ -25,6 +28,15 @@ enum CardVID {
 	CARD_NORMALS_X,CARD_NORMALS_Y,CARD_NORMALS_Z,
 	CARD_SIDES,
 	CARD_VERTEX_REPEAT
+};
+
+enum CardIID {
+	ICARD_POSITION_X,ICARD_POSITION_Y,ICARD_POSITION_Z,
+	ICARD_TEXTURE_X,ICARD_TEXTURE_Y,
+	ICARD_SINROT_X,ICARD_SINROT_Y,ICARD_SINROT_Z,
+	ICARD_COSROT_X,ICARD_COSROT_Y,ICARD_COSROT_Z,
+	ICARD_DECK,
+	CARD_INSTANCE_REPEAT
 };
 
 class PlayingCards : public ShadowGeometry
@@ -43,7 +55,7 @@ public:
 public:
 
 	// render
-	std::vector<float> rqueue;
+	std::vector<float> rqueue = std::vector<float>(CSYS_CARD_COUNT*CARD_INSTANCE_REPEAT);
 
 private:
 

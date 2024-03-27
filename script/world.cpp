@@ -87,7 +87,7 @@ void World::render(bool &running,bool &reboot)
 
 	// update
 	m_ccbf->r3d->update_animations(m_ccbf->frame->time_delta);
-	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+	//m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
 
 	// start geometry pass deferred scene
 	m_ccbf->r3d->start_target(rtarget_id);

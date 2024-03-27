@@ -105,6 +105,7 @@ void PlayingCards::render_shadow()
 	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 }
+// FIXME: this shadow projection breaks the program for some reason. find out why
 
 /*
 	render() -> void
