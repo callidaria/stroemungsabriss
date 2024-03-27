@@ -41,10 +41,11 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 	size_t i = 0;
 	for (auto cstage:curr_path) {
 		m_ccbf->r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
-				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,true);
+				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,false);
 		currency_stats[i++] = { .value = cstage.value };
 		cstack.stacks.push_back({});
 	}
+	// FIXME: shadow projection for instanced currency objects
 
 	// precalculations
 	phead_mat = glm::rotate(glm::mat4(1),glm::radians(90.0f),glm::vec3(0,0,1));
@@ -68,15 +69,16 @@ void CardSystem::shuffle_all()
 
 		// pick a random, uninitialized card & put it into pile
 		uint8_t rcard = rand()%loose_list.size();
-		dpiles[0].cards[i++] = loose_list[rcard];
+		dpiles[0].cards[i] = loose_list[rcard];
 		set_position(loose_list[rcard],
-				glm::vec3(dpiles[0].pos.x,dpiles[0].cards.size()*.017f,dpiles[0].pos.y));
+				glm::vec3(dpiles[0].pos.x,i*.017f,dpiles[0].pos.y));
 
 		// face down card
 		set_rotation(loose_list[rcard],glm::vec3(0,0,glm::radians(180.0f)));
 
 		// un-loosen card status
 		loose_list.erase(loose_list.begin()+rcard,loose_list.begin()+rcard+1);
+		i++;
 	}
 }
 

@@ -17,7 +17,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 	// convert card object vertices into the format compatible with card shader
 	// memory allocation
 	size_t vertsize = overts.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
-	std::vector<float> cverts = std::vector<float>(vertsize*CARD_VERTEX_REPEAT);
+	std::vector<float> cverts = std::vector<float>(vertsize*CARD_VERTEX_REPEAT*2);
 
 	// front side
 	for (uint32_t i=0;i<vertsize;i++) {
@@ -29,13 +29,13 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 		cverts[k0+CARD_POSITION_Z] = overts[k1+2];
 
 		// correlate texture coordinates
-		cverts[k0+CARD_TCOORD_X] = overts[i+3];
-		cverts[k0+CARD_TCOORD_Y] = -overts[i+4];
+		cverts[k0+CARD_TCOORD_X] = overts[k1+3];
+		cverts[k0+CARD_TCOORD_Y] = -overts[k1+4];
 
 		// correlate normals
-		cverts[k0+CARD_NORMALS_X] = overts[i+5];
-		cverts[k0+CARD_NORMALS_Y] = overts[i+6];
-		cverts[k0+CARD_NORMALS_Z] = overts[i+7];
+		cverts[k0+CARD_NORMALS_X] = overts[k1+5];
+		cverts[k0+CARD_NORMALS_Y] = overts[k1+6];
+		cverts[k0+CARD_NORMALS_Z] = overts[k1+7];
 
 		// add frontside identifier
 		cverts[k0+CARD_SIDES] = 0;
@@ -43,7 +43,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 
 	// back side
 	for (uint32_t i=0;i<vertsize;i++) {
-		uint32_t k0 = i*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
+		uint32_t k0 = (i+vertsize)*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
 
 		// correlate position
 		cverts[k0+CARD_POSITION_X] = -overts[k1];
@@ -51,15 +51,15 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 		cverts[k0+CARD_POSITION_Z] = overts[k1+2];
 
 		// correlate texture coordinates
-		cverts[k0+CARD_TCOORD_X] = overts[i+3];
-		cverts[k0+CARD_TCOORD_Y] = overts[i+4];
+		cverts[k0+CARD_TCOORD_X] = overts[k1+3];
+		cverts[k0+CARD_TCOORD_Y] = overts[k1+4];
 
 		// correlate normals
-		cverts[k0+CARD_NORMALS_X] = overts[i+5];
-		cverts[k0+CARD_NORMALS_Y] = overts[i+6];
-		cverts[k0+CARD_NORMALS_Z] = overts[i+7];
+		cverts[k0+CARD_NORMALS_X] = overts[k1+5];
+		cverts[k0+CARD_NORMALS_Y] = overts[k1+6];
+		cverts[k0+CARD_NORMALS_Z] = overts[k1+7];
 
-		// add frontside identifier
+		// add backside identifier
 		cverts[k0+CARD_SIDES] = 1;
 	}
 
@@ -102,7 +102,7 @@ void PlayingCards::render_shadow()
 	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
 	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
 	sdr.upload_vec3("shadow_dir",shadow_dir);
-	glDrawArraysInstanced(GL_TRIANGLES,0,12,112);
+	glDrawArraysInstanced(GL_TRIANGLES,0,CARD_INSTANCE_REPEAT,CSYS_CARD_COUNT);
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
 }
 // FIXME: this shadow projection breaks the program for some reason. find out why
