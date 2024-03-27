@@ -8,6 +8,14 @@
 #include "../../ccb/frm/frame.h"
 #include "../../ccb/gfx/rendereri.h"
 
+struct BulletCluster {
+	uint16_t width,height;
+	uint16_t bullet_count;
+	uint32_t bullet_cap;
+	std::vector<glm::vec2> directions;
+	std::vector<int32_t> ticks;
+};
+
 class BulletSystem
 {
 public:
@@ -28,20 +36,20 @@ public:
 
 	// update
 	void inc_tick(uint8_t cluster);
-	inline void reset_tick(uint8_t cluster,uint32_t index) { ts[cluster][index] = 0; }
+	inline void reset_tick(uint8_t cluster,uint32_t index) { clusters[cluster].ticks[index] = 0; }
 
 	// set
 	inline void set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos)
 		{ m_rI->set_aOffset(cluster,index,nPos); }
 	inline void set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
-		{ dirs[cluster][index] = nDir; }
+		{ clusters[cluster].directions[index] = nDir; }
 
 	// get
 	inline glm::vec2 get_bltPos(uint8_t cluster,uint32_t index)
 		{ return m_rI->get_aOffset(cluster,index); }
-	inline glm::vec2 get_bltDir(uint8_t cluster,uint32_t index) { return dirs[cluster][index]; }
-	inline uint16_t get_bCount(uint8_t cluster) { return bCount[cluster]; }
-	inline int32_t get_ts(uint8_t cluster,uint32_t index) { return ts[cluster][index]; }
+	inline glm::vec2 get_bltDir(uint8_t cluster,uint32_t index) { return clusters[cluster].directions[index]; }
+	inline uint16_t get_bCount(uint8_t cluster) { return clusters[cluster].bullet_count; }
+	inline int32_t get_ts(uint8_t cluster,uint32_t index) { return clusters[cluster].ticks[index]; }
 	uint8_t get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br);
 
 	// draw
@@ -54,12 +62,15 @@ private:
 	RendererI* m_rI;							// index renderer pointer
 
 	// bullet physics
+	std::vector<BulletCluster> clusters;
+	/*
 	std::vector<uint16_t> c_width;				// widths of each cluster
 	std::vector<uint16_t> c_height;				// heights of each cluster
 	std::vector<uint16_t> bCount;				// bullet count to render
 	std::vector<uint32_t> countCaps;			// maximum bullet capacity loop cutoff
 	std::vector<std::vector<glm::vec2>> dirs;	// lists of all bullet directions
 	std::vector<std::vector<int32_t>> ts;		// tick counter list
+	*/
 };
 
 #endif
