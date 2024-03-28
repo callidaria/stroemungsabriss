@@ -190,9 +190,9 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	ibuffer.upload_vertices(v_instance);
 	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
-	is3d.def_indexF(ibuffer.iebo,"offset",3,0,R3D_INDEX_REPEAT),
-			is3d.def_indexF(ibuffer.iebo,"rotation_sin",3,3,R3D_INDEX_REPEAT),
-			is3d.def_indexF(ibuffer.iebo,"rotation_cos",3,6,R3D_INDEX_REPEAT);
+	is3d.def_indexF("offset",3,0,R3D_INDEX_REPEAT);
+	is3d.def_indexF("rotation_sin",3,3,R3D_INDEX_REPEAT);
+	is3d.def_indexF("rotation_cos",3,6,R3D_INDEX_REPEAT);
 	for (auto im : iml) im.texture();
 	is3d.upload_int("tex",0),is3d.upload_int("sm",1),
 			is3d.upload_int("emit",2),is3d.upload_int("nmap",3);

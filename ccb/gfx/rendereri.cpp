@@ -75,10 +75,10 @@ void RendererI::load(float &progress,float pseq)
 	// we could make instanced_anim the only instanced object or find a different solution??
 	sI.compile2d("shader/vertex_inst.shader","shader/fragment_inst.shader");
 	buffer.bind_index();
-	sI.def_indexF(buffer.iebo,"offset",2,0,6);
-	sI.def_indexF(buffer.iebo,"rotation_sin",1,2,6);
-	sI.def_indexF(buffer.iebo,"rotation_cos",1,3,6);
-	sI.def_indexF(buffer.iebo,"i_tex",2,4,6);
+	sI.def_indexF("offset",2,0,6);
+	sI.def_indexF("rotation_sin",1,2,6);
+	sI.def_indexF("rotation_cos",1,3,6);
+	sI.def_indexF("i_tex",2,4,6);
 
 	// load textures
 	for (int i=0;i<il.size();i++) il[i].texture(),progress += ptarget;

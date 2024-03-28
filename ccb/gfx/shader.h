@@ -33,7 +33,7 @@ public:
 	void def_attributeF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 	void def_irregular_attributeI(const char* vname,uint8_t dim,size_t vsize,size_t osize);
 	void def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize,size_t osize);
-	void def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
+	void def_indexF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
 
 	// setup
 	inline void enable() { glUseProgram(m_shaderProgram); }

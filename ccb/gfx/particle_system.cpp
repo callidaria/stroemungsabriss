@@ -84,8 +84,8 @@ void ParticleSystem::load()
 	shader.def_attributeF("position",3,0,5);
 	shader.def_attributeF("texCoords",2,3,5);
 	buffer.bind_index();
-	shader.def_indexF(buffer.iebo,"particle_position",3,0,5);
-	shader.def_indexF(buffer.iebo,"anim_index",2,3,5);
+	shader.def_indexF("particle_position",3,0,5);
+	shader.def_indexF("anim_index",2,3,5);
 
 	// load textures
 	for (auto entity : entity_list) Toolbox::load_texture(entity.texture,entity.panim,false);

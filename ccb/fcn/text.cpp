@@ -124,10 +124,10 @@ void Text::load()
 	buffer.bind_index();
 
 	// index upload mapping
-	sT.def_indexF(buffer.iebo,"offset",2,0,8);
-	sT.def_indexF(buffer.iebo,"texpos",2,2,8);
-	sT.def_indexF(buffer.iebo,"bounds",2,4,8);
-	sT.def_indexF(buffer.iebo,"cursor",2,6,8);
+	sT.def_indexF("offset",2,0,8);
+	sT.def_indexF("texpos",2,2,8);
+	sT.def_indexF("bounds",2,4,8);
+	sT.def_indexF("cursor",2,6,8);
 	sT.upload_float("wdt",font.mw);
 	sT.upload_camera(Camera2D(1280.0f,720.0f));
 	texture();

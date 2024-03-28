@@ -103,12 +103,11 @@ void Shader::def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize
 
 /*
 	def_indexF(unsigned int,const char*,uint8_t,uint8_t,uint8_t)
-	ibo: index buffer object to be used by shader and defined by layout pattern
 	vname, dim, offset, cap: same function as in def_attributeF
 	purpose: define input pattern of index buffer object for shader variables (not uniform)
 	NOTE: !!! ibo needs to be bound first !!!
 */
-void Shader::def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
+void Shader::def_indexF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
 	size_t vsize = sizeof(float);
 	int attrib = glGetAttribLocation(m_shaderProgram,vname);
@@ -116,7 +115,6 @@ void Shader::def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offse
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 	glVertexAttribDivisor(attrib,1);
 }
-// FIXME: ibo is never actually used, even though it is passed
 
 /*
 	compile_shader(const char*,GLenum) -> uint32_t
