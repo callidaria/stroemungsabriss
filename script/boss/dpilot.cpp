@@ -9,13 +9,13 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
 {
 	// visuals
-	r3d_index = m_ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+	/*r3d_index = m_ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
 	bsys_index = m_ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
 	m_ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
-	m_ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);
+	m_ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);*/
 	//m_ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
 }
 
@@ -26,7 +26,7 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 */
 void DPilot::update(glm::vec2 pPos)
 {
-	if (m_ccbf->frame->time_delta>.1f) {
+	/*if (m_ccbf->frame->time_delta>.1f) {
 
 		// movement
 		ePos = glm::vec2(!mv_stage)
@@ -44,10 +44,11 @@ void DPilot::update(glm::vec2 pPos)
 		mines();
 		directional_sweep(pPos);
 		//whirlpool();
-	}
+	}*/
 
 	// collision check
-	health_mod = m_ccbf->bSys->get_pHit(0,ePos,35,0);
+	health_mod = 0;
+	//health_mod = m_ccbf->bSys->get_pHit(0,ePos,35,0);
 	/*uint8_t n1_hit = m_ccbf->bSys->get_pHit(bsys_index,m_ccbf->player->get_pPos(),0,5);
 	uint8_t n2_hit = m_ccbf->bSys->get_pHit(bsys_index+1,m_ccbf->player->get_pPos(),0,5);
 	uint8_t n3_hit = m_ccbf->bSys->get_pHit(bsys_index+2,m_ccbf->player->get_pPos(),0,7);*/
@@ -56,10 +57,10 @@ void DPilot::update(glm::vec2 pPos)
 	//iframes++;
 
 	// visuals
-	m_ccbf->r3d->prepare();
+	/*m_ccbf->r3d->prepare();
 	m_ccbf->r3d->s3d.upload_matrix("model",
 			glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);*/
 
 	// healthbar
 	hbar.register_damage(health_mod);

@@ -51,13 +51,25 @@ enum HBState
 	RESET,			// reset healthbar parameters
 	CLEAR			// attached boss clear
 };
+// TODO: join both preparation stages, if possible
+
+struct HBarIndexUpload
+{
+	float offset_x;
+	float bar_value = 0;
+	float damage = 0;
+	float edgemod_left_lower,edgemod_left_upper;
+	float edgemod_right_lower,edgemod_right_upper;
+	float floating_x = 0,floating_y = 0;  // TODO: join into vector
+	float target_width;
+};
 
 // components for nanobar placement, filling and other information
 struct HPBarSwap
 {
 	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
 	std::vector<std::vector<float>> dest_wdt;	// all destination widths per combined bar
-	std::vector<float> upload;					// indexing upload data. pattern: (p,w,d,p,w,d,...)
+	std::vector<HBarIndexUpload> upload;		// indexing upload data. pattern: (p,w,d,p,w,d,...)
 	std::vector<float> upload_splice;			// upload data for healthbar splicers
     int8_t target_itr = 0;						// iteration of target bar modification
 	uint8_t hpbar_itr = 0;						// iteration of current healthbar cluster

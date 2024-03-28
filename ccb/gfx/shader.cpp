@@ -116,6 +116,7 @@ void Shader::def_indexF(uint32_t ibo,const char* vname,uint8_t dim,uint8_t offse
 	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
 	glVertexAttribDivisor(attrib,1);
 }
+// FIXME: ibo is never actually used, even though it is passed
 
 /*
 	compile_shader(const char*,GLenum) -> uint32_t

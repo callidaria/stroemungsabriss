@@ -105,13 +105,13 @@ void Worldbuilder::load_dpilot()
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
 	progress += .2f;
-	JaegerJet* jj = new JaegerJet(m_ccbf);
-	progress += .2f;
+	/*JaegerJet* jj = new JaegerJet(m_ccbf);
+	progress += .2f;*/
 	DPilot* dpilot = new DPilot(m_ccbf);
 	progress += .2f;
 	m_world->add_ui(action_menu);
 	m_world->add_scene(nmw);
-	m_world->add_playable(jj);
+	//m_world->add_playable(jj);
 	m_world->add_boss(dpilot);
 	m_world->active_daui = 1;
 	m_world->load(progress,.2f);

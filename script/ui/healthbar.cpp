@@ -11,35 +11,31 @@ void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	uint8_t ihp = hpswap.hpbar_itr;
 	int32_t rnd_edge_dwn = 0,rnd_edge_up = 0;
 
-	// load upload vector and its targets
-	for (int i=0;i<hpswap.dest_pos[ihp].size();i++) {
+	// memory allocation
+	size_t iterations = hpswap.dest_pos[ihp].size();
+	hpswap.upload = std::vector<HBarIndexUpload>(iterations);
+	hpswap.mntm = std::vector<glm::vec2>(iterations,glm::vec2(0));
 
-		// basis for upload and targets
-		hpswap.upload.push_back(hpswap.dest_pos[ihp][i]);	// x-axis position offset
-		hpswap.upload.push_back(0);							// current hp in healthbar
-		hpswap.upload.push_back(0);							// current damage to health
+	// load upload vector and its targets
+	for (int i=0;i<iterations;i++) {
+
+		// positioning
+		hpswap.upload[i].offset_x = hpswap.dest_pos[ihp][i];
 
 		// left edge transformation for current nanobar
-		hpswap.upload.push_back(rnd_edge_dwn);	// randomized left lower edge modification
-		hpswap.upload.push_back(rnd_edge_up);	// randomized left upper edge modification
+		hpswap.upload[i].edgemod_left_lower = rnd_edge_dwn;
+		hpswap.upload[i].edgemod_left_upper = rnd_edge_up;
 
 		// generate new healthbar cut if not at last nanobar
 		bool inner_edge = i!=(hpswap.dest_pos[ihp].size()-1);
 		rnd_edge_dwn = (rand()%30-15)*inner_edge,rnd_edge_up = (rand()%30-15)*inner_edge;
 
 		// right edge transformation for current nanobar
-		hpswap.upload.push_back(rnd_edge_dwn);	// randomized right lower edge modification
-		hpswap.upload.push_back(rnd_edge_up);	// randomized right upper edge modification
-
-		// vertex information placeholders for floating effect
-		hpswap.upload.push_back(0);
-		hpswap.upload.push_back(0);
+		hpswap.upload[i].edgemod_right_lower = rnd_edge_dwn;
+		hpswap.upload[i].edgemod_right_upper = rnd_edge_up;
 
 		// upload tail specifying width target after fill
-		hpswap.upload.push_back(hpswap.dest_wdt[ihp][i]);
-
-		// memory reservation for leftest nanobar momentum
-		hpswap.mntm.push_back(glm::vec2(0));
+		hpswap.upload[i].target_width = hpswap.dest_wdt[ihp][i];
 	}
 	frdy++;
 }
@@ -53,20 +49,24 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// filling width & dmg until target
 	uint8_t ritr = hpswap.target_itr*PT_REPEAT;
-	bool full_bar = hpswap.upload[ritr+1]>=hpswap.upload[ritr+9];
+	bool full_bar = hpswap.upload[ritr].bar_value>=hpswap.upload[ritr].target_width;
 	hpswap.target_itr += full_bar;
-	hpswap.upload[ritr+1] += 4;
-	hpswap.upload[ritr+1] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+1]*!full_bar;
-	hpswap.upload[ritr+2] += 4;
-	hpswap.upload[ritr+2] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+2]*!full_bar;
+	hpswap.upload[ritr].bar_value += 4;
+	hpswap.upload[ritr].bar_value
+			= hpswap.upload[ritr].target_width*full_bar+hpswap.upload[ritr].bar_value*!full_bar;
+	hpswap.upload[ritr].damage += 4;
+	hpswap.upload[ritr].damage
+			= hpswap.upload[ritr].target_width*full_bar+hpswap.upload[ritr].damage*!full_bar;
 
 	// cap upload values to ideal once target is full
-	hpswap.upload[ritr+1] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+1]*!full_bar;
-	hpswap.upload[ritr+2] = hpswap.upload[ritr+9]*full_bar+hpswap.upload[ritr+2]*!full_bar;
+	hpswap.upload[ritr].bar_value
+			= hpswap.upload[ritr].target_width*full_bar+hpswap.upload[ritr].bar_value*!full_bar;
+	hpswap.upload[ritr].damage
+			= hpswap.upload[ritr].target_width*full_bar+hpswap.upload[ritr].damage*!full_bar;
 
 	// signal ready to splice if bars full
-	frdy = (frdy+hpswap.target_itr>=(hpswap.upload.size()/PT_REPEAT));
-	hpswap.target_itr -= frdy;
+	frdy += hpswap.target_itr>=(hpswap.upload.size()/PT_REPEAT);
+	hpswap.target_itr -= (frdy-1);
 }
 
 /*
@@ -75,13 +75,18 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// defining splice index upload
-	for (int i=1;i<hpswap.upload.size()/PT_REPEAT;i++) {
+	for (int i=1;i<hpswap.upload.size();i++) {
 
 		// calculate vector continuation
 		uint8_t ridx = i*PT_REPEAT;
-		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+3],0);
-		glm::vec2 splice_up =
-				glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+4],hpswap.max_height);
+		glm::vec2 splice_dwn = glm::vec2(
+				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_lower,
+				0
+			);
+		glm::vec2 splice_up = glm::vec2(
+				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_upper,
+				hpswap.max_height
+			);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
 		glm::vec2 upload_dwn = splice_dwn-splice_dir*glm::vec2(SPLICE_ELONGATION),
 				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(SPLICE_ELONGATION);
@@ -127,7 +132,7 @@ void splice_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	}
 
 	// signal splice readiness
-	frdy = frdy+(index==amt_splice);
+	frdy += index==amt_splice;
 }
 
 /*
@@ -181,14 +186,19 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 
 		// get splice direction
 		uint8_t ridx = i*PT_REPEAT;
-		glm::vec2 splice_dwn = glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+3],0);
-		glm::vec2 splice_up =
-				glm::vec2(hpswap.upload[ridx]+hpswap.upload[ridx+4],hpswap.max_height);
+		glm::vec2 splice_dwn = glm::vec2(
+				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_lower,
+				0
+			);
+		glm::vec2 splice_up = glm::vec2(
+				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_upper,
+				hpswap.max_height
+			);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
 		// FIXME: repeat code. reduce!
 
 		// accellerate if empty
-		bool not_empty = hpswap.upload[ridx+2]>0;
+		bool not_empty = hpswap.upload[ridx].damage>0;
 		hpswap.mntm[i] += splice_dir*glm::vec2(ACC_CLEAREDBAR*!not_empty);
 
 		// despawn slices between empty nanobars
@@ -199,17 +209,17 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	}
 
 	// subtract nanobar hp by damage in threshold
-	hpswap.upload[hpswap.target_itr*PT_REPEAT+2] -= hpswap.dmg_threshold;
+	hpswap.upload[hpswap.target_itr*PT_REPEAT].damage -= hpswap.dmg_threshold;
 	hpswap.dmg_threshold = 0;
 
 	// decrease target iteration if nanobar is empty
-	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*PT_REPEAT+2]<=0;
+	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*PT_REPEAT].damage<=0;
 
 	// signal refill if all bars are empty
 	bool hpbar_empty = hpswap.target_itr<0;
 	hpswap.target_itr += hpbar_empty;
 	hpswap.hpbar_itr += hpbar_empty;
-	frdy = frdy+hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
+	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
 }
 
 /*
@@ -225,7 +235,7 @@ void reset_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	hpswap.mntm.clear();
 
 	// signal refill
-	frdy = HBState::FILLING;
+	frdy = HBState::PREPARATION;
 }
 
 /*
@@ -452,8 +462,8 @@ void Healthbar::floating_nanobars()
 	for (int i=0+1000*((uint8_t)frdy<2);i<hpswap.mntm.size();i++) {
 
 		// apply momentum to position
-		hpswap.upload[i*PT_REPEAT+7] += hpswap.mntm[i].x;
-		hpswap.upload[i*PT_REPEAT+8] += hpswap.mntm[i].y;
+		hpswap.upload[i*PT_REPEAT].floating_x += hpswap.mntm[i].x;
+		hpswap.upload[i*PT_REPEAT].floating_y += hpswap.mntm[i].y;
 
 		// mellow momentum through appearance of resistance
 		hpswap.mntm[i] *= glm::vec2(NBMOMENTUM_RESISTANCE);
