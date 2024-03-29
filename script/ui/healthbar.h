@@ -28,9 +28,6 @@ constexpr uint8_t SPLICE_ELONGATION = 12;	// elongation distance of splicing aft
 constexpr float POT = 40.0f;			// animation tick maximum for phase upcounting
 constexpr uint8_t SPLICE_TICKS = 30;	// animation tick length for splicing animation
 
-// index repeater
-constexpr uint8_t SL_REPEAT = 5;	// amount of floats the slice pattern takes to repeat
-
 // physics
 constexpr float NBMOMENTUM_RESISTANCE = .9f;	// mellow the nanobar momentum after application
 constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback constance from slice motion
@@ -58,25 +55,32 @@ struct HBarIndexUpload
 	float damage = 0;
 	float edgemod_left_lower,edgemod_left_upper;
 	float edgemod_right_lower,edgemod_right_upper;
-	float floating_x = 0,floating_y = 0;  // TODO: join into vector
+	glm::vec2 floating = glm::vec2(0);
 	float target_width;
+};
+
+struct HBarSpliceIndexUpload
+{
+	glm::vec2 start;
+	glm::vec2 end;
+	float spread = .0f;
 };
 
 // components for nanobar placement, filling and other information
 struct HPBarSwap
 {
-	std::vector<std::vector<float>> dest_pos;	// all destination positions per combined bar
-	std::vector<std::vector<float>> dest_wdt;	// all destination widths per combined bar
-	std::vector<HBarIndexUpload> upload;		// indexing upload data. pattern: (p,w,d,p,w,d,...)
-	std::vector<float> upload_splice;			// upload data for healthbar splicers
-    int8_t target_itr = 0;						// iteration of target bar modification
-	uint8_t hpbar_itr = 0;						// iteration of current healthbar cluster
-	Text phname,phcnt;							// visuals for phase name and counter
-	glm::vec2 position;							// position of most left nanobar
-	uint16_t max_height,max_width;				// dimensions of all frankensteind' nanobars
-	uint16_t dmg_threshold = 0;					// counter to precalculate damage to sub later
-	uint8_t anim_tick = 0;						// counter for animation ticks
-	std::vector<glm::vec2> mntm;				// momentum for all nanobars
+	std::vector<std::vector<float>> dest_pos;			// all destination positions per combined bar
+	std::vector<std::vector<float>> dest_wdt;			// all destination widths per combined bar
+	std::vector<HBarIndexUpload> upload;				// indexing upload data. pattern: (p,w,d,p,w,d,...)
+	std::vector<HBarSpliceIndexUpload> upload_splice;	// upload data for healthbar splicers
+    int8_t target_itr = 0;								// iteration of target bar modification
+	uint8_t hpbar_itr = 0;								// iteration of current healthbar cluster
+	Text phname,phcnt;									// visuals for phase name and counter
+	glm::vec2 position;									// position of most left nanobar
+	uint16_t max_height,max_width;						// dimensions of all frankensteind' nanobars
+	uint16_t dmg_threshold = 0;							// counter to precalculate damage to sub later
+	uint8_t anim_tick = 0;								// counter for animation ticks
+	std::vector<glm::vec2> mntm;						// momentum for all nanobars
 };
 
 /*

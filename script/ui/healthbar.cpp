@@ -75,6 +75,7 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// defining splice index upload
+	hpswap.upload_splice = std::vector<HBarSpliceIndexUpload>(hpswap.upload.size());
 	for (int i=1;i<hpswap.upload.size();i++) {
 
 		// calculate vector continuation
@@ -91,11 +92,10 @@ void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 				upload_up = glm::vec2(splice_up.x,0)+splice_dir*glm::vec2(SPLICE_ELONGATION);
 
 		// upload splice continuations
-		hpswap.upload_splice.push_back(upload_dwn.x);
-		hpswap.upload_splice.push_back(upload_dwn.y);
-		hpswap.upload_splice.push_back(upload_up.x);
-		hpswap.upload_splice.push_back(upload_up.y);
-		hpswap.upload_splice.push_back(0);
+		hpswap.upload_splice[i-1] = {
+			.start = upload_dwn,
+			.end = upload_up
+		};
 
 		// calculate nanobar momentum based on the direction of the splices
 		int8_t dir_mulid = (splice_dir.x<=0)-(splice_dir.x>0);
@@ -113,7 +113,7 @@ void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 void splice_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// animate splicing
-	uint8_t amt_splice = hpswap.upload_splice.size()/SL_REPEAT;
+	uint8_t amt_splice = hpswap.upload_splice.size();
 	float per_splice = 1.0f/(SPLICE_TICKS/amt_splice);
 
 	// all index spreads get updated
@@ -121,9 +121,8 @@ void splice_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	while (index<amt_splice) {
 
 		// add length to splice when incomplete
-		uint8_t j = index*SL_REPEAT+4;
-		bool ncomplete = hpswap.upload_splice[j]<1;
-		hpswap.upload_splice[j] += per_splice*ncomplete;
+		bool ncomplete = hpswap.upload_splice[index].spread<1;
+		hpswap.upload_splice[index].spread += per_splice*ncomplete;
 
 		// halt at index if incomplete
 		index += !ncomplete;
@@ -200,10 +199,10 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 		hpswap.mntm[i] += splice_dir*glm::vec2(ACC_CLEAREDBAR*!not_empty);
 
 		// despawn slices between empty nanobars
-		uint8_t curr_splice = (i-1)*(i!=0)*SL_REPEAT+4;
-		hpswap.upload_splice[curr_splice] -= RED_DISCONSPLC*!not_empty;
-		hpswap.upload_splice[curr_splice] += -hpswap.upload_splice[curr_splice]
-				*(hpswap.upload_splice[curr_splice]<0);
+		uint8_t curr_splice = (i-1)*(i!=0);
+		hpswap.upload_splice[curr_splice].spread -= RED_DISCONSPLC*!not_empty;
+		hpswap.upload_splice[curr_splice].spread += -hpswap.upload_splice[curr_splice].spread
+				* (hpswap.upload_splice[curr_splice].spread<0);
 	}
 
 	// subtract nanobar hp by damage in threshold
@@ -303,7 +302,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_irregular_indexF("edg_trans[1]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_upper));
 	shp.def_irregular_indexF("edg_trans[2]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_lower));
 	shp.def_irregular_indexF("edg_trans[3]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_upper));
-	shp.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating_x));
+	shp.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating));
 	shp.def_irregular_indexF("target",1,vsize,offsetof(HBarIndexUpload,target_width));
 
 	// 2D projection hpbar
@@ -335,7 +334,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	sborder.def_irregular_indexF("edg_trans[1]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_upper));
 	sborder.def_irregular_indexF("edg_trans[2]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_lower));
 	sborder.def_irregular_indexF("edg_trans[3]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_upper));
-	sborder.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating_x));
+	sborder.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating));
 	sborder.def_irregular_indexF("target",1,vsize,offsetof(HBarIndexUpload,target_width));
 
 	// 2D projection border
@@ -354,10 +353,11 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	ssplice.def_attributeF("edge_id",1,2,3);
 
 	// splice indexing
+	vsize = sizeof(HBarSpliceIndexUpload);
 	splcbuffer.bind_index();
-	ssplice.def_indexF("ofs[0]",2,0,SL_REPEAT);
-	ssplice.def_indexF("ofs[1]",2,2,SL_REPEAT);
-	ssplice.def_indexF("spread",1,4,SL_REPEAT);
+	ssplice.def_irregular_indexF("ofs[0]",2,vsize,offsetof(HBarSpliceIndexUpload,start));
+	ssplice.def_irregular_indexF("ofs[1]",2,vsize,offsetof(HBarSpliceIndexUpload,end));
+	ssplice.def_irregular_indexF("spread",1,vsize,offsetof(HBarSpliceIndexUpload,spread));
 
 	// 2D projection splice
 	ssplice.upload_matrix("view",tc2d.view2D);
@@ -435,7 +435,7 @@ void Healthbar::render()
 	splcbuffer.bind_index();
 	splcbuffer.upload_indices(hpswap.upload_splice);
 	ssplice.upload_int("cnt_height",hpswap.max_height);
-	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size()/SL_REPEAT);
+	glDrawArraysInstanced(GL_LINES,0,2,hpswap.upload_splice.size());
 
 	// render name and phase counter
 	hpswap.phname.prepare();
@@ -461,8 +461,7 @@ void Healthbar::floating_nanobars()
 	for (int i=0+1000*((uint8_t)frdy<2);i<hpswap.mntm.size();i++) {
 
 		// apply momentum to position
-		hpswap.upload[i].floating_x += hpswap.mntm[i].x;
-		hpswap.upload[i].floating_y += hpswap.mntm[i].y;
+		hpswap.upload[i].floating += hpswap.mntm[i];
 
 		// mellow momentum through appearance of resistance
 		hpswap.mntm[i] *= glm::vec2(NBMOMENTUM_RESISTANCE);
