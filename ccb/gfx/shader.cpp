@@ -110,10 +110,19 @@ void Shader::def_irregular_attributeF(const char* vname,uint8_t dim,size_t vsize
 void Shader::def_indexF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap)
 {
 	size_t vsize = sizeof(float);
-	int attrib = glGetAttribLocation(m_shaderProgram,vname);
-	glEnableVertexAttribArray(attrib);
-	glVertexAttribPointer(attrib,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
-	glVertexAttribDivisor(attrib,1);
+	int32_t index = handle_index_location_by_name(vname);
+	glVertexAttribPointer(index,dim,GL_FLOAT,GL_FALSE,cap*vsize,(void*)(offset*vsize));
+	glVertexAttribDivisor(index,1);
+}
+
+/*
+	TODO
+*/
+void Shader::def_irregular_indexF(const char* vname,uint8_t dim,size_t isize,size_t offset)
+{
+	int32_t index = handle_index_location_by_name(vname);
+	glVertexAttribPointer(index,dim,GL_FLOAT,GL_FALSE,isize,(void*)(offset));
+	glVertexAttribDivisor(index,1);
 }
 
 /*
@@ -173,6 +182,16 @@ int32_t Shader::handle_attrib_location_by_name(const char* name)
 	int32_t attrib = glGetAttribLocation(m_shaderProgram,name);
 	glEnableVertexAttribArray(attrib);
 	return attrib;
+}
+
+/*
+	TODO
+*/
+int32_t Shader::handle_index_location_by_name(const char* name)
+{
+	int32_t index = glGetAttribLocation(m_shaderProgram,name);
+	glEnableVertexAttribArray(index);
+	return index;
 }
 
 /*

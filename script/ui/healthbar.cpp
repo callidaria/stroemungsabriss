@@ -48,7 +48,7 @@ void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// filling width & dmg until target
-	uint8_t ritr = hpswap.target_itr*PT_REPEAT;
+	uint8_t ritr = hpswap.target_itr;
 	bool full_bar = hpswap.upload[ritr].bar_value>=hpswap.upload[ritr].target_width;
 	hpswap.target_itr += full_bar;
 	hpswap.upload[ritr].bar_value += 4;
@@ -65,7 +65,7 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 			= hpswap.upload[ritr].target_width*full_bar+hpswap.upload[ritr].damage*!full_bar;
 
 	// signal ready to splice if bars full
-	frdy += hpswap.target_itr>=(hpswap.upload.size()/PT_REPEAT);
+	frdy += hpswap.target_itr>=hpswap.upload.size();
 	hpswap.target_itr -= (frdy-1);
 }
 
@@ -78,13 +78,12 @@ void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 	for (int i=1;i<hpswap.upload.size();i++) {
 
 		// calculate vector continuation
-		uint8_t ridx = i*PT_REPEAT;
 		glm::vec2 splice_dwn = glm::vec2(
-				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_lower,
+				hpswap.upload[i].offset_x+hpswap.upload[i].edgemod_left_lower,
 				0
 			);
 		glm::vec2 splice_up = glm::vec2(
-				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_upper,
+				hpswap.upload[i].offset_x+hpswap.upload[i].edgemod_left_upper,
 				hpswap.max_height
 			);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
@@ -185,20 +184,19 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	for (int i=0;i<hpswap.mntm.size();i++) {
 
 		// get splice direction
-		uint8_t ridx = i*PT_REPEAT;
 		glm::vec2 splice_dwn = glm::vec2(
-				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_lower,
+				hpswap.upload[i].offset_x+hpswap.upload[i].edgemod_left_lower,
 				0
 			);
 		glm::vec2 splice_up = glm::vec2(
-				hpswap.upload[ridx].offset_x+hpswap.upload[ridx].edgemod_left_upper,
+				hpswap.upload[i].offset_x+hpswap.upload[i].edgemod_left_upper,
 				hpswap.max_height
 			);
 		glm::vec2 splice_dir = glm::normalize(splice_up-splice_dwn);
 		// FIXME: repeat code. reduce!
 
 		// accellerate if empty
-		bool not_empty = hpswap.upload[ridx].damage>0;
+		bool not_empty = hpswap.upload[i].damage>0;
 		hpswap.mntm[i] += splice_dir*glm::vec2(ACC_CLEAREDBAR*!not_empty);
 
 		// despawn slices between empty nanobars
@@ -209,11 +207,11 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	}
 
 	// subtract nanobar hp by damage in threshold
-	hpswap.upload[hpswap.target_itr*PT_REPEAT].damage -= hpswap.dmg_threshold;
+	hpswap.upload[hpswap.target_itr].damage -= hpswap.dmg_threshold;
 	hpswap.dmg_threshold = 0;
 
 	// decrease target iteration if nanobar is empty
-	hpswap.target_itr -= hpswap.upload[hpswap.target_itr*PT_REPEAT].damage<=0;
+	hpswap.target_itr -= hpswap.upload[hpswap.target_itr].damage<=0;
 
 	// signal refill if all bars are empty
 	bool hpbar_empty = hpswap.target_itr<0;
@@ -296,16 +294,17 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 	shp.def_attributeF("edge_id",1,2,3);
 
 	// hpbar indexing
+	size_t vsize = sizeof(HBarIndexUpload);
 	hpbuffer.bind_index();
-	shp.def_indexF("ofs",1,0,PT_REPEAT);
-	shp.def_indexF("wdt",1,1,PT_REPEAT);
-	shp.def_indexF("dmg",1,2,PT_REPEAT);
-	shp.def_indexF("edg_trans[0]",1,3,PT_REPEAT);
-	shp.def_indexF("edg_trans[1]",1,4,PT_REPEAT);
-	shp.def_indexF("edg_trans[2]",1,5,PT_REPEAT);
-	shp.def_indexF("edg_trans[3]",1,6,PT_REPEAT);
-	shp.def_indexF("flt",2,7,PT_REPEAT);
-	shp.def_indexF("target",1,9,PT_REPEAT);
+	shp.def_irregular_indexF("ofs",1,vsize,offsetof(HBarIndexUpload,offset_x));
+	shp.def_irregular_indexF("wdt",1,vsize,offsetof(HBarIndexUpload,bar_value));
+	shp.def_irregular_indexF("dmg",1,vsize,offsetof(HBarIndexUpload,damage));
+	shp.def_irregular_indexF("edg_trans[0]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_lower));
+	shp.def_irregular_indexF("edg_trans[1]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_upper));
+	shp.def_irregular_indexF("edg_trans[2]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_lower));
+	shp.def_irregular_indexF("edg_trans[3]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_upper));
+	shp.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating_x));
+	shp.def_irregular_indexF("target",1,vsize,offsetof(HBarIndexUpload,target_width));
 
 	// 2D projection hpbar
 	shp.upload_matrix("view",tc2d.view2D);
@@ -329,15 +328,15 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// border indexing
 	brdbuffer.bind_index();
-	sborder.def_indexF("ofs",1,0,BRD_REPEAT);
-	sborder.def_indexF("wdt",1,1,BRD_REPEAT);
-	sborder.def_indexF("dmg",1,2,BRD_REPEAT);
-	sborder.def_indexF("edg_trans[0]",1,3,BRD_REPEAT);
-	sborder.def_indexF("edg_trans[1]",1,4,BRD_REPEAT);
-	sborder.def_indexF("edg_trans[2]",1,5,BRD_REPEAT);
-	sborder.def_indexF("edg_trans[3]",1,6,BRD_REPEAT);
-	sborder.def_indexF("flt",2,7,BRD_REPEAT);
-	sborder.def_indexF("target",1,9,BRD_REPEAT);
+	sborder.def_irregular_indexF("ofs",1,vsize,offsetof(HBarIndexUpload,offset_x));
+	sborder.def_irregular_indexF("wdt",1,vsize,offsetof(HBarIndexUpload,bar_value));
+	sborder.def_irregular_indexF("dmg",1,vsize,offsetof(HBarIndexUpload,damage));
+	sborder.def_irregular_indexF("edg_trans[0]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_lower));
+	sborder.def_irregular_indexF("edg_trans[1]",1,vsize,offsetof(HBarIndexUpload,edgemod_left_upper));
+	sborder.def_irregular_indexF("edg_trans[2]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_lower));
+	sborder.def_irregular_indexF("edg_trans[3]",1,vsize,offsetof(HBarIndexUpload,edgemod_right_upper));
+	sborder.def_irregular_indexF("flt",2,vsize,offsetof(HBarIndexUpload,floating_x));
+	sborder.def_irregular_indexF("target",1,vsize,offsetof(HBarIndexUpload,target_width));
 
 	// 2D projection border
 	sborder.upload_matrix("view",tc2d.view2D);
@@ -419,7 +418,7 @@ void Healthbar::render()
 	hpbuffer.bind();
 	hpbuffer.bind_index();
 	hpbuffer.upload_indices(hpswap.upload);
-	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size()/PT_REPEAT);
+	glDrawArraysInstanced(GL_TRIANGLES,0,6,hpswap.upload.size());
 
 	// setup & draw border
 	sborder.enable();
@@ -428,7 +427,7 @@ void Healthbar::render()
 	brdbuffer.upload_indices(hpswap.upload);
 	sborder.upload_int("cnt_height",hpswap.max_height);
 	sborder.upload_int("brd_space",BORDER_CLEARING);
-	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size()/BRD_REPEAT);
+	glDrawArraysInstanced(GL_LINES,0,8,hpswap.upload.size());
 
 	// setup & draw splice
 	ssplice.enable();
@@ -462,8 +461,8 @@ void Healthbar::floating_nanobars()
 	for (int i=0+1000*((uint8_t)frdy<2);i<hpswap.mntm.size();i++) {
 
 		// apply momentum to position
-		hpswap.upload[i*PT_REPEAT].floating_x += hpswap.mntm[i].x;
-		hpswap.upload[i*PT_REPEAT].floating_y += hpswap.mntm[i].y;
+		hpswap.upload[i].floating_x += hpswap.mntm[i].x;
+		hpswap.upload[i].floating_y += hpswap.mntm[i].y;
 
 		// mellow momentum through appearance of resistance
 		hpswap.mntm[i] *= glm::vec2(NBMOMENTUM_RESISTANCE);
