@@ -12,7 +12,7 @@ void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	int32_t rnd_edge_dwn = 0,rnd_edge_up = 0;
 
 	// memory allocation
-	size_t iterations = hpswap.dest_pos[ihp].size();
+	size_t iterations = hpswap.dest[ihp].size();
 	hpswap.upload = std::vector<HBarIndexUpload>(iterations);
 	hpswap.mntm = std::vector<glm::vec2>(iterations,glm::vec2(0));
 
@@ -20,14 +20,14 @@ void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	for (int i=0;i<iterations;i++) {
 
 		// positioning
-		hpswap.upload[i].offset_x = hpswap.dest_pos[ihp][i];
+		hpswap.upload[i].offset_x = hpswap.dest[ihp][i].position;
 
 		// left edge transformation for current nanobar
 		hpswap.upload[i].edgemod_left_lower = rnd_edge_dwn;
 		hpswap.upload[i].edgemod_left_upper = rnd_edge_up;
 
 		// generate new healthbar cut if not at last nanobar
-		bool inner_edge = i!=(hpswap.dest_pos[ihp].size()-1);
+		bool inner_edge = i!=(hpswap.dest[ihp].size()-1);
 		rnd_edge_dwn = (rand()%30-15)*inner_edge,rnd_edge_up = (rand()%30-15)*inner_edge;
 
 		// right edge transformation for current nanobar
@@ -35,7 +35,7 @@ void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 		hpswap.upload[i].edgemod_right_upper = rnd_edge_up;
 
 		// upload tail specifying width target after fill
-		hpswap.upload[i].target_width = hpswap.dest_wdt[ihp][i];
+		hpswap.upload[i].target_width = hpswap.dest[ihp][i].width;
 	}
 	frdy++;
 }
@@ -75,7 +75,7 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 {
 	// defining splice index upload
-	hpswap.upload_splice = std::vector<HBarSpliceIndexUpload>(hpswap.upload.size());
+	hpswap.upload_splice = std::vector<HBarSpliceIndexUpload>(hpswap.upload.size()-1);
 	for (int i=1;i<hpswap.upload.size();i++) {
 
 		// calculate vector continuation
@@ -144,8 +144,8 @@ void count_phases(uint8_t& frdy,HPBarSwap& hpswap)
 	hpswap.anim_tick += POT*(hpswap.hpbar_itr>0);
 
 	// increase phase counter
-	uint8_t split_ticks = POT/(hpswap.dest_pos.size()+2);  // ticks after scaling is reversed
-	uint8_t aprog = hpswap.dest_pos.size()*((hpswap.anim_tick+split_ticks)/POT);
+	uint8_t split_ticks = POT/(hpswap.dest.size()+2);  // ticks after scaling is reversed
+	uint8_t aprog = hpswap.dest.size()*((hpswap.anim_tick+split_ticks)/POT);
 	std::string pprefix = (hpswap.anim_tick>=POT) ? std::to_string(hpswap.hpbar_itr+1)+'/' : "";
 	hpswap.phcnt.clear();
 	hpswap.phcnt.add((pprefix+std::to_string(aprog)).c_str(),glm::vec2(0,0));
@@ -216,7 +216,7 @@ void ready_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 	bool hpbar_empty = hpswap.target_itr<0;
 	hpswap.target_itr += hpbar_empty;
 	hpswap.hpbar_itr += hpbar_empty;
-	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest_pos.size());
+	frdy += hpbar_empty+(hpswap.hpbar_itr>=hpswap.dest.size());
 }
 
 /*
@@ -365,6 +365,7 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 
 	// calculate render specifications
 	uint8_t t_index = 0;
+	hpswap.dest = std::vector<std::vector<HBarDestination>>(phases.size());
 	for (int i=0;i<phases.size();i++) {
 
 		// calculate current phases combined hp
@@ -372,19 +373,18 @@ Healthbar::Healthbar(glm::vec2 pos,uint16_t width,uint16_t height,std::vector<in
 		for (int j=0;j<phases[i];j++)
 			target_hp += hp[t_index+j];
 
+		// memory allocation
+		hpswap.dest[i] = std::vector<HBarDestination>(phases[i]);
+
 		// calculate positions and widths
 		std::vector<float> t_pos,t_wdt;
 		float draw_cursor = 0;
 		for (int j=0;j<phases[i];j++) {
-			t_pos.push_back(draw_cursor);
+			hpswap.dest[i][j].position = draw_cursor;
 			float t_width = (hp[t_index+j]/target_hp)*width;
-			t_wdt.push_back(t_width);
+			hpswap.dest[i][j].width = t_width;
 			draw_cursor += t_width;
 		}
-
-		// save list to upload space
-		hpswap.dest_pos.push_back(t_pos);
-		hpswap.dest_wdt.push_back(t_wdt);
 
 		// increase index above phase counter
 		t_index += phases[i];

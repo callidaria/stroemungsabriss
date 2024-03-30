@@ -30,7 +30,7 @@ constexpr uint8_t SPLICE_TICKS = 30;	// animation tick length for splicing anima
 
 // physics
 constexpr float NBMOMENTUM_RESISTANCE = .9f;	// mellow the nanobar momentum after application
-constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback constance from slice motion
+constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback from slice motion
 constexpr float ACC_CLEAREDBAR = .25f;			// acceleration of cleared nanobars
 constexpr float RED_DISCONSPLC = .1f;			// despawn reduction of disconnected splices
 
@@ -47,6 +47,12 @@ enum HBState
 	CLEAR			// attached boss clear
 };
 // TODO: join both preparation stages, if possible
+
+struct HBarDestination
+{
+	float position;
+	float width;
+};
 
 struct HBarIndexUpload
 {
@@ -69,8 +75,7 @@ struct HBarSpliceIndexUpload
 // components for nanobar placement, filling and other information
 struct HPBarSwap
 {
-	std::vector<std::vector<float>> dest_pos;			// all destination positions per combined bar
-	std::vector<std::vector<float>> dest_wdt;			// all destination widths per combined bar
+	std::vector<std::vector<HBarDestination>> dest;		// all destinations per combined bar
 	std::vector<HBarIndexUpload> upload;				// indexing upload data. pattern: (p,w,d,p,w,d,...)
 	std::vector<HBarSpliceIndexUpload> upload_splice;	// upload data for healthbar splicers
     int8_t target_itr = 0;								// iteration of target bar modification
