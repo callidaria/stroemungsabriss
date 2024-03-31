@@ -240,6 +240,8 @@ void Toolbox::create_sprite_canvas(std::vector<float>& vs,uint16_t ofs,glm::vec2
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs] = 1.f;
 }
+// TODO: change offset to prerasterized value for all canavs creations.
+// most of the usages just resize their vector and return an already rasterized offset value through size
 
 /*
 	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)
@@ -253,7 +255,7 @@ void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,uint16_t ofs
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs] = 1.f;
 }
 
 /*
