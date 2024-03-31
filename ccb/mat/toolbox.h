@@ -38,6 +38,10 @@ constexpr double CONVERSION_MULT_MILLISECONDS = .000001;
 constexpr double CONVERSION_MULT_SECONDS = .000000001;
 
 // pattern
+constexpr uint8_t TOOLBOX_SPRITE_LOAD_REPEAT = 4;
+constexpr uint8_t TOOLBOX_SPRITE_ELEMENT_REPEAT = 6;
+constexpr uint8_t TOOLBOX_SPRITE_VERTEX_REPEAT = 4*TOOLBOX_SPRITE_LOAD_REPEAT;
+constexpr uint8_t TOOLBOX_SPRITE_TRIANGLE_REPEAT = 6*TOOLBOX_SPRITE_LOAD_REPEAT;
 constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
 
 
@@ -76,9 +80,8 @@ public:
 	static void flush_debug_logging(DebugLogData dld);
 
 	// vertex setup
-	static std::vector<float> create_sprite_canvas();
-	static std::vector<float> create_sprite_canvas(glm::vec2 pos,float width,float height);
-	static std::vector<float> create_sprite_canvas_triangled(glm::vec2 pos,float width,float height);
+	static void create_sprite_canvas(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height);
+	static void create_sprite_canvas_triangled(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height);
 	// TODO: find a way to create function overloads, that directly add to a vertex array!
 
 	// graphical setup
@@ -99,6 +102,19 @@ public:
 	static void set_texture_parameter_clamp_to_edge();
 	static void set_texture_parameter_clamp_to_border();
 	static void set_texture_parameter_texture_repeat();
+
+	// inline definition
+	static inline std::vector<float> create_sprite_canvas() {
+		return {
+			-1.0f,	1.0f,	0.0f,	1.0f,
+			-1.0f,	-1.0f,	0.0f,	0.0f,
+			1.0f,	-1.0f,	1.0f,	0.0f,
+			-1.0f,	1.0f,	0.0f,	1.0f,
+			1.0f,	-1.0f,	1.0f,	0.0f,
+			1.0f,	1.0f,	1.0f,	1.0f
+		};
+	}
+	// TODO: find out if vectorcopy is optimized away when inline
 
 private:
 

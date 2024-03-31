@@ -48,21 +48,25 @@ void RendererI::load(float &progress,float pseq)
 	// setup progress bar
 	float ptarget = (pseq*.5f)/(il.size()+ial.size());
 
+	// memory allocation for vertices
+	size_t t_vsize = vertices.size();
+	vertices.resize(t_vsize+(il.size()+ial.size())*TOOLBOX_SPRITE_TRIANGLE_REPEAT);
+	t_vsize /= TOOLBOX_SPRITE_TRIANGLE_REPEAT;
+
 	// generate sprite vertices
 	for (int i=0;i<il.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(il[i].position,
-				il[i].width,il[i].height);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize+i,il[i].position,il[i].width,il[i].height);
 		progress += ptarget;
 	}
 
 	// generate animation vertices
 	for (int i=0;i<ial.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(ial[i].position,
-				ial[i].width,ial[i].height);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		uint16_t k = il.size()+i;
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize+k,ial[i].position,ial[i].width,ial[i].height);
 		progress += ptarget;
 	}
+	// FIXME: untested after new memory management
+	// FIXME: similarly questionable architecture as in renderer2d.cpp
 
 	// upload to buffer
 	buffer.bind();

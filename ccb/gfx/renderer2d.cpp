@@ -55,21 +55,29 @@ void Renderer2D::load(float &progress,float pseq)
 	// setup progress bar
 	uint32_t ptarget = (pseq*.5f)/(sl.size()+al.size());
 
+	// memory allocation for vertices and elements
+	size_t t_vsize = vertices.size(), t_esize = elements.size();
+	vertices.resize(t_vsize+(sl.size()+al.size())*TOOLBOX_SPRITE_VERTEX_REPEAT);
+	elements.resize(t_esize+(sl.size()+al.size())*TOOLBOX_SPRITE_ELEMENT_REPEAT);
+	t_vsize /= TOOLBOX_SPRITE_VERTEX_REPEAT, t_esize /= TOOLBOX_SPRITE_ELEMENT_REPEAT;
+
 	// write sprite vertex values to upload list
-	for (int i=0;i<sl.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas(sl[i].pos,sl[i].sclx,sl[i].scly);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
-		Toolbox::generate_elements(i,elements);
+	for (uint16_t i=0;i<sl.size();i++) {
+		Toolbox::create_sprite_canvas(vertices,t_vsize+i,sl[i].pos,sl[i].sclx,sl[i].scly);
+		Toolbox::generate_elements(t_esize+i,elements);
 		progress += ptarget;
 	}
 
 	// write animation vertex values to upload list
-	for(int i=0;i<al.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas(al[i].pos,al[i].sclx,al[i].scly);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
-		Toolbox::generate_elements(i+sl.size(),elements);
+	for (uint16_t i=0;i<al.size();i++) {
+		uint16_t k = sl.size()+i;
+		Toolbox::create_sprite_canvas(vertices,t_vsize+k,al[i].pos,al[i].sclx,al[i].scly);
+		Toolbox::generate_elements(t_esize+k,elements);
 		progress += ptarget;
 	}
+	// FIXME: extremely questionable architecture:
+	//		it is expected that every load adds to current vertex array, but
+	//		will multi load all sprites that are created during more than one load?
 
 	// upload to buffers
 	buffer.bind();

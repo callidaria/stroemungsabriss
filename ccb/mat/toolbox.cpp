@@ -222,18 +222,6 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 */
 
 /*
-	create_sprite_canvas() -> std::vector<float> (static)
-	returns: primitive canvas vertices without camera ready coordinate system and element draw
-*/
-std::vector<float> Toolbox::create_sprite_canvas()
-{
-	std::vector<float> out = {
-		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,
-		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f
-	}; return out;
-}
-
-/*
 	PARAMETER DEFINITIONS:
 	pos: origin position of canvas
 	width: vertex distanced width of canvas
@@ -244,25 +232,28 @@ std::vector<float> Toolbox::create_sprite_canvas()
 	create_sprite_canvas(vec2,float,float) -> std::vector<float> (static)
 	returns: created canvas vertices to later base 2D object generation on
 */
-std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height)
 {
-	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y,0.0f,1.0f
-	}; return out;
+	ofs *= TOOLBOX_SPRITE_VERTEX_REPEAT;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs] = 1.f;
 }
-// FIXME: not intuitive if vertices returned are expecting element buffer
 
 /*
 	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)
 	returns: the same canvas as create_sprite_canvas, but without relying on element buffer
 */
-std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height)
 {
-	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y,1.0f,1.0f,pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y+height,0.0f,0.0f,pos.x,pos.y,0.0f,1.0f,
-	}; return out;
+	ofs *= TOOLBOX_SPRITE_TRIANGLE_REPEAT;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
 
 /*
@@ -340,13 +331,14 @@ void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 	i: objects index to use to rasterize element value generation
 	ls: element list input to add generated elements to
 	purpose: generate buffer elements based on object list index
+	NOTE: expects memory to be allocated
 */
 void Toolbox::generate_elements(uint16_t i,std::vector<uint32_t>& ls)
 {
-	ls.push_back(i*4), ls.push_back(i*4+2), ls.push_back(i*4+1);  // map first triangle
-	ls.push_back(i*4+2), ls.push_back(i*4), ls.push_back(i*4+3);  // map second triangle
+	uint32_t k0 = i*TOOLBOX_SPRITE_ELEMENT_REPEAT, k1 = i*TOOLBOX_SPRITE_LOAD_REPEAT;
+	ls[k0++] = k1, ls[k0++] = k1+2, ls[k0++] = k1+1;
+	ls[k0++] = k1+2, ls[k0++] = k1, ls[k0] = k1+3;
 }
-// TODO: change element storage
 
 /*
 	set_texture_parameter_linear_mipmap() -> void (static)
