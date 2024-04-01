@@ -131,8 +131,9 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	Camera2D cam2D = Camera2D(1280.0f,720.0f);
 
 	// loading bar setup
+	size_t t_vsize = 0;
 	std::vector<float> ld_canvas = std::vector<float>(TOOLBOX_SPRITE_TRIANGLE_REPEAT);
-	Toolbox::create_sprite_canvas_triangled(ld_canvas,0,glm::vec2(0),700,10);
+	Toolbox::create_sprite_canvas_triangled(ld_canvas,t_vsize,glm::vec2(0),700,10);
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);

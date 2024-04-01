@@ -59,7 +59,6 @@ uint16_t ParticleSystem::add(const char* panim,uint8_t rows,uint8_t cols,uint16_
 	float hs = scl*.5f;
 	size_t t_vsize = verts.size();
 	verts.resize(verts.size()+TOOLBOX_SPRITE_TRIANGLE_REPEAT);
-	t_vsize /= TOOLBOX_SPRITE_TRIANGLE_REPEAT;
 	Toolbox::create_sprite_canvas_triangled(verts,t_vsize,glm::vec2(-hs,-hs),scl,scl);
 
 	// save entity

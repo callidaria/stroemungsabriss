@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.7 DEV
 
 ### optimizations:
+- memory optimizations across the board, avoiding misinformed vector usage decisions
 - bitwise operations replacing some division and modulo operators
 - removed unnecessary calculations from montecarlo shader
 
@@ -216,5 +217,5 @@ Worktime: 120h
 - Worktime v0.0.7:
   + 281: 30min
   + 258: 29min
-  + 253: 21h 57min
+  + 253: 22h 42min
 - Total Code Lines: 17.485

@@ -59,25 +59,24 @@ void Renderer2D::load(float &progress,float pseq)
 	size_t t_vsize = vertices.size(), t_esize = elements.size();
 	vertices.resize(t_vsize+(sl.size()+al.size())*TOOLBOX_SPRITE_VERTEX_REPEAT);
 	elements.resize(t_esize+(sl.size()+al.size())*TOOLBOX_SPRITE_ELEMENT_REPEAT);
-	t_vsize /= TOOLBOX_SPRITE_VERTEX_REPEAT, t_esize /= TOOLBOX_SPRITE_ELEMENT_REPEAT;
 
 	// write sprite vertex values to upload list
+	size_t i_velem = t_vsize/TOOLBOX_SPRITE_LOAD_REPEAT;
 	for (uint16_t i=0;i<sl.size();i++) {
-		Toolbox::create_sprite_canvas(vertices,t_vsize+i,sl[i].pos,sl[i].sclx,sl[i].scly);
-		Toolbox::generate_elements(t_esize+i,elements);
+		Toolbox::create_sprite_canvas(vertices,t_vsize,sl[i].pos,sl[i].sclx,sl[i].scly);
+		Toolbox::generate_elements(t_esize,i_velem,elements);
 		progress += ptarget;
 	}
 
 	// write animation vertex values to upload list
 	for (uint16_t i=0;i<al.size();i++) {
-		uint16_t k = sl.size()+i;
-		Toolbox::create_sprite_canvas(vertices,t_vsize+k,al[i].pos,al[i].sclx,al[i].scly);
-		Toolbox::generate_elements(t_esize+k,elements);
+		Toolbox::create_sprite_canvas(vertices,t_vsize,al[i].pos,al[i].sclx,al[i].scly);
+		Toolbox::generate_elements(t_esize,i_velem,elements);
 		progress += ptarget;
 	}
 	// FIXME: extremely questionable architecture:
-	//		it is expected that every load adds to current vertex array, but
-	//		will multi load all sprites that are created during more than one load?
+	// it is expected that every load adds to current vertex array, but
+	// will multi load all sprites that are created during more than one load?
 
 	// upload to buffers
 	buffer.bind();

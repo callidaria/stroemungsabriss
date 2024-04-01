@@ -37,9 +37,10 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	slct_shader.upload_camera(cam2D);
 
 	// compile conversation visualization vertices
+	size_t t_vsize = 0;
 	std::vector<float> moodconv_verts = std::vector<float>(2*TOOLBOX_SPRITE_TRIANGLE_REPEAT);
-	Toolbox::create_sprite_canvas_triangled(moodconv_verts,0,glm::vec2(0,50),100,400);
-	Toolbox::create_sprite_canvas_triangled(moodconv_verts,1,glm::vec2(1100,0),180,720);
+	Toolbox::create_sprite_canvas_triangled(moodconv_verts,t_vsize,glm::vec2(0,50),100,400);
+	Toolbox::create_sprite_canvas_triangled(moodconv_verts,t_vsize,glm::vec2(1100,0),180,720);
 
 	// conversation mood visualizations
 	mood_buffer.bind();

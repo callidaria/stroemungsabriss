@@ -232,30 +232,26 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 	create_sprite_canvas(vec2,float,float) -> std::vector<float> (static)
 	returns: created canvas vertices to later base 2D object generation on
 */
-void Toolbox::create_sprite_canvas(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
 {
-	ofs *= TOOLBOX_SPRITE_VERTEX_REPEAT;
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs] = 1.f;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
-// TODO: change offset to prerasterized value for all canavs creations.
-// most of the usages just resize their vector and return an already rasterized offset value through size
 
 /*
 	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)
 	returns: the same canvas as create_sprite_canvas, but without relying on element buffer
 */
-void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,uint16_t ofs,glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
 {
-	ofs *= TOOLBOX_SPRITE_TRIANGLE_REPEAT;
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs] = 1.f;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
 
 /*
@@ -335,11 +331,11 @@ void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 	purpose: generate buffer elements based on object list index
 	NOTE: expects memory to be allocated
 */
-void Toolbox::generate_elements(uint16_t i,std::vector<uint32_t>& ls)
+void Toolbox::generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& ls)
 {
-	uint32_t k0 = i*TOOLBOX_SPRITE_ELEMENT_REPEAT, k1 = i*TOOLBOX_SPRITE_LOAD_REPEAT;
-	ls[k0++] = k1, ls[k0++] = k1+2, ls[k0++] = k1+1;
-	ls[k0++] = k1+2, ls[k0++] = k1, ls[k0] = k1+3;
+	ls[k0++] = k1,		ls[k0++] = k1+2,	ls[k0++] = k1+1,
+	ls[k0++] = k1+2,	ls[k0++] = k1,		ls[k0++] = k1+3;
+	k1 += TOOLBOX_SPRITE_LOAD_REPEAT;;
 }
 
 /*

@@ -51,18 +51,16 @@ void RendererI::load(float &progress,float pseq)
 	// memory allocation for vertices
 	size_t t_vsize = vertices.size();
 	vertices.resize(t_vsize+(il.size()+ial.size())*TOOLBOX_SPRITE_TRIANGLE_REPEAT);
-	t_vsize /= TOOLBOX_SPRITE_TRIANGLE_REPEAT;
 
 	// generate sprite vertices
 	for (int i=0;i<il.size();i++) {
-		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize+i,il[i].position,il[i].width,il[i].height);
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize,il[i].position,il[i].width,il[i].height);
 		progress += ptarget;
 	}
 
 	// generate animation vertices
 	for (int i=0;i<ial.size();i++) {
-		uint16_t k = il.size()+i;
-		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize+k,ial[i].position,ial[i].width,ial[i].height);
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize,ial[i].position,ial[i].width,ial[i].height);
 		progress += ptarget;
 	}
 	// FIXME: untested after new memory management
