@@ -63,14 +63,6 @@ private:
 
 	// bullet physics
 	std::vector<BulletCluster> clusters;
-	/*
-	std::vector<uint16_t> c_width;				// widths of each cluster
-	std::vector<uint16_t> c_height;				// heights of each cluster
-	std::vector<uint16_t> bCount;				// bullet count to render
-	std::vector<uint32_t> countCaps;			// maximum bullet capacity loop cutoff
-	std::vector<std::vector<glm::vec2>> dirs;	// lists of all bullet directions
-	std::vector<std::vector<int32_t>> ts;		// tick counter list
-	*/
 };
 
 #endif

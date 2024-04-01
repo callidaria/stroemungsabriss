@@ -94,10 +94,6 @@ void CasinoSpike::render()
 	Core::gCamera3D.pos = cp_pos, Core::gCamera3D.front = cp_dir;
 	Core::gCamera3D.update();
 
-	// camera update
-	/*m_setRigs->cam3D[0].pos = cp_pos, m_setRigs->cam3D[0].front = cp_dir;
-	m_setRigs->cam3D[0].update();*/
-
 	// update physics
 	for (uint8_t i=0;i<4;i++) {
 		m_ccbf->r3d->ml[index_r3D+2+i].model

@@ -27,8 +27,6 @@ public:
 	// upload
 	void upload_elements(unsigned int* elements,size_t esize);
 	void upload_elements(std::vector<unsigned int> ie);
-	/*void upload_indices(std::vector<float> is);
-	void upload_indices(float* is,size_t issize);*/
 
 	// upload vertices
 	template<typename T> void upload_vertices(T* vertices,size_t vsize) {

@@ -202,12 +202,12 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	abuffer.bind();
 	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
-	as3d.def_attributeF("position",3,0,ANIM_VERTEX_REPEAT),
-			as3d.def_attributeF("texCoords",2,3,ANIM_VERTEX_REPEAT),
-			as3d.def_attributeF("normals",3,5,ANIM_VERTEX_REPEAT),
-			as3d.def_attributeF("tangent",3,8,ANIM_VERTEX_REPEAT),
-			as3d.def_attributeF("boneIndex",4,11,ANIM_VERTEX_REPEAT),
-			as3d.def_attributeF("boneWeight",4,15,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("position",3,0,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("texCoords",2,3,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("normals",3,5,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("tangent",3,8,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneIndex",4,11,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneWeight",4,15,ANIM_VERTEX_REPEAT);
 	for (auto am : mal) am.texture();
 	as3d.upload_int("colour_map",0),as3d.upload_int("normal_map",1),
 			as3d.upload_int("material_map",2),as3d.upload_int("emission_map",3);
