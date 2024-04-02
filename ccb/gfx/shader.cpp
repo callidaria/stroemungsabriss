@@ -116,7 +116,12 @@ void Shader::def_indexF(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap
 }
 
 /*
-	TODO
+	!O(1) /+load -> (public)
+	purpose: define float index variable
+	\param vname: index variable name
+	\param dim: upload dimension of variable
+	\param isize: index upload pattern range until repeat
+	\param offset: variable value offset within upload pattern range
 */
 void Shader::def_irregular_indexF(const char* vname,uint8_t dim,size_t isize,size_t offset)
 {
@@ -185,7 +190,10 @@ int32_t Shader::handle_attrib_location_by_name(const char* name)
 }
 
 /*
-	TODO
+	!O(1) /function -> (private)
+	purpose: get attribute location in shader program by variable name
+	\param name: variable name
+	\returns shader attribute location
 */
 int32_t Shader::handle_index_location_by_name(const char* name)
 {
