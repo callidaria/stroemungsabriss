@@ -178,48 +178,69 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 {
 	// load meshes
+	// mesh vertex upload & mapping
 	buffer.bind();
 	buffer.upload_vertices(v_mesh);
 	s3d.compile3d("./shader/gvertex.shader","./shader/gfragment.shader");
+
+	// mesh texturing & coordinate system
 	for (auto im : ml) im.texture();
-	s3d.upload_int("tex",0),s3d.upload_int("sm",1),s3d.upload_int("emit",2),s3d.upload_int("nmap",3);
+	s3d.upload_int("tex",0);
+	s3d.upload_int("sm",1);
+	s3d.upload_int("emit",2);
+	s3d.upload_int("nmap",3);
 	s3d.upload_camera(cam3d);
 
 	// load instances
+	// instance vertex upload & mapping
 	ibuffer.bind();
 	ibuffer.upload_vertices(v_instance);
 	is3d.compile3d("./shader/givertex.shader","./shader/gfragment.shader");
 	ibuffer.bind_index();
-	is3d.def_indexF("offset",3,0,R3D_INDEX_REPEAT);
-	is3d.def_indexF("rotation_sin",3,3,R3D_INDEX_REPEAT);
-	is3d.def_indexF("rotation_cos",3,6,R3D_INDEX_REPEAT);
+	is3d.def_indexF("offset",3,INST_POSITION_X,INST_VERTEX_REPEAT);
+	is3d.def_indexF("rotation_sin",3,INST_SINROT_X,INST_VERTEX_REPEAT);
+	is3d.def_indexF("rotation_cos",3,INST_COSROT_X,INST_VERTEX_REPEAT);
+
+	// instance texturing & coordinate system
 	for (auto im : iml) im.texture();
-	is3d.upload_int("tex",0),is3d.upload_int("sm",1),
-			is3d.upload_int("emit",2),is3d.upload_int("nmap",3);
+	is3d.upload_int("tex",0);
+	is3d.upload_int("sm",1);
+	is3d.upload_int("emit",2);
+	is3d.upload_int("nmap",3);
 	is3d.upload_camera(cam3d);
 
 	// load animations
+	// animation vertex upload & mapping
 	abuffer.bind();
 	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/vanimation.shader","./shader/gpfragment.shader");
-	as3d.def_attributeF("position",3,0,ANIM_VERTEX_REPEAT);
-	as3d.def_attributeF("texCoords",2,3,ANIM_VERTEX_REPEAT);
-	as3d.def_attributeF("normals",3,5,ANIM_VERTEX_REPEAT);
-	as3d.def_attributeF("tangent",3,8,ANIM_VERTEX_REPEAT);
-	as3d.def_attributeF("boneIndex",4,11,ANIM_VERTEX_REPEAT);
-	as3d.def_attributeF("boneWeight",4,15,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("position",3,ANIM_POSITION_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("texCoords",2,ANIM_TCOORD_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("normals",3,ANIM_NORMALS_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("tangent",3,ANIM_TANGENT_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneIndex",4,ANIM_BONE0,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneWeight",4,ANIM_WEIGHT0,ANIM_VERTEX_REPEAT);
+
+	// animation texturing & coordinate system
 	for (auto am : mal) am.texture();
-	as3d.upload_int("colour_map",0),as3d.upload_int("normal_map",1),
-			as3d.upload_int("material_map",2),as3d.upload_int("emission_map",3);
+	as3d.upload_int("colour_map",0);
+	as3d.upload_int("normal_map",1);
+	as3d.upload_int("material_map",2);
+	as3d.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
 
 	// load physical based meshes
+	// physical vertex upload & mapping
 	pbuffer.bind();
 	pbuffer.upload_vertices(v_pbm);
 	pbms.compile3d("shader/gvertex.shader","shader/gpfragment.shader");
+
+	// physical texturing & coordinate system
 	for (auto im : pml) im.texture();
-	pbms.upload_int("colour_map",0),pbms.upload_int("normal_map",1),
-			pbms.upload_int("material_map",2),pbms.upload_int("emission_map",3);
+	pbms.upload_int("colour_map",0);
+	pbms.upload_int("normal_map",1),
+	pbms.upload_int("material_map",2);
+	pbms.upload_int("emission_map",3);
 	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
@@ -686,7 +707,7 @@ void Renderer3D::render_pmsh(uint16_t i)
 */
 void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 {
-	uint16_t rid = mid*R3D_INDEX_REPEAT;
+	uint16_t rid = mid*INST_VERTEX_REPEAT;
 	mesh_indices[id][rid] = pos.x,mesh_indices[id][rid+1] = pos.y,mesh_indices[id][rid+2] = pos.z;
 }
 
@@ -698,7 +719,7 @@ void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 void Renderer3D::inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot)
 {
 	// rasterize id jumps
-	uint16_t rid = mid*R3D_INDEX_REPEAT;
+	uint16_t rid = mid*INST_VERTEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
 	mesh_indices[id][rid+3] = glm::sin(rot.x),mesh_indices[id][rid+6] = glm::cos(rot.x),

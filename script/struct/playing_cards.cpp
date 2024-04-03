@@ -16,12 +16,12 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 
 	// convert card object vertices into the format compatible with card shader
 	// memory allocation
-	size_t vertsize = overts.size()/TOOLBOX_OBJECT_LOAD_REPEAT;
+	size_t vertsize = overts.size()/PATTERN_OBJECT_LOAD_REPEAT;
 	std::vector<float> cverts = std::vector<float>(vertsize*CARD_VERTEX_REPEAT*2);
 
 	// front side
 	for (uint32_t i=0;i<vertsize;i++) {
-		uint32_t k0 = i*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
+		uint32_t k0 = i*CARD_VERTEX_REPEAT, k1 = i*PATTERN_OBJECT_LOAD_REPEAT;
 
 		// correlate position
 		cverts[k0+CARD_POSITION_X] = overts[k1];
@@ -43,7 +43,7 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 
 	// back side
 	for (uint32_t i=0;i<vertsize;i++) {
-		uint32_t k0 = (i+vertsize)*CARD_VERTEX_REPEAT, k1 = i*TOOLBOX_OBJECT_LOAD_REPEAT;
+		uint32_t k0 = (i+vertsize)*CARD_VERTEX_REPEAT, k1 = i*PATTERN_OBJECT_LOAD_REPEAT;
 
 		// correlate position
 		cverts[k0+CARD_POSITION_X] = -overts[k1];
@@ -81,11 +81,11 @@ PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::v
 	// card instancing: single draw call for all playing cards
 	bfr.add_buffer();
 	bfr.bind_index();
-	sdr.def_indexF("tofs",3,0,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF("i_tex",2,3,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF("rotation_sin",3,5,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF("rotation_cos",3,8,CARDSYSTEM_INDEX_REPEAT);
-	sdr.def_indexF("deckID",1,11,CARDSYSTEM_INDEX_REPEAT);
+	sdr.def_indexF("tofs",3,ICARD_POSITION_X,CARD_INSTANCE_REPEAT);
+	sdr.def_indexF("i_tex",2,ICARD_TEXTURE_X,CARD_INSTANCE_REPEAT);
+	sdr.def_indexF("rotation_sin",3,ICARD_SINROT_X,CARD_INSTANCE_REPEAT);
+	sdr.def_indexF("rotation_cos",3,ICARD_COSROT_X,CARD_INSTANCE_REPEAT);
+	sdr.def_indexF("deckID",1,ICARD_DECK,CARD_INSTANCE_REPEAT);
 }
 // TODO: compare performance between card object and cutouts with render queue
 

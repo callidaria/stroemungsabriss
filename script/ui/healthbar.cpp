@@ -3,7 +3,9 @@
 typedef void (*healthbar_state)(uint8_t&,HPBarSwap&);
 
 /*
-	TODO
+	!O(n)m .healthbar destinations /function -> healthbar_state (local,static)
+	purpose: memory allocation and data preparation for healthbar filling animation.
+		this will be executed once and transitioned immediately into fill_hpbar for the next loop cycle.
 */
 void prepare_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 {
@@ -70,7 +72,8 @@ void fill_hpbar(uint8_t& frdy,HPBarSwap& hpswap)
 }
 
 /*
-	TODO
+	!O(n)m .amount of splits between nanobars /function -> healthbar_state (local,static)
+	purpose: allocate memory and prepare data for nanobar splice animation
 */
 void prepare_splices(uint8_t& frdy,HPBarSwap& hpswap)
 {

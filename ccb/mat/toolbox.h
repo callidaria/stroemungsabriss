@@ -23,6 +23,7 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+
 // math constants
 constexpr double MATH_CARTESIAN_XRANGE = 1280.f;
 constexpr double MATH_CARTESIAN_YRANGE = 720.f;
@@ -38,11 +39,11 @@ constexpr double CONVERSION_MULT_MILLISECONDS = .000001;
 constexpr double CONVERSION_MULT_SECONDS = .000000001;
 
 // pattern
-constexpr uint8_t TOOLBOX_SPRITE_LOAD_REPEAT = 4;
-constexpr uint8_t TOOLBOX_SPRITE_ELEMENT_REPEAT = 6;
-constexpr uint8_t TOOLBOX_SPRITE_VERTEX_REPEAT = 4*TOOLBOX_SPRITE_LOAD_REPEAT;
-constexpr uint8_t TOOLBOX_SPRITE_TRIANGLE_REPEAT = 6*TOOLBOX_SPRITE_LOAD_REPEAT;
-constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
+constexpr uint8_t PATTERN_SPRITE_LOAD_REPEAT = 4;
+constexpr uint8_t PATTERN_SPRITE_ELEMENT_REPEAT = 6;
+constexpr uint8_t PATTERN_SPRITE_VERTEX_REPEAT = 4*PATTERN_SPRITE_LOAD_REPEAT;
+constexpr uint8_t PATTERN_SPRITE_TRIANGLE_REPEAT = 6*PATTERN_SPRITE_LOAD_REPEAT;
+constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
 
 
 // debug timing keys to record individual loadtimes for task sequences

@@ -132,7 +132,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 
 	// loading bar setup
 	size_t t_vsize = 0;
-	std::vector<float> ld_canvas = std::vector<float>(TOOLBOX_SPRITE_TRIANGLE_REPEAT);
+	std::vector<float> ld_canvas = std::vector<float>(PATTERN_SPRITE_TRIANGLE_REPEAT);
 	Toolbox::create_sprite_canvas_triangled(ld_canvas,t_vsize,glm::vec2(0),700,10);
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();

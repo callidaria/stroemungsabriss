@@ -57,11 +57,11 @@ void Renderer2D::load(float &progress,float pseq)
 
 	// memory allocation for vertices and elements
 	size_t t_vsize = vertices.size(), t_esize = elements.size();
-	vertices.resize(t_vsize+(sl.size()+al.size())*TOOLBOX_SPRITE_VERTEX_REPEAT);
-	elements.resize(t_esize+(sl.size()+al.size())*TOOLBOX_SPRITE_ELEMENT_REPEAT);
+	vertices.resize(t_vsize+(sl.size()+al.size())*PATTERN_SPRITE_VERTEX_REPEAT);
+	elements.resize(t_esize+(sl.size()+al.size())*PATTERN_SPRITE_ELEMENT_REPEAT);
 
 	// write sprite vertex values to upload list
-	size_t i_velem = t_vsize/TOOLBOX_SPRITE_LOAD_REPEAT;
+	size_t i_velem = t_vsize/PATTERN_SPRITE_LOAD_REPEAT;
 	for (uint16_t i=0;i<sl.size();i++) {
 		Toolbox::create_sprite_canvas(vertices,t_vsize,sl[i].pos,sl[i].sclx,sl[i].scly);
 		Toolbox::generate_elements(t_esize,i_velem,elements);

@@ -17,9 +17,6 @@
 #include "../frm/gbuffer.h"
 #include "../fcn/buffer.h"
 
-// structure
-constexpr uint8_t R3D_INDEX_REPEAT = 9;
-
 
 enum InstVID {
 	INST_POSITION_X,INST_POSITION_Y,INST_POSITION_Z,

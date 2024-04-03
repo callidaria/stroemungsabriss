@@ -50,7 +50,7 @@ void RendererI::load(float &progress,float pseq)
 
 	// memory allocation for vertices
 	size_t t_vsize = vertices.size();
-	vertices.resize(t_vsize+(il.size()+ial.size())*TOOLBOX_SPRITE_TRIANGLE_REPEAT);
+	vertices.resize(t_vsize+(il.size()+ial.size())*PATTERN_SPRITE_TRIANGLE_REPEAT);
 
 	// generate sprite vertices
 	for (int i=0;i<il.size();i++) {

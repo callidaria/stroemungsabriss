@@ -13,6 +13,7 @@
 #include "../../ccb/mat/camera2d.h"
 #include "../../ccb/gfx/shader.h"
 
+
 // text related constants
 constexpr uint8_t TEXT_MV = 25;							// inwards move offset for name and counter
 constexpr int8_t TEXT_DV = -7;							// y-axis dive of name and counter display
@@ -33,6 +34,7 @@ constexpr float NBMOMENTUM_RESISTANCE = .9f;	// mellow the nanobar momentum afte
 constexpr float SLICE_BLOWBACK = .15f;			// momentum blowback from slice motion
 constexpr float ACC_CLEAREDBAR = .25f;			// acceleration of cleared nanobars
 constexpr float RED_DISCONSPLC = .1f;			// despawn reduction of disconnected splices
+
 
 // states of healthbar
 enum HBState

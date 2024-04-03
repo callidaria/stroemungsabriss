@@ -266,7 +266,7 @@ void Toolbox::generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e)
 {
 	e[k0++] = k1,		e[k0++] = k1+2,		e[k0++] = k1+1,
 	e[k0++] = k1+2,		e[k0++] = k1,		e[k0++] = k1+3;
-	k1 += TOOLBOX_SPRITE_LOAD_REPEAT;;
+	k1 += PATTERN_SPRITE_LOAD_REPEAT;;
 }
 
 /*

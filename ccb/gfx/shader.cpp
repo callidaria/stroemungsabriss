@@ -39,10 +39,10 @@ void Shader::compile2d(const char* vspath,const char* fspath)
 void Shader::compile3d(const char* vspath,const char* fspath)
 {
 	compile(vspath,fspath);
-	def_attributeF("position",3,0,TOOLBOX_OBJECT_LOAD_REPEAT);
-	def_attributeF("texCoords",2,3,TOOLBOX_OBJECT_LOAD_REPEAT);
-	def_attributeF("normals",3,5,TOOLBOX_OBJECT_LOAD_REPEAT);
-	def_attributeF("tangent",3,8,TOOLBOX_OBJECT_LOAD_REPEAT);
+	def_attributeF("position",3,0,PATTERN_OBJECT_LOAD_REPEAT);
+	def_attributeF("texCoords",2,3,PATTERN_OBJECT_LOAD_REPEAT);
+	def_attributeF("normals",3,5,PATTERN_OBJECT_LOAD_REPEAT);
+	def_attributeF("tangent",3,8,PATTERN_OBJECT_LOAD_REPEAT);
 }
 
 /*

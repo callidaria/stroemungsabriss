@@ -429,7 +429,7 @@ void CardSystem::update()
 	for (uint8_t i=0;i<hand.size();i++) {
 
 		// prepare indices
-		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
+		uint16_t idx = hand[i]*CARD_INSTANCE_REPEAT+1;
 		uint16_t hidx = i*2;
 
 		// calculate card modification
@@ -453,7 +453,7 @@ void CardSystem::update()
 	/*for (uint8_t i=0;i<hand.size();i++) {
 
 		// modify selected card to stand out compared to the others
-		uint16_t idx = hand[i]*CARDSYSTEM_INDEX_REPEAT+1;
+		uint16_t idx = hand[i]*CARD_INSTANCE_REPEAT+1;
 		float selected_mod = (i==choice)*.5f;
 		pcards->rqueue[idx] += selected_mod,pcards->rqueue[idx+1] -= selected_mod;
 
@@ -502,7 +502,7 @@ void CardSystem::render()
 */
 void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 {
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
 	pcards->rqueue[rid] = pos.x,pcards->rqueue[rid+1] = pos.y,pcards->rqueue[rid+2] = pos.z;
 }
 
@@ -514,7 +514,7 @@ void CardSystem::set_position(uint8_t id,glm::vec3 pos)
 void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 {
 	// rasterize id jumps
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
 	pcards->rqueue[rid+5] = glm::sin(rot.x),pcards->rqueue[rid+6] = glm::sin(rot.y),
@@ -532,7 +532,7 @@ void CardSystem::set_rotation(uint8_t id,glm::vec3 rot)
 void CardSystem::reset_rotation(uint8_t id)
 {
 	// rasterize id jumps
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
 	pcards->rqueue[rid+5] = 0,pcards->rqueue[rid+6] = 0,pcards->rqueue[rid+7] = 0,
@@ -545,7 +545,7 @@ void CardSystem::reset_rotation(uint8_t id)
 */
 glm::vec3 CardSystem::get_position(uint8_t id)
 {
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
 	return glm::vec3(pcards->rqueue[rid],pcards->rqueue[rid+1],pcards->rqueue[rid+2]);
 }
 
@@ -557,7 +557,7 @@ glm::vec3 CardSystem::get_position(uint8_t id)
 glm::vec3 CardSystem::get_rotation(uint8_t id)
 {
 	// get sine & cosine rotations
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
 	glm::vec3 srot = glm::vec3(glm::asin(pcards->rqueue[rid+5]),glm::asin(pcards->rqueue[rid+6]),
 			glm::asin(pcards->rqueue[rid+7]));
 	glm::vec3 crot = glm::vec3(glm::acos(pcards->rqueue[rid+8]),glm::acos(pcards->rqueue[rid+9]),
@@ -611,8 +611,8 @@ void CardSystem::create_card(size_t& mem_id,glm::vec2 tex_id,bool deck_id)
 */
 /*void CardSystem::card_to_queue(uint8_t id)
 {
-	uint16_t rid = id*CARDSYSTEM_INDEX_REPEAT;
-	for (uint8_t i=0;i<CARDSYSTEM_INDEX_REPEAT;i++) pcards->render_queue.push_back(icpos[rid+i]);
+	uint16_t rid = id*CARD_INSTANCE_REPEAT;
+	for (uint8_t i=0;i<CARD_INSTANCE_REPEAT;i++) pcards->render_queue.push_back(icpos[rid+i]);
 }*/
 
 /*
