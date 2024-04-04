@@ -43,21 +43,6 @@ uint16_t CCBManager::add_lv(const char* path)
 }
 
 /*
-	rm_lv(uint16_t) -> void
-	id: id of the level that shall be removed
-	purpose: remove a level from manager by id
-*/
-void CCBManager::rm_lv(uint16_t id)
-{ linpr[id].delete_level(); }
-
-/*
-	vanish() -> void
-	purpose: close ccb manager and clean memory
-*/
-void CCBManager::vanish()
-{ for (uint16_t i=0;i<linpr.size();i++) rm_lv(i); }
-
-/*
 	dev_console(uint32_t&,bool&) -> void
 	running: reference to runstate variable to possibly end program from console by setting it to 0
 	dactive: reference to boolean holding if developer console should be activated & shown

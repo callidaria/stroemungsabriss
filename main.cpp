@@ -123,7 +123,6 @@ int main(int argc,char** argv)
 	// CLOSING
 	world.free_memory();
 	r3d.clear_memory();
-	ccbm.vanish();
 	f.vanish();
 	return 0;
 }

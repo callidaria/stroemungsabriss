@@ -14,16 +14,24 @@
  *	PLEASE DONT JUDGE OR RELY ON THIS CODE. THANK YOU!
 */
 
-enum CCBArgs {
-	COMMAND,
-	POS_X,POS_Y,
-	WIDTH,HEIGHT,
-	TEXPATH,
-	REPEAT,
-	COUNT,
-	FRAMES,
-	TICKS,
-	ARGUMENT_COUNT
+enum CCBSpriteArgs {
+	CSPR_COMMAND,
+	CSPR_POSX,CSPR_POSY,
+	CSPR_WIDTH,CSPR_HEIGHT,
+	CSPR_TEXPATH,
+	CSPR_ARGUMENT_COUNT
+};
+
+enum CCBAnimArgs {
+	CANM_COMMAND,
+	CANM_POSX,CANM_POSY,
+	CANM_WIDTH,CANM_HEIGHT,
+	CANM_TEXPATH,
+	CANM_REPEAT,
+	CANM_COUNT,
+	CANM_FRAMES,
+	CANM_TICKS,
+	CANM_ARGUMENT_COUNT
 };
 
 struct InterpreterSpriteData {
@@ -48,7 +56,6 @@ public:
 	// interaction
 	uint16_t load_level();
 	void write_level();
-	void delete_level();
 
 private:
 

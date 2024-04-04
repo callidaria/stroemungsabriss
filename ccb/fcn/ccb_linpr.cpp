@@ -20,7 +20,7 @@ uint16_t CCBLInterpreter::load_level()
 	int out = m_r2d->sl.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
 	std::string tline;
-	std::string args[CCBArgs::ARGUMENT_COUNT];
+	std::string args[CANM_ARGUMENT_COUNT];
 
 	// interpret level file
 	while (getline(lvfile,tline)) {
@@ -32,13 +32,13 @@ uint16_t CCBLInterpreter::load_level()
 		while (std::getline(ssline,arg,' ')) args[arg_index++] = arg;
 
 		// pattern for spritedef: lh position_x position_y width height texpath
-		if (args[CCBArgs::COMMAND]=="sprite:") {
+		if (args[CSPR_COMMAND]=="sprite:") {
 
 			// extract values
-			glm::vec2 pos = glm::vec2(stoi(args[CCBArgs::POS_X]),stoi(args[CCBArgs::POS_Y]));
-			float width = stoi(args[CCBArgs::WIDTH]),height = stoi(args[CCBArgs::HEIGHT]);
-			char* tex_path = new char[args[CCBArgs::TEXPATH].length()+1];
-			strcpy(tex_path,args[CCBArgs::TEXPATH].c_str());
+			glm::vec2 pos = glm::vec2(stoi(args[CSPR_POSX]),stoi(args[CSPR_POSY]));
+			float width = stoi(args[CSPR_WIDTH]),height = stoi(args[CSPR_HEIGHT]);
+			char* tex_path = new char[args[CSPR_TEXPATH].length()+1];
+			strcpy(tex_path,args[CSPR_TEXPATH].c_str());
 
 			// save values & create sprite
 			InterpreterSpriteData proc = {
@@ -53,17 +53,17 @@ uint16_t CCBLInterpreter::load_level()
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
 		//		frames timesplit
-		else if (args[CCBArgs::COMMAND]=="anim:") {
+		else if (args[CANM_COMMAND]=="anim:") {
 
 			// extract values
-			glm::vec2 pos = glm::vec2(stoi(args[CCBArgs::POS_X]),stoi(args[CCBArgs::POS_Y]));
-			float width = stoi(args[CCBArgs::WIDTH]),height = stoi(args[CCBArgs::HEIGHT]);
-			char* tex_path = new char[args[CCBArgs::TEXPATH].length()+1];
-			strcpy(tex_path,args[CCBArgs::TEXPATH].c_str());
-			uint8_t r = stoi(args[CCBArgs::REPEAT]),
-				c = stoi(args[CCBArgs::COUNT]),
-				f = stoi(args[CCBArgs::FRAMES]),
-				t = stoi(args[CCBArgs::TICKS]);
+			glm::vec2 pos = glm::vec2(stoi(args[CANM_POSX]),stoi(args[CANM_POSY]));
+			float width = stoi(args[CANM_WIDTH]),height = stoi(args[CANM_HEIGHT]);
+			char* tex_path = new char[args[CANM_TEXPATH].length()+1];
+			strcpy(tex_path,args[CANM_TEXPATH].c_str());
+			uint8_t r = stoi(args[CANM_REPEAT]),
+				c = stoi(args[CANM_COUNT]),
+				f = stoi(args[CANM_FRAMES]),
+				t = stoi(args[CANM_TICKS]);
 
 			// save values & create animation
 			InterpreterAnimData proc = {
@@ -114,15 +114,3 @@ void CCBLInterpreter::write_level()
 	}
 	lvfile.close();
 }
-
-/*
-	delete_level() -> void
-	purpose: manually remove all texture paths from allocated memory
-*/
-void CCBLInterpreter::delete_level()
-{
-	/*for (const char* tex : m_tex) delete[] tex;
-	for (const char* tex : a_tex) delete[] tex;*/
-	// TODO
-}
-// TODO: completely unload all of the level from memory
