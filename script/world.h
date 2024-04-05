@@ -26,7 +26,7 @@ class World
 public:
 
 	// construction
-	World(CascabelBaseFeature* eref,StageSetup* set_rigs);
+	World(CascabelBaseFeature* eref);
 	~World() {  }
 
 	// creation
@@ -57,7 +57,6 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 	FrameBuffer game_fb;
 	uint8_t rtarget_id;
 

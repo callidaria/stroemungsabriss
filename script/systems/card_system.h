@@ -89,7 +89,7 @@ public:
 
 	// construction
 	CardSystem() {  }
-	CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,std::vector<Currency> curr_path);
+	CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path);
 	~CardSystem() {  }
 
 	// interaction
@@ -149,7 +149,6 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 
 	// render
 	uint16_t r3d_index,ir3d_index;

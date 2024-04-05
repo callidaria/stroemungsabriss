@@ -65,13 +65,12 @@ int main(int argc,char** argv)
 	// LOADERS
 	CCBManager ccbm = CCBManager(&f,&r2d,&cam2d);
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
-	StageSetup set_rigs = { Lighting() };
 
 	// BUILD SET
-	World world = World(&eref,&set_rigs);
+	World world = World(&eref);
 
 	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
+	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
 	eref.ld.push(LOAD_START);
 
 #if BUILD_DEV_MODE

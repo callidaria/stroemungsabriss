@@ -3,13 +3,11 @@
 /*
 	constructor(CascabelBaseFeature*,StageSetup*,std::vector<Currency>)
 	ccbf: most basic cascabel features
-	set_rigs: scene setup
 	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
-		std::vector<Currency> curr_path)
-	: m_ccbf(ccbf),m_setRigs(set_rigs)
+CardSystem::CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path)
+	: m_ccbf(ccbf)
 {
 	// camera setup
 	Core::gCamera3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
@@ -19,7 +17,7 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
 
 	Core::gCamera3D.view3D = glm::rotate(Core::gCamera3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
-	pcards = new PlayingCards(ccbf,set_rigs,set_rigs->lighting.sunlights[0].position);
+	pcards = new PlayingCards(ccbf,Core::gLighting.sunlights[0].position);
 	ccbf->r3d->register_geometry(pcards);
 
 	// spawn cards into space

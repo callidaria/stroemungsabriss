@@ -40,9 +40,4 @@ struct CascabelBaseFeature {
 	std::queue<LoadInstruction> ld;
 };
 
-// refers to all set utility used to visualize the scene
-struct StageSetup {
-	Lighting lighting;
-};
-
 #endif

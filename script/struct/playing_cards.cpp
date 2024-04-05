@@ -4,11 +4,10 @@
 	constructor(CascabelBaseFeature*,StageSetup*)
 	purpose: create aunt susann's kopfüber playing cards
 	\param ccbf: most basic cascabel features
-	\param set_rigs: stage setup
 	\param sorg: light origin position, from where the shadow is projected
 */
-PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sorg)
-	: m_ccbf(ccbf),m_setRigs(set_rigs),shadow_dir(-glm::normalize(sorg))
+PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,glm::vec3 sorg)
+	: m_ccbf(ccbf),shadow_dir(-glm::normalize(sorg))
 {
 	// load card vertices
 	std::vector<float> overts;

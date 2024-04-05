@@ -3,11 +3,10 @@
 /*
 	constructor(CascabelBaseFeature*,StageSetup*)
 	eref: references to all relevant engine objects
-	set_rigs: stage setup
 	purpose: create a world handling entity for a better loop structure
 */
-World::World(CascabelBaseFeature* eref,StageSetup* set_rigs)
-	: m_ccbf(eref),m_setRigs(set_rigs)
+World::World(CascabelBaseFeature* eref)
+	: m_ccbf(eref)
 {
 	// memfail avoidance shadow setup
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
@@ -68,7 +67,7 @@ void World::load(float &progress,float ldsplit)
 	m_ccbf->r2d->load(progress,pr_progress);
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(Core::gCamera3D,progress,pr_progress);
-	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&m_setRigs->lighting);
+	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&Core::gLighting);
 	m_ccbf->pSys->load();
 	progress = org_progress+ldsplit;
 }
@@ -107,7 +106,7 @@ void World::render(bool &running,bool &reboot)
 	// run deferred shading
 	glDisable(GL_DEPTH_TEST);
 	game_fb.bind();
-	m_ccbf->r3d->render_target(rtarget_id,Core::gCamera3D,&m_setRigs->lighting);
+	m_ccbf->r3d->render_target(rtarget_id,Core::gCamera3D,&Core::gLighting);
 
 	// render bullets
 	m_ccbf->bSys->render();

@@ -3,16 +3,15 @@
 /*
 	constructor(CascabelBaseFeature*,StageSetup*)
 	ccbf: all basic cascabel features
-	set_rigs: scene lighting and cameras
 	purpose: load & setup table scene
 */
-CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq)
-	: m_ccbf(ccbf),m_setRigs(set_rigs)
+CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,float &progress,float pseq)
+	: m_ccbf(ccbf)
 {
 	// lighting
 	float sseq = pseq/5.0f;
 	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),100,100,10,4096);
-	set_rigs->lighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.7f });
+	Core::gLighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.7f });
 	progress += sseq;
 
 	// setup card system
@@ -21,7 +20,8 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 			"./res/none.png",10 },
 		{ "./res/coin.obj","./res/coin_tex.png","./res/none.png","./res/dnormal.png",
 			"./res/none.png",5 }
-	}; card_system = CardSystem(ccbf,m_setRigs,curr_path);
+	};
+	card_system = CardSystem(ccbf,curr_path);
 	progress += sseq;
 
 	// create card game players

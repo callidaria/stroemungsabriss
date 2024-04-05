@@ -3,11 +3,10 @@
 /*
 	constructor(CascabelBaseFeature*,StageSetup*)
 	ccbf: all of cascabel's most prized features
-	set_rigs: stage utility setup
 	purpose: create dilapidated casino scene
 */
-CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq)
-	: m_ccbf(ccbf),m_setRigs(set_rigs)
+CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,float &progress,float pseq)
+	: m_ccbf(ccbf)
 {
 	// camera setup
 	Core::gCamera3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f);
@@ -53,17 +52,17 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &p
 	for (uint8_t i=0;i<9;i++) {
 		m_ccbf->r3d->add("./res/casino/rolling.obj","./res/all.png","./res/none.png",
 			"./res/dnormal.png","./res/all.png",light_pos[i],.25f,glm::vec3(),true);
-		set_rigs->lighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
+		Core::gLighting.add_pointlight({ light_pos[i],glm::vec3(1),1,1,.1f,1 });
 	} oheights[0] = 5.5f,oheights[1] = 7,oheights[2] = 6.5f,oheights[3] = 6;
 	progress += sseq;
-	m_ccbf->r3d->upload_target_static_lighting(0,&set_rigs->lighting);
+	m_ccbf->r3d->upload_target_static_lighting(0,&Core::gLighting);
 	// TODO: structurize again and again until this shit makes any sense!
 	//	maybe approaching a worldly stage lighting is the wrong idea & privatize lights for scenes
 
 	// lighting maps
 	m_ccbf->r3d->create_shadow(glm::vec3(150,125,-100),glm::vec3(0),25,25,10,4096);
 	irradiance_map.dynamic_precalculation_load_switch("tcasino",1024,32,128,7,2048);
-	m_setRigs->lighting.load_irradiance_maps(irradiance_map);
+	Core::gLighting.load_irradiance_maps(irradiance_map);
 	progress += sseq;
 }
 
@@ -98,7 +97,7 @@ void CasinoSpike::render()
 	for (uint8_t i=0;i<4;i++) {
 		m_ccbf->r3d->ml[index_r3D+2+i].model
 				= glm::translate(glm::mat4(1),glm::vec3(0,oheights[i],0));
-		m_setRigs->lighting.pointlights[2+i].position.y = oheights[i]+.25f;
+		Core::gLighting.pointlights[2+i].position.y = oheights[i]+.25f;
 		ospeed[i] *= 1-2*(oheights[i]<0);
 		oheights[i] += ospeed[i];
 		ospeed[i] -= .0009f;

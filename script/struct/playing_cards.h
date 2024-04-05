@@ -42,7 +42,7 @@ public:
 
 	// construction
 	PlayingCards() {  }
-	PlayingCards(CascabelBaseFeature* ccbf,StageSetup* set_rigs,glm::vec3 sdir);
+	PlayingCards(CascabelBaseFeature* ccbf,glm::vec3 sdir);
 	~PlayingCards() {  }
 
 	// draw
@@ -60,7 +60,6 @@ private:
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 
 	// render
 	GLuint tex;
