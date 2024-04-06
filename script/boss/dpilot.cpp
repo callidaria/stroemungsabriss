@@ -82,16 +82,16 @@ void DPilot::flaredrop()
 {
 	// downwards movement depending on index
 	for (int i=0;i<2048;i++)
-		m_ccbf->bSys->delta_bltPos(bsys_index+BMEM_FLARES,i,glm::vec2(0,((i%6)+1)*-1));
+		m_ccbf->bSys->delta_bltPos(bsys_index+DP_FLARES,i,glm::vec2(0,((i%6)+1)*-1));
 	// FIXME: count of movement loop
 	// ??cut spray while state 1 or continuous
 
 	// flaredrop spawn if cooldown over
 	bool no_flares = cd_flares||mv_stage;
 	for (int i=0+6*no_flares;i<6;i++)
-		m_ccbf->bSys->spwn_blt(bsys_index+BMEM_FLARES,glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
+		m_ccbf->bSys->spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
 	for (int i=0+6*no_flares;i<6;i++)
-		m_ccbf->bSys->spwn_blt(bsys_index+BMEM_FLARES,glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
+		m_ccbf->bSys->spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
 
 	// setup random cooldown time if flares spawned
 	cd_flares = !no_flares*(rand()%12+4)+no_flares*cd_flares;
@@ -108,12 +108,12 @@ void DPilot::mines()
 {
 	// constant downwards movement
 	for (int i=0;i<2048;i++)
-		m_ccbf->bSys->delta_bltPos(bsys_index+BMEM_MINES,i,
-				glm::vec2(0,-1+(m_ccbf->bSys->get_bltPos(bsys_index+BMEM_MINES,i).y<50)*-100));
+		m_ccbf->bSys->delta_bltPos(bsys_index+DP_MINES,i,
+				glm::vec2(0,-1+(m_ccbf->bSys->get_bltPos(bsys_index+DP_MINES,i).y<50)*-100));
 
 	// spawn after cooldown frames ticked down
 	for (int i=(cd_mines||!mv_stage);i<1;i++) {
-		m_ccbf->bSys->spwn_blt(bsys_index+BMEM_MINES,glm::vec2(ePos.x+20,ePos.y-15));
+		m_ccbf->bSys->spwn_blt(bsys_index+DP_MINES,glm::vec2(ePos.x+20,ePos.y-15));
 		cd_mines = rand()%3+1;  // FIXME: kick this outside of loop to reduce the amount of rand()
 	} cd_mines -= mv_stage;  // tick cooldown frame counter
 }
@@ -129,7 +129,7 @@ void DPilot::mines()
 void DPilot::directional_sweep(glm::vec2 pPos)
 {
 	// move bullets towards set directions
-	m_ccbf->bSys->delta_fDir(bsys_index+BMEM_SPREAD);
+	m_ccbf->bSys->delta_fDir(bsys_index+DP_SPREAD);
 
 	// aim bullets in normalized direction at player
 	glm::vec2 dPos = ePos+glm::vec2(16.5f);
@@ -139,7 +139,7 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 	for (int i=-2+5*!!cd_direction;i<3;i++) {
 		glm::vec4 rVec = glm::vec4(norm.x,norm.y,0,0)
 				* glm::rotate(glm::mat4(1.0f),i*.175f,glm::vec3(0,0,1));
-		m_ccbf->bSys->spwn_blt(bsys_index+BMEM_SPREAD,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
+		m_ccbf->bSys->spwn_blt(bsys_index+DP_SPREAD,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
 				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
 				* ((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		spray_counter--;
@@ -164,10 +164,10 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 void DPilot::whirlpool()
 {
 	for (int i=0;i<2048;i++) {
-		float t = 0.1f*m_ccbf->bSys->get_ts(bsys_index+BMEM_WHIRL,i);
-		m_ccbf->bSys->set_bltPos(bsys_index+BMEM_WHIRL,i,
-				m_ccbf->bSys->get_bltDir(bsys_index+BMEM_WHIRL,i)
+		float t = 0.1f*m_ccbf->bSys->get_ts(bsys_index+DP_WHIRL,i);
+		m_ccbf->bSys->set_bltPos(bsys_index+DP_WHIRL,i,
+				m_ccbf->bSys->get_bltDir(bsys_index+DP_WHIRL,i)
 				+ glm::vec2(-pow(E,.35f*t)*glm::cos(t),pow(E,.35f*t)*glm::sin(t)));
-	} m_ccbf->bSys->inc_tick(bsys_index+BMEM_WHIRL);
-	for (int i=0;i<1;i++) m_ccbf->bSys->spwn_blt(bsys_index+BMEM_WHIRL,ePos,ePos);
+	} m_ccbf->bSys->inc_tick(bsys_index+DP_WHIRL);
+	for (int i=0;i<1;i++) m_ccbf->bSys->spwn_blt(bsys_index+DP_WHIRL,ePos,ePos);
 }
