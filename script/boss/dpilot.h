@@ -5,12 +5,12 @@
 
 #include <glm/glm.hpp>
 
+#include "../../ccb/mat/toolbox.h"
+
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 
 #include "../ui/healthbar.h"
-
-#define E 2.7182818284
 
 // bullet memory offset
 enum DPilotBMEM

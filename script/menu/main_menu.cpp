@@ -1941,7 +1941,7 @@ void interface_behaviour_continue(MainMenu& tm)
 	// response: continue instruction
 	switch (tm.mdialogues.status) {
 	case 1:
-		tm.m_ccbf->ld.push(/*tm.savestates.saves[0].ld_inst*/LOAD_DPILOT);
+		tm.m_ccbf->ld.push(tm.savestates.saves[0].ld_inst);
 		break;
 
 	// response: change run, therefore transition to load mode

@@ -9,11 +9,11 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
 {
 	// visuals
-	/*r3d_index = m_ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+	r3d_index = m_ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	bsys_index = m_ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
+	/*bsys_index = m_ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
 	m_ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
 	m_ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);*/
 	//m_ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
@@ -26,10 +26,10 @@ DPilot::DPilot(CascabelBaseFeature* ccbf)
 */
 void DPilot::update(glm::vec2 pPos)
 {
-	/*if (m_ccbf->frame->time_delta>.1f) {
+	//if (m_ccbf->frame->time_delta>.1) {
 
 		// movement
-		ePos = glm::vec2(!mv_stage)
+		/*ePos = glm::vec2(!mv_stage)
 			* glm::vec2(615+ph_fcount,650+dir_mult*20000/(ph_fcount>>1-100*dir_mult)+50)
 			+ glm::vec2(mv_stage)*glm::vec2(615+ph_fcount,650+ph_fcount*ph_fcount/2400-150);
 		bool ex_ovfl = ph_fcount<-600||ph_fcount>600;
@@ -37,14 +37,17 @@ void DPilot::update(glm::vec2 pPos)
 		dir_mult *= -1*mult_swap+1*!mult_swap;
 		mv_stage += ex_ovfl-mult_swap;
 		ph_fcount += (!mv_stage*-4*dir_mult+mv_stage*8*dir_mult)*!!cd_flare;
-		cd_flare -= mult_swap;
+		cd_flare -= mult_swap;*/
+	
 
 		// patterns
+/*
 		flaredrop();
 		mines();
 		directional_sweep(pPos);
 		//whirlpool();
-	}*/
+*/
+		//}
 
 	// collision check
 	health_mod = 0;
@@ -57,10 +60,10 @@ void DPilot::update(glm::vec2 pPos)
 	//iframes++;
 
 	// visuals
-	/*m_ccbf->r3d->prepare();
+	m_ccbf->r3d->prepare();
 	m_ccbf->r3d->s3d.upload_matrix("model",
 			glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);*/
+	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
 
 	// healthbar
 	hbar.register_damage(health_mod);
@@ -167,7 +170,7 @@ void DPilot::whirlpool()
 		float t = 0.1f*m_ccbf->bSys->get_ts(bsys_index+DP_WHIRL,i);
 		m_ccbf->bSys->set_bltPos(bsys_index+DP_WHIRL,i,
 				m_ccbf->bSys->get_bltDir(bsys_index+DP_WHIRL,i)
-				+ glm::vec2(-pow(E,.35f*t)*glm::cos(t),pow(E,.35f*t)*glm::sin(t)));
+				+ glm::vec2(-pow(MATH_E,.35f*t)*glm::cos(t),pow(MATH_E,.35f*t)*glm::sin(t)));
 	} m_ccbf->bSys->inc_tick(bsys_index+DP_WHIRL);
 	for (int i=0;i<1;i++) m_ccbf->bSys->spwn_blt(bsys_index+DP_WHIRL,ePos,ePos);
 }
