@@ -23,10 +23,12 @@
 #include "../../include/stb_image_write.h"
 #endif
 
+
 // math constants
 constexpr double MATH_CARTESIAN_XRANGE = 1280.f;
 constexpr double MATH_CARTESIAN_YRANGE = 720.f;
 constexpr double MATH_PI = 3.141592653;
+constexpr double MATH_E = 2.7182818284;
 constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_XRANGE*.618;
 
 // conversion
@@ -38,7 +40,11 @@ constexpr double CONVERSION_MULT_MILLISECONDS = .000001;
 constexpr double CONVERSION_MULT_SECONDS = .000000001;
 
 // pattern
-constexpr uint8_t TOOLBOX_OBJECT_LOAD_REPEAT = 11;
+constexpr uint8_t PATTERN_SPRITE_LOAD_REPEAT = 4;
+constexpr uint8_t PATTERN_SPRITE_ELEMENT_REPEAT = 6;
+constexpr uint8_t PATTERN_SPRITE_VERTEX_REPEAT = 4*PATTERN_SPRITE_LOAD_REPEAT;
+constexpr uint8_t PATTERN_SPRITE_TRIANGLE_REPEAT = 6*PATTERN_SPRITE_LOAD_REPEAT;
+constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
 
 
 // debug timing keys to record individual loadtimes for task sequences
@@ -61,7 +67,7 @@ class Toolbox
 public:
 
 	// loader
-	static uint32_t load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+	static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 			float scl,glm::vec3 rot);
 
 	// math helper
@@ -76,17 +82,15 @@ public:
 	static void flush_debug_logging(DebugLogData dld);
 
 	// vertex setup
-	static std::vector<float> create_sprite_canvas();
-	static std::vector<float> create_sprite_canvas(glm::vec2 pos,float width,float height);
-	static std::vector<float> create_sprite_canvas_triangled(glm::vec2 pos,float width,float height);
-	// TODO: find a way to create function overloads, that directly add to a vertex array!
+	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
+	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
+	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
 
 	// graphical setup
 	static void load_texture(uint32_t tex,const char* path,bool corrected=false);
 	static void load_texture(uint32_t tex,const char* path,float bias,bool corrected=false);
 	static void load_texture_unfiltered(uint32_t tex,const char* path,bool corrected=false);
 	static void load_texture_repeat(uint32_t tex,const char* path,bool corrected=false);
-	static void generate_elements(uint16_t i,std::vector<unsigned int> &ls);
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
@@ -99,6 +103,19 @@ public:
 	static void set_texture_parameter_clamp_to_edge();
 	static void set_texture_parameter_clamp_to_border();
 	static void set_texture_parameter_texture_repeat();
+
+	// inline definition
+	static inline std::vector<float> create_sprite_canvas() {
+		return {
+			-1.0f,	1.0f,	0.0f,	1.0f,
+			-1.0f,	-1.0f,	0.0f,	0.0f,
+			1.0f,	-1.0f,	1.0f,	0.0f,
+			-1.0f,	1.0f,	0.0f,	1.0f,
+			1.0f,	-1.0f,	1.0f,	0.0f,
+			1.0f,	1.0f,	1.0f,	1.0f
+		};
+	}
+	// TODO: find out if vectorcopy is optimized away when inline
 
 private:
 

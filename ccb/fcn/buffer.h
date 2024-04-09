@@ -27,17 +27,25 @@ public:
 	// upload
 	void upload_elements(unsigned int* elements,size_t esize);
 	void upload_elements(std::vector<unsigned int> ie);
-	void upload_indices(std::vector<float> is);
-	void upload_indices(float* is,size_t issize);
 
-	// inlined templates
+	// upload vertices
 	template<typename T> void upload_vertices(T* vertices,size_t vsize) {
 		glBindBuffer(GL_ARRAY_BUFFER,vbo);
 		glBufferData(GL_ARRAY_BUFFER,vsize,vertices,GL_STATIC_DRAW);
 	}
-	template<typename T> void upload_vertices(std::vector<T> iv) {
+	template<typename T> void upload_vertices(std::vector<T> vertices) {
 		glBindBuffer(GL_ARRAY_BUFFER,vbo);
-		glBufferData(GL_ARRAY_BUFFER,iv.size()*sizeof(T),&iv[0],GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER,vertices.size()*sizeof(T),&vertices[0],GL_STATIC_DRAW);
+	}
+
+	// upload indices
+	template<typename T> void upload_indices(T* indices,size_t isize) {
+		glBindBuffer(GL_ARRAY_BUFFER,iebo);
+		glBufferData(GL_ARRAY_BUFFER,isize,indices,GL_DYNAMIC_DRAW);
+	}
+	template<typename T> void upload_indices(std::vector<T> indices) {
+		glBindBuffer(GL_ARRAY_BUFFER,iebo);
+		glBufferData(GL_ARRAY_BUFFER,indices.size()*sizeof(T),&indices[0],GL_DYNAMIC_DRAW);
 	}
 
 public:

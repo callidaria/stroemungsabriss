@@ -52,12 +52,26 @@ uint16_t Renderer3D::add(const char* m,const char* t,const char* sm,const char* 
 	iml.push_back(Mesh(m,t,sm,nm,em,p,s,r,v_instance,imofs));
 
 	// create related index upload pattern
-	std::vector<float> cmesh_index;
+	std::vector<float> temp = std::vector<float>(dcap*INST_VERTEX_REPEAT);
 	for (uint16_t i=0;i<dcap;i++) {
-		cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),cmesh_index.push_back(-10000),
-		cmesh_index.push_back(0),cmesh_index.push_back(0),cmesh_index.push_back(0),
-		cmesh_index.push_back(1),cmesh_index.push_back(1),cmesh_index.push_back(1);
-	} mesh_indices.push_back(cmesh_index);
+		uint32_t r = i*INST_VERTEX_REPEAT;
+
+		// write offset
+		temp[r+INST_POSITION_X] = -10000;
+		temp[r+INST_POSITION_Y] = -10000;
+		temp[r+INST_POSITION_Z] = -10000;
+
+		// write sine rotation
+		temp[r+INST_SINROT_X] = 0;
+		temp[r+INST_SINROT_Y] = 0;
+		temp[r+INST_SINROT_Z] = 0;
+
+		// write cosine rotation
+		temp[r+INST_COSROT_X] = 1;
+		temp[r+INST_COSROT_Y] = 1;
+		temp[r+INST_COSROT_Z] = 1;
+	}
+	mesh_indices.push_back(temp);
 
 	// check shadow cast request & output mesh id
 	if (cast_shadow) scast_instance_ids.push_back(mesh_id);
@@ -164,48 +178,69 @@ void Renderer3D::create_shadow(glm::vec3 pos,glm::vec3 center,float mwidth,float
 void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 {
 	// load meshes
+	// mesh vertex upload & mapping
 	buffer.bind();
 	buffer.upload_vertices(v_mesh);
 	s3d.compile3d("./shader/obj/mesh.vs","./shader/obj/mesh.fs");
+
+	// mesh texturing & coordinate system
 	for (auto im : ml) im.texture();
-	s3d.upload_int("tex",0),s3d.upload_int("sm",1),s3d.upload_int("emit",2),s3d.upload_int("nmap",3);
+	s3d.upload_int("tex",0);
+	s3d.upload_int("sm",1);
+	s3d.upload_int("emit",2);
+	s3d.upload_int("nmap",3);
 	s3d.upload_camera(cam3d);
 
 	// load instances
+	// instance vertex upload & mapping
 	ibuffer.bind();
 	ibuffer.upload_vertices(v_instance);
 	is3d.compile3d("./shader/obj/instance.vs","./shader/obj/mesh.fs");
 	ibuffer.bind_index();
-	is3d.def_indexF(ibuffer.iebo,"offset",3,0,R3D_INDEX_REPEAT),
-			is3d.def_indexF(ibuffer.iebo,"rotation_sin",3,3,R3D_INDEX_REPEAT),
-			is3d.def_indexF(ibuffer.iebo,"rotation_cos",3,6,R3D_INDEX_REPEAT);
+	is3d.def_indexF("offset",3,INST_POSITION_X,INST_VERTEX_REPEAT);
+	is3d.def_indexF("rotation_sin",3,INST_SINROT_X,INST_VERTEX_REPEAT);
+	is3d.def_indexF("rotation_cos",3,INST_COSROT_X,INST_VERTEX_REPEAT);
+
+	// instance texturing & coordinate system
 	for (auto im : iml) im.texture();
-	is3d.upload_int("tex",0),is3d.upload_int("sm",1),
-			is3d.upload_int("emit",2),is3d.upload_int("nmap",3);
+	is3d.upload_int("tex",0);
+	is3d.upload_int("sm",1);
+	is3d.upload_int("emit",2);
+	is3d.upload_int("nmap",3);
 	is3d.upload_camera(cam3d);
 
 	// load animations
+	// animation vertex upload & mapping
 	abuffer.bind();
 	abuffer.upload_vertices(v_animation),abuffer.upload_elements(e_animation);
 	as3d.compile("./shader/obj/animation.vs","./shader/obj/physical.fs");
-	as3d.def_attributeF("position",3,0,ANIMATION_MAP_REPEAT),
-			as3d.def_attributeF("texCoords",2,3,ANIMATION_MAP_REPEAT),
-			as3d.def_attributeF("normals",3,5,ANIMATION_MAP_REPEAT),
-			as3d.def_attributeF("tangent",3,8,ANIMATION_MAP_REPEAT),
-			as3d.def_attributeF("boneIndex",4,11,ANIMATION_MAP_REPEAT),
-			as3d.def_attributeF("boneWeight",4,15,ANIMATION_MAP_REPEAT);
+	as3d.def_attributeF("position",3,ANIM_POSITION_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("texCoords",2,ANIM_TCOORD_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("normals",3,ANIM_NORMALS_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("tangent",3,ANIM_TANGENT_X,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneIndex",4,ANIM_BONE0,ANIM_VERTEX_REPEAT);
+	as3d.def_attributeF("boneWeight",4,ANIM_WEIGHT0,ANIM_VERTEX_REPEAT);
+
+	// animation texturing & coordinate system
 	for (auto am : mal) am.texture();
-	as3d.upload_int("colour_map",0),as3d.upload_int("normal_map",1),
-			as3d.upload_int("material_map",2),as3d.upload_int("emission_map",3);
+	as3d.upload_int("colour_map",0);
+	as3d.upload_int("normal_map",1);
+	as3d.upload_int("material_map",2);
+	as3d.upload_int("emission_map",3);
 	as3d.upload_camera(cam3d);
 
 	// load physical based meshes
+	// physical vertex upload & mapping
 	pbuffer.bind();
 	pbuffer.upload_vertices(v_pbm);
 	pbms.compile3d("./shader/obj/mesh.vs","./shader/obj/physical.fs");
+
+	// physical texturing & coordinate system
 	for (auto im : pml) im.texture();
-	pbms.upload_int("colour_map",0),pbms.upload_int("normal_map",1),
-			pbms.upload_int("material_map",2),pbms.upload_int("emission_map",3);
+	pbms.upload_int("colour_map",0);
+	pbms.upload_int("normal_map",1),
+	pbms.upload_int("material_map",2);
+	pbms.upload_int("emission_map",3);
 	pbms.upload_camera(cam3d);
 
 	// compile shadow shader
@@ -313,7 +348,7 @@ void Renderer3D::switch_target_transparency(uint8_t id)
 	\param cam3D: camera to draw scene in perspective to
 	\param lighting: pointer to lighting containing the simulated dynamic lights
 */
-void Renderer3D::render_target(uint8_t id,Camera3D cam3D,Lighting* lighting)
+void Renderer3D::render_target(uint8_t id,Camera3D& cam3D,Lighting* lighting)
 {
 	// upload buffers elements
 	rtargets[id].dbuffer.prepare();
@@ -672,7 +707,7 @@ void Renderer3D::render_pmsh(uint16_t i)
 */
 void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 {
-	uint16_t rid = mid*R3D_INDEX_REPEAT;
+	uint16_t rid = mid*INST_VERTEX_REPEAT;
 	mesh_indices[id][rid] = pos.x,mesh_indices[id][rid+1] = pos.y,mesh_indices[id][rid+2] = pos.z;
 }
 
@@ -684,7 +719,7 @@ void Renderer3D::inst_position(uint8_t id,uint8_t mid,glm::vec3 pos)
 void Renderer3D::inst_rotation(uint8_t id,uint8_t mid,glm::vec3 rot)
 {
 	// rasterize id jumps
-	uint16_t rid = mid*R3D_INDEX_REPEAT;
+	uint16_t rid = mid*INST_VERTEX_REPEAT;
 
 	// precalculate sine & cosine for rotation matrix in GPU
 	mesh_indices[id][rid+3] = glm::sin(rot.x),mesh_indices[id][rid+6] = glm::cos(rot.x),

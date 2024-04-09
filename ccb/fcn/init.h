@@ -69,12 +69,8 @@ class Init
 public:
 
 	Init(const char* path);
-	static uint32_t find_iKey(const char* key);
+	static uint16_t find_iKey(const char* key);
 	static void write_changes();
-
-private:
-
-	std::vector<uint32_t> read_cartesian(std::string val);
 
 public:
 

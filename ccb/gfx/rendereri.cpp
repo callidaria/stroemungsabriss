@@ -48,21 +48,23 @@ void RendererI::load(float &progress,float pseq)
 	// setup progress bar
 	float ptarget = (pseq*.5f)/(il.size()+ial.size());
 
+	// memory allocation for vertices
+	size_t t_vsize = vertices.size();
+	vertices.resize(t_vsize+(il.size()+ial.size())*PATTERN_SPRITE_TRIANGLE_REPEAT);
+
 	// generate sprite vertices
 	for (int i=0;i<il.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(il[i].position,
-				il[i].width,il[i].height);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize,il[i].position,il[i].width,il[i].height);
 		progress += ptarget;
 	}
 
 	// generate animation vertices
 	for (int i=0;i<ial.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas_triangled(ial[i].position,
-				ial[i].width,ial[i].height);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
+		Toolbox::create_sprite_canvas_triangled(vertices,t_vsize,ial[i].position,ial[i].width,ial[i].height);
 		progress += ptarget;
 	}
+	// FIXME: untested after new memory management
+	// FIXME: similarly questionable architecture as in renderer2d.cpp
 
 	// upload to buffer
 	buffer.bind();
@@ -75,10 +77,10 @@ void RendererI::load(float &progress,float pseq)
 	// we could make instanced_anim the only instanced object or find a different solution??
 	sI.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
 	buffer.bind_index();
-	sI.def_indexF(buffer.iebo,"offset",2,0,6);
-	sI.def_indexF(buffer.iebo,"rotation_sin",1,2,6);
-	sI.def_indexF(buffer.iebo,"rotation_cos",1,3,6);
-	sI.def_indexF(buffer.iebo,"i_tex",2,4,6);
+	sI.def_indexF("offset",2,0,6);
+	sI.def_indexF("rotation_sin",1,2,6);
+	sI.def_indexF("rotation_cos",1,3,6);
+	sI.def_indexF("i_tex",2,4,6);
 
 	// load textures
 	for (int i=0;i<il.size();i++) il[i].texture(),progress += ptarget;

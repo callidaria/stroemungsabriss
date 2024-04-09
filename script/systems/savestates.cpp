@@ -50,8 +50,11 @@ void SaveStates::read_savefile()
 
 		// list save data
 		saves.push_back(save);
-	} file.close();
+	}
+	file.close();
 }
+// TODO: break up saves into multiple files
+// TODO: pack all info in first line to reduce raw savedata to single string
 
 /*
 	write_savefile() -> void

@@ -1,5 +1,63 @@
 #include "jaeger_jet.h"
 
+
+typedef void (*jet_movement_logic)(BulletSystem*,int32_t*);
+
+/*
+	jet_wait(BulletSystem*,int32_t*) -> void (private,static)
+	conforming to: rng_flib
+	purpose: handle the jet flight movement idle state
+*/
+void jet_wait(BulletSystem* bsys,int32_t* treg)
+{
+	// TODO: cool waiting animation and muzzle smoke particles
+}
+
+/*
+	jet_wide(BulletSystem*,int32_t*) -> void (private,static)
+	conforming to: rng_flib
+	purpose: handle wideshot for fighter jet
+*/
+void jet_wide(BulletSystem* bsys,int32_t* treg)
+{
+	for (int i=-10+50*(treg[2]<5);i<11;i++) {
+		float rot = i*.075f;
+		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),rot,glm::vec3(0,0,1));
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12),rot);
+	} treg[2]--;
+	treg[2] += (treg[2]<1)*9;
+}
+
+/*
+	jet_focus(BulletSystem*,int32_t*) -> void (private,static)
+	conforming to: rng_flib
+	purpose: handle focus shot for fighter jet
+*/
+void jet_focus(BulletSystem* bsys,int32_t* treg)
+{
+	for (int i=-10;i<11;i++)
+		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12),0);
+}
+
+/*
+	jet_scientific(BulletSystem*,int32_t*) -> void (private,static)
+	conforming to: rng_flib
+	purpose: handle chosen secondary shot for fighter jet
+*/
+void jet_scientific(BulletSystem* bsys,int32_t* treg)
+{
+	// TODO: second shot type
+}
+
+// pointers to movement logic modes
+jet_movement_logic rng_flib[] = {
+	jet_wait,
+	jet_wide,
+	jet_focus,
+	jet_scientific
+};
+
+
 /*
 	constructor(CascabelBaseFeature*)
 	ccbf: collection of most important engine tools
@@ -18,12 +76,6 @@ JaegerJet::JaegerJet(CascabelBaseFeature* ccbf)
 	// add pc projectiles to bullet system
 	ccbf->bSys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
 	treg[2] = 9;
-
-	// adressing indexable interaction methods
-	rng_flib.push_back(&jet_wait);
-	rng_flib.push_back(&jet_wide);
-	rng_flib.push_back(&jet_focus);
-	rng_flib.push_back(&jet_scientific);
 }
 
 /*
@@ -56,7 +108,7 @@ void JaegerJet::update()
 	// run requested shot type or idle
 	uint8_t sidx = ((m_ccbf->iMap->input_val[InputID::WIDE]&&!m_ccbf->iMap->input_val[InputID::FOCUS])+2
 			* m_ccbf->iMap->input_val[InputID::FOCUS])*(m_ccbf->frame->time_delta>.1f);
-	rng_flib.at(sidx)(m_ccbf->bSys,treg);
+	rng_flib[sidx](m_ccbf->bSys,treg);
 
 	// TODO: bombs
 	// TODO: shot modes and spawn
@@ -82,50 +134,4 @@ void JaegerJet::update()
 	// render health bar
 	/*hbar.register_damage(pDmg);
 	hbar.render();*/
-}
-
-/*
-	jet_wait(BulletSystem*,int32_t*) -> void (private,static)
-	conforming to: rng_flib
-	purpose: handle the jet flight movement idle state
-*/
-void JaegerJet::jet_wait(BulletSystem* bsys,int32_t* treg)
-{
-	// TODO: cool waiting animation and muzzle smoke particles
-}
-
-/*
-	jet_wide(BulletSystem*,int32_t*) -> void (private,static)
-	conforming to: rng_flib
-	purpose: handle wideshot for fighter jet
-*/
-void JaegerJet::jet_wide(BulletSystem* bsys,int32_t* treg)
-{
-	for (int i=-10+50*(treg[2]<5);i<11;i++) {
-		float rot = i*.075f;
-		glm::vec4 rVec = glm::vec4(0,1,0,0)*glm::rotate(glm::mat4(1.0f),rot,glm::vec3(0,0,1));
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7,treg[1]+10),glm::vec2(rVec.x,rVec.y)*glm::vec2(12),rot);
-	} treg[2]--;
-	treg[2] += (treg[2]<1)*9;
-}
-
-/*
-	jet_focus(BulletSystem*,int32_t*) -> void (private,static)
-	conforming to: rng_flib
-	purpose: handle focus shot for fighter jet
-*/
-void JaegerJet::jet_focus(BulletSystem* bsys,int32_t* treg)
-{
-	for (int i=-10;i<11;i++)
-		bsys->spwn_blt(0,glm::vec2(treg[0]-7+i*7,treg[1]+10),glm::vec2(0,1)*glm::vec2(12),0);
-}
-
-/*
-	jet_scientific(BulletSystem*,int32_t*) -> void (private,static)
-	conforming to: rng_flib
-	purpose: handle chosen secondary shot for fighter jet
-*/
-void JaegerJet::jet_scientific(BulletSystem* bsys,int32_t* treg)
-{
-	// TODO: second shot type
 }

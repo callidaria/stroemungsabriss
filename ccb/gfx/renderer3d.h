@@ -17,8 +17,13 @@
 #include "../frm/gbuffer.h"
 #include "../fcn/buffer.h"
 
-// structure
-constexpr uint8_t R3D_INDEX_REPEAT = 9;
+
+enum InstVID {
+	INST_POSITION_X,INST_POSITION_Y,INST_POSITION_Z,
+	INST_SINROT_X,INST_SINROT_Y,INST_SINROT_Z,
+	INST_COSROT_X,INST_COSROT_Y,INST_COSROT_Z,
+	INST_VERTEX_REPEAT
+};
 
 enum GBufferComponentID {
 	COLOUR,
@@ -60,7 +65,7 @@ public:
 	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
 	void start_target(uint8_t id);
 	void switch_target_transparency(uint8_t id);
-	void render_target(uint8_t id,Camera3D cam3D,Lighting* lighting);
+	void render_target(uint8_t id,Camera3D& cam3D,Lighting* lighting);
 
 	// preparations
 	void prepare();

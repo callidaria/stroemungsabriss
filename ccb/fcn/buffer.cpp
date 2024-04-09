@@ -42,26 +42,3 @@ void Buffer::upload_elements(std::vector<unsigned int> ie)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,iebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,ie.size()*sizeof(unsigned int),&ie[0],GL_STATIC_DRAW);
 }
-
-/*
-	upload_indices(std::vector<float>) -> void
-	is: list of dynamic indices to upload additionally to static array buffer
-	purpose: upload index array for later usage in graphical processes
-*/
-void Buffer::upload_indices(std::vector<float> is)
-{
-	glBindBuffer(GL_ARRAY_BUFFER,iebo);
-	glBufferData(GL_ARRAY_BUFFER,is.size()*sizeof(float),&is[0],GL_DYNAMIC_DRAW);
-}
-
-/*
-	upload_indices(std::vector<glm::vec2> is) -> void
-	is: array of dynamic indices, to upload additionally to static array buffer
-	issize: size of array to upload
-	purpose: overload previous to work with glm::vec2 arrays
-*/
-void Buffer::upload_indices(float* is,size_t issize)
-{
-	glBindBuffer(GL_ARRAY_BUFFER,iebo);
-	glBufferData(GL_ARRAY_BUFFER,issize,is,GL_DYNAMIC_DRAW);
-}

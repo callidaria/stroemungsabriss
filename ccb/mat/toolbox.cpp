@@ -10,7 +10,7 @@
 	\param rot: direct modification of vertex rotation around the object's origin point#
 	\returns amount of written vertices (vertices NOT values)
 */
-uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 pos,
+uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
 {
 	// setup vertex information lists
@@ -29,19 +29,29 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 
 		else {
 
 			// check value prefix
+			// position prefix
 			if (strcmp(lh,"v")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				verts.push_back(p);
-			} else if (strcmp(lh,"vt")==0) {
+			}
+
+			// texture coordinate prefix
+			else if (strcmp(lh,"vt")==0) {
 				glm::vec2 p;
 				fscanf(file,"%f %f\n",&p.x,&p.y);
 				uv.push_back(p);
-			} else if (strcmp(lh,"vn")==0) {
+			}
+
+			// normals prefix
+			else if (strcmp(lh,"vn")==0) {
 				glm::vec3 p;
 				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
 				norm.push_back(p);
-			} else if(strcmp(lh,"f")==0) {
+			}
+
+			// faces prefix
+			else if(strcmp(lh,"f")==0) {
 
 				// read element node for current triangle
 				unsigned int vi[3],ui[3],ni[3];
@@ -93,12 +103,13 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float> &ov,glm::vec3 
 		rotate_vector(tn,rot);
 
 		// save data to buffer vector
-		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z),
-				ov.push_back(tu.x),ov.push_back(tu.y),
-				ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z),
-				ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
+		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z);
+		ov.push_back(tu.x),ov.push_back(tu.y);
+		ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z);
+		ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
 		out++;
-	} return out;
+	}
+	return out;
 }
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
 
@@ -125,6 +136,8 @@ void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 r
 
 /*
 	rotate_vector(vec3&,vec3) -> void (static)
+	ov: vector to be transformed
+	rot: rotation of vector, without directional reset
 	purpose: 3D vector rotation
 */
 void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
@@ -206,52 +219,54 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 
 /*
 	PARAMETER DEFINITIONS:
-	ov: vector to be transformed
-	rot: rotation of vector, without directional reset
-*/
-
-/*
-	create_sprite_canvas() -> std::vector<float> (static)
-	returns: primitive canvas vertices without camera ready coordinate system and element draw
-*/
-std::vector<float> Toolbox::create_sprite_canvas()
-{
-	std::vector<float> out = {
-		-1.0f,1.0f,0.0f,1.0f,-1.0f,-1.0f,0.0f,0.0f,1.0f,-1.0f,1.0f,0.0f,
-		-1.0f,1.0f,0.0f,1.0f,1.0f,-1.0f,1.0f,0.0f,1.0f,1.0f,1.0f,1.0f
-	}; return out;
-}
-
-/*
-	PARAMETER DEFINITIONS:
+	vs: reference to vertex array
+	ofs: memory offset of vertex array write. !already rasterized, not an index. actual float offset!
 	pos: origin position of canvas
 	width: vertex distanced width of canvas
 	height: vertex distanced height of canvas
 */
 
 /*
-	create_sprite_canvas(vec2,float,float) -> std::vector<float> (static)
-	returns: created canvas vertices to later base 2D object generation on
+	O(1) /+load -> (static)
+	purpose: create vertices for a sprite, supported by an additional element buffer
+	NOTE: expects memory to be allocated
 */
-std::vector<float> Toolbox::create_sprite_canvas(glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
 {
-	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y,0.0f,1.0f
-	}; return out;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
-// FIXME: not intuitive if vertices returned are expecting element buffer
 
 /*
-	create_sprite_canvas_triangled(vec2,float,float) -> std::vector<float> (static)
-	returns: the same canvas as create_sprite_canvas, but without relying on element buffer
+	O(1) /+load -> (static)
+	purpose: create vertices for a sprite without element buffer, drawn per triangle
+	NOTE: expects memory to be allocated
 */
-std::vector<float> Toolbox::create_sprite_canvas_triangled(glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
 {
-	std::vector<float> out = {
-		pos.x,pos.y+height,0.0f,0.0f,pos.x+width,pos.y,1.0f,1.0f,pos.x+width,pos.y+height,1.0f,0.0f,
-		pos.x+width,pos.y,1.0f,1.0f,pos.x,pos.y+height,0.0f,0.0f,pos.x,pos.y,0.0f,1.0f,
-	}; return out;
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
+	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
+}
+
+/*
+	O(1) /+load -> (static)
+	purpose: generate buffer elements based on object list index
+	\param k0: reference to current element memory offset. !actual memory offset, not to be rasterized!
+	\param k1: current triangle starting vertex index
+	\param e: element array
+	NOTE: expects memory to be allocated
+*/
+void Toolbox::generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e)
+{
+	e[k0++] = k1,		e[k0++] = k1+2,		e[k0++] = k1+1,
+	e[k0++] = k1+2,		e[k0++] = k1,		e[k0++] = k1+3;
+	k1 += PATTERN_SPRITE_LOAD_REPEAT;;
 }
 
 /*
@@ -323,18 +338,6 @@ void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 // TODO: break edge cases apart and let the statii be determined separately with additional methods
-
-/*
-	generate_elements(uint16_t,std::vector<uint16_t>&) -> void (static)
-	i: objects index to use to rasterize element value generation
-	ls: element list input to add generated elements to
-	purpose: generate buffer elements based on object list index
-*/
-void Toolbox::generate_elements(uint16_t i,std::vector<unsigned int> &ls)
-{
-	ls.push_back(i*4);ls.push_back(i*4+2);ls.push_back(i*4+1);	// map first triangle
-	ls.push_back(i*4+2);ls.push_back(i*4);ls.push_back(i*4+3);	// map second triangle
-}
 
 /*
 	set_texture_parameter_linear_mipmap() -> void (static)

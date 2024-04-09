@@ -3,14 +3,13 @@
 /*
 	construction(CascabelBaseFeature*,CCBManager*,World*)
 	ccbf: all common cascabel tools & features
-	set_rigs: stage setup
 	ccbm: cascabel manager to load level files with
 	world: world to load objects & logic for
 	purpose: create a worldbuilder to process world loading logic
 */
-Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,StageSetup* set_rigs,CCBManager* ccbm,
+Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,
 		World* world)
-	: m_ccbf(ccbf),m_setRigs(set_rigs),m_ccbm(ccbm),m_world(world) {  }
+	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
 
 /*
 	load() -> void
@@ -65,7 +64,6 @@ void Worldbuilder::load_titles()
 { std::cout << "loading: title display\n"; }
 void Worldbuilder::load_menu()
 {
-	//Menu* main_menu = new Menu(m_world,m_ccbm,m_ccbf,progress,.75f);
 	MainMenu* main_menu = new MainMenu(m_ccbm,m_ccbf,m_world,progress,.75f);
 	m_world->add_ui(main_menu);
 	m_world->load(progress,.25f);
@@ -75,11 +73,10 @@ void Worldbuilder::load_casino()
 {
 	std::cout << "loading: spike's casino\n";
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf,m_setRigs,progress,.5f);
+	CasinoSpike* cspike = new CasinoSpike(m_ccbf,progress,.5f);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(cspike);
 	m_world->active_daui = 1;
-	m_world->active_cam3D = 0;
 	m_world->load(progress,.21f);
 	progress = 1.0f;
 	// TODO: dynamification of camera and ui (etc...) picker
@@ -89,11 +86,10 @@ void Worldbuilder::load_cards()
 {
 	std::cout << "loading: card games\n";
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
-	CasinoTable* ctable = new CasinoTable(m_ccbf,m_setRigs,progress,.5f);
+	CasinoTable* ctable = new CasinoTable(m_ccbf,progress,.5f);
 	m_world->add_ui(action_menu);
 	m_world->add_scene(ctable);
 	m_world->active_daui = 1;
-	m_world->active_cam3D = 3;
 	m_world->load(progress,.21f);
 	progress = 1.0f;
 }
@@ -104,19 +100,19 @@ void Worldbuilder::load_airfield()
 void Worldbuilder::load_dpilot()
 {
 	std::cout << "loading: dancing pilot duel\n";
+	Core::gCamera3D = Camera3D(1280.0f,720.0f);
 	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
 	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
 	progress += .2f;
-	JaegerJet* jj = new JaegerJet(m_ccbf);
-	progress += .2f;
+	/*JaegerJet* jj = new JaegerJet(m_ccbf);
+	progress += .2f;*/
 	DPilot* dpilot = new DPilot(m_ccbf);
 	progress += .2f;
 	m_world->add_ui(action_menu);
 	m_world->add_scene(nmw);
-	m_world->add_playable(jj);
+	//m_world->add_playable(jj);
 	m_world->add_boss(dpilot);
 	m_world->active_daui = 1;
-	m_world->active_cam3D = 1;
 	m_world->load(progress,.2f);
 }
 
@@ -133,8 +129,9 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	SDL_GLContext context = ccbf->frame->create_new_context();
 
 	// loading bar setup
-	std::vector<float> ld_canvas
-			= Toolbox::create_sprite_canvas_triangled(glm::vec2(0),700,10);
+	size_t t_vsize = 0;
+	std::vector<float> ld_canvas = std::vector<float>(PATTERN_SPRITE_TRIANGLE_REPEAT);
+	Toolbox::create_sprite_canvas_triangled(ld_canvas,t_vsize,glm::vec2(0),700,10);
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);

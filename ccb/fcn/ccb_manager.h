@@ -21,8 +21,6 @@ public:
 
 	// load & unload
 	uint16_t add_lv(const char* path);
-	void rm_lv(uint16_t id);
-	void vanish();
 
 	// functionality
 	void dev_console(bool &running,bool &dactive);

@@ -10,6 +10,8 @@ class Camera3D
 public:
 
 	// construction
+	Camera3D() {  }
+	~Camera3D() {  }
 	Camera3D(float w_res,float h_res);
 	Camera3D(glm::vec3 cp,float w_res,float h_res,float fov);
 	Camera3D(glm::vec3 cp,glm::vec3 front,float w_res,float h_res,float fov);

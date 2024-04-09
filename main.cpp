@@ -64,17 +64,12 @@ int main(int argc,char** argv)
 	// LOADERS
 	CCBManager ccbm = CCBManager(&f,&r2d);
 	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
-	StageSetup set_rigs = { {  },Lighting() };
 
 	// BUILD SET
-	World world = World(&eref,&set_rigs);
-	set_rigs.cam3D.push_back(Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.0f,720.0f,45.0f));
-	set_rigs.cam3D.push_back(Camera3D(1280.0f,720.0f));
-	set_rigs.cam3D.push_back(Camera3D(glm::vec3(),glm::vec3(),1280.0f,720.0f,45.0f));
-	set_rigs.cam3D.push_back(Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f));
+	World world = World(&eref);
 
 	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&set_rigs,&ccbm,&world);
+	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
 	eref.ld.push(LOAD_START);
 
 #if BUILD_DEV_MODE
@@ -126,7 +121,6 @@ int main(int argc,char** argv)
 	// CLOSING
 	world.free_memory();
 	r3d.clear_memory();
-	ccbm.vanish();
 	f.vanish();
 	return 0;
 }

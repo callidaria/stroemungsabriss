@@ -55,21 +55,28 @@ void Renderer2D::load(float &progress,float pseq)
 	// setup progress bar
 	uint32_t ptarget = (pseq*.5f)/(sl.size()+al.size());
 
+	// memory allocation for vertices and elements
+	size_t t_vsize = vertices.size(), t_esize = elements.size();
+	vertices.resize(t_vsize+(sl.size()+al.size())*PATTERN_SPRITE_VERTEX_REPEAT);
+	elements.resize(t_esize+(sl.size()+al.size())*PATTERN_SPRITE_ELEMENT_REPEAT);
+
 	// write sprite vertex values to upload list
-	for (int i=0;i<sl.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas(sl[i].pos,sl[i].sclx,sl[i].scly);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
-		Toolbox::generate_elements(i,elements);
+	size_t i_velem = t_vsize/PATTERN_SPRITE_LOAD_REPEAT;
+	for (uint16_t i=0;i<sl.size();i++) {
+		Toolbox::create_sprite_canvas(vertices,t_vsize,sl[i].pos,sl[i].sclx,sl[i].scly);
+		Toolbox::generate_elements(t_esize,i_velem,elements);
 		progress += ptarget;
 	}
 
 	// write animation vertex values to upload list
-	for(int i=0;i<al.size();i++) {
-		std::vector<float> pv = Toolbox::create_sprite_canvas(al[i].pos,al[i].sclx,al[i].scly);
-		vertices.insert(vertices.end(),pv.begin(),pv.end());
-		Toolbox::generate_elements(i+sl.size(),elements);
+	for (uint16_t i=0;i<al.size();i++) {
+		Toolbox::create_sprite_canvas(vertices,t_vsize,al[i].pos,al[i].sclx,al[i].scly);
+		Toolbox::generate_elements(t_esize,i_velem,elements);
 		progress += ptarget;
 	}
+	// FIXME: extremely questionable architecture:
+	// it is expected that every load adds to current vertex array, but
+	// will multi load all sprites that are created during more than one load?
 
 	// upload to buffers
 	buffer.bind();
@@ -79,8 +86,8 @@ void Renderer2D::load(float &progress,float pseq)
 	s2d.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 
 	// load textures
-	for (int i=0;i<sl.size();i++) sl.at(i).texture(),progress += ptarget;
-	for (int i=0;i<al.size();i++) al.at(i).texture(),progress += ptarget;
+	for (int i=0;i<sl.size();i++) sl[i].texture(), progress += ptarget;
+	for (int i=0;i<al.size();i++) al[i].texture(), progress += ptarget;
 	s2d.upload_int("tex",0);
 
 	// coordinate system

@@ -6,6 +6,7 @@
 #include <vector>
 
 // engine
+#include "../ccb/core.h"
 #include "../ccb/frm/frame.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/frm/gbuffer.h"
@@ -25,7 +26,7 @@ class World
 public:
 
 	// construction
-	World(CascabelBaseFeature* eref,StageSetup* set_rigs);
+	World(CascabelBaseFeature* eref);
 	~World() {  }
 
 	// creation
@@ -50,13 +51,12 @@ public:
 public:
 
 	// public indices
-	uint8_t active_daui = 0,active_cam2D = 0,active_cam3D = 0;
+	uint8_t active_daui = 0;
 
 private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 	FrameBuffer game_fb;
 	uint8_t rtarget_id;
 

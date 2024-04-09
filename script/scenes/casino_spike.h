@@ -1,6 +1,7 @@
 #ifndef SCR_SCENES_CASINO_SPIKE
 #define SCR_SCENES_CASINO_SPIKE
 
+#include "../../ccb/core.h"
 #include "../../ccb/gfx/cubemap.h"
 
 #include "../struct/feature_base.h"
@@ -11,7 +12,7 @@ class CasinoSpike : public Scene
 public:
 
 	// construction
-	CasinoSpike(CascabelBaseFeature* ccbf,StageSetup* set_rigs,float &progress,float pseq);
+	CasinoSpike(CascabelBaseFeature* ccbf,float &progress,float pseq);
 	~CasinoSpike() {  }
 
 	// draw
@@ -21,10 +22,9 @@ private:
 
 	// render information
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 	Cubemap irradiance_map = Cubemap("./res/irradiance_map.hdr");
 	uint16_t index_r3D,index_p3D;
-	std::vector<uint8_t> texture_repeat;
+	uint8_t texture_repeat[6] = { 1,1,10,4,1,1 };
 
 	// physics
 	float oheights[4] = { 0 },ospeed[4] = { 0 };

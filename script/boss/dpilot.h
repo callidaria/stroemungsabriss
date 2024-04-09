@@ -5,18 +5,21 @@
 
 #include <glm/glm.hpp>
 
+#include "../../ccb/mat/toolbox.h"
+
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 
 #include "../ui/healthbar.h"
 
-#define E 2.7182818284
-
 // bullet memory offset
-constexpr uint8_t BMEM_FLARES = 0;
-constexpr uint8_t BMEM_MINES = 1;
-constexpr uint8_t BMEM_SPREAD = 2;
-constexpr uint8_t BMEM_WHIRL = 3;
+enum DPilotBMEM
+{
+	DP_FLARES,
+	DP_MINES,
+	DP_SPREAD,
+	DP_WHIRL
+};
 
 class DPilot : public Boss
 {

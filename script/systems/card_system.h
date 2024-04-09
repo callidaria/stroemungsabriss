@@ -20,10 +20,11 @@
 #include "../struct/playing_cards.h"
 //#include "../ui/cursor.h"
 
+// count
 constexpr uint16_t CSYS_CURRENCY_CAP = 1024;
 
-// TIMING
-constexpr float CARDSYSTEM_DEAL_WAIT = 15;
+// timing
+constexpr float CARDSYSTEM_DEAL_WAIT = .15f;
 
 // structure to hold currency object & texture path
 struct Currency
@@ -31,6 +32,13 @@ struct Currency
 	const char* object;
 	const char* texture,*specular,*normals,*emission;
 	uint16_t value;
+};
+
+// currency stats
+struct CurrencyStats
+{
+	uint16_t value;
+	uint16_t spawn = 0;
 };
 
 // currency stacking
@@ -81,7 +89,7 @@ public:
 
 	// construction
 	CardSystem() {  }
-	CardSystem(CascabelBaseFeature* ccbf,StageSetup* set_rigs,std::vector<Currency> curr_path);
+	CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path);
 	~CardSystem() {  }
 
 	// interaction
@@ -121,7 +129,7 @@ public:
 private:
 
 	// helpers
-	void create_card(glm::vec2 tex_id,bool deck_id);
+	void create_card(size_t& mem_id,glm::vec2 tex_id,bool deck_id);
 	//void card_to_queue(uint8_t id);
 	glm::vec3 get_card_screen_space(uint8_t id);
 
@@ -141,7 +149,6 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	StageSetup* m_setRigs;
 
 	// render
 	uint16_t r3d_index,ir3d_index;
@@ -154,8 +161,7 @@ private:
 	uint8_t choice = 0;
 
 	// currency information
-	std::vector<uint16_t> currency_value;
-	std::vector<uint16_t> currency_spawn;
+	std::vector<CurrencyStats> currency_stats;
 	CurrencyStack cstack = { glm::vec2(7,7),{} };
 	std::vector<CurrencyStack> field_stacks;
 

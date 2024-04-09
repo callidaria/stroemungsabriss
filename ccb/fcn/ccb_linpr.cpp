@@ -19,60 +19,71 @@ uint16_t CCBLInterpreter::load_level()
 	// setup
 	int out = m_r2d->sl.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
-	std::vector<std::string> lines;
 	std::string tline;
-
-	// get raw level file information
-	while (getline(lvfile,tline)) lines.push_back(tline);
-	// FIXME: why do i do this again?
+	std::string args[CANM_ARGUMENT_COUNT];
 
 	// interpret level file
-	for (auto line : lines) {
-		std::stringstream ssline(line);
-		std::vector<std::string> args;
+	while (getline(lvfile,tline)) {
+		std::stringstream ssline(tline);
+
+		// extract arguments
+		uint8_t arg_index = 0;
 		std::string arg;
-		while (std::getline(ssline,arg,' ')) args.push_back(arg);
+		while (std::getline(ssline,arg,' ')) args[arg_index++] = arg;
 
 		// pattern for spritedef: lh position_x position_y width height texpath
-		if (args[0]=="sprite:") {
+		if (args[CSPR_COMMAND]=="sprite:") {
 
 			// extract values
-			glm::vec2 pos = glm::vec2(stoi(args[1]),stoi(args[2]));
-			float width = stoi(args[3]),height = stoi(args[4]);
-			char* tex_path = new char[args[5].length()+1];
-			strcpy(tex_path,args[5].c_str());
+			glm::vec2 pos = glm::vec2(stoi(args[CSPR_POSX]),stoi(args[CSPR_POSY]));
+			float width = stoi(args[CSPR_WIDTH]),height = stoi(args[CSPR_HEIGHT]);
+			char* tex_path = new char[args[CSPR_TEXPATH].length()+1];
+			strcpy(tex_path,args[CSPR_TEXPATH].c_str());
 
 			// save values & create sprite
-			m_pos.push_back(pos);
-			m_width.push_back(width);
-			m_height.push_back(height);
-			m_tex.push_back(tex_path);
+			InterpreterSpriteData proc = {
+				.position = pos,
+				.width = width,
+				.height = height,
+				.texpath = tex_path
+			};
+			sprite_data.push_back(proc);
 			m_r2d->add(pos,width,height,tex_path);
 		}
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
 		//		frames timesplit
-		else if (args[0]=="anim:") {
+		else if (args[CANM_COMMAND]=="anim:") {
 
 			// extract values
-			glm::vec2 pos = glm::vec2(stoi(args[1]),stoi(args[2]));
-			float width = stoi(args[3]),height = stoi(args[4]);
-			char* tex_path = new char[args[5].length()+1];
-			strcpy(tex_path,args[5].c_str());
-			uint8_t r = stoi(args[6]),c = stoi(args[7]),f = stoi(args[8]),t = stoi(args[9]);
+			glm::vec2 pos = glm::vec2(stoi(args[CANM_POSX]),stoi(args[CANM_POSY]));
+			float width = stoi(args[CANM_WIDTH]),height = stoi(args[CANM_HEIGHT]);
+			char* tex_path = new char[args[CANM_TEXPATH].length()+1];
+			strcpy(tex_path,args[CANM_TEXPATH].c_str());
+			uint8_t r = stoi(args[CANM_REPEAT]),
+				c = stoi(args[CANM_COUNT]),
+				f = stoi(args[CANM_FRAMES]),
+				t = stoi(args[CANM_TICKS]);
 
 			// save values & create animation
-			a_pos.push_back(pos);
-			a_width.push_back(width);
-			a_height.push_back(height);
-			a_tex.push_back(tex_path);
-			a_row.push_back(r);a_column.push_back(c);
-			a_frames.push_back(f);a_ts.push_back(t);
+			InterpreterAnimData proc = {
+				.position = pos,
+				.width = width,
+				.height = height,
+				.texpath = tex_path,
+				.row = r,
+				.column = c,
+				.frames = f,
+				.ticks = t
+			};
+			anim_data.push_back(proc);
 			m_r2d->add(pos,width,height,tex_path,r,c,f,t);
 		}
-	} return out;
+	}
+	return out;
 }
 // FIXME: duplicate code
+// FIXME: maybe it is time to retire manager system as it is (it is not very useful)
 
 /*
 	write_level() -> void
@@ -80,28 +91,26 @@ uint16_t CCBLInterpreter::load_level()
 */
 void CCBLInterpreter::write_level()
 {
+	// write mesh positions
 	std::ofstream lvfile(lvpath,std::ios::out);
-	for (int i=0;i<m_pos.size();i++) {
+	for (InterpreterSpriteData sprite : sprite_data) {
 		std::stringstream lvbuff;
-		lvbuff <<"sprite: "<<m_pos.at(i).x<<' '<<m_pos.at(i).y<<' '
-			<<m_width.at(i)<<' '<<m_height.at(i)<<' '<<m_tex.at(i)<<'\n';
+		lvbuff << "sprite: "
+				<< sprite.position.x << ' ' << sprite.position.y << ' '
+				<< sprite.width << ' ' << sprite.height << ' '
+				<< sprite.texpath << '\n';
 		lvfile << lvbuff.str();
-	} for (int i=0;i<a_pos.size();i++) {
-		std::stringstream lvbuff;
-		lvbuff <<"anim: "<<a_pos.at(i).x<<' '<<a_pos.at(i).y<<' '
-			<<a_width.at(i)<<' '<<a_height.at(i)<<' '<<a_tex.at(i)<<' '
-			<<a_row.at(i)<<' '<<a_column.at(i)<<' '<<a_frames.at(i)<<' '<<a_ts.at(i)<<'\n';
-		lvfile << lvbuff.str();
-	} lvfile.close();
-}
+	}
 
-/*
-	delete_level() -> void
-	purpose: manually remove all texture paths from allocated memory
-*/
-void CCBLInterpreter::delete_level()
-{
-	for (const char* tex : m_tex) delete[] tex;
-	for (const char* tex : a_tex) delete[] tex;
+	// write animation positions
+	for (InterpreterAnimData anim : anim_data) {
+		std::stringstream lvbuff;
+		lvbuff << "anim: "
+				<< anim.position.x << ' ' << anim.position.y << ' '
+				<< anim.width << ' ' << anim.height << ' '
+				<< anim.texpath << ' '
+				<< anim.row << ' ' << anim.column << ' ' << anim.frames << ' ' << anim.ticks << '\n';
+		lvfile << lvbuff.str();
+	}
+	lvfile.close();
 }
-// TODO: completely unload all of the level from memory

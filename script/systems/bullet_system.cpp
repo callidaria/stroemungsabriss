@@ -22,23 +22,21 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 {
 	// setting bullet parameter lists
 	m_rI->add(glm::vec2(0),width,height,tPath,rows,cols,itn,f);		// adding bullets
-	std::vector<glm::vec2> t_dirs(caps);	// creating temporary bullet direction list
-	std::vector<int32_t> t_ts(caps);		// creating temporary bullet tick counter list
 
 	// moving all instanced objects outside orthogonal view
-	for (int i=0;i<caps;i++) m_rI->set_aOffset(bCount.size(),i,glm::vec2(10000));
+	for (int i=0;i<caps;i++) m_rI->set_aOffset(clusters.size(),i,glm::vec2(10000));
 	// FIXME: set at construction
 
-	// save bullet width and height of cluster
-	c_width.push_back(width);
-	c_height.push_back(height);
-
-	// setting initial values
-	bCount.push_back(0);		// add value of already spawned bullets, set to 0
-	countCaps.push_back(caps);	// save capacity value to capacity value list
-	dirs.push_back(t_dirs);		// add bullet direction list
-	ts.push_back(t_ts);			// add bullet tick counter list
-	return bCount.size()-1;		// return the index the cluster is to be referenced by
+	// create cluster
+	clusters.push_back({
+		.width = width,
+		.height = height,
+		.bullet_count = 0,
+		.bullet_cap = caps,
+		.directions = std::vector<glm::vec2>(caps),
+		.ticks = std::vector<int32_t>(caps)
+	});
+	return clusters.size()-1;		// return the index the cluster is to be referenced by
 }
 // TODO: find a way to index cluster attributes and independent renderer draws alike
 
@@ -57,12 +55,12 @@ uint16_t BulletSystem::add_cluster(uint16_t width,uint16_t height,
 */
 void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 {
-	bCount[cluster] %= countCaps[cluster];  			// resetting bullet count if cap reached
-	m_rI->set_aOffset(cluster,bCount[cluster],nPos);	// move bullets from original position
-	m_rI->reset_anim_tick(cluster,bCount[cluster]);		// reset animation tick counter
-	set_bltDir(cluster,bCount[cluster],nDir);			// setting bullet direction parameter
-	reset_tick(cluster,bCount[cluster]);				// resetting bullet time ticks to 0
-	bCount[cluster]++;									// increment bullet spawn counter
+	clusters[cluster].bullet_count %= clusters[cluster].bullet_cap;
+	m_rI->set_aOffset(cluster,clusters[cluster].bullet_count,nPos);
+	m_rI->reset_anim_tick(cluster,clusters[cluster].bullet_count);
+	set_bltDir(cluster,clusters[cluster].bullet_count,nDir);
+	reset_tick(cluster,clusters[cluster].bullet_count);
+	clusters[cluster].bullet_count++;
 }
 
 /*
@@ -74,7 +72,7 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir)
 void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float r)
 {
 	spwn_blt(cluster,nPos,nDir);
-	m_rI->set_aRotation(cluster,bCount[cluster]-1,r);
+	m_rI->set_aRotation(cluster,clusters[cluster].bullet_count-1,r);
 }
 
 /*
@@ -92,8 +90,8 @@ void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
 void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
-	for (int i=0;i<countCaps.at(cluster);i++)
-		m_rI->add_aOffset(cluster,i,dirs[cluster][i]*(float)m_frame->time_delta);
+	for (int i=0;i<clusters[cluster].bullet_cap;i++)
+		m_rI->add_aOffset(cluster,i,clusters[cluster].directions[i]*(float)m_frame->time_delta);
 }
 
 /*
@@ -102,8 +100,8 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 */
 void BulletSystem::inc_tick(uint8_t cluster)
 {
-	for(int i=0;i<bCount[cluster];i++)
-		ts[cluster][i]++;
+	for(int i=0;i<clusters[cluster].bullet_count;i++)
+		clusters[cluster].ticks[i]++;
 }
 
 /*
@@ -120,11 +118,11 @@ void BulletSystem::inc_tick(uint8_t cluster)
 uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 {
 	uint8_t out = 0;
-	for (int i=0;i<countCaps[cluster];i++) {
+	for (int i=0;i<clusters[cluster].bullet_cap;i++) {
 
 		// get centered bullet position
 		glm::vec2 cPos = m_rI->get_aOffset(cluster,i)
-				+ glm::vec2(c_width[cluster]/2.0f,c_height[cluster]/2.0f);
+				+ glm::vec2(clusters[cluster].width*.5f,clusters[cluster].height*.5f);
 
 		// calculate if object got hit & "despawn"
 		bool hit = glm::length(cPos-pos)<=hr+br;
@@ -145,7 +143,7 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 void BulletSystem::render()
 {
 	m_rI->prepare(m_frame->time_delta);
-	for (int i=0;i<bCount.size();i++) m_rI->render_anim(i,countCaps[i]);
+	for (int i=0;i<clusters.size();i++) m_rI->render_anim(i,clusters[i].bullet_cap);
 }
 // TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)
 // TODO: add a reset method
