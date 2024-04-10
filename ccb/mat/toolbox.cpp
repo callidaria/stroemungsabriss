@@ -212,7 +212,8 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 	for(auto key : dld.key_list) {
 		printf("| \033[1;32m%s\033[0m: \033[1;33m%fms\033[0m\n",key.key_name,key.delta_ticks);
 		total_time += key.delta_ticks;
-	} printf("----------------------------------------\n");
+	}
+	printf("----------------------------------------\n");
 	printf("| total time: \033[1;35m%fms\033[0m\n",total_time);
 	printf("----------------------------------------\n\n");
 }
