@@ -1,5 +1,25 @@
 #include "input_map.h"
 
+
+// definition string constants for input names
+// TODO: expand into naming list for correlation with input ids, this is extremely horrible and pathetic atm
+const std::string
+
+// keyboard input naming
+keynames[9] = {
+	"RETURN","ESCAPE","BACKSPACE","TAB","SPACE","RIGHT","LEFT","DOWN","UP"
+},
+
+// controller button input naming
+cntnames[21] = {
+	"A","B","X","Y","OPTIONS","GUIDE","START","LSTICK","RSTICK","RSHOULDER","LSHOULDER",
+	"UP","DOWN","LEFT","RIGHT","CAPTURE","PADDLE 1","PADDLE 2","PADDLE 3","PADDLE 4","TRIGGERPAD"
+},
+
+// controller axis input naming
+axisnames[2] = { "LTRIGGER","RTRIGGER" };
+
+
 /*
 	constructor(Frame*)
 	frame: reference to frame, which is enabled when the input happens
@@ -19,8 +39,8 @@ InputMap::InputMap(Frame* frame)
 void InputMap::map_keyboard()
 {
 	for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
-		key_actions[i] = &m_frame->kb.ka[kmap[i]];
-		key_name[i] = get_input_name(kmap[i]);
+		key_actions[i] = &m_frame->kb.ka[kref[i].key_id];
+		key_name[i] = get_input_name(kref[i].key_id);
 	}
 }
 
@@ -35,9 +55,9 @@ void InputMap::map_controller()
 		cnt_lraxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX];
 		cnt_udaxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY];
 		for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
-			cnt_actions[i] = caxis[i] ? (bool*)&m_frame->xb[0].xba[cmap[i]]
-					: &m_frame->xb[0].xbb[cmap[i]];
-			cnt_name[i] = get_input_name(cmap[i],caxis[i]);
+			cnt_actions[i] = kref[i].is_axis ? (bool*)&m_frame->xb[0].xba[kref[i].controller_id]
+					: &m_frame->xb[0].xbb[kref[i].controller_id];
+			cnt_name[i] = get_input_name(kref[i].controller_id,kref[i].controller_id);
 		}
 	}
 
