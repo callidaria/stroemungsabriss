@@ -249,20 +249,12 @@ void Frame::vanish()
 void Frame::init()
 {
 	// sdl setup
-	DebugLogData dld;
-	Toolbox::start_debug_logging(dld,"frame initialization & setup");
 	SDL_Init(SDL_INIT_EVERYTHING);
-	Toolbox::add_timekey(dld,"SDL init");
-
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
-	Toolbox::add_timekey(dld,"GL attribute setup");
-
 	SDL_StopTextInput();
-	Toolbox::add_timekey(dld,"exit text input mode");
-	Toolbox::flush_debug_logging(dld);
 	//SDL_ShowCursor(SDL_DISABLE);
 	// TODO: dynamically hide the cursor, when controller input is mainly used
 }
