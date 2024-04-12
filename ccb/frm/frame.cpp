@@ -248,7 +248,6 @@ void Frame::vanish()
 */
 void Frame::init()
 {
-
 	// sdl setup
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);

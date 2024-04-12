@@ -74,6 +74,7 @@ To see the full documentation of engine go [here](doc/index.md)
 - removed unnecessary calculations from montecarlo shader
 
 ### fixes:
+- FIXED: horrible formatting in time profiler output
 - FIXED: unbelievable naming & navigation mess in shader directory
 
 ## v0.0.6 [UNX]
@@ -224,4 +225,5 @@ Worktime: 120h
   + 238: 4h 45min
   + 295: 44min
   + 253: 27h 41min
+  + 265: 1h 28min
 - Total Code Lines: 17.485

@@ -58,8 +58,9 @@ struct DebugLogKey
 struct DebugLogData
 {
 	const char* task_name;
-	std::vector<DebugLogKey> key_list;
+	std::vector<DebugLogKey> key_list = {  };
 	std::chrono::steady_clock::time_point last_ticks;
+	uint8_t max_name_width = 0;
 };
 
 class Toolbox
@@ -121,6 +122,8 @@ private:
 
 	// helpers
 	static void load_texture_function_head(uint32_t tex,const char* path,bool corrected);
+	static inline std::string produce_logging_cell(std::string content,std::string col,uint8_t len)
+		{ return "| "+col+content+std::string(len-content.length(),' ')+"\033[0m |"; }
 };
 
 #endif
