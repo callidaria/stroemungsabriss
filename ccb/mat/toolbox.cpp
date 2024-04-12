@@ -177,7 +177,6 @@ void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
 {
 	dld.task_name = tname;
 	dld.last_ticks = std::chrono::steady_clock::now();
-	dld.key_list = {  };
 	printf("\033[1;35mprocessing -> %s\033[0m",tname);
 }
 
@@ -189,13 +188,22 @@ void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
 */
 void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 {
-	DebugLogKey nkey;
-	nkey.key_name = kname;
-	nkey.delta_ticks = (std::chrono::steady_clock::now()-dld.last_ticks).count()
-			* CONVERSION_MULT_MILLISECONDS;
+	// add time log key
+	DebugLogKey nkey = {
+		.key_name = kname,
+		.delta_ticks = (std::chrono::steady_clock::now()-dld.last_ticks).count()*CONVERSION_MULT_MILLISECONDS,
+	};
 	dld.key_list.push_back(nkey);
-	dld.last_ticks = std::chrono::steady_clock::now();
+
+	// update needed leftmost table cell width
+	uint8_t key_width = strlen(kname);
+	dld.max_name_width = (dld.max_name_width<key_width) ? key_width : dld.max_name_width;
+
+	// signal progression
 	printf("...");
+	
+	// reset counter
+	dld.last_ticks = std::chrono::steady_clock::now();
 }
 
 /*
@@ -205,17 +213,26 @@ void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 */
 void Toolbox::flush_debug_logging(DebugLogData dld)
 {
-	printf("\n----------------------------------------\n");
-	printf("| \033[1;34m%s\033[0m\n",dld.task_name);
-	printf("----------------------------------------\n");
+	// output task headline
+	std::string head_line = '|'+std::string(dld.max_name_width+23,'-')+'|';
+	printf("\n%s\n",head_line.c_str());
+	printf("%s\n",produce_logging_cell(dld.task_name,"\033[1;34m",dld.max_name_width+21).c_str());
+
+	// output table contents
+	std::string pref_line = '|'+std::string(dld.max_name_width+2,'-')+'|'+std::string(20,'-')+'|';
+	printf("%s\n",pref_line.c_str());
 	double total_time = .0;
 	for(auto key : dld.key_list) {
-		printf("| \033[1;32m%s\033[0m: \033[1;33m%fms\033[0m\n",key.key_name,key.delta_ticks);
+		//printf("| \033[1;32m%s\033[1;33m%fms\033[0m\n",key.key_name,key.delta_ticks);
+		printf("%s%17fms |\n",
+				produce_logging_cell(key.key_name,"\033[1;32m",dld.max_name_width).c_str(),key.delta_ticks);
 		total_time += key.delta_ticks;
 	}
-	printf("----------------------------------------\n");
-	printf("| total time: \033[1;35m%fms\033[0m\n",total_time);
-	printf("----------------------------------------\n\n");
+
+	// output result row and close table
+	printf("%s\n",pref_line.c_str());
+	printf("%s%17fms |\n",produce_logging_cell("total","\033[1;35m",dld.max_name_width).c_str(),total_time);
+	printf("%s\n\n",head_line.c_str());
 }
 
 /*
