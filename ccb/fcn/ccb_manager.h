@@ -17,7 +17,7 @@ class CCBManager
 public:
 
 	// construction
-	CCBManager(Frame* frame,Renderer2D* r2d);
+	CCBManager(Frame* frame,Renderer* renderer);
 
 	// load & unload
 	uint16_t add_lv(const char* path);
@@ -29,7 +29,7 @@ private:
 
 	// background
 	Frame* m_frame;
-	Renderer2D* m_r2d;
+	Renderer* m_rnd;
 	std::vector<CCBLInterpreter> linpr;
 	std::vector<int> index;
 

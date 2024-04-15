@@ -8,8 +8,16 @@
 
 
 // data structure for sprite information
-struct Sprite
+class Sprite
 {
+public:
+
+	// construction
+	Sprite(glm::vec2 position,float width,float height,const char* texpath);
+	~Sprite() {  }
+
+public:
+
 	// attributes
 	glm::vec2 position;
 	float width,height;
@@ -20,9 +28,19 @@ struct Sprite
 	uint32_t texture;
 };
 
+
 // data structure for spritesheet information
-struct Atlas
+class Atlas
 {
+public:
+
+	// construction
+	Atlas(glm::vec2 position,float width,float height,const char* texpath,
+			uint8_t rows,uint8_t columns,uint8_t frames,uint8_t span);
+	~Atlas() {  }
+
+public:
+
 	// attributes
 	glm::vec2 position;
 	float width,height;
@@ -48,6 +66,13 @@ public:
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t);
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s);
 
+	// transformation
+	Sprite transform(Sprite spr,glm::vec2 dir,float wdt,float hgt,glm::vec3 rot);
+	Sprite translate(Sprite spr,glm::vec2 dir);
+	Sprite scale(Sprite spr,float wdt,float height);
+	Sprite rotate(Sprite spr,glm::vec3 rot);
+	// TODO: make this part of sprite :(
+
 	// setup
 	void load();
 	void prepare_sprites();
@@ -59,6 +84,12 @@ public:
 	void render_sprite_frame(uint16_t i,glm::vec2 pos);
 	void render_sprite_animated(uint16_t i);
 
+public:
+
+	// objects
+	std::vector<Sprite> sprites;
+	std::vector<Atlas> atlas;
+
 private:
 
 	// engine
@@ -66,8 +97,6 @@ private:
 	Shader sprite_shader;
 
 	// data
-	std::vector<Sprite> sprites;
-	std::vector<Atlas> atlas;
 	std::vector<float> sprite_vertices;
 	std::vector<uint32_t> sprite_elements;
 };

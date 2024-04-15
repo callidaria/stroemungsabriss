@@ -1,13 +1,13 @@
 #include "ccb_linpr.h"
 
 /*
-	constructor(Renderer2D*,const char*)
-	r2d: points to 2D renderer handling all sprite & anim creation requests
+	constructor(Renderer*,const char*)
+	renderer: points to 2D renderer handling all sprite & anim creation requests
 	path: path to environment cascabel file holding all creation requests & parameters
 	purpose: saves path & renderer for later usage
 */
-CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,const char* path)
-	: m_r2d(r2d),lvpath(path) {  }
+CCBLInterpreter::CCBLInterpreter(Renderer* renderer,const char* path)
+	: m_rnd(renderer),lvpath(path) {  }
 
 /*
 	load_level() -> uint16_t
@@ -17,7 +17,7 @@ CCBLInterpreter::CCBLInterpreter(Renderer2D* r2d,const char* path)
 uint16_t CCBLInterpreter::load_level()
 {
 	// setup
-	int out = m_r2d->sl.size();
+	int out = m_rnd->sprites.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
 	std::string tline;
 	std::string args[CANM_ARGUMENT_COUNT];
@@ -48,7 +48,7 @@ uint16_t CCBLInterpreter::load_level()
 				.texpath = tex_path
 			};
 			sprite_data.push_back(proc);
-			m_r2d->add(pos,width,height,tex_path);
+			m_rnd->add_sprite(pos,width,height,tex_path);
 		}
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
@@ -77,7 +77,7 @@ uint16_t CCBLInterpreter::load_level()
 				.ticks = t
 			};
 			anim_data.push_back(proc);
-			m_r2d->add(pos,width,height,tex_path,r,c,f,t);
+			m_rnd->add_sprite(pos,width,height,tex_path,r,c,f,t);
 		}
 	}
 	return out;

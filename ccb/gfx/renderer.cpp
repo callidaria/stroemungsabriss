@@ -1,5 +1,37 @@
 #include "renderer.h"
 
+
+/**
+ * TODO: expand
+*/
+
+/*
+	TODO
+*/
+Sprite::Sprite(glm::vec2 position,float width,float height,const char* texpath)
+	: position(position),width(width),height(height),texpath(texpath)
+{
+	glGenTextures(1,&texture);
+}
+
+
+/**
+ * TODO: expand
+*/
+
+Atlas::Atlas(glm::vec2 position,float width,float height,const char* texpath,
+		uint8_t rows,uint8_t columns,uint8_t frames,uint8_t span)
+	: position(position),width(width),height(height),texpath(texpath),
+		rows(rows),columns(columns),frames(frames),span(span)
+{
+	glGenTextures(1,&texture);
+}
+
+
+/**
+ * TODO: expand
+*/
+
 /*
 	!O(1) /load -> (public)
 	purpose: create renderer object to subsequently add 2D objects to and draw them
@@ -20,19 +52,7 @@ Renderer::Renderer()
 */
 uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 {
-	// sprite definition
-	Sprite s = {
-		.position = p,
-		.width = w,
-		.height = h,
-		.texpath = t
-	};
-
-	// generate texture
-	glGenTextures(1,&s.texture);
-
-	// write and end creation
-	sprites.push_back(s);
+	sprites.push_back(Sprite(p,w,h,t));
 	return sprites.size()-1;
 }
 
@@ -51,23 +71,7 @@ uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 */
 uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
-	// atlas definition
-	Atlas a = {
-		.position = p,
-		.width = w,
-		.height = h,
-		.texpath = t,
-		.rows = r,
-		.columns = c,
-		.frames = f,
-		.span = s
-	};
-
-	// generate texture
-	glGenTextures(1,&a.texture);
-
-	// write and end creation
-	atlas.push_back(a);
+	atlas.push_back(Atlas(p,w,h,t,r,c,f,s));
 	return atlas.size()-1;
 }
 

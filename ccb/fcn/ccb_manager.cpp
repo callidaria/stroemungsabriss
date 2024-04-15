@@ -1,17 +1,17 @@
 #include "ccb_manager.h"
 
 /*
-	constructor(Frame*,Renderer2D*)
+	constructor(Frame*,Renderer*)
 	frame: frame entity, handling the relevant input for dev console
-	r2d: renderer to handle loaded & added 2D entities
+	renderer: renderer to handle loaded & added 2D entities
 	cam2d: reference to 2D camera defining the coordinate system and perspective for renderer
 	purpose: build a manager instance, for later usage of developer console and level loading
 */
-CCBManager::CCBManager(Frame* frame,Renderer2D* r2d)
-	: m_frame(frame),m_r2d(r2d)
+CCBManager::CCBManager(Frame* frame,Renderer* renderer)
+	: m_frame(frame),m_rnd(renderer)
 {
 	// create developer mode label
-	m_r2d->add(glm::vec2(1230,690),40,20,"./res/dev.png");
+	m_rnd->add_sprite(glm::vec2(1230,690),40,20,"./res/dev.png");
 
 	// create developer console greetings and initial setup
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));
@@ -33,7 +33,7 @@ CCBManager::CCBManager(Frame* frame,Renderer2D* r2d)
 uint16_t CCBManager::add_lv(const char* path)
 {
 	// interpret level environment file
-	CCBLInterpreter proc = CCBLInterpreter(m_r2d,path);
+	CCBLInterpreter proc = CCBLInterpreter(m_rnd,path);
 	int out = proc.load_level();
 
 	// save to interpreter & renderer memory index list
@@ -51,8 +51,8 @@ uint16_t CCBManager::add_lv(const char* path)
 void CCBManager::dev_console(bool &running,bool &dactive)
 {
 	// draw developer mode label
-	m_r2d->prepare();
-	m_r2d->render_sprite(0,1);
+	m_rnd->prepare_sprites();
+	m_rnd->render_sprite(0);
 
 	// open or close console with comma if not opened or closed last frame
 	if (m_frame->kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) {
@@ -79,8 +79,8 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// move sprite according to mouse vector delta
 		glm::vec2 deltamv = glm::vec2(m_frame->mouse.mxfr-mlf.x,m_frame->mouse.myfr-mlf.y);
 		int ti = index[i_lv]+i_rf;
-		m_r2d->sl[ti].model
-				= glm::translate(m_r2d->sl[ti].model,glm::vec3(deltamv.x,deltamv.y,0));
+		m_rnd->sprites[ti].model
+				= glm::translate(m_rnd->sprites[ti].model,glm::vec3(deltamv.x,deltamv.y,0));
 		linpr[i_lv].sprite_data[i_rf].position += deltamv;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	}
@@ -96,7 +96,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// scale sprite according to mouse movement vector length
 		deltascl += (m_frame->mouse.myfr-mlf.y)*0.001f;
 		int ti = index[i_lv]+i_rf;
-		m_r2d->sl[ti].scale_arbit(deltascl,deltascl);
+		m_rnd->sprites[ti].scale_arbit(deltascl,deltascl);
 		linpr[i_lv].sprite_data[i_rf].width = tmp_wscale*deltascl;
 		linpr[i_lv].sprite_data[i_rf].height = tmp_hscale*deltascl;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);

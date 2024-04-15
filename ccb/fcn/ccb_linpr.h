@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include "../gfx/renderer2d.h"
+#include "../gfx/renderer.h"
 
 /**
  *		ATTENTION SHOPPERS
@@ -51,7 +51,7 @@ class CCBLInterpreter
 {
 public:
 
-	CCBLInterpreter(Renderer2D* r2d,const char* path);
+	CCBLInterpreter(Renderer* renderer,const char* path);
 
 	// interaction
 	uint16_t load_level();
@@ -60,7 +60,7 @@ public:
 private:
 
 	// cascabel
-	Renderer2D* m_r2d;
+	Renderer* m_rnd;
 
 	// source
 	const char* lvpath;

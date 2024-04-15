@@ -8,7 +8,7 @@
 
 #include "ccb/frm/frame.h"
 
-#include "ccb/gfx/renderer2d.h"
+#include "ccb/gfx/renderer.h"
 #include "ccb/gfx/renderer3d.h"
 #include "ccb/gfx/rendereri.h"
 #include "ccb/gfx/particle_system.h"
@@ -55,15 +55,15 @@ int main(int argc,char** argv)
 	Listener listener = Listener();
 
 	// RENDERERS
-	Renderer2D r2d = Renderer2D();
+	Renderer renderer = Renderer();
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	ParticleSystem psys = ParticleSystem();
 	BulletSystem bsys = BulletSystem(&f,&ri);
 
 	// LOADERS
-	CCBManager ccbm = CCBManager(&f,&r2d);
-	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
+	CCBManager ccbm = CCBManager(&f,&renderer);
+	CascabelBaseFeature eref = { &f,&renderer,&r3d,&ri,&psys,&bsys,&imap };
 
 	// BUILD SET
 	World world = World(&eref);

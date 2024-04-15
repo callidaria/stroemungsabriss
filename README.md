@@ -68,6 +68,7 @@ To see the full documentation of engine go [here](doc/index.md)
 ## v0.0.7 DEV
 
 ### optimizations:
+- renderer usage, management and implementation. everything is now using the same system
 - memory optimizations across the board, avoiding misinformed vector usage decisions
 - global coordinate system, no more recalculation of 2D camera
 - bitwise operations replacing some division and modulo operators
@@ -226,5 +227,5 @@ Worktime: 120h
   + 295: 44min
   + 253: 27h 41min
   + 265: 1h 28min
-  + 248: 2h 16min
+  + 248: 3h 15min
 - Total Code Lines: 17.485
