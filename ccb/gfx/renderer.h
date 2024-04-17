@@ -7,51 +7,40 @@
 #include "shader.h"
 
 
-// data structure for sprite information
-class Sprite
+// basic functionality of 2D geometry
+struct Geometry2D
 {
-public:
-
-	// construction
-	Sprite(glm::vec2 position,float width,float height,const char* texpath);
-	~Sprite() {  }
-
-public:
+	// streamline utility
+	// TODO
 
 	// attributes
 	glm::vec2 position;
 	float width,height;
-	const char* texpath;
 
-	// data
+	// transform
 	glm::mat4 model = glm::mat4(1.f);
+};
+
+// data structure for sprite information
+struct Sprite : Geometry2D
+{
+	// texture
+	const char* texpath;
 	uint32_t texture;
 };
 
-
 // data structure for spritesheet information
-class Atlas
+struct Atlas : Geometry2D
 {
-public:
-
-	// construction
-	Atlas(glm::vec2 position,float width,float height,const char* texpath,
-			uint8_t rows,uint8_t columns,uint8_t frames,uint8_t span);
-	~Atlas() {  }
-
-public:
-
 	// attributes
-	glm::vec2 position;
-	float width,height;
-	const char* texpath;
 	uint8_t rows,columns;
 	uint8_t frames,span;
 
-	// data
-	glm::mat4 model = glm::mat4(1.f);
+	// texture
+	const char* texpath;
 	uint32_t texture;
 };
+// TODO: possibly choose containment over inheritance
 
 
 class Renderer
