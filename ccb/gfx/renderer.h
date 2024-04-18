@@ -8,39 +8,55 @@
 
 
 // basic functionality of 2D geometry
-struct Geometry2D
+struct RTransform2D
 {
 	// streamline utility
-	// TODO
+	void transform(glm::vec2 p,float w,float h,float r);
+	void transform(glm::vec2 p,float w,float h,float r,glm::vec2 a);
+	inline void translate(glm::vec2 p) { model = glm::translate(model,glm::vec3(p.x,p.y,0)); }
+	inline void scale(float w,float h) { model[0][0] = w, model[1][1] = h; }
+	void scale(float w,float h,glm::vec2 a);
+	inline void rotate(float r) { model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1)); }
+	void rotate(float r,glm::vec2 a);
 
 	// attributes
-	glm::vec2 position;
-	float width,height;
+	const glm::vec2 position;
+	const float width,height;
+	float rot = .0f;
 
 	// transform
 	glm::mat4 model = glm::mat4(1.f);
 };
 
-// data structure for sprite information
-struct Sprite : Geometry2D
+// texture duality structure containing source and data
+struct RTextureTuple
 {
-	// texture
-	const char* texpath;
+	// utility
+	inline void load() { glGenTextures(1,&texture),Toolbox::load_texture(texture,path); }
+
+	// data
 	uint32_t texture;
+	const char* path;
+};
+
+// data structure for sprite information
+struct Sprite
+{
+	RTransform2D transform;
+	RTextureTuple texture;
 };
 
 // data structure for spritesheet information
-struct Atlas : Geometry2D
+struct Atlas
 {
+	// fundamentals
+	RTransform2D transform;
+	RTextureTuple texture;
+
 	// attributes
 	uint8_t rows,columns;
 	uint8_t frames,span;
-
-	// texture
-	const char* texpath;
-	uint32_t texture;
 };
-// TODO: possibly choose containment over inheritance
 
 
 class Renderer

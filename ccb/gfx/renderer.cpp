@@ -5,7 +5,39 @@
  * TODO: expand
 */
 
-// TODO
+/*
+	TODO
+*/
+void RTransform2D::scale(float w,float h,glm::vec2 a)
+{
+	// reset towards arbitrary origin
+	model = glm::mat4(1.f);
+	translate(a-position);
+
+	// scale from arbitrary position & reconstruct
+	rotate(rot);
+	scale(w,h);
+	translate(position-a);
+}
+
+/*
+	TODO
+*/
+void RTransform2D::rotate(float r,glm::vec2 a)
+{
+	// reset towards arbitrary origin
+	float t_wfac = model[0][0], t_hfac = model[1][1];
+	model = glm::mat4(1.f);
+	translate(a-position);
+
+	// change rotation and reset scaling and previous position
+	rotate(r);
+	scale(t_wfac,t_hfac);
+	translate(position-a);
+
+	// save current rotation
+	rot = r;
+}
 
 
 /**
@@ -32,13 +64,17 @@ Renderer::Renderer()
 */
 uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 {
+	// information setup
 	Sprite s = {
+		.transform = {
 			.position = p,
 			.width = w,
 			.height = h,
-			.texpath = t
+		},
+		.texture = { .path = t },
 	};
-	glGenTexture(1,s.texture);
+
+	// data setup
 	sprites.push_back(s);
 	return sprites.size()-1;
 }
@@ -58,18 +94,22 @@ uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 */
 uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
+	// information setup
 	Atlas a = {
-		.position = p,
-		.width = w,
-		.height = h,
-		.texpath = t,
+		.transform = {
+			.position = p,
+			.width = w,
+			.height = h,
+		},
+		.texture = { .path = t },
 		.rows = r,
 		.columns = c,
 		.frames = f,
 		.span = s
 	};
-	glGenerateTexture(1,a.texture);
-	atlas.push_back(Atlas(a);
+
+	// data setup
+	atlas.push_back(a);
 	return atlas.size()-1;
 }
 
@@ -87,13 +127,15 @@ void Renderer::load()
 	// write sprite vertex values to upload list
 	size_t i_velem = t_vsize/PATTERN_SPRITE_LOAD_REPEAT;
 	for (Sprite& s : sprites) {
-		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,s.position,s.width,s.height);
+		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,s.transform.position,
+				s.transform.width,s.transform.height);
 		Toolbox::generate_elements(t_esize,i_velem,sprite_elements);
 	}
 
 	// write animation vertex values to upload list
 	for (Atlas& a : atlas) {
-		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,a.position,a.width,a.height);
+		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,a.transform.position,
+				a.transform.width,a.transform.height);
 		Toolbox::generate_elements(t_esize,i_velem,sprite_elements);
 	}
 
@@ -105,8 +147,8 @@ void Renderer::load()
 	sprite_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 
 	// load textures
-	for (Sprite& s : sprites) Toolbox::load_texture(s.texture,s.texpath);
-	for (Atlas& a : atlas) Toolbox::load_texture(a.texture,a.texpath);
+	for (Sprite& s : sprites) s.texture.load();
+	for (Atlas& a : atlas) a.texture.load();
 	sprite_shader.upload_int("tex",0);
 
 	// coordinate system
@@ -130,8 +172,8 @@ void Renderer::prepare_sprites()
 */
 void Renderer::render_sprite(uint16_t i)
 {
-	sprite_shader.upload_matrix("model",sprites[i].model);
-	glBindTexture(GL_TEXTURE_2D,sprites[i].texture);
+	sprite_shader.upload_matrix("model",sprites[i].transform.model);
+	glBindTexture(GL_TEXTURE_2D,sprites[i].texture.texture);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
 }
 
@@ -143,7 +185,7 @@ void Renderer::render_sprite(uint16_t i)
 */
 void Renderer::render_sprite_overwritten(uint16_t i,uint32_t tex)
 {
-	sprite_shader.upload_matrix("model",sprites[i].model);
+	sprite_shader.upload_matrix("model",sprites[i].transform.model);
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
 }
@@ -160,10 +202,10 @@ void Renderer::render_sprite_frame(uint16_t i,glm::vec2 pos)
 	sprite_shader.upload_int("row",atlas[i].rows);
 	sprite_shader.upload_int("col",atlas[i].columns);
 	sprite_shader.upload_vec2("i_tex",pos);
-	sprite_shader.upload_matrix("model",atlas[i].model);
+	sprite_shader.upload_matrix("model",atlas[i].transform.model);
 
 	// draw sprite
-	glBindTexture(GL_TEXTURE_2D,atlas[i].texture);
+	glBindTexture(GL_TEXTURE_2D,atlas[i].texture.texture);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sprites.size())*6*sizeof(uint32_t)));
 }
 
@@ -174,6 +216,6 @@ void Renderer::render_sprite_frame(uint16_t i,glm::vec2 pos)
 */
 void Renderer::render_sprite_animated(uint16_t i)
 {
-	glBindTexture(GL_TEXTURE_2D,atlas[i].texture);
+	glBindTexture(GL_TEXTURE_2D,atlas[i].texture.texture);
 	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sprites.size())*6*sizeof(uint32_t)));
 }
