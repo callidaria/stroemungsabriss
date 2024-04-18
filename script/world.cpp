@@ -64,7 +64,7 @@ void World::remove_boss(uint8_t boss_id)
 void World::load(float &progress,float ldsplit)
 {
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
-	m_ccbf->r2d->load(progress,pr_progress);
+	m_ccbf->rnd->load();
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(Core::gCamera3D,progress,pr_progress);
 	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&Core::gLighting);

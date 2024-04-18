@@ -6,7 +6,7 @@
 
 #include "../../ccb/frm/frame.h"
 
-#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/renderer.h"
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
 #include "../../ccb/gfx/particle_system.h"
@@ -31,7 +31,7 @@ enum LoadInstruction
 // refers to all basic cascabel tools and features
 struct CascabelBaseFeature {
 	Frame* frame;
-	Renderer2D* r2d;
+	Renderer* rnd;
 	Renderer3D* r3d;
 	RendererI* rI;
 	ParticleSystem* pSys;

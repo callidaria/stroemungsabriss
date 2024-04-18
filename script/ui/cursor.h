@@ -6,14 +6,14 @@
 #include <glm/glm.hpp>
 
 #include "../../ccb/frm/frame.h"
-#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/renderer.h"
 #include "../../ccb/mat/camera2d.h"
 
 class Cursor
 {
 public:
 
-	Cursor(Frame* frame,Renderer2D* r2d);
+	Cursor(Frame* frame,Renderer* rnd);
 	void render();
 
 public:
@@ -24,7 +24,7 @@ private:
 
 	// cascabel
 	Frame* pFrame;
-	Renderer2D* pR2D;
+	Renderer* pRnd;
 
 	// draw
 	uint16_t rindex;

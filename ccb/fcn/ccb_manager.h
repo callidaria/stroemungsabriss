@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include "../frm/frame.h"
-#include "../gfx/renderer2d.h"
 #include "../mat/camera2d.h"
 #include "ccb_linpr.h"
 #include "text.h"

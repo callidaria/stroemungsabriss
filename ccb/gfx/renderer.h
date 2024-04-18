@@ -10,7 +10,7 @@
 // basic functionality of 2D geometry
 struct RTransform2D
 {
-	// streamline utility
+	// transformation utility
 	void transform(glm::vec2 p,float w,float h,float r);
 	void transform(glm::vec2 p,float w,float h,float r,glm::vec2 a);
 	inline void translate(glm::vec2 p) { model = glm::translate(model,glm::vec3(p.x,p.y,0)); }
@@ -71,13 +71,6 @@ public:
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t);
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s);
 
-	// transformation
-	Sprite transform(Sprite spr,glm::vec2 dir,float wdt,float hgt,glm::vec3 rot);
-	Sprite translate(Sprite spr,glm::vec2 dir);
-	Sprite scale(Sprite spr,float wdt,float height);
-	Sprite rotate(Sprite spr,glm::vec3 rot);
-	// TODO: make this part of sprite :(
-
 	// setup
 	void load();
 	void prepare_sprites();
@@ -95,11 +88,11 @@ public:
 	std::vector<Sprite> sprites;
 	std::vector<Atlas> atlas;
 
-private:
-
 	// engine
 	Buffer sprite_buffer;
 	Shader sprite_shader;
+
+private:
 
 	// data
 	std::vector<float> sprite_vertices;

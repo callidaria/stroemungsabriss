@@ -79,8 +79,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// move sprite according to mouse vector delta
 		glm::vec2 deltamv = glm::vec2(m_frame->mouse.mxfr-mlf.x,m_frame->mouse.myfr-mlf.y);
 		int ti = index[i_lv]+i_rf;
-		m_rnd->sprites[ti].model
-				= glm::translate(m_rnd->sprites[ti].model,glm::vec3(deltamv.x,deltamv.y,0));
+		m_rnd->sprites[ti].transform.translate(deltamv);
 		linpr[i_lv].sprite_data[i_rf].position += deltamv;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
 	}
@@ -96,7 +95,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// scale sprite according to mouse movement vector length
 		deltascl += (m_frame->mouse.myfr-mlf.y)*0.001f;
 		int ti = index[i_lv]+i_rf;
-		m_rnd->sprites[ti].scale_arbit(deltascl,deltascl);
+		m_rnd->sprites[ti].transform.scale(deltascl,deltascl,glm::vec2(0));
 		linpr[i_lv].sprite_data[i_rf].width = tmp_wscale*deltascl;
 		linpr[i_lv].sprite_data[i_rf].height = tmp_hscale*deltascl;
 		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);

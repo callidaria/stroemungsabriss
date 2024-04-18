@@ -13,8 +13,6 @@
 #include "../../ccb/mat/toolbox.h"
 
 #include "../../ccb/gfx/shader.h"
-#include "../../ccb/gfx/renderer2d.h"
-#include "../../ccb/gfx/renderer3d.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/playing_cards.h"
@@ -176,7 +174,7 @@ private:
 	float crr_dtime = 0;
 
 	// controls
-	//Cursor cursor = Cursor(m_frame,m_r2d);
+	//Cursor cursor = Cursor(m_frame,m_rnd);
 	bool lfI = false,kinput = true;
 	int32_t tmx = 0;
 	float cstart = 0;

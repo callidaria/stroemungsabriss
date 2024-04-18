@@ -67,7 +67,7 @@ JaegerJet::JaegerJet(CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
 {
 	// setup player hitbox indicator
-	index_r2D = ccbf->r2d->add(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
+	index_r2D = ccbf->rnd->add_sprite(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// setup player character visualization
 	index_r3D = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
@@ -127,9 +127,10 @@ void JaegerJet::update()
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+1);
 
 	// render player hitbox indicator
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->sl[index_r2D].model = glm::translate(glm::mat4(1.0f),position-glm::vec3(5,5,0));
-	m_ccbf->r2d->render_sprite(index_r2D,index_r2D+1);
+	m_ccbf->rnd->prepare_sprites();
+	m_ccbf->rnd->sprites[index_r2D].transform.model = glm::mat4(1.f);
+	m_ccbf->rnd->sprites[index_r2D].transform.translate(position-glm::vec3(5,5,0));
+	m_ccbf->rnd->render_sprite(index_r2D);
 
 	// render health bar
 	/*hbar.register_damage(pDmg);

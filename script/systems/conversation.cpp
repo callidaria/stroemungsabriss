@@ -1,15 +1,15 @@
 #include "conversation.h"
 
 /*
-	constructor(Frame*,Renderer2D*,CharacterManager*,const char*,string)
+	constructor(Frame*,Renderer*,CharacterManager*,const char*,string)
 	frame: pointer to frame, the conversation gets rendered to
-	r2D: pointer to 2D renderer, handling UI and sprites
+	rnc: pointer to 2D renderer, handling UI and sprites
 	cm: pointer to character manager holding character reference data
 	mm_path: path to mindmap file holding conversation branch
 	purpose: creates conversation visuals & prepares interactive branching
 */
-Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path)
-	: m_frame(frame),m_r2D(r2D),charManager(cm)
+Conversation::Conversation(Frame* frame,Renderer* rnd,CharacterManager* cm,const char* mm_path)
+	: m_frame(frame),m_rnd(rnd),charManager(cm)
 {
 	// extract lines from conversation file
 	std::ifstream mm_file(mm_path,std::ios::in);
@@ -69,7 +69,7 @@ Conversation::Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,con
 	manipulate_background_edges();
 
 	// load continue button animation
-	btn_rindex = m_r2D->add(glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-CNV_CREQUEST_WQUAD),
+	btn_rindex = m_rnd->add_sprite(glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-CNV_CREQUEST_WQUAD),
 			CNV_CREQUEST_WQUAD,CNV_CREQUEST_WQUAD,"./res/continue_dialogue.png",2,3,5,30);
 }
 
@@ -257,12 +257,12 @@ void Conversation::render(GLuint scene_tex)
 		tname.render(1024,name_colour);
 
 		// animate continue request
-		m_r2D->prepare();
-		m_r2D->al[btn_rindex].model = glm::translate(glm::mat4(1.0f),
+		m_rnd->prepare_sprites();
+		m_rnd->atlas[btn_rindex].transform.model = glm::translate(glm::mat4(1.0f),
 				glm::vec3(btn_position.x+1280
 				* (sltr_count<sltr_target||dltr_count||input_blocked||iwait),
 				btn_position.y+tscroll,0));
-		m_r2D->render_anim(btn_rindex);
+		m_rnd->render_sprite_animated(btn_rindex);
 
 		// increase disengage wait frames when input is blocked
 		dwait += m_frame->time_delta*input_blocked;

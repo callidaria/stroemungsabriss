@@ -916,8 +916,8 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 
 	// difficulty preview spritesheet
 	m_ccbf = ccbf;
-	rid_diffs = m_ccbf->r2d->add(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
-	m_ccbf->r2d->add(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
+	rid_diffs = m_ccbf->rnd->add_sprite(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
+	m_ccbf->rnd->add_sprite(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
 
 	// globe render target
 	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
@@ -1202,17 +1202,19 @@ void MenuList::render()
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
-	glm::mat4 diff_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
+	m_ccbf->rnd->atlas[rid_diffs+1].transform
+			.transform(glm::vec2(1075,575),diff_scale,diff_scale,diff_rotation,glm::vec2(0));
+	/*glm::mat4 diff_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
 	diff_model = glm::scale(diff_model,glm::vec3(diff_scale,diff_scale,0));
 	diff_model = glm::rotate(diff_model,glm::radians(diff_rotation),glm::vec3(0,0,1));
-	m_ccbf->r2d->al[rid_diffs+1].model = diff_model;
+	m_ccbf->rnd->atlas[rid_diffs+1].transform.model = diff_model;*/
 	anim_prog += .02f;
 
 	// difficulty prognosis render
 	uint8_t rstate = crr.entities[crr.select_id].diff_preview-1;
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->render_state(rid_diffs,glm::vec2(0,rstate));
-	m_ccbf->r2d->render_state(rid_diffs+1,glm::vec2(0,rstate));
+	m_ccbf->rnd->prepare_sprites();
+	m_ccbf->rnd->render_sprite_frame(rid_diffs,glm::vec2(0,rstate));
+	m_ccbf->rnd->render_sprite_frame(rid_diffs+1,glm::vec2(0,rstate));
 }
 // TODO: animate dropdown opening
 
@@ -1277,10 +1279,10 @@ void MenuList::update_overlays()
 	FrameBuffer::close();
 
 	// draw globe buffer
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->s2d.upload_float("vFlip",1.f);
-	m_ccbf->r2d->render_sprite(globe_target_id,globe_target_id+1,fb_globe.tex);
-	m_ccbf->r2d->s2d.upload_float("vFlip",.0f);
+	m_ccbf->rnd->prepare_sprites();
+	m_ccbf->rnd->sprite_shader.upload_float("vFlip",1.f);
+	m_ccbf->rnd->render_sprite_overwritten(globe_target_id,fb_globe.tex);
+	m_ccbf->rnd->sprite_shader.upload_float("vFlip",.0f);
 }
 
 /*
@@ -2051,7 +2053,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	// TODO: this proves it! mouse has to be part of input mapping at once!
 
 	// asset load
-	index_ranim = ccbf->r2d->al.size();
+	index_ranim = ccbf->rnd->atlas.size();
 	ccbm->add_lv("lvload/main_menu.ccb");
 
 	// version annotation text setup
@@ -2282,8 +2284,9 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 				glm::vec3(tshift)
 			),HRZ_TITLE_SCALESET
 		);
-	m_ccbf->r2d->al[index_ranim].model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
-	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
+	m_ccbf->rnd->atlas[index_ranim].transform.model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
+	m_ccbf->rnd->atlas[index_ranim+1].transform.model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
+	// TODO: rework with the new transform features
 
 	// peripheral switch for input request annotation
 	if (input.controller_preferred_peripheral!=m_ccbf->frame->cpref_peripheral)
@@ -2338,11 +2341,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// FIXME: optimize when all the text transitions are done
 
 	// render titles
-	m_ccbf->r2d->al[index_ranim+1].model = glm::translate(m_ccbf->r2d->al[index_ranim+1].model,
-			glm::vec3(0,150*ftransition,0));
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->render_state(index_ranim,glm::vec2(3,0));
-	m_ccbf->r2d->render_state(index_ranim+1,glm::vec2(0,0));
+	m_ccbf->rnd->atlas[index_ranim+1].transform.translate(glm::vec2(0,150*ftransition));
+	m_ccbf->rnd->prepare_sprites();
+	m_ccbf->rnd->render_sprite_frame(index_ranim,glm::vec2(3,0));
+	m_ccbf->rnd->render_sprite_frame(index_ranim+1,glm::vec2(0,0));
 
 	// update dialogues & lists
 	mlists.render();

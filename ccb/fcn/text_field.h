@@ -5,17 +5,16 @@
 #include <string>
 #include <glm/glm.hpp>
 #include "../frm/frame.h"
-#include "../gfx/renderer2d.h"
+#include "../gfx/renderer.h"
 #include "font.h"
 #include "text.h"
 
 class TextField
 {
-
 public:
 
 	// construction
-	TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* tp,glm::vec2 bpos,float width,float height);
+	TextField(Font* fnt,Renderer* rnd,glm::vec2 pos,const char* tp,glm::vec2 bpos,float width,float height);
 
 	// draw
 	void render(Frame* frame,glm::vec4 col);
@@ -23,7 +22,7 @@ public:
 private:
 
 	Text txt;
-	Renderer2D* m_r2d;
+	Renderer* m_rnd;
 	std::string cnt;
 	glm::vec2 m_pos;
 	glm::vec2 m_bpos;

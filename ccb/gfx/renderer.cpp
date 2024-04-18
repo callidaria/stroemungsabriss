@@ -8,6 +8,34 @@
 /*
 	TODO
 */
+void RTransform2D::transform(glm::vec2 p,float w,float h,float r)
+{
+	rotate(r);
+	scale(w,h);
+	translate(p);
+}
+
+/*
+	TODO
+*/
+void RTransform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
+{
+	// reset towards arbitrary origin
+	model = glm::mat4(1.f);
+	translate(a-position);
+
+	// execute transformation
+	rotate(r);
+	scale(w,h);
+	translate(position+p-a);
+
+	// save current rotation
+	rot = r;
+}
+
+/*
+	TODO
+*/
 void RTransform2D::scale(float w,float h,glm::vec2 a)
 {
 	// reset towards arbitrary origin
@@ -33,9 +61,9 @@ void RTransform2D::rotate(float r,glm::vec2 a)
 	// change rotation and reset scaling and previous position
 	rotate(r);
 	scale(t_wfac,t_hfac);
-	translate(position-a);
 
-	// save current rotation
+	// reconstruct valid transform state
+	translate(position-a);
 	rot = r;
 }
 
@@ -154,6 +182,7 @@ void Renderer::load()
 	// coordinate system
 	sprite_shader.upload_camera();
 }
+// FIXME: extremely questionable loading processing
 
 /*
 	!O(1) /+function -> (public)

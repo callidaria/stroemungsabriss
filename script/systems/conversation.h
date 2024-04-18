@@ -12,7 +12,7 @@
 #include "../../ccb/fcn/text.h"
 
 #include "../../ccb/gfx/shader.h"
-#include "../../ccb/gfx/renderer2d.h"
+#include "../../ccb/gfx/renderer.h"
 
 #include "../../ccb/frm/frame.h"
 #include "../../ccb/mat/camera2d.h"
@@ -57,7 +57,7 @@ class Conversation
 public:
 
 	// construction
-	Conversation(Frame* frame,Renderer2D* r2D,CharacterManager* cm,const char* mm_path);
+	Conversation(Frame* frame,Renderer* rnd,CharacterManager* cm,const char* mm_path);
 	~Conversation() {  }
 
 	// interaction
@@ -95,7 +95,7 @@ private:
 	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),mood_buffer = Buffer();
 	Shader slct_shader = Shader(),bgr_shader = Shader(),mood_shader = Shader();
 	Frame* m_frame;
-	Renderer2D* m_r2D;
+	Renderer* m_rnd;
 	CharacterManager* charManager;
 
 	// text

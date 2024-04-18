@@ -1,9 +1,9 @@
 #include "text_field.h"
 
-TextField::TextField(Font* fnt,Renderer2D* r2d,glm::vec2 pos,const char* bp,glm::vec2 bpos,float width,float height)
-	: m_r2d(r2d),m_pos(pos),m_bpos(bpos),m_width(width),m_height(height)
+TextField::TextField(Font* fnt,Renderer* rnd,glm::vec2 pos,const char* bp,glm::vec2 bpos,float width,float height)
+	: m_rnd(rnd),m_pos(pos),m_bpos(bpos),m_width(width),m_height(height)
 {
-	rinst = m_r2d->add(bpos,width,height,bp,3,1,30,0);
+	rinst = m_rnd->add_sprite(bpos,width,height,bp,3,1,30,0);
 	txt = Text(*fnt);
 }
 void TextField::render(Frame* frame,glm::vec4 col)
@@ -25,8 +25,9 @@ void TextField::render(Frame* frame,glm::vec4 col)
 		} txt.load();
 	} // !!write input prefix for activating
 
-	m_r2d->prepare();
-	m_r2d->render_state(rinst,glm::vec2(0,0+input_active+hover));
+	m_rnd->prepare_sprites();
+	m_rnd->render_sprite_frame(rinst,glm::vec2(0,0+input_active+hover));
 	txt.prepare();
 	txt.render(char_amount,col);
 }
+// TODO: redo all that, this is trash!

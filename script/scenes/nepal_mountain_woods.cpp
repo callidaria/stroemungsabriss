@@ -16,6 +16,6 @@ NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeatu
 */
 void NepalMountainWoods::render()
 {
-	m_ccbf->r2d->prepare();
-	m_ccbf->r2d->render_sprite(index_r2D,index_r2D+1);
+	m_ccbf->rnd->prepare_sprites();
+	m_ccbf->rnd->render_sprite(index_r2D);
 }
