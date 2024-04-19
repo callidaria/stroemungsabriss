@@ -1202,13 +1202,13 @@ void MenuList::render()
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
-	m_ccbf->rnd->atlas[rid_diffs+1].transform
-			.transform(glm::vec2(1075,575),diff_scale,diff_scale,diff_rotation,glm::vec2(0));
-	/*glm::mat4 diff_model = glm::translate(glm::mat4(1.0f),glm::vec3(1075,575,0));
-	diff_model = glm::scale(diff_model,glm::vec3(diff_scale,diff_scale,0));
-	diff_model = glm::rotate(diff_model,glm::radians(diff_rotation),glm::vec3(0,0,1));
-	m_ccbf->rnd->atlas[rid_diffs+1].transform.model = diff_model;*/
+	m_ccbf->rnd->atlas[rid_diffs+1].transform.model = glm::mat4(1.f);
+	m_ccbf->rnd->atlas[rid_diffs+1].transform.translate(glm::vec2(1075,575));
+	m_ccbf->rnd->atlas[rid_diffs+1].transform.scale(diff_scale,diff_scale);
+	m_ccbf->rnd->atlas[rid_diffs+1].transform.rotate(diff_rotation);
 	anim_prog += .02f;
+	// TODO: this translation pipeline does not make much sense does it?
+	//		translation still needs some work for it to be feasable for actual utility
 
 	// difficulty prognosis render
 	uint8_t rstate = crr.entities[crr.select_id].diff_preview-1;
