@@ -191,6 +191,9 @@ void Renderer::load()
 void Renderer::prepare_sprites()
 {
 	sprite_shader.enable();
+	sprite_shader.upload_int("row",1);
+	sprite_shader.upload_int("col",1);
+	sprite_shader.upload_vec2("i_tex",glm::vec2(0));
 	sprite_buffer.bind();
 }
 

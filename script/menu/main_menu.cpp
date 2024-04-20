@@ -1283,6 +1283,7 @@ void MenuList::update_overlays()
 	m_ccbf->rnd->sprite_shader.upload_float("vFlip",1.f);
 	m_ccbf->rnd->render_sprite_overwritten(globe_target_id,fb_globe.tex);
 	m_ccbf->rnd->sprite_shader.upload_float("vFlip",.0f);
+	// TODO: remove this from acceptable routine to correct corrupt target textures
 }
 
 /*
