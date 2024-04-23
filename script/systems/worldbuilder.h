@@ -18,6 +18,15 @@
 #include "../boss/dpilot.h"
 #include "../world.h"
 
+struct LoadStorage
+{
+	CascabelBaseFeature* m_ccbf;
+	CCBManager* m_ccbm;
+	World* world;
+	bool ldfb_showing = false;
+	float progress = .0;
+};
+
 class Worldbuilder
 {
 public:
@@ -31,25 +40,13 @@ public:
 
 private:
 
-	// load
-	void load_titles();
-	void load_menu();
-	void load_casino();
-	void load_cards();
-	void load_airfield();
-	void load_dpilot();
-
 	// loading progression feedback
 	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress);
 
 private:
 
 	// system
-	CascabelBaseFeature* m_ccbf;
-	CCBManager* m_ccbm;
-	World* m_world;
-	bool ldfb_showing = false;
-	float progress;
+	LoadStorage ldstorage;
 };
 
 #endif

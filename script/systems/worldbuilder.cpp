@@ -1,5 +1,102 @@
 #include "worldbuilder.h"
 
+
+
+typedef void (*load_routine)(LoadStorage&);
+// TODO: every load a member of the board evrart?!??!?
+
+/*
+	load_<scene>() -> void (private)
+	purpose: load logic of different scenes throughout the game
+*/
+void load_titles(LoadStorage& lds)
+{
+	std::cout << "loading: title display\n";
+	// TODO
+}
+
+/*
+	TODO
+*/
+void load_menu(LoadStorage& lds)
+{
+	MainMenu* main_menu = new MainMenu(lds.m_ccbm,lds.m_ccbf,lds.world,lds.progress,.75f);
+	lds.world->add_ui(main_menu);
+	lds.world->load(lds.progress,.25f);
+}
+
+/*
+	TODO
+*/
+void load_casino(LoadStorage& lds)
+{
+	std::cout << "loading: spike's casino\n";
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
+	lds.world->add_ui(action_menu);
+	lds.world->add_scene(cspike);
+	lds.world->active_daui = 1;
+	lds.world->load(lds.progress,.21f);
+	lds.progress = 1.0f;
+	// TODO: dynamification of camera and ui (etc...) picker
+}
+
+/*
+	TODO
+*/
+void load_cards(LoadStorage& lds)
+{
+	std::cout << "loading: card games\n";
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
+	lds.world->add_ui(action_menu);
+	lds.world->add_scene(ctable);
+	lds.world->active_daui = 1;
+	lds.world->load(lds.progress,.21f);
+	lds.progress = 1.0f;
+}
+
+/*
+	TODO
+*/
+void load_airfield(LoadStorage& lds)
+{
+	std::cout << "loading: airfield scene\n";
+	// TODO
+}
+
+/*
+	TODO
+*/
+void load_dpilot(LoadStorage& lds)
+{
+	std::cout << "loading: dancing pilot duel\n";
+	Core::gCamera3D = Camera3D(1280.0f,720.0f);
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	NepalMountainWoods* nmw = new NepalMountainWoods(lds.m_ccbm,lds.m_ccbf);
+	lds.progress += .2f;
+	/*JaegerJet* jj = new JaegerJet(m_ccbf);
+	progress += .2f;*/
+	DPilot* dpilot = new DPilot(lds.m_ccbf);
+	lds.progress += .2f;
+	lds.world->add_ui(action_menu);
+	lds.world->add_scene(nmw);
+	//m_world->add_playable(jj);
+	lds.world->add_boss(dpilot);
+	lds.world->active_daui = 1;
+	lds.world->load(lds.progress,.2f);
+}
+
+const load_routine load_routines[] = {
+	load_titles,
+	load_menu,
+	load_casino,
+	load_cards,
+	load_airfield,
+	load_dpilot,
+};
+
+
 /*
 	construction(CascabelBaseFeature*,CCBManager*,World*)
 	ccbf: all common cascabel tools & features
@@ -7,9 +104,14 @@
 	world: world to load objects & logic for
 	purpose: create a worldbuilder to process world loading logic
 */
-Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,
-		World* world)
-	: m_ccbf(ccbf),m_ccbm(ccbm),m_world(world) {  }
+Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
+{
+	ldstorage = {
+		.m_ccbf = ccbf,
+		.m_ccbm = ccbm,
+		.world = world
+	};
+}
 
 /*
 	load() -> void
@@ -17,103 +119,22 @@ Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,
 */
 void Worldbuilder::load()
 {
-	while (!m_ccbf->ld.empty()) {
+	while (!ldstorage.m_ccbf->ld.empty()) {
 
 		// loading feedback creation
-		if (!ldfb_showing) {
-			progress = .0f;
-			ldfb_showing = true;
-			std::thread load_fdb(show_load_progression,&ldfb_showing,m_ccbf,&progress);
+		if (!ldstorage.ldfb_showing) {
+			ldstorage.progress = .0f;
+			ldstorage.ldfb_showing = true;
+			std::thread load_fdb(show_load_progression,&ldstorage.ldfb_showing,ldstorage.m_ccbf,&ldstorage.progress);
 			load_fdb.detach();
 		} // FIXME: yes, this causes a memory leak ...too bad. called by member?
 
-		// switch load instructions
-		switch (m_ccbf->ld.front()) {
-
-		// start
-		case LOAD_START: load_titles();
-		case LOAD_MENU: load_menu();
-			break;
-
-		// casino
-		case LOAD_CASINO: load_casino();
-			break;
-
-		// cardtable testing
-		case LOAD_CARDTABLE: load_cards();
-			break;
-
-		// nepal
-		case LOAD_AIRFIELD: load_airfield();
-		case LOAD_DPILOT: load_dpilot();
-			break;
-
-		default: printf("load instruction has no logic\n");
-		} m_ccbf->ld.pop();
+		load_routines[ldstorage.m_ccbf->ld.front()](ldstorage);
+		ldstorage.m_ccbf->ld.pop();
 
 		// check loading feedback conclusion
-		ldfb_showing = !m_ccbf->ld.empty();
+		ldstorage.ldfb_showing = !ldstorage.m_ccbf->ld.empty();
 	}
-}
-
-/*
-	load_<scene>() -> void (private)
-	purpose: load logic of different scenes throughout the game
-*/
-void Worldbuilder::load_titles()
-{ std::cout << "loading: title display\n"; }
-void Worldbuilder::load_menu()
-{
-	MainMenu* main_menu = new MainMenu(m_ccbm,m_ccbf,m_world,progress,.75f);
-	m_world->add_ui(main_menu);
-	m_world->load(progress,.25f);
-}
-
-void Worldbuilder::load_casino()
-{
-	std::cout << "loading: spike's casino\n";
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
-	CasinoSpike* cspike = new CasinoSpike(m_ccbf,progress,.5f);
-	m_world->add_ui(action_menu);
-	m_world->add_scene(cspike);
-	m_world->active_daui = 1;
-	m_world->load(progress,.21f);
-	progress = 1.0f;
-	// TODO: dynamification of camera and ui (etc...) picker
-}
-
-void Worldbuilder::load_cards()
-{
-	std::cout << "loading: card games\n";
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
-	CasinoTable* ctable = new CasinoTable(m_ccbf,progress,.5f);
-	m_world->add_ui(action_menu);
-	m_world->add_scene(ctable);
-	m_world->active_daui = 1;
-	m_world->load(progress,.21f);
-	progress = 1.0f;
-}
-
-void Worldbuilder::load_airfield()
-{ std::cout << "loading: airfield scene\n"; }
-
-void Worldbuilder::load_dpilot()
-{
-	std::cout << "loading: dancing pilot duel\n";
-	Core::gCamera3D = Camera3D(1280.0f,720.0f);
-	ActionMenu* action_menu = new ActionMenu(m_ccbf->frame,m_ccbf->iMap,progress,.25f);
-	NepalMountainWoods* nmw = new NepalMountainWoods(m_ccbm,m_ccbf);
-	progress += .2f;
-	/*JaegerJet* jj = new JaegerJet(m_ccbf);
-	progress += .2f;*/
-	DPilot* dpilot = new DPilot(m_ccbf);
-	progress += .2f;
-	m_world->add_ui(action_menu);
-	m_world->add_scene(nmw);
-	//m_world->add_playable(jj);
-	m_world->add_boss(dpilot);
-	m_world->active_daui = 1;
-	m_world->load(progress,.2f);
 }
 
 /*
