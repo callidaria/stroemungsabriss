@@ -13,6 +13,7 @@ void load_titles(LoadStorage& lds)
 {
 	std::cout << "loading: title display\n";
 	// TODO
+	lds.m_ccbf->ld.push(LOAD_MENU);
 }
 
 /*
@@ -125,9 +126,10 @@ void Worldbuilder::load()
 		if (!ldstorage.ldfb_showing) {
 			ldstorage.progress = .0f;
 			ldstorage.ldfb_showing = true;
-			std::thread load_fdb(show_load_progression,&ldstorage.ldfb_showing,ldstorage.m_ccbf,&ldstorage.progress);
+			std::thread load_fdb(show_load_progression,&ldstorage);
 			load_fdb.detach();
-		} // FIXME: yes, this causes a memory leak ...too bad. called by member?
+		}
+		// FIXME: yes, this causes a memory leak ...too bad. called by member?
 
 		load_routines[ldstorage.m_ccbf->ld.front()](ldstorage);
 		ldstorage.m_ccbf->ld.pop();
@@ -140,19 +142,19 @@ void Worldbuilder::load()
 /*
 	show_load_progression(bool*,CascabelBaseFeature*,float*) -> void
 	purpose: display loading screen by a different thread, to visualize load progression
-	\param loading: memory address of boolean holding info, if load instructions are being processed
-	\param ccbf: addresses to main feature objects of cascabel
-	\param progress: address of loading progress variable
+	// TODO: adjust params
 */
-void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress)
+void Worldbuilder::show_load_progression(LoadStorage* lds)
 {
 	// visualization setup
-	SDL_GLContext context = ccbf->frame->create_new_context();
+	SDL_GLContext context = lds->m_ccbf->frame->create_new_context();
 
 	// loading bar setup
 	size_t t_vsize = 0;
 	std::vector<float> ld_canvas = std::vector<float>(PATTERN_SPRITE_TRIANGLE_REPEAT);
-	Toolbox::create_sprite_canvas_triangled(ld_canvas,t_vsize,glm::vec2(0),700,10);
+	Toolbox::create_sprite_canvas_triangled(ld_canvas,t_vsize,glm::vec2(0),700,10);		// TODO: use constants
+
+	// bar upload
 	Buffer ld_buffer = Buffer();
 	ld_buffer.bind();
 	ld_buffer.upload_vertices(ld_canvas);
@@ -167,7 +169,10 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 		x_rgt,y_up, x_rgt-brd_offset,y_up, x_rgt,y_up, x_rgt,y_up-brd_offset,
 		x_lft,y_dwn, x_lft+brd_offset,y_dwn, x_lft,y_dwn, x_lft,y_dwn+brd_offset,
 		x_rgt,y_dwn, x_rgt-brd_offset,y_dwn, x_rgt,y_dwn, x_rgt,y_dwn+brd_offset,
-	}; Buffer brd_buffer = Buffer();
+	};
+
+	// border upload
+	Buffer brd_buffer = Buffer();
 	brd_buffer.bind();
 	brd_buffer.upload_vertices(ld_bar);
 	Shader brd_shader = Shader();
@@ -176,12 +181,12 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 	brd_shader.upload_camera();
 
 	// render loop
-	while (*loading) {
+	while (lds->ldfb_showing) {
 
 		// clear loading screen
-		ccbf->frame->clear(.1f,.1f,.1f);
-		ccbf->frame->cpu_vsync();
-		ccbf->frame->calc_time_delta();
+		lds->m_ccbf->frame->clear(.1f,.1f,.1f);
+		lds->m_ccbf->frame->cpu_vsync();
+		lds->m_ccbf->frame->calc_time_delta();
 		// create stylized background animation OR timed background action art iterations
 
 		// prepare bar
@@ -190,7 +195,7 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 
 		// translate bar
 		glm::mat4 rmodel = glm::translate(glm::mat4(1.0f),glm::vec3(530,45,0));
-		rmodel = glm::scale(rmodel,glm::vec3(*progress,1,1));
+		rmodel = glm::scale(rmodel,glm::vec3(lds->progress,1,1));
 		ld_shader.upload_matrix("model",rmodel);
 
 		// render bar
@@ -202,7 +207,8 @@ void Worldbuilder::show_load_progression(bool* loading,CascabelBaseFeature* ccbf
 		glDrawArrays(GL_LINES,0,16);
 
 		// update loading screen
-		ccbf->frame->update();
-	} SDL_GL_DeleteContext(context);
+		lds->m_ccbf->frame->update();
+	}
+	SDL_GL_DeleteContext(context);
 }
 // TODO: what if multiple load instructions are in queue? the loading bar will reset! fix this!

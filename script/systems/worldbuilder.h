@@ -41,7 +41,7 @@ public:
 private:
 
 	// loading progression feedback
-	static void show_load_progression(bool* loading,CascabelBaseFeature* ccbf,float* progress);
+	static void show_load_progression(LoadStorage* lds);
 
 private:
 
