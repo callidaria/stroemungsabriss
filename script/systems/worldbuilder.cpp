@@ -88,6 +88,20 @@ void load_dpilot(LoadStorage& lds)
 	lds.world->load(lds.progress,.2f);
 }
 
+/*
+	TODO
+*/
+void load_testing(LoadStorage& lds)
+{
+	std::cout << "loading: test scene\n";
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	lds.world->add_ui(action_menu);
+	lds.world->active_daui = 1;
+	lds.world->load(lds.progress,.2f);
+}
+// FIXME: create menus once and keep, creating them within every load statement is a farce
+// FIXME: this loading structure results in a lot of repitition and a bad routine in general
+
 const load_routine load_routines[] = {
 	load_titles,
 	load_menu,
@@ -95,7 +109,9 @@ const load_routine load_routines[] = {
 	load_cards,
 	load_airfield,
 	load_dpilot,
+	load_testing,
 };
+// TODO: use a queue of function pointers directly
 
 
 /*

@@ -47,6 +47,7 @@ private:
 
 	// system
 	LoadStorage ldstorage;
+	// FIXME: load storage should be obsolete with core system
 };
 
 #endif

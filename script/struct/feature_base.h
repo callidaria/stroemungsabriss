@@ -25,7 +25,8 @@ enum LoadInstruction
 	LOAD_CASINO,
 	LOAD_CARDTABLE,
 	LOAD_AIRFIELD,
-	LOAD_DPILOT
+	LOAD_DPILOT,
+	LOAD_AREA51
 };
 
 // refers to all basic cascabel tools and features
