@@ -4,8 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../frm/frame.h"
-#include "../mat/camera2d.h"
+#include "../core.h"
 #include "ccb_linpr.h"
 #include "text.h"
 #include "font.h"
@@ -16,7 +15,7 @@ class CCBManager
 public:
 
 	// construction
-	CCBManager(Frame* frame,Renderer* renderer);
+	CCBManager();
 
 	// load & unload
 	uint16_t add_lv(const char* path);
@@ -27,8 +26,6 @@ public:
 private:
 
 	// background
-	Frame* m_frame;
-	Renderer* m_rnd;
 	std::vector<CCBLInterpreter> linpr;
 	std::vector<int> index;
 

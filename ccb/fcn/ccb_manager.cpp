@@ -7,11 +7,10 @@
 	cam2d: reference to 2D camera defining the coordinate system and perspective for renderer
 	purpose: build a manager instance, for later usage of developer console and level loading
 */
-CCBManager::CCBManager(Frame* frame,Renderer* renderer)
-	: m_frame(frame),m_rnd(renderer)
+CCBManager::CCBManager()
 {
 	// create developer mode label
-	m_rnd->add_sprite(glm::vec2(1230,690),40,20,"./res/dev.png");
+	Core::gRenderer.add_sprite(glm::vec2(1230,690),40,20,"./res/dev.png");
 
 	// create developer console greetings and initial setup
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));
@@ -33,7 +32,7 @@ CCBManager::CCBManager(Frame* frame,Renderer* renderer)
 uint16_t CCBManager::add_lv(const char* path)
 {
 	// interpret level environment file
-	CCBLInterpreter proc = CCBLInterpreter(m_rnd,path);
+	CCBLInterpreter proc = CCBLInterpreter(path);
 	int out = proc.load_level();
 
 	// save to interpreter & renderer memory index list
@@ -51,78 +50,78 @@ uint16_t CCBManager::add_lv(const char* path)
 void CCBManager::dev_console(bool &running,bool &dactive)
 {
 	// draw developer mode label
-	m_rnd->prepare_sprites();
-	m_rnd->render_sprite(0);
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite(0);
 
 	// open or close console with comma if not opened or closed last frame
-	if (m_frame->kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) {
+	if (Core::gFrame.kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) {
 		activeonsc = true;	// TODO: initially set this to false and remove later trigger call
 
 		// process
-		if (dactive) { m_frame->input_stop();m_frame->tline.pop_back(); }
-		else m_frame->input_start();
+		if (dactive) { Core::gFrame.input_stop();Core::gFrame.tline.pop_back(); }
+		else Core::gFrame.input_start();
 
 		// negate console's state of openness
 		dactive = !dactive;
 	}
 
 	// set if open was requested for next frame
-	activeonsc = m_frame->kb.ka[SDL_SCANCODE_COMMA];
+	activeonsc = Core::gFrame.kb.ka[SDL_SCANCODE_COMMA];
 
 	// object movement through user input
 	if (mv) {
 
 		// break movement at confirmation
-		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) mv = false;
-		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		if (Core::gFrame.kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) mv = false;
+		activeonentr = Core::gFrame.kb.ka[SDL_SCANCODE_RETURN];
 
 		// move sprite according to mouse vector delta
-		glm::vec2 deltamv = glm::vec2(m_frame->mouse.mxfr-mlf.x,m_frame->mouse.myfr-mlf.y);
+		glm::vec2 deltamv = glm::vec2(Core::gFrame.mouse.mxfr-mlf.x,Core::gFrame.mouse.myfr-mlf.y);
 		int ti = index[i_lv]+i_rf;
-		m_rnd->sprites[ti].transform.translate(deltamv);
+		Core::gRenderer.sprites[ti].transform.translate(deltamv);
 		linpr[i_lv].sprite_data[i_rf].position += deltamv;
-		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+		mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);
 	}
 
 	// object scaling throught user input
 	else if (scl) {
 
 		// break scaling through user input
-		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) scl = false;
-		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		if (Core::gFrame.kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) scl = false;
+		activeonentr = Core::gFrame.kb.ka[SDL_SCANCODE_RETURN];
 		// FIXME: duplicate code. reduce!
 
 		// scale sprite according to mouse movement vector length
-		deltascl += (m_frame->mouse.myfr-mlf.y)*0.001f;
+		deltascl += (Core::gFrame.mouse.myfr-mlf.y)*0.001f;
 		int ti = index[i_lv]+i_rf;
-		m_rnd->sprites[ti].transform.scale(deltascl,deltascl,glm::vec2(0));
+		Core::gRenderer.sprites[ti].transform.scale(deltascl,deltascl,glm::vec2(0));
 		linpr[i_lv].sprite_data[i_rf].width = tmp_wscale*deltascl;
 		linpr[i_lv].sprite_data[i_rf].height = tmp_hscale*deltascl;
-		mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+		mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);
 	}
 
 	// developer console is active and normal due to exclusion of the above cases
 	else if (dactive) {
 
 		// input confirmation and processing
-		if (m_frame->kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) {
+		if (Core::gFrame.kb.ka[SDL_SCANCODE_RETURN]&&!activeonentr) {
 
 			// reset confirmation frame trigger
 			activeonentr = true;  // FIXME: not really necessary, is it?
 
 			// add command to passive console text lines & scroll
-			ct.add(m_frame->tline.c_str(),glm::vec2(770,console_y));
+			ct.add(Core::gFrame.tline.c_str(),glm::vec2(770,console_y));
 			console_y -= 20;
 
 			// split command & arguments in input string
 			std::vector<std::string> args;
 			std::string tmp = "";
-			for (int i=0;i<m_frame->tline.length();i++) {
-				if (m_frame->tline[i]==' ') { 
+			for (int i=0;i<Core::gFrame.tline.length();i++) {
+				if (Core::gFrame.tline[i]==' ') { 
 					args.push_back(tmp);
 					tmp = "";
 				}
-				else tmp.push_back(m_frame->tline[i]);
+				else tmp.push_back(Core::gFrame.tline[i]);
 			}
 			args.push_back(tmp);
 
@@ -141,7 +140,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 					mv = true;
 
 					// save argument values & origin mouse coordinates to calculate delta from
-					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+					mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);
 					i_lv = std::stoi(args[1]);i_rf = std::stoi(args[2]);
 				}
 			}
@@ -158,7 +157,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 					scl = true;
 
 					// save delta scaling variables & input arguments
-					mlf = glm::vec2(m_frame->mouse.mxfr,m_frame->mouse.myfr);
+					mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);
 					i_lv = std::stoi(args[1]);i_rf = std::stoi(args[2]);
 					tmp_wscale = linpr[i_lv].sprite_data[i_rf].width;
 					tmp_hscale = linpr[i_lv].sprite_data[i_rf].height;
@@ -178,21 +177,21 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 			}  // FIXME: make a dynamically changable command list with function jmp not branching
 
 			// remove input line contents & autoscroll terminal
-			m_frame->tline = "";
+			Core::gFrame.tline = "";
 			console_y -= 20;
 			ct.add('>',glm::vec2(750,console_y));
 			cscroll = glm::translate(cscroll,glm::vec3(0,40,0));
 		}
 
 		// prevent consecutive frame confirmation input
-		activeonentr = m_frame->kb.ka[SDL_SCANCODE_RETURN];
+		activeonentr = Core::gFrame.kb.ka[SDL_SCANCODE_RETURN];
 
 		// if mouse button is pressen while console active
-		if (m_frame->mouse.mb[0]&&!activeonmcl) {
+		if (Core::gFrame.mouse.mb[0]&&!activeonmcl) {
 
 			// catch mouse coordinates and print them
 			std::string mouse_out
-				= std::to_string(m_frame->mouse.mxfr)+'x'+std::to_string(m_frame->mouse.myfr);
+				= std::to_string(Core::gFrame.mouse.mxfr)+'x'+std::to_string(Core::gFrame.mouse.myfr);
 			ct.add(mouse_out.c_str(),glm::vec2(770,console_y));
 
 			// autoscroll after output
@@ -201,11 +200,11 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		}
 
 		// prevent consecutive frame mouse click printout
-		activeonmcl = m_frame->mouse.mb[0];
+		activeonmcl = Core::gFrame.mouse.mb[0];
 
 		// rewrite console input line
 		cl.clear(); // ??maybe directly add and remove chars from text instead of rewrite
-		cl.add(m_frame->tline.c_str(),glm::vec2(770,30));
+		cl.add(Core::gFrame.tline.c_str(),glm::vec2(770,30));
 
 		// draw console text above input line & upload scroll
 		ct.prepare();
@@ -214,6 +213,6 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 
 		// draw console input line
 		cl.prepare();
-		cl.render(m_frame->tline.size(),glm::vec4(.7f,.7f,.2f,1));
+		cl.render(Core::gFrame.tline.size(),glm::vec4(.7f,.7f,.2f,1));
 	}
 }

@@ -1,22 +1,15 @@
 #ifndef SCR_SYSTEMS_CARD_SYSTEM
 #define SCR_SYSTEMS_CARD_SYSTEM
 
-#include <iostream>
-
-#include <glm/glm.hpp>
-
+#include "../../ccb/core.h"
 #include "../../ccb/fcn/buffer.h"
-#include "../../ccb/frm/frame.h"
-
-#include "../../ccb/mat/camera3d.h"
-#include "../../ccb/mat/lighting.h"
 #include "../../ccb/mat/toolbox.h"
-
 #include "../../ccb/gfx/shader.h"
 
 #include "../struct/feature_base.h"
 #include "../struct/playing_cards.h"
 //#include "../ui/cursor.h"
+
 
 // count
 constexpr uint16_t CSYS_CURRENCY_CAP = 1024;

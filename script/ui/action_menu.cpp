@@ -1,13 +1,12 @@
 #include "action_menu.h"
 
 /*
-	construction(Frame*,InputMap*)
-	frame: pointer to frame the game is drawn onto
+	TODO
 	input_map: input map to use prehandled controller/keyboard/stick input
 	purpose: creates the lightweight in-action menu to pause and use while in-game
 */
-ActionMenu::ActionMenu(Frame* frame,InputMap* input_map,float &progress,float pseq)
-	: m_frame(frame),imap(input_map)
+ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
+	: imap(input_map)
 {
 	// vertices for selection splash
 	float sseq = pseq/3.0f;
@@ -64,7 +63,7 @@ void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// game time modification
 	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
-	m_frame->time_mod = ptrans;
+	Core::gFrame.time_mod = ptrans;
 
 	// process user selection
 	int8_t smod = ((down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
@@ -81,7 +80,7 @@ void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 	running *= !(imap->request(InputID::FOCUS)&&msel==2&&menu_sys);
 
 	// sepia colourspace when paused
-	m_frame->clear();
+	Frame::clear();
 	game_fb->prepare();
 	game_fb->s.upload_vec2(
 			"ratio",

@@ -916,16 +916,15 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 
 	// difficulty preview spritesheet
 	m_ccbf = ccbf;
-	rid_diffs = m_ccbf->rnd->add_sprite(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
-	m_ccbf->rnd->add_sprite(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
+	rid_diffs = Core::gRenderer.add_sprite(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
+	Core::gRenderer.add_sprite(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
 
 	// globe render target
 	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
 			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
 	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
-	globe_target_id = m_ccbf->r3d->add_target(m_ccbf->frame);
-	fb_globe = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false);
+	globe_target_id = m_ccbf->r3d->add_target();
+	fb_globe = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false);
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -1202,19 +1201,19 @@ void MenuList::render()
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
-	m_ccbf->rnd->atlas[rid_diffs+1].transform.model = glm::mat4(1.f);
-	m_ccbf->rnd->atlas[rid_diffs+1].transform.translate(glm::vec2(1075,575));
-	m_ccbf->rnd->atlas[rid_diffs+1].transform.scale(diff_scale,diff_scale);
-	m_ccbf->rnd->atlas[rid_diffs+1].transform.rotate(diff_rotation);
+	Core::gRenderer.atlas[rid_diffs+1].transform.model = glm::mat4(1.f);
+	Core::gRenderer.atlas[rid_diffs+1].transform.translate(glm::vec2(1075,575));
+	Core::gRenderer.atlas[rid_diffs+1].transform.scale(diff_scale,diff_scale);
+	Core::gRenderer.atlas[rid_diffs+1].transform.rotate(diff_rotation);
 	anim_prog += .02f;
 	// TODO: this translation pipeline does not make much sense does it?
 	//		translation still needs some work for it to be feasable for actual utility
 
 	// difficulty prognosis render
 	uint8_t rstate = crr.entities[crr.select_id].diff_preview-1;
-	m_ccbf->rnd->prepare_sprites();
-	m_ccbf->rnd->render_sprite_frame(rid_diffs,glm::vec2(0,rstate));
-	m_ccbf->rnd->render_sprite_frame(rid_diffs+1,glm::vec2(0,rstate));
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite_frame(rid_diffs,glm::vec2(0,rstate));
+	Core::gRenderer.render_sprite_frame(rid_diffs+1,glm::vec2(0,rstate));
 }
 // TODO: animate dropdown opening
 
@@ -1279,10 +1278,10 @@ void MenuList::update_overlays()
 	FrameBuffer::close();
 
 	// draw globe buffer
-	m_ccbf->rnd->prepare_sprites();
-	m_ccbf->rnd->sprite_shader.upload_float("vFlip",1.f);
-	m_ccbf->rnd->render_sprite_overwritten(globe_target_id,fb_globe.tex);
-	m_ccbf->rnd->sprite_shader.upload_float("vFlip",.0f);
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.sprite_shader.upload_float("vFlip",1.f);
+	Core::gRenderer.render_sprite_overwritten(globe_target_id,fb_globe.tex);
+	Core::gRenderer.sprite_shader.upload_float("vFlip",.0f);
 	// TODO: remove this from acceptable routine to correct corrupt target textures
 }
 
@@ -2049,12 +2048,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
 {
 	// pointers
-	input.mouse = &m_ccbf->frame->mouse;
-	input.mouse_preferred_peripheral = &m_ccbf->frame->mpref_peripheral;
+	input.mouse = &Core::gFrame.mouse;
+	input.mouse_preferred_peripheral = &Core::gFrame.mpref_peripheral;
 	// TODO: this proves it! mouse has to be part of input mapping at once!
 
 	// asset load
-	index_ranim = ccbf->rnd->atlas.size();
+	index_ranim = Core::gRenderer.atlas.size();
 	ccbm->add_lv("lvload/main_menu.ccb");
 
 	// version annotation text setup
@@ -2187,16 +2186,12 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mdialogues.load();
 
 	// buffers
-	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",
-			m_ccbf->frame->w_res,m_ccbf->frame->h_res,8);
-	fb_nslice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs");
-	fb_menu = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
+	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",8);
+	fb_nslice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs");
+	fb_menu = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
-	fb_slice = FrameBuffer(m_ccbf->frame->w_res,m_ccbf->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/overlay.fs");
+	fb_slice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/overlay.fs");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
@@ -2209,7 +2204,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 {
 	// button input
-	bool plmb = m_ccbf->frame->mouse.mb[0]&&!trg_lmb,prmb = m_ccbf->frame->mouse.mb[2]&&!trg_rmb;
+	bool plmb = Core::gFrame.mouse.mb[0]&&!trg_lmb,prmb = Core::gFrame.mouse.mb[2]&&!trg_rmb;
 	input.hit_a =
 			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
@@ -2232,18 +2227,18 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 
 	// mouse input
 	input.mouse_cartesian = glm::vec2(
-			m_ccbf->frame->mouse.mxfr*MATH_CARTESIAN_XRANGE,
-			m_ccbf->frame->mouse.myfr*MATH_CARTESIAN_YRANGE
+			Core::gFrame.mouse.mxfr*MATH_CARTESIAN_XRANGE,
+			Core::gFrame.mouse.myfr*MATH_CARTESIAN_YRANGE
 		);
-	trg_lmb = m_ccbf->frame->mouse.mb[0], trg_rmb = m_ccbf->frame->mouse.mb[2];
+	trg_lmb = Core::gFrame.mouse.mb[0], trg_rmb = Core::gFrame.mouse.mb[2];
 
 	// timing
-	transition_delta = TRANSITION_SPEED*m_ccbf->frame->time_delta;
+	transition_delta = TRANSITION_SPEED*Core::gFrame.time_delta;
 	bool anim_go = anim_timing>ANIMATION_UPDATE_TIMEOUT;
-	anim_timing += m_ccbf->frame->time_delta;
+	anim_timing += Core::gFrame.time_delta;
 
 	// speedup animation advancement checking
-	dt_tshiftdown += m_ccbf->frame->time_delta*speedup, dt_tnormalize += m_ccbf->frame->time_delta*!speedup;
+	dt_tshiftdown += Core::gFrame.time_delta*speedup, dt_tnormalize += Core::gFrame.time_delta*!speedup;
 	bool shiftdown_over = dt_tshiftdown>TITLE_SHIFTDOWN_TIMEOUT,
 			normalize_over = dt_tnormalize>TITLE_NORMALIZATION_TIMEOUT;
 	dt_tshiftdown -= TITLE_SHIFTDOWN_TIMEOUT*shiftdown_over,
@@ -2285,12 +2280,12 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 				glm::vec3(tshift)
 			),HRZ_TITLE_SCALESET
 		);
-	m_ccbf->rnd->atlas[index_ranim].transform.model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
-	m_ccbf->rnd->atlas[index_ranim+1].transform.model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
+	Core::gRenderer.atlas[index_ranim].transform.model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
+	Core::gRenderer.atlas[index_ranim+1].transform.model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
 	// TODO: rework with the new transform features
 
 	// peripheral switch for input request annotation
-	if (input.controller_preferred_peripheral!=m_ccbf->frame->cpref_peripheral)
+	if (input.controller_preferred_peripheral!=Core::gFrame.cpref_peripheral)
 		update_peripheral_annotations();
 
 	// component updates before interface behaviour & rendering
@@ -2342,10 +2337,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// FIXME: optimize when all the text transitions are done
 
 	// render titles
-	m_ccbf->rnd->atlas[index_ranim+1].transform.translate(glm::vec2(0,150*ftransition));
-	m_ccbf->rnd->prepare_sprites();
-	m_ccbf->rnd->render_sprite_frame(index_ranim,glm::vec2(3,0));
-	m_ccbf->rnd->render_sprite_frame(index_ranim+1,glm::vec2(0,0));
+	Core::gRenderer.atlas[index_ranim+1].transform.translate(glm::vec2(0,150*ftransition));
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite_frame(index_ranim,glm::vec2(3,0));
+	Core::gRenderer.render_sprite_frame(index_ranim+1,glm::vec2(0,0));
 
 	// update dialogues & lists
 	mlists.render();
@@ -2427,7 +2422,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 void MainMenu::update_peripheral_annotations()
 {
 	// update shown preferred peripheral
-	input.controller_preferred_peripheral = m_ccbf->frame->cpref_peripheral;
+	input.controller_preferred_peripheral = Core::gFrame.cpref_peripheral;
 
 	// clear instruction text
 	tx_dare.clear();

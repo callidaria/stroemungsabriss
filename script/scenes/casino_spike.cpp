@@ -73,21 +73,21 @@ CasinoSpike::CasinoSpike(CascabelBaseFeature* ccbf,float &progress,float pseq)
 void CasinoSpike::render()
 {
 	// camera front handling
-	pitch += m_ccbf->frame->kb.ka[SDL_SCANCODE_I],pitch -= m_ccbf->frame->kb.ka[SDL_SCANCODE_K];
-	yaw += m_ccbf->frame->kb.ka[SDL_SCANCODE_L],yaw -= m_ccbf->frame->kb.ka[SDL_SCANCODE_J];
+	pitch += Core::gFrame.kb.ka[SDL_SCANCODE_I],pitch -= Core::gFrame.kb.ka[SDL_SCANCODE_K];
+	yaw += Core::gFrame.kb.ka[SDL_SCANCODE_L],yaw -= Core::gFrame.kb.ka[SDL_SCANCODE_J];
 	cp_dir.x = glm::cos(glm::radians(pitch))*glm::cos(glm::radians(yaw));
 	cp_dir.y = glm::sin(glm::radians(pitch));
 	cp_dir.z = glm::cos(glm::radians(pitch))*glm::sin(glm::radians(yaw));
 
 	// camera position handling
-	cp_pos += cp_dir*glm::vec3(.05f*m_ccbf->frame->kb.ka[SDL_SCANCODE_W]);
-	cp_pos -= cp_dir*glm::vec3(.05f*m_ccbf->frame->kb.ka[SDL_SCANCODE_S]);
+	cp_pos += cp_dir*glm::vec3(.05f*Core::gFrame.kb.ka[SDL_SCANCODE_W]);
+	cp_pos -= cp_dir*glm::vec3(.05f*Core::gFrame.kb.ka[SDL_SCANCODE_S]);
 	cp_pos += glm::normalize(glm::cross(cp_dir,glm::vec3(0,1,0)))
-			* glm::vec3(.05f*m_ccbf->frame->kb.ka[SDL_SCANCODE_D]);
+			* glm::vec3(.05f*Core::gFrame.kb.ka[SDL_SCANCODE_D]);
 	cp_pos -= glm::normalize(glm::cross(cp_dir,glm::vec3(0,1,0)))
-			* glm::vec3(.05f*m_ccbf->frame->kb.ka[SDL_SCANCODE_A]);
-	cp_pos.y += m_ccbf->frame->kb.ka[SDL_SCANCODE_R]*.05f;
-	cp_pos.y -= m_ccbf->frame->kb.ka[SDL_SCANCODE_F]*.05f;
+			* glm::vec3(.05f*Core::gFrame.kb.ka[SDL_SCANCODE_A]);
+	cp_pos.y += Core::gFrame.kb.ka[SDL_SCANCODE_R]*.05f;
+	cp_pos.y -= Core::gFrame.kb.ka[SDL_SCANCODE_F]*.05f;
 
 	// camera update
 	Core::gCamera3D.pos = cp_pos, Core::gCamera3D.front = cp_dir;

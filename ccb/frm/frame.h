@@ -1,17 +1,12 @@
 #ifndef CCB_FRAME_SELFTITLED
 #define CCB_FRAME_SELFTITLED
 
-#include <iostream>
 #include <thread>
 #include <chrono>
 #include <string>
-#include <vector>
-
 #include <GL/glew.h>
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-
 #include <AL/alc.h>
 
 #include "../fcn/init.h"
@@ -49,12 +44,13 @@ class Frame
 public:
 
 	// construction
-	Frame(const char* title="callidaria-program",int8_t screen=0,
+	Frame(const char* title);
+	/*Frame(const char* title="callidaria-program",int8_t screen=0,
 			SDL_WindowFlags fs=(SDL_WindowFlags)0);
 	Frame(const char* title="callidaria-program",int16_t width=1280,int16_t height=720,
 			SDL_WindowFlags fs=(SDL_WindowFlags)0);
 	Frame(const char* title="callidaria-program",int8_t screen=0,int16_t width=1280,
-			int16_t height=720,SDL_WindowFlags fs=(SDL_WindowFlags)0);
+			int16_t height=720,SDL_WindowFlags fs=(SDL_WindowFlags)0);*/
 	~Frame() {  }
 
 	// modification

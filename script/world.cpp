@@ -12,9 +12,8 @@ World::World(CascabelBaseFeature* eref)
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
 
 	// framebuffer setup
-	game_fb = FrameBuffer(eref->frame->w_res,eref->frame->h_res,
-			"./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
-	rtarget_id = eref->r3d->add_target(eref->frame);
+	game_fb = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
+	rtarget_id = eref->r3d->add_target();
 }
 
 /*
@@ -64,7 +63,7 @@ void World::remove_boss(uint8_t boss_id)
 void World::load(float &progress,float ldsplit)
 {
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
-	m_ccbf->rnd->load();
+	Core::gRenderer.load();
 	m_ccbf->rI->load(progress,pr_progress);
 	m_ccbf->r3d->load(Core::gCamera3D,progress,pr_progress);
 	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&Core::gLighting);
@@ -85,8 +84,8 @@ void World::render(bool &running,bool &reboot)
 	glDisable(GL_BLEND);
 
 	// update
-	m_ccbf->r3d->update_animations(m_ccbf->frame->time_delta);
-	m_ccbf->r3d->update_shadows(m_ccbf->frame->w_res,m_ccbf->frame->h_res);
+	m_ccbf->r3d->update_animations(Core::gFrame.time_delta);
+	m_ccbf->r3d->update_shadows(Core::gFrame.w_res,Core::gFrame.h_res);
 
 	// start geometry pass deferred scene
 	m_ccbf->r3d->start_target(rtarget_id);
@@ -100,7 +99,7 @@ void World::render(bool &running,bool &reboot)
 	m_ccbf->r3d->switch_target_transparency(rtarget_id);
 
 	// render particles
-	m_ccbf->pSys->update(Core::gCamera3D,m_ccbf->frame->time_delta);
+	m_ccbf->pSys->update(Core::gCamera3D,Core::gFrame.time_delta);
 	m_ccbf->pSys->auto_render(Core::gCamera3D);
 
 	// run deferred shading

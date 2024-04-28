@@ -1,26 +1,15 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
-#include <iostream>
-#include <glm/gtx/rotate_vector.hpp>
 
 #ifdef __WIN32__
 #include <windows.h>
 #endif
 
-#include "ccb/frm/frame.h"
-
-#include "ccb/gfx/renderer.h"
+#include "ccb/core.h"
 #include "ccb/gfx/renderer3d.h"
 #include "ccb/gfx/rendereri.h"
 #include "ccb/gfx/particle_system.h"
 
-#include "ccb/mat/camera2d.h"
-#include "ccb/mat/camera3d.h"
-
-#include "ccb/ppe/msaa.h"
-#include "ccb/ppe/bloom.h"
-
 #include "ccb/fcn/text.h"
-#include "ccb/fcn/init.h"
 
 #include "ccb/aud/audio.h"
 #include "ccb/aud/listener.h"
@@ -40,30 +29,29 @@
 int main(int argc,char** argv)
 {
 	// INIT
-	Init("config.ini");
-	Frame f = Frame(
+	/*Init("config.ini");
+	Core::gFrame = Frame(
 			"黄泉先生",
 			Init::iConfig[InitVariable::FRAME_DISPLAY_ID],
 			Init::iConfig[InitVariable::FRAME_RESOLUTION_WIDTH],
 			Init::iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT],
-			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);
+			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);*/
 	//Frame::gpu_vsync_on();
-	f.set_refresh_rate(60);
-	InputMap imap = InputMap(&f);
+	Core::gFrame.set_refresh_rate(60);
+	InputMap imap = InputMap();
 
 	// AUDIO
 	Listener listener = Listener();
 
 	// RENDERERS
-	Renderer renderer = Renderer();
 	Renderer3D r3d = Renderer3D();
 	RendererI ri = RendererI();
 	ParticleSystem psys = ParticleSystem();
-	BulletSystem bsys = BulletSystem(&f,&ri);
+	BulletSystem bsys = BulletSystem(&ri);
 
 	// LOADERS
-	CCBManager ccbm = CCBManager(&f,&renderer);
-	CascabelBaseFeature eref = { &f,&renderer,&r3d,&ri,&psys,&bsys,&imap };
+	CCBManager ccbm = CCBManager();
+	CascabelBaseFeature eref = { &r3d,&ri,&psys,&bsys,&imap };
 
 	// BUILD SET
 	World world = World(&eref);
@@ -84,10 +72,10 @@ int main(int argc,char** argv)
 		wb.load();
 
 		// timing & raw input
-		f.calc_time_delta();
-		f.cpu_vsync();
-		f.print_fps();
-		f.input(run);
+		Core::gFrame.calc_time_delta();
+		Core::gFrame.cpu_vsync();
+		Core::gFrame.print_fps();
+		Core::gFrame.input(run);
 		Frame::clear();
 
 		// input mapping
@@ -107,7 +95,7 @@ int main(int argc,char** argv)
 #endif
 
 		// flip
-		f.update();
+		Core::gFrame.update();
 	}
 
 	// TRIGGER REBOOT
@@ -121,6 +109,6 @@ int main(int argc,char** argv)
 	// CLOSING
 	world.free_memory();
 	r3d.clear_memory();
-	f.vanish();
+	Core::gFrame.vanish();
 	return 0;
 }

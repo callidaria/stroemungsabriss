@@ -10,17 +10,40 @@
 */
 
 /*
+	TODO
+*/
+Frame::Frame(const char* title)
+{
+	// import global variables
+	Init("config.ini");
+
+	// initializing
+	init();
+
+	// screen information
+	SDL_Rect dim_screen;
+	get_screen(Init::iConfig[FRAME_DISPLAY_ID],&dim_screen);
+
+	// setup routine
+	setup(
+			title,dim_screen.x+100,dim_screen.y+100,
+			Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT],
+			(SDL_WindowFlags)Init::iConfig[FRAME_SET_FULLSCREEN]
+		);
+}
+
+/*
 	constructor(const char*,int8_t,SDL_WindowFlags)
 	purpose: create output frame with given title on given screen
 	ADD FEATURE: !!! ADD OUTPUT INFORMATION ABOUT SYSTEM !!!
 		ALSO MAYBE IMPLEMENT WITH VIEWPORT RIGHT FROM THE BEGINNING ?
 */
-Frame::Frame(const char* title,int8_t screen,SDL_WindowFlags fs)
+/*Frame::Frame(const char* title,int8_t screen,SDL_WindowFlags fs)
 {
 	// initializing
 	init();
 
-	// screen informations
+	// screen information
 	SDL_Rect dim_screen;
 	get_screen(screen,&dim_screen);
 
@@ -34,30 +57,30 @@ Frame::Frame(const char* title,int8_t screen,SDL_WindowFlags fs)
 	constructor(const char*,int16_t,int16_t,SDL_WindowFlags)
 	purpose: create output frame with given title with given frame dimensions
 */
-Frame::Frame(const char* title,int16_t width,int16_t height,SDL_WindowFlags fs)
+/*Frame::Frame(const char* title,int16_t width,int16_t height,SDL_WindowFlags fs)
 	: w_res(width),h_res(height)
 {
 	init();
 	setup(title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,fs);
-}
+}*/
 
 /*
 	constructor(const char*,int8_t,int16_t,int16_t,SDL_WindowFlags)
 	purpose: create output frame with given title with given frame dimensions on given screen
 */
-Frame::Frame(const char* title,int8_t screen,int16_t width,int16_t height,SDL_WindowFlags fs)
+/*Frame::Frame(const char* title,int8_t screen,int16_t width,int16_t height,SDL_WindowFlags fs)
 	: w_res(width),h_res(height)
 {
 	// initializing
 	init();
 
-	// screen informations
+	// screen information
 	SDL_Rect dim_screen;
 	get_screen(screen,&dim_screen);
 
 	// setup routine
 	setup(title,dim_screen.x+100,dim_screen.y+100,width,height,fs);
-}
+}*/
 
 /*
 	clear(float,float,float) -> void (static)

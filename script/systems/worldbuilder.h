@@ -1,21 +1,20 @@
 #ifndef SCR_SYSTEMS_WORLDBUILDER
 #define SCR_SYSTEMS_WORLDBUILDER
 
-#include <iostream>
+#include <vector>
 #include <thread>
-#include <queue>
 
-#include "../../ccb/fcn/ccb_manager.h"
+#include "../../ccb/core.h"
 
 #include "../scenes/nepal_mountain_woods.h"
 #include "../scenes/casino_spike.h"
 #include "../scenes/casino_table.h"
-
 #include "../menu/main_menu.h"
 #include "../ui/action_menu.h"
 #include "../struct/feature_base.h"
 #include "../pcs/jaeger_jet.h"
 #include "../boss/dpilot.h"
+#include "../boards/testing.h"
 #include "../world.h"
 
 struct LoadStorage

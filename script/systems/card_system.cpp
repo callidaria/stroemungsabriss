@@ -320,24 +320,24 @@ void CardSystem::create_currency_stack(glm::vec2 pos,float rot)
 void CardSystem::process_input()
 {
 	// keyboard input
-	choice += (m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
-			- m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
-	lfI = m_ccbf->frame->kb.ka[SDL_SCANCODE_RIGHT]||m_ccbf->frame->kb.ka[SDL_SCANCODE_LEFT];
+	choice += (Core::gFrame.kb.ka[SDL_SCANCODE_RIGHT]*(choice<hand.size()-1)
+			- Core::gFrame.kb.ka[SDL_SCANCODE_LEFT]*(choice>0))*!lfI;
+	lfI = Core::gFrame.kb.ka[SDL_SCANCODE_RIGHT]||Core::gFrame.kb.ka[SDL_SCANCODE_LEFT];
 	kinput = lfI;
 
 	// transform from clip space & compare screen spaces with cursor position for choice
 	bool mouse_input
-			= (m_ccbf->frame->mouse.mxfr!=tmx)&&(m_ccbf->frame->mouse.myfr<.35f)
-				&&(m_ccbf->frame->mouse.mxfr<.5f);
+			= (Core::gFrame.mouse.mxfr!=tmx)&&(Core::gFrame.mouse.myfr<.35f)
+				&&(Core::gFrame.mouse.mxfr<.5f);
 	if (hand.size()&&mouse_input) {
 		float start = (get_card_screen_space(hand[0]).x+1)/2;
 		float end = (get_card_screen_space(hand.back()).x+1)/2;
-		float stapled_pos = m_ccbf->frame->mouse.mxfr-start;
+		float stapled_pos = Core::gFrame.mouse.mxfr-start;
 		float single_card = (end-start)/(hand.size()-1);
 		choice = stapled_pos/single_card;
 		bool overselected = choice>=hand.size();
 		choice = overselected*(hand.size()-1)+!overselected*choice;
-	} tmx = m_ccbf->frame->mouse.mxfr;
+	} tmx = Core::gFrame.mouse.mxfr;
 }
 
 /*
@@ -401,7 +401,7 @@ void CardSystem::update()
 	// remove if deal is completed & update deal stall time
 	else if (!auto_deals[crr_deal].amount&&!stall)
 		auto_deals.erase(auto_deals.begin()+crr_deal,auto_deals.begin()+crr_deal+1);
-	crr_dtime += m_ccbf->frame->time_delta;
+	crr_dtime += Core::gFrame.time_delta;
 
 	// animate
 	i = 0;

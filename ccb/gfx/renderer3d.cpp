@@ -256,10 +256,12 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 	\param frame: current window to get maximum resolution from
 	\returns target id
 */
-uint8_t Renderer3D::add_target(Frame* frame)
+uint8_t Renderer3D::add_target()
 {
 	// gbuffer setup
-	GBuffer gbuffer = GBuffer(frame->w_res,frame->h_res);
+	GBuffer gbuffer = GBuffer(
+			Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
+	// TODO: add standard constructor gbuffer using full screen range
 	gbuffer.add_colour_component();
 	gbuffer.add_colour_component(true);
 	gbuffer.add_colour_component(true);
@@ -268,8 +270,8 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	gbuffer.finalize_buffer();
 
 	// deferred shading buffer setup
-	FrameBuffer cbuffer = FrameBuffer(frame->w_res,frame->h_res,"./shader/standard/framebuffer.vs",
-			"./shader/lighting/pbr.fs",false);
+	FrameBuffer cbuffer = FrameBuffer(
+			"./shader/standard/framebuffer.vs","./shader/lighting/pbr.fs",false);
 	cbuffer.s.upload_int("gbuffer_colour",0);
 	cbuffer.s.upload_int("gbuffer_position",1);
 	cbuffer.s.upload_int("gbuffer_normals",2);
@@ -283,7 +285,7 @@ uint8_t Renderer3D::add_target(Frame* frame)
 	cbuffer.s.upload_int("world_depth",10);
 
 	// transparency buffer
-	FrameBuffer tbuffer = FrameBuffer(frame->w_res,frame->h_res,
+	FrameBuffer tbuffer = FrameBuffer(
 			"./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false,true);
 
 	// store & return

@@ -1,11 +1,7 @@
 #ifndef SCR_SYSTEMS_BULLET_SYSTEM
 #define SCR_SYSTEMS_BULLET_SYSTEM
 
-#include <iostream>
-#include <vector>
-#include <glm/glm.hpp>
-
-#include "../../ccb/frm/frame.h"
+#include "../../ccb/core.h"
 #include "../../ccb/gfx/rendereri.h"
 
 struct BulletCluster {
@@ -21,7 +17,7 @@ class BulletSystem
 public:
 
 	// construction
-	BulletSystem(Frame* frame,RendererI* rI);
+	BulletSystem(RendererI* rI) : m_rI(rI) {  }
 	~BulletSystem() {  }
 
 	// creation
@@ -58,7 +54,6 @@ public:
 private:
 
 	// cascabel
-	Frame* m_frame;								// target frame pointer
 	RendererI* m_rI;							// index renderer pointer
 
 	// bullet physics

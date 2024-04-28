@@ -7,11 +7,9 @@
 
 // engine
 #include "../ccb/core.h"
-#include "../ccb/frm/frame.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/frm/gbuffer.h"
 
-#include "../ccb/gfx/renderer.h"
 #include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/cubemap.h"
 

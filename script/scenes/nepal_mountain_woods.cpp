@@ -7,8 +7,9 @@
 	purpose: load the nepal mountain scene, representing the backdrop for dpilot fight
 */
 NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeature* ccbf)
-	: m_ccbf(ccbf)
-{ index_r2D = ccb_manager->add_lv("lvload/dpilot.ccb"); }
+{
+	index_r2D = ccb_manager->add_lv("lvload/dpilot.ccb");
+}
 
 /*
 	render() -> void (virtual)
@@ -16,6 +17,6 @@ NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeatu
 */
 void NepalMountainWoods::render()
 {
-	m_ccbf->rnd->prepare_sprites();
-	m_ccbf->rnd->render_sprite(index_r2D);
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite(index_r2D);
 }

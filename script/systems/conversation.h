@@ -1,21 +1,14 @@
 #ifndef SCR_SYSTEMS_CONVERSATION
 #define SCR_SYSTEMS_CONVERSATION
 
-#include <iostream>
 #include <fstream>
-#include <string>
 #include <cstring>
-#include <vector>
 
+#include "../../ccb/core.h"
 #include "../../ccb/fcn/buffer.h"
+#include "../../ccb/gfx/shader.h"
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
-
-#include "../../ccb/gfx/shader.h"
-#include "../../ccb/gfx/renderer.h"
-
-#include "../../ccb/frm/frame.h"
-#include "../../ccb/mat/camera2d.h"
 
 #include "character_manager.h"
 
@@ -57,7 +50,7 @@ class Conversation
 public:
 
 	// construction
-	Conversation(Frame* frame,Renderer* rnd,CharacterManager* cm,const char* mm_path);
+	Conversation(CharacterManager* cm,const char* mm_path);
 	~Conversation() {  }
 
 	// interaction
@@ -94,8 +87,6 @@ private:
 	// cascabel
 	Buffer slct_buffer = Buffer(),bgr_buffer = Buffer(),mood_buffer = Buffer();
 	Shader slct_shader = Shader(),bgr_shader = Shader(),mood_shader = Shader();
-	Frame* m_frame;
-	Renderer* m_rnd;
 	CharacterManager* charManager;
 
 	// text

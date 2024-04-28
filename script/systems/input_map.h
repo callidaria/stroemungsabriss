@@ -5,8 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../../ccb/core.h"
 #include "../../ccb/fcn/init.h"
-#include "../../ccb/frm/frame.h"
 
 
 enum InputID : uint8_t {
@@ -33,7 +33,7 @@ class InputMap
 public:
 
 	// construction
-	InputMap(Frame* frame);
+	InputMap();
 	~InputMap() {  }
 
 	// mapping
@@ -72,9 +72,6 @@ public:
 	std::string key_name[InputID::MAX_INPUTS],cnt_name[InputID::MAX_INPUTS];
 
 private:
-
-	// cascabel
-	Frame* m_frame;
 
 	// input index maps
 	SDL_Scancode kmap[InputID::MAX_INPUTS] = {

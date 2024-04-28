@@ -1,16 +1,13 @@
 #include "cursor.h"
 
 /*
-	constructor(Frame*,Renderer*)
-	frame: reference to cascabel frame, used to interpret mouse input
-	rnd: reference to renderer, used to render in-program cursor elements
+	constructor()
 	purpose: create a cursor object to render a stylish representation of mouse position
 */
-Cursor::Cursor(Frame* frame,Renderer* rnd)
-	: pFrame(frame),pRnd(rnd)
+Cursor::Cursor()
 {
-	rindex = pRnd->add_sprite(glm::vec2(-20),40,40,"./res/menu/bgr_seldom.png");
-	pRnd->add_sprite(glm::vec2(-20),40,40,"./res/menu/seldom.png");
+	rindex = Core::gRenderer.add_sprite(glm::vec2(-20),40,40,"./res/menu/bgr_seldom.png");
+	Core::gRenderer.add_sprite(glm::vec2(-20),40,40,"./res/menu/seldom.png");
 }
 
 /*
@@ -21,20 +18,23 @@ Cursor::Cursor(Frame* frame,Renderer* rnd)
 void Cursor::render()
 {
 	// calculate drawn position
-	position = glm::vec2(pFrame->mouse.mxfr*MATH_CARTESIAN_XRANGE,pFrame->mouse.myfr*MATH_CARTESIAN_YRANGE);
+	position = glm::vec2(
+			Core::gFrame.mouse.mxfr*MATH_CARTESIAN_XRANGE,
+			Core::gFrame.mouse.myfr*MATH_CARTESIAN_YRANGE
+		);
 
 	// render cursor counter rotation
-	pRnd->prepare_sprites();
-	pRnd->sprites[rindex].transform.model = glm::mat4(1.f);
-	pRnd->sprites[rindex].transform.rotate(bgr_crot);
-	pRnd->sprites[rindex].transform.translate(position+glm::vec2(-5,10));
-	pRnd->render_sprite(rindex);
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.sprites[rindex].transform.model = glm::mat4(1.f);
+	Core::gRenderer.sprites[rindex].transform.rotate(bgr_crot);
+	Core::gRenderer.sprites[rindex].transform.translate(position+glm::vec2(-5,10));
+	Core::gRenderer.render_sprite(rindex);
 
 	// render cursor front rotation
-	pRnd->sprites[rindex+1].transform.model = glm::mat4(1.f);
-	pRnd->sprites[rindex+1].transform.rotate(front_crot);
-	pRnd->sprites[rindex+1].transform.translate(position);
-	pRnd->render_sprite(rindex+1);
+	Core::gRenderer.sprites[rindex+1].transform.model = glm::mat4(1.f);
+	Core::gRenderer.sprites[rindex+1].transform.rotate(front_crot);
+	Core::gRenderer.sprites[rindex+1].transform.translate(position);
+	Core::gRenderer.render_sprite(rindex+1);
 
 	// update rotations
 	bgr_crot -= 7-(bgr_crot<-360)*360;

@@ -1,12 +1,10 @@
 #ifndef CCB_FEATURE_LEVELINTERPRETER
 #define CCB_FEATURE_LEVELINTERPRETER
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
 
-#include "../gfx/renderer.h"
+#include "../core.h"
 
 /**
  *		ATTENTION SHOPPERS
@@ -51,16 +49,13 @@ class CCBLInterpreter
 {
 public:
 
-	CCBLInterpreter(Renderer* renderer,const char* path);
+	CCBLInterpreter(const char* path);
 
 	// interaction
 	uint16_t load_level();
 	void write_level();
 
 private:
-
-	// cascabel
-	Renderer* m_rnd;
 
 	// source
 	const char* lvpath;

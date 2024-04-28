@@ -1,10 +1,7 @@
 #ifndef SCR_PCHARS_JAEGER_JET
 #define SCR_PCHARS_JAEGER_JET
 
-#include <iostream>
-
-#include <glm/glm.hpp>
-
+#include "../../ccb/core.h"
 #include "../struct/feature_base.h"
 #include "../struct/world_structures.h"
 

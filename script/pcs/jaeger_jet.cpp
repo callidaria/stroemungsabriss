@@ -67,7 +67,7 @@ JaegerJet::JaegerJet(CascabelBaseFeature* ccbf)
 	: m_ccbf(ccbf)
 {
 	// setup player hitbox indicator
-	index_r2D = ccbf->rnd->add_sprite(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
+	index_r2D = Core::gRenderer.add_sprite(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// setup player character visualization
 	index_r3D = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
@@ -91,7 +91,7 @@ void JaegerJet::update()
 
 	// change position of player based on calculated movement direction
 	position += glm::vec3(m_ccbf->iMap->move_dir.x*mvspeed,m_ccbf->iMap->move_dir.y*mvspeed,0)
-			* glm::vec3(m_ccbf->frame->time_delta);
+			* glm::vec3(Core::gFrame.time_delta);
 
 	// force player in-bounds
 	uint16_t x_full_cap = 1280-JET_BORDER_WIDTH;
@@ -107,7 +107,7 @@ void JaegerJet::update()
 
 	// run requested shot type or idle
 	uint8_t sidx = ((m_ccbf->iMap->input_val[InputID::WIDE]&&!m_ccbf->iMap->input_val[InputID::FOCUS])+2
-			* m_ccbf->iMap->input_val[InputID::FOCUS])*(m_ccbf->frame->time_delta>.1f);
+			* m_ccbf->iMap->input_val[InputID::FOCUS])*(Core::gFrame.time_delta>.1f);
 	rng_flib[sidx](m_ccbf->bSys,treg);
 
 	// TODO: bombs
@@ -117,8 +117,8 @@ void JaegerJet::update()
 	// calculate player jet tilt
 	bool abs_right = m_ccbf->iMap->input_val[InputID::RIGHT];
 	bool abs_left = m_ccbf->iMap->input_val[InputID::LEFT];
-	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*m_ccbf->frame->time_delta;
-	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*m_ccbf->frame->time_delta;
+	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*Core::gFrame.time_delta;
+	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*Core::gFrame.time_delta;
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
 
 	// render and move player character
@@ -127,10 +127,10 @@ void JaegerJet::update()
 	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+1);
 
 	// render player hitbox indicator
-	m_ccbf->rnd->prepare_sprites();
-	m_ccbf->rnd->sprites[index_r2D].transform.model = glm::mat4(1.f);
-	m_ccbf->rnd->sprites[index_r2D].transform.translate(position-glm::vec3(5,5,0));
-	m_ccbf->rnd->render_sprite(index_r2D);
+	Core::gRenderer.prepare_sprites();
+	Core::gRenderer.sprites[index_r2D].transform.model = glm::mat4(1.f);
+	Core::gRenderer.sprites[index_r2D].transform.translate(position-glm::vec3(5,5,0));
+	Core::gRenderer.render_sprite(index_r2D);
 
 	// render health bar
 	/*hbar.register_damage(pDmg);

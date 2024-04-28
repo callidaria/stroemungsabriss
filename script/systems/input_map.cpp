@@ -1,12 +1,10 @@
 #include "input_map.h"
 
 /*
-	constructor(Frame*)
-	frame: reference to frame, which is enabled when the input happens
+	constructor()
 	purpose: map keyboard & controller inputs
 */
-InputMap::InputMap(Frame* frame)
-	: m_frame(frame)
+InputMap::InputMap()
 {
 	map_keyboard();
 	map_controller();
@@ -19,7 +17,7 @@ InputMap::InputMap(Frame* frame)
 void InputMap::map_keyboard()
 {
 	for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
-		key_actions[i] = &m_frame->kb.ka[kmap[i]];
+		key_actions[i] = &Core::gFrame.kb.ka[kmap[i]];
 		key_name[i] = get_input_name(kmap[i]);
 	}
 }
@@ -31,12 +29,12 @@ void InputMap::map_keyboard()
 void InputMap::map_controller()
 {
 	// controller has been plugged in
-	if (m_frame->xb.size()) {
-		cnt_lraxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX];
-		cnt_udaxis = &m_frame->xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY];
+	if (Core::gFrame.xb.size()) {
+		cnt_lraxis = &Core::gFrame.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTX];
+		cnt_udaxis = &Core::gFrame.xb[0].xba[SDL_CONTROLLER_AXIS_LEFTY];
 		for (uint8_t i=0;i<InputID::MAX_INPUTS;i++) {
-			cnt_actions[i] = caxis[i] ? (bool*)&m_frame->xb[0].xba[cmap[i]]
-					: &m_frame->xb[0].xbb[cmap[i]];
+			cnt_actions[i] = caxis[i] ? (bool*)&Core::gFrame.xb[0].xba[cmap[i]]
+					: &Core::gFrame.xb[0].xbb[cmap[i]];
 			cnt_name[i] = get_input_name(cmap[i],caxis[i]);
 		}
 	}
@@ -55,9 +53,9 @@ void InputMap::map_controller()
 */
 void InputMap::update()
 {
-	if (m_frame->controller_remap) {
+	if (Core::gFrame.controller_remap) {
 		map_controller();
-		m_frame->controller_remap = false;
+		Core::gFrame.controller_remap = false;
 	}
 }
 // FIXME: constant (nested) branching. maybe worth it, but it can always be improved

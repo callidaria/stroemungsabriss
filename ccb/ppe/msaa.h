@@ -1,8 +1,7 @@
 #ifndef CCB_POSTPROCESSING_MSAA
 #define CCB_POSTPROCESSING_MSAA
 
-#include <iostream>
-
+#include "../fcn/init.h"
 #include "../mat/toolbox.h"
 #include "../fcn/buffer.h"
 #include "../gfx/shader.h"
@@ -13,6 +12,7 @@ public:
 
 	// construction
 	MSAA();
+	MSAA(const char* vsp,const char* fsp,int los);
 	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los);
 	~MSAA() {  }
 

@@ -1,7 +1,6 @@
 #include "worldbuilder.h"
 
 
-
 typedef void (*load_routine)(LoadStorage&);
 // TODO: every load a member of the board evrart?!??!?
 
@@ -32,7 +31,7 @@ void load_menu(LoadStorage& lds)
 void load_casino(LoadStorage& lds)
 {
 	std::cout << "loading: spike's casino\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
 	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
 	lds.world->add_ui(action_menu);
 	lds.world->add_scene(cspike);
@@ -48,7 +47,7 @@ void load_casino(LoadStorage& lds)
 void load_cards(LoadStorage& lds)
 {
 	std::cout << "loading: card games\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
 	CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
 	lds.world->add_ui(action_menu);
 	lds.world->add_scene(ctable);
@@ -73,7 +72,7 @@ void load_dpilot(LoadStorage& lds)
 {
 	std::cout << "loading: dancing pilot duel\n";
 	Core::gCamera3D = Camera3D(1280.0f,720.0f);
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
 	NepalMountainWoods* nmw = new NepalMountainWoods(lds.m_ccbm,lds.m_ccbf);
 	lds.progress += .2f;
 	/*JaegerJet* jj = new JaegerJet(m_ccbf);
@@ -94,7 +93,9 @@ void load_dpilot(LoadStorage& lds)
 void load_testing(LoadStorage& lds)
 {
 	std::cout << "loading: test scene\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->frame,lds.m_ccbf->iMap,lds.progress,.25f);
+	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
+	//Board<TestArea>* board = new TestArea();
+	//board->load();
 	lds.world->add_ui(action_menu);
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.2f);
@@ -163,7 +164,7 @@ void Worldbuilder::load()
 void Worldbuilder::show_load_progression(LoadStorage* lds)
 {
 	// visualization setup
-	SDL_GLContext context = lds->m_ccbf->frame->create_new_context();
+	SDL_GLContext context = Core::gFrame.create_new_context();
 
 	// loading bar setup
 	size_t t_vsize = 0;
@@ -200,9 +201,9 @@ void Worldbuilder::show_load_progression(LoadStorage* lds)
 	while (lds->ldfb_showing) {
 
 		// clear loading screen
-		lds->m_ccbf->frame->clear(.1f,.1f,.1f);
-		lds->m_ccbf->frame->cpu_vsync();
-		lds->m_ccbf->frame->calc_time_delta();
+		Core::gFrame.clear(.1f,.1f,.1f);
+		Core::gFrame.cpu_vsync();
+		Core::gFrame.calc_time_delta();
 		// create stylized background animation OR timed background action art iterations
 
 		// prepare bar
@@ -223,7 +224,7 @@ void Worldbuilder::show_load_progression(LoadStorage* lds)
 		glDrawArrays(GL_LINES,0,16);
 
 		// update loading screen
-		lds->m_ccbf->frame->update();
+		Core::gFrame.update();
 	}
 	SDL_GL_DeleteContext(context);
 }

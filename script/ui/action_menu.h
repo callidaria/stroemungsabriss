@@ -3,17 +3,16 @@
 
 #include <iostream>
 
-#include "../../ccb/frm/frame.h"
+#include "../../ccb/core.h"
 #include "../../ccb/frm/framebuffer.h"
-
 #include "../../ccb/fcn/buffer.h"
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
-
 #include "../../ccb/gfx/shader.h"
 
 #include "../struct/world_structures.h"
 #include "../systems/input_map.h"
+
 
 // constant
 constexpr uint8_t SYS_OPTION_COUNT = 3;
@@ -28,12 +27,13 @@ constexpr uint16_t TEXT_YPOSITION_INFO = ((uint16_t)MATH_CARTESIAN_YRANGE>>1)-(A
 		+ (INFO_OPTION_COUNT>>1)*ACT_TEXT_SIZE+(INFO_OPTION_COUNT&1)*(ACT_TEXT_SIZE>>1);
 constexpr uint8_t TEXT_DRAW_SPACE = ACT_TEXT_SIZE-TEXT_DISTANCE;
 
+
 class ActionMenu : public UI
 {
 public:
 
 	// construction
-	ActionMenu(Frame* frame,InputMap* input_map,float &progress,float pseq);
+	ActionMenu(InputMap* input_map,float &progress,float pseq);
 	~ActionMenu() {  }
 
 	// runtime interactions
@@ -42,7 +42,6 @@ public:
 private:
 
 	// cascabel
-	Frame* m_frame;
 	Buffer splash_buffer = Buffer();
 	Shader splash_shader = Shader();
 	Font tfont = Font("res/fonts/nimbus_roman.fnt","res/fonts/nimbus_roman.png",

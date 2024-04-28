@@ -6,6 +6,11 @@
 */
 MSAA::MSAA() {  }
 
+MSAA::MSAA(const char* vsp,const char* fsp,int los)
+{
+	MSAA(vsp,fsp,Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT],los);
+}
+
 /*
 	constructor(const char*,const char*,uint32_t,uint32_t,int)
 	vsp: target vertex shader path

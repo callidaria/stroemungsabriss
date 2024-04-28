@@ -1,8 +1,6 @@
 #ifndef CCB_GRAPHICS_RENDERER3D
 #define CCB_GRAPHICS_RENDERER3D
 
-#include <iostream>
-
 #include "shader.h"
 #include "mesh.h"
 #include "mesh_anim.h"
@@ -61,7 +59,7 @@ public:
 	void load(Camera3D cam3d,float &progress,float pseq);
 
 	// targets
-	uint8_t add_target(Frame* frame);
+	uint8_t add_target();
 	void upload_target_static_lighting(uint8_t id,Lighting* lighting);
 	void start_target(uint8_t id);
 	void switch_target_transparency(uint8_t id);

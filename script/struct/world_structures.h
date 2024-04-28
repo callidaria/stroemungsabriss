@@ -7,6 +7,15 @@
 
 #include "../../ccb/frm/framebuffer.h"
 
+
+// describes game board setup routines for loading and rendering
+/*template <typename Derivative> class Board
+{
+public:
+	void load() { (static_cast<Derivative*>(this))->load(); };
+	void update() { (static_cast<Derivative*>(this))->update(); };
+};*/
+
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI
 {

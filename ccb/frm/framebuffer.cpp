@@ -1,6 +1,21 @@
 #include "framebuffer.h"
 
 /*
+	TODO
+*/
+FrameBuffer::FrameBuffer(const char* vsp,const char* fsp,bool float_buffer,bool depth_buffer)
+{
+	FrameBuffer(
+			Init::iConfig[FRAME_RESOLUTION_WIDTH],
+			Init::iConfig[FRAME_RESOLUTION_HEIGHT],
+			vsp,
+			fsp,
+			float_buffer,
+			depth_buffer
+		);
+}
+
+/*
 	constructor(uint32_t,uint32_t,const char*,const char*,bool) !O(1)b
 	purpose: creates framebuffer object to change original visuals through shaders
 	\param fr_width: width of frame, in this case identical to frame resolution width

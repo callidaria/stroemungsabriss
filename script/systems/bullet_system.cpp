@@ -1,12 +1,5 @@
 #include "bullet_system.h"
 
-/*
-	constructor(Frame*,RendererI*)
-	rI: points to index renderer the visualized bullets will be handled by
-	purpose: setting up the bullet system object
-*/
-BulletSystem::BulletSystem(Frame* frame,RendererI* rI)
-	: m_frame(frame),m_rI(rI) {  }
 
 /*
 	add_cluster(uint16_t,uint16_t,const uint32_t,const char*) -> uint16_t
@@ -81,7 +74,7 @@ void BulletSystem::spwn_blt(uint8_t cluster,glm::vec2 nPos,glm::vec2 nDir,float 
 	purpose: move specific bullet according to outsidely precalculated direction and speed
 */
 void BulletSystem::delta_bltPos(uint8_t cluster,uint32_t index,glm::vec2 dPos)
-{ m_rI->add_aOffset(cluster,index,dPos*(float)m_frame->time_delta); }
+{ m_rI->add_aOffset(cluster,index,dPos*(float)Core::gFrame.time_delta); }
 
 /*
 	delta_fDir(uint8_t) -> void
@@ -91,7 +84,7 @@ void BulletSystem::delta_fDir(uint8_t cluster)
 {
 	// FIXME: static update loop counter
 	for (int i=0;i<clusters[cluster].bullet_cap;i++)
-		m_rI->add_aOffset(cluster,i,clusters[cluster].directions[i]*(float)m_frame->time_delta);
+		m_rI->add_aOffset(cluster,i,clusters[cluster].directions[i]*(float)Core::gFrame.time_delta);
 }
 
 /*
@@ -142,7 +135,7 @@ uint8_t BulletSystem::get_pHit(uint8_t cluster,glm::vec2 pos,float hr,float br)
 */
 void BulletSystem::render()
 {
-	m_rI->prepare(m_frame->time_delta);
+	m_rI->prepare(Core::gFrame.time_delta);
 	for (int i=0;i<clusters.size();i++) m_rI->render_anim(i,clusters[i].bullet_cap);
 }
 // TODO: ??maybe add some sort of bullet cleaning system for oos bullets and reschedule (if not too perf. hoggy)

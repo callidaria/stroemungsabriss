@@ -1,18 +1,11 @@
 #ifndef SCR_STRUCTURES_FEATURE_BASE
 #define SCR_STRUCTURES_FEATURE_BASE
 
-#include <vector>
 #include <queue>
 
-#include "../../ccb/frm/frame.h"
-
-#include "../../ccb/gfx/renderer.h"
 #include "../../ccb/gfx/renderer3d.h"
 #include "../../ccb/gfx/rendereri.h"
 #include "../../ccb/gfx/particle_system.h"
-
-#include "../../ccb/mat/camera3d.h"
-#include "../../ccb/mat/lighting.h"
 
 #include "../systems/bullet_system.h"
 #include "../systems/input_map.h"
@@ -31,8 +24,6 @@ enum LoadInstruction
 
 // refers to all basic cascabel tools and features
 struct CascabelBaseFeature {
-	Frame* frame;
-	Renderer* rnd;
 	Renderer3D* r3d;
 	RendererI* rI;
 	ParticleSystem* pSys;
