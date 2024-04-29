@@ -34,11 +34,6 @@ public:
 
 	// buffer & textures
 	uint32_t fbo,tex,dptex;
-
-private:
-
-	// dimensions
-	uint32_t frw,frh;
 };
 
 #endif

@@ -25,7 +25,6 @@ FrameBuffer::FrameBuffer(const char* vsp,const char* fsp,bool float_buffer,bool 
 */
 FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 		const char* fsp,bool float_buffer,bool depth_buffer)
-	: frw(fr_width),frh(fr_height)
 {
 	// setup
 	glGenFramebuffers(1,&fbo);

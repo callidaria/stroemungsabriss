@@ -2391,7 +2391,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 
 	// render anti-aliased splices
 	fb_slice.bind();
-	Frame::clear();
+	Frame::clear(1,0,0);
 	msaa.prepare();
 	MSAA::render();
 	FrameBuffer::close();

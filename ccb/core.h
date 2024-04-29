@@ -14,7 +14,7 @@ public:
 
 	// engine
 	inline static Frame gFrame = Frame("黄泉先生");
-	inline static Renderer gRenderer = Renderer();
+	inline static Renderer gRenderer;
 
 	// math
 	inline static Camera3D gCamera3D;
