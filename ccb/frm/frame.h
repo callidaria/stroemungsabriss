@@ -96,7 +96,6 @@ private:
 public:
 
 	// properties
-	int w_res,h_res;
 	bool event_active = false;
 	double time_mod = 1.,time_delta = 0;
 	bool cpref_peripheral = false,mpref_peripheral = false;
@@ -119,6 +118,9 @@ private:
 	// audio
 	ALCdevice* m_alcdev;
 	ALCcontext* m_alccon;
+
+	// dimensions
+	uint32_t w_res,h_res;
 
 	// time & vsync
 	std::chrono::steady_clock::time_point past_ticks,curr_ticks = std::chrono::steady_clock::now(),

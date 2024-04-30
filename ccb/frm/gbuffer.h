@@ -1,12 +1,7 @@
 #ifndef CCB_FRAME_GBUFFER
 #define CCB_FRAME_GBUFFER
 
-#include <iostream>
-
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-
+#include "frame.h"
 #include "../mat/toolbox.h"
 
 class GBuffer
@@ -14,7 +9,8 @@ class GBuffer
 public:
 
 	// construction
-	GBuffer(float w_res=1280.f,float h_res=720.f);
+	GBuffer();
+	GBuffer(float w_res,float h_res);
 	~GBuffer() {  }
 
 	// creation

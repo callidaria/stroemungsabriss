@@ -24,6 +24,10 @@ Frame::Frame(const char* title)
 	SDL_Rect dim_screen;
 	get_screen(Init::iConfig[FRAME_DISPLAY_ID],&dim_screen);
 
+	// save screen dimension
+	w_res = Init::iConfig[FRAME_RESOLUTION_WIDTH], h_res = Init::iConfig[FRAME_RESOLUTION_HEIGHT];
+	// TODO: in setup
+
 	// setup routine
 	setup(
 			title,dim_screen.x+100,dim_screen.y+100,
@@ -291,7 +295,6 @@ void Frame::init()
 void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t height,
 		SDL_WindowFlags fs)
 {
-
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);

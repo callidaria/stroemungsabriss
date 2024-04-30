@@ -1,6 +1,14 @@
 #include "gbuffer.h"
 
 /*
+	TODO
+*/
+GBuffer::GBuffer()
+{
+	GBuffer(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
+}
+
+/*
 	!O(1) /load -> (public)
 	purpose: create a g-buffer based on the given resolution
 	\param wres: g-buffer's x-axis resolution
@@ -27,8 +35,7 @@ void GBuffer::add_colour_component(bool fcomp)
 	uint32_t t_component,def_component = GL_COLOR_ATTACHMENT0+t_colour_components.size();
 	glGenTextures(1,&t_component);
 	glBindTexture(GL_TEXTURE_2D,t_component);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA+fcomp*0x6F12,w_res,h_res,0,GL_RGBA,
-			GL_UNSIGNED_INT+fcomp,NULL);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA+fcomp*0x6F12,w_res,h_res,0,GL_RGBA,GL_UNSIGNED_INT+fcomp,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,def_component,GL_TEXTURE_2D,t_component,0);
 	t_colour_components.push_back(t_component),def_colour_components.push_back(def_component);
@@ -45,8 +52,7 @@ uint8_t GBuffer::add_depth_component()
 	uint32_t t_depth;
 	glGenTextures(1,&t_depth);
 	glBindTexture(GL_TEXTURE_2D,t_depth);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,w_res,h_res,0,GL_DEPTH_COMPONENT,
-			GL_UNSIGNED_INT,NULL);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,w_res,h_res,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_INT,NULL);
 	Toolbox::set_texture_parameter_nearest_unfiltered();
 	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,t_depth,0);
 	t_value_components.push_back(t_depth);

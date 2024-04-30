@@ -259,8 +259,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 uint8_t Renderer3D::add_target()
 {
 	// gbuffer setup
-	GBuffer gbuffer = GBuffer(
-			Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
+	GBuffer gbuffer = GBuffer(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
 	// TODO: add standard constructor gbuffer using full screen range
 	gbuffer.add_colour_component();
 	gbuffer.add_colour_component(true);
@@ -270,8 +269,7 @@ uint8_t Renderer3D::add_target()
 	gbuffer.finalize_buffer();
 
 	// deferred shading buffer setup
-	FrameBuffer cbuffer = FrameBuffer(
-			"./shader/standard/framebuffer.vs","./shader/lighting/pbr.fs",false);
+	FrameBuffer cbuffer = FrameBuffer("./shader/standard/framebuffer.vs","./shader/lighting/pbr.fs",false);
 	cbuffer.s.upload_int("gbuffer_colour",0);
 	cbuffer.s.upload_int("gbuffer_position",1);
 	cbuffer.s.upload_int("gbuffer_normals",2);
@@ -483,10 +481,10 @@ void Renderer3D::prepare_shadow()
 	h_res: y-axis resolution reset
 	purpose: end shadow map projection render
 */
-void Renderer3D::close_shadow(uint16_t w_res,uint16_t h_res)
+void Renderer3D::close_shadow()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
-	glViewport(0,0,w_res,h_res);
+	glViewport(0,0,Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
 	glCullFace(GL_BACK);
 }
 
@@ -517,7 +515,7 @@ void Renderer3D::update_animations(double dt)
 	\param swidth: screen width as stored in frame for viewport reset
 	\param sheight: screen height as stored in frame for viewport reset
 */
-void Renderer3D::update_shadows(float swidth,float sheight)
+void Renderer3D::update_shadows()
 {
 	prepare_shadow();
 	render_mesh_shadow();
@@ -525,7 +523,7 @@ void Renderer3D::update_shadows(float swidth,float sheight)
 	render_animation_shadow();
 	render_physical_shadow();
 	render_geometry_shadow();
-	close_shadow(swidth,sheight);
+	close_shadow();
 }
 
 /*

@@ -57,6 +57,7 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 		Toolbox::set_texture_parameter_nearest_unfiltered();
 		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,dptex,0);
 	}
+	// FIXME: branching can be avoided with simple hexmath and logic, do that
 }
 // TODO: make the resolution of framebuffers dynamic (cambased)
 

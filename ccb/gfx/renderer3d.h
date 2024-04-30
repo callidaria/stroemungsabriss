@@ -78,12 +78,12 @@ public:
 	inline void register_geometry(ShadowGeometry* geometry) { shadow_geometry.push_back(geometry); }
 
 	// close process
-	void close_shadow(uint16_t w_res,uint16_t h_res);
+	void close_shadow();
 	void clear_memory();
 
 	// update
 	void update_animations(double dt);
-	void update_shadows(float swidth,float sheight);
+	void update_shadows();
 
 	// shadow
 	void render_mesh_shadow();
