@@ -259,8 +259,7 @@ void Renderer3D::load(Camera3D cam3d,float &progress,float pseq)
 uint8_t Renderer3D::add_target()
 {
 	// gbuffer setup
-	GBuffer gbuffer = GBuffer(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
-	// TODO: add standard constructor gbuffer using full screen range
+	GBuffer gbuffer = GBuffer();
 	gbuffer.add_colour_component();
 	gbuffer.add_colour_component(true);
 	gbuffer.add_colour_component(true);
