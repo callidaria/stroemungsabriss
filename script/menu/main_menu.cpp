@@ -924,7 +924,6 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
 	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
 	globe_target_id = m_ccbf->r3d->add_target();
-	fb_globe = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false);
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -1273,7 +1272,7 @@ void MenuList::update_overlays()
 
 	// globe deferred shading
 	fb_globe.bind();
-	Frame::clear();
+	//Frame::clear();
 	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
 	FrameBuffer::close();
 
@@ -2186,12 +2185,8 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mdialogues.load();
 
 	// buffers
-	msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",8);
-	fb_nslice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs");
-	fb_menu = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
-	fb_slice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/overlay.fs");
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
@@ -2350,7 +2345,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// multisampling
 	// prepare msaa framebuffer for geometry section
 	FrameBuffer::close();
-	msaa.bind();
+	//msaa.bind();
 	Frame::clear();
 
 	// curtain animation for main option selector splice
@@ -2381,20 +2376,21 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	mdialogues.update_background_component();
 
 	// finalize multisampling
-	msaa.blit();
+	//msaa.blit();
 
 	// render menu
 	fb_menu.prepare();
 	fb_menu.s.upload_float("vignette",.44f+(float)(rand()%21)*.001f);
 	fb_menu.s.upload_float("mtransition",mtransition);
 	fb_menu.render();
+	// TODO: this always happens when transitioning into any menu, do this outside
 
 	// render anti-aliased splices
-	fb_slice.bind();
+	/*fb_slice.bind();
 	Frame::clear();
 	msaa.prepare();
 	MSAA::render();
-	FrameBuffer::close();
+	FrameBuffer::close();*/
 
 	// render layers
 	fb_slice.prepare();

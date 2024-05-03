@@ -466,7 +466,7 @@ private:
 	// globe scene
 	uint16_t rid_globe;
 	uint8_t globe_target_id;
-	FrameBuffer fb_globe;
+	FrameBuffer fb_globe = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",false);
 	Camera3D gb_cam3D = Camera3D(glm::vec3(.1f,-.1f,1.5f),1280.f,720.f,45.f,15.f,-110.f);
 	Lighting gb_lights = Lighting();
 	bool show_globe = false;
@@ -656,8 +656,10 @@ private:
 	// engine
 	CCBManager* m_ccbm;
 	World* m_world;
-	FrameBuffer fb_menu,fb_nslice,fb_slice;
-	MSAA msaa;
+	FrameBuffer fb_menu = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs"),
+			fb_nslice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/standard/direct.fs"),
+			fb_slice = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/overlay.fs");
+	MSAA msaa = MSAA("./shader/standard/framebuffer.vs","./shader/standard/direct.fs",8);
 
 	// text
 	Font fnt_mopts = Font("./res/fonts/nimbus_roman.fnt","./res/fonts/nimbus_roman.png",

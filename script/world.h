@@ -41,10 +41,10 @@ public:
 	void remove_boss(uint8_t boss_id);
 
 	// load
-	void load(float &progress,float ldsplit);
+	void load(float& progress,float ldsplit);
 
 	// draw
-	void render(bool &running,bool &reboot);
+	void render(bool& running,bool& reboot);
 
 public:
 
@@ -55,7 +55,7 @@ private:
 
 	// cascabel
 	CascabelBaseFeature* m_ccbf;
-	FrameBuffer game_fb;
+	FrameBuffer game_fb = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	uint8_t rtarget_id;
 
 	// scene components

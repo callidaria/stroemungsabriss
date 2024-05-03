@@ -1,11 +1,5 @@
 #include "msaa.h"
 
-/*
-	constructor()
-	purpose: creates a placeholder object for multisampling
-*/
-MSAA::MSAA() {  }
-
 MSAA::MSAA(const char* vsp,const char* fsp,int los)
 {
 	MSAA(vsp,fsp,Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT],los);

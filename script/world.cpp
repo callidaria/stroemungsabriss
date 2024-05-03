@@ -12,7 +12,6 @@ World::World(CascabelBaseFeature* eref)
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
 
 	// framebuffer setup
-	game_fb = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	rtarget_id = eref->r3d->add_target();
 }
 
@@ -60,7 +59,7 @@ void World::remove_boss(uint8_t boss_id)
 	\param progress: load progress to be changed while loading
 	\param ldsplit: partition of load progress influenced by load progression
 */
-void World::load(float &progress,float ldsplit)
+void World::load(float& progress,float ldsplit)
 {
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
 	Core::gRenderer.load();
@@ -77,7 +76,7 @@ void World::load(float &progress,float ldsplit)
 	reboot: holds if program should reboot after it has been closed
 	purpose: render & handle world entites
 */
-void World::render(bool &running,bool &reboot)
+void World::render(bool& running,bool& reboot)
 {
 	// 3D
 	glEnable(GL_DEPTH_TEST);

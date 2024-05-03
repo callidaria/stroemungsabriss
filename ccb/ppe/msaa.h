@@ -11,7 +11,7 @@ class MSAA
 public:
 
 	// construction
-	MSAA();
+	MSAA() {  }
 	MSAA(const char* vsp,const char* fsp,int los);
 	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los);
 	~MSAA() {  }
