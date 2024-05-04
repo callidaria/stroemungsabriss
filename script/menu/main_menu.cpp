@@ -1272,7 +1272,7 @@ void MenuList::update_overlays()
 
 	// globe deferred shading
 	fb_globe.bind();
-	//Frame::clear();
+	Frame::clear();
 	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
 	FrameBuffer::close();
 
@@ -2376,7 +2376,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	mdialogues.update_background_component();
 
 	// finalize multisampling
-	//msaa.blit();
+	msaa.blit();
 
 	// render menu
 	fb_menu.prepare();
@@ -2384,13 +2384,15 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	fb_menu.s.upload_float("mtransition",mtransition);
 	fb_menu.render();
 	// TODO: this always happens when transitioning into any menu, do this outside
+	//		this assumes the main menu utility to be rendered to scene instead of everything being ui
+	//		decide how this should be handled and combine into most reduced implementation
 
 	// render anti-aliased splices
-	/*fb_slice.bind();
+	fb_slice.bind();
 	Frame::clear();
 	msaa.prepare();
 	MSAA::render();
-	FrameBuffer::close();*/
+	FrameBuffer::close();
 
 	// render layers
 	fb_slice.prepare();

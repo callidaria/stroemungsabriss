@@ -1,8 +1,12 @@
 #include "msaa.h"
 
-MSAA::MSAA(const char* vsp,const char* fsp,int los)
+/*
+	TODO
+*/
+MSAA::MSAA(const char* vsp,const char* fsp,uint8_t los)
 {
-	MSAA(vsp,fsp,Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT],los);
+	fbw = Init::iConfig[FRAME_RESOLUTION_WIDTH], fbh = Init::iConfig[FRAME_RESOLUTION_HEIGHT];
+	init(vsp,fsp,los);
 }
 
 /*
@@ -14,8 +18,10 @@ MSAA::MSAA(const char* vsp,const char* fsp,int los)
 	los: level of multisampling
 	purpose: create an object for multisampling
 */
-MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los)
-	: fbw(bw),fbh(bh)
+MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,uint8_t los)
+	: fbw(bw),fbh(bh) { init(vsp,fsp,los); }
+
+void MSAA::init(const char* vsp,const char* fsp,uint8_t los)
 {
 	// buffer upload
 	std::vector<float> verts = Toolbox::create_sprite_canvas();

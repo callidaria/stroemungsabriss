@@ -11,9 +11,8 @@ class MSAA
 public:
 
 	// construction
-	MSAA() {  }
-	MSAA(const char* vsp,const char* fsp,int los);
-	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,int los);
+	MSAA(const char* vsp,const char* fsp,uint8_t los);
+	MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,uint8_t los);
 	~MSAA() {  }
 
 	// action
@@ -23,6 +22,10 @@ public:
 	// draw
 	void prepare();
 	static inline void render() { glDrawArrays(GL_TRIANGLES,0,6); }
+
+private:
+
+	void init(const char* vsp,const char* fsp,uint8_t los);
 
 public:
 
