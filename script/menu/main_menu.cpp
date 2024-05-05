@@ -2185,8 +2185,10 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 	mdialogues.load();
 
 	// buffers
+	fb_menu.s.enable();
 	fb_menu.s.upload_vec2("ratio",
 			glm::vec2(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]));
+	fb_slice.s.enable();
 	fb_slice.s.upload_int("gbuffer_colour",0);
 	fb_slice.s.upload_int("gbuffer_normals",1);
 	fb_slice.s.upload_int("menu_fb",2);
@@ -2199,7 +2201,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 {
 	// button input
-	bool plmb = Core::gFrame.mouse.mb[0]&&!trg_lmb,prmb = Core::gFrame.mouse.mb[2]&&!trg_rmb;
+	bool plmb = Core::gFrame.mouse.mb[0]&&!trg_lmb, prmb = Core::gFrame.mouse.mb[2]&&!trg_rmb;
 	input.hit_a =
 			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
 			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
@@ -2345,7 +2347,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// multisampling
 	// prepare msaa framebuffer for geometry section
 	FrameBuffer::close();
-	//msaa.bind();
+	msaa.bind();
 	Frame::clear();
 
 	// curtain animation for main option selector splice

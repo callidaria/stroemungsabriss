@@ -67,8 +67,8 @@ void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// process user selection
 	int8_t smod = ((down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
-			-(up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
-			*(ptrans<.1f);
+			- (up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
+			* (ptrans<.1f);
 	msel += smod*menu_sys;
 	isel += smod*menu_inf;
 	trg_smod = down||up;

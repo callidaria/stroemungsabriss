@@ -21,6 +21,9 @@ MSAA::MSAA(const char* vsp,const char* fsp,uint8_t los)
 MSAA::MSAA(const char* vsp,const char* fsp,uint16_t bw,uint16_t bh,uint8_t los)
 	: fbw(bw),fbh(bh) { init(vsp,fsp,los); }
 
+/*
+	TODO
+*/
 void MSAA::init(const char* vsp,const char* fsp,uint8_t los)
 {
 	// buffer upload

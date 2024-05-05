@@ -29,6 +29,9 @@ FrameBuffer::FrameBuffer(uint32_t fr_width,uint32_t fr_height,const char* vsp,
 	init(fr_width,fr_height,vsp,fsp,float_buffer,depth_buffer);
 }
 
+/*
+	TODO
+*/
 void FrameBuffer::init(uint32_t fr_width,uint32_t fr_height,const char* vsp,const char* fsp,
 		bool float_buffer,bool depth_buffer)
 {
