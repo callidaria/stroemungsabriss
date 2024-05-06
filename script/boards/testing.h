@@ -4,7 +4,7 @@
 #include <iostream>
 #include "../struct/world_structures.h"
 
-class TestArea  // : public Board<TestArea>
+class TestArea : public Board<TestArea>
 {
 public:
 

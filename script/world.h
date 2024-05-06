@@ -28,7 +28,6 @@ public:
 	~World() {  }
 
 	// creation
-	inline void add_ui(UI* ui) { ui_master.push_back(ui); }
 	inline void add_scene(Scene* scene) { scene_master.push_back(scene); }
 	inline void add_playable(Player* player) { player_master.push_back(player); }
 	inline void add_boss(Boss* boss) { boss_master.push_back(boss); }
@@ -51,6 +50,11 @@ public:
 	// public indices
 	uint8_t active_daui = 0;
 
+public:
+
+	// scene components
+	std::vector<UI*> ui_master;
+
 private:
 
 	// cascabel
@@ -59,7 +63,6 @@ private:
 	uint8_t rtarget_id;
 
 	// scene components
-	std::vector<UI*> ui_master;
 	std::vector<Scene*> scene_master;
 	std::vector<Player*> player_master;
 	std::vector<Boss*> boss_master;

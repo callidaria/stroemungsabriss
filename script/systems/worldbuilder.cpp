@@ -20,8 +20,6 @@ void load_titles(LoadStorage& lds)
 */
 void load_menu(LoadStorage& lds)
 {
-	MainMenu* main_menu = new MainMenu(lds.m_ccbm,lds.m_ccbf,lds.world,lds.progress,.75f);
-	lds.world->add_ui(main_menu);
 	lds.world->load(lds.progress,.25f);
 }
 
@@ -31,14 +29,11 @@ void load_menu(LoadStorage& lds)
 void load_casino(LoadStorage& lds)
 {
 	std::cout << "loading: spike's casino\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
 	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
-	lds.world->add_ui(action_menu);
 	lds.world->add_scene(cspike);
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.21f);
 	lds.progress = 1.0f;
-	// TODO: dynamification of camera and ui (etc...) picker
 }
 
 /*
@@ -47,9 +42,7 @@ void load_casino(LoadStorage& lds)
 void load_cards(LoadStorage& lds)
 {
 	std::cout << "loading: card games\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
 	CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
-	lds.world->add_ui(action_menu);
 	lds.world->add_scene(ctable);
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.21f);
@@ -71,15 +64,13 @@ void load_airfield(LoadStorage& lds)
 void load_dpilot(LoadStorage& lds)
 {
 	std::cout << "loading: dancing pilot duel\n";
-	Core::gCamera3D = Camera3D(1280.0f,720.0f);
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
+	Core::gCamera3D = Camera3D(1280.0f,720.0f);  // TODO: this belongs inside the scene loader
 	NepalMountainWoods* nmw = new NepalMountainWoods(lds.m_ccbm,lds.m_ccbf);
 	lds.progress += .2f;
 	/*JaegerJet* jj = new JaegerJet(m_ccbf);
 	progress += .2f;*/
 	DPilot* dpilot = new DPilot(lds.m_ccbf);
 	lds.progress += .2f;
-	lds.world->add_ui(action_menu);
 	lds.world->add_scene(nmw);
 	//m_world->add_playable(jj);
 	lds.world->add_boss(dpilot);
@@ -93,10 +84,8 @@ void load_dpilot(LoadStorage& lds)
 void load_testing(LoadStorage& lds)
 {
 	std::cout << "loading: test scene\n";
-	ActionMenu* action_menu = new ActionMenu(lds.m_ccbf->iMap,lds.progress,.25f);
-	//Board<TestArea>* board = new TestArea();
-	//board->load();
-	lds.world->add_ui(action_menu);
+	Board<TestArea>* board = new TestArea();
+	board->load();
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.2f);
 }
@@ -124,11 +113,17 @@ const load_routine load_routines[] = {
 */
 Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
 {
+	// setup loader storage
 	ldstorage = {
 		.m_ccbf = ccbf,
 		.m_ccbm = ccbm,
 		.world = world
 	};
+
+	// preload user interface
+	MainMenu* main_menu = new MainMenu(ccbm,ccbf,world,ldstorage.progress,.75f);
+	ActionMenu* action_menu = new ActionMenu(ccbf->iMap,ldstorage.progress,.25f);
+	world->ui_master = { main_menu,action_menu };
 }
 
 /*
