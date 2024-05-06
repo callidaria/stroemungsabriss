@@ -10,6 +10,7 @@ World::World(CascabelBaseFeature* eref)
 {
 	// memfail avoidance shadow setup
 	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
+	// FIXME: if r3d would be a good renderer this would be unnecessary!!
 
 	// framebuffer setup
 	rtarget_id = eref->r3d->add_target();
@@ -108,7 +109,7 @@ void World::render(bool& running,bool& reboot)
 
 	// render bullets
 	m_ccbf->bSys->render();
-	game_fb.close();
+	FrameBuffer::close();
 
 	// render ui
 	ui_master[active_daui]->render(&game_fb,running,reboot);

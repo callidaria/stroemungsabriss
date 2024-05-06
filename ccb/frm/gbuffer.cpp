@@ -5,7 +5,8 @@
 */
 GBuffer::GBuffer()
 {
-	GBuffer(Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT]);
+	w_res = Init::iConfig[FRAME_RESOLUTION_WIDTH], h_res = Init::iConfig[FRAME_RESOLUTION_HEIGHT];
+	init();
 }
 
 /*
@@ -16,7 +17,9 @@ GBuffer::GBuffer()
 	NOTE: constructing will immediately bind framebuffer for setup
 */
 GBuffer::GBuffer(float wres,float hres)
-	: w_res(wres),h_res(hres)
+	: w_res(wres),h_res(hres) { init(); }
+
+void GBuffer::init()
 {
 	// generating framebuffer
 	glGenFramebuffers(1,&buffer);

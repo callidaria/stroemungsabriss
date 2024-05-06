@@ -21,6 +21,11 @@ public:
 	// bind
 	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,buffer); }
 
+private:
+
+	// creation
+	void init();
+
 public:
 
 	// attributes
