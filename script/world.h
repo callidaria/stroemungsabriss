@@ -15,9 +15,9 @@
 
 #include "../ccb/mat/lighting.h"
 
-// scripts
 #include "struct/feature_base.h"
 #include "struct/world_structures.h"
+
 
 class World
 {
@@ -54,6 +54,7 @@ public:
 
 	// scene components
 	std::vector<UI*> ui_master;
+	std::vector<board_logic> board_master;
 
 private:
 

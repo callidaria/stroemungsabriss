@@ -4,16 +4,14 @@
 #include <iostream>
 #include "../struct/world_structures.h"
 
-class TestArea : public Board<TestArea>
+
+class TestArea
 {
 public:
 
-	// construction
-	TestArea() {  }
-
 	// implementation
-	void load();
-	void update();
+	static void load();
+	static void update(Board& b);
 };
 
 #endif

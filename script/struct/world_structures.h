@@ -8,13 +8,22 @@
 #include "../../ccb/frm/framebuffer.h"
 
 
+//		BOARD DEFINITION
+// data structure to use in board logic
+struct Board
+{
+	// TODO
+};
+
 // describes game board setup routines for loading and rendering
-template <typename Derivative> class Board
+typedef void (*board_logic)(Board&);
+
+/*template <typename Derivative> class Board
 {
 public:
 	void load() { (static_cast<Derivative*>(this))->load(); };
 	void update() { (static_cast<Derivative*>(this))->update(); };
-};
+};*/
 
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI

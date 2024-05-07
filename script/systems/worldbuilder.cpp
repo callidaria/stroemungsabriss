@@ -84,8 +84,8 @@ void load_dpilot(LoadStorage& lds)
 void load_testing(LoadStorage& lds)
 {
 	std::cout << "loading: test scene\n";
-	Board<TestArea>* board = new TestArea();
-	board->load();
+	TestArea::load();
+	lds.world->board_master.push_back(TestArea::update);
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.2f);
 }
@@ -99,6 +99,7 @@ const load_routine load_routines[] = {
 	load_cards,
 	load_airfield,
 	load_dpilot,
+	//TestArea::load,
 	load_testing,
 };
 // TODO: use a queue of function pointers directly
@@ -132,6 +133,7 @@ Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* wor
 */
 void Worldbuilder::load()
 {
+	// process load instructions
 	while (!ldstorage.m_ccbf->ld.empty()) {
 
 		// loading feedback creation

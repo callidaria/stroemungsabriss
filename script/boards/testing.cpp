@@ -12,7 +12,7 @@ void TestArea::load()
 /*
 	TODO
 */
-void TestArea::update()
+void TestArea::update(Board& b)
 {
 	std::cout << "running now...\n";
 	// TODO
