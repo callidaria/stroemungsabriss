@@ -79,6 +79,9 @@ void World::load(float& progress,float ldsplit)
 */
 void World::render(bool& running,bool& reboot)
 {
+	// logic test
+	for (board_logic logic : board_master) logic(board);
+
 	// 3D
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);

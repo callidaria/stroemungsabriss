@@ -53,6 +53,7 @@ public:
 public:
 
 	// scene components
+	Board board;
 	std::vector<UI*> ui_master;
 	std::vector<board_logic> board_master;
 

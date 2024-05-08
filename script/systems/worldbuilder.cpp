@@ -99,7 +99,6 @@ const load_routine load_routines[] = {
 	load_cards,
 	load_airfield,
 	load_dpilot,
-	//TestArea::load,
 	load_testing,
 };
 // TODO: use a queue of function pointers directly
