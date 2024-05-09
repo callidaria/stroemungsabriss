@@ -1,7 +1,7 @@
 #ifndef BRD_TESTAREA
 #define BRD_TESTAREA
 
-#include <iostream>
+#include "../../ccb/core.h"
 #include "../struct/world_structures.h"
 
 
