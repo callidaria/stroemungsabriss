@@ -17,14 +17,6 @@
 #include "../boards/testing.h"
 #include "../world.h"
 
-struct LoadStorage
-{
-	CascabelBaseFeature* m_ccbf;
-	CCBManager* m_ccbm;
-	World* world;
-	bool ldfb_showing = false;
-	float progress = .0;
-};
 
 class Worldbuilder
 {

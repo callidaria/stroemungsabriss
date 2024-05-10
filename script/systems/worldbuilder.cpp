@@ -1,28 +1,6 @@
 #include "worldbuilder.h"
 
 
-typedef void (*load_routine)(LoadStorage&);
-// TODO: every load a member of the board evrart?!??!?
-
-/*
-	load_<scene>() -> void (private)
-	purpose: load logic of different scenes throughout the game
-*/
-void load_titles(LoadStorage& lds)
-{
-	std::cout << "loading: title display\n";
-	// TODO
-	lds.m_ccbf->ld.push(LOAD_MENU);
-}
-
-/*
-	TODO
-*/
-void load_menu(LoadStorage& lds)
-{
-	lds.world->load(lds.progress,.25f);
-}
-
 /*
 	TODO
 */
@@ -89,12 +67,12 @@ void load_testing(LoadStorage& lds)
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.2f);
 }
-// FIXME: create menus once and keep, creating them within every load statement is a farce
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general
+// FIXME: switch active ui on demand instead of setting it inside every load
 
+
+typedef void (*load_routine)(LoadStorage&);
 const load_routine load_routines[] = {
-	load_titles,
-	load_menu,
 	load_casino,
 	load_cards,
 	load_airfield,
@@ -102,6 +80,7 @@ const load_routine load_routines[] = {
 	load_testing,
 };
 // TODO: use a queue of function pointers directly
+// TODO: every load a member of the board evrart?!??!?
 
 
 /*
@@ -124,6 +103,7 @@ Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* wor
 	MainMenu* main_menu = new MainMenu(ccbm,ccbf,world,ldstorage.progress,.75f);
 	ActionMenu* action_menu = new ActionMenu(ccbf->iMap,ldstorage.progress,.25f);
 	world->ui_master = { main_menu,action_menu };
+	world->load(ldstorage.progress,.25f);
 }
 
 /*

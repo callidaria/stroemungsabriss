@@ -13,8 +13,6 @@
 // enumeration of load instructions definitions, to add more instructions and dynamically scale
 enum LoadInstruction
 {
-	LOAD_START,
-	LOAD_MENU,
 	LOAD_CASINO,
 	LOAD_CARDTABLE,
 	LOAD_AIRFIELD,

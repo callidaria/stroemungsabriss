@@ -1,29 +1,16 @@
 #ifndef SCR_STRUCTURES_WORLD_STRUCTURES
 #define SCR_STRUCTURES_WORLD_STRUCTURES
 
-#include <iostream>
-
 #include <glm/glm.hpp>
-
 #include "../../ccb/frm/framebuffer.h"
 
 
 //		BOARD DEFINITION
-// data structure to use in board logic
 struct Board
 {
 	// TODO
 };
-
-// describes game board setup routines for loading and rendering
 typedef void (*board_logic)(Board&);
-
-/*template <typename Derivative> class Board
-{
-public:
-	void load() { (static_cast<Derivative*>(this))->load(); };
-	void update() { (static_cast<Derivative*>(this))->update(); };
-};*/
 
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI
@@ -40,6 +27,7 @@ public:
 	virtual ~Scene() {  }
 	virtual void render() {  }
 };
+
 
 // describes all objects/character, that can be controlled by the player
 class Player
