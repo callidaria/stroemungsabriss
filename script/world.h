@@ -1,7 +1,6 @@
 #ifndef SCR_ROOT_WORLD
 #define SCR_ROOT_WORLD
 
-// engine
 #include "../ccb/core.h"
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/frm/gbuffer.h"
@@ -49,9 +48,11 @@ public:
 
 public:
 
-	// scene components
-	Board board;
+	// ui components
 	std::vector<UI*> ui_master;
+
+	// board components
+	Board board;
 	std::vector<board_logic> board_master;
 
 private:

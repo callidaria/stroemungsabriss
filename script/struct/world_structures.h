@@ -6,11 +6,9 @@
 
 
 //		BOARD DEFINITION
-struct Board
-{
-	// TODO
-};
-typedef void (*board_logic)(Board&);
+struct Board { };
+typedef void (*board_logic)(Board*);
+
 
 // describes any form of large scale user interface the player interacts with mainly, when enabled
 class UI
@@ -27,7 +25,6 @@ public:
 	virtual ~Scene() {  }
 	virtual void render() {  }
 };
-
 
 // describes all objects/character, that can be controlled by the player
 class Player

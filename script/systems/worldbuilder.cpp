@@ -62,7 +62,7 @@ void load_dpilot(LoadStorage& lds)
 void load_testing(LoadStorage& lds)
 {
 	std::cout << "loading: test scene\n";
-	TestArea::load();
+	TestArea::load(&lds.world->board);
 	lds.world->board_master.push_back(TestArea::update);
 	lds.world->active_daui = 1;
 	lds.world->load(lds.progress,.2f);

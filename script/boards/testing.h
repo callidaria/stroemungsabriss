@@ -5,13 +5,15 @@
 #include "../struct/world_structures.h"
 
 
-class TestArea
+struct TestArea
 {
-public:
+	// variables
+	Board b;
+	uint16_t sprite_rID,anim_rID;
 
 	// implementation
-	static void load();
-	static void update(Board& b);
+	static void load(Board* b);
+	static void update(Board* b);
 };
 
 #endif
