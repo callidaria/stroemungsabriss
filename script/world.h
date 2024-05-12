@@ -15,6 +15,13 @@
 #include "struct/world_structures.h"
 
 
+struct BoardTuple
+{
+	Board* data;
+	board_logic logic;
+};
+
+
 class World
 {
 public:
@@ -52,8 +59,7 @@ public:
 	std::vector<UI*> ui_master;
 
 	// board components
-	Board board;
-	std::vector<board_logic> board_master;
+	std::vector<BoardTuple> board_master;
 
 private:
 

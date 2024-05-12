@@ -3,6 +3,7 @@
 
 #include "../../ccb/core.h"
 #include "../struct/world_structures.h"
+#include "../world.h"
 
 
 struct TestArea
@@ -12,7 +13,7 @@ struct TestArea
 	uint16_t sprite_rID,anim_rID;
 
 	// implementation
-	static void load(Board* b);
+	static void load(LoadStorage& lds);
 	static void update(Board* b);
 };
 

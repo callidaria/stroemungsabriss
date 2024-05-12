@@ -56,20 +56,6 @@ void load_dpilot(LoadStorage& lds)
 	lds.world->load(lds.progress,.2f);
 }
 
-/*
-	TODO
-*/
-void load_testing(LoadStorage& lds)
-{
-	std::cout << "loading: test scene\n";
-	TestArea::load(&lds.world->board);
-	lds.world->board_master.push_back(TestArea::update);
-	lds.world->active_daui = 1;
-	lds.world->load(lds.progress,.2f);
-}
-// FIXME: this loading structure results in a lot of repitition and a bad routine in general
-// FIXME: switch active ui on demand instead of setting it inside every load
-
 
 typedef void (*load_routine)(LoadStorage&);
 const load_routine load_routines[] = {
@@ -77,7 +63,8 @@ const load_routine load_routines[] = {
 	load_cards,
 	load_airfield,
 	load_dpilot,
-	load_testing,
+	TestArea::load,
+	//load_testing,
 };
 // TODO: use a queue of function pointers directly
 // TODO: every load a member of the board evrart?!??!?

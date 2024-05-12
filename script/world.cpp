@@ -79,9 +79,6 @@ void World::load(float& progress,float ldsplit)
 */
 void World::render(bool& running,bool& reboot)
 {
-	// logic test
-	for (board_logic logic : board_master) logic(&board);
-
 	// 3D
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -112,6 +109,10 @@ void World::render(bool& running,bool& reboot)
 
 	// render bullets
 	m_ccbf->bSys->render();
+
+	// logic test
+	for (BoardTuple board : board_master) board.logic(board.data);
+
 	FrameBuffer::close();
 
 	// render ui
