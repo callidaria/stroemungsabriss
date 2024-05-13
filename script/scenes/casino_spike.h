@@ -5,7 +5,7 @@
 #include "../../ccb/gfx/cubemap.h"
 
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
+#include "../world.h"
 
 class CasinoSpike : public Scene
 {

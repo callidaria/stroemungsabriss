@@ -2,9 +2,8 @@
 #define SCR_SCENES_CASINO_TABLE
 
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
-
 #include "../systems/card_system.h"
+#include "../world.h"
 
 class CasinoTable : public Scene
 {

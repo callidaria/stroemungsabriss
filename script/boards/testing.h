@@ -2,7 +2,7 @@
 #define BRD_TESTAREA
 
 #include "../../ccb/core.h"
-#include "../struct/world_structures.h"
+
 #include "../world.h"
 
 

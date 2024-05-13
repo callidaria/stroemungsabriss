@@ -10,7 +10,7 @@
 #include "../../ccb/fcn/text.h"
 #include "../../ccb/gfx/shader.h"
 
-#include "../struct/world_structures.h"
+#include "../world.h"
 #include "../systems/input_map.h"
 
 

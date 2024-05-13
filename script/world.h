@@ -12,16 +12,60 @@
 #include "../ccb/fcn/ccb_manager.h"
 
 #include "struct/feature_base.h"
-#include "struct/world_structures.h"
 
 
+//		BOARD DEFINITION
+struct Board { };
+typedef void (*board_logic)(Board*);
+
+
+// describes any form of large scale user interface the player interacts with mainly, when enabled
+class UI
+{
+public:
+	virtual ~UI() {  }
+	virtual void render(FrameBuffer*,bool&,bool&) {  }
+};
+
+// describes all environments the player visits during playtime
+class Scene
+{
+public:
+	virtual ~Scene() {  }
+	virtual void render() {  }
+};
+
+// describes all objects/character, that can be controlled by the player
+class Player
+{
+public:
+	virtual ~Player() {  }
+	virtual void update() {  }
+
+public:
+	glm::vec3 position = glm::vec3(0);
+};
+
+// describes any form of enemy, that can be considered significant and/or deserves a health bar
+class Boss
+{
+public:
+	virtual ~Boss() {  }
+	virtual void update(glm::vec2) {  }
+};
+
+
+//		REGISTRATION STRUCTURE
 struct BoardTuple
 {
 	Board* data;
 	board_logic logic;
 };
+// TODO: split render instructions into 2D, 3D, transparency, etc... to reduce preparation and possible render
+//		pipeline issues
 
 
+// update pipeline handling
 class World
 {
 public:
@@ -34,13 +78,6 @@ public:
 	inline void add_scene(Scene* scene) { scene_master.push_back(scene); }
 	inline void add_playable(Player* player) { player_master.push_back(player); }
 	inline void add_boss(Boss* boss) { boss_master.push_back(boss); }
-
-	// destruction
-	void free_memory();
-	void remove_ui(uint8_t ui_id);
-	void remove_scene(uint8_t scene_id);
-	void remove_playable(uint8_t player_id);
-	void remove_boss(uint8_t boss_id);
 
 	// load
 	void load(float& progress,float ldsplit);

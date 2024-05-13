@@ -10,6 +10,7 @@ void TestArea::load(LoadStorage& lds)
 			.data = (Board*)c,
 			.logic = update
 		});
+	// TODO: generalize, maybe board_logic pointer definition too specific and has to be update-general
 
 	// adding test sprites
 	c->sprite_rID = Core::gRenderer.add_sprite(glm::vec2(100,100),200,200,"./res/bllt_ffdir.png");

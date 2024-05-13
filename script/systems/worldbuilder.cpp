@@ -64,7 +64,6 @@ const load_routine load_routines[] = {
 	load_airfield,
 	load_dpilot,
 	TestArea::load,
-	//load_testing,
 };
 // TODO: use a queue of function pointers directly
 // TODO: every load a member of the board evrart?!??!?

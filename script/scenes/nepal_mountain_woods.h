@@ -6,7 +6,7 @@
 #include "../../ccb/fcn/ccb_manager.h"
 
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
+#include "../world.h"
 
 
 class NepalMountainWoods : public Scene

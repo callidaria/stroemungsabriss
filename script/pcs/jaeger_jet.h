@@ -2,8 +2,9 @@
 #define SCR_PCHARS_JAEGER_JET
 
 #include "../../ccb/core.h"
+
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
+#include "../world.h"
 
 // movement collision bounds for the jaeger jet
 constexpr uint8_t JET_BORDER_WIDTH = 42;

@@ -1,16 +1,11 @@
 #ifndef SCR_BOSS_DANCING_PILOT
 #define SCR_BOSS_DANCING_PILOT
 
-#include <iostream>
-
-#include <glm/glm.hpp>
-
 #include "../../ccb/mat/toolbox.h"
 
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
-
 #include "../ui/healthbar.h"
+#include "../world.h"
 
 // bullet memory offset
 enum DPilotBMEM

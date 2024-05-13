@@ -6,15 +6,13 @@
 #include "../../ccb/fcn/ccb_manager.h"
 #include "../../ccb/fcn/font.h"
 #include "../../ccb/fcn/text.h"
-
 #include "../../ccb/frm/framebuffer.h"
 #include "../../ccb/ppe/msaa.h"
 
 #include "../struct/feature_base.h"
-#include "../struct/world_structures.h"
-
 #include "../systems/savestates.h"
 #include "../world.h"
+
 
 // information
 constexpr uint8_t INFO_VERSION_RELEASE = 0;

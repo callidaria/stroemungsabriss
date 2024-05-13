@@ -106,7 +106,6 @@ int main(int argc,char** argv)
 #endif
 
 	// CLOSING
-	world.free_memory();
 	r3d.clear_memory();
 	Core::gFrame.vanish();
 	return 0;
