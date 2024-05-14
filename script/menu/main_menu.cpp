@@ -1903,6 +1903,8 @@ void interface_behaviour_practice(MainMenu& tm)
 		tm.logic_setup = true;
 	}
 
+	// TODO: jump to selected pratice board
+
 	// keep alive as long as practice list is active
 	tm.interface_logic_id *= tm.mlists.system_active;
 }

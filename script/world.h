@@ -88,7 +88,7 @@ public:
 public:
 
 	// public indices
-	uint8_t active_daui = 0;
+	static inline uint8_t active_daui = 0;
 
 public:
 

@@ -22,7 +22,8 @@ ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
 	// add menu text
 	mtext.add("continue",glm::vec2(240,TEXT_YPOSITION_SYS));
 	mtext.add("settings (reduced)",glm::vec2(240,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE));
-	mtext.add("quit",glm::vec2(240,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE));
+	mtext.add("quit to menu",glm::vec2(240,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE));
+	mtext.add("quit to operating system",glm::vec2(240,TEXT_YPOSITION_SYS-3*ACT_TEXT_SIZE));
 	mtext.add("phone",glm::vec2(2240,TEXT_YPOSITION_INFO));
 	mtext.add("hitlist",glm::vec2(2240,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE));
 	mtext.add("collection",glm::vec2(2240,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE));
@@ -33,7 +34,8 @@ ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
 	// add text shadow
 	stext.add("continue",glm::vec2(237,TEXT_YPOSITION_SYS-4));
 	stext.add("settings (reduced)",glm::vec2(237,TEXT_YPOSITION_SYS-ACT_TEXT_SIZE-4));
-	stext.add("quit",glm::vec2(237,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE-4));
+	mtext.add("quit to menu",glm::vec2(237,TEXT_YPOSITION_SYS-2*ACT_TEXT_SIZE-4));
+	mtext.add("quit to operating system",glm::vec2(237,TEXT_YPOSITION_SYS-3*ACT_TEXT_SIZE-4));
 	stext.add("phone",glm::vec2(2237,TEXT_YPOSITION_INFO-4));
 	stext.add("hitlist",glm::vec2(2237,TEXT_YPOSITION_INFO-ACT_TEXT_SIZE-4));
 	stext.add("collection",glm::vec2(2237,TEXT_YPOSITION_INFO-2*ACT_TEXT_SIZE-4));
@@ -52,32 +54,37 @@ ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
 */
 void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
+	bool pause = imap->input_val[InputID::PAUSE], details = imap->input_val[InputID::DETAILS];
+	bool down = imap->input_val[InputID::DOWN], up = imap->input_val[InputID::UP];
+
 	// action menu open requests
-	bool pause = imap->input_val[InputID::PAUSE],details = imap->input_val[InputID::DETAILS];
-	bool down = imap->input_val[InputID::DOWN],up = imap->input_val[InputID::UP];
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
-	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
 	bool req_infomenu = details&&!menu_trg&&!menu_sys;
+
+	// menu activation flags & input trigger
+	menu_sys = menu_sys*!req_sysmenu+!menu_sys*req_sysmenu;
 	menu_inf = menu_inf*!req_infomenu+!menu_inf*req_infomenu;
 	menu_trg = pause||details;
 
-	// game time modification
+	// time modification on action (smooth slowdown when halted)
 	ptrans += -.1f*((menu_sys||menu_inf)&&ptrans>0)+.1f*((!menu_sys&&!menu_inf)&&ptrans<1);
 	Core::gFrame.time_mod = ptrans;
 
 	// process user selection
-	int8_t smod = ((down&&!trg_smod)*((msel<2&&menu_sys)||(isel<3&&menu_inf))
+	int8_t smod =
+			((down&&!trg_smod)*((msel<AMSEL_SYS_MAXCHOICE&&menu_sys)||(isel<AMSEL_INFO_MAXCHOICE&&menu_inf))
 			- (up&&!trg_smod)*((msel>0&&menu_sys)||(isel>0&&menu_inf)))
 			* (ptrans<.1f);
-	msel += smod*menu_sys;
-	isel += smod*menu_inf;
+	msel += smod*menu_sys, isel += smod*menu_inf;
 	trg_smod = down||up;
 
 	// get new edge values
 	for (int i=0;i<4*(smod!=0&&(menu_sys||menu_inf));i++) sEdges[i] = rand()%15-10;
 
-	// close when quit selected and hit
-	running *= !(imap->request(InputID::FOCUS)&&msel==2&&menu_sys);
+	// request handling
+	// choose reset when selected and hit
+	World::active_daui *= !(imap->request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET);
+	running *= !(imap->request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET_OS&&menu_sys);
 
 	// sepia colourspace when paused
 	Frame::clear();
