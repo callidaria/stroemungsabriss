@@ -9,9 +9,6 @@ void load_casino(LoadStorage& lds)
 	std::cout << "loading: spike's casino\n";
 	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
 	lds.world->add_scene(cspike);
-	lds.world->active_daui = 1;
-	lds.world->load(lds.progress,.21f);
-	lds.progress = 1.0f;
 }
 
 /*
@@ -22,9 +19,6 @@ void load_cards(LoadStorage& lds)
 	std::cout << "loading: card games\n";
 	CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
 	lds.world->add_scene(ctable);
-	lds.world->active_daui = 1;
-	lds.world->load(lds.progress,.21f);
-	lds.progress = 1.0f;
 }
 
 /*
@@ -52,8 +46,6 @@ void load_dpilot(LoadStorage& lds)
 	lds.world->add_scene(nmw);
 	//m_world->add_playable(jj);
 	lds.world->add_boss(dpilot);
-	lds.world->active_daui = 1;
-	lds.world->load(lds.progress,.2f);
 }
 
 
@@ -112,6 +104,10 @@ void Worldbuilder::load()
 
 		load_routines[ldstorage.m_ccbf->ld.front()](ldstorage);
 		ldstorage.m_ccbf->ld.pop();
+
+		// load & switch to action ui
+		ldstorage.world->active_daui = 1;
+		ldstorage.world->load(ldstorage.progress,.2f);
 
 		// check loading feedback conclusion
 		ldstorage.ldfb_showing = !ldstorage.m_ccbf->ld.empty();

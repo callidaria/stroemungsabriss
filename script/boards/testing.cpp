@@ -19,14 +19,8 @@ void TestArea::load(LoadStorage& lds)
 	// adding test sprite animations
 	c->anim_rID = Core::gRenderer.add_sprite(glm::vec2(100,100),200,200,"./res/continue_dialogue.png",3,2,6,60);
 	Core::gRenderer.add_sprite(glm::vec2(100,100),200,200,"./res/test_bullet_anim.png",3,2,6,30);
-
-	// switch to action menu mode
-	// TODO: this is extremely annoying to set for every single load routine. this shall be automized
-	lds.world->active_daui = 1;
-	lds.world->load(lds.progress,.2d);
 }
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general
-// FIXME: switch active ui on demand instead of setting it inside every load
 
 /*
 	TODO
