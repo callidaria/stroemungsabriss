@@ -3,16 +3,18 @@
 
 #include "../../ccb/core.h"
 
+#include "../scenes/nepal_mountain_woods.h"
+#include "../scenes/casino_spike.h"
+#include "../scenes/casino_table.h"
+#include "../pcs/jaeger_jet.h"
+#include "../boss/dpilot.h"
 #include "../world.h"
 
 
 // casino bonus environment
-struct CasinoSpike
+struct NevadaCasino
 {
-	// equivalence to board pointer
-	Board d;
-
-	// variables
+	Board b;
 	uint8_t process_id;
 
 	// implementation
@@ -21,11 +23,25 @@ struct CasinoSpike
 	static void update_cardtable(Board* b);
 };
 
+// nepal airfield finale (d3)
+struct NepalAirfield
+{
+	Board b;
+	uint8_t process_id;
+	// FIXME: this id will be invalidated once a baord has been deleted
+
+	// implementation
+	static void load(LoadStorage& lds);
+	static void update_airfield(Board* b);
+	static void update_pilots(Board* b);
+};
+
 // test area for visualization and structuring tryouts
 struct TestArea
 {
-	// variables
 	Board b;
+
+	// memory index
 	uint16_t sprite_rID,anim_rID;
 
 	// implementation

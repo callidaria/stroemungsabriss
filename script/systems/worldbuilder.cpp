@@ -1,64 +1,13 @@
 #include "worldbuilder.h"
 
 
-/*
-	TODO
-*/
-void load_casino(LoadStorage& lds)
-{
-	std::cout << "loading: spike's casino\n";
-	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
-	lds.world->add_scene(cspike);
-}
-
-/*
-	TODO
-*/
-void load_cards(LoadStorage& lds)
-{
-	std::cout << "loading: card games\n";
-	CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
-	lds.world->add_scene(ctable);
-}
-
-/*
-	TODO
-*/
-void load_airfield(LoadStorage& lds)
-{
-	std::cout << "loading: airfield scene\n";
-	// TODO
-}
-
-/*
-	TODO
-*/
-void load_dpilot(LoadStorage& lds)
-{
-	std::cout << "loading: dancing pilot duel\n";
-	Core::gCamera3D = Camera3D(1280.0f,720.0f);  // TODO: this belongs inside the scene loader
-	NepalMountainWoods* nmw = new NepalMountainWoods(lds.m_ccbm,lds.m_ccbf);
-	lds.progress += .2f;
-	/*JaegerJet* jj = new JaegerJet(m_ccbf);
-	progress += .2f;*/
-	DPilot* dpilot = new DPilot(lds.m_ccbf);
-	lds.progress += .2f;
-	lds.world->add_scene(nmw);
-	//m_world->add_playable(jj);
-	lds.world->add_boss(dpilot);
-}
-
-
 typedef void (*load_routine)(LoadStorage&);
 const load_routine load_routines[] = {
-	load_casino,
-	load_cards,
-	load_airfield,
-	load_dpilot,
+	NevadaCasino::load,
+	NepalAirfield::load,
 	TestArea::load,
 };
 // TODO: use a queue of function pointers directly
-// TODO: every load a member of the board evrart?!??!?
 
 
 /*

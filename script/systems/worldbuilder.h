@@ -14,7 +14,7 @@
 #include "../struct/feature_base.h"
 #include "../pcs/jaeger_jet.h"
 #include "../boss/dpilot.h"
-#include "../boards/testing.h"
+#include "../components/board.h"
 #include "../world.h"
 
 

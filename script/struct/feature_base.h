@@ -14,9 +14,7 @@
 enum LoadInstruction
 {
 	LOAD_CASINO,
-	LOAD_CARDTABLE,
 	LOAD_AIRFIELD,
-	LOAD_DPILOT,
 	LOAD_AREA51
 };
 

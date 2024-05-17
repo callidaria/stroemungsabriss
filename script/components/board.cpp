@@ -4,21 +4,27 @@
 /*
 	TODO
 */
-void CasinoSpike::load(LoadStorage& lds)
+void NevadaCasino::load(LoadStorage& lds)
 {
-	CasinoSpike* c = new CasinoSpike();
+	NevadaCasino* c = new NevadaCasino();
 	c->process_id = lds.world->board_master.size();
 	lds.world->board_master.push_back({
 			.data = (Board*)c,
-			.logic = update_showroom
+			.logic = NevadaCasino::update_showroom
 		});
-	// TODO
+
+	// scene register
+	CasinoSpike* cspike = new CasinoSpike(lds.m_ccbf,lds.progress,.5f);
+	lds.world->add_scene(cspike);
+	//CasinoTable* ctable = new CasinoTable(lds.m_ccbf,lds.progress,.5f);
+	// FIXME: enable second load will override critical setup (e.g. shadow projection)
+	// TODO: add scene later, when requested, this preemtively loads
 }
 
 /*
 	TODO
 */
-void CasinoSpike::update_showroom(Board* b)
+void NevadaCasino::update_showroom(Board* b)
 {
 	TestArea* c = (TestArea*)b;
 	// TODO
@@ -27,9 +33,53 @@ void CasinoSpike::update_showroom(Board* b)
 /*
 	TODO
 */
-void CasinoSpike::update_cardtable(Board* b)
+void NevadaCasino::update_cardtable(Board* b)
 {
 	TestArea* c = (TestArea*)b;
+	// TODO
+}
+
+
+/*
+	TODO
+*/
+void NepalAirfield::load(LoadStorage& lds)
+{
+	NepalAirfield* c = new NepalAirfield();
+	c->process_id = lds.world->board_master.size();
+	lds.world->board_master.push_back({
+			.data = (Board*)c,
+			.logic = NepalAirfield::update_airfield
+		});
+
+	// load
+	Core::gCamera3D = Camera3D(1280.0f,720.0f);  // TODO: this belongs inside the scene loader
+	NepalMountainWoods* nmw = new NepalMountainWoods(lds.m_ccbm,lds.m_ccbf);
+	lds.progress += .2f;
+	/*JaegerJet* jj = new JaegerJet(m_ccbf);
+	progress += .2f;*/
+	DPilot* dpilot = new DPilot(lds.m_ccbf);
+	lds.progress += .2f;
+	lds.world->add_scene(nmw);
+	//m_world->add_playable(jj);
+	lds.world->add_boss(dpilot);
+}
+
+/*
+	TODO
+*/
+void NepalAirfield::update_airfield(Board* b)
+{
+	NepalAirfield* c = (NepalAirfield*)b;
+	// TODO
+}
+
+/*
+	TODO
+*/
+void NepalAirfield::update_pilots(Board* b)
+{
+	NepalAirfield* c = (NepalAirfield*)b;
 	// TODO
 }
 
@@ -42,7 +92,7 @@ void TestArea::load(LoadStorage& lds)
 	TestArea* c = new TestArea();
 	lds.world->board_master.push_back({
 			.data = (Board*)c,
-			.logic = update
+			.logic = TestArea::update
 		});
 	// TODO: generalize, maybe board_logic pointer definition too specific and has to be update-general
 
