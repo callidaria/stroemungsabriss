@@ -11,7 +11,6 @@
 #include "../scenes/casino_table.h"
 #include "../menu/main_menu.h"
 #include "../ui/action_menu.h"
-#include "../struct/feature_base.h"
 #include "../pcs/jaeger_jet.h"
 #include "../boss/dpilot.h"
 #include "../components/board.h"
@@ -23,7 +22,7 @@ class Worldbuilder
 public:
 
 	// construction
-	Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world);
+	Worldbuilder(CCBManager* ccbm,World* world);
 	~Worldbuilder() {  }
 
 	// load

@@ -2,7 +2,9 @@
 #define SCR_SYSTEMS_BULLET_SYSTEM
 
 #include "../../ccb/core.h"
-#include "../../ccb/gfx/rendereri.h"
+
+#include "input_map.h"
+
 
 struct BulletCluster {
 	uint16_t width,height;
@@ -17,7 +19,7 @@ class BulletSystem
 public:
 
 	// construction
-	BulletSystem(RendererI* rI) : m_rI(rI) {  }
+	BulletSystem() {  }
 	~BulletSystem() {  }
 
 	// creation
@@ -36,13 +38,13 @@ public:
 
 	// set
 	inline void set_bltPos(uint8_t cluster,uint32_t index,glm::vec2 nPos)
-		{ m_rI->set_aOffset(cluster,index,nPos); }
+		{ Core::gRInst.set_aOffset(cluster,index,nPos); }
 	inline void set_bltDir(uint8_t cluster,uint32_t index,glm::vec2 nDir)
 		{ clusters[cluster].directions[index] = nDir; }
 
 	// get
 	inline glm::vec2 get_bltPos(uint8_t cluster,uint32_t index)
-		{ return m_rI->get_aOffset(cluster,index); }
+		{ return Core::gRInst.get_aOffset(cluster,index); }
 	inline glm::vec2 get_bltDir(uint8_t cluster,uint32_t index) { return clusters[cluster].directions[index]; }
 	inline uint16_t get_bCount(uint8_t cluster) { return clusters[cluster].bullet_count; }
 	inline int32_t get_ts(uint8_t cluster,uint32_t index) { return clusters[cluster].ticks[index]; }
@@ -53,11 +55,10 @@ public:
 
 private:
 
-	// cascabel
-	RendererI* m_rI;							// index renderer pointer
-
 	// bullet physics
 	std::vector<BulletCluster> clusters;
 };
+
+static inline BulletSystem gBSys = BulletSystem();
 
 #endif

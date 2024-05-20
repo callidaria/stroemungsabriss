@@ -1,22 +1,21 @@
 #include "dpilot.h"
 
 /*
-	construction(CascabelBaseFeature*)
+	construction()
 	conforming to: Boss::Boss()
 	purpose: load the essentials for the dancing pilot fight and set initial register values
 */
-DPilot::DPilot(CascabelBaseFeature* ccbf)
-	: m_ccbf(ccbf)
+DPilot::DPilot()
 {
 	// visuals
-	r3d_index = m_ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+	r3d_index = Core::gR3D.add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// danmaku
-	/*bsys_index = m_ccbf->bSys->add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
-	m_ccbf->bSys->add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
-	m_ccbf->bSys->add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);*/
-	//m_ccbf->bSys->add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
+	/*bsys_index = gBSys.add_cluster(15,15,2048,"./res/test_bullet_anim.png",2,3,6,30);
+	gBSys.add_cluster(15,15,2048,"./res/bllt_norm.png",1,1,1,30);
+	gBSys.add_cluster(17,17,1024,"./res/bllt_ffdir.png",1,1,1,30);*/
+	//gBSys.add_cluster(12,12,2048,"./res/fast_bullet.png",1,1,1,30);
 }
 
 /*
@@ -51,19 +50,19 @@ void DPilot::update(glm::vec2 pPos)
 
 	// collision check
 	health_mod = 0;
-	//health_mod = m_ccbf->bSys->get_pHit(0,ePos,35,0);
-	/*uint8_t n1_hit = m_ccbf->bSys->get_pHit(bsys_index,m_ccbf->player->get_pPos(),0,5);
-	uint8_t n2_hit = m_ccbf->bSys->get_pHit(bsys_index+1,m_ccbf->player->get_pPos(),0,5);
-	uint8_t n3_hit = m_ccbf->bSys->get_pHit(bsys_index+2,m_ccbf->player->get_pPos(),0,7);*/
+	//health_mod = gBSys.get_pHit(0,ePos,35,0);
+	/*uint8_t n1_hit = gBSys.get_pHit(bsys_index,m_ccbf->player->get_pPos(),0,5);
+	uint8_t n2_hit = gBSys.get_pHit(bsys_index+1,m_ccbf->player->get_pPos(),0,5);
+	uint8_t n3_hit = gBSys.get_pHit(bsys_index+2,m_ccbf->player->get_pPos(),0,7);*/
 	/*bool pHit = (n1_hit||n2_hit||n3_hit)&&iframes>11;
 	iframes -= iframes*pHit;*/
 	//iframes++;
 
 	// visuals
-	m_ccbf->r3d->prepare();
-	m_ccbf->r3d->s3d.upload_matrix("model",
+	Core::gR3D.prepare();
+	Core::gR3D.s3d.upload_matrix("model",
 			glm::translate(glm::mat4(1.0f),glm::vec3(ePos.x,ePos.y,0)));
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
+	Core::gR3D.render_mesh(r3d_index,r3d_index+1);
 
 	// healthbar
 	hbar.register_damage(health_mod);
@@ -85,16 +84,16 @@ void DPilot::flaredrop()
 {
 	// downwards movement depending on index
 	for (int i=0;i<2048;i++)
-		m_ccbf->bSys->delta_bltPos(bsys_index+DP_FLARES,i,glm::vec2(0,((i%6)+1)*-1));
+		gBSys.delta_bltPos(bsys_index+DP_FLARES,i,glm::vec2(0,((i%6)+1)*-1));
 	// FIXME: count of movement loop
 	// ??cut spray while state 1 or continuous
 
 	// flaredrop spawn if cooldown over
 	bool no_flares = cd_flares||mv_stage;
 	for (int i=0+6*no_flares;i<6;i++)
-		m_ccbf->bSys->spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
+		gBSys.spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x-10,ePos.y));  // lft flaredrop
 	for (int i=0+6*no_flares;i<6;i++)
-		m_ccbf->bSys->spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
+		gBSys.spwn_blt(bsys_index+DP_FLARES,glm::vec2(ePos.x+40,ePos.y));  // rgt flaredrop
 
 	// setup random cooldown time if flares spawned
 	cd_flares = !no_flares*(rand()%12+4)+no_flares*cd_flares;
@@ -111,12 +110,12 @@ void DPilot::mines()
 {
 	// constant downwards movement
 	for (int i=0;i<2048;i++)
-		m_ccbf->bSys->delta_bltPos(bsys_index+DP_MINES,i,
-				glm::vec2(0,-1+(m_ccbf->bSys->get_bltPos(bsys_index+DP_MINES,i).y<50)*-100));
+		gBSys.delta_bltPos(bsys_index+DP_MINES,i,
+				glm::vec2(0,-1+(gBSys.get_bltPos(bsys_index+DP_MINES,i).y<50)*-100));
 
 	// spawn after cooldown frames ticked down
 	for (int i=(cd_mines||!mv_stage);i<1;i++) {
-		m_ccbf->bSys->spwn_blt(bsys_index+DP_MINES,glm::vec2(ePos.x+20,ePos.y-15));
+		gBSys.spwn_blt(bsys_index+DP_MINES,glm::vec2(ePos.x+20,ePos.y-15));
 		cd_mines = rand()%3+1;  // FIXME: kick this outside of loop to reduce the amount of rand()
 	} cd_mines -= mv_stage;  // tick cooldown frame counter
 }
@@ -132,7 +131,7 @@ void DPilot::mines()
 void DPilot::directional_sweep(glm::vec2 pPos)
 {
 	// move bullets towards set directions
-	m_ccbf->bSys->delta_fDir(bsys_index+DP_SPREAD);
+	gBSys.delta_fDir(bsys_index+DP_SPREAD);
 
 	// aim bullets in normalized direction at player
 	glm::vec2 dPos = ePos+glm::vec2(16.5f);
@@ -142,7 +141,7 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 	for (int i=-2+5*!!cd_direction;i<3;i++) {
 		glm::vec4 rVec = glm::vec4(norm.x,norm.y,0,0)
 				* glm::rotate(glm::mat4(1.0f),i*.175f,glm::vec3(0,0,1));
-		m_ccbf->bSys->spwn_blt(bsys_index+DP_SPREAD,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
+		gBSys.spwn_blt(bsys_index+DP_SPREAD,dPos,glm::vec2(7)*glm::vec2(rVec.x,rVec.y),
 				Toolbox::calculate_vecangle(glm::vec2(0,-1),glm::vec2(rVec.x,rVec.y))
 				* ((pPos.x<=ePos.x)-(pPos.x>ePos.x)));
 		spray_counter--;
@@ -167,10 +166,10 @@ void DPilot::directional_sweep(glm::vec2 pPos)
 void DPilot::whirlpool()
 {
 	for (int i=0;i<2048;i++) {
-		float t = 0.1f*m_ccbf->bSys->get_ts(bsys_index+DP_WHIRL,i);
-		m_ccbf->bSys->set_bltPos(bsys_index+DP_WHIRL,i,
-				m_ccbf->bSys->get_bltDir(bsys_index+DP_WHIRL,i)
+		float t = 0.1f*gBSys.get_ts(bsys_index+DP_WHIRL,i);
+		gBSys.set_bltPos(bsys_index+DP_WHIRL,i,
+				gBSys.get_bltDir(bsys_index+DP_WHIRL,i)
 				+ glm::vec2(-pow(MATH_E,.35f*t)*glm::cos(t),pow(MATH_E,.35f*t)*glm::sin(t)));
-	} m_ccbf->bSys->inc_tick(bsys_index+DP_WHIRL);
-	for (int i=0;i<1;i++) m_ccbf->bSys->spwn_blt(bsys_index+DP_WHIRL,ePos,ePos);
+	} gBSys.inc_tick(bsys_index+DP_WHIRL);
+	for (int i=0;i<1;i++) gBSys.spwn_blt(bsys_index+DP_WHIRL,ePos,ePos);
 }

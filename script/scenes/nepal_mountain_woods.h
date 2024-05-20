@@ -5,7 +5,6 @@
 #include "../../ccb/core.h"
 #include "../../ccb/fcn/ccb_manager.h"
 
-#include "../struct/feature_base.h"
 #include "../world.h"
 
 
@@ -14,7 +13,7 @@ class NepalMountainWoods : public Scene
 public:
 
 	// construction
-	NepalMountainWoods(CCBManager* ccb_manager,CascabelBaseFeature* ccbf);
+	NepalMountainWoods(CCBManager* ccb_manager);
 	~NepalMountainWoods() {  }
 
 	// draw

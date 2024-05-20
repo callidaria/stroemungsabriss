@@ -1,16 +1,14 @@
 #include "casino_table.h"
 
 /*
-	constructor(CascabelBaseFeature*,StageSetup*)
-	ccbf: all basic cascabel features
+	constructor(StageSetup*)
 	purpose: load & setup table scene
 */
-CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,float &progress,float pseq)
-	: m_ccbf(ccbf)
+CasinoTable::CasinoTable(float &progress,float pseq)
 {
 	// lighting
 	float sseq = pseq/5.0f;
-	m_ccbf->r3d->create_shadow(glm::vec3(100,150,150),glm::vec3(0),100,100,10,4096);
+	Core::gR3D.create_shadow(glm::vec3(100,150,150),glm::vec3(0),100,100,10,4096);
 	Core::gLighting.add_sunlight({ glm::vec3(100,150,150),glm::vec3(1),.7f });
 	progress += sseq;
 
@@ -21,7 +19,7 @@ CasinoTable::CasinoTable(CascabelBaseFeature* ccbf,float &progress,float pseq)
 		{ "./res/coin.obj","./res/coin_tex.png","./res/none.png","./res/dnormal.png",
 			"./res/none.png",5 }
 	};
-	card_system = CardSystem(ccbf,curr_path);
+	card_system = CardSystem(curr_path);
 	progress += sseq;
 
 	// create card game players

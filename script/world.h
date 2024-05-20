@@ -5,13 +5,12 @@
 #include "../ccb/frm/framebuffer.h"
 #include "../ccb/frm/gbuffer.h"
 
-#include "../ccb/gfx/renderer3d.h"
 #include "../ccb/gfx/cubemap.h"
 
 #include "../ccb/mat/lighting.h"
 #include "../ccb/fcn/ccb_manager.h"
 
-#include "struct/feature_base.h"
+#include "systems/bullet_system.h"
 
 
 //		BOARD DEFINITION
@@ -71,7 +70,7 @@ class World
 public:
 
 	// construction
-	World(CascabelBaseFeature* eref);
+	World();
 	~World() {  }
 
 	// creation
@@ -101,7 +100,6 @@ public:
 private:
 
 	// cascabel
-	CascabelBaseFeature* m_ccbf;
 	FrameBuffer game_fb = FrameBuffer("./shader/standard/framebuffer.vs","./shader/menu/mainmenu.fs");
 	uint8_t rtarget_id;
 
@@ -114,7 +112,6 @@ private:
 
 struct LoadStorage
 {
-	CascabelBaseFeature* m_ccbf;
 	CCBManager* m_ccbm;
 	World* world;
 	bool ldfb_showing = false;

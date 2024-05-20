@@ -11,24 +11,23 @@ const load_routine load_routines[] = {
 
 
 /*
-	construction(CascabelBaseFeature*,CCBManager*,World*)
+	construction(CCBManager*,World*)
 	ccbf: all common cascabel tools & features
 	ccbm: cascabel manager to load level files with
 	world: world to load objects & logic for
 	purpose: create a worldbuilder to process world loading logic
 */
-Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* world)
+Worldbuilder::Worldbuilder(CCBManager* ccbm,World* world)
 {
 	// setup loader storage
 	ldstorage = {
-		.m_ccbf = ccbf,
 		.m_ccbm = ccbm,
 		.world = world
 	};
 
 	// preload user interface
-	MainMenu* main_menu = new MainMenu(ccbm,ccbf,world,ldstorage.progress,.75f);
-	ActionMenu* action_menu = new ActionMenu(ccbf->iMap,ldstorage.progress,.25f);
+	MainMenu* main_menu = new MainMenu(ccbm,world,ldstorage.progress,.75f);
+	ActionMenu* action_menu = new ActionMenu(ldstorage.progress,.25f);
 	world->ui_master = { main_menu,action_menu };
 	world->load(ldstorage.progress,.25f);
 }
@@ -40,7 +39,7 @@ Worldbuilder::Worldbuilder(CascabelBaseFeature* ccbf,CCBManager* ccbm,World* wor
 void Worldbuilder::load()
 {
 	// process load instructions
-	while (!ldstorage.m_ccbf->ld.empty()) {
+	while (!Core::gLI.empty()) {
 
 		// loading feedback creation
 		if (!ldstorage.ldfb_showing) {
@@ -51,20 +50,20 @@ void Worldbuilder::load()
 		}
 		// FIXME: yes, this causes a memory leak ...too bad. called by member?
 
-		load_routines[ldstorage.m_ccbf->ld.front()](ldstorage);
-		ldstorage.m_ccbf->ld.pop();
+		load_routines[Core::gLI.front()](ldstorage);
+		Core::gLI.pop();
 
 		// load & switch to action ui
 		ldstorage.world->active_daui = 1;
 		ldstorage.world->load(ldstorage.progress,.2f);
 
 		// check loading feedback conclusion
-		ldstorage.ldfb_showing = !ldstorage.m_ccbf->ld.empty();
+		ldstorage.ldfb_showing = !Core::gLI.empty();
 	}
 }
 
 /*
-	show_load_progression(bool*,CascabelBaseFeature*,float*) -> void
+	show_load_progression(LoadStorage*) -> void
 	purpose: display loading screen by a different thread, to visualize load progression
 	// TODO: adjust params
 */

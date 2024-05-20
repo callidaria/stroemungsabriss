@@ -3,7 +3,6 @@
 
 #include "../../ccb/core.h"
 
-#include "../struct/feature_base.h"
 #include "../world.h"
 
 // movement collision bounds for the jaeger jet
@@ -15,7 +14,7 @@ class JaegerJet : public Player
 public:
 
 	// contruction
-	JaegerJet(CascabelBaseFeature* ccbf);
+	JaegerJet();
 	~JaegerJet() {  }
 
 	// draw
@@ -24,7 +23,6 @@ public:
 private:
 
 	// render information
-	CascabelBaseFeature* m_ccbf;
 	uint16_t index_r2D,index_r3D;
 
 	// system

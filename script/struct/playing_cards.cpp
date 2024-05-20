@@ -1,13 +1,12 @@
 #include "playing_cards.h"
 
 /*
-	constructor(CascabelBaseFeature*,StageSetup*)
+	constructor(StageSetup*)
 	purpose: create aunt susann's kopfüber playing cards
-	\param ccbf: most basic cascabel features
 	\param sorg: light origin position, from where the shadow is projected
 */
-PlayingCards::PlayingCards(CascabelBaseFeature* ccbf,glm::vec3 sorg)
-	: m_ccbf(ccbf),shadow_dir(-glm::normalize(sorg))
+PlayingCards::PlayingCards(glm::vec3 sorg)
+	: shadow_dir(-glm::normalize(sorg))
 {
 	// load card vertices
 	std::vector<float> overts;
@@ -98,8 +97,8 @@ void PlayingCards::render_shadow()
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(rqueue);
-	sdr.upload_matrix("view",m_ccbf->r3d->shadow_view);
-	sdr.upload_matrix("proj",m_ccbf->r3d->shadow_proj);
+	sdr.upload_matrix("view",Core::gR3D.shadow_view);
+	sdr.upload_matrix("proj",Core::gR3D.shadow_proj);
 	sdr.upload_vec3("shadow_dir",shadow_dir);
 	glDrawArraysInstanced(GL_TRIANGLES,0,CARD_INSTANCE_REPEAT,CSYS_CARD_COUNT);
 	sdr.upload_vec3("shadow_dir",glm::vec3(.0f));
@@ -115,7 +114,7 @@ void PlayingCards::render()
 	sdr.enable();
 	bfr.bind();
 	bfr.upload_indices(rqueue);
-	sdr.upload_matrix("light_trans",m_ccbf->r3d->scam_projection);
+	sdr.upload_matrix("light_trans",Core::gR3D.scam_projection);
 	sdr.upload_camera(Core::gCamera3D);
 
 	// draw cards

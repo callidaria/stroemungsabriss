@@ -1,19 +1,18 @@
 #include "world.h"
 
 /*
-	constructor(CascabelBaseFeature*,StageSetup*)
+	constructor()
 	eref: references to all relevant engine objects
 	purpose: create a world handling entity for a better loop structure
 */
-World::World(CascabelBaseFeature* eref)
-	: m_ccbf(eref)
+World::World()
 {
 	// memfail avoidance shadow setup
-	eref->r3d->create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
+	Core::gR3D.create_shadow(glm::vec3(0),glm::vec3(3),1,1,1,1);
 	// FIXME: if r3d would be a good renderer this would be unnecessary!!
 
 	// framebuffer setup
-	rtarget_id = eref->r3d->add_target();
+	rtarget_id = Core::gR3D.add_target();
 }
 
 /*
@@ -26,10 +25,10 @@ void World::load(float& progress,float ldsplit)
 {
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
 	Core::gRenderer.load();
-	m_ccbf->rI->load(progress,pr_progress);
-	m_ccbf->r3d->load(Core::gCamera3D,progress,pr_progress);
-	m_ccbf->r3d->upload_target_static_lighting(rtarget_id,&Core::gLighting);
-	m_ccbf->pSys->load();
+	Core::gRInst.load(progress,pr_progress);
+	Core::gR3D.load(Core::gCamera3D,progress,pr_progress);
+	Core::gR3D.upload_target_static_lighting(rtarget_id,&Core::gLighting);
+	Core::gPSys.load();
 	progress = org_progress+ldsplit;
 }
 
@@ -46,11 +45,11 @@ void World::render(bool& running,bool& reboot)
 	glDisable(GL_BLEND);
 
 	// update
-	m_ccbf->r3d->update_animations(Core::gFrame.time_delta);
-	m_ccbf->r3d->update_shadows();
+	Core::gR3D.update_animations(Core::gFrame.time_delta);
+	Core::gR3D.update_shadows();
 
 	// start geometry pass deferred scene
-	m_ccbf->r3d->start_target(rtarget_id);
+	Core::gR3D.start_target(rtarget_id);
 
 	// handle environments, bosses & player
 	for (auto scene : scene_master) scene->render();
@@ -58,19 +57,19 @@ void World::render(bool& running,bool& reboot)
 	for (auto player : player_master) player->update();
 
 	// TRANSPARENCY
-	m_ccbf->r3d->switch_target_transparency(rtarget_id);
+	Core::gR3D.switch_target_transparency(rtarget_id);
 
 	// render particles
-	m_ccbf->pSys->update(Core::gCamera3D,Core::gFrame.time_delta);
-	m_ccbf->pSys->auto_render(Core::gCamera3D);
+	Core::gPSys.update(Core::gCamera3D,Core::gFrame.time_delta);
+	Core::gPSys.auto_render(Core::gCamera3D);
 
 	// run deferred shading
 	glDisable(GL_DEPTH_TEST);
 	game_fb.bind();
-	m_ccbf->r3d->render_target(rtarget_id,Core::gCamera3D,&Core::gLighting);
+	Core::gR3D.render_target(rtarget_id,Core::gCamera3D,&Core::gLighting);
 
 	// render bullets
-	m_ccbf->bSys->render();
+	gBSys.render();
 
 	// logic test
 	for (BoardTuple board : board_master) board.logic(board.data);

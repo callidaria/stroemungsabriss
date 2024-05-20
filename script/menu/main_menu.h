@@ -9,7 +9,7 @@
 #include "../../ccb/frm/framebuffer.h"
 #include "../../ccb/ppe/msaa.h"
 
-#include "../struct/feature_base.h"
+#include "../systems/input_map.h"
 #include "../systems/savestates.h"
 #include "../world.h"
 
@@ -406,7 +406,7 @@ public:
 	// invokation
 	uint8_t define_list(const char* path);
 	uint8_t define_list(SaveStates states);
-	void load(CascabelBaseFeature* ccbf);
+	void load();
 
 	// interaction
 	void open_list(uint8_t id);
@@ -420,7 +420,7 @@ public:
 	bool linked_variables_changed(uint16_t list_id,bool& reload);
 
 	// draw
-	int8_t update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd);
+	int8_t update(ProcessedMenuInput& input,bool& rrnd);
 	void render();
 	void update_background_component();
 	void update_overlays();
@@ -448,7 +448,6 @@ public:
 private:
 
 	// engine
-	CascabelBaseFeature* m_ccbf;
 	Buffer checkbox_buffer = Buffer(),ddbgr_buffer = Buffer(),slider_buffer = Buffer();
 	Shader checkbox_shader = Shader(),ddbgr_shader = Shader(),slider_shader = Shader();
 
@@ -599,7 +598,7 @@ public:
 
 	// construction
 	MainMenu() {  }
-	MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float& progress,float pseq);
+	MainMenu(CCBManager* ccbm,World* world,float& progress,float pseq);
 	~MainMenu() {  }
 
 	// draw
@@ -613,7 +612,6 @@ private:
 public:
 
 	// engine
-	CascabelBaseFeature* m_ccbf;
 	SaveStates savestates;
 	bool request_close = false,request_restart = false;
 	ProcessedMenuInput input;

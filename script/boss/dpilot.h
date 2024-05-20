@@ -3,7 +3,6 @@
 
 #include "../../ccb/mat/toolbox.h"
 
-#include "../struct/feature_base.h"
 #include "../ui/healthbar.h"
 #include "../world.h"
 
@@ -21,8 +20,7 @@ class DPilot : public Boss
 public:
 
 	// construction
-	DPilot() {  }
-	DPilot(CascabelBaseFeature* ccbf);
+	DPilot();
 	~DPilot() {  }
 
 	// update
@@ -51,7 +49,6 @@ private:
 			{ 10000,5000,10000,10000,5000,5000,10000 },"The Dancing Pilot");
 
 	// render index
-	CascabelBaseFeature* m_ccbf;
 	uint16_t r3d_index,bsys_index;
 
 	// system

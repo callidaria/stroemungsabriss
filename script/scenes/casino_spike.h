@@ -4,7 +4,6 @@
 #include "../../ccb/core.h"
 #include "../../ccb/gfx/cubemap.h"
 
-#include "../struct/feature_base.h"
 #include "../world.h"
 
 class CasinoSpike : public Scene
@@ -12,7 +11,7 @@ class CasinoSpike : public Scene
 public:
 
 	// construction
-	CasinoSpike(CascabelBaseFeature* ccbf,float &progress,float pseq);
+	CasinoSpike(float &progress,float pseq);
 	~CasinoSpike() {  }
 
 	// draw
@@ -21,7 +20,6 @@ public:
 private:
 
 	// render information
-	CascabelBaseFeature* m_ccbf;
 	Cubemap irradiance_map = Cubemap("./res/irradiance_map.hdr");
 	uint16_t index_r3D,index_p3D;
 	uint8_t texture_repeat[6] = { 1,1,10,4,1,1 };

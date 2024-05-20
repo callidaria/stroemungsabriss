@@ -59,22 +59,20 @@ jet_movement_logic rng_flib[] = {
 
 
 /*
-	constructor(CascabelBaseFeature*)
-	ccbf: collection of most important engine tools
+	constructor()
 	purpose: setting up the player object to be able to control and visualize pc later
 */
-JaegerJet::JaegerJet(CascabelBaseFeature* ccbf)
-	: m_ccbf(ccbf)
+JaegerJet::JaegerJet()
 {
 	// setup player hitbox indicator
 	index_r2D = Core::gRenderer.add_sprite(glm::vec2(0,0),10,10,"./res/hitbox_def.png");
 
 	// setup player character visualization
-	index_r3D = ccbf->r3d->add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
+	index_r3D = Core::gR3D.add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// add pc projectiles to bullet system
-	ccbf->bSys->add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
+	gBSys.add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
 	treg[2] = 9;
 }
 
@@ -85,12 +83,12 @@ JaegerJet::JaegerJet(CascabelBaseFeature* ccbf)
 void JaegerJet::update()
 {
 	// movement speed and direction based on shot and focus mode
-	glm::vec2 mvdir = m_ccbf->iMap->move_dir;
+	glm::vec2 mvdir = gIMap.move_dir;
 	float mvspeed = !ddur*(4+(3*!(
-		m_ccbf->iMap->input_val[InputID::FOCUS]||m_ccbf->iMap->input_val[InputID::CHANGE])));
+		gIMap.input_val[InputID::FOCUS]||gIMap.input_val[InputID::CHANGE])));
 
 	// change position of player based on calculated movement direction
-	position += glm::vec3(m_ccbf->iMap->move_dir.x*mvspeed,m_ccbf->iMap->move_dir.y*mvspeed,0)
+	position += glm::vec3(gIMap.move_dir.x*mvspeed,gIMap.move_dir.y*mvspeed,0)
 			* glm::vec3(Core::gFrame.time_delta);
 
 	// force player in-bounds
@@ -102,29 +100,30 @@ void JaegerJet::update()
 			- (position.y>y_full_cap)*(position.y-y_full_cap),position.z);
 
 	// update bullet position by current direction & write position to register
-	m_ccbf->bSys->delta_fDir(0);
-	treg[0] = position.x,treg[1] = position.y;
+	gBSys.delta_fDir(0);
+	treg[0] = position.x, treg[1] = position.y;
 
 	// run requested shot type or idle
-	uint8_t sidx = ((m_ccbf->iMap->input_val[InputID::WIDE]&&!m_ccbf->iMap->input_val[InputID::FOCUS])+2
-			* m_ccbf->iMap->input_val[InputID::FOCUS])*(Core::gFrame.time_delta>.1f);
-	rng_flib[sidx](m_ccbf->bSys,treg);
+	uint8_t sidx = ((gIMap.input_val[InputID::WIDE]&&!gIMap.input_val[InputID::FOCUS])+2
+			* gIMap.input_val[InputID::FOCUS])*(Core::gFrame.time_delta>.1f);
+	rng_flib[sidx](&gBSys,treg);
+	// TODO: remove bullet system pass. it will be global
 
 	// TODO: bombs
 	// TODO: shot modes and spawn
 	// TODO: close quarters
 
 	// calculate player jet tilt
-	bool abs_right = m_ccbf->iMap->input_val[InputID::RIGHT];
-	bool abs_left = m_ccbf->iMap->input_val[InputID::LEFT];
+	bool abs_right = gIMap.input_val[InputID::RIGHT];
+	bool abs_left = gIMap.input_val[InputID::LEFT];
 	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*Core::gFrame.time_delta;
 	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*Core::gFrame.time_delta;
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));
 
 	// render and move player character
-	m_ccbf->r3d->prepare();
-	m_ccbf->r3d->s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),position)*mdrot);
-	m_ccbf->r3d->render_mesh(index_r3D,index_r3D+1);
+	Core::gR3D.prepare();
+	Core::gR3D.s3d.upload_matrix("model",glm::translate(glm::mat4(1.0f),position)*mdrot);
+	Core::gR3D.render_mesh(index_r3D,index_r3D+1);
 
 	// render player hitbox indicator
 	Core::gRenderer.prepare_sprites();

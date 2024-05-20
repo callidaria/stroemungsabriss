@@ -8,8 +8,6 @@
 
 #include "../../ccb/fcn/buffer.h"
 
-#include "feature_base.h"
-
 // count
 constexpr uint8_t CSYS_CARD_COUNT = 112;
 
@@ -42,7 +40,7 @@ public:
 
 	// construction
 	PlayingCards() {  }
-	PlayingCards(CascabelBaseFeature* ccbf,glm::vec3 sdir);
+	PlayingCards(glm::vec3 sdir);
 	~PlayingCards() {  }
 
 	// draw
@@ -59,7 +57,6 @@ private:
 	// cascabel
 	Buffer bfr = Buffer();
 	Shader sdr = Shader();
-	CascabelBaseFeature* m_ccbf;
 
 	// render
 	GLuint tex;

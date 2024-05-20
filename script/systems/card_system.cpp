@@ -1,24 +1,22 @@
 #include "card_system.h"
 
 /*
-	constructor(CascabelBaseFeature*,StageSetup*,std::vector<Currency>)
-	ccbf: most basic cascabel features
+	constructor(StageSetup*,std::vector<Currency>)
 	curr_path: references a list of all necessary object and texture paths for all currency stages
 	purpose: creates background objects, indexes playing cards & precalculates positioning
 */
-CardSystem::CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path)
-	: m_ccbf(ccbf)
+CardSystem::CardSystem(std::vector<Currency> curr_path)
 {
 	// camera setup
 	Core::gCamera3D = Camera3D(glm::vec3(0,1,20),1280.0f,720.0f,60.0f);
 
 	// background objects
-	r3d_index = m_ccbf->r3d->add("./res/table.obj","./res/table.jpg","./res/none.png",
+	r3d_index = Core::gR3D.add("./res/table.obj","./res/table.jpg","./res/none.png",
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,-0.001f,0),7,glm::vec3(0,0,0));
 
 	Core::gCamera3D.view3D = glm::rotate(Core::gCamera3D.view3D,glm::radians(45.0f),glm::vec3(1,0,0));
-	pcards = new PlayingCards(ccbf,Core::gLighting.sunlights[0].position);
-	ccbf->r3d->register_geometry(pcards);
+	pcards = new PlayingCards(Core::gLighting.sunlights[0].position);
+	Core::gR3D.register_geometry(pcards);
 
 	// spawn cards into space
 	size_t cmid = 0;
@@ -34,11 +32,11 @@ CardSystem::CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path
 	shuffle_all();
 
 	// create payment visualization
-	ir3d_index = m_ccbf->r3d->iml.size();
+	ir3d_index = Core::gR3D.iml.size();
 	currency_stats = std::vector<CurrencyStats>(curr_path.size());
 	size_t i = 0;
 	for (auto cstage:curr_path) {
-		m_ccbf->r3d->add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
+		Core::gR3D.add(cstage.object,cstage.texture,cstage.specular,cstage.normals,cstage.emission,
 				glm::vec3(0),1,glm::vec3(0),CSYS_CURRENCY_CAP,false);
 		currency_stats[i++] = { .value = cstage.value };
 		cstack.stacks.push_back({});
@@ -190,9 +188,9 @@ void CardSystem::add_currency(uint8_t cid,uint16_t count)
 {
 	// move currency representation towards players side
 	for (uint16_t i=0;i<count;i++) {
-		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_stats[cid].spawn,
+		Core::gR3D.inst_position(ir3d_index+cid,currency_stats[cid].spawn,
 				glm::vec3(cstack.position.x+2*cid,.2f*cstack.stacks[cid].size(),cstack.position.y));
-		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_stats[cid].spawn,
+		Core::gR3D.inst_rotation(ir3d_index+cid,currency_stats[cid].spawn,
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & stack counts
@@ -209,10 +207,10 @@ void CardSystem::add_currency(uint8_t cid,uint8_t oid,uint16_t count)
 {
 	// move currency representation towards opponents side
 	for (uint16_t i=0;i<count;i++) {
-		m_ccbf->r3d->inst_position(ir3d_index+cid,currency_stats[cid].spawn,
+		Core::gR3D.inst_position(ir3d_index+cid,currency_stats[cid].spawn,
 				glm::vec3(ops[oid].capital.position.x,ops[oid].capital.stacks[cid].size()*.2f,
 					ops[oid].capital.position.y)+ops[oid].capital.direction*glm::vec3(cid*2));
-		m_ccbf->r3d->inst_rotation(ir3d_index+cid,currency_stats[cid].spawn,
+		Core::gR3D.inst_rotation(ir3d_index+cid,currency_stats[cid].spawn,
 				glm::vec3(0,glm::radians((float)(rand()%360)),0));
 
 		// increment currency spawn & respective opponent stack count
@@ -230,7 +228,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t sid,uint16_t count)
 {
 	// move players currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_ccbf->r3d->inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
+		Core::gR3D.inst_position(ir3d_index+cid,cstack.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -248,7 +246,7 @@ void CardSystem::set_currency(uint8_t cid,uint8_t oid,uint8_t sid,uint16_t count
 {
 	// move opponents currency representation to the selected field stack
 	for (uint16_t i=0;i<count;i++) {
-		m_ccbf->r3d->inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
+		Core::gR3D.inst_position(ir3d_index+cid,ops[oid].capital.stacks[cid].back(),
 				glm::vec3(field_stacks[sid].position.x,field_stacks[sid].stacks[cid].size()*.2f,
 					field_stacks[sid].position.y)+field_stacks[sid].direction*glm::vec3(cid*2));
 
@@ -468,15 +466,15 @@ void CardSystem::update()
 void CardSystem::render()
 {
 	// render background
-	m_ccbf->r3d->prepare(Core::gCamera3D);
-	m_ccbf->r3d->s3d.upload_float("tex_repeat",10);
-	m_ccbf->r3d->render_mesh(r3d_index,r3d_index+1);
+	Core::gR3D.prepare(Core::gCamera3D);
+	Core::gR3D.s3d.upload_float("tex_repeat",10);
+	Core::gR3D.render_mesh(r3d_index,r3d_index+1);
 
 	// render currency
-	/*m_ccbf->r3d->prepare_inst(Core::gCamera3D);
+	/*Core::gR3D.prepare_inst(Core::gCamera3D);
 	for (uint8_t i=0;i<currency_spawn.size();i++) {
-		m_ccbf->r3d->inst_counts[ir3d_index+i] = currency_spawn[i];
-		m_ccbf->r3d->render_inst(ir3d_index+i);
+		Core::gR3D.inst_counts[ir3d_index+i] = currency_spawn[i];
+		Core::gR3D.render_inst(ir3d_index+i);
 	}*/
 	// FIXME: something something 3D instance renderer something something
 

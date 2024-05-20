@@ -6,7 +6,6 @@
 #include "../../ccb/mat/toolbox.h"
 #include "../../ccb/gfx/shader.h"
 
-#include "../struct/feature_base.h"
 #include "../struct/playing_cards.h"
 //#include "../ui/cursor.h"
 
@@ -80,7 +79,7 @@ public:
 
 	// construction
 	CardSystem() {  }
-	CardSystem(CascabelBaseFeature* ccbf,std::vector<Currency> curr_path);
+	CardSystem(std::vector<Currency> curr_path);
 	~CardSystem() {  }
 
 	// interaction
@@ -137,9 +136,6 @@ private:
 	int16_t get_animation_id(uint8_t id);
 
 private:
-
-	// cascabel
-	CascabelBaseFeature* m_ccbf;
 
 	// render
 	uint16_t r3d_index,ir3d_index;

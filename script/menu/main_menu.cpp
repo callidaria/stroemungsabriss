@@ -867,9 +867,8 @@ uint8_t MenuList::define_list(SaveStates states)
 /*
 	!O(1)m /load -> (public)
 	purpose: setup vertices & compile shaders for entity attribute visualization
-	\param ccbf: pointer to basic engine features
 */
-void MenuList::load(CascabelBaseFeature* ccbf)
+void MenuList::load()
 {
 	// setup dropdown background
 	float ddbgr_vertices[] = {
@@ -915,15 +914,14 @@ void MenuList::load(CascabelBaseFeature* ccbf)
 	slider_shader.upload_camera();
 
 	// difficulty preview spritesheet
-	m_ccbf = ccbf;
 	rid_diffs = Core::gRenderer.add_sprite(glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
 	Core::gRenderer.add_sprite(glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
 
 	// globe render target
-	rid_globe = m_ccbf->r3d->add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
+	rid_globe = Core::gR3D.add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
 			"./res/terra/materials.png","./res/none.png",glm::vec3(0),1,glm::vec3(0));
 	gb_lights.add_sunlight({ glm::vec3(-50,25,25),glm::vec3(1),10.f });
-	globe_target_id = m_ccbf->r3d->add_target();
+	globe_target_id = Core::gR3D.add_target();
 	// TODO: replace emission map with nighttime extrapolation in terra directory
 }
 
@@ -1011,11 +1009,10 @@ bool MenuList::linked_variables_changed(uint16_t list_id,bool& reload)
 	~O(n)b .furthest possible selection difference /update -> (public)
 	purpose: update menu list state & selection values
 	\param input: processed input for all main menu interactions
-	\param iMap: input mapping for additional features beyond previous structure (will replace input later)
 	\param rrnd: reference to boolean value, telling the selection splices to rerandomize geometry
 	\returns selection mapped to grid position after applying scroll, this determines the splice position
 */
-int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
+int8_t MenuList::update(ProcessedMenuInput& input,bool& rrnd)
 {
 	// early exit when no lists active
 	system_active = active_ids.size();
@@ -1073,7 +1070,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,InputMap* iMap,bool& rrnd)
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
 			instruction_mod = 2;
-			int8_t nt_hdir = iMap->request(InputID::RIGHT)-iMap->request(InputID::LEFT);
+			int8_t nt_hdir = gIMap.request(InputID::RIGHT)-gIMap.request(InputID::LEFT);
 
 			// slider modification
 			if (input.mouse->mb[0]
@@ -1259,21 +1256,21 @@ void MenuList::update_overlays()
 	if (!show_globe) return;
 
 	// transform globe towards preview location
-	m_ccbf->r3d->pml[rid_globe].model = glm::rotate(
+	Core::gR3D.pml[rid_globe].model = glm::rotate(
 			glm::rotate(glm::mat4(1),glm::radians(globe_rotation.x),glm::vec3(1,0,0)),
 			glm::radians(globe_rotation.y),glm::vec3(0,1,0)
 		);
 
 	// render globe to target
 	glEnable(GL_DEPTH_TEST), glDisable(GL_BLEND);
-	m_ccbf->r3d->start_target(globe_target_id);
-	m_ccbf->r3d->prepare_pmesh(gb_cam3D), m_ccbf->r3d->render_pmsh(rid_globe);
+	Core::gR3D.start_target(globe_target_id);
+	Core::gR3D.prepare_pmesh(gb_cam3D), Core::gR3D.render_pmsh(rid_globe);
 	glDisable(GL_DEPTH_TEST), glEnable(GL_BLEND);
 
 	// globe deferred shading
 	fb_globe.bind();
 	Frame::clear();
-	m_ccbf->r3d->render_target(globe_target_id,gb_cam3D,&gb_lights);
+	Core::gR3D.render_target(globe_target_id,gb_cam3D,&gb_lights);
 	FrameBuffer::close();
 
 	// draw globe buffer
@@ -1922,7 +1919,7 @@ void interface_behaviour_load(MainMenu& tm)
 	}
 
 	// push selected load instruction on confirm
-	if (tm.mlists.status) tm.m_ccbf->ld.push(tm.savestates.saves[tm.mlists.status-1].ld_inst);
+	if (tm.mlists.status) Core::gLI.push(tm.savestates.saves[tm.mlists.status-1].ld_inst);
 
 	// keep alive as long as save list is active
 	tm.interface_logic_id *= tm.mlists.system_active;
@@ -1944,7 +1941,7 @@ void interface_behaviour_continue(MainMenu& tm)
 	// response: continue instruction
 	switch (tm.mdialogues.status) {
 	case 1:
-		tm.m_ccbf->ld.push(/*tm.savestates.saves[0].ld_inst*/LOAD_AREA51);
+		Core::gLI.push(/*tm.savestates.saves[0].ld_inst*/LOAD_AREA51);
 		break;
 
 	// response: change run, therefore transition to load mode
@@ -2045,8 +2042,8 @@ const char* main_options[OptionLogicID::LOGIC_COUNT] = {
 	!O(n)bm .logic + display count /load -> UI (public)
 	purpose: setup menu environment, populate with lists and define input possibilities
 */
-MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float& progress,float pseq)
-	: m_ccbm(ccbm),m_ccbf(ccbf),m_world(world)
+MainMenu::MainMenu(CCBManager* ccbm,World* world,float& progress,float pseq)
+	: m_ccbm(ccbm),m_world(world)
 {
 	// pointers
 	input.mouse = &Core::gFrame.mouse;
@@ -2177,7 +2174,7 @@ MainMenu::MainMenu(CCBManager* ccbm,CascabelBaseFeature* ccbf,World* world,float
 		cmle.dd_colours.push_back(TEXT_ERROR_COLOUR);
 		cmle.dd_length.push_back(6);
 	}
-	mlists.load(m_ccbf);
+	mlists.load();
 
 	// dialogue setup
 	dg_diffs = mdialogues.add_dialogue_window("./lvload/challenge.ldc",glm::vec2(400,420),320,140,30,25);
@@ -2204,24 +2201,24 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 {
 	// button input
 	bool plmb = Core::gFrame.mouse.mb[0]&&!trg_lmb, prmb = Core::gFrame.mouse.mb[2]&&!trg_rmb;
-	input.hit_a =
-			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&!menu_action)
-			|| m_ccbf->iMap->get_input_triggered(InputID::FOCUS)
-			|| m_ccbf->iMap->get_input_triggered(InputID::CONFIRM)
+	input.hit_a = 
+			(gIMap.get_input_triggered(InputID::PAUSE)&&!menu_action)
+			|| gIMap.get_input_triggered(InputID::FOCUS)
+			|| gIMap.get_input_triggered(InputID::CONFIRM)
 			|| plmb;
 	input.hit_b =
-			(m_ccbf->iMap->get_input_triggered(InputID::PAUSE)&&menu_action)
-			|| m_ccbf->iMap->get_input_triggered(InputID::BOMB)
+			(gIMap.get_input_triggered(InputID::PAUSE)&&menu_action)
+			|| gIMap.get_input_triggered(InputID::BOMB)
 			|| prmb;
 
 	// directional input
 	input.dir_horz =
-			((m_ccbf->iMap->get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
-			- (m_ccbf->iMap->get_input_triggered(InputID::LEFT)&&vselect>0))
+			((gIMap.get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
+			- (gIMap.get_input_triggered(InputID::LEFT)&&vselect>0))
 			* menu_action;
 	input.dir_vert =
-			(m_ccbf->iMap->get_input_triggered(InputID::DOWN)
-			- m_ccbf->iMap->get_input_triggered(InputID::UP))
+			(gIMap.get_input_triggered(InputID::DOWN)
+			- gIMap.get_input_triggered(InputID::UP))
 			* menu_action;
 
 	// mouse input
@@ -2289,7 +2286,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 
 	// component updates before interface behaviour & rendering
 	bool rrnd = false;
-	int8_t sd_grid = mlists.update(input,m_ccbf->iMap,rrnd);
+	int8_t sd_grid = mlists.update(input,rrnd);
 	mdialogues.update(input);
 
 	// start render
@@ -2440,53 +2437,53 @@ void MainMenu::update_peripheral_annotations()
 	if (input.controller_preferred_peripheral) {
 
 		// write messages for controller input
-		dmessage = "press ["+m_ccbf->iMap->cnt_name[InputID::PAUSE]+"] if you DARE";
+		dmessage = "press ["+gIMap.cnt_name[InputID::PAUSE]+"] if you DARE";
 		instr[0] =
-				"confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
-				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+				"confirm ["+gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.cnt_name[InputID::LEFT]
+				+ '/'+gIMap.cnt_name[InputID::RIGHT]+"]"
+				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[1] =
-				"confirm ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+				"confirm ["+gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.cnt_name[InputID::UP]
+				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[2] =
-				"see options ["+m_ccbf->iMap->cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+				"see options ["+gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.cnt_name[InputID::UP]
+				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[3] =
-				"adjust slider ["+m_ccbf->iMap->cnt_name[InputID::LEFT]
-				+ '/'+m_ccbf->iMap->cnt_name[InputID::RIGHT]+"]"
-				+ "  select ["+m_ccbf->iMap->cnt_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->cnt_name[InputID::BOMB]+"]";
+				"adjust slider ["+gIMap.cnt_name[InputID::LEFT]
+				+ '/'+gIMap.cnt_name[InputID::RIGHT]+"]"
+				+ "  select ["+gIMap.cnt_name[InputID::UP]
+				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
 	} else {
 
 		// write message for keyboard input
-		dmessage = "press ["+m_ccbf->iMap->key_name[InputID::CONFIRM]+"] if you DARE";
+		dmessage = "press ["+gIMap.key_name[InputID::CONFIRM]+"] if you DARE";
 		instr[0] =
-				"confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[InputID::LEFT]
-				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+				"confirm ["+gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.key_name[InputID::LEFT]
+				+ '/'+gIMap.key_name[InputID::RIGHT]+"]"
+				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
 		instr[1] =
-				"confirm ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+				"confirm ["+gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.key_name[InputID::UP]
+				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
 		instr[2] =
-				"see options ["+m_ccbf->iMap->key_name[InputID::FOCUS]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+				"see options ["+gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+gIMap.key_name[InputID::UP]
+				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
 		instr[3] =
-				"adjust slider ["+m_ccbf->iMap->key_name[InputID::LEFT]
-				+ '/'+m_ccbf->iMap->key_name[InputID::RIGHT]+"]"
-				+ "  select ["+m_ccbf->iMap->key_name[InputID::UP]
-				+ '/'+m_ccbf->iMap->key_name[InputID::DOWN]+"]"
-				+ "  go back ["+m_ccbf->iMap->key_name[InputID::BOMB]+"]";
+				"adjust slider ["+gIMap.key_name[InputID::LEFT]
+				+ '/'+gIMap.key_name[InputID::RIGHT]+"]"
+				+ "  select ["+gIMap.key_name[InputID::UP]
+				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
 	}
 
 	// write dare message

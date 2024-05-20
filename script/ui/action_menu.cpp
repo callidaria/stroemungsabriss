@@ -2,11 +2,9 @@
 
 /*
 	TODO
-	input_map: input map to use prehandled controller/keyboard/stick input
 	purpose: creates the lightweight in-action menu to pause and use while in-game
 */
-ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
-	: imap(input_map)
+ActionMenu::ActionMenu(float &progress,float pseq)
 {
 	// vertices for selection splash
 	float sseq = pseq/3.0f;
@@ -54,8 +52,8 @@ ActionMenu::ActionMenu(InputMap* input_map,float &progress,float pseq)
 */
 void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
-	bool pause = imap->input_val[InputID::PAUSE], details = imap->input_val[InputID::DETAILS];
-	bool down = imap->input_val[InputID::DOWN], up = imap->input_val[InputID::UP];
+	bool pause = gIMap.input_val[InputID::PAUSE], details = gIMap.input_val[InputID::DETAILS];
+	bool down = gIMap.input_val[InputID::DOWN], up = gIMap.input_val[InputID::UP];
 
 	// action menu open requests
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
@@ -83,8 +81,8 @@ void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// request handling
 	// choose reset when selected and hit
-	World::active_daui *= !(imap->request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET);
-	running *= !(imap->request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET_OS&&menu_sys);
+	World::active_daui *= !(gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET);
+	running *= !(gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET_OS&&menu_sys);
 
 	// sepia colourspace when paused
 	Frame::clear();

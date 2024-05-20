@@ -51,7 +51,7 @@ class ActionMenu : public UI
 public:
 
 	// construction
-	ActionMenu(InputMap* input_map,float& progress,float pseq);
+	ActionMenu(float& progress,float pseq);
 	~ActionMenu() {  }
 
 	// runtime interactions

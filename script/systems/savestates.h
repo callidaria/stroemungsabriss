@@ -7,8 +7,9 @@
 #include <sstream>
 #include <fstream>
 
-#include "../struct/feature_base.h"
+#include "../../ccb/core.h"
 #include "../../ccb/fcn/text.h"
+
 
 // data structure for save information
 struct SaveData

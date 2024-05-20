@@ -5,9 +5,6 @@
 #endif
 
 #include "ccb/core.h"
-#include "ccb/gfx/renderer3d.h"
-#include "ccb/gfx/rendereri.h"
-#include "ccb/gfx/particle_system.h"
 
 #include "ccb/fcn/text.h"
 
@@ -38,26 +35,18 @@ int main(int argc,char** argv)
 			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);*/
 	//Frame::gpu_vsync_on();
 	Core::gFrame.set_refresh_rate(60);
-	InputMap imap = InputMap();
 
 	// AUDIO
 	Listener listener = Listener();
 
-	// RENDERERS
-	Renderer3D r3d = Renderer3D();
-	RendererI ri = RendererI();
-	ParticleSystem psys = ParticleSystem();
-	BulletSystem bsys = BulletSystem(&ri);
-
 	// LOADERS
 	CCBManager ccbm = CCBManager();
-	CascabelBaseFeature eref = { &r3d,&ri,&psys,&bsys,&imap };
 
 	// BUILD SET
-	World world = World(&eref);
+	World world = World();
 
 	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
+	Worldbuilder wb = Worldbuilder(&ccbm,&world);
 
 #if BUILD_DEV_MODE
 	bool dactive = false;
@@ -78,15 +67,15 @@ int main(int argc,char** argv)
 		Frame::clear();
 
 		// input mapping
-		imap.update();
-		imap.precalculate_all();
-		imap.stick_to_dpad();
+		gIMap.update();
+		gIMap.precalculate_all();
+		gIMap.stick_to_dpad();
 
 		// render scene
 		world.render(run,reboot);
 
 		// debrief
-		imap.update_triggers();
+		gIMap.update_triggers();
 
 		// developer tools in debug mode
 #if BUILD_DEV_MODE
@@ -106,7 +95,7 @@ int main(int argc,char** argv)
 #endif
 
 	// CLOSING
-	r3d.clear_memory();
+	Core::gR3D.clear_memory();
 	Core::gFrame.vanish();
 	return 0;
 }
