@@ -3,7 +3,9 @@
 
 #include "../../ccb/core.h"
 
+#include "../base.h"
 #include "../world.h"
+
 
 // movement collision bounds for the jaeger jet
 constexpr uint8_t JET_BORDER_WIDTH = 42;

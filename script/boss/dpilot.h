@@ -3,8 +3,10 @@
 
 #include "../../ccb/mat/toolbox.h"
 
-#include "../ui/healthbar.h"
+#include "../base.h"
 #include "../world.h"
+#include "../ui/healthbar.h"
+
 
 // bullet memory offset
 enum DPilotBMEM

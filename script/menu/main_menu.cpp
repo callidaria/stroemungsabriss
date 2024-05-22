@@ -1070,7 +1070,7 @@ int8_t MenuList::update(ProcessedMenuInput& input,bool& rrnd)
 		// slider manipulation by input
 		if (ce.etype==LDCEntityType::SLIDER) {
 			instruction_mod = 2;
-			int8_t nt_hdir = gIMap.request(InputID::RIGHT)-gIMap.request(InputID::LEFT);
+			int8_t nt_hdir = Base::gIMap.request(InputID::RIGHT)-Base::gIMap.request(InputID::LEFT);
 
 			// slider modification
 			if (input.mouse->mb[0]
@@ -2202,23 +2202,23 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// button input
 	bool plmb = Core::gFrame.mouse.mb[0]&&!trg_lmb, prmb = Core::gFrame.mouse.mb[2]&&!trg_rmb;
 	input.hit_a = 
-			(gIMap.get_input_triggered(InputID::PAUSE)&&!menu_action)
-			|| gIMap.get_input_triggered(InputID::FOCUS)
-			|| gIMap.get_input_triggered(InputID::CONFIRM)
+			(Base::gIMap.get_input_triggered(InputID::PAUSE)&&!menu_action)
+			|| Base::gIMap.get_input_triggered(InputID::FOCUS)
+			|| Base::gIMap.get_input_triggered(InputID::CONFIRM)
 			|| plmb;
 	input.hit_b =
-			(gIMap.get_input_triggered(InputID::PAUSE)&&menu_action)
-			|| gIMap.get_input_triggered(InputID::BOMB)
+			(Base::gIMap.get_input_triggered(InputID::PAUSE)&&menu_action)
+			|| Base::gIMap.get_input_triggered(InputID::BOMB)
 			|| prmb;
 
 	// directional input
 	input.dir_horz =
-			((gIMap.get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
-			- (gIMap.get_input_triggered(InputID::LEFT)&&vselect>0))
+			((Base::gIMap.get_input_triggered(InputID::RIGHT)&&vselect<OptionLogicID::OPTION_CAP)
+			- (Base::gIMap.get_input_triggered(InputID::LEFT)&&vselect>0))
 			* menu_action;
 	input.dir_vert =
-			(gIMap.get_input_triggered(InputID::DOWN)
-			- gIMap.get_input_triggered(InputID::UP))
+			(Base::gIMap.get_input_triggered(InputID::DOWN)
+			- Base::gIMap.get_input_triggered(InputID::UP))
 			* menu_action;
 
 	// mouse input
@@ -2437,53 +2437,53 @@ void MainMenu::update_peripheral_annotations()
 	if (input.controller_preferred_peripheral) {
 
 		// write messages for controller input
-		dmessage = "press ["+gIMap.cnt_name[InputID::PAUSE]+"] if you DARE";
+		dmessage = "press ["+Base::gIMap.cnt_name[InputID::PAUSE]+"] if you DARE";
 		instr[0] =
-				"confirm ["+gIMap.cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.cnt_name[InputID::LEFT]
-				+ '/'+gIMap.cnt_name[InputID::RIGHT]+"]"
-				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
+				"confirm ["+Base::gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.cnt_name[InputID::LEFT]
+				+ '/'+Base::gIMap.cnt_name[InputID::RIGHT]+"]"
+				+ "  go back ["+Base::gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[1] =
-				"confirm ["+gIMap.cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.cnt_name[InputID::UP]
-				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
+				"confirm ["+Base::gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.cnt_name[InputID::UP]
+				+ '/'+Base::gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[2] =
-				"see options ["+gIMap.cnt_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.cnt_name[InputID::UP]
-				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
+				"see options ["+Base::gIMap.cnt_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.cnt_name[InputID::UP]
+				+ '/'+Base::gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.cnt_name[InputID::BOMB]+"]";
 		instr[3] =
-				"adjust slider ["+gIMap.cnt_name[InputID::LEFT]
-				+ '/'+gIMap.cnt_name[InputID::RIGHT]+"]"
-				+ "  select ["+gIMap.cnt_name[InputID::UP]
-				+ '/'+gIMap.cnt_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.cnt_name[InputID::BOMB]+"]";
+				"adjust slider ["+Base::gIMap.cnt_name[InputID::LEFT]
+				+ '/'+Base::gIMap.cnt_name[InputID::RIGHT]+"]"
+				+ "  select ["+Base::gIMap.cnt_name[InputID::UP]
+				+ '/'+Base::gIMap.cnt_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.cnt_name[InputID::BOMB]+"]";
 	} else {
 
 		// write message for keyboard input
-		dmessage = "press ["+gIMap.key_name[InputID::CONFIRM]+"] if you DARE";
+		dmessage = "press ["+Base::gIMap.key_name[InputID::CONFIRM]+"] if you DARE";
 		instr[0] =
-				"confirm ["+gIMap.key_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.key_name[InputID::LEFT]
-				+ '/'+gIMap.key_name[InputID::RIGHT]+"]"
-				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
+				"confirm ["+Base::gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.key_name[InputID::LEFT]
+				+ '/'+Base::gIMap.key_name[InputID::RIGHT]+"]"
+				+ "  go back ["+Base::gIMap.key_name[InputID::BOMB]+"]";
 		instr[1] =
-				"confirm ["+gIMap.key_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.key_name[InputID::UP]
-				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
+				"confirm ["+Base::gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.key_name[InputID::UP]
+				+ '/'+Base::gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.key_name[InputID::BOMB]+"]";
 		instr[2] =
-				"see options ["+gIMap.key_name[InputID::FOCUS]+"]"
-				+ "  select ["+gIMap.key_name[InputID::UP]
-				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
+				"see options ["+Base::gIMap.key_name[InputID::FOCUS]+"]"
+				+ "  select ["+Base::gIMap.key_name[InputID::UP]
+				+ '/'+Base::gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.key_name[InputID::BOMB]+"]";
 		instr[3] =
-				"adjust slider ["+gIMap.key_name[InputID::LEFT]
-				+ '/'+gIMap.key_name[InputID::RIGHT]+"]"
-				+ "  select ["+gIMap.key_name[InputID::UP]
-				+ '/'+gIMap.key_name[InputID::DOWN]+"]"
-				+ "  go back ["+gIMap.key_name[InputID::BOMB]+"]";
+				"adjust slider ["+Base::gIMap.key_name[InputID::LEFT]
+				+ '/'+Base::gIMap.key_name[InputID::RIGHT]+"]"
+				+ "  select ["+Base::gIMap.key_name[InputID::UP]
+				+ '/'+Base::gIMap.key_name[InputID::DOWN]+"]"
+				+ "  go back ["+Base::gIMap.key_name[InputID::BOMB]+"]";
 	}
 
 	// write dare message

@@ -24,9 +24,8 @@ enum LoadInstruction
 // FIXME: do this somewhere else. also load queue has to be changed fundamentally
 
 
-class Core
+struct Core
 {
-public:
 
 	// engine
 	inline static Frame gFrame = Frame("黄泉先生");

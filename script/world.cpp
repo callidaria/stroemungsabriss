@@ -69,7 +69,7 @@ void World::render(bool& running,bool& reboot)
 	Core::gR3D.render_target(rtarget_id,Core::gCamera3D,&Core::gLighting);
 
 	// render bullets
-	gBSys.render();
+	Base::gBSys.render();
 
 	// logic test
 	for (BoardTuple board : board_master) board.logic(board.data);

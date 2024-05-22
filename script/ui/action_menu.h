@@ -4,14 +4,9 @@
 #include <iostream>
 
 #include "../../ccb/core.h"
-#include "../../ccb/frm/framebuffer.h"
-#include "../../ccb/fcn/buffer.h"
-#include "../../ccb/fcn/font.h"
-#include "../../ccb/fcn/text.h"
-#include "../../ccb/gfx/shader.h"
 
+#include "../base.h"
 #include "../world.h"
-#include "../systems/input_map.h"
 
 
 // constant

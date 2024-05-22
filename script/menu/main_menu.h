@@ -9,9 +9,9 @@
 #include "../../ccb/frm/framebuffer.h"
 #include "../../ccb/ppe/msaa.h"
 
-#include "../systems/input_map.h"
-#include "../systems/savestates.h"
+#include "../base.h"
 #include "../world.h"
+#include "../systems/savestates.h"
 
 
 // information

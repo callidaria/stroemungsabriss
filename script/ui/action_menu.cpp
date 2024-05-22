@@ -52,8 +52,8 @@ ActionMenu::ActionMenu(float &progress,float pseq)
 */
 void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 {
-	bool pause = gIMap.input_val[InputID::PAUSE], details = gIMap.input_val[InputID::DETAILS];
-	bool down = gIMap.input_val[InputID::DOWN], up = gIMap.input_val[InputID::UP];
+	bool pause = Base::gIMap.input_val[InputID::PAUSE], details = Base::gIMap.input_val[InputID::DETAILS];
+	bool down = Base::gIMap.input_val[InputID::DOWN], up = Base::gIMap.input_val[InputID::UP];
 
 	// action menu open requests
 	bool req_sysmenu = pause&&!menu_trg&&!menu_inf;
@@ -81,8 +81,8 @@ void ActionMenu::render(FrameBuffer* game_fb,bool &running,bool &reboot)
 
 	// request handling
 	// choose reset when selected and hit
-	World::active_daui *= !(gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET);
-	running *= !(gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET_OS&&menu_sys);
+	World::active_daui *= !(Base::gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET);
+	running *= !(Base::gIMap.request(InputID::FOCUS)&&msel==AMSEL_SYS_RESET_OS&&menu_sys);
 
 	// sepia colourspace when paused
 	Frame::clear();

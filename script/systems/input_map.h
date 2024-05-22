@@ -109,7 +109,4 @@ private:
 };
 // TODO: make the input map dynamic for button reallocation
 
-static inline InputMap gIMap = InputMap();
-// TODO: make part of core somehow... or no core at all?
-
 #endif

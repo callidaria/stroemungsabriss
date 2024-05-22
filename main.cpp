@@ -6,19 +6,8 @@
 
 #include "ccb/core.h"
 
-#include "ccb/fcn/text.h"
-
-#include "ccb/aud/audio.h"
-#include "ccb/aud/listener.h"
-
-#include "ccb/fcn/ccb_manager.h"
-
-#include "ccb/gfx/mesh_anim.h"
-
-#include "script/systems/input_map.h"
+#include "script/base.h"
 #include "script/systems/worldbuilder.h"
-
-#include "script/world.h"
 
 #define MVMT_SPEED 4
 #define BUILD_DEV_MODE 1
@@ -35,9 +24,6 @@ int main(int argc,char** argv)
 			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);*/
 	//Frame::gpu_vsync_on();
 	Core::gFrame.set_refresh_rate(60);
-
-	// AUDIO
-	Listener listener = Listener();
 
 	// LOADERS
 	CCBManager ccbm = CCBManager();
@@ -67,15 +53,15 @@ int main(int argc,char** argv)
 		Frame::clear();
 
 		// input mapping
-		gIMap.update();
-		gIMap.precalculate_all();
-		gIMap.stick_to_dpad();
+		Base::gIMap.update();
+		Base::gIMap.precalculate_all();
+		Base::gIMap.stick_to_dpad();
 
 		// render scene
 		world.render(run,reboot);
 
 		// debrief
-		gIMap.update_triggers();
+		Base::gIMap.update_triggers();
 
 		// developer tools in debug mode
 #if BUILD_DEV_MODE

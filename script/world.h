@@ -2,15 +2,9 @@
 #define SCR_ROOT_WORLD
 
 #include "../ccb/core.h"
-#include "../ccb/frm/framebuffer.h"
-#include "../ccb/frm/gbuffer.h"
-
-#include "../ccb/gfx/cubemap.h"
-
-#include "../ccb/mat/lighting.h"
 #include "../ccb/fcn/ccb_manager.h"
 
-#include "systems/bullet_system.h"
+#include "base.h"
 
 
 //		BOARD DEFINITION

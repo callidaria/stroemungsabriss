@@ -72,7 +72,7 @@ JaegerJet::JaegerJet()
 			"./res/dnormal.png","./res/none.png",glm::vec3(0,0,0),18,glm::vec3(-90,0,0));
 
 	// add pc projectiles to bullet system
-	gBSys.add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
+	Base::gBSys.add_cluster(15,15,4096,"./res/hntblt.png",1,1,1,30);
 	treg[2] = 9;
 }
 
@@ -83,12 +83,12 @@ JaegerJet::JaegerJet()
 void JaegerJet::update()
 {
 	// movement speed and direction based on shot and focus mode
-	glm::vec2 mvdir = gIMap.move_dir;
+	glm::vec2 mvdir = Base::gIMap.move_dir;
 	float mvspeed = !ddur*(4+(3*!(
-		gIMap.input_val[InputID::FOCUS]||gIMap.input_val[InputID::CHANGE])));
+			Base::gIMap.input_val[InputID::FOCUS]||Base::gIMap.input_val[InputID::CHANGE])));
 
 	// change position of player based on calculated movement direction
-	position += glm::vec3(gIMap.move_dir.x*mvspeed,gIMap.move_dir.y*mvspeed,0)
+	position += glm::vec3(Base::gIMap.move_dir.x*mvspeed,Base::gIMap.move_dir.y*mvspeed,0)
 			* glm::vec3(Core::gFrame.time_delta);
 
 	// force player in-bounds
@@ -100,13 +100,13 @@ void JaegerJet::update()
 			- (position.y>y_full_cap)*(position.y-y_full_cap),position.z);
 
 	// update bullet position by current direction & write position to register
-	gBSys.delta_fDir(0);
+	Base::gBSys.delta_fDir(0);
 	treg[0] = position.x, treg[1] = position.y;
 
 	// run requested shot type or idle
-	uint8_t sidx = ((gIMap.input_val[InputID::WIDE]&&!gIMap.input_val[InputID::FOCUS])+2
-			* gIMap.input_val[InputID::FOCUS])*(Core::gFrame.time_delta>.1f);
-	rng_flib[sidx](&gBSys,treg);
+	uint8_t sidx = ((Base::gIMap.input_val[InputID::WIDE]&&!Base::gIMap.input_val[InputID::FOCUS])+2
+			* Base::gIMap.input_val[InputID::FOCUS])*(Core::gFrame.time_delta>.1f);
+	rng_flib[sidx](&Base::gBSys,treg);
 	// TODO: remove bullet system pass. it will be global
 
 	// TODO: bombs
@@ -114,8 +114,8 @@ void JaegerJet::update()
 	// TODO: close quarters
 
 	// calculate player jet tilt
-	bool abs_right = gIMap.input_val[InputID::RIGHT];
-	bool abs_left = gIMap.input_val[InputID::LEFT];
+	bool abs_right = Base::gIMap.input_val[InputID::RIGHT];
+	bool abs_left = Base::gIMap.input_val[InputID::LEFT];
 	tilt += (abs_right*5*(tilt<30)-abs_left*5*(tilt>-30))*Core::gFrame.time_delta;
 	tilt += (((tilt<0)-(tilt>0))*5*(!abs_left&&!abs_right))*Core::gFrame.time_delta;
 	glm::mat4 mdrot = glm::rotate(glm::mat4(1.0f),glm::radians(tilt),glm::vec3(0,1,0));

@@ -59,6 +59,4 @@ private:
 	std::vector<BulletCluster> clusters;
 };
 
-static inline BulletSystem gBSys = BulletSystem();
-
 #endif
