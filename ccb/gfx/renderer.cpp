@@ -73,12 +73,12 @@ void RTransform2D::rotate(float r,glm::vec2 a)
 */
 
 /*
-	!O(1) /load -> (public)
-	purpose: create renderer object to subsequently add 2D objects to and draw them
+	TODO
 */
 Renderer::Renderer()
 {
-	sprite_buffer.add_buffer();
+	// setup element array buffers for sprites
+	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) bfr_sprite[i].buffer.add_buffer();
 }
 
 /*
@@ -183,6 +183,22 @@ void Renderer::load()
 	sprite_shader.upload_camera();
 }
 // FIXME: extremely questionable loading processing
+
+/*
+	TODO
+*/
+void Renderer::update()
+{
+	// render setup
+	sprite_shader.enable();
+	sprite_shader.upload_int("row",1);
+	sprite_shader.upload_int("col",1);
+	sprite_shader.upload_vec2("i_tex",glm::vec2(0));
+	sprite_buffer.bind();
+
+	// render registered sprites
+	// TODO
+}
 
 /*
 	!O(1) /+function -> (public)

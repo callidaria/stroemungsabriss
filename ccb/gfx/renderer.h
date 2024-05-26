@@ -7,6 +7,17 @@
 #include "shader.h"
 
 
+constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
+
+
+// description of current buffer state, is it rendering, is it loading, should it be ignored?
+enum BufferState
+{
+	RBFR_IDLE,
+	RBFR_LOAD,
+	RBFR_RENDER
+};
+
 // basic functionality of 2D geometry
 struct RTransform2D
 {
@@ -32,7 +43,7 @@ struct RTransform2D
 struct RTextureTuple
 {
 	// utility
-	inline void load() { glGenTextures(1,&texture),Toolbox::load_texture(texture,path); }
+	inline void load() { glGenTextures(1,&texture), Toolbox::load_texture(texture,path); }
 
 	// data
 	uint32_t texture;
@@ -58,6 +69,21 @@ struct Atlas
 	uint8_t frames,span;
 };
 
+// buffer data to seperately load and display to other buffers
+struct SpriteBuffer
+{
+	// objects
+	std::vector<Sprite> sprites;
+	std::vector<Atlas> atlas;
+
+	// data
+	Buffer buffer;
+	Shader shader;
+
+	// state
+	BufferState state = RBFR_IDLE;
+};
+
 
 class Renderer
 {
@@ -71,12 +97,13 @@ public:
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t);
 	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s);
 
-	// setup
+	// stages
 	void load();
-	void prepare_sprites();
+	void update();
 	// FIXME: restructure loading concept
 
 	// draw
+	void prepare_sprites();
 	void render_sprite(uint16_t i);
 	void render_sprite_overwritten(uint16_t i,uint32_t tex);
 	void render_sprite_frame(uint16_t i,glm::vec2 pos);
@@ -84,13 +111,8 @@ public:
 
 public:
 
-	// objects
-	std::vector<Sprite> sprites;
-	std::vector<Atlas> atlas;
-
-	// engine
-	Buffer sprite_buffer;
-	Shader sprite_shader;
+	// buffers
+	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
 
 private:
 
