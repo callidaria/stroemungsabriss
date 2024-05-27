@@ -84,13 +84,14 @@ Renderer::Renderer()
 /*
 	!O(1)m /+load -> (public)
 	purpose: add new sprite to renderer
+	\param bfr_id: id of sprite buffer to write sprite to
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
 	\param t: path to file containing sprite texture
 	\returns: memory index the sprite can be referenced by later
 */
-uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
+uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t)
 {
 	// information setup
 	Sprite s = {
@@ -103,13 +104,14 @@ uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 	};
 
 	// data setup
-	sprites.push_back(s);
-	return sprites.size()-1;
+	bfr_sprite[bfr_id].sprites.push_back(s);
+	return bfr_sprite[bfr_id].sprites.size()-1;
 }
 
 /*
 	!O(1)m /+load -> (public)
 	purpose: add new spritesheet to renderer
+	\param bfr_id: id of sprite buffer to write animation to
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
@@ -120,7 +122,8 @@ uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t)
 	\param s: frames the animation takes to fully iterate through all textures
 	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s)
+uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
+		uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
 	// information setup
 	Atlas a = {
@@ -137,67 +140,109 @@ uint16_t Renderer::add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t 
 	};
 
 	// data setup
-	atlas.push_back(a);
-	return atlas.size()-1;
+	bfr_sprite[bfr_id].atlas.push_back(a);
+	return bfr_sprite[bfr_id].atlas.size()-1;
+}
+
+
+/**
+ *	TODO
+*/
+
+typedef void (*sprite_buffer_routine)(SpriteBuffer&);
+
+/*
+	TODO
+*/
+void sprite_buffer_idle(SpriteBuffer& sb)
+{
+	// TODO: what even to do here? maintaining checks, idle update, can this be skipped?
+	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
 }
 
 /*
-	!O(n)m .amount of added objects /load -> (public)
-	purpose: combine vertex and texture loading and compile shader program
+	// TODO
 */
-void Renderer::load()
+void sprite_buffer_load(SpriteBuffer& sb)
 {
 	// memory allocation for vertices and elements
-	size_t t_vsize = sprite_vertices.size(), t_esize = sprite_elements.size();
-	sprite_vertices.resize(t_vsize+(sprites.size()+atlas.size())*PATTERN_SPRITE_VERTEX_REPEAT);
-	sprite_elements.resize(t_esize+(sprites.size()+atlas.size())*PATTERN_SPRITE_ELEMENT_REPEAT);
+	sb.sprite_vertices.resize((sb.sprites.size()+sb.atlas.size())*PATTERN_SPRITE_VERTEX_REPEAT);
+	sb.sprite_elements.resize((sb.sprites.size()+sb.atlas.size())*PATTERN_SPRITE_ELEMENT_REPEAT);
 
 	// write sprite vertex values to upload list
 	size_t i_velem = t_vsize/PATTERN_SPRITE_LOAD_REPEAT;
-	for (Sprite& s : sprites) {
-		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,s.transform.position,
+	for (Sprite& s : sb.sprites) {
+		Toolbox::create_sprite_canvas(sb.sprite_vertices,t_vsize,s.transform.position,
 				s.transform.width,s.transform.height);
-		Toolbox::generate_elements(t_esize,i_velem,sprite_elements);
+		Toolbox::generate_elements(t_esize,i_velem,sb.sprite_elements);
 	}
 
 	// write animation vertex values to upload list
-	for (Atlas& a : atlas) {
-		Toolbox::create_sprite_canvas(sprite_vertices,t_vsize,a.transform.position,
+	for (Atlas& a : sb.atlas) {
+		Toolbox::create_sprite_canvas(sb.sprite_vertices,t_vsize,a.transform.position,
 				a.transform.width,a.transform.height);
-		Toolbox::generate_elements(t_esize,i_velem,sprite_elements);
+		Toolbox::generate_elements(t_esize,i_velem,sb.sprite_elements);
 	}
 
 	// upload to buffers
-	sprite_buffer.bind();
-	sprite_buffer.upload_vertices(sprite_vertices), sprite_buffer.upload_elements(sprite_elements);
+	sb.sprite_buffer.bind();
+	sb.sprite_buffer.upload_vertices(sb.sprite_vertices), sb.sprite_buffer.upload_elements(sb.sprite_elements);
 
 	// compile shader
-	sprite_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
+	sb.sprite_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 
 	// load textures
-	for (Sprite& s : sprites) s.texture.load();
-	for (Atlas& a : atlas) a.texture.load();
-	sprite_shader.upload_int("tex",0);
+	for (Sprite& s : sb.sprites) s.texture.load();
+	for (Atlas& a : sb.atlas) a.texture.load();
+	sb.sprite_shader.upload_int("tex",0);
 
-	// coordinate system
-	sprite_shader.upload_camera();
+	// coordinate system & transition buffer into next state
+	sb.sprite_shader.upload_camera();
+	sb.state += auto_stateswitch;
+	// TODO: change auto stateswitch on demand later
 }
 // FIXME: extremely questionable loading processing
 
 /*
 	TODO
 */
+void sprite_buffer_render(SpriteBuffer& sb)
+{
+	// prepare shader and bind buffers
+	sb.sprite_shader.enable();
+	sb.sprite_shader.upload_int("row",1);
+	sb.sprite_shader.upload_int("col",1);
+	sb.sprite_shader.upload_vec2("i_tex",glm::vec2(0));
+	sb.sprite_buffer.bind();
+
+	// iterate sprites
+	for (uint16_t i=0;i<sb.sprites.size();i++) {
+		sb.sprite_shader.upload_matrix("model",sb.sprites[i].transform.model);
+		glBindTexture(GL_TEXTURE_2D,sb.sprites[i].texture.texture);
+		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
+	}
+
+	// iterate animations
+	// TODO
+}
+
+sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
+	sprite_buffer_idle,
+	sprite_buffer_load,
+	sprite_buffer_render
+};
+
+
+/*
+	TODO
+*/
 void Renderer::update()
 {
-	// render setup
-	sprite_shader.enable();
-	sprite_shader.upload_int("row",1);
-	sprite_shader.upload_int("col",1);
-	sprite_shader.upload_vec2("i_tex",glm::vec2(0));
-	sprite_buffer.bind();
-
-	// render registered sprites
-	// TODO
+	// iterate sprite buffer
+	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) {
+		SpriteBuffer& bfr = bfr_sprite[i];
+		routine_sbuffers[bfr.state](bfr);
+	}
 }
 
 /*

@@ -15,7 +15,8 @@ enum BufferState
 {
 	RBFR_IDLE,
 	RBFR_LOAD,
-	RBFR_RENDER
+	RBFR_RENDER,
+	RBFR_STATE_COUNT
 };
 
 // basic functionality of 2D geometry
@@ -76,12 +77,17 @@ struct SpriteBuffer
 	std::vector<Sprite> sprites;
 	std::vector<Atlas> atlas;
 
-	// data
+	// gpu
 	Buffer buffer;
 	Shader shader;
 
+	// data
+	std::vector<float> sprite_vertices;
+	std::vector<uint32_t> sprite_elements;
+
 	// state
 	BufferState state = RBFR_IDLE;
+	bool auto_stateswitch = true;
 };
 
 
@@ -94,8 +100,12 @@ public:
 	~Renderer() {  }
 
 	// object adder
-	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t);
-	uint16_t add_sprite(glm::vec2 p,float w,float h,const char* t,uint8_t r,uint8_t c,uint8_t f,uint8_t s);
+	uint16_t add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t);
+	uint16_t add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
+			uint8_t r,uint8_t c,uint8_t f,uint8_t s);
+
+	// interaction
+	inline void load_buffer_sprites(uint8_t id) { bfr_sprite[id].state = RBFR_LOAD; }
 
 	// stages
 	void load();
@@ -113,12 +123,6 @@ public:
 
 	// buffers
 	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
-
-private:
-
-	// data
-	std::vector<float> sprite_vertices;
-	std::vector<uint32_t> sprite_elements;
 };
 
 #endif
