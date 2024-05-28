@@ -18,10 +18,10 @@ public:
 	CCBManager();
 
 	// load & unload
-	uint16_t add_lv(const char* path);
+	uint16_t add_lv(uint8_t bfr_id,const char* path);
 
 	// functionality
-	void dev_console(bool &running,bool &dactive);
+	void dev_console(bool& running,bool& dactive);
 
 private:
 

@@ -10,7 +10,7 @@
 CCBManager::CCBManager()
 {
 	// create developer mode label
-	Core::gRenderer.add_sprite(glm::vec2(1230,690),40,20,"./res/dev.png");
+	Core::gRenderer.add_sprite(0,glm::vec2(1230,690),40,20,"./res/dev.png");
 
 	// create developer console greetings and initial setup
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));
@@ -29,11 +29,11 @@ CCBManager::CCBManager()
 	purpose: loads a cascabel level environment file
 	returns: start address of environment objects within 2D renderer memory
 */
-uint16_t CCBManager::add_lv(const char* path)
+uint16_t CCBManager::add_lv(uint8_t bfr_id,const char* path)
 {
 	// interpret level environment file
 	CCBLInterpreter proc = CCBLInterpreter(path);
-	int out = proc.load_level();
+	int out = proc.load_level(bfr_id);
 
 	// save to interpreter & renderer memory index list
 	linpr.push_back(proc);
@@ -50,8 +50,8 @@ uint16_t CCBManager::add_lv(const char* path)
 void CCBManager::dev_console(bool &running,bool &dactive)
 {
 	// draw developer mode label
-	Core::gRenderer.prepare_sprites();
-	Core::gRenderer.render_sprite(0);
+	/*Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite(0);*/
 
 	// open or close console with comma if not opened or closed last frame
 	if (Core::gFrame.kb.ka[SDL_SCANCODE_COMMA]&&!activeonsc) {
@@ -78,7 +78,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// move sprite according to mouse vector delta
 		glm::vec2 deltamv = glm::vec2(Core::gFrame.mouse.mxfr-mlf.x,Core::gFrame.mouse.myfr-mlf.y);
 		int ti = index[i_lv]+i_rf;
-		Core::gRenderer.sprites[ti].transform.translate(deltamv);
+		//Core::gRenderer.sprites[ti].transform.translate(deltamv);
 		linpr[i_lv].sprite_data[i_rf].position += deltamv;
 		mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);
 	}
@@ -94,7 +94,7 @@ void CCBManager::dev_console(bool &running,bool &dactive)
 		// scale sprite according to mouse movement vector length
 		deltascl += (Core::gFrame.mouse.myfr-mlf.y)*0.001f;
 		int ti = index[i_lv]+i_rf;
-		Core::gRenderer.sprites[ti].transform.scale(deltascl,deltascl,glm::vec2(0));
+		//Core::gRenderer.sprites[ti].transform.scale(deltascl,deltascl,glm::vec2(0));
 		linpr[i_lv].sprite_data[i_rf].width = tmp_wscale*deltascl;
 		linpr[i_lv].sprite_data[i_rf].height = tmp_hscale*deltascl;
 		mlf = glm::vec2(Core::gFrame.mouse.mxfr,Core::gFrame.mouse.myfr);

@@ -52,7 +52,7 @@ public:
 	CCBLInterpreter(const char* path);
 
 	// interaction
-	uint16_t load_level();
+	uint16_t load_level(uint8_t bfr_id);
 	void write_level();
 
 private:

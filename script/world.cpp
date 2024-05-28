@@ -24,7 +24,6 @@ World::World()
 void World::load(float& progress,float ldsplit)
 {
 	float org_progress = progress,pr_progress = ldsplit/4.0f;
-	Core::gRenderer.load();
 	Core::gRInst.load(progress,pr_progress);
 	Core::gR3D.load(Core::gCamera3D,progress,pr_progress);
 	Core::gR3D.upload_target_static_lighting(rtarget_id,&Core::gLighting);

@@ -80,10 +80,11 @@ struct SpriteBuffer
 	// gpu
 	Buffer buffer;
 	Shader shader;
+	// FIXME: is a seperate shader for each SpriteBuffer really necessary? they can all use one shader!
 
 	// data
-	std::vector<float> sprite_vertices;
-	std::vector<uint32_t> sprite_elements;
+	std::vector<float> vertices;
+	std::vector<uint32_t> elements;
 
 	// state
 	BufferState state = RBFR_IDLE;
@@ -113,11 +114,11 @@ public:
 	// FIXME: restructure loading concept
 
 	// draw
-	void prepare_sprites();
+	/*void prepare_sprites();
 	void render_sprite(uint16_t i);
 	void render_sprite_overwritten(uint16_t i,uint32_t tex);
 	void render_sprite_frame(uint16_t i,glm::vec2 pos);
-	void render_sprite_animated(uint16_t i);
+	void render_sprite_animated(uint16_t i);*/
 
 public:
 

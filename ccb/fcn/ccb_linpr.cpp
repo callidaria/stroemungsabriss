@@ -13,10 +13,10 @@ CCBLInterpreter::CCBLInterpreter(const char* path)
 	purpose: process all creation requests held by the cascabel environment file
 	returns: starting draw address for 2D renderer
 */
-uint16_t CCBLInterpreter::load_level()
+uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 {
 	// setup
-	int out = Core::gRenderer.sprites.size();
+	int out = Core::gRenderer.bfr_sprite[bfr_id].sprites.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
 	std::string tline;
 	std::string args[CANM_ARGUMENT_COUNT];
@@ -47,7 +47,7 @@ uint16_t CCBLInterpreter::load_level()
 				.texpath = tex_path
 			};
 			sprite_data.push_back(proc);
-			Core::gRenderer.add_sprite(pos,width,height,tex_path);
+			Core::gRenderer.add_sprite(bfr_id,pos,width,height,tex_path);
 		}
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
@@ -76,7 +76,7 @@ uint16_t CCBLInterpreter::load_level()
 				.ticks = t
 			};
 			anim_data.push_back(proc);
-			Core::gRenderer.add_sprite(pos,width,height,tex_path,r,c,f,t);
+			Core::gRenderer.add_sprite(bfr_id,pos,width,height,tex_path,r,c,f,t);
 		}
 	}
 	return out;

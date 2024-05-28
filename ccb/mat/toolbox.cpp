@@ -261,7 +261,8 @@ void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 
 	purpose: create vertices for a sprite without element buffer, drawn per triangle
 	NOTE: expects memory to be allocated
 */
-void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
+void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
+		glm::vec2 pos,float width,float height)
 {
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,

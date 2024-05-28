@@ -7,7 +7,7 @@
 */
 NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager)
 {
-	index_r2D = ccb_manager->add_lv("lvload/dpilot.ccb");
+	index_r2D = ccb_manager->add_lv(0,"lvload/dpilot.ccb");
 }
 
 /*
@@ -16,6 +16,6 @@ NepalMountainWoods::NepalMountainWoods(CCBManager* ccb_manager)
 */
 void NepalMountainWoods::render()
 {
-	Core::gRenderer.prepare_sprites();
-	Core::gRenderer.render_sprite(index_r2D);
+	/*Core::gRenderer.prepare_sprites();
+	Core::gRenderer.render_sprite(index_r2D);*/
 }
