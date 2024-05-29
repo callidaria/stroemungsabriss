@@ -54,17 +54,9 @@ struct RTextureTuple
 // data structure for sprite information
 struct Sprite
 {
-	RTransform2D transform;
-	RTextureTuple texture;
-};
-
-// data structure for spritesheet information
-struct Atlas
-{
 	// fundamentals
 	RTransform2D transform;
 	RTextureTuple texture;
-	// join atlas & sprites?
 
 	// attributes
 	uint8_t rows,columns;
@@ -76,10 +68,6 @@ struct SpriteBuffer
 {
 	// objects
 	std::vector<Sprite> sprites;
-	std::vector<Atlas> atlas;
-	std::vector<bool> ljmp;
-	std::vector<uint16_t> lidx;
-	// FIXME: idea of some sort of queue implementation
 
 	// gpu
 	Buffer buffer;
@@ -105,9 +93,8 @@ public:
 	~Renderer() {  }
 
 	// object adder
-	uint16_t add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t);
 	uint16_t add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
-			uint8_t r,uint8_t c,uint8_t f,uint8_t s);
+			uint8_t r=1,uint8_t c=1,uint8_t f=0,uint8_t s=0);
 
 	// interaction
 	inline void load_buffer_sprites(uint8_t id) { bfr_sprite[id].state = RBFR_LOAD; }

@@ -83,56 +83,35 @@ Renderer::Renderer()
 
 /*
 	!O(1)m /+load -> (public)
-	purpose: add new sprite to renderer
-	\param bfr_id: id of sprite buffer to write sprite to
-	\param p: origin position of added sprite
-	\param w: width of added sprite
-	\param h: height of added sprite
-	\param t: path to file containing sprite texture
-	\returns: memory index the sprite can be referenced by later
-*/
-uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t)
-{
-	// information setup
-	Sprite s = {
-		.transform = {
-			.position = p,
-			.width = w,
-			.height = h,
-		},
-		.texture = { .path = t },
-	};
-
-	// data setup
-	bfr_sprite[bfr_id].sprites.push_back(s);
-	return bfr_sprite[bfr_id].sprites.size()-1;
-}
-
-/*
-	!O(1)m /+load -> (public)
 	purpose: add new spritesheet to renderer
 	\param bfr_id: id of sprite buffer to write animation to
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
 	\param t: path to file containing spritesheet
-	\param r: rows on spritesheet
-	\param c: columns on spritesheet
-	\param f: number of frames held by spritesheet
-	\param s: frames the animation takes to fully iterate through all textures
+	\param r (default=1): rows on spritesheet
+	\param c (default=1): columns on spritesheet
+	\param f (default=0): number of frames held by spritesheet
+	\param s (default=0): frames the animation takes to fully iterate through all textures
 	\returns: memory index the spritesheet can be referenced by later
 */
 uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
 		uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
 	// information setup
-	Atlas a = {
+	Sprite sprite = {
+
+		// transform component
 		.transform = {
 			.position = p,
 			.width = w,
 			.height = h,
 		},
+
+		// texture component
 		.texture = { .path = t },
+
+		// attributes
 		.rows = r,
 		.columns = c,
 		.frames = f,
@@ -140,8 +119,8 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const c
 	};
 
 	// data setup
-	bfr_sprite[bfr_id].atlas.push_back(a);
-	return bfr_sprite[bfr_id].atlas.size()-1;
+	bfr_sprite[bfr_id].sprites.push_back(sprite);
+	return bfr_sprite[bfr_id].sprites.size()-1;
 }
 
 
@@ -166,21 +145,14 @@ void sprite_buffer_idle(SpriteBuffer& sb)
 void sprite_buffer_load(SpriteBuffer& sb)
 {
 	// memory allocation for vertices and elements
-	sb.vertices.resize((sb.sprites.size()+sb.atlas.size())*PATTERN_SPRITE_VERTEX_REPEAT);
-	sb.elements.resize((sb.sprites.size()+sb.atlas.size())*PATTERN_SPRITE_ELEMENT_REPEAT);
+	sb.vertices.resize(sb.sprites.size()*PATTERN_SPRITE_VERTEX_REPEAT);
+	sb.elements.resize(sb.sprites.size()*PATTERN_SPRITE_ELEMENT_REPEAT);
 
 	// write sprite vertex values to upload list
 	size_t t_vsize = 0, t_esize = 0, i_velem = 0;
 	for (Sprite& s : sb.sprites) {
 		Toolbox::create_sprite_canvas(sb.vertices,t_vsize,
 				s.transform.position,s.transform.width,s.transform.height);
-		Toolbox::generate_elements(t_esize,i_velem,sb.elements);
-	}
-
-	// write animation vertex values to upload list
-	for (Atlas& a : sb.atlas) {
-		Toolbox::create_sprite_canvas(sb.vertices,t_vsize,
-				a.transform.position,a.transform.width,a.transform.height);
 		Toolbox::generate_elements(t_esize,i_velem,sb.elements);
 	}
 
@@ -191,7 +163,6 @@ void sprite_buffer_load(SpriteBuffer& sb)
 
 	// load textures
 	for (Sprite& s : sb.sprites) s.texture.load();
-	for (Atlas& a : sb.atlas) a.texture.load();
 	sb.shader.upload_int("tex",0);
 
 	// coordinate system & transition buffer into next state
@@ -208,21 +179,21 @@ void sprite_buffer_render(SpriteBuffer& sb)
 {
 	// prepare shader and bind buffers
 	sb.shader.enable();
-	sb.shader.upload_int("row",1);
-	sb.shader.upload_int("col",1);
-	sb.shader.upload_vec2("i_tex",glm::vec2(0));
 	sb.buffer.bind();
 
 	// iterate sprites
 	for (uint16_t i=0;i<sb.sprites.size();i++) {
+
+		// upload sprite attributes
+		sb.shader.upload_int("row",sb.sprites[i].rows);
+		sb.shader.upload_int("col",sb.sprites[i].columns);
+		sb.shader.upload_vec2("i_tex",glm::vec2(0));
 		sb.shader.upload_matrix("model",sb.sprites[i].transform.model);
+
+		// draw sprite
 		glBindTexture(GL_TEXTURE_2D,sb.sprites[i].texture.texture);
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
 	}
-
-	// iterate animations
-	// TODO
-	// FIXME: this would mean, that all animations will be rendered on top of sprites... not ideal
 }
 
 // behaviours mapped towards BufferState enumeration
@@ -244,81 +215,3 @@ void Renderer::update()
 		routine_sbuffers[bfr.state](bfr);
 	}
 }
-
-/*
-	!O(1) /+function -> (public)
-	purpose: prepare shader and buffer to render sprites and animated spritesheets
-*/
-/*
-void Renderer::prepare_sprites()
-{
-	sprite_shader.enable();
-	sprite_shader.upload_int("row",1);
-	sprite_shader.upload_int("col",1);
-	sprite_shader.upload_vec2("i_tex",glm::vec2(0));
-	sprite_buffer.bind();
-}
-*/
-
-/*
-	!O(1) /update -> (public)
-	purpose: draw indexed sprite
-	\param i: sprite index
-*/
-/*
-void Renderer::render_sprite(uint16_t i)
-{
-	sprite_shader.upload_matrix("model",sprites[i].transform.model);
-	glBindTexture(GL_TEXTURE_2D,sprites[i].texture.texture);
-	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
-}
-*/
-
-/*
-	!O(1) /update -> (public)
-	purpose: same basic functionality as the normal render_sprite but with previous texture overwrite
-	\param i: sprite index
-	\param tex: texture to overwrite the normal sprite texture before render
-*/
-/*
-void Renderer::render_sprite_overwritten(uint16_t i,uint32_t tex)
-{
-	sprite_shader.upload_matrix("model",sprites[i].transform.model);
-	glBindTexture(GL_TEXTURE_2D,tex);
-	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
-}
-*/
-
-/*
-	!O(1) /update -> (public)
-	purpose: permanently render a specific frame of a spritesheet
-	\param i: spritesheet index
-	\param pos: two-dimensional index of spritesheet frame to draw
-*/
-/*
-void Renderer::render_sprite_frame(uint16_t i,glm::vec2 pos)
-{
-	// shader upload
-	sprite_shader.upload_int("row",atlas[i].rows);
-	sprite_shader.upload_int("col",atlas[i].columns);
-	sprite_shader.upload_vec2("i_tex",pos);
-	sprite_shader.upload_matrix("model",atlas[i].transform.model);
-
-	// draw sprite
-	glBindTexture(GL_TEXTURE_2D,atlas[i].texture.texture);
-	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sprites.size())*6*sizeof(uint32_t)));
-}
-*/
-
-/*
-	!O(1) /update -> (public)
-	purpose: animate spritesheet and automatically iterate through all contained frames
-	\param i: spritesheet index
-*/
-/*
-void Renderer::render_sprite_animated(uint16_t i)
-{
-	glBindTexture(GL_TEXTURE_2D,atlas[i].texture.texture);
-	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)((i+sprites.size())*6*sizeof(uint32_t)));
-}
-*/

@@ -256,7 +256,7 @@ void Conversation::render(GLuint scene_tex)
 
 		// animate continue request
 		//Core::gRenderer.prepare_sprites();
-		Core::gRenderer.bfr_sprite[0].atlas[btn_rindex].transform.model = glm::translate(glm::mat4(1.0f),
+		Core::gRenderer.bfr_sprite[0].sprites[btn_rindex].transform.model = glm::translate(glm::mat4(1.0f),
 				glm::vec3(btn_position.x+1280
 				* (sltr_count<sltr_target||dltr_count||input_blocked||iwait),
 				btn_position.y+tscroll,0));
