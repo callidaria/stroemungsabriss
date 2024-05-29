@@ -14,7 +14,7 @@
 	\param mofs: self increasing offset, which saves the buffer offset for later draw calls
 */
 MeshAnimation::MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs)
+			const char* ipemit,std::vector<float>& vl,std::vector<uint32_t>& el,uint32_t& mofs)
 	: path_colour(ipcol),path_normals(ipnorm),path_materials(ipmat),path_emission(ipemit),ofs(mofs)
 {
 	// texture generation
@@ -265,7 +265,7 @@ void MeshAnimation::interpolate(double dt)
 	purpose: make animation object information console printable
 	conforming to: operator definition
 */
-std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj)
+std::ostream& operator<<(std::ostream& os,const MeshAnimation& obj)
 {
 	os << "---------------------< MeshAnimation >-----------------------\n";
 	os << "faces: " << obj.size << '\n';
@@ -294,7 +294,7 @@ uint16_t MeshAnimation::rc_get_joint_count(aiNode* joint)
 	\param joint: root node in assimp node format, to start processing extraction from
 	\joint_count: current progression of id count to identify joint's place in memory by
 */
-void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count)
+void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t& joint_count)
 {
 	// save joints place in memory and increase
 	uint16_t memory_id = joint_count++;
@@ -321,7 +321,7 @@ void MeshAnimation::rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_co
 	\param gtrans: previous transformation influence until this joint within the chain
 	\param id: current joint index
 */
-void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id)
+void MeshAnimation::rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t& id)
 {
 	glm::mat4 lgtrans = gtrans*cjoint->trans;
 	cjoint->btrans = lgtrans*bone_offsets[id++];
@@ -350,7 +350,7 @@ uint16_t MeshAnimation::get_joint_id(std::string jname)
 	\param jid: current id of node to print depthsearch output from
 	\param depth: current depth of recursion
 */
-void MeshAnimation::rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,
+void MeshAnimation::rc_print_joint_tree(std::ostream& os,std::vector<ColladaJoint> joints,
 		uint16_t jid,uint8_t depth)
 {
 	for (auto joint : joints[jid].children) {

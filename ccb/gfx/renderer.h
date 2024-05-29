@@ -64,6 +64,7 @@ struct Atlas
 	// fundamentals
 	RTransform2D transform;
 	RTextureTuple texture;
+	// join atlas & sprites?
 
 	// attributes
 	uint8_t rows,columns;
@@ -76,6 +77,9 @@ struct SpriteBuffer
 	// objects
 	std::vector<Sprite> sprites;
 	std::vector<Atlas> atlas;
+	std::vector<bool> ljmp;
+	std::vector<uint16_t> lidx;
+	// FIXME: idea of some sort of queue implementation
 
 	// gpu
 	Buffer buffer;
@@ -111,14 +115,6 @@ public:
 	// stages
 	void load();
 	void update();
-	// FIXME: restructure loading concept
-
-	// draw
-	/*void prepare_sprites();
-	void render_sprite(uint16_t i);
-	void render_sprite_overwritten(uint16_t i,uint32_t tex);
-	void render_sprite_frame(uint16_t i,glm::vec2 pos);
-	void render_sprite_animated(uint16_t i);*/
 
 public:
 

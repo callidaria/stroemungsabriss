@@ -184,11 +184,9 @@ void sprite_buffer_load(SpriteBuffer& sb)
 		Toolbox::generate_elements(t_esize,i_velem,sb.elements);
 	}
 
-	// upload to buffers
+	// upload to buffers & compile
 	sb.buffer.bind();
 	sb.buffer.upload_vertices(sb.vertices), sb.buffer.upload_elements(sb.elements);
-
-	// compile shader
 	sb.shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 
 	// load textures
@@ -227,7 +225,7 @@ void sprite_buffer_render(SpriteBuffer& sb)
 	// FIXME: this would mean, that all animations will be rendered on top of sprites... not ideal
 }
 
-// behaviour mapped towards BufferState enumeration
+// behaviours mapped towards BufferState enumeration
 sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 	sprite_buffer_idle,
 	sprite_buffer_load,

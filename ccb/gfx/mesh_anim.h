@@ -78,7 +78,7 @@ public:
 
 	// construction
 	MeshAnimation(const char* path,const char* ipcol,const char* ipnorm,const char* ipmat,
-			const char* ipemit,std::vector<float> &vl,std::vector<uint32_t> &el,uint32_t &mofs);
+			const char* ipemit,std::vector<float>& vl,std::vector<uint32_t>& el,uint32_t& mofs);
 	~MeshAnimation() {  }
 
 	// load
@@ -90,12 +90,12 @@ public:
 	void interpolate(double dt);
 
 	// system
-	friend std::ostream &operator<<(std::ostream &os,const MeshAnimation& obj);
+	friend std::ostream &operator<<(std::ostream& os,const MeshAnimation& obj);
 
 private:
 
 	static uint16_t rc_get_joint_count(aiNode* joint);
-	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t &joint_count);
+	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t& joint_count);
 
 	// standard recursion
 	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);
@@ -109,7 +109,7 @@ private:
 		{ return glm::transpose(glm::make_mat4(&imat4.a1)); }
 
 	// system
-	static void rc_print_joint_tree(std::ostream &os,std::vector<ColladaJoint> joints,uint16_t jid,
+	static void rc_print_joint_tree(std::ostream& os,std::vector<ColladaJoint> joints,uint16_t jid,
 			uint8_t depth);
 
 public:
