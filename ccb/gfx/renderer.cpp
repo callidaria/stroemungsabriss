@@ -77,25 +77,50 @@ void RTransform2D::rotate(float r,glm::vec2 a)
 */
 Renderer::Renderer()
 {
-	// setup element array buffers for sprites
-	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) bfr_sprite[i].buffer.add_buffer();
+	// preload sprite data
+	// generate sprite vertex data
+	float vertices[] = { -.5f,.5f,.0f,.0f, .5f,.5f,1.f,.0f, .5f,-.5f,1.f,1.f, -.5f,-.5f,.0f,1.f };
+	uint32_t elements[] = { 0,2,1, 2,0,3 };
+
+	// setup vertex & element buffer for sprites
+	spr_buffer.add_buffer();
+	spr_buffer.bind();
+	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_VERTEX_REPEAT);
+	spr_buffer.upload_elements(elements,PATTERN_SPRITE_ELEMENT_REPEAT);
+
+	// setup sprite shader
+	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
+	spr_shader.upload_int("tex",0);
+	spr_shader.upload_camera();
+}
+
+/*
+	TODO
+	\param bfr_id: id of sprite buffer to write animation to
+	\param t: path to file containing spritesheet
+	\returns: memory index the spritesheet can be referenced by later
+*/
+uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath)
+{
+	RTextureTuple tex = { .path = texpath };
+	bfr_sprite[bfr_id].textures.push_back(tex);
+	return bfr_sprite[bfr_id].textures.size()-1;
 }
 
 /*
 	!O(1)m /+load -> (public)
 	purpose: add new spritesheet to renderer
 	\param bfr_id: id of sprite buffer to write animation to
+	\param tex_id: id of spritesheet texture to link
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
-	\param t: path to file containing spritesheet
 	\param r (default=1): rows on spritesheet
 	\param c (default=1): columns on spritesheet
 	\param f (default=0): number of frames held by spritesheet
 	\param s (default=0): frames the animation takes to fully iterate through all textures
-	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
+void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
 		uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
 	// information setup
@@ -108,8 +133,8 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const c
 			.height = h,
 		},
 
-		// texture component
-		.texture = { .path = t },
+		// link sprite to texture
+		.texture_id = tex_id,
 
 		// attributes
 		.rows = r,
@@ -117,10 +142,7 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const c
 		.frames = f,
 		.span = s
 	};
-
-	// data setup
 	bfr_sprite[bfr_id].sprites.push_back(sprite);
-	return bfr_sprite[bfr_id].sprites.size()-1;
 }
 
 
@@ -128,12 +150,12 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const c
  *	TODO
 */
 
-typedef void (*sprite_buffer_routine)(SpriteBuffer&);
+typedef void (*sprite_buffer_routine)(SpriteBuffer&,Shader&);
 
 /*
 	TODO
 */
-void sprite_buffer_idle(SpriteBuffer& sb)
+void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 {
 	// TODO: what even to do here? maintaining checks, idle update, can this be skipped?
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
@@ -142,31 +164,10 @@ void sprite_buffer_idle(SpriteBuffer& sb)
 /*
 	// TODO
 */
-void sprite_buffer_load(SpriteBuffer& sb)
+void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	// memory allocation for vertices and elements
-	sb.vertices.resize(sb.sprites.size()*PATTERN_SPRITE_VERTEX_REPEAT);
-	sb.elements.resize(sb.sprites.size()*PATTERN_SPRITE_ELEMENT_REPEAT);
-
-	// write sprite vertex values to upload list
-	size_t t_vsize = 0, t_esize = 0, i_velem = 0;
-	for (Sprite& s : sb.sprites) {
-		Toolbox::create_sprite_canvas(sb.vertices,t_vsize,
-				s.transform.position,s.transform.width,s.transform.height);
-		Toolbox::generate_elements(t_esize,i_velem,sb.elements);
-	}
-
-	// upload to buffers & compile
-	sb.buffer.bind();
-	sb.buffer.upload_vertices(sb.vertices), sb.buffer.upload_elements(sb.elements);
-	sb.shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
-
-	// load textures
-	for (Sprite& s : sb.sprites) s.texture.load();
-	sb.shader.upload_int("tex",0);
-
-	// coordinate system & transition buffer into next state
-	sb.shader.upload_camera();
+	// load textures & autoswitch
+	for (RTextureTuple& t : sb.textures) t.load();
 	sb.state = (BufferState)(sb.state+sb.auto_stateswitch);
 	// TODO: change auto stateswitch on demand later
 }
@@ -175,24 +176,20 @@ void sprite_buffer_load(SpriteBuffer& sb)
 /*
 	TODO
 */
-void sprite_buffer_render(SpriteBuffer& sb)
+void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 {
-	// prepare shader and bind buffers
-	sb.shader.enable();
-	sb.buffer.bind();
-
 	// iterate sprites
 	for (uint16_t i=0;i<sb.sprites.size();i++) {
 
 		// upload sprite attributes
-		sb.shader.upload_int("row",sb.sprites[i].rows);
-		sb.shader.upload_int("col",sb.sprites[i].columns);
-		sb.shader.upload_vec2("i_tex",glm::vec2(0));
-		sb.shader.upload_matrix("model",sb.sprites[i].transform.model);
+		shader.upload_int("row",sb.sprites[i].rows);
+		shader.upload_int("col",sb.sprites[i].columns);
+		shader.upload_vec2("i_tex",glm::vec2(0));
+		shader.upload_matrix("model",sb.sprites[i].transform.model);
 
 		// draw sprite
-		glBindTexture(GL_TEXTURE_2D,sb.sprites[i].texture.texture);
-		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)(i*6*sizeof(uint32_t)));
+		glBindTexture(GL_TEXTURE_2D,sb.textures[sb.sprites[i].texture_id].texture);
+		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)0);
 	}
 }
 
@@ -210,8 +207,10 @@ sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 void Renderer::update()
 {
 	// iterate sprite buffer
+	spr_shader.enable();
+	spr_buffer.bind();
 	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) {
 		SpriteBuffer& bfr = bfr_sprite[i];
-		routine_sbuffers[bfr.state](bfr);
+		routine_sbuffers[bfr.state](bfr,spr_shader);
 	}
 }

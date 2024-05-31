@@ -51,14 +51,10 @@ struct RTextureTuple
 	const char* path;
 };
 
-// data structure for sprite information
 struct Sprite
 {
-	// fundamentals
 	RTransform2D transform;
-	RTextureTuple texture;
-
-	// attributes
+	uint16_t texture_id;
 	uint8_t rows,columns;
 	uint8_t frames,span;
 };
@@ -66,17 +62,9 @@ struct Sprite
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
-	// objects
-	std::vector<Sprite> sprites;
-
-	// gpu
-	Buffer buffer;
-	Shader shader;
-	// FIXME: is a seperate shader for each SpriteBuffer really necessary? they can all use one shader!
-
 	// data
-	std::vector<float> vertices;
-	std::vector<uint32_t> elements;
+	std::vector<RTextureTuple> textures;
+	std::vector<Sprite> sprites;
 
 	// state
 	BufferState state = RBFR_IDLE;
@@ -93,7 +81,10 @@ public:
 	~Renderer() {  }
 
 	// object adder
-	uint16_t add_sprite(uint8_t bfr_id,glm::vec2 p,float w,float h,const char* t,
+	uint16_t add_sprite(uint8_t bfr_id,const char* texpath);
+
+	// registration
+	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
 			uint8_t r=1,uint8_t c=1,uint8_t f=0,uint8_t s=0);
 
 	// interaction
@@ -104,6 +95,10 @@ public:
 	void update();
 
 public:
+
+	// shaders
+	Buffer spr_buffer;
+	Shader spr_shader;
 
 	// buffers
 	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
