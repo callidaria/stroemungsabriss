@@ -65,7 +65,8 @@ jet_movement_logic rng_flib[] = {
 JaegerJet::JaegerJet()
 {
 	// setup player hitbox indicator
-	index_r2D = Core::gRenderer.add_sprite(0,glm::vec2(0,0),10,10,"./res/hitbox_def.png");
+	index_r2D = Core::gRenderer.add_sprite(0,"./res/hitbox_def.png");
+	Core::gRenderer.register_sprite(0,index_r2D,glm::vec2(0,0),10,10);
 
 	// setup player character visualization
 	index_r3D = Core::gR3D.add("./res/flyfighter.obj","./res/flyfighter_tex.png","./res/none.png",

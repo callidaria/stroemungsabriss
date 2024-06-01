@@ -47,7 +47,8 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 				.texpath = tex_path
 			};
 			sprite_data.push_back(proc);
-			Core::gRenderer.add_sprite(bfr_id,pos,width,height,tex_path);
+			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path);
+			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height);
 		}
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
@@ -76,9 +77,13 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 				.ticks = t
 			};
 			anim_data.push_back(proc);
-			Core::gRenderer.add_sprite(bfr_id,pos,width,height,tex_path,r,c,f,t);
+			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path);
+			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height,r,c,f,t);
 		}
 	}
+
+	// load level & return starting memory index
+	Core::gRenderer.load_buffer_sprites(bfr_id);
 	return out;
 }
 // FIXME: duplicate code

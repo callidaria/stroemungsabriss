@@ -914,8 +914,10 @@ void MenuList::load()
 	slider_shader.upload_camera();
 
 	// difficulty preview spritesheet
-	rid_diffs = Core::gRenderer.add_sprite(0,glm::vec2(950,550),250,50,"./res/menu/diffbanner_colours.png",16,1,30,0);
-	Core::gRenderer.add_sprite(0,glm::vec2(-125,-25),250,50,"./res/menu/diffbanner_annotations.png",16,1,30,0);
+	rid_diffs = Core::gRenderer.add_sprite(0,"./res/menu/diffbanner_colours.png");
+	Core::gRenderer.add_sprite(0,"./res/menu/diffbanner_annotations.png");
+	Core::gRenderer.register_sprite(0,rid_diffs,glm::vec2(950,550),250,50,16,1,30,0);
+	Core::gRenderer.register_sprite(0,rid_diffs+1,glm::vec2(-125,-25),250,50,16,1,30,0);
 
 	// globe render target
 	rid_globe = Core::gR3D.add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",

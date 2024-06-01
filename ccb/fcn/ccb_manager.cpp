@@ -10,7 +10,7 @@
 CCBManager::CCBManager()
 {
 	// create developer mode label
-	Core::gRenderer.add_sprite(0,glm::vec2(1230,690),40,20,"./res/dev.png");
+	//Core::gRenderer.add_sprite(0,glm::vec2(1230,690),40,20,"./res/dev.png");
 
 	// create developer console greetings and initial setup
 	ct.add("Welcome to the CASCABEL shell",glm::vec2(750,console_y+20));

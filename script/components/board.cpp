@@ -97,12 +97,14 @@ void TestArea::load(LoadStorage& lds)
 	// TODO: generalize, maybe board_logic pointer definition too specific and has to be update-general
 
 	// adding test sprites
-	c->sprite_rID = Core::gRenderer.add_sprite(0,glm::vec2(100,100),200,200,"./res/bllt_ffdir.png");
-	Core::gRenderer.add_sprite(0,glm::vec2(100,100),200,200,"./res/bllt_ffdir.png");
+	uint16_t midx = Core::gRenderer.add_sprite(0,"./res/bllt_ffdir.png");
+	Core::gRenderer.register_sprite(0,midx,glm::vec2(100,100),200,200);
 
 	// adding test sprite animations
-	c->anim_rID = Core::gRenderer.add_sprite(0,glm::vec2(100,100),200,200,"./res/continue_dialogue.png",3,2,6,60);
-	Core::gRenderer.add_sprite(0,glm::vec2(100,100),200,200,"./res/test_bullet_anim.png",3,2,6,30);
+	midx = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png");
+	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png");
+	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200,3,2,6,60);
+	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200,3,2,6,60);
 	Core::gRenderer.load_buffer_sprites(0);
 }
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general

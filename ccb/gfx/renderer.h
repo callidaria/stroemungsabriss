@@ -55,6 +55,8 @@ struct Sprite
 {
 	RTransform2D transform;
 	uint16_t texture_id;
+
+	// TODO: the following might be part of the texture not the sprite
 	uint8_t rows,columns;
 	uint8_t frames,span;
 };
