@@ -25,7 +25,30 @@ int main(int argc,char** argv)
 	//Frame::gpu_vsync_on();
 	Core::gFrame.set_refresh_rate(60);
 
+	// register test assets
+	Renderer renderer = Renderer();
+	uint16_t sid = renderer.add_sprite(0,"./res/bllt_ffdir.png");
+	renderer.register_sprite(0,sid,glm::vec2(100,100),100,100);
+	renderer.load_buffer_sprites(0);
+
+	// MAIN LOOP
+	bool run = true;
+	while (run) {
+
+		// frame
+		Core::gFrame.calc_time_delta();
+		Core::gFrame.cpu_vsync();
+		Core::gFrame.print_fps();
+		Core::gFrame.input(run);
+		Frame::clear();
+
+		// update
+		renderer.update();
+		Core::gFrame.update();
+	}
+
 	// LOADERS
+	/*
 	CCBManager ccbm = CCBManager();
 
 	// BUILD SET
@@ -82,6 +105,7 @@ int main(int argc,char** argv)
 
 	// CLOSING
 	Core::gR3D.clear_memory();
+	*/
 	Core::gFrame.vanish();
 	return 0;
 }

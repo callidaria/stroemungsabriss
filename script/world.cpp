@@ -77,4 +77,5 @@ void World::render(bool& running,bool& reboot)
 
 	// render ui
 	ui_master[active_daui]->render(&game_fb,running,reboot);
+	Core::gRenderer.update();
 }
