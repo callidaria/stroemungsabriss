@@ -101,10 +101,10 @@ void TestArea::load(LoadStorage& lds)
 	Core::gRenderer.register_sprite(0,midx,glm::vec2(100,100),200,200);
 
 	// adding test sprite animations
-	midx = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png");
-	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png");
-	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200,3,2,6,60);
-	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200,3,2,6,60);
+	midx = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",3,2,6,60);
+	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png",3,2,6,60);
+	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200);
+	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200);
 	Core::gRenderer.load_buffer_sprites(0);
 }
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general

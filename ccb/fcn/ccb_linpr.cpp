@@ -77,8 +77,8 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 				.ticks = t
 			};
 			anim_data.push_back(proc);
-			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path);
-			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height,r,c,f,t);
+			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path,r,c,f,t);
+			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height);
 		}
 	}
 

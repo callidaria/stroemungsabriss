@@ -30,6 +30,7 @@ struct RTransform2D
 	void scale(float w,float h,glm::vec2 a);
 	inline void rotate(float r) { model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1)); }
 	void rotate(float r,glm::vec2 a);
+	inline void to_origin() { scale(width,height), translate(position); }
 
 	// attributes
 	const glm::vec2 position;
@@ -49,16 +50,18 @@ struct RTextureTuple
 	// data
 	uint32_t texture;
 	const char* path;
+
+	// math
+	uint8_t rows,columns;
+	uint8_t frames,span;
 };
 
+// render entry connected to loaded sprite and individually transformed
 struct Sprite
 {
 	RTransform2D transform;
 	uint16_t texture_id;
-
-	// TODO: the following might be part of the texture not the sprite
-	uint8_t rows,columns;
-	uint8_t frames,span;
+	glm::vec2 floc = glm::vec2(0);
 };
 
 // buffer data to seperately load and display to other buffers
@@ -83,11 +86,10 @@ public:
 	~Renderer() {  }
 
 	// object adder
-	uint16_t add_sprite(uint8_t bfr_id,const char* texpath);
+	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=0,uint8_t s=0);
 
 	// registration
-	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
-			uint8_t r=1,uint8_t c=1,uint8_t f=0,uint8_t s=0);
+	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h);
 
 	// interaction
 	inline void load_buffer_sprites(uint8_t id) { bfr_sprite[id].state = RBFR_LOAD; }

@@ -95,14 +95,31 @@ Renderer::Renderer()
 }
 
 /*
-	TODO
+	!O(1)m /+load -> (public)
 	\param bfr_id: id of sprite buffer to write animation to
-	\param t: path to file containing spritesheet
+	\param texpath: path to file containing spritesheet
+	\param r (default=1): rows on spritesheet
+	\param c (default=1): columns on spritesheet
+	\param f (default=0): number of frames held by spritesheet
+	\param s (default=0): frames the animation takes to fully iterate through all textures
 	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath)
+uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f,uint8_t s)
 {
-	RTextureTuple tex = { .path = texpath };
+	// create sprite source
+	RTextureTuple tex = {
+
+		// source
+		.path = texpath,
+
+		// spritesheet segmentation
+		.rows = r,
+		.columns = c,
+		.frames = f,
+		.span = s
+	};
+
+	// write and return reference id
 	bfr_sprite[bfr_id].textures.push_back(tex);
 	return bfr_sprite[bfr_id].textures.size()-1;
 }
@@ -115,13 +132,8 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath)
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
-	\param r (default=1): rows on spritesheet
-	\param c (default=1): columns on spritesheet
-	\param f (default=0): number of frames held by spritesheet
-	\param s (default=0): frames the animation takes to fully iterate through all textures
 */
-void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
-		uint8_t r,uint8_t c,uint8_t f,uint8_t s)
+void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h)
 {
 	// information setup
 	Sprite sprite = {
@@ -135,13 +147,10 @@ void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float 
 
 		// link sprite to texture
 		.texture_id = tex_id,
-
-		// attributes
-		.rows = r,
-		.columns = c,
-		.frames = f,
-		.span = s
 	};
+
+	// transform and write
+	sprite.transform.to_origin();
 	bfr_sprite[bfr_id].sprites.push_back(sprite);
 }
 
@@ -180,12 +189,14 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 {
 	// iterate sprites
 	for (uint16_t i=0;i<sb.sprites.size();i++) {
+		Sprite& ts = sb.sprites[i];
+		RTextureTuple& tt = sb.textures[ts.texture_id];
 
 		// upload sprite attributes
-		shader.upload_int("row",sb.sprites[i].rows);
-		shader.upload_int("col",sb.sprites[i].columns);
-		shader.upload_vec2("i_tex",glm::vec2(0));
-		shader.upload_matrix("model",sb.sprites[i].transform.model);
+		shader.upload_int("row",tt.rows);
+		shader.upload_int("col",tt.columns);
+		shader.upload_vec2("i_tex",ts.floc);
+		shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
 		glBindTexture(GL_TEXTURE_2D,sb.textures[sb.sprites[i].texture_id].texture);
