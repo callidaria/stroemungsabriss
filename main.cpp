@@ -29,7 +29,7 @@ int main(int argc,char** argv)
 	// register test assets
 	Renderer renderer = Renderer();
 	uint16_t sid = renderer.add_sprite(0,"./res/bllt_ffdir.png");
-	renderer.register_sprite(0,sid,glm::vec2(100,100),100,100);
+	renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
 	renderer.load_buffer_sprites(0);
 
 	// MAIN LOOP

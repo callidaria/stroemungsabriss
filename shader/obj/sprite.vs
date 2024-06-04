@@ -12,10 +12,10 @@ uniform mat4 view = mat4(1.0);
 uniform mat4 proj = mat4(1.0);
 
 // spritesheet rasterization
-uniform int row = 1;				// amount of rows on spritesheet
-uniform int col = 1;				// amount of columns on spritesheet
+uniform int row = 1;			// amount of rows on spritesheet
+uniform int col = 1;			// amount of columns on spritesheet
 uniform vec2 i_tex = vec2(0,0);		// 2D identification of subtexture on spritesheet raster
-uniform float vFlip = 0.0;			// identifies if texture is flipped
+uniform float vFlip = 0.0;		// identifies if texture is flipped
 
 void main()
 {

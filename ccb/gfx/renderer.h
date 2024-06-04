@@ -30,7 +30,7 @@ struct RTransform2D
 	void scale(float w,float h,glm::vec2 a);
 	inline void rotate(float r) { model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1)); }
 	void rotate(float r,glm::vec2 a);
-	inline void to_origin() { scale(width,height), translate(position); }
+	inline void to_origin() { translate(position), scale(width,height); }
 
 	// attributes
 	const glm::vec2 position;

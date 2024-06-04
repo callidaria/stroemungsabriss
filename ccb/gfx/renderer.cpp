@@ -85,8 +85,8 @@ Renderer::Renderer()
 	// setup vertex & element buffer for sprites
 	spr_buffer.add_buffer();
 	spr_buffer.bind();
-	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_VERTEX_REPEAT);
-	spr_buffer.upload_elements(elements,PATTERN_SPRITE_ELEMENT_REPEAT);
+	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_VERTEX_REPEAT*sizeof(float));
+	spr_buffer.upload_elements(elements,PATTERN_SPRITE_ELEMENT_REPEAT*sizeof(uint32_t));
 
 	// setup sprite shader
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
