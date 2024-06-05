@@ -171,16 +171,13 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 }
 
 /*
-	// TODO
+	TODO
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	// load textures & autoswitch
 	for (RTextureTuple& t : sb.textures) t.load();
-	sb.state = (BufferState)(sb.state+sb.auto_stateswitch);
-	// TODO: change auto stateswitch on demand later
+	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 }
-// FIXME: extremely questionable loading processing
 
 /*
 	TODO
@@ -204,7 +201,7 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 	}
 }
 
-// behaviours mapped towards BufferState enumeration
+// behaviours mapped towards bufferstate enumeration
 sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 	sprite_buffer_idle,
 	sprite_buffer_load,
@@ -213,7 +210,7 @@ sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 
 
 /*
-	TODO
+	todo
 */
 void Renderer::update()
 {
@@ -222,6 +219,6 @@ void Renderer::update()
 	spr_buffer.bind();
 	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) {
 		SpriteBuffer& bfr = bfr_sprite[i];
-		routine_sbuffers[bfr.state](bfr,spr_shader);
+		routine_sbuffers[bfr.attribs.state](bfr,spr_shader);
 	}
 }

@@ -64,16 +64,20 @@ struct Sprite
 	glm::vec2 floc = glm::vec2(0);
 };
 
+// attribute structure for all object buffers
+struct BufferAttribs
+{
+	BufferState state = RBFR_IDLE;
+	bool auto_stateswitch = false;
+};
+
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
 	// data
 	std::vector<RTextureTuple> textures;
 	std::vector<Sprite> sprites;
-
-	// state
-	BufferState state = RBFR_IDLE;
-	bool auto_stateswitch = true;
+	BufferAttribs attribs;
 };
 
 
@@ -90,9 +94,6 @@ public:
 
 	// registration
 	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h);
-
-	// interaction
-	inline void load_buffer_sprites(uint8_t id) { bfr_sprite[id].state = RBFR_LOAD; }
 
 	// stages
 	void load();

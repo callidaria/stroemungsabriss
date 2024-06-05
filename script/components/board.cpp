@@ -105,7 +105,8 @@ void TestArea::load(LoadStorage& lds)
 	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png",3,2,6,60);
 	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200);
 	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200);
-	Core::gRenderer.load_buffer_sprites(0);
+	Core::gRenderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
+	Core::gRenderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 }
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general
 

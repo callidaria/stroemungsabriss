@@ -30,7 +30,8 @@ int main(int argc,char** argv)
 	Renderer renderer = Renderer();
 	uint16_t sid = renderer.add_sprite(0,"./res/bllt_ffdir.png");
 	renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
-	renderer.load_buffer_sprites(0);
+	renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
+	renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 
 	// MAIN LOOP
 	bool run = true;

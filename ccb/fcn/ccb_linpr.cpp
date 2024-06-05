@@ -83,7 +83,8 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 	}
 
 	// load level & return starting memory index
-	Core::gRenderer.load_buffer_sprites(bfr_id);
+	Core::gRenderer.bfr_sprite[bfr_id].attribs.state = RBFR_LOAD;
+	Core::gRenderer.bfr_sprite[bfr_id].attribs.auto_stateswitch = true;
 	return out;
 }
 // FIXME: duplicate code
