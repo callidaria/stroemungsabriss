@@ -10,15 +10,6 @@
 constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
 
 
-// description of current buffer state, is it rendering, is it loading, should it be ignored?
-enum BufferState
-{
-	RBFR_IDLE,
-	RBFR_LOAD,
-	RBFR_RENDER,
-	RBFR_STATE_COUNT
-};
-
 // basic functionality of 2D geometry
 struct RTransform2D
 {
@@ -53,15 +44,16 @@ struct RTextureTuple
 
 	// math
 	uint8_t rows,columns;
-	uint8_t frames,span;
+	uint8_t frames;
 };
 
-// render entry connected to loaded sprite and individually transformed
-struct Sprite
+// description of current buffer state, is it rendering, is it loading, should it be ignored?
+enum BufferState
 {
-	RTransform2D transform;
-	uint16_t texture_id;
-	glm::vec2 floc = glm::vec2(0);
+	RBFR_IDLE,
+	RBFR_LOAD,
+	RBFR_RENDER,
+	RBFR_STATE_COUNT
 };
 
 // attribute structure for all object buffers
@@ -71,12 +63,28 @@ struct BufferAttribs
 	bool auto_stateswitch = false;
 };
 
+// render entry connected to loaded sprite and individually transformed
+struct Sprite
+{
+	RTransform2D transform;
+	uint16_t texture_id;
+	glm::vec2 atlas_index = glm::vec2(0);
+};
+
+struct SpriteAnimation
+{
+	uint16_t id;
+	uint8_t cycle_duration;
+	float frame_duration,anim_progression = .0f;
+};
+
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
 	// data
 	std::vector<RTextureTuple> textures;
 	std::vector<Sprite> sprites;
+	std::vector<SpriteAnimation> animations;
 	BufferAttribs attribs;
 };
 
@@ -90,10 +98,11 @@ public:
 	~Renderer() {  }
 
 	// object adder
-	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=0,uint8_t s=0);
+	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
 
 	// registration
-	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h);
+	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
+			bool animate=false,uint8_t s=0);
 
 	// stages
 	void load();

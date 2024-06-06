@@ -67,9 +67,9 @@ Conversation::Conversation(CharacterManager* cm,const char* mm_path)
 	manipulate_background_edges();
 
 	// load continue button animation
-	btn_rindex = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5,30);
+	btn_rindex = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	Core::gRenderer.register_sprite(0,btn_rindex,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-CNV_CREQUEST_WQUAD),
-			CNV_CREQUEST_WQUAD,CNV_CREQUEST_WQUAD);
+			CNV_CREQUEST_WQUAD,CNV_CREQUEST_WQUAD,true,30);
 }
 
 /*

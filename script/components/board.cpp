@@ -101,10 +101,10 @@ void TestArea::load(LoadStorage& lds)
 	Core::gRenderer.register_sprite(0,midx,glm::vec2(100,100),200,200);
 
 	// adding test sprite animations
-	midx = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",3,2,6,60);
-	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png",3,2,6,60);
-	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200);
-	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200);
+	midx = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",3,2,6);
+	Core::gRenderer.add_sprite(0,"./res/test_bullet_anim.png",3,2,6);
+	Core::gRenderer.register_sprite(0,midx,glm::vec2(400,150),200,200,true,60);
+	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200,true,60);
 	Core::gRenderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
 	Core::gRenderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 }

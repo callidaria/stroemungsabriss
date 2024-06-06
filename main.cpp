@@ -29,7 +29,9 @@ int main(int argc,char** argv)
 	// register test assets
 	Renderer renderer = Renderer();
 	uint16_t sid = renderer.add_sprite(0,"./res/bllt_ffdir.png");
+	renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
+	renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
 	renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
 	renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 

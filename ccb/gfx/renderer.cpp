@@ -100,11 +100,11 @@ Renderer::Renderer()
 	\param texpath: path to file containing spritesheet
 	\param r (default=1): rows on spritesheet
 	\param c (default=1): columns on spritesheet
-	\param f (default=0): number of frames held by spritesheet
+	\param f (default=1): number of frames held by spritesheet
 	\param s (default=0): frames the animation takes to fully iterate through all textures
 	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f,uint8_t s)
+uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
 {
 	// create sprite source
 	RTextureTuple tex = {
@@ -115,8 +115,7 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 		// spritesheet segmentation
 		.rows = r,
 		.columns = c,
-		.frames = f,
-		.span = s
+		.frames = f
 	};
 
 	// write and return reference id
@@ -132,8 +131,9 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 	\param p: origin position of added sprite
 	\param w: width of added sprite
 	\param h: height of added sprite
+	TODO extend param description
 */
-void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h)
+void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,bool animate,uint8_t s)
 {
 	// information setup
 	Sprite sprite = {
@@ -152,6 +152,14 @@ void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float 
 	// transform and write
 	sprite.transform.to_origin();
 	bfr_sprite[bfr_id].sprites.push_back(sprite);
+
+	// register animation if requested
+	if (animate)
+		bfr_sprite[bfr_id].animations.push_back({
+			.id = bfr_sprite[bfr_id].sprites.size()-1,
+			.cycle_duration = s,
+			.frame_duration = (float)s/bfr_sprite[bfr_id].textures[tex_id].frames
+		});
 }
 
 
@@ -184,6 +192,22 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 {
+	// iterate animation updates
+	for (SpriteAnimation& ta : sb.animations) {
+		Sprite& ts = sb.sprites[ta.id];
+		RTextureTuple& tt = sb.textures[ts.texture_id];
+
+		// calculate current frame
+		bool inc_anim = ta.anim_progression<ta.cycle_duration;
+		ta.anim_progression += inc_anim-ta.anim_progression*!inc_anim;
+		// TODO: make this update depend on frame update delta
+		//		test with unlocked frames to make sure this is actually working
+
+		// calculate spritesheet location
+		int index = ta.anim_progression/ta.frame_duration;
+		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+	}
+
 	// iterate sprites
 	for (uint16_t i=0;i<sb.sprites.size();i++) {
 		Sprite& ts = sb.sprites[i];
@@ -192,7 +216,7 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 		// upload sprite attributes
 		shader.upload_int("row",tt.rows);
 		shader.upload_int("col",tt.columns);
-		shader.upload_vec2("i_tex",ts.floc);
+		shader.upload_vec2("i_tex",ts.atlas_index);
 		shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
