@@ -1,6 +1,8 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
+#include <thread>
+
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
 #include "../fcn/buffer.h"
@@ -71,6 +73,7 @@ struct Sprite
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 
+// animation entry connected to render entry, holding state of animation
 struct SpriteAnimation
 {
 	uint16_t id;

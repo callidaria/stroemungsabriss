@@ -178,13 +178,20 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
 }
 
+void sprite_load_thread(SpriteBuffer* sb)
+{
+	for (RTextureTuple& t : sb->textures) t.load();
+	sb->attribs.state = (BufferState)(sb->attribs.state+sb->attribs.auto_stateswitch);
+	std::cout << "sync\n";
+}
+
 /*
 	TODO
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	for (RTextureTuple& t : sb.textures) t.load();
-	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
+	std::thread load_thread(sprite_load_thread,&sb);
+	load_thread.detach();
 }
 
 /*
@@ -234,7 +241,7 @@ sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 
 
 /*
-	todo
+	TODO
 */
 void Renderer::update()
 {
