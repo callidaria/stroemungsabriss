@@ -80,6 +80,8 @@ public:
 
 	// getter
 	inline SDL_GLContext create_new_context() { return SDL_GL_CreateContext(m_frame); }
+	inline void make_context_current(SDL_GLContext& context) { SDL_GL_MakeCurrent(m_frame,context); }
+	inline void reset_context() { SDL_GL_MakeCurrent(m_frame,m_context); }
 
 private:
 

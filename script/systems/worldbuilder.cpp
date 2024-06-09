@@ -65,7 +65,7 @@ void Worldbuilder::load()
 /*
 	show_load_progression(LoadStorage*) -> void
 	purpose: display loading screen by a different thread, to visualize load progression
-	// TODO: adjust params
+	TODO: adjust params
 */
 void Worldbuilder::show_load_progression(LoadStorage* lds)
 {
@@ -86,7 +86,7 @@ void Worldbuilder::show_load_progression(LoadStorage* lds)
 	ld_shader.upload_camera();
 
 	// bar borders setup
-	float x_lft = 528.0f,x_rgt = 1232.0f,y_dwn = 42.0f,y_up = 57.0f,brd_offset = 4;
+	float x_lft = 528.0f, x_rgt = 1232.0f, y_dwn = 42.0f, y_up = 57.0f, brd_offset = 4;
 	std::vector<float> ld_bar = {
 		x_lft,y_up, x_lft+brd_offset,y_up, x_lft,y_up, x_lft,y_up-brd_offset,
 		x_rgt,y_up, x_rgt-brd_offset,y_up, x_rgt,y_up, x_rgt,y_up-brd_offset,

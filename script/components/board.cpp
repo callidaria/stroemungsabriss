@@ -97,6 +97,7 @@ void TestArea::load(LoadStorage& lds)
 	// TODO: generalize, maybe board_logic pointer definition too specific and has to be update-general
 
 	// adding test sprites
+	/*
 	uint16_t midx = Core::gRenderer.add_sprite(0,"./res/bllt_ffdir.png");
 	Core::gRenderer.register_sprite(0,midx,glm::vec2(100,100),200,200);
 
@@ -107,6 +108,7 @@ void TestArea::load(LoadStorage& lds)
 	Core::gRenderer.register_sprite(0,midx+1,glm::vec2(150,300),200,200,true,60);
 	Core::gRenderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
 	Core::gRenderer.bfr_sprite[0].attribs.auto_stateswitch = true;
+	*/
 }
 // FIXME: this loading structure results in a lot of repitition and a bad routine in general
 

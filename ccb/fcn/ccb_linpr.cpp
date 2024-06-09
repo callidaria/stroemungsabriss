@@ -16,7 +16,7 @@ CCBLInterpreter::CCBLInterpreter(const char* path)
 uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 {
 	// setup
-	int out = Core::gRenderer.bfr_sprite[bfr_id].sprites.size();
+	//int out = Core::gRenderer.bfr_sprite[bfr_id].sprites.size();
 	std::ifstream lvfile(lvpath,std::ios::in);
 	std::string tline;
 	std::string args[CANM_ARGUMENT_COUNT];
@@ -47,8 +47,10 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 				.texpath = tex_path
 			};
 			sprite_data.push_back(proc);
+			/*
 			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path);
 			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height);
+			*/
 		}
 
 		// pattern for animdef: lh position_x position_y width height texpath rows columns
@@ -77,15 +79,19 @@ uint16_t CCBLInterpreter::load_level(uint8_t bfr_id)
 				.ticks = t
 			};
 			anim_data.push_back(proc);
+			/*
 			uint16_t midx = Core::gRenderer.add_sprite(bfr_id,tex_path,r,c);
 			Core::gRenderer.register_sprite(bfr_id,midx,pos,width,height);
+			*/
 		}
 	}
 
 	// load level & return starting memory index
+	/*
 	Core::gRenderer.bfr_sprite[bfr_id].attribs.state = RBFR_LOAD;
 	Core::gRenderer.bfr_sprite[bfr_id].attribs.auto_stateswitch = true;
-	return out;
+	*/
+	return 0;
 }
 // FIXME: duplicate code
 // FIXME: maybe it is time to retire manager system as it is (it is not very useful)

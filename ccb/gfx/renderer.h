@@ -3,6 +3,7 @@
 
 #include <thread>
 
+#include "../core.h"
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
 #include "../fcn/buffer.h"

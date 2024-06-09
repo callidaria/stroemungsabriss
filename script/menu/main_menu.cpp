@@ -914,10 +914,12 @@ void MenuList::load()
 	slider_shader.upload_camera();
 
 	// difficulty preview spritesheet
+	/*
 	rid_diffs = Core::gRenderer.add_sprite(0,"./res/menu/diffbanner_colours.png",16,1);
 	Core::gRenderer.add_sprite(0,"./res/menu/diffbanner_annotations.png",16,1);
 	Core::gRenderer.register_sprite(0,rid_diffs,glm::vec2(950,550),250,50);
 	Core::gRenderer.register_sprite(0,rid_diffs+1,glm::vec2(-125,-25),250,50);
+	*/
 
 	// globe render target
 	rid_globe = Core::gR3D.add_physical("./res/terra.obj","./res/terra/albedo.jpg","./res/terra/norm.png",
@@ -1199,10 +1201,12 @@ void MenuList::render()
 	anim_prog -= 2*MATH_PI*(anim_prog>2*MATH_PI);
 	float diff_scale = 1.f+glm::sin(anim_prog)*.4f;
 	float diff_rotation = glm::sin(anim_prog*2.f)*45.f;
+	/*
 	Core::gRenderer.bfr_sprite[0].sprites[rid_diffs+1].transform.model = glm::mat4(1.f);
 	Core::gRenderer.bfr_sprite[0].sprites[rid_diffs+1].transform.translate(glm::vec2(1075,575));
 	Core::gRenderer.bfr_sprite[0].sprites[rid_diffs+1].transform.scale(diff_scale,diff_scale);
 	Core::gRenderer.bfr_sprite[0].sprites[rid_diffs+1].transform.rotate(diff_rotation);
+	*/
 	anim_prog += .02f;
 	// TODO: this translation pipeline does not make much sense does it?
 	//		translation still needs some work for it to be feasable for actual utility
@@ -2053,7 +2057,7 @@ MainMenu::MainMenu(CCBManager* ccbm,World* world,float& progress,float pseq)
 	// TODO: this proves it! mouse has to be part of input mapping at once!
 
 	// asset load
-	index_ranim = Core::gRenderer.bfr_sprite[0].sprites.size();
+	//index_ranim = Core::gRenderer.bfr_sprite[0].sprites.size();
 	ccbm->add_lv(0,"lvload/main_menu.ccb");
 
 	// version annotation text setup
@@ -2278,8 +2282,10 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 				glm::vec3(tshift)
 			),HRZ_TITLE_SCALESET
 		);
+	/*
 	Core::gRenderer.bfr_sprite[0].sprites[index_ranim].transform.model = glm::translate(glm::mat4(1),vrt_position)*vrt_scale,
 	Core::gRenderer.bfr_sprite[0].sprites[index_ranim+1].transform.model = glm::translate(glm::mat4(1),hrz_position)*hrz_scale;
+	*/
 	// TODO: rework with the new transform features
 
 	// peripheral switch for input request annotation
@@ -2335,7 +2341,7 @@ void MainMenu::render(FrameBuffer* game_fb,bool& running,bool& reboot)
 	// FIXME: optimize when all the text transitions are done
 
 	// render titles
-	Core::gRenderer.bfr_sprite[0].sprites[index_ranim+1].transform.translate(glm::vec2(0,150*ftransition));
+	//Core::gRenderer.bfr_sprite[0].sprites[index_ranim+1].transform.translate(glm::vec2(0,150*ftransition));
 	/*Core::gRenderer.prepare_sprites();
 	Core::gRenderer.render_sprite_frame(index_ranim,glm::vec2(3,0));
 	Core::gRenderer.render_sprite_frame(index_ranim+1,glm::vec2(0,0));*/

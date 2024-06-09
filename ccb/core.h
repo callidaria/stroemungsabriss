@@ -29,7 +29,7 @@ struct Core
 
 	// engine
 	inline static Frame gFrame = Frame("黄泉先生");
-	inline static Renderer gRenderer;
+	//inline static Renderer gRenderer;
 
 	// replacable
 	inline static Renderer3D gR3D;

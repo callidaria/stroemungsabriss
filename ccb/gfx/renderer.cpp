@@ -174,24 +174,34 @@ typedef void (*sprite_buffer_routine)(SpriteBuffer&,Shader&);
 */
 void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 {
-	// TODO: what even to do here? maintaining checks, idle update, can this be skipped?
+	// TODO: what even do here? maintaining checks, idle update, can this be skipped?
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
-}
-
-void sprite_load_thread(SpriteBuffer* sb)
-{
-	for (RTextureTuple& t : sb->textures) t.load();
-	sb->attribs.state = (BufferState)(sb->attribs.state+sb->attribs.auto_stateswitch);
-	std::cout << "sync\n";
 }
 
 /*
 	TODO
 */
+void sprite_load_thread(SpriteBuffer* sb,Shader* shader)
+{
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT,1);
+	SDL_GLContext load_context = Core::gFrame.create_new_context();
+	Core::gFrame.make_context_current(load_context);
+	shader->enable();
+	for (RTextureTuple& t : sb->textures) t.load();
+	sb->attribs.state = (BufferState)(RBFR_RENDER*sb->attribs.auto_stateswitch);
+	SDL_GL_DeleteContext(load_context);
+	std::cout << "sync\n";
+	Core::gFrame.reset_context();
+}
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	std::thread load_thread(sprite_load_thread,&sb);
+	std::thread load_thread(sprite_load_thread,&sb,&shader);
 	load_thread.detach();
+	sb.attribs.state = RBFR_IDLE;
+	/*
+	for (RTextureTuple& t : sb.textures) t.load();
+	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
+	*/
 }
 
 /*

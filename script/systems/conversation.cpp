@@ -67,9 +67,11 @@ Conversation::Conversation(CharacterManager* cm,const char* mm_path)
 	manipulate_background_edges();
 
 	// load continue button animation
+	/*
 	btn_rindex = Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	Core::gRenderer.register_sprite(0,btn_rindex,glm::vec2(CONVERSATION_SPOKEN_TEXT_X,-CNV_CREQUEST_WQUAD),
 			CNV_CREQUEST_WQUAD,CNV_CREQUEST_WQUAD,true,30);
+	*/
 }
 
 /*
@@ -257,10 +259,12 @@ void Conversation::render(GLuint scene_tex)
 
 		// animate continue request
 		//Core::gRenderer.prepare_sprites();
+		/*
 		Core::gRenderer.bfr_sprite[0].sprites[btn_rindex].transform.model = glm::translate(glm::mat4(1.0f),
 				glm::vec3(btn_position.x+1280
 				* (sltr_count<sltr_target||dltr_count||input_blocked||iwait),
 				btn_position.y+tscroll,0));
+		*/
 		//Core::gRenderer.render_sprite_animated(btn_rindex);
 
 		// increase disengage wait frames when input is blocked
