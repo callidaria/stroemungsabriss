@@ -183,7 +183,6 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_load_thread(SpriteBuffer* sb,Shader* shader)
 {
-	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT,1);
 	SDL_GLContext load_context = Core::gFrame.create_new_context();
 	Core::gFrame.make_context_current(load_context);
 	shader->enable();

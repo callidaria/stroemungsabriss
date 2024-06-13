@@ -85,7 +85,6 @@ struct SpriteAnimation
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
-	// data
 	std::vector<RTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
