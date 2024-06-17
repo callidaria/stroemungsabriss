@@ -108,8 +108,8 @@ public:
 			bool animate=false,uint8_t s=0);
 
 	// stages
-	void load();
 	void update();
+	void close();
 
 public:
 

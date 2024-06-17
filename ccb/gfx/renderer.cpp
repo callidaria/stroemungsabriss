@@ -92,6 +92,9 @@ Renderer::Renderer()
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
+
+	// setup loading thread
+	// TODO
 }
 
 /*
@@ -181,26 +184,10 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 /*
 	TODO
 */
-void sprite_load_thread(SpriteBuffer* sb,Shader* shader)
-{
-	SDL_GLContext load_context = Core::gFrame.create_new_context();
-	Core::gFrame.make_context_current(load_context);
-	shader->enable();
-	for (RTextureTuple& t : sb->textures) t.load();
-	sb->attribs.state = (BufferState)(RBFR_RENDER*sb->attribs.auto_stateswitch);
-	SDL_GL_DeleteContext(load_context);
-	std::cout << "sync\n";
-	Core::gFrame.reset_context();
-}
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	std::thread load_thread(sprite_load_thread,&sb,&shader);
-	load_thread.detach();
-	sb.attribs.state = RBFR_IDLE;
-	/*
 	for (RTextureTuple& t : sb.textures) t.load();
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
-	*/
 }
 
 /*
@@ -261,4 +248,12 @@ void Renderer::update()
 		SpriteBuffer& bfr = bfr_sprite[i];
 		routine_sbuffers[bfr.attribs.state](bfr,spr_shader);
 	}
+}
+
+/*
+	TODO
+*/
+void Renderer::close()
+{
+	// TODO
 }
