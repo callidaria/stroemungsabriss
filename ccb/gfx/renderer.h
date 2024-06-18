@@ -59,6 +59,11 @@ enum BufferState
 	RBFR_STATE_COUNT
 };
 
+struct LoadThreadData
+{
+	bool ld_semaphore = false;
+};
+
 // attribute structure for all object buffers
 struct BufferAttribs
 {

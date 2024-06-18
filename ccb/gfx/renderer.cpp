@@ -72,6 +72,16 @@ void RTransform2D::rotate(float r,glm::vec2 a)
  * TODO: expand
 */
 
+void sprite_load_thread(LoadThreadData* data)
+{
+	// TODO
+}
+
+
+/**
+ * TODO: expand
+*/
+
 /*
 	TODO
 */
