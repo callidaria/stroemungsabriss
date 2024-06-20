@@ -74,7 +74,16 @@ void RTransform2D::rotate(float r,glm::vec2 a)
 
 void sprite_load_thread(LoadThreadData* data)
 {
-	// TODO
+	// TODO: create shared context & setup loader
+
+	// setup waiting
+	std::unique_lock lock(data->mux);
+
+	// load routine
+	while (data->active) {
+		data->cond.wait(lock);
+		std::cout << "sync loading\n";
+	}
 }
 
 
@@ -104,7 +113,8 @@ Renderer::Renderer()
 	spr_shader.upload_camera();
 
 	// setup loading thread
-	// TODO
+	th_sprite_loader = std::thread(sprite_load_thread,&th_ldsprite_data);
+	th_sprite_loader.detach();
 }
 
 /*
@@ -198,6 +208,10 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
 	for (RTextureTuple& t : sb.textures) t.load();
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
+	std::cout << "load stage calling\n";
+	std::unique_lock lock(th_ldsprite_data.mux);
+	lock.unlock();
+	th_ldsprite_data.cond.notify_one();
 }
 
 /*

@@ -2,6 +2,8 @@
 #define CCB_GRAPHICS_RENDERER
 
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "../core.h"
 #include "../mat/toolbox.h"
@@ -59,9 +61,12 @@ enum BufferState
 	RBFR_STATE_COUNT
 };
 
+// data to pass to loader
 struct LoadThreadData
 {
-	bool ld_semaphore = false;
+	std::mutex mux;
+	std::condition_variable cond;
+	bool active = true;
 };
 
 // attribute structure for all object buffers
@@ -124,6 +129,13 @@ public:
 
 	// buffers
 	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
+
+private:
+
+	// threading
+	std::thread th_sprite_loader;
 };
+
+static inline LoadThreadData th_ldsprite_data;
 
 #endif
