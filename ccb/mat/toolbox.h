@@ -2,8 +2,11 @@
 #define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
-#include <chrono>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -63,6 +66,14 @@ struct DebugLogData
 	uint8_t max_name_width = 0;
 };
 
+// data to represent detatched and waiting thread state
+struct ThreadState
+{
+	std::mutex mux;
+	std::condition_variable cond;
+	bool active = true;
+};
+
 class Toolbox
 {
 public:
@@ -81,6 +92,10 @@ public:
 	static void start_debug_logging(DebugLogData &dld,const char* tname);
 	static void add_timekey(DebugLogData &dld,const char* kname);
 	static void flush_debug_logging(DebugLogData dld);
+
+	// threading
+	static void thread_detached_continue(ThreadState& state);
+	static void thread_detached_stop(ThreadState& state);
 
 	// vertex setup
 	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);

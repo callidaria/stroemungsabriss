@@ -72,16 +72,13 @@ void RTransform2D::rotate(float r,glm::vec2 a)
  * TODO: expand
 */
 
-void sprite_load_thread(LoadThreadData* data)
+void sprite_load_thread(ThreadState* data)
 {
 	// TODO: create shared context & setup loader
 
-	// setup waiting
-	std::unique_lock lock(data->mux);
-
 	// load routine
 	while (data->active) {
-		data->cond.wait(lock);
+		Toolbox::thread_detached_stop(th_ldsprite_data);
 		std::cout << "sync loading\n";
 	}
 }
@@ -209,9 +206,7 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 	for (RTextureTuple& t : sb.textures) t.load();
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 	std::cout << "load stage calling\n";
-	std::unique_lock lock(th_ldsprite_data.mux);
-	lock.unlock();
-	th_ldsprite_data.cond.notify_one();
+	Toolbox::thread_detached_continue(th_ldsprite_data);
 }
 
 /*
@@ -265,9 +260,11 @@ sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
 */
 void Renderer::update()
 {
-	// iterate sprite buffer
+	// setup sprite buffers
 	spr_shader.enable();
 	spr_buffer.bind();
+
+	// iterate sprite buffer
 	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) {
 		SpriteBuffer& bfr = bfr_sprite[i];
 		routine_sbuffers[bfr.attribs.state](bfr,spr_shader);
@@ -279,5 +276,6 @@ void Renderer::update()
 */
 void Renderer::close()
 {
-	// TODO
+	th_ldsprite_data.active = false;
+	Toolbox::thread_detached_continue(th_ldsprite_data);
 }

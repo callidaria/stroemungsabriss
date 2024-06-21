@@ -235,6 +235,28 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 }
 
 /*
+	TODO
+*/
+void Toolbox::thread_detached_continue(ThreadState& state)
+{
+	std::unique_lock lock(state.mux);
+	lock.unlock();
+	state.cond.notify_one();
+}
+
+/*
+	TODO
+*/
+void Toolbox::thread_detached_stop(ThreadState& state)
+{
+	std::unique_lock lock(state.mux);
+	state.cond.wait(lock);
+}
+
+// FIXME: todo unique lock creation may abuse performace a bit,
+//		also parameters are many but my patience is limited...
+
+/*
 	PARAMETER DEFINITIONS:
 	vs: reference to vertex array
 	ofs: memory offset of vertex array write. !already rasterized, not an index. actual float offset!

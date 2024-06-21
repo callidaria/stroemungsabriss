@@ -51,6 +51,11 @@ int main(int argc,char** argv)
 		Core::gFrame.update();
 	}
 
+	// vanish
+	renderer.close();
+	Core::gFrame.vanish();
+	return 0;
+
 	// LOADERS
 	/*
 	CCBManager ccbm = CCBManager();
@@ -109,7 +114,7 @@ int main(int argc,char** argv)
 
 	// CLOSING
 	Core::gR3D.clear_memory();
-	*/
 	Core::gFrame.vanish();
 	return 0;
+	*/
 }

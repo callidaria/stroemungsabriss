@@ -1,10 +1,6 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
 #include "../core.h"
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
@@ -59,14 +55,6 @@ enum BufferState
 	RBFR_LOAD,
 	RBFR_RENDER,
 	RBFR_STATE_COUNT
-};
-
-// data to pass to loader
-struct LoadThreadData
-{
-	std::mutex mux;
-	std::condition_variable cond;
-	bool active = true;
 };
 
 // attribute structure for all object buffers
@@ -136,6 +124,6 @@ private:
 	std::thread th_sprite_loader;
 };
 
-static inline LoadThreadData th_ldsprite_data;
+static inline ThreadState th_ldsprite_data;
 
 #endif
