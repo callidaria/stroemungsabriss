@@ -74,14 +74,13 @@ public:
 	// termination
 	void vanish();
 
+	// creation
+	inline SDL_GLContext produce_window_context() { return SDL_GL_CreateContext(m_frame); }
+	inline void make_window_context_current(SDL_GLContext* context) { SDL_GL_MakeCurrent(m_frame,*context); }
+
 	// text input
 	inline void input_start() { SDL_StartTextInput(); }
 	inline void input_stop() { SDL_StopTextInput(); }
-
-	// getter
-	inline SDL_GLContext create_new_context() { return SDL_GL_CreateContext(m_frame); }
-	inline void make_context_current(SDL_GLContext& context) { SDL_GL_MakeCurrent(m_frame,context); }
-	inline void reset_context() { SDL_GL_MakeCurrent(m_frame,m_context); }
 
 private:
 
@@ -96,6 +95,9 @@ private:
 	void kill_controllers();
 
 public:
+
+	// context
+	SDL_GLContext load_context;
 
 	// properties
 	bool event_active = false;

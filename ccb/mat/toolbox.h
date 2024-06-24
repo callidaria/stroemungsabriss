@@ -99,7 +99,8 @@ public:
 
 	// vertex setup
 	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
-	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
+	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
+			glm::vec2 pos,float width,float height);
 	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
 
 	// graphical setup

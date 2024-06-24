@@ -70,7 +70,7 @@ void Worldbuilder::load()
 void Worldbuilder::show_load_progression(LoadStorage* lds)
 {
 	// visualization setup
-	SDL_GLContext context = Core::gFrame.create_new_context();
+	SDL_GLContext context = Core::gFrame.produce_window_context();
 
 	// loading bar setup
 	size_t t_vsize = 0;

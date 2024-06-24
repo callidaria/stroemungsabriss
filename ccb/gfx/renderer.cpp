@@ -72,15 +72,24 @@ void RTransform2D::rotate(float r,glm::vec2 a)
  * TODO: expand
 */
 
-void sprite_load_thread(ThreadState* data)
+void sprite_load_thread(SDL_GLContext* context,ThreadState* data)
 {
-	// TODO: create shared context & setup loader
+	// create shared context & setup loader
+	Core::gFrame.make_window_context_current(context);
 
 	// load routine
-	while (data->active) {
+	while (true) {
+
+		// wait until active loading or termination
 		Toolbox::thread_detached_stop(th_ldsprite_data);
+		if (!data->active) break;
+
+		// sprite loading
 		std::cout << "sync loading\n";
 	}
+
+	// context destruction
+	SDL_GL_DeleteContext(*context);
 }
 
 
@@ -110,7 +119,7 @@ Renderer::Renderer()
 	spr_shader.upload_camera();
 
 	// setup loading thread
-	th_sprite_loader = std::thread(sprite_load_thread,&th_ldsprite_data);
+	th_sprite_loader = std::thread(sprite_load_thread,&Core::gFrame.load_context,&th_ldsprite_data);
 	th_sprite_loader.detach();
 }
 

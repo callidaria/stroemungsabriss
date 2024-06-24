@@ -281,6 +281,7 @@ void Frame::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,3);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,8);
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT,1);
 	SDL_StopTextInput();
 	//SDL_ShowCursor(SDL_DISABLE);
 	// TODO: dynamically hide the cursor, when controller input is mainly used
@@ -298,7 +299,8 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
-	m_context = create_new_context();
+	load_context = produce_window_context();
+	m_context = produce_window_context();
 
 	// opengl setup
 	glewInit();
