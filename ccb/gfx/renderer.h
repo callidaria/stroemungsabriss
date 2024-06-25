@@ -1,6 +1,8 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
+#include <queue>
+
 #include "../core.h"
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
@@ -89,6 +91,13 @@ struct SpriteBuffer
 	BufferAttribs attribs;
 };
 
+// load thread data
+struct SpriteLoadInstrData
+{
+	SDL_GLContext* context;
+	std::queue<SpriteBuffer*> ldbfr;
+};
+
 
 class Renderer
 {
@@ -125,5 +134,6 @@ private:
 };
 
 static inline ThreadState th_ldsprite_data;
+static inline SpriteLoadInstrData th_inst_sprite_data;
 
 #endif
