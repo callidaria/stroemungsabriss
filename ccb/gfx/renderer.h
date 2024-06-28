@@ -10,7 +10,12 @@
 #include "shader.h"
 
 
+// memory
 constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
+constexpr uint8_t RENDERER_TEXTURE_BUFFER_COUNT = 4;
+constexpr uint32_t RENDERER_TEXTURE_BUFFER_WIDTH = 4096;
+constexpr uint32_t RENDERER_TEXTURE_BUFFER_HEIGHT = 4096;
+constexpr uint32_t RENDERER_TEXTURE_BUFFER_SIZE = RENDERER_TEXTURE_BUFFER_WIDTH*RENDERER_TEXTURE_BUFFER_HEIGHT*4;
 
 
 // basic functionality of 2D geometry
@@ -94,7 +99,7 @@ struct SpriteBuffer
 // load thread data
 struct SpriteLoadInstrData
 {
-	SDL_GLContext* context;
+	//SDL_GLContext* context;
 	std::queue<SpriteBuffer*> ldbfr;
 };
 
@@ -126,6 +131,7 @@ public:
 
 	// buffers
 	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
+	//uint32_t texture_buffers[RENDERER_TEXTURE_BUFFER_COUNT];
 
 private:
 

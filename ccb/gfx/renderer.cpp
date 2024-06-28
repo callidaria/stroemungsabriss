@@ -75,8 +75,8 @@ void RTransform2D::rotate(float r,glm::vec2 a)
 void sprite_load_thread(SpriteLoadInstrData* data,ThreadState* state)
 {
 	// create shared context & setup loader
+	//*data->context = SDL_GL_GetCurrentContext();
 	//Core::gFrame.make_window_context_current(data->context);
-	data->context = (SDL_GLContext)SDL_GL_GetCurrentContext();
 
 	// load routine
 	while (true) {
@@ -96,7 +96,7 @@ void sprite_load_thread(SpriteLoadInstrData* data,ThreadState* state)
 	}
 
 	// context destruction
-	SDL_GL_DeleteContext(*data->context);
+	//SDL_GL_DeleteContext(*data->context);
 }
 
 
@@ -125,8 +125,17 @@ Renderer::Renderer()
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
 
+	// setup sprite batches
+	/*
+	glGenBuffers(RENDERER_TEXTURE_BUFFER_COUNT,texture_buffers);
+	for (uint8_t i=0;i<RENDERER_TEXTURE_BUFFER_COUNT;i++) {
+		glBindBuffer(GL_PIXEL_PACK_BUFFER,texture_buffers[i]);
+		glBufferData(GL_PIXEL_PACK_BUFFER,RENDERER_TEXTURE_BUFFER_SIZE,NULL,GL_STREAM_DRAW);
+	}
+	glBindBuffer(GL_PIXEL_PACK_BUFFER,0);
+	*/
+
 	// setup loading thread
-	th_inst_sprite_data = { .context = &Core::gFrame.load_context, };
 	th_sprite_loader = std::thread(sprite_load_thread,&th_inst_sprite_data,&th_ldsprite_data);
 	th_sprite_loader.detach();
 }
@@ -220,11 +229,10 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	/*for (RTextureTuple& t : sb.textures) t.load();
-	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);*/
-	std::cout << "load stage calling\n";
-	th_inst_sprite_data.ldbfr.push(&sb);
-	Toolbox::thread_detached_continue(th_ldsprite_data);
+	for (RTextureTuple& t : sb.textures) t.load();
+	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
+	/*th_inst_sprite_data.ldbfr.push(&sb);
+	Toolbox::thread_detached_continue(th_ldsprite_data);*/
 }
 
 /*
