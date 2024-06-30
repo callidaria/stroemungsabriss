@@ -72,31 +72,34 @@ void RTransform2D::rotate(float r,glm::vec2 a)
  * TODO: expand
 */
 
-void sprite_load_thread(SpriteLoadInstrData* data,ThreadState* state)
+int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr)
 {
 	// create shared context & setup loader
 	//*data->context = SDL_GL_GetCurrentContext();
-	//Core::gFrame.make_window_context_current(data->context);
+	//CombinedLoadData* data = (CombinedLoadData*)ptr;
+	Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
 
 	// load routine
 	while (true) {
 
 		// wait until active loading or termination
-		Toolbox::thread_detached_stop(th_ldsprite_data);
-		if (!state->active) break;
+		//Toolbox::thread_detached_stop(th_ldsprite_data);
+		if (!th_ldsprite_data.active) break;
 
 		// sprite loading
-		while (!data->ldbfr.empty()) {
+		while (!th_inst_sprite_data.ldbfr.empty()) {
 			std::cout << "sync loading\n";
-			SpriteBuffer* bfr = data->ldbfr.front();
+			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
 			for (RTextureTuple& t : bfr->textures) t.load();
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
-			data->ldbfr.pop();
+			th_inst_sprite_data.ldbfr.pop();
 		}
 	}
 
 	// context destruction
-	//SDL_GL_DeleteContext(*data->context);
+	std::cout << "exit load thread & delete context\n";
+	SDL_GL_DeleteContext(*th_inst_sprite_data.context);
+	return 0;
 }
 
 
@@ -136,8 +139,13 @@ Renderer::Renderer()
 	*/
 
 	// setup loading thread
+	th_inst_sprite_data = { .context = &Core::gFrame.load_context };
+	//th_data = { .data = &th_inst_sprite_data,.state = &th_ldsprite_data };
+	/*
 	th_sprite_loader = std::thread(sprite_load_thread,&th_inst_sprite_data,&th_ldsprite_data);
 	th_sprite_loader.detach();
+	*/
+	ld_thread = SDL_CreateThread(sprite_load_thread,"testing thread specification difference",(void*)NULL);
 }
 
 /*
@@ -229,10 +237,12 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
+	/*
 	for (RTextureTuple& t : sb.textures) t.load();
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
-	/*th_inst_sprite_data.ldbfr.push(&sb);
-	Toolbox::thread_detached_continue(th_ldsprite_data);*/
+	*/
+	th_inst_sprite_data.ldbfr.push(&sb);
+	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
 
 /*
@@ -303,5 +313,6 @@ void Renderer::update()
 void Renderer::close()
 {
 	th_ldsprite_data.active = false;
-	Toolbox::thread_detached_continue(th_ldsprite_data);
+	SDL_WaitThread(ld_thread,nullptr);
+	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }

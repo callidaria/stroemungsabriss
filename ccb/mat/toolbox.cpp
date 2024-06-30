@@ -478,6 +478,6 @@ void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corr
 
 	// load texture data from source
 	void* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);
-	//glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
+	glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
 	stbi_image_free(image);
 }

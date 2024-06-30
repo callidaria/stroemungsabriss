@@ -71,7 +71,7 @@ struct ThreadState
 {
 	std::mutex mux;
 	std::condition_variable cond;
-	bool active = true;
+	volatile bool active = true;
 };
 
 class Toolbox

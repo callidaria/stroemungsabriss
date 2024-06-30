@@ -99,9 +99,19 @@ struct SpriteBuffer
 // load thread data
 struct SpriteLoadInstrData
 {
-	//SDL_GLContext* context;
+	SDL_GLContext* context;
 	std::queue<SpriteBuffer*> ldbfr;
+	volatile bool snap_load = false;
 };
+
+// sdl thread testing data structure
+/*
+struct CombinedLoadData
+{
+	SpriteLoadInstrData* data;
+	ThreadState* state;
+};
+*/
 
 
 class Renderer
@@ -136,10 +146,12 @@ public:
 private:
 
 	// threading
-	std::thread th_sprite_loader;
+	//std::thread th_sprite_loader;
+	SDL_Thread* ld_thread;
 };
 
 static inline ThreadState th_ldsprite_data;
 static inline SpriteLoadInstrData th_inst_sprite_data;
+//static inline CombinedLoadData th_data;
 
 #endif

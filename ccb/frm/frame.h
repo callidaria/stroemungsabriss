@@ -97,7 +97,7 @@ private:
 public:
 
 	// context
-	//SDL_GLContext load_context;
+	SDL_GLContext load_context;
 
 	// properties
 	bool event_active = false;
