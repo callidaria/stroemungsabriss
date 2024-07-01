@@ -87,12 +87,15 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 		if (!th_ldsprite_data.active) break;
 
 		// sprite loading
-		while (!th_inst_sprite_data.ldbfr.empty()) {
+		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
 			std::cout << "sync loading\n";
 			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
+			std::cout << "loading textures: " + (unsigned int)bfr->textures.size() + '\n';
+
 			for (RTextureTuple& t : bfr->textures) t.load();
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
 			th_inst_sprite_data.ldbfr.pop();
+			th_inst_sprite_data.snap_load = !th_inst_sprite_data.ldbfr.empty();
 		}
 	}
 
@@ -242,6 +245,7 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 	*/
 	th_inst_sprite_data.ldbfr.push(&sb);
+	th_inst_sprite_data.snap_load = true;
 	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
 
