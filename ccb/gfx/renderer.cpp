@@ -80,6 +80,8 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 	Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
 
 	// load routine
+	th_inst_sprite_data.spr_shader->enable();
+	th_inst_sprite_data.spr_buffer->bind();
 	while (true) {
 
 		// wait until active loading or termination
@@ -88,9 +90,8 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 
 		// sprite loading
 		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
-			std::cout << "sync loading\n";
 			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
-			std::cout << "loading textures: " + (unsigned int)bfr->textures.size() + '\n';
+			std::cout << "loading textures: " << (unsigned int)bfr->textures.size() << '\n';
 
 			for (RTextureTuple& t : bfr->textures) t.load();
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
@@ -142,7 +143,11 @@ Renderer::Renderer()
 	*/
 
 	// setup loading thread
-	th_inst_sprite_data = { .context = &Core::gFrame.load_context };
+	th_inst_sprite_data = {
+		.context = &Core::gFrame.load_context,
+		.spr_buffer = &spr_buffer,
+		.spr_shader = &spr_shader
+	};
 	//th_data = { .data = &th_inst_sprite_data,.state = &th_ldsprite_data };
 	/*
 	th_sprite_loader = std::thread(sprite_load_thread,&th_inst_sprite_data,&th_ldsprite_data);
@@ -244,6 +249,7 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 	for (RTextureTuple& t : sb.textures) t.load();
 	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 	*/
+	std::cout << "sync load\n";
 	th_inst_sprite_data.ldbfr.push(&sb);
 	th_inst_sprite_data.snap_load = true;
 	//Toolbox::thread_detached_continue(th_ldsprite_data);

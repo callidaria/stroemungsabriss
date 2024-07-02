@@ -100,18 +100,11 @@ struct SpriteBuffer
 struct SpriteLoadInstrData
 {
 	SDL_GLContext* context;
+	Buffer* spr_buffer;
+	Shader* spr_shader;
 	std::queue<SpriteBuffer*> ldbfr;
 	volatile bool snap_load = false;
 };
-
-// sdl thread testing data structure
-/*
-struct CombinedLoadData
-{
-	SpriteLoadInstrData* data;
-	ThreadState* state;
-};
-*/
 
 
 class Renderer
