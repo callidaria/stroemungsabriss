@@ -94,6 +94,7 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 			std::cout << "loading textures: " << (unsigned int)bfr->textures.size() << '\n';
 
 			for (RTextureTuple& t : bfr->textures) t.load();
+			SDL_CondSignal(th_gpu_write_condition);
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
 			th_inst_sprite_data.ldbfr.pop();
 			th_inst_sprite_data.snap_load = !th_inst_sprite_data.ldbfr.empty();
@@ -245,13 +246,15 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	/*
-	for (RTextureTuple& t : sb.textures) t.load();
-	sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
-	*/
-	std::cout << "sync load\n";
 	th_inst_sprite_data.ldbfr.push(&sb);
 	th_inst_sprite_data.snap_load = true;
+
+	SDL_LockMutex(th_loadlock);
+	SDL_CondWait(th_gpu_write_condition,th_loadlock);
+	for (RTextureTuple& t : sb.textures) t.load();
+	SDL_UnlockMutex(th_loadlock);
+	std::cout << "sync load\n";
+	//sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
 
@@ -324,5 +327,7 @@ void Renderer::close()
 {
 	th_ldsprite_data.active = false;
 	SDL_WaitThread(ld_thread,nullptr);
+	SDL_DestroyMutex(th_loadlock);
+	SDL_DestroyCond(th_gpu_write_condition);
 	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
