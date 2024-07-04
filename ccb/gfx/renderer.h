@@ -147,6 +147,10 @@ static inline ThreadState th_ldsprite_data;
 static inline SpriteLoadInstrData th_inst_sprite_data;
 //static inline CombinedLoadData th_data;
 
+/*
 static inline SDL_mutex* th_loadlock = SDL_CreateMutex();
 static inline SDL_cond* th_gpu_write_condition = SDL_CreateCond();
+*/
+
+//static inline SDL_sem* th_lockdata = SDL_CreateSemaphore(1);
 #endif

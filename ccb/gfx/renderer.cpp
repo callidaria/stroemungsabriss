@@ -77,6 +77,8 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 	// create shared context & setup loader
 	//*data->context = SDL_GL_GetCurrentContext();
 	//CombinedLoadData* data = (CombinedLoadData*)ptr;
+
+	// RESTORE!
 	Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
 
 	// load routine
@@ -87,17 +89,30 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 		// wait until active loading or termination
 		//Toolbox::thread_detached_stop(th_ldsprite_data);
 		if (!th_ldsprite_data.active) break;
+		//Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
 
 		// sprite loading
 		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
 			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
 			std::cout << "loading textures: " << (unsigned int)bfr->textures.size() << '\n';
 
+			//SDL_SemWait(th_lockdata);
+
+			/*
+			SDL_LockMutex(th_loadlock);
+			SDL_CondWait(th_gpu_write_condition,th_loadlock);
+			*/
 			for (RTextureTuple& t : bfr->textures) t.load();
-			SDL_CondSignal(th_gpu_write_condition);
+			//SDL_UnlockMutex(th_loadlock);
+			//SDL_CondSignal(th_gpu_write_condition);
+
+			//SDL_SemPost(th_lockdata);
+
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
 			th_inst_sprite_data.ldbfr.pop();
 			th_inst_sprite_data.snap_load = !th_inst_sprite_data.ldbfr.empty();
+			//Core::gFrame.make_window_context_current(NULL);
+			std::cout << "finished gpu write\n";
 		}
 	}
 
@@ -249,11 +264,19 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 	th_inst_sprite_data.ldbfr.push(&sb);
 	th_inst_sprite_data.snap_load = true;
 
+	//SDL_SemWait(th_lockdata);
+
+	/*
 	SDL_LockMutex(th_loadlock);
 	SDL_CondWait(th_gpu_write_condition,th_loadlock);
+	*/
 	for (RTextureTuple& t : sb.textures) t.load();
-	SDL_UnlockMutex(th_loadlock);
+	//SDL_CondSignal(th_gpu_write_condition);
+	//SDL_UnlockMutex(th_loadlock);
 	std::cout << "sync load\n";
+
+	//SDL_SemPost(th_lockdata);
+
 	//sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
 	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
@@ -327,7 +350,11 @@ void Renderer::close()
 {
 	th_ldsprite_data.active = false;
 	SDL_WaitThread(ld_thread,nullptr);
+	/*
 	SDL_DestroyMutex(th_loadlock);
 	SDL_DestroyCond(th_gpu_write_condition);
+	*/
+
+	//SDL_DestroySemaphore(th_lockdata);
 	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
