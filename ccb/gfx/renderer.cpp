@@ -94,25 +94,12 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 		// sprite loading
 		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
 			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
-			std::cout << "loading textures: " << (unsigned int)bfr->textures.size() << '\n';
 
-			//SDL_SemWait(th_lockdata);
-
-			/*
-			SDL_LockMutex(th_loadlock);
-			SDL_CondWait(th_gpu_write_condition,th_loadlock);
-			*/
 			for (RTextureTuple& t : bfr->textures) t.load();
-			//SDL_UnlockMutex(th_loadlock);
-			//SDL_CondSignal(th_gpu_write_condition);
-
-			//SDL_SemPost(th_lockdata);
 
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
 			th_inst_sprite_data.ldbfr.pop();
 			th_inst_sprite_data.snap_load = !th_inst_sprite_data.ldbfr.empty();
-			//Core::gFrame.make_window_context_current(NULL);
-			std::cout << "finished gpu write\n";
 		}
 	}
 
@@ -263,22 +250,7 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
 	th_inst_sprite_data.ldbfr.push(&sb);
 	th_inst_sprite_data.snap_load = true;
-
-	//SDL_SemWait(th_lockdata);
-
-	/*
-	SDL_LockMutex(th_loadlock);
-	SDL_CondWait(th_gpu_write_condition,th_loadlock);
-	*/
 	for (RTextureTuple& t : sb.textures) t.load();
-	//SDL_CondSignal(th_gpu_write_condition);
-	//SDL_UnlockMutex(th_loadlock);
-	std::cout << "sync load\n";
-
-	//SDL_SemPost(th_lockdata);
-
-	//sb.attribs.state = (BufferState)(sb.attribs.state+sb.attribs.auto_stateswitch);
-	//Toolbox::thread_detached_continue(th_ldsprite_data);
 }
 
 /*
