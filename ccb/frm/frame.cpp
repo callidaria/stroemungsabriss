@@ -300,10 +300,7 @@ void Frame::setup(const char* title,GLuint x,GLuint y,int16_t width,int16_t heig
 	// creating window
 	m_frame = SDL_CreateWindow(title,x,y,width,height,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,fs);
-	load_context = produce_window_context();
-	m_context = produce_window_context();
-	make_window_context_current(&m_context);
-	// TODO: find out if (when created in this order) m_context has to be made current even
+	m_context = SDL_GL_CreateContext(m_frame);
 
 	// opengl setup
 	glewInit();

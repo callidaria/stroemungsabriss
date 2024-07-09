@@ -103,12 +103,6 @@ public:
 			glm::vec2 pos,float width,float height);
 	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
 
-	// graphical setup
-	static void load_texture(uint32_t tex,const char* path,bool corrected=false);
-	static void load_texture(uint32_t tex,const char* path,float bias,bool corrected=false);
-	static void load_texture_unfiltered(uint32_t tex,const char* path,bool corrected=false);
-	static void load_texture_repeat(uint32_t tex,const char* path,bool corrected=false);
-
 	// inline definition
 	static inline std::vector<float> create_sprite_canvas() {
 		return {
@@ -125,7 +119,6 @@ public:
 private:
 
 	// helpers
-	static void load_texture_function_head(uint32_t tex,const char* path,bool corrected);
 	static inline std::string produce_logging_cell(std::string content,std::string col,uint8_t len)
 		{ return "| "+col+content+std::string(len-content.length(),' ')+"\033[0m |"; }
 };

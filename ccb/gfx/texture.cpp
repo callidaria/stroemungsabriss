@@ -3,9 +3,31 @@
 /*
 	TODO
 */
-Texture::Texture(const char* texpath)
+Texture::Texture(const char* path,bool corrected)
 {
-	// TODO
+	// setup
+	image.format = GL_RGBA+corrected*0x7338;
+	glGenTextures(1,&texture);
+
+	// load texture data from source
+	image.data = stbi_load(path,&image.width,&image.height,0,STBI_rgb_alpha);
+}
+
+/*
+	TODO
+*/
+void Texture::gpu_upload()
+{
+	bind();
+	glTexImage2D(GL_TEXTURE_2D,0,image.format,image.width,image.height,0,GL_RGBA,GL_UNSIGNED_BYTE,image.data);
+}
+
+/*
+	TODO
+*/
+void Texture::cleanup()
+{
+	stbi_image_free(image.data);
 }
 
 /*
@@ -89,7 +111,7 @@ void Texture::set_texture_parameter_clamp_to_border()
 	!O(1) /+load -> (static)
 	purpose: define texture as repeatable
 */
-void Texture::set_texture_parameter_texture_repeat()
+void Texture::set_texture_parameter_repeat()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
