@@ -11,6 +11,7 @@
 #include "font.h"
 
 #include "../gfx/shader.h"
+#include "../gfx/texture.h"
 #include "../mat/camera2d.h"
 
 class Text
@@ -30,7 +31,7 @@ public:
 	inline void clear() { ibv.clear(); }
 
 	// preparation
-	inline void texture() { Toolbox::load_texture(ftexture,font.tp); }
+	void texture();
 	inline void enable_shader() { sT.enable(); }
 	void load();
 	void prepare();
@@ -56,7 +57,7 @@ private:
 
 	// vertices & texturing
 	std::vector<float> ibv;
-	GLuint ftexture;
+	Texture ftexture;
 };
 
 #endif

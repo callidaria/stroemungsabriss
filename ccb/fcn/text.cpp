@@ -9,7 +9,7 @@ Text::Text(Font f)
 	:font(f)
 {
 	buffer.add_buffer();
-	glGenTextures(1,&ftexture);
+	ftexture = Texture(f.tp);
 }
 
 /*
@@ -109,6 +109,17 @@ glm::vec2 Text::add(std::string s,glm::vec2 p,float bwdt,float nline_offset)
 
 	// return cursor position
 	return glm::vec2(crr_width,p.y);
+}
+
+/*
+	TODO
+*/
+void Text::texture()
+{
+	ftexture.gpu_upload();
+	Texture::set_texture_parameter_clamp_to_edge();
+	Texture::set_texture_parameter_linear_mipmap();
+	ftexture.cleanup();
 }
 
 /*
