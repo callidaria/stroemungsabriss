@@ -3,11 +3,12 @@
 
 #include <queue>
 
-#include "../core.h"
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
 #include "../fcn/buffer.h"
+
 #include "shader.h"
+#include "texture.h"
 
 
 // memory
@@ -41,6 +42,7 @@ struct RTransform2D
 };
 
 // texture duality structure containing source and data
+/*
 struct RTextureTuple
 {
 	// utility
@@ -53,6 +55,18 @@ struct RTextureTuple
 	// math
 	uint8_t rows,columns;
 	uint8_t frames;
+};*/
+
+struct TextureAtlasTuple
+{
+	uint8_t rows,columns;
+	uint16_t frames;
+};
+
+struct RTextureTuple
+{
+	Texture texture;
+	TextureAtlasTuple atlas;
 };
 
 // description of current buffer state, is it rendering, is it loading, should it be ignored?
@@ -90,6 +104,7 @@ struct SpriteAnimation
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
+	//std::vector<RTextureTuple> textures;
 	std::vector<RTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
@@ -147,10 +162,4 @@ static inline ThreadState th_ldsprite_data;
 static inline SpriteLoadInstrData th_inst_sprite_data;
 //static inline CombinedLoadData th_data;
 
-/*
-static inline SDL_mutex* th_loadlock = SDL_CreateMutex();
-static inline SDL_cond* th_gpu_write_condition = SDL_CreateCond();
-*/
-
-//static inline SDL_sem* th_lockdata = SDL_CreateSemaphore(1);
 #endif

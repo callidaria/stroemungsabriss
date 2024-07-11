@@ -1,6 +1,8 @@
 #ifndef CCB_GRAPHICS_TEXTURE
 #define CCB_GRAPHICS_TEXTURE
 
+#include "../mat/toolbox.h"
+
 // information about image data
 struct ImageData
 {
@@ -14,7 +16,7 @@ class Texture
 public:
 
 	// construction
-	Texture(const char* path);
+	Texture(const char* path,bool corrected=false);
 	~Texture() {  }
 
 	// activation

@@ -79,7 +79,7 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 	//CombinedLoadData* data = (CombinedLoadData*)ptr;
 
 	// RESTORE!
-	Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
+	//Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
 
 	// load routine
 	th_inst_sprite_data.spr_shader->enable();
@@ -95,7 +95,7 @@ int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr
 		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
 			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
 
-			for (RTextureTuple& t : bfr->textures) t.load();
+			//for (RTextureTuple& t : bfr->textures) t.load();
 
 			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
 			th_inst_sprite_data.ldbfr.pop();
@@ -146,17 +146,19 @@ Renderer::Renderer()
 	*/
 
 	// setup loading thread
+	/*
 	th_inst_sprite_data = {
 		.context = &Core::gFrame.load_context,
 		.spr_buffer = &spr_buffer,
 		.spr_shader = &spr_shader
 	};
+	*/
 	//th_data = { .data = &th_inst_sprite_data,.state = &th_ldsprite_data };
 	/*
 	th_sprite_loader = std::thread(sprite_load_thread,&th_inst_sprite_data,&th_ldsprite_data);
 	th_sprite_loader.detach();
 	*/
-	ld_thread = SDL_CreateThread(sprite_load_thread,"testing thread specification difference",(void*)NULL);
+	//ld_thread = SDL_CreateThread(sprite_load_thread,"testing thread specification difference",(void*)NULL);
 }
 
 /*
@@ -172,6 +174,7 @@ Renderer::Renderer()
 uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
 {
 	// create sprite source
+	/*
 	RTextureTuple tex = {
 
 		// source
@@ -182,9 +185,22 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 		.columns = c,
 		.frames = f
 	};
+	*/
+	RTextureTuple tuple = {
+
+		// source
+		.texture = Texture(texpath),
+
+		// spritesheet segmentation
+		.atlas = {
+			.rows = r,
+			.columns = c,
+			.frames = f
+		}
+	};
 
 	// write and return reference id
-	bfr_sprite[bfr_id].textures.push_back(tex);
+	bfr_sprite[bfr_id].textures.push_back(tuple);
 	return bfr_sprite[bfr_id].textures.size()-1;
 }
 
@@ -223,7 +239,7 @@ void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float 
 		bfr_sprite[bfr_id].animations.push_back({
 			.id = bfr_sprite[bfr_id].sprites.size()-1,
 			.cycle_duration = s,
-			.frame_duration = (float)s/bfr_sprite[bfr_id].textures[tex_id].frames
+			.frame_duration = (float)s/bfr_sprite[bfr_id].textures[tex_id].atlas.frames
 		});
 }
 
@@ -250,7 +266,13 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
 	th_inst_sprite_data.ldbfr.push(&sb);
 	th_inst_sprite_data.snap_load = true;
-	for (RTextureTuple& t : sb.textures) t.load();
+	for (RTextureTuple& t : sb.textures) {
+		t.texture.gpu_upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		t.texture.generate_mipmap();
+		t.texture.cleanup();
+	}
 }
 
 /*
@@ -271,7 +293,7 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 
 		// calculate spritesheet location
 		int index = ta.anim_progression/ta.frame_duration;
-		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+		ts.atlas_index = glm::vec2(index%tt.atlas.columns,index/tt.atlas.columns);
 	}
 
 	// iterate sprites
@@ -280,13 +302,14 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 		RTextureTuple& tt = sb.textures[ts.texture_id];
 
 		// upload sprite attributes
-		shader.upload_int("row",tt.rows);
-		shader.upload_int("col",tt.columns);
+		shader.upload_int("row",tt.atlas.rows);
+		shader.upload_int("col",tt.atlas.columns);
 		shader.upload_vec2("i_tex",ts.atlas_index);
 		shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		glBindTexture(GL_TEXTURE_2D,sb.textures[sb.sprites[i].texture_id].texture);
+		//glBindTexture(GL_TEXTURE_2D,sb.textures[sb.sprites[i].texture_id].texture);
+		sb.textures[sb.sprites[i].texture_id].texture.bind();
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)0);
 	}
 }

@@ -201,14 +201,3 @@ int32_t Shader::handle_index_location_by_name(const char* name)
 	glEnableVertexAttribArray(index);
 	return index;
 }
-
-/*
-	upload_camera(Camera3D) -> void
-	cam3d: camera to upload as uniform to shader program
-	purpose: upload relevant camera matrices
-*/
-void Shader::upload_camera(Camera3D cam3d)
-{
-	upload_matrix("view",cam3d.view3D);
-	upload_matrix("proj",cam3d.proj3D);
-}
