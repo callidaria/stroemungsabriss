@@ -14,26 +14,24 @@
 */
 Frame::Frame(const char* title)
 {
-	// import global variables
-	Init("config.ini");
-
 	// initializing
+	Init::run_init();
 	init();
 
 	// screen information
 	SDL_Rect dim_screen;
-	get_screen(Init::iConfig[FRAME_DISPLAY_ID],&dim_screen);
+	get_screen(Init::correlate_variable(FRAME_DISPLAY_IDENTIFIER),&dim_screen);
 
 	// save screen dimension
-	w_res = Init::iConfig[FRAME_RESOLUTION_WIDTH], h_res = Init::iConfig[FRAME_RESOLUTION_HEIGHT];
-	// TODO: in setup
+	w_res = Init::correlate_variable(RESOLUTION_WIDTH_IDENTIFIER);
+	h_res = Init::correlate_variable(RESOLUTION_HEIGHT_IDENTIFIER);
 
 	// setup routine
 	setup(
-			title,dim_screen.x+100,dim_screen.y+100,
-			Init::iConfig[FRAME_RESOLUTION_WIDTH],Init::iConfig[FRAME_RESOLUTION_HEIGHT],
-			(SDL_WindowFlags)Init::iConfig[FRAME_SET_FULLSCREEN]
-		);
+		title,
+		dim_screen.x+100,dim_screen.y+100,w_res,h_res,
+		(SDL_WindowFlags)Init::correlate_variable(FRAME_FULLSCREEN_IDENTIFIER)
+	);
 }
 
 /*
@@ -180,7 +178,8 @@ void Frame::input(bool &running)
 
 	// process events and set input activity
 	event_active = false;
-	while (SDL_PollEvent(&m_fe)) {
+	while (SDL_PollEvent(&m_fe))
+	{
 		event_active = true;
 		bool relevant_motion = false;
 
@@ -212,8 +211,7 @@ void Frame::input(bool &running)
 		case SDL_CONTROLLERAXISMOTION:
 			motion = SDL_GameControllerGetAxis(m_gc[0],(SDL_GameControllerAxis)m_fe.caxis.axis);
 			xb[0].xba[m_fe.caxis.axis] = motion;
-			relevant_motion = (abs(motion)>Init::iConfig[InitVariable::GENERAL_PERIPHERAL_AXIS_DEADZONE])
-					|| relevant_motion;
+			relevant_motion = (abs(motion)>axis_deadzone)||relevant_motion;
 			break;
 		case SDL_CONTROLLERBUTTONDOWN: xb[0].xbb[m_fe.cbutton.button] = true;
 			break;

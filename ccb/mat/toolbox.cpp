@@ -1,6 +1,27 @@
 #include "toolbox.h"
 
 /*
+	!O(n) .filesize /function -> (static)
+	purpose: copy file data to a new location
+	\param origin: path to file to copy from
+	\param dest: destination path of new file
+*/
+void Toolbox::copy_file(const char* origin,const char* dest)
+{
+	// open files
+	std::ifstream read_file(origin,std::ios::in);
+	std::ofstream write_file(dest,std::ios::app);
+
+	// write file content
+	std::string line;
+	while (getline(read_file,line)) write_file << line << '\n';
+
+	// close files
+	read_file.close();
+	write_file.close();
+}
+
+/*
 	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static) !O(n)
 	purpose: load object from file
 	\param path: path to .obj file

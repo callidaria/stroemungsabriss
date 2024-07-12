@@ -1,16 +1,24 @@
 #ifndef CCB_FEATURE_INITIALIZATION
 #define CCB_FEATURE_INITIALIZATION
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstring>
-#include <vector>
+#include "../mat/toolbox.h"
 
 
+// frame resolution preset translation
 constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
+constexpr char* RESOLUTION_PRESET_IDENTIFIER = "iFrameResolutionPreset";
+constexpr char* RESOLUTION_WIDTH_IDENTIFIER = "vFrameResolutionWidth";
+constexpr char* RESOLUTION_HEIGHT_IDENTIFIER = "vFrameResolutionHeight";
+
+// frame variables correlation
+constexpr char* FRAME_FULLSCREEN_IDENTIFIER = "bFrameFullscreen";
+constexpr char* FRAME_DISPLAY_IDENTIFIER = "iFrameTargetMonitor";
+
+// input variable correlation
+constexpr char* PERIPHERAL_DEADZONE_IDENTIFIER = "iGeneralPeripheralAxisDeadzone";
 
 
+/*
 struct InitVariableInfo {
 	const char* name;
 	const bool restart_system_on_change;
@@ -63,21 +71,24 @@ enum InitVariable
 	VARIABLE_KEY_LENGTH,
 	VARIABLE_ERROR = VARIABLE_KEY_LENGTH
 };
+*/
+// DEPRECATED: key-value mapping has replaced previous variable handling
 
 class Init
 {
 public:
 
-	Init(const char* path);
-	static uint16_t find_iKey(const char* key);
+	// interaction with initialization data structure
+	static void run_init();
+	static inline const uint32_t& correlate_variable(std::string key) { return iConfig[key]; };
 	static void write_changes();
 
 public:
 
 	// constant collections
-	static inline uint32_t iConfig[InitVariable::VARIABLE_KEY_LENGTH];
+	static std::map<std::string,uint32_t> iConfig;
 
-private:
+public:
 
 	// preset translation
 	static inline uint16_t resolutionWidthPresets[AMOUNT_RESOLUTION_PRESETS] = { 1280,1600,1920 };

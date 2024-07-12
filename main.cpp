@@ -11,8 +11,10 @@
 #include "script/systems/worldbuilder.h"
 */
 
+/*
 #define MVMT_SPEED 4
 #define BUILD_DEV_MODE 1
+*/
 
 int main(int argc,char** argv)
 {
@@ -29,19 +31,17 @@ int main(int argc,char** argv)
 	//Core::gFrame.set_refresh_rate(60);
 
 	// register test assets
-	/*
 	uint16_t sid = Core::gRenderer.add_sprite(0,"./res/bllt_ffdir.png");
 	Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	Core::gRenderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
 	Core::gRenderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
 	Core::gRenderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
 	Core::gRenderer.bfr_sprite[0].attribs.auto_stateswitch = true;
-	*/
 
 	// MAIN LOOP
 	bool run = true;
-	while (run) {
-
+	while (run)
+	{
 		// frame
 		//Core::gFrame.calc_time_delta();
 		//Core::gFrame.cpu_vsync();
@@ -55,7 +55,7 @@ int main(int argc,char** argv)
 	}
 
 	// vanish
-	//Core::gRenderer.close();
+	Core::gRenderer.close();
 	Core::gFrame.vanish();
 	return 0;
 

@@ -1,17 +1,13 @@
 #ifndef CCB_FRAME_SELFTITLED
 #define CCB_FRAME_SELFTITLED
 
-#include <thread>
-#include <chrono>
-#include <string>
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <AL/alc.h>
 
-#include "../fcn/init.h"
 #include "../mat/toolbox.h"
+#include "../fcn/init.h"
 
+
+// input
 constexpr uint16_t KEYBOARD_INPUT_RANGE = 285;
 constexpr uint8_t MOUSE_BUTTON_INPUT_RANGE = 5;
 constexpr uint8_t CONTROLLER_AXIS_INPUT_RANGE = 6;
@@ -19,6 +15,7 @@ constexpr uint8_t CONTROLLER_BUTTON_INPUT_RANGE = 22;
 
 // timing
 constexpr double FRAME_REFRATE_DEFAULT_DELTA = 1./60.;
+
 
 struct Keyboard
 {
@@ -118,6 +115,9 @@ private:
 
 	// dimensions
 	uint32_t w_res,h_res;
+
+	// input
+	const uint32_t& axis_deadzone = Init::correlate_variable(PERIPHERAL_DEADZONE_IDENTIFIER);
 
 	// time & vsync
 	std::chrono::steady_clock::time_point past_ticks,curr_ticks = std::chrono::steady_clock::now(),

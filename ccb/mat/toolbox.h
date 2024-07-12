@@ -2,7 +2,10 @@
 #define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
+#include <string>
 #include <vector>
+#include <map>
+#include <fstream>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -77,6 +80,9 @@ struct ThreadState
 class Toolbox
 {
 public:
+
+	// files
+	static void copy_file(const char* origin,const char* dest);
 
 	// loader
 	static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
