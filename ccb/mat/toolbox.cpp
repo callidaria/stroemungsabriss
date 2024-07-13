@@ -31,6 +31,7 @@ void Toolbox::copy_file(const char* origin,const char* dest)
 	\param rot: direct modification of vertex rotation around the object's origin point#
 	\returns amount of written vertices (vertices NOT values)
 */
+/*
 uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 		float scl,glm::vec3 rot)
 {
@@ -132,6 +133,7 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 
 	}
 	return out;
 }
+*/
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
 
 /*
@@ -140,8 +142,10 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 
 	b: second vector, returned degrees from first vector
 	returns: angle between vectors in radians
 */
+/*
 float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 { return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
+*/
 
 /*
 	transform_vector(vec3&,vec3,float,vec3) -> void (static)
@@ -149,11 +153,13 @@ float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 	scl: multiplicative modification of vector length
 	purpose: full vector transformation
 */
+/*
 void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	rotate_vector(ov,rot);
 	ov *= scl,ov += pos;
 }
+*/
 
 /*
 	rotate_vector(vec3&,vec3) -> void (static)
@@ -161,12 +167,14 @@ void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 r
 	rot: rotation of vector, without directional reset
 	purpose: 3D vector rotation
 */
+/*
 void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 {
 	ov = glm::rotate(ov,glm::radians(rot.x),glm::vec3(1,0,0));
 	ov = glm::rotate(ov,glm::radians(rot.y),glm::vec3(0,1,0));
 	ov = glm::rotate(ov,glm::radians(rot.z),glm::vec3(0,0,1));
 }
+*/
 
 /*
 	!O(1)b /+function -> (public,static)
@@ -194,12 +202,14 @@ void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 	\param tname: title of debug log, to describe output information to recognize their allegiance
 */
+/*
 void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
 {
 	dld.task_name = tname;
 	dld.last_ticks = std::chrono::steady_clock::now();
 	printf("\033[1;35mprocessing -> %s\033[0m",tname);
 }
+*/
 
 /*
 	add_timekey(DebugLogData&,const char*) -> void (static) !O(1)
@@ -207,6 +217,7 @@ void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 	\param kname: string id of created key, to describe what was achieved within the recorded time
 */
+/*
 void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 {
 	// add time log key
@@ -226,12 +237,14 @@ void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 	// reset counter
 	dld.last_ticks = std::chrono::steady_clock::now();
 }
+*/
 
 /*
 	flush_debug_logging(DebugLogData) -> void (static) !O(1)
 	purpose: writes structured runtime debug log data to the console
 	\param dld: variable holding runtime debug data, such as recording keys & their string id
 */
+/*
 void Toolbox::flush_debug_logging(DebugLogData dld)
 {
 	// output task headline
@@ -254,6 +267,7 @@ void Toolbox::flush_debug_logging(DebugLogData dld)
 	printf("%s%17fms |\n",produce_logging_cell("total","\033[1;35m",dld.max_name_width).c_str(),total_time);
 	printf("%s\n\n",head_line.c_str());
 }
+*/
 
 /*
 	TODO

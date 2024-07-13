@@ -15,22 +15,22 @@
 Frame::Frame(const char* title)
 {
 	// initializing
-	Init::run_init();
+	Configuration::run_init();
 	init();
 
 	// screen information
 	SDL_Rect dim_screen;
-	get_screen(Init::correlate_variable(FRAME_DISPLAY_IDENTIFIER),&dim_screen);
+	get_screen(Configuration::correlate_variable(VKEY_FRAME_DISPLAY),&dim_screen);
 
 	// save screen dimension
-	w_res = Init::correlate_variable(RESOLUTION_WIDTH_IDENTIFIER);
-	h_res = Init::correlate_variable(RESOLUTION_HEIGHT_IDENTIFIER);
+	w_res = Configuration::correlate_variable(VKEY_RESOLUTION_WIDTH);
+	h_res = Configuration::correlate_variable(VKEY_RESOLUTION_HEIGHT);
 
 	// setup routine
 	setup(
 		title,
 		dim_screen.x+100,dim_screen.y+100,w_res,h_res,
-		(SDL_WindowFlags)Init::correlate_variable(FRAME_FULLSCREEN_IDENTIFIER)
+		(SDL_WindowFlags)Configuration::correlate_variable(VKEY_FRAME_FULLSCREEN)
 	);
 }
 

@@ -81,23 +81,27 @@ class Toolbox
 {
 public:
 
-	// files
+	// system
 	static void copy_file(const char* origin,const char* dest);
 
 	// loader
-	static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
-			float scl,glm::vec3 rot);
+	//static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
+	//		float scl,glm::vec3 rot);
 
 	// math helper
+	/*
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
 	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
+	*/
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
 	// timing debug
+	/*
 	static void start_debug_logging(DebugLogData &dld,const char* tname);
 	static void add_timekey(DebugLogData &dld,const char* kname);
 	static void flush_debug_logging(DebugLogData dld);
+	*/
 
 	// threading
 	static void thread_detached_continue(ThreadState& state);
@@ -125,8 +129,10 @@ public:
 private:
 
 	// helpers
+	/*
 	static inline std::string produce_logging_cell(std::string content,std::string col,uint8_t len)
 		{ return "| "+col+content+std::string(len-content.length(),' ')+"\033[0m |"; }
+	*/
 };
 
 #endif

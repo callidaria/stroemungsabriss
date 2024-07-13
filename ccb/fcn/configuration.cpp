@@ -1,10 +1,10 @@
-#include "init.h"
+#include "configuration.h"
 
 /*
 	!O(nlog(n)) .length of config file /load -> (static)
 	purpose: read config file and extract variable values for program initialization
 */
-void Init::run_init()
+void Configuration::run_init()
 {
 	// attempting to read the config file
 	const char* path = "config.ini";
@@ -23,24 +23,25 @@ void Init::run_init()
 		std::string key,value;
 		file >> key, file >> value;
 
-		// correlate key literal with its memory index
-		iConfig[key] = stoi(value);
+		// correlate key literal with its memory index & handle potential problems with value conversion
+		try { iConfig[key] = stoi(value); }
+		catch (std::exception const& ex) { iConfig[key] = 0; }
+		// TODO: log mistaken value conversions in a future logging system
 	}
 
 	// close config file
 	file.close();
 }
-// TODO: try/catch stoi exceptions
 
 /*
 	!O(n) .initialization variables /function -> (public)
 	purpose: write all variables back to config file
 */
-void Init::write_changes()
+void Configuration::write_changes()
 {
 	// handle frame resolution preset translation to vector
-	iConfig[RESOLUTION_WIDTH_IDENTIFIER] = resolutionWidthPresets[iConfig[RESOLUTION_PRESET_IDENTIFIER]];
-	iConfig[RESOLUTION_HEIGHT_IDENTIFIER] = resolutionHeightPresets[iConfig[RESOLUTION_PRESET_IDENTIFIER]];
+	iConfig[VKEY_RESOLUTION_WIDTH] = resolutionWidthPresets[iConfig[VKEY_RESOLUTION_PRESET]];
+	iConfig[VKEY_RESOLUTION_HEIGHT] = resolutionHeightPresets[iConfig[VKEY_RESOLUTION_PRESET]];
 
 	// write changes to config file
 	std::ofstream chwrite("./config.ini",std::ios::out);

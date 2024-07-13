@@ -4,7 +4,7 @@
 #include <AL/alc.h>
 
 #include "../mat/toolbox.h"
-#include "../fcn/init.h"
+#include "../fcn/configuration.h"
 
 
 // input
@@ -117,7 +117,7 @@ private:
 	uint32_t w_res,h_res;
 
 	// input
-	const uint32_t& axis_deadzone = Init::correlate_variable(PERIPHERAL_DEADZONE_IDENTIFIER);
+	const uint32_t& axis_deadzone = Configuration::correlate_variable(VKEY_PERIPHERAL_AXIS_DEADZONE);
 
 	// time & vsync
 	std::chrono::steady_clock::time_point past_ticks,curr_ticks = std::chrono::steady_clock::now(),
