@@ -6,15 +6,6 @@
 
 #include "ccb/core.h"
 
-/*
-#include "script/base.h"
-#include "script/systems/worldbuilder.h"
-*/
-
-/*
-#define MVMT_SPEED 4
-#define BUILD_DEV_MODE 1
-*/
 
 int main(int argc,char** argv)
 {

@@ -30,7 +30,7 @@ enum LoadInstruction
 
 struct Core
 {
-	inline static Frame gFrame = Frame("黄泉先生");
+	inline static Frame gFrame = Frame("stroemungsabriss");
 	inline static Renderer gRenderer;
 
 	// replacable

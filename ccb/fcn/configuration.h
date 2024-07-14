@@ -16,8 +16,26 @@ constexpr char VKEY_FRAME_FULLSCREEN[] = "bFrameFullscreen";
 constexpr char VKEY_FRAME_DISPLAY[] = "iFrameTargetMonitor";
 
 // input variable correlation
-constexpr char VKEY_PERIPHERAL_FORCED[] = "iGeneralPeripheralAxisDeadzone";
+constexpr char VKEY_PERIPHERAL_FORCED[] = "iGeneralForcePeripheral";
 constexpr char VKEY_PERIPHERAL_AXIS_DEADZONE[] = "iGeneralPeripheralAxisDeadzone";
+
+
+// references to configuration variables, to reduce expensive correlation
+struct Config
+{
+	// frame resolution preset
+	uint32_t& iFrameResolutionPreset;
+	uint32_t& vFrameResolutionWidth,&vFrameResolutionHeight;
+
+	// frame state
+	uint32_t& bFrameFullscreen;
+	uint32_t& iFrameTargetMonitor;
+
+	// input
+	uint32_t& iGeneralForcePeripheral;
+	uint32_t& iGeneralPeripheralAxisDeadzone;
+};
+// TODO: create automized referencing
 
 
 // interaction tools with config file
