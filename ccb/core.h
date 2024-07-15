@@ -4,6 +4,7 @@
 //#include <queue>
 
 #include "frm/frame.h"
+#include "fcn/input.h"
 #include "gfx/renderer.h"
 
 /*
@@ -30,8 +31,9 @@ enum LoadInstruction
 
 struct Core
 {
-	inline static Frame gFrame = Frame("stroemungsabriss");
-	inline static Renderer gRenderer;
+	inline static Frame g_Frame = Frame("stroemungsabriss");
+	inline static Input g_Input;
+	inline static Renderer g_Renderer;
 
 	// replacable
 	/*

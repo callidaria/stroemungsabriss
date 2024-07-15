@@ -6,6 +6,7 @@
 */
 void Configuration::run_init()
 {
+	// config file extraction
 	// attempting to read the config file
 	const char* path = "config.ini";
 	std::ifstream file(path,std::ios::in);
@@ -31,6 +32,16 @@ void Configuration::run_init()
 
 	// close config file
 	file.close();
+
+	// config variable correlation
+	// iterate config variables in datastructure
+	uint32_t* addr = &g_Config.iFrameResolutionPreset;
+	for (uint8_t i=0;i<AMOUNT_MAPPED_VARIABLES;i++)
+	{
+		*addr = iConfig[VKEY_IDENTIFIER_MAP[i]];
+		addr++;
+	}
+	std::cout << g_Config.vFrameResolutionWidth << '\n';
 }
 
 /*
@@ -39,9 +50,9 @@ void Configuration::run_init()
 */
 void Configuration::write_changes()
 {
-	// handle frame resolution preset translation to vector
-	iConfig[VKEY_RESOLUTION_WIDTH] = resolutionWidthPresets[iConfig[VKEY_RESOLUTION_PRESET]];
-	iConfig[VKEY_RESOLUTION_HEIGHT] = resolutionHeightPresets[iConfig[VKEY_RESOLUTION_PRESET]];
+	// frame resolution preset translation to vector
+	g_Config.vFrameResolutionWidth = resolutionWidthPresets[g_Config.iFrameResolutionPreset];
+	g_Config.vFrameResolutionHeight = resolutionHeightPresets[g_Config.iFrameResolutionPreset];
 
 	// write changes to config file
 	std::ofstream chwrite("./config.ini",std::ios::out);

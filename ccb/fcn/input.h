@@ -70,9 +70,6 @@ private:
 	// api
 	SDL_Event m_event;
 	std::vector<SDL_GameController*> m_gc;
-
-	// settings
-	uint32_t const& axis_deadzone = Configuration::correlate_variable(VKEY_PERIPHERAL_AXIS_DEADZONE);
 };
 
 #endif

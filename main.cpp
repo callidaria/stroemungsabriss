@@ -22,12 +22,12 @@ int main(int argc,char** argv)
 	//Core::gFrame.set_refresh_rate(60);
 
 	// register test assets
-	uint16_t sid = Core::gRenderer.add_sprite(0,"./res/bllt_ffdir.png");
-	Core::gRenderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
-	Core::gRenderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
-	Core::gRenderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
-	Core::gRenderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
-	Core::gRenderer.bfr_sprite[0].attribs.auto_stateswitch = true;
+	uint16_t sid = Core::g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
+	Core::g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
+	Core::g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
+	Core::g_Renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
+	Core::g_Renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
+	Core::g_Renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 
 	// MAIN LOOP
 	bool run = true;
@@ -37,17 +37,18 @@ int main(int argc,char** argv)
 		//Core::gFrame.calc_time_delta();
 		//Core::gFrame.cpu_vsync();
 		//Core::gFrame.print_fps();
-		Core::gFrame.input(run);
+		Core::g_Input.update(run);
 		Frame::clear();
 
 		// update
 		//Core::gRenderer.update();
-		Core::gFrame.update();
+		Core::g_Frame.update();
 	}
 
 	// vanish
-	Core::gRenderer.close();
-	Core::gFrame.vanish();
+	Core::g_Renderer.close();
+	Core::g_Input.close();
+	Core::g_Frame.vanish();
 	return 0;
 
 	// LOADERS
