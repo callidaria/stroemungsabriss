@@ -1,67 +1,11 @@
-# callidaria's yomisensei
+# Strömungsabriss Technical Details
 
-## RUN
+## Index
 
-<br>
-
-### linux
-```
-./yomisensei
-```
-or press [r] key in cascabel console
-
-<br>
-
-### windows
-double click yomisensei.exe \
-or press [r] key in cascabel console
-
-### DISCLAIMER
-*building is not required to run the game!*
-
-<br>
-
-***
-
-<br>
-
-## BUILD
-
-<br>
-
-### linux
-```
-# to open cascabel console
-./ccb_console
-```
-select BUILD ALL COMPONENTS with arrow keys and run with [SPACE] to build libraries \
-then, press [b] key to build executable
-
-<br>
-
-### windows
-run ccb_console.exe \
-select BUILD ALL COMPONENTS with [w] & [s] and run with [SPACE] to build libraries \
-then, press [b] key to build executable
-
-<br>
-
-### DISCLAIMER
-*certain libraries are required to satisfy the compiler:*
-- SDL2
-- SDL2_net
-- GLEW
-- GLM
-- SOIL
-- OpenAL
-
-<br>
-
-To see the full documentation of engine go [here](doc/index.md)
-
-<br>
-
-***
+- [Build & Run](doc/specs/build.md)
+- [Codestyle Specification](doc/specs/codestyle.md)
+- [Implementation Patterns](doc/specs/patterns.md)
+- [Engine Documentation](doc/index.md)
 
 <br>
 
@@ -226,4 +170,5 @@ Worktime: 120h
   + 295: 44min
   + 253: 27h 41min
   + 265: 1h 28min
+  + 328: 45min
 - Total Code Lines: 17.485
