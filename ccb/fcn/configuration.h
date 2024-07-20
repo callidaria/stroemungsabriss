@@ -1,5 +1,5 @@
-#ifndef CCB_FEATURE_INITIALIZATION
-#define CCB_FEATURE_INITIALIZATION
+#ifndef CCB_FEATURE_CONFIGURATION
+#define CCB_FEATURE_CONFIGURATION
 
 #include "../mat/toolbox.h"
 
@@ -10,7 +10,7 @@ constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
 
 
 // references to configuration variables, to reduce expensive correlation by caching common key results
-struct Config
+namespace Config
 {
 	// frame resolution preset
 	uint32_t iFrameResolutionPreset;
@@ -23,9 +23,7 @@ struct Config
 	// input
 	uint32_t iGeneralForcePeripheral;
 	uint32_t iGeneralPeripheralAxisDeadzone;
-};
-
-static inline Config g_Config;
+}
 
 
 // interaction tools with config file

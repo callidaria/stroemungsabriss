@@ -45,12 +45,16 @@ class Input
 public:
 
 	// construction
-	Input() {  }
+	Input();
 	~Input() {  }
 
 	// system
 	void update(bool& running);
 	inline void close() { kill_controllers(); }
+
+	// text input mode
+	inline void text_input_start() { SDL_StartTextInput(); }
+	inline void text_input_stop() { SDL_StopTextInput(); }
 
 private:
 

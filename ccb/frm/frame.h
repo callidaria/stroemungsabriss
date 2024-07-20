@@ -42,10 +42,6 @@ public:
 	// termination
 	void vanish();
 
-	// text input
-	inline void input_start() { SDL_StartTextInput(); }
-	inline void input_stop() { SDL_StopTextInput(); }
-
 private:
 
 	// controller management

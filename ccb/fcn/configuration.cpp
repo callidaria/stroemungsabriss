@@ -35,13 +35,9 @@ void Configuration::run_init()
 
 	// config variable correlation
 	// iterate config variables in datastructure
-	uint32_t* addr = &g_Config.iFrameResolutionPreset;
-	for (uint8_t i=0;i<AMOUNT_MAPPED_VARIABLES;i++)
-	{
-		*addr = iConfig[VKEY_IDENTIFIER_MAP[i]];
-		addr++;
-	}
-	std::cout << g_Config.vFrameResolutionWidth << '\n';
+	uint32_t* addr = &Config::iFrameResolutionPreset;
+	std::cout << &Config::iFrameResolutionPreset << '\n';
+	for (uint8_t i=0;i<AMOUNT_MAPPED_VARIABLES;i++) *(addr+i) = iConfig[VKEY_IDENTIFIER_MAP[i]];
 }
 
 /*
@@ -51,8 +47,8 @@ void Configuration::run_init()
 void Configuration::write_changes()
 {
 	// frame resolution preset translation to vector
-	g_Config.vFrameResolutionWidth = resolutionWidthPresets[g_Config.iFrameResolutionPreset];
-	g_Config.vFrameResolutionHeight = resolutionHeightPresets[g_Config.iFrameResolutionPreset];
+	Config::vFrameResolutionWidth = resolutionWidthPresets[Config::iFrameResolutionPreset];
+	Config::vFrameResolutionHeight = resolutionHeightPresets[Config::iFrameResolutionPreset];
 
 	// write changes to config file
 	std::ofstream chwrite("./config.ini",std::ios::out);

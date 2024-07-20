@@ -1,6 +1,14 @@
 #include "input.h"
 
 /*
+	TODO
+*/
+Input::Input()
+{
+	text_input_stop();
+}
+
+/*
 	!O(n)b .input events /update -> (public)
 	purpose: process keyboard, controller and mouse input
 	\param running: value to negate if the window gets closed
@@ -29,8 +37,8 @@ void Input::update(bool& running)
 		// mouse input
 		case SDL_MOUSEMOTION:
 			SDL_GetMouseState(&mouse.mx,&mouse.my);
-			mouse.mxfr = (float)mouse.mx/g_Config.vFrameResolutionWidth;
-			mouse.myfr = (float)(g_Config.vFrameResolutionHeight-mouse.my)/g_Config.vFrameResolutionHeight;
+			mouse.mxfr = (float)mouse.mx/Config::vFrameResolutionWidth;
+			mouse.myfr = (float)(Config::vFrameResolutionHeight-mouse.my)/Config::vFrameResolutionHeight;
 			break;
 		case SDL_MOUSEBUTTONDOWN: mouse.mb[m_event.button.button-1] = true;
 			break;
@@ -43,7 +51,7 @@ void Input::update(bool& running)
 		case SDL_CONTROLLERAXISMOTION:
 			motion = SDL_GameControllerGetAxis(m_gc[0],(SDL_GameControllerAxis)m_event.caxis.axis);
 			xb[0].xba[m_event.caxis.axis] = motion;
-			//relevant_motion = (abs(motion)>g_Config.iGeneralPeripheralAxisDeadzone)||relevant_motion;
+			//relevant_motion = (abs(motion)>Config::iGeneralPeripheralAxisDeadzone)||relevant_motion;
 			break;
 		case SDL_CONTROLLERBUTTONDOWN: xb[0].xbb[m_event.cbutton.button] = true;
 			break;
