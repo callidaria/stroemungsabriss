@@ -162,4 +162,6 @@ static inline ThreadState th_ldsprite_data;
 static inline SpriteLoadInstrData th_inst_sprite_data;
 //static inline CombinedLoadData th_data;
 
+inline Renderer g_Renderer = Renderer();
+
 #endif

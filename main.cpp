@@ -4,7 +4,9 @@
 #include <windows.h>
 #endif
 
-#include "ccb/core.h"
+#include "ccb/frm/frame.h"
+#include "ccb/fcn/input.h"
+#include "ccb/gfx/renderer.h"
 
 
 int main(int argc,char** argv)
@@ -22,12 +24,12 @@ int main(int argc,char** argv)
 	//Core::gFrame.set_refresh_rate(60);
 
 	// register test assets
-	uint16_t sid = Core::g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
-	Core::g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
-	Core::g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
-	Core::g_Renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
-	Core::g_Renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
-	Core::g_Renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
+	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
+	g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
+	g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
+	g_Renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
+	g_Renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
+	g_Renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
 
 	// MAIN LOOP
 	bool run = true;
@@ -37,18 +39,18 @@ int main(int argc,char** argv)
 		//Core::gFrame.calc_time_delta();
 		//Core::gFrame.cpu_vsync();
 		//Core::gFrame.print_fps();
-		Core::g_Input.update(run);
+		g_Input.update(run);
 		Frame::clear();
 
 		// update
 		//Core::gRenderer.update();
-		Core::g_Frame.update();
+		g_Frame.update();
 	}
 
 	// vanish
-	Core::g_Renderer.close();
-	Core::g_Input.close();
-	Core::g_Frame.vanish();
+	g_Renderer.close();
+	g_Input.close();
+	g_Frame.vanish();
 	return 0;
 
 	// LOADERS

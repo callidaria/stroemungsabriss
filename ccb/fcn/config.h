@@ -10,8 +10,19 @@ constexpr uint8_t AMOUNT_RESOLUTION_PRESETS = 3;
 
 
 // references to configuration variables, to reduce expensive correlation by caching common key results
-namespace Config
+class Config
 {
+public:
+
+	// initialization
+	Config();
+	~Config() {  }
+
+	// serialization
+	static void write_changes();
+
+public:
+
 	// frame resolution preset
 	uint32_t iFrameResolutionPreset;
 	uint32_t vFrameResolutionWidth,vFrameResolutionHeight;
@@ -23,17 +34,6 @@ namespace Config
 	// input
 	uint32_t iGeneralForcePeripheral;
 	uint32_t iGeneralPeripheralAxisDeadzone;
-}
-
-
-// interaction tools with config file
-class Configuration
-{
-public:
-
-	// interaction with initialization data structure
-	static void run_init();
-	static void write_changes();
 
 private:
 
@@ -60,5 +60,7 @@ private:
 		"iGeneralPeripheralAxisDeadzone",
 	};
 };
+
+inline Config g_Config = Config();
 
 #endif

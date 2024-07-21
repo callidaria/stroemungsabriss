@@ -4,7 +4,7 @@
 #include <AL/alc.h>
 
 #include "../mat/toolbox.h"
-#include "../fcn/configuration.h"
+#include "../fcn/config.h"
 
 
 // timing
@@ -78,5 +78,7 @@ private:
 	double rate_delta = FRAME_REFRATE_DEFAULT_DELTA;
 	double stalled_time = .0;
 };
+
+inline Frame g_Frame = Frame("stroemungsabriss");
 
 #endif

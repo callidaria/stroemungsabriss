@@ -7,10 +7,6 @@
 */
 Frame::Frame(const char* title)
 {
-	// load variables from configuration file
-	Configuration::run_init();
-	std::cout << Config::iFrameResolutionPreset << ' ' << Config::vFrameResolutionWidth << '\n';
-
 	// api initialization
 	// sdl setup
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -23,7 +19,7 @@ Frame::Frame(const char* title)
 	// FIXME: conflicted reporting regarding SDL_GL_SHARE_WITH_CURRENT_CONTEXT attribute
 
 	// screen information
-	int8_t screen_id = Config::iFrameTargetMonitor;
+	int8_t screen_id = g_Config.iFrameTargetMonitor;
 	SDL_Rect dim_screen;
 	if (screen_id<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen_id,&dim_screen)==0)
 		printf("\033[1;36mmaximum resolution of selected screen is: %ix%i\n",dim_screen.w,dim_screen.h);
@@ -38,9 +34,9 @@ Frame::Frame(const char* title)
 
 	// environmental setup
 	// creating window
-	w_res = Config::vFrameResolutionWidth, h_res = Config::vFrameResolutionHeight;
+	w_res = g_Config.vFrameResolutionWidth, h_res = g_Config.vFrameResolutionHeight;
 	m_frame = SDL_CreateWindow(title,dim_screen.x+100,dim_screen.y+100,w_res,h_res,SDL_WINDOW_OPENGL);
-	SDL_SetWindowFullscreen(m_frame,(SDL_WindowFlags)Config::bFrameFullscreen);
+	SDL_SetWindowFullscreen(m_frame,(SDL_WindowFlags)g_Config.bFrameFullscreen);
 	m_context = SDL_GL_CreateContext(m_frame);
 
 	// opengl setup

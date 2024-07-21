@@ -2,7 +2,7 @@
 #define CCB_FEATURE_INPUT
 
 #include "../mat/toolbox.h"
-#include "../fcn/configuration.h"
+#include "../fcn/config.h"
 
 
 // input
@@ -75,5 +75,7 @@ private:
 	SDL_Event m_event;
 	std::vector<SDL_GameController*> m_gc;
 };
+
+inline Input g_Input = Input();
 
 #endif
