@@ -17,8 +17,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-#include "../fcn/logger.h"
-
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
@@ -30,6 +28,11 @@
 #define STB_IMAGE_WRITE_STATIC
 #include "../../include/stb_image_write.h"
 #endif
+
+
+// define build state
+#define DEBUG
+// TODO: move debug flag definition
 
 
 // math constants
@@ -53,6 +56,38 @@ constexpr uint8_t PATTERN_SPRITE_ELEMENT_REPEAT = 6;
 constexpr uint8_t PATTERN_SPRITE_VERTEX_REPEAT = 4*PATTERN_SPRITE_LOAD_REPEAT;
 constexpr uint8_t PATTERN_SPRITE_TRIANGLE_REPEAT = 6*PATTERN_SPRITE_LOAD_REPEAT;
 constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
+
+
+// logger macro definitions
+// text colour definitions
+constexpr const char* LOG_RED = "\033[1;31m";
+constexpr const char* LOG_BLUE = "\033[1;36m";
+constexpr const char* LOG_CLEAR = "\033[0m";
+
+// logger macro definition to include component in debug build
+#ifdef DEBUG
+
+// basic console communication
+#define COMM_MSG(col,...) printf("%s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
+#define COMM_ERR(msg) printf("%s%s%s\n",LOG_RED,msg,LOG_CLEAR);
+
+// communicate by condition
+#define COMM_MSG_COND(msg,col,cnd) if (cnd) COMM_MSG(msg,col);
+#define COMM_ERR_COND(msg,cnd) if (cnd) COMM_ERR(msg);
+
+// switch errors
+#define COMM_SWITCH(msg,err,col,cnd) if (cnd) { COMM_MSG(msg,col); } else { COMM_ERR(err); }
+
+// logger macro definition to exclude component in release build
+#else
+
+#define COMM_MSG(msg,col)
+#define COMM_ERR(msg)
+#define COMM_MSG_COND(msg,col,cnd)
+#define COMM_ERR_COND(msg,cnd)
+#define COMM_SWITCH(msg,err,col,cnd)
+
+#endif
 
 
 // debug timing keys to record individual loadtimes for task sequences

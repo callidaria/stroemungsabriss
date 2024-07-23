@@ -9,8 +9,7 @@ Frame::Frame(const char* title)
 {
 	// api initialization
 	// sdl setup
-	COMM_MSG("SDL setup",LOG_BLUE);
-	COMM_ERR("test warning");
+	COMM_MSG("SDL setup",LOG_CLEAR);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
@@ -22,14 +21,19 @@ Frame::Frame(const char* title)
 
 	// screen information
 	int8_t screen_id = g_Config.iFrameTargetMonitor;
-	SDL_Rect dim_screen;
+	SDL_Rect dim_screen = { .x = 0,.y = 0,.w = 1280,.h = 720 };
+	bool conf_hardware = screen_id<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen_id,&dim_screen)==0;
+	COMM_MSG(
+			LOG_BLUE,
+			"maximum resolution of selected screen is: %ix%i",
+			dim_screen.w,dim_screen.h,
+		);
 	if (screen_id<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen_id,&dim_screen)==0)
 		printf("\033[1;36mmaximum resolution of selected screen is: %ix%i\n",dim_screen.w,dim_screen.h);
 	else
 	{
 		printf("\033[1;31mscreen could not be set: %s\n",SDL_GetError());
 		printf("\033[1;36m\t=> falling back to standard configuration\n");
-		dim_screen.x = 0,dim_screen.y = 0,dim_screen.w = 1280,dim_screen.h = 720;
 	}
 	printf("\033[0m");
 	// TODO: use logging system
