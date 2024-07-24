@@ -9,7 +9,8 @@ Frame::Frame(const char* title)
 {
 	// api initialization
 	// sdl setup
-	COMM_MSG("SDL setup",LOG_CLEAR);
+	COMM_MSG(LOG_HEADINGS,"frame setup...");
+	COMM_LOG("setup sdl version 3.3");
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
@@ -20,32 +21,30 @@ Frame::Frame(const char* title)
 	// FIXME: conflicted reporting regarding SDL_GL_SHARE_WITH_CURRENT_CONTEXT attribute
 
 	// screen information
+	COMM_LOG("get display hardware information");
 	int8_t screen_id = g_Config.iFrameTargetMonitor;
 	SDL_Rect dim_screen = { .x = 0,.y = 0,.w = 1280,.h = 720 };
-	bool conf_hardware = screen_id<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen_id,&dim_screen)==0;
-	COMM_MSG(
-			LOG_BLUE,
-			"maximum resolution of selected screen is: %ix%i",
-			dim_screen.w,dim_screen.h,
-		);
-	if (screen_id<SDL_GetNumVideoDisplays()&&SDL_GetDisplayBounds(screen_id,&dim_screen)==0)
-		printf("\033[1;36mmaximum resolution of selected screen is: %ix%i\n",dim_screen.w,dim_screen.h);
-	else
-	{
-		printf("\033[1;31mscreen could not be set: %s\n",SDL_GetError());
-		printf("\033[1;36m\t=> falling back to standard configuration\n");
-	}
-	printf("\033[0m");
-	// TODO: use logging system
+	bool conf_hardware = screen_id<SDL_GetNumVideoDisplays()&&!SDL_GetDisplayBounds(screen_id,&dim_screen);
+	COMM_MSG_COND(
+		conf_hardware,
+		LOG_YELLOW,
+		"maximum resolution of selected screen is: %ix%i",
+		dim_screen.w,dim_screen.h
+	) COMM_ERR_FALLBACK(
+		"screen could not be set: %s\n%s",SDL_GetError(),
+		"falling back to standard configuration"
+	);
 
 	// environmental setup
 	// creating window
+	COMM_LOG("window creation");
 	w_res = g_Config.vFrameResolutionWidth, h_res = g_Config.vFrameResolutionHeight;
 	m_frame = SDL_CreateWindow(title,dim_screen.x+100,dim_screen.y+100,w_res,h_res,SDL_WINDOW_OPENGL);
 	SDL_SetWindowFullscreen(m_frame,(SDL_WindowFlags)g_Config.bFrameFullscreen);
 	m_context = SDL_GL_CreateContext(m_frame);
 
 	// opengl setup
+	COMM_LOG("opengl setup");
 	glewInit();
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LEQUAL);
@@ -56,12 +55,15 @@ Frame::Frame(const char* title)
 	glViewport(0,0,w_res,h_res);
 
 	// openal setup
+	COMM_LOG("audio setup");
 	m_alcdev = alcOpenDevice(NULL);
 	m_alccon = alcCreateContext(m_alcdev,NULL);
 	alcMakeContextCurrent(m_alccon);
 
 	// default settings
 	set_clear_colour();
+
+	COMM_SCC("frame initialization done");
 }
 
 /*
@@ -91,11 +93,16 @@ void Frame::change_tmod(double goal,double rate)
 */
 void Frame::gpu_vsync_on()
 {
+	COMM_LOG("setting gpu vsync...");
+
+	// trying to set adaptive vsync
 	if (SDL_GL_SetSwapInterval(-1)==-1)
 	{
-		printf("\033[1;31madaptive vsync not supported\033[0m\n");
+		COMM_ERR("adaptive vsync is not supported");
 		SDL_GL_SetSwapInterval(1);
 	}
+
+	COMM_SCC("done");
 }
 
 /*
@@ -131,6 +138,7 @@ void Frame::print_fps()
 		fps = 0,stalled_time = 0;
 	}
 }
+// TODO: add features to display runtime information
 // FIXME: NEGATIVE?!?!?!? PROCESSING TIME?!
 
 /*
@@ -139,15 +147,18 @@ void Frame::print_fps()
 */
 void Frame::vanish()
 {
-	// breakline on out
-	printf("\n");
+	COMM_MSG(LOG_CYAN,"destroying frame...");
 
 	// closing audio context & device
+	COMM_LOG("closing audio device");
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(m_alccon);
 	alcCloseDevice(m_alcdev);
 
 	// closing render context & program
+	COMM_LOG("closing graphical device and delete context");
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
+
+	COMM_SCC("done");
 }

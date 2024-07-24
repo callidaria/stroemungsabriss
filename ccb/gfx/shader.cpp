@@ -145,17 +145,23 @@ uint32_t Shader::compile_shader(const char* path,GLenum stype)
 	// get source file
 	std::string src; // FIXME: delete after usage
 	std::ifstream file(path);
-	if (!file.is_open()) {
-		printf("\033[1;31mno shader found at path: %s\033[0m\n",path);
+	if (!file.is_open())
+	{
+		COMM_ERR("no shader found at path: %s",path);
 		return 0;
 	}
+	// FIXME: !file.is_open() can be replaced by !file. test this assumption
 
 	// reads from source
 	std::string line;
-	while (!file.eof()) {
+	while (!file.eof())
+	{
 		std::getline(file,line);
 		src.append(line+"\n"); // ??standard && addable const char* is less performant bc stack
-	} file.close();
+	}
+
+	// close source file
+	file.close();
 	const char* source = src.c_str();
 
 	// shader creation
@@ -169,7 +175,7 @@ uint32_t Shader::compile_shader(const char* path,GLenum stype)
 	if (!stat) {
 		char log[512];
 		glGetShaderInfoLog(shader,512,NULL,log);
-		printf("\033[1;31mshader error at: %s\nerror:\033[033[36m%s\033[0m\n",path,log);
+		COMM_ERR("shader error -> %s: %s",path,log);
 	}
 
 	// return compiled shader

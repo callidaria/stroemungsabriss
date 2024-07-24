@@ -96,12 +96,17 @@ void Input::update(bool& running)
 */
 void Input::load_controllers()
 {
+	COMM_LOG("reading controllers...");
+
 	// allocate memory
 	m_gc.resize(SDL_NumJoysticks()), xb.resize(SDL_NumJoysticks());
 
 	// open peripheral devices
 	uint8_t gcc = 0;
 	while (SDL_IsGameController(gcc)) m_gc[gcc] = SDL_GameControllerOpen(gcc), gcc++;
+
+	COMM_MSG(LOG_SETTINGS,"%li controllers connected",xb.size());
+	COMM_SCC("done");
 }
 
 /*
@@ -110,6 +115,10 @@ void Input::load_controllers()
 */
 void Input::kill_controllers()
 {
+	COMM_LOG("closing controller devices...");
+
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc[i]);
 	m_gc.clear(),xb.clear();
+
+	COMM_SCC("done");
 }

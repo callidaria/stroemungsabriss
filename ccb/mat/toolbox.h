@@ -58,36 +58,50 @@ constexpr uint8_t PATTERN_SPRITE_TRIANGLE_REPEAT = 6*PATTERN_SPRITE_LOAD_REPEAT;
 constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
 
 
-// logger macro definitions
-// text colour definitions
-constexpr const char* LOG_RED = "\033[1;31m";
-constexpr const char* LOG_BLUE = "\033[1;36m";
-constexpr const char* LOG_CLEAR = "\033[0m";
-
 // logger macro definition to include component in debug build
 #ifdef DEBUG
 
+// text colour definitions
+constexpr const char* LOG_RED = "\e[1;31m";
+constexpr const char* LOG_GREEN = "\e[1;32m";
+constexpr const char* LOG_YELLOW = "\e[1;33m";
+constexpr const char* LOG_BLUE = "\e[1;34m";
+constexpr const char* LOG_PURPLE = "\e[1;35m";
+constexpr const char* LOG_CYAN = "\e[1;36m";
+constexpr const char* LOG_GREY = "\e[1;90m";
+constexpr const char* LOG_CLEAR = "\e[0;39m";
+
+// functionality shortcuts
+constexpr const char* LOG_HEADINGS = LOG_PURPLE;
+constexpr const char* LOG_SETTINGS = LOG_YELLOW;
+
 // basic console communication
 #define COMM_MSG(col,...) printf("%s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
-#define COMM_ERR(msg) printf("%s%s%s\n",LOG_RED,msg,LOG_CLEAR);
+#define COMM_LOG(...) COMM_MSG(LOG_CLEAR,__VA_ARGS__);
+#define COMM_SCC(...) COMM_MSG(LOG_GREEN,__VA_ARGS__);
+#define COMM_ERR(...) COMM_MSG(LOG_RED,__VA_ARGS__);
 
 // communicate by condition
-#define COMM_MSG_COND(msg,col,cnd) if (cnd) COMM_MSG(msg,col);
-#define COMM_ERR_COND(msg,cnd) if (cnd) COMM_ERR(msg);
+#define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
+#define COMM_ERR_COND(cnd,...) if (cnd) { COMM_ERR(__VA_ARGS__); }
 
 // switch errors
-#define COMM_SWITCH(msg,err,col,cnd) if (cnd) { COMM_MSG(msg,col); } else { COMM_ERR(err); }
+#define COMM_ERR_FALLBACK(...) else { COMM_ERR(__VA_ARGS__); }
 
 // logger macro definition to exclude component in release build
 #else
 
-#define COMM_MSG(msg,col)
-#define COMM_ERR(msg)
-#define COMM_MSG_COND(msg,col,cnd)
-#define COMM_ERR_COND(msg,cnd)
-#define COMM_SWITCH(msg,err,col,cnd)
+#define COMM_MSG(col,...)
+#define COMM_LOG(...)
+#define COMM_SCC(...)
+#define COMM_ERR(...)
+#define COMM_MSG_COND(cnd,col,...)
+#define COMM_ERR_COND(cnd,...)
+#define COMM_ERR_COND_BREAK(cnd,ret,...)
+#define COMM_ERR_FALLBACK(...)
 
 #endif
+// TODO: add timing feature for each logged operation
 
 
 // debug timing keys to record individual loadtimes for task sequences
