@@ -32,7 +32,7 @@ Config::Config()
 		try { iConfig[key] = stoi(value); }
 		catch (std::exception const& ex)
 		{
-			COMM_ERR("faulty conversion for key \"%s\" with attempted value %s",key.c_str(),value.c_str());
+			COMM_ERR("faulty conversion for key \"%s\" with attempted value \"%s\"",key.c_str(),value.c_str());
 			iConfig[key] = 0;
 		}
 	}

@@ -62,6 +62,7 @@ constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
 #ifdef DEBUG
 
 // text colour definitions
+constexpr const char* LOG_WHITE = "\e[0;30m";
 constexpr const char* LOG_RED = "\e[1;31m";
 constexpr const char* LOG_GREEN = "\e[1;32m";
 constexpr const char* LOG_YELLOW = "\e[1;33m";
@@ -74,12 +75,25 @@ constexpr const char* LOG_CLEAR = "\e[0;39m";
 // functionality shortcuts
 constexpr const char* LOG_HEADINGS = LOG_PURPLE;
 constexpr const char* LOG_SETTINGS = LOG_YELLOW;
+constexpr const char* LOG_TIMING = LOG_GREY;
+
+// time performance records
+inline std::chrono::steady_clock::time_point log_tdelta = std::chrono::steady_clock::now();
+static inline void reset_timestamp() { log_tdelta = std::chrono::steady_clock::now(); }
+static inline void produce_timestamp(bool padding=true)
+{
+	double ll_delta = (std::chrono::steady_clock::now()-log_tdelta).count()*CONVERSION_MULT_MILLISECONDS;
+	printf((padding) ? "%s%12fms" : "%s%fms",LOG_TIMING,ll_delta);
+	reset_timestamp();
+}
 
 // basic console communication
-#define COMM_MSG(col,...) printf("%s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
+#define COMM_AWT(...) reset_timestamp(),printf(__VA_ARGS__),printf("... ");
+#define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
+#define COMM_MSG(col,...) produce_timestamp(),printf(" | %s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
+#define COMM_ERR(...) printf("%serror: ",LOG_RED),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
 #define COMM_LOG(...) COMM_MSG(LOG_CLEAR,__VA_ARGS__);
 #define COMM_SCC(...) COMM_MSG(LOG_GREEN,__VA_ARGS__);
-#define COMM_ERR(...) COMM_MSG(LOG_RED,__VA_ARGS__);
 
 // communicate by condition
 #define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
@@ -91,10 +105,12 @@ constexpr const char* LOG_SETTINGS = LOG_YELLOW;
 // logger macro definition to exclude component in release build
 #else
 
+#define COMM_AWT(...)
+#define COMM_CNF()
 #define COMM_MSG(col,...)
+#define COMM_ERR(...)
 #define COMM_LOG(...)
 #define COMM_SCC(...)
-#define COMM_ERR(...)
 #define COMM_MSG_COND(cnd,col,...)
 #define COMM_ERR_COND(cnd,...)
 #define COMM_ERR_COND_BREAK(cnd,ret,...)
@@ -105,6 +121,7 @@ constexpr const char* LOG_SETTINGS = LOG_YELLOW;
 
 
 // debug timing keys to record individual loadtimes for task sequences
+/*
 struct DebugLogKey
 {
 	const char* key_name;
@@ -119,6 +136,7 @@ struct DebugLogData
 	std::chrono::steady_clock::time_point last_ticks;
 	uint8_t max_name_width = 0;
 };
+*/
 
 // data to represent detatched and waiting thread state
 struct ThreadState

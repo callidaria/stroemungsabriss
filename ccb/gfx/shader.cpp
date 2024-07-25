@@ -143,7 +143,7 @@ void Shader::def_irregular_indexF(const char* vname,uint8_t dim,size_t isize,siz
 uint32_t Shader::compile_shader(const char* path,GLenum stype)
 {
 	// get source file
-	std::string src; // FIXME: delete after usage
+	std::string src;
 	std::ifstream file(path);
 	if (!file.is_open())
 	{

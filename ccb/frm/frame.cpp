@@ -93,7 +93,7 @@ void Frame::change_tmod(double goal,double rate)
 */
 void Frame::gpu_vsync_on()
 {
-	COMM_LOG("setting gpu vsync...");
+	COMM_AWT("setting gpu vsync");
 
 	// trying to set adaptive vsync
 	if (SDL_GL_SetSwapInterval(-1)==-1)
@@ -102,7 +102,7 @@ void Frame::gpu_vsync_on()
 		SDL_GL_SetSwapInterval(1);
 	}
 
-	COMM_SCC("done");
+	COMM_CNF();
 }
 
 /*

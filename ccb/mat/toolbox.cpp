@@ -183,7 +183,7 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 	\param tspeed: controlled delay interval
 	\param cnd: boolean condition, defining target float value
 */
-void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
+void Toolbox::transition_float_on_condition(float& tval,float tspeed,bool cnd)
 {
 	tval += tspeed*(cnd-!cnd);
 	tval = (tval<.0f) ? .0f : (tval>1.f) ? 1.f : tval;
@@ -233,7 +233,7 @@ void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
 
 	// signal progression
 	printf("...");
-	
+
 	// reset counter
 	dld.last_ticks = std::chrono::steady_clock::now();
 }

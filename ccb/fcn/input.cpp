@@ -115,10 +115,10 @@ void Input::load_controllers()
 */
 void Input::kill_controllers()
 {
-	COMM_LOG("closing controller devices...");
+	COMM_AWT("closing controller devices");
 
 	for (int i=0;i<m_gc.size();i++) SDL_GameControllerClose(m_gc[i]);
 	m_gc.clear(),xb.clear();
 
-	COMM_SCC("done");
+	COMM_CNF();
 }
