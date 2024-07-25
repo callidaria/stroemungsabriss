@@ -117,26 +117,7 @@ static inline void produce_timestamp(bool padding=true)
 #define COMM_ERR_FALLBACK(...)
 
 #endif
-// TODO: add timing feature for each logged operation
 
-
-// debug timing keys to record individual loadtimes for task sequences
-/*
-struct DebugLogKey
-{
-	const char* key_name;
-	double delta_ticks;
-};
-
-// structure to hold all timing debug data for a single method
-struct DebugLogData
-{
-	const char* task_name;
-	std::vector<DebugLogKey> key_list = {  };
-	std::chrono::steady_clock::time_point last_ticks;
-	uint8_t max_name_width = 0;
-};
-*/
 
 // data to represent detatched and waiting thread state
 struct ThreadState
@@ -165,13 +146,6 @@ public:
 	*/
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
-	// timing debug
-	/*
-	static void start_debug_logging(DebugLogData &dld,const char* tname);
-	static void add_timekey(DebugLogData &dld,const char* kname);
-	static void flush_debug_logging(DebugLogData dld);
-	*/
-
 	// threading
 	static void thread_detached_continue(ThreadState& state);
 	static void thread_detached_stop(ThreadState& state);
@@ -194,14 +168,6 @@ public:
 		};
 	}
 	// TODO: find out if vectorcopy is optimized away when inline
-
-private:
-
-	// helpers
-	/*
-	static inline std::string produce_logging_cell(std::string content,std::string col,uint8_t len)
-		{ return "| "+col+content+std::string(len-content.length(),' ')+"\033[0m |"; }
-	*/
 };
 
 #endif
