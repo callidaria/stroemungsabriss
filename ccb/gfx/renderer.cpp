@@ -72,55 +72,16 @@ void RTransform2D::rotate(float r,glm::vec2 a)
  * TODO: expand
 */
 
-int sprite_load_thread(/*SpriteLoadInstrData* data,ThreadState* state*/void* ptr)
-{
-	// create shared context & setup loader
-	//*data->context = SDL_GL_GetCurrentContext();
-	//CombinedLoadData* data = (CombinedLoadData*)ptr;
-
-	// RESTORE!
-	//Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
-
-	// load routine
-	th_inst_sprite_data.spr_shader->enable();
-	th_inst_sprite_data.spr_buffer->bind();
-	while (true) {
-
-		// wait until active loading or termination
-		//Toolbox::thread_detached_stop(th_ldsprite_data);
-		if (!th_ldsprite_data.active) break;
-		//Core::gFrame.make_window_context_current(th_inst_sprite_data.context);
-
-		// sprite loading
-		while (/*!th_inst_sprite_data.ldbfr.empty()*/th_inst_sprite_data.snap_load) {
-			SpriteBuffer* bfr = th_inst_sprite_data.ldbfr.front();
-
-			//for (RTextureTuple& t : bfr->textures) t.load();
-
-			bfr->attribs.state = (BufferState)(bfr->attribs.state+bfr->attribs.auto_stateswitch);
-			th_inst_sprite_data.ldbfr.pop();
-			th_inst_sprite_data.snap_load = !th_inst_sprite_data.ldbfr.empty();
-		}
-	}
-
-	// context destruction
-	std::cout << "exit load thread & delete context\n";
-	SDL_GL_DeleteContext(*th_inst_sprite_data.context);
-	return 0;
-}
-
-
-/**
- * TODO: expand
-*/
-
 /*
 	TODO
 */
 Renderer::Renderer()
 {
+	COMM_MSG(LOG_HEADINGS,"renderer setup...");
+
 	// preload sprite data
 	// generate sprite vertex data
+	COMM_LOG("pre-loading basic geometry");
 	float vertices[] = { -.5f,.5f,.0f,.0f, .5f,.5f,1.f,.0f, .5f,-.5f,1.f,1.f, -.5f,-.5f,.0f,1.f };
 	uint32_t elements[] = { 0,2,1, 2,0,3 };
 
@@ -131,34 +92,12 @@ Renderer::Renderer()
 	spr_buffer.upload_elements(elements,PATTERN_SPRITE_ELEMENT_REPEAT*sizeof(uint32_t));
 
 	// setup sprite shader
+	COMM_LOG("2D shader preparation");
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
 
-	// setup sprite batches
-	/*
-	glGenBuffers(RENDERER_TEXTURE_BUFFER_COUNT,texture_buffers);
-	for (uint8_t i=0;i<RENDERER_TEXTURE_BUFFER_COUNT;i++) {
-		glBindBuffer(GL_PIXEL_PACK_BUFFER,texture_buffers[i]);
-		glBufferData(GL_PIXEL_PACK_BUFFER,RENDERER_TEXTURE_BUFFER_SIZE,NULL,GL_STREAM_DRAW);
-	}
-	glBindBuffer(GL_PIXEL_PACK_BUFFER,0);
-	*/
-
-	// setup loading thread
-	/*
-	th_inst_sprite_data = {
-		.context = &Core::gFrame.load_context,
-		.spr_buffer = &spr_buffer,
-		.spr_shader = &spr_shader
-	};
-	*/
-	//th_data = { .data = &th_inst_sprite_data,.state = &th_ldsprite_data };
-	/*
-	th_sprite_loader = std::thread(sprite_load_thread,&th_inst_sprite_data,&th_ldsprite_data);
-	th_sprite_loader.detach();
-	*/
-	//ld_thread = SDL_CreateThread(sprite_load_thread,"testing thread specification difference",(void*)NULL);
+	COMM_SCC("renderer ready");
 }
 
 /*
@@ -174,18 +113,6 @@ Renderer::Renderer()
 uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
 {
 	// create sprite source
-	/*
-	RTextureTuple tex = {
-
-		// source
-		.path = texpath,
-
-		// spritesheet segmentation
-		.rows = r,
-		.columns = c,
-		.frames = f
-	};
-	*/
 	RTextureTuple tuple = {
 
 		// source
@@ -264,8 +191,6 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
-	th_inst_sprite_data.ldbfr.push(&sb);
-	th_inst_sprite_data.snap_load = true;
 	for (RTextureTuple& t : sb.textures) {
 		t.texture.gpu_upload();
 		Texture::set_texture_parameter_clamp_to_edge();
@@ -343,13 +268,10 @@ void Renderer::update()
 */
 void Renderer::close()
 {
-	th_ldsprite_data.active = false;
-	SDL_WaitThread(ld_thread,nullptr);
-	/*
-	SDL_DestroyMutex(th_loadlock);
-	SDL_DestroyCond(th_gpu_write_condition);
-	*/
+	COMM_MSG(LOG_DESTRUCTION,"closing renderer...");
+	COMM_MSG(LOG_BLUE,"deprecated function called! not useful right now.");
 
-	//SDL_DestroySemaphore(th_lockdata);
-	//Toolbox::thread_detached_continue(th_ldsprite_data);
+	// TODO
+
+	COMM_SCC("done");
 }

@@ -74,6 +74,7 @@ constexpr const char* LOG_CLEAR = "\e[0;39m";
 
 // functionality shortcuts
 constexpr const char* LOG_HEADINGS = LOG_PURPLE;
+constexpr const char* LOG_DESTRUCTION = LOG_CYAN;
 constexpr const char* LOG_SETTINGS = LOG_YELLOW;
 constexpr const char* LOG_TIMING = LOG_GREY;
 
@@ -88,7 +89,8 @@ static inline void produce_timestamp(bool padding=true)
 }
 
 // basic console communication
-#define COMM_AWT(...) reset_timestamp(),printf(__VA_ARGS__),printf("... ");
+#define COMM_RST() reset_timestamp()
+#define COMM_AWT(...) COMM_RST(),printf(__VA_ARGS__),printf("... ");
 #define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
 #define COMM_MSG(col,...) produce_timestamp(),printf(" | %s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
 #define COMM_ERR(...) printf("%serror: ",LOG_RED),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
@@ -98,13 +100,12 @@ static inline void produce_timestamp(bool padding=true)
 // communicate by condition
 #define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
 #define COMM_ERR_COND(cnd,...) if (cnd) { COMM_ERR(__VA_ARGS__); }
-
-// switch errors
 #define COMM_ERR_FALLBACK(...) else { COMM_ERR(__VA_ARGS__); }
 
 // logger macro definition to exclude component in release build
 #else
 
+#define COMM_RST()
 #define COMM_AWT(...)
 #define COMM_CNF()
 #define COMM_MSG(col,...)
@@ -120,12 +121,14 @@ static inline void produce_timestamp(bool padding=true)
 
 
 // data to represent detatched and waiting thread state
+/*
 struct ThreadState
 {
 	std::mutex mux;
 	std::condition_variable cond;
 	volatile bool active = true;
 };
+*/
 
 class Toolbox
 {
@@ -147,16 +150,21 @@ public:
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
 	// threading
+	/*
 	static void thread_detached_continue(ThreadState& state);
 	static void thread_detached_stop(ThreadState& state);
+	*/
 
 	// vertex setup
+	/*
 	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
 	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
 			glm::vec2 pos,float width,float height);
 	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
+	*/
 
 	// inline definition
+	/*
 	static inline std::vector<float> create_sprite_canvas() {
 		return {
 			-1.0f,	1.0f,	0.0f,	1.0f,
@@ -167,6 +175,7 @@ public:
 			1.0f,	1.0f,	1.0f,	1.0f
 		};
 	}
+	*/
 	// TODO: find out if vectorcopy is optimized away when inline
 };
 

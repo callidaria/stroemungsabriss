@@ -13,10 +13,6 @@
 
 // memory
 constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
-constexpr uint8_t RENDERER_TEXTURE_BUFFER_COUNT = 4;
-constexpr uint32_t RENDERER_TEXTURE_BUFFER_WIDTH = 4096;
-constexpr uint32_t RENDERER_TEXTURE_BUFFER_HEIGHT = 4096;
-constexpr uint32_t RENDERER_TEXTURE_BUFFER_SIZE = RENDERER_TEXTURE_BUFFER_WIDTH*RENDERER_TEXTURE_BUFFER_HEIGHT*4;
 
 
 // basic functionality of 2D geometry
@@ -41,28 +37,14 @@ struct RTransform2D
 	glm::mat4 model = glm::mat4(1.f);
 };
 
-// texture duality structure containing source and data
-/*
-struct RTextureTuple
-{
-	// utility
-	inline void load() { glGenTextures(1,&texture), Toolbox::load_texture(texture,path); }
-
-	// data
-	uint32_t texture;
-	const char* path;
-
-	// math
-	uint8_t rows,columns;
-	uint8_t frames;
-};*/
-
+// TODO
 struct TextureAtlasTuple
 {
 	uint8_t rows,columns;
 	uint16_t frames;
 };
 
+// TODO
 struct RTextureTuple
 {
 	Texture texture;
@@ -104,21 +86,10 @@ struct SpriteAnimation
 // buffer data to seperately load and display to other buffers
 struct SpriteBuffer
 {
-	//std::vector<RTextureTuple> textures;
 	std::vector<RTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
 	BufferAttribs attribs;
-};
-
-// load thread data
-struct SpriteLoadInstrData
-{
-	SDL_GLContext* context;
-	Buffer* spr_buffer;
-	Shader* spr_shader;
-	std::queue<SpriteBuffer*> ldbfr;
-	volatile bool snap_load = false;
 };
 
 
@@ -149,18 +120,7 @@ public:
 
 	// buffers
 	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
-	//uint32_t texture_buffers[RENDERER_TEXTURE_BUFFER_COUNT];
-
-private:
-
-	// threading
-	//std::thread th_sprite_loader;
-	SDL_Thread* ld_thread;
 };
-
-static inline ThreadState th_ldsprite_data;
-static inline SpriteLoadInstrData th_inst_sprite_data;
-//static inline CombinedLoadData th_data;
 
 inline Renderer g_Renderer = Renderer();
 

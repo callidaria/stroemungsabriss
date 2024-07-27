@@ -199,21 +199,25 @@ void Toolbox::transition_float_on_condition(float& tval,float tspeed,bool cnd)
 /*
 	TODO
 */
+/*
 void Toolbox::thread_detached_continue(ThreadState& state)
 {
 	std::unique_lock lock(state.mux);
 	lock.unlock();
 	state.cond.notify_one();
 }
+*/
 
 /*
 	TODO
 */
+/*
 void Toolbox::thread_detached_stop(ThreadState& state)
 {
 	std::unique_lock lock(state.mux);
 	state.cond.wait(lock);
 }
+*/
 // FIXME: todo unique lock creation may abuse performace a bit,
 //		also parameters are many but my patience is limited...
 
@@ -231,6 +235,7 @@ void Toolbox::thread_detached_stop(ThreadState& state)
 	purpose: create vertices for a sprite, supported by an additional element buffer
 	NOTE: expects memory to be allocated
 */
+/*
 void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
 {
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
@@ -238,12 +243,14 @@ void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 
 	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
+*/
 
 /*
 	O(1) /+load -> (static)
 	purpose: create vertices for a sprite without element buffer, drawn per triangle
 	NOTE: expects memory to be allocated
 */
+/*
 void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
 		glm::vec2 pos,float width,float height)
 {
@@ -254,6 +261,7 @@ void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
 	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
 }
+*/
 
 /*
 	O(1) /+load -> (static)
@@ -263,9 +271,11 @@ void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
 	\param e: element array
 	NOTE: expects memory to be allocated
 */
+/*
 void Toolbox::generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e)
 {
 	e[k0++] = k1,		e[k0++] = k1+2,		e[k0++] = k1+1,
 	e[k0++] = k1+2,		e[k0++] = k1,		e[k0++] = k1+3;
 	k1 += PATTERN_SPRITE_LOAD_REPEAT;;
 }
+*/

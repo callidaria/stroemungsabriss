@@ -56,7 +56,7 @@ Config::Config()
 */
 void Config::write_changes()
 {
-	COMM_MSG(LOG_BLUE,"writing log changes...");
+	COMM_AWT("writing log changes...");
 
 	// frame resolution preset translation to vector
 	g_Config.vFrameResolutionWidth = resolutionWidthPresets[g_Config.iFrameResolutionPreset];
@@ -68,5 +68,5 @@ void Config::write_changes()
 
 	// close config file
 	chwrite.close();
-	COMM_SCC("successfully written config changes");
+	COMM_CNF();
 }

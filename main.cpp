@@ -48,6 +48,7 @@ int main(int argc,char** argv)
 	}
 
 	// vanish
+	COMM_RST();
 	g_Renderer.close();
 	g_Input.close();
 	g_Frame.vanish();

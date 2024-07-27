@@ -17,6 +17,5 @@ public:
 };
 
 inline Camera2D g_Camera2D = Camera2D(1280.f,720.f);
-// TODO: relocate
 
 #endif
