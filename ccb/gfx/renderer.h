@@ -1,8 +1,6 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
-#include <queue>
-
 #include "../mat/toolbox.h"
 #include "../mat/camera2d.h"  // TODO: join camera definitions into one file
 #include "../fcn/buffer.h"
@@ -16,17 +14,21 @@ constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
 
 
 // basic functionality of 2D geometry
-struct RTransform2D
+struct Transform2D
 {
-	// transformation utility
+	// transformation combined
 	void transform(glm::vec2 p,float w,float h,float r);
 	void transform(glm::vec2 p,float w,float h,float r,glm::vec2 a);
+	void to_origin();
+
+	// transformation utility
 	inline void translate(glm::vec2 p) { model = glm::translate(model,glm::vec3(p.x,p.y,0)); }
 	inline void scale(float w,float h) { model[0][0] = w, model[1][1] = h; }
-	void scale(float w,float h,glm::vec2 a);
 	inline void rotate(float r) { model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1)); }
+
+	// arbitrary transformation
+	void scale(float w,float h,glm::vec2 a);
 	void rotate(float r,glm::vec2 a);
-	inline void to_origin() { translate(position), scale(width,height); }
 
 	// attributes
 	const glm::vec2 position;
@@ -70,7 +72,7 @@ struct BufferAttribs
 // render entry connected to loaded sprite and individually transformed
 struct Sprite
 {
-	RTransform2D transform;
+	Transform2D transform;
 	uint16_t texture_id;
 	glm::vec2 atlas_index = glm::vec2(0);
 };

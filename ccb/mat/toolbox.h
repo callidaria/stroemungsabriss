@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
 #include <map>
 #include <fstream>
 #include <thread>
@@ -77,6 +78,7 @@ constexpr const char* LOG_HEADINGS = LOG_PURPLE;
 constexpr const char* LOG_DESTRUCTION = LOG_CYAN;
 constexpr const char* LOG_SETTINGS = LOG_YELLOW;
 constexpr const char* LOG_TIMING = LOG_GREY;
+constexpr const char* LOG_SNITCH = LOG_BLUE;
 
 // time performance records
 inline std::chrono::steady_clock::time_point log_tdelta = std::chrono::steady_clock::now();
@@ -100,6 +102,7 @@ static inline void produce_timestamp(bool padding=true)
 // communicate by condition
 #define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
 #define COMM_ERR_COND(cnd,...) if (cnd) { COMM_ERR(__VA_ARGS__); }
+#define COMM_MSG_FALLBACK(col,...) else { COMM_MSG(col,__VA_ARGS__); }
 #define COMM_ERR_FALLBACK(...) else { COMM_ERR(__VA_ARGS__); }
 
 // logger macro definition to exclude component in release build
@@ -114,7 +117,7 @@ static inline void produce_timestamp(bool padding=true)
 #define COMM_SCC(...)
 #define COMM_MSG_COND(cnd,col,...)
 #define COMM_ERR_COND(cnd,...)
-#define COMM_ERR_COND_BREAK(cnd,ret,...)
+#define COMM_MSG_FALLBACK(col,...)
 #define COMM_ERR_FALLBACK(...)
 
 #endif

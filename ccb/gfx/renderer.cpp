@@ -8,7 +8,7 @@
 /*
 	TODO
 */
-void RTransform2D::transform(glm::vec2 p,float w,float h,float r)
+void Transform2D::transform(glm::vec2 p,float w,float h,float r)
 {
 	rotate(r);
 	scale(w,h);
@@ -18,7 +18,7 @@ void RTransform2D::transform(glm::vec2 p,float w,float h,float r)
 /*
 	TODO
 */
-void RTransform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
+void Transform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
 {
 	// reset towards arbitrary origin
 	model = glm::mat4(1.f);
@@ -36,7 +36,16 @@ void RTransform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
 /*
 	TODO
 */
-void RTransform2D::scale(float w,float h,glm::vec2 a)
+void Transform2D::to_origin()
+{
+	translate(position);
+	scale(width,height);
+}
+
+/*
+	TODO
+*/
+void Transform2D::scale(float w,float h,glm::vec2 a)
 {
 	// reset towards arbitrary origin
 	model = glm::mat4(1.f);
@@ -51,7 +60,7 @@ void RTransform2D::scale(float w,float h,glm::vec2 a)
 /*
 	TODO
 */
-void RTransform2D::rotate(float r,glm::vec2 a)
+void Transform2D::rotate(float r,glm::vec2 a)
 {
 	// reset towards arbitrary origin
 	float t_wfac = model[0][0], t_hfac = model[1][1];
@@ -191,6 +200,8 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 */
 void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 {
+	COMM_AWT("streaming %li textures",sb.textures.size());
+
 	for (RTextureTuple& t : sb.textures) {
 		t.texture.gpu_upload();
 		Texture::set_texture_parameter_clamp_to_edge();
@@ -198,6 +209,9 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 		t.texture.generate_mipmap();
 		t.texture.cleanup();
 	}
+	sb.attribs.state = (sb.attribs.auto_stateswitch) ? RBFR_RENDER : RBFR_IDLE;
+
+	COMM_CNF();
 }
 
 /*
@@ -233,7 +247,6 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 		shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		//glBindTexture(GL_TEXTURE_2D,sb.textures[sb.sprites[i].texture_id].texture);
 		sb.textures[sb.sprites[i].texture_id].texture.bind();
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)0);
 	}
@@ -269,7 +282,7 @@ void Renderer::update()
 void Renderer::close()
 {
 	COMM_MSG(LOG_DESTRUCTION,"closing renderer...");
-	COMM_MSG(LOG_BLUE,"deprecated function called! not useful right now.");
+	COMM_MSG(LOG_SNITCH,"deprecated function called! not useful right now.");
 
 	// TODO
 

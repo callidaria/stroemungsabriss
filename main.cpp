@@ -24,12 +24,14 @@ int main(int argc,char** argv)
 	//Core::gFrame.set_refresh_rate(60);
 
 	// register test assets
+	COMM_AWT("loading test sprites and textures");
 	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
 	g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
 	g_Renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
 	g_Renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
 	g_Renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
+	COMM_CNF();
 
 	// MAIN LOOP
 	bool run = true;
@@ -43,7 +45,7 @@ int main(int argc,char** argv)
 		Frame::clear();
 
 		// update
-		//Core::gRenderer.update();
+		g_Renderer.update();
 		g_Frame.update();
 	}
 
