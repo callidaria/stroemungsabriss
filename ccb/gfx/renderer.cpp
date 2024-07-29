@@ -111,6 +111,7 @@ Renderer::Renderer()
 
 /*
 	!O(1)m /+load -> (public)
+	// TODO: add purpose
 	\param bfr_id: id of sprite buffer to write animation to
 	\param texpath: path to file containing spritesheet
 	\param r (default=1): rows on spritesheet
@@ -122,27 +123,24 @@ Renderer::Renderer()
 uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
 {
 	// create sprite source
-	RTextureTuple tuple = {
+	SpriteTextureTuple tuple = {
 
 		// source
 		.texture = Texture(texpath),
 
 		// spritesheet segmentation
-		.atlas = {
-			.rows = r,
-			.columns = c,
-			.frames = f
-		}
+		.rows = r,
+		.columns = c,
+		.frames = f
 	};
 
 	// write and return reference id
-	bfr_sprite[bfr_id].textures.push_back(tuple);
-	return bfr_sprite[bfr_id].textures.size()-1;
+	sprite_batches[bfr_id].textures.push_back(tuple);
+	return sprite_batches[bfr_id].textures.size()-1;
 }
 
 /*
 	!O(1)m /+load -> (public)
-	purpose: add new spritesheet to renderer
 	\param bfr_id: id of sprite buffer to write animation to
 	\param tex_id: id of spritesheet texture to link
 	\param p: origin position of added sprite
@@ -150,7 +148,7 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 	\param h: height of added sprite
 	TODO extend param description
 */
-void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,bool animate,uint8_t s)
+void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h)
 {
 	// information setup
 	Sprite sprite = {
@@ -168,15 +166,23 @@ void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float 
 
 	// transform and write
 	sprite.transform.to_origin();
-	bfr_sprite[bfr_id].sprites.push_back(sprite);
+	sprite_batches[batch_id].sprites.push_back(sprite);
+}
 
-	// register animation if requested
-	if (animate)
-		bfr_sprite[bfr_id].animations.push_back({
-			.id = bfr_sprite[bfr_id].sprites.size()-1,
-			.cycle_duration = s,
-			.frame_duration = (float)s/bfr_sprite[bfr_id].textures[tex_id].atlas.frames
+/*
+	TODO
+*/
+void Renderer::register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
+{
+	// add animation data
+	sprite_batches[batch_id].animations.push_back({
+			.id = sprite_batches[batch_id].sprites.size(),
+			.cycle_duration = dur,
+			.frame_duration = (float)dur/sprite_batches[batch_id].textures[tex_id].frames
 		});
+
+	// register sprite data
+	register_sprite(batch_id,tex_id,p,w,h);
 }
 
 
@@ -184,12 +190,12 @@ void Renderer::register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float 
  *	TODO
 */
 
-typedef void (*sprite_buffer_routine)(SpriteBuffer&,Shader&);
+typedef void (*sprite_buffer_routine)(SpriteBatch&,Shader&);
 
 /*
 	TODO
 */
-void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
+void sprite_buffer_idle(SpriteBatch& sb,Shader& shader)
 {
 	// TODO: what even do here? maintaining checks, idle update, can this be skipped?
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
@@ -198,11 +204,12 @@ void sprite_buffer_idle(SpriteBuffer& sb,Shader& shader)
 /*
 	TODO
 */
-void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
+void sprite_buffer_load(SpriteBatch& sb,Shader& shader)
 {
 	COMM_AWT("streaming %li textures",sb.textures.size());
 
-	for (RTextureTuple& t : sb.textures) {
+	for (SpriteTextureTuple& t : sb.textures)
+	{
 		t.texture.gpu_upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
@@ -217,12 +224,13 @@ void sprite_buffer_load(SpriteBuffer& sb,Shader& shader)
 /*
 	TODO
 */
-void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
+void sprite_buffer_render(SpriteBatch& sb,Shader& shader)
 {
 	// iterate animation updates
-	for (SpriteAnimation& ta : sb.animations) {
+	for (SpriteAnimation& ta : sb.animations)
+	{
 		Sprite& ts = sb.sprites[ta.id];
-		RTextureTuple& tt = sb.textures[ts.texture_id];
+		SpriteTextureTuple& tt = sb.textures[ts.texture_id];
 
 		// calculate current frame
 		bool inc_anim = ta.anim_progression<ta.cycle_duration;
@@ -232,17 +240,18 @@ void sprite_buffer_render(SpriteBuffer& sb,Shader& shader)
 
 		// calculate spritesheet location
 		int index = ta.anim_progression/ta.frame_duration;
-		ts.atlas_index = glm::vec2(index%tt.atlas.columns,index/tt.atlas.columns);
+		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
 	}
 
 	// iterate sprites
-	for (uint16_t i=0;i<sb.sprites.size();i++) {
+	for (uint16_t i=0;i<sb.sprites.size();i++)
+	{
 		Sprite& ts = sb.sprites[i];
-		RTextureTuple& tt = sb.textures[ts.texture_id];
+		SpriteTextureTuple& tt = sb.textures[ts.texture_id];
 
 		// upload sprite attributes
-		shader.upload_int("row",tt.atlas.rows);
-		shader.upload_int("col",tt.atlas.columns);
+		shader.upload_int("row",tt.rows);
+		shader.upload_int("col",tt.columns);
 		shader.upload_vec2("i_tex",ts.atlas_index);
 		shader.upload_matrix("model",ts.transform.model);
 
@@ -270,8 +279,9 @@ void Renderer::update()
 	spr_buffer.bind();
 
 	// iterate sprite buffer
-	for (uint8_t i=0;i<RENDERER_BUFFERS_SPRITE_COUNT;i++) {
-		SpriteBuffer& bfr = bfr_sprite[i];
+	for (uint8_t i=0;i<RENDERER_BATCHES_SPRITE_COUNT;i++)
+	{
+		SpriteBatch& bfr = sprite_batches[i];
 		routine_sbuffers[bfr.attribs.state](bfr,spr_shader);
 	}
 }

@@ -28,9 +28,9 @@ int main(int argc,char** argv)
 	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
 	g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
 	g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
-	g_Renderer.register_sprite(0,sid+1,glm::vec2(300,200),75,75,true,20);
-	g_Renderer.bfr_sprite[0].attribs.state = RBFR_LOAD;
-	g_Renderer.bfr_sprite[0].attribs.auto_stateswitch = true;
+	g_Renderer.register_animation(0,sid+1,glm::vec2(300,200),75,75,20);
+	g_Renderer.sprite_batches[0].attribs.state = RBFR_LOAD;
+	g_Renderer.sprite_batches[0].attribs.auto_stateswitch = true;
 	COMM_CNF();
 
 	// MAIN LOOP

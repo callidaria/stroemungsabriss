@@ -6,11 +6,11 @@
 Texture::Texture(const char* path,bool corrected)
 {
 	// setup
-	image.format = GL_RGBA+corrected*0x7338;
+	m_format = GL_RGBA+corrected*0x7338;
 	glGenTextures(1,&texture);
 
 	// load texture data from source
-	image.data = stbi_load(path,&image.width,&image.height,0,STBI_rgb_alpha);
+	m_data = stbi_load(path,&m_width,&m_height,0,STBI_rgb_alpha);
 }
 
 /*
@@ -19,15 +19,7 @@ Texture::Texture(const char* path,bool corrected)
 void Texture::gpu_upload()
 {
 	bind();
-	glTexImage2D(GL_TEXTURE_2D,0,image.format,image.width,image.height,0,GL_RGBA,GL_UNSIGNED_BYTE,image.data);
-}
-
-/*
-	TODO
-*/
-void Texture::cleanup()
-{
-	stbi_image_free(image.data);
+	glTexImage2D(GL_TEXTURE_2D,0,m_format,m_width,m_height,0,GL_RGBA,GL_UNSIGNED_BYTE,m_data);
 }
 
 /*

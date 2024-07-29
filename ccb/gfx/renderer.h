@@ -10,9 +10,10 @@
 
 
 // memory
-constexpr uint8_t RENDERER_BUFFERS_SPRITE_COUNT = 4;
+constexpr uint8_t RENDERER_BATCHES_SPRITE_COUNT = 4;
 
 
+// transformation math
 // basic functionality of 2D geometry
 struct Transform2D
 {
@@ -39,34 +40,14 @@ struct Transform2D
 	glm::mat4 model = glm::mat4(1.f);
 };
 
-// TODO
-struct TextureAtlasTuple
-{
-	uint8_t rows,columns;
-	uint16_t frames;
-};
 
-// TODO
-struct RTextureTuple
+// sprite data
+// texture information for sprites
+struct SpriteTextureTuple
 {
 	Texture texture;
-	TextureAtlasTuple atlas;
-};
-
-// description of current buffer state, is it rendering, is it loading, should it be ignored?
-enum BufferState
-{
-	RBFR_IDLE,
-	RBFR_LOAD,
-	RBFR_RENDER,
-	RBFR_STATE_COUNT
-};
-
-// attribute structure for all object buffers
-struct BufferAttribs
-{
-	BufferState state = RBFR_IDLE;
-	bool auto_stateswitch = false;
+	uint8_t rows,columns;
+	uint16_t frames;
 };
 
 // render entry connected to loaded sprite and individually transformed
@@ -85,13 +66,31 @@ struct SpriteAnimation
 	float frame_duration,anim_progression = .0f;
 };
 
-// buffer data to seperately load and display to other buffers
-struct SpriteBuffer
+
+// batch datastructure definitions
+// description of current buffer state, is it rendering, is it loading, should it be ignored?
+enum BatchState
 {
-	std::vector<RTextureTuple> textures;
+	RBFR_IDLE,
+	RBFR_LOAD,
+	RBFR_RENDER,
+	RBFR_STATE_COUNT
+};
+
+// attribute structure for all object buffers
+struct BatchAttribs
+{
+	BatchState state = RBFR_IDLE;
+	bool auto_stateswitch = false;
+};
+
+// buffer data to seperately load and display to other buffers
+struct SpriteBatch
+{
+	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
-	BufferAttribs attribs;
+	BatchAttribs attribs;
 };
 
 
@@ -107,8 +106,8 @@ public:
 	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
 
 	// registration
-	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,
-			bool animate=false,uint8_t s=0);
+	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h);
+	void register_animation(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 
 	// stages
 	void update();
@@ -121,7 +120,7 @@ public:
 	Shader spr_shader;
 
 	// buffers
-	SpriteBuffer bfr_sprite[RENDERER_BUFFERS_SPRITE_COUNT];
+	SpriteBatch sprite_batches[RENDERER_BATCHES_SPRITE_COUNT];
 };
 
 inline Renderer g_Renderer = Renderer();

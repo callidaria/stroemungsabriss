@@ -3,12 +3,6 @@
 
 #include "../mat/toolbox.h"
 
-// information about image data
-struct ImageData
-{
-	int32_t width,height,format;
-	void* data;
-};
 
 // representing textures
 class Texture
@@ -25,7 +19,8 @@ public:
 
 	// interaction
 	void gpu_upload();
-	void cleanup();
+	inline void cleanup() { stbi_image_free(m_data); }
+	// TODO: is image free irrelevant when texture object itself gets deconstructed
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
@@ -40,7 +35,8 @@ public:
 	static void set_texture_parameter_repeat();
 
 	// filter features
-	static inline void set_texture_filter_bias(float bias) { glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,bias); }
+	static inline void set_texture_filter_bias(float bias)
+		{ glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,bias); }
 	static inline void generate_mipmap() { glGenerateMipmap(GL_TEXTURE_2D); }
 
 public:
@@ -51,7 +47,8 @@ public:
 private:
 
 	// image
-	ImageData image;
+	int32_t m_width,m_height,m_format;
+	void* m_data;
 };
 
 #endif
