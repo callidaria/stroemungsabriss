@@ -22,6 +22,23 @@ void Toolbox::copy_file(const char* origin,const char* dest)
 }
 
 /*
+	TODO
+*/
+std::vector<std::string> Toolbox::split_string(std::string str,char delim)
+{
+	// prepare buffer read
+	std::vector<std::string> out;
+	std::stringstream bfr(str);
+	std::string substr;
+
+	// execute buffer read until end, then return substring list
+	while (std::getline(bfr,substr,delim))
+		out.push_back(substr);
+	return out;
+}
+// FIXME: contemplate improving performance
+
+/*
 	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static) !O(n)
 	purpose: load object from file
 	\param path: path to .obj file

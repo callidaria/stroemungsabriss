@@ -109,6 +109,46 @@ Renderer::Renderer()
 	COMM_SCC("renderer ready");
 }
 
+
+/**
+ *	TODO
+*/
+
+// loader definition command list
+const std::string gfxcmd[] = { "texture","sprite" };
+
+/*
+	TODO
+*/
+void Renderer::compile(const char* path)
+{
+	COMM_LOG("renderer: reading load definition file \"%s\"",path);
+
+	// find available batch
+	// TODO
+	uint8_t batch_id = 0;
+
+	// open file
+	std::ifstream file(path,std::ios::in);
+	std::string cmd_line;
+	while (getline(file,cmd_line)) {
+
+		// split command and its arguments
+		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
+		std::cout << args[0] << ' ' args[1] << '\n';
+
+		// call command
+		// TODO
+	}
+
+	// close file and ready batch load
+	file.close();
+	sprite_batches[batch_id].state = RBFR_LOAD;
+
+	COMM_SCC("");
+}
+
+
 /*
 	!O(1)m /+load -> (public)
 	// TODO: add purpose
@@ -216,7 +256,7 @@ void sprite_buffer_load(SpriteBatch& sb,Shader& shader)
 		t.texture.generate_mipmap();
 		t.texture.cleanup();
 	}
-	sb.attribs.state = (sb.attribs.auto_stateswitch) ? RBFR_RENDER : RBFR_IDLE;
+	sb.state = RBFR_RENDER;
 
 	COMM_CNF();
 }
@@ -282,7 +322,7 @@ void Renderer::update()
 	for (uint8_t i=0;i<RENDERER_BATCHES_SPRITE_COUNT;i++)
 	{
 		SpriteBatch& bfr = sprite_batches[i];
-		routine_sbuffers[bfr.attribs.state](bfr,spr_shader);
+		routine_sbuffers[bfr.state](bfr,spr_shader);
 	}
 }
 

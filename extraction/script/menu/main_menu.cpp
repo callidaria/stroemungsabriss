@@ -426,6 +426,7 @@ void LDCCompiler::compile(const char* path,std::vector<LDCCluster>& rClusters)
 		}
 	}
 }
+// TODO: infuse all menu code with the power of my new logging system!
 
 
 /**

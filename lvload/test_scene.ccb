@@ -1,0 +1,5 @@
+texture ./res/bllt_ffdir.png
+texture ./res/continue_dialogue.png 2 3 5
+
+sprite 0 150 150 100 100
+sprite 1 300 200 75 75 20

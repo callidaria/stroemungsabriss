@@ -140,6 +140,9 @@ public:
 	// system
 	static void copy_file(const char* origin,const char* dest);
 
+	// data helper
+	static std::vector<std::string> split_string(std::string str,char delim);
+
 	// loader
 	//static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
 	//		float scl,glm::vec3 rot);

@@ -41,6 +41,17 @@ struct Transform2D
 };
 
 
+// batch datastructure definitions
+// description of current buffer state, is it rendering, is it loading, should it be ignored?
+enum BatchState
+{
+	RBFR_IDLE,
+	RBFR_LOAD,
+	RBFR_RENDER,
+	RBFR_STATE_COUNT
+};
+
+
 // sprite data
 // texture information for sprites
 struct SpriteTextureTuple
@@ -66,31 +77,13 @@ struct SpriteAnimation
 	float frame_duration,anim_progression = .0f;
 };
 
-
-// batch datastructure definitions
-// description of current buffer state, is it rendering, is it loading, should it be ignored?
-enum BatchState
-{
-	RBFR_IDLE,
-	RBFR_LOAD,
-	RBFR_RENDER,
-	RBFR_STATE_COUNT
-};
-
-// attribute structure for all object buffers
-struct BatchAttribs
-{
-	BatchState state = RBFR_IDLE;
-	bool auto_stateswitch = false;
-};
-
-// buffer data to seperately load and display to other buffers
+// sprite batch data to seperately load and display to other buffers
 struct SpriteBatch
 {
 	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
-	BatchAttribs attribs;
+	BatchState state = RBFR_IDLE;
 };
 
 
@@ -101,6 +94,9 @@ public:
 	// construction
 	Renderer();
 	~Renderer() {  }
+
+	// interpretation
+	void compile(const char* path);
 
 	// object adder
 	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
