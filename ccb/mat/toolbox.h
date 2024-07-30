@@ -2,6 +2,7 @@
 #define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <queue>

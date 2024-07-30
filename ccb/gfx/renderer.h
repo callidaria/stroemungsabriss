@@ -9,7 +9,8 @@
 #include "texture.h"
 
 
-// memory
+// maxima
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 2;
 constexpr uint8_t RENDERER_BATCHES_SPRITE_COUNT = 4;
 
 
@@ -99,11 +100,11 @@ public:
 	void compile(const char* path);
 
 	// object adder
-	uint16_t add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
+	uint16_t add_sprite(uint8_t batch_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
 
 	// registration
-	void register_sprite(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h);
-	void register_animation(uint8_t bfr_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
+	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
+	void register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 
 	// stages
 	void update();

@@ -25,6 +25,12 @@ int main(int argc,char** argv)
 
 	// register test assets
 	g_Renderer.compile("./lvload/test_scene.ccb");
+	/*COMM_AWT("loading scene");
+	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
+	g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
+	g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
+	g_Renderer.register_animation(0,sid+1,glm::vec2(300,200),75,75,20);
+	COMM_CNF();*/
 
 	// MAIN LOOP
 	bool run = true;

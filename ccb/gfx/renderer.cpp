@@ -115,7 +115,56 @@ Renderer::Renderer()
 */
 
 // loader definition command list
-const std::string gfxcmd[] = { "texture","sprite" };
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite" };
+
+/*
+	TODO
+*/
+void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
+{
+	// arguments to variables
+	const char* path = args[1].c_str();
+	uint8_t rows = 1, cols = 1, frames = 1;
+
+	// check for texture atlas
+	if (args.size()>2) rows = stoi(args[2]), cols = stoi(args[3]), frames = stoi(args[4]);
+
+	// write texture
+	g_Renderer.add_sprite(batch_id,path,rows,cols,frames);
+}
+
+/*
+	TODO
+*/
+void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
+{
+	// arguments to variables
+	uint16_t texture_id = stoi(args[1]);
+	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
+	float width = stof(args[4]), height = stof(args[5]);
+
+	// register sprite or animation based on argument length
+	if (args.size()>6)
+	{
+		uint8_t duration = stoi(args[6]);
+		g_Renderer.register_animation(batch_id,texture_id,position,width,height,duration);
+	}
+	else g_Renderer.register_sprite(batch_id,texture_id,position,width,height);
+}
+
+/*
+	TODO
+*/
+void interpreter_logic_syntax_error(uint8_t batch_id,std::vector<std::string>& args)
+{
+	COMM_ERR("syntax error while writing to batch %i: \"%s\" not a valid command",batch_id,args[0].c_str());
+}
+
+typedef void (*gfx_interpreter_logic)(uint8_t,std::vector<std::string>&);
+const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
+	interpreter_logic_texture,interpreter_logic_sprite,
+	interpreter_logic_syntax_error
+};
 
 /*
 	TODO
@@ -133,19 +182,23 @@ void Renderer::compile(const char* path)
 	std::string cmd_line;
 	while (getline(file,cmd_line)) {
 
-		// split command and its arguments
+		// split command and its arguments, interrupt when empty command
 		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
-		std::cout << args[0] << ' ' args[1] << '\n';
+		if (!args.size()) continue;
+
+		// correlate command
+		uint8_t i = 0;
+		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&args[0]!=gfxcmd[i]) i++;
 
 		// call command
-		// TODO
+		cmd_handler[i](batch_id,args);
 	}
 
 	// close file and ready batch load
 	file.close();
 	sprite_batches[batch_id].state = RBFR_LOAD;
 
-	COMM_SCC("");
+	COMM_SCC("interpretation completed");
 }
 
 

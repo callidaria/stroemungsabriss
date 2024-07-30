@@ -173,6 +173,7 @@ enum LDCCommandID
 	SYNTAX_ERROR,
 	COMMAND_COUNT = SYNTAX_ERROR
 };
+// FIXME: enumerator definition is not justified, only usage is command_count
 
 // enumeration of possible list entity states as defined by LDC language
 enum LDCEntityType
