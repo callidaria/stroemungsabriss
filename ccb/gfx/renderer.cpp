@@ -173,9 +173,11 @@ void Renderer::compile(const char* path)
 {
 	COMM_LOG("renderer: reading load definition file \"%s\"",path);
 
-	// find available batch
-	// TODO
+	// find available batch by unix approach: last batch will be overwritten if no idle
 	uint8_t batch_id = 0;
+	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&batches[batch_id].state!=RBFR_IDLE) batch_id++;
+	COMM_LOG("batch %i selected for writing",batch_id);
+	COMM_ERR_COND(batches[batch_id].state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
 
 	// open file
 	std::ifstream file(path,std::ios::in);
@@ -196,7 +198,7 @@ void Renderer::compile(const char* path)
 
 	// close file and ready batch load
 	file.close();
-	sprite_batches[batch_id].state = RBFR_LOAD;
+	batches[batch_id].state = RBFR_LOAD;
 
 	COMM_SCC("interpretation completed");
 }
@@ -228,8 +230,8 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 	};
 
 	// write and return reference id
-	sprite_batches[bfr_id].textures.push_back(tuple);
-	return sprite_batches[bfr_id].textures.size()-1;
+	batches[bfr_id].textures.push_back(tuple);
+	return batches[bfr_id].textures.size()-1;
 }
 
 /*
@@ -259,7 +261,7 @@ void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,floa
 
 	// transform and write
 	sprite.transform.to_origin();
-	sprite_batches[batch_id].sprites.push_back(sprite);
+	batches[batch_id].sprites.push_back(sprite);
 }
 
 /*
@@ -268,10 +270,10 @@ void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,floa
 void Renderer::register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
 {
 	// add animation data
-	sprite_batches[batch_id].animations.push_back({
-			.id = sprite_batches[batch_id].sprites.size(),
+	batches[batch_id].animations.push_back({
+			.id = batches[batch_id].sprites.size(),
 			.cycle_duration = dur,
-			.frame_duration = (float)dur/sprite_batches[batch_id].textures[tex_id].frames
+			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames
 		});
 
 	// register sprite data
@@ -283,12 +285,12 @@ void Renderer::register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,f
  *	TODO
 */
 
-typedef void (*sprite_buffer_routine)(SpriteBatch&,Shader&);
+typedef void (*batch_routine)(RenderBatch&);
 
 /*
 	TODO
 */
-void sprite_buffer_idle(SpriteBatch& sb,Shader& shader)
+void batch_idle(RenderBatch& batch)
 {
 	// TODO: what even do here? maintaining checks, idle update, can this be skipped?
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
@@ -297,11 +299,11 @@ void sprite_buffer_idle(SpriteBatch& sb,Shader& shader)
 /*
 	TODO
 */
-void sprite_buffer_load(SpriteBatch& sb,Shader& shader)
+void batch_load(RenderBatch& batch)
 {
-	COMM_AWT("streaming %li textures",sb.textures.size());
+	COMM_AWT("streaming %li textures",batch.textures.size());
 
-	for (SpriteTextureTuple& t : sb.textures)
+	for (SpriteTextureTuple& t : batch.textures)
 	{
 		t.texture.gpu_upload();
 		Texture::set_texture_parameter_clamp_to_edge();
@@ -309,7 +311,7 @@ void sprite_buffer_load(SpriteBatch& sb,Shader& shader)
 		t.texture.generate_mipmap();
 		t.texture.cleanup();
 	}
-	sb.state = RBFR_RENDER;
+	batch.state = RBFR_RENDER;
 
 	COMM_CNF();
 }
@@ -317,13 +319,13 @@ void sprite_buffer_load(SpriteBatch& sb,Shader& shader)
 /*
 	TODO
 */
-void sprite_buffer_render(SpriteBatch& sb,Shader& shader)
+void batch_render(RenderBatch& batch)
 {
 	// iterate animation updates
-	for (SpriteAnimation& ta : sb.animations)
+	for (SpriteAnimation& ta : batch.animations)
 	{
-		Sprite& ts = sb.sprites[ta.id];
-		SpriteTextureTuple& tt = sb.textures[ts.texture_id];
+		Sprite& ts = batch.sprites[ta.id];
+		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
 
 		// calculate current frame
 		bool inc_anim = ta.anim_progression<ta.cycle_duration;
@@ -337,29 +339,25 @@ void sprite_buffer_render(SpriteBatch& sb,Shader& shader)
 	}
 
 	// iterate sprites
-	for (uint16_t i=0;i<sb.sprites.size();i++)
+	for (uint16_t i=0;i<batch.sprites.size();i++)
 	{
-		Sprite& ts = sb.sprites[i];
-		SpriteTextureTuple& tt = sb.textures[ts.texture_id];
+		Sprite& ts = batch.sprites[i];
+		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
 
 		// upload sprite attributes
-		shader.upload_int("row",tt.rows);
-		shader.upload_int("col",tt.columns);
-		shader.upload_vec2("i_tex",ts.atlas_index);
-		shader.upload_matrix("model",ts.transform.model);
+		g_Renderer.spr_shader.upload_int("row",tt.rows);
+		g_Renderer.spr_shader.upload_int("col",tt.columns);
+		g_Renderer.spr_shader.upload_vec2("i_tex",ts.atlas_index);
+		g_Renderer.spr_shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		sb.textures[sb.sprites[i].texture_id].texture.bind();
+		batch.textures[batch.sprites[i].texture_id].texture.bind();
 		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)0);
 	}
 }
 
 // behaviours mapped towards bufferstate enumeration
-sprite_buffer_routine routine_sbuffers[RBFR_STATE_COUNT] = {
-	sprite_buffer_idle,
-	sprite_buffer_load,
-	sprite_buffer_render
-};
+batch_routine batch_routines[RBFR_STATE_COUNT] = { batch_idle,batch_load,batch_render };
 
 
 /*
@@ -372,22 +370,9 @@ void Renderer::update()
 	spr_buffer.bind();
 
 	// iterate sprite buffer
-	for (uint8_t i=0;i<RENDERER_BATCHES_SPRITE_COUNT;i++)
+	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
 	{
-		SpriteBatch& bfr = sprite_batches[i];
-		routine_sbuffers[bfr.state](bfr,spr_shader);
+		RenderBatch& batch = batches[i];
+		batch_routines[batch.state](batch);
 	}
-}
-
-/*
-	TODO
-*/
-void Renderer::close()
-{
-	COMM_MSG(LOG_DESTRUCTION,"closing renderer...");
-	COMM_MSG(LOG_SNITCH,"deprecated function called! not useful right now.");
-
-	// TODO
-
-	COMM_SCC("done");
 }

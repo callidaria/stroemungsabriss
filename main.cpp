@@ -24,6 +24,10 @@ int main(int argc,char** argv)
 	//Core::gFrame.set_refresh_rate(60);
 
 	// register test assets
+	g_Renderer.batches[0].state = RBFR_RENDER;
+	g_Renderer.batches[1].state = RBFR_RENDER;
+	g_Renderer.batches[2].state = RBFR_RENDER;
+	g_Renderer.batches[3].state = RBFR_RENDER;
 	g_Renderer.compile("./lvload/test_scene.ccb");
 	/*COMM_AWT("loading scene");
 	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
@@ -50,7 +54,6 @@ int main(int argc,char** argv)
 
 	// vanish
 	COMM_RST();
-	g_Renderer.close();
 	g_Input.close();
 	g_Frame.vanish();
 	return 0;

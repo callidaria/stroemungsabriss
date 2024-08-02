@@ -11,7 +11,7 @@
 
 // maxima
 constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 2;
-constexpr uint8_t RENDERER_BATCHES_SPRITE_COUNT = 4;
+constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
 
 // transformation math
@@ -78,12 +78,15 @@ struct SpriteAnimation
 	float frame_duration,anim_progression = .0f;
 };
 
-// sprite batch data to seperately load and display to other buffers
-struct SpriteBatch
+// batch data to seperately load and display to other buffers
+struct RenderBatch
 {
+	// sprites
 	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
+
+	// attributes
 	BatchState state = RBFR_IDLE;
 };
 
@@ -108,7 +111,6 @@ public:
 
 	// stages
 	void update();
-	void close();
 
 public:
 
@@ -117,7 +119,7 @@ public:
 	Shader spr_shader;
 
 	// buffers
-	SpriteBatch sprite_batches[RENDERER_BATCHES_SPRITE_COUNT];
+	RenderBatch batches[RENDERER_BATCHES_COUNT];
 };
 
 inline Renderer g_Renderer = Renderer();
