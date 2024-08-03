@@ -103,8 +103,10 @@ static inline void produce_timestamp(bool padding=true)
 // communicate by condition
 #define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
 #define COMM_ERR_COND(cnd,...) if (cnd) { COMM_ERR(__VA_ARGS__); }
+#define COMM_LOG_COND(cnd,...) if (cnd) { COMM_LOG(__VA_ARGS__); }
 #define COMM_MSG_FALLBACK(col,...) else { COMM_MSG(col,__VA_ARGS__); }
 #define COMM_ERR_FALLBACK(...) else { COMM_ERR(__VA_ARGS__); }
+#define COMM_LOG_FALLBACK(...) else { COMM_LOG(__VA_ARGS__); }
 
 // logger macro definition to exclude component in release build
 #else
@@ -116,10 +118,13 @@ static inline void produce_timestamp(bool padding=true)
 #define COMM_ERR(...)
 #define COMM_LOG(...)
 #define COMM_SCC(...)
+
 #define COMM_MSG_COND(cnd,col,...)
 #define COMM_ERR_COND(cnd,...)
+#define COMM_LOG_COND(cnd,...)
 #define COMM_MSG_FALLBACK(col,...)
 #define COMM_ERR_FALLBACK(...)
+#define COMM_LOG_FALLBACK(...)
 
 #endif
 

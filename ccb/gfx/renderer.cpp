@@ -122,6 +122,12 @@ const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","spri
 */
 void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 {
+	COMM_LOG_COND(
+			args.size()>1,
+			"request texture: %s",args[1].c_str()
+		)
+		COMM_ERR_FALLBACK("texture request: not enough arguments provided");
+
 	// arguments to variables
 	const char* path = args[1].c_str();
 	uint8_t rows = 1, cols = 1, frames = 1;
@@ -138,6 +144,14 @@ void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 */
 void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 {
+	COMM_LOG_COND(
+			args.size()>5,
+			"register %s of texture %s: pos -> (%s,%s), dim -> %sx%s",
+			(args.size()>6) ? "animation" : "sprite",
+			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str(),args[5].c_str()
+		)
+		COMM_ERR_FALLBACK("sprite registration: not enough arguments provided");
+
 	// arguments to variables
 	uint16_t texture_id = stoi(args[1]);
 	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
@@ -180,6 +194,7 @@ void Renderer::compile(const char* path)
 	COMM_ERR_COND(batches[batch_id].state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
 
 	// open file
+	COMM_MSG(LOG_BLUE,"-> loading start");
 	std::ifstream file(path,std::ios::in);
 	std::string cmd_line;
 	while (getline(file,cmd_line)) {
@@ -197,6 +212,7 @@ void Renderer::compile(const char* path)
 	}
 
 	// close file and ready batch load
+	COMM_MSG(LOG_BLUE,"-> loading end");
 	file.close();
 	batches[batch_id].state = RBFR_LOAD;
 
@@ -207,7 +223,7 @@ void Renderer::compile(const char* path)
 /*
 	!O(1)m /+load -> (public)
 	// TODO: add purpose
-	\param bfr_id: id of sprite buffer to write animation to
+	\param batch_id: id of sprite buffer to write animation to
 	\param texpath: path to file containing spritesheet
 	\param r (default=1): rows on spritesheet
 	\param c (default=1): columns on spritesheet
@@ -215,7 +231,7 @@ void Renderer::compile(const char* path)
 	\param s (default=0): frames the animation takes to fully iterate through all textures
 	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
+uint16_t Renderer::add_sprite(uint8_t batch_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
 {
 	// create sprite source
 	SpriteTextureTuple tuple = {
@@ -230,13 +246,13 @@ uint16_t Renderer::add_sprite(uint8_t bfr_id,const char* texpath,uint8_t r,uint8
 	};
 
 	// write and return reference id
-	batches[bfr_id].textures.push_back(tuple);
-	return batches[bfr_id].textures.size()-1;
+	batches[batch_id].textures.push_back(tuple);
+	return batches[batch_id].textures.size()-1;
 }
 
 /*
 	!O(1)m /+load -> (public)
-	\param bfr_id: id of sprite buffer to write animation to
+	\param batch_id: id of sprite buffer to write animation to
 	\param tex_id: id of spritesheet texture to link
 	\param p: origin position of added sprite
 	\param w: width of added sprite
@@ -358,7 +374,6 @@ void batch_render(RenderBatch& batch)
 
 // behaviours mapped towards bufferstate enumeration
 batch_routine batch_routines[RBFR_STATE_COUNT] = { batch_idle,batch_load,batch_render };
-
 
 /*
 	TODO
