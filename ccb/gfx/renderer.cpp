@@ -321,11 +321,10 @@ void batch_load(RenderBatch& batch)
 
 	for (SpriteTextureTuple& t : batch.textures)
 	{
-		t.texture.gpu_upload();
+		t.texture.load();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		t.texture.generate_mipmap();
-		t.texture.cleanup();
+		Texture::generate_mipmap();
 	}
 	batch.state = RBFR_RENDER;
 

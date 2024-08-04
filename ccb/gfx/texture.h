@@ -10,7 +10,7 @@ class Texture
 public:
 
 	// construction
-	Texture(const char* path,bool corrected=false);
+	Texture(std::string path,bool corrected=false);
 	~Texture() {  }
 
 	// activation
@@ -18,9 +18,7 @@ public:
 	static inline void unbind() { glBindTexture(GL_TEXTURE_2D,0); }
 
 	// interaction
-	void gpu_upload();
-	inline void cleanup() { stbi_image_free(m_data); }
-	// TODO: is image free irrelevant when texture object itself gets deconstructed
+	void load();
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
@@ -47,8 +45,8 @@ public:
 private:
 
 	// image
-	int32_t m_width,m_height,m_format;
-	void* m_data;
+	std::string m_path;
+	int32_t m_format;
 };
 
 #endif
