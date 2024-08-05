@@ -88,6 +88,7 @@ struct RenderBatch
 
 	// attributes
 	BatchState state = RBFR_IDLE;
+	volatile uint8_t load_semaphore = 2;
 };
 
 

@@ -19,6 +19,7 @@ public:
 
 	// interaction
 	void load();
+	void upload();
 
 	// filter settings
 	static void set_texture_parameter_linear_mipmap();
@@ -46,7 +47,8 @@ private:
 
 	// image
 	std::string m_path;
-	int32_t m_format;
+	int32_t m_width,m_height,m_format;
+	void* m_data;
 };
 
 #endif
