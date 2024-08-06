@@ -48,6 +48,7 @@ enum BatchState
 {
 	RBFR_IDLE,
 	RBFR_LOAD,
+	RBFR_UPLOAD,
 	RBFR_RENDER,
 	RBFR_STATE_COUNT
 };
@@ -88,7 +89,7 @@ struct RenderBatch
 
 	// attributes
 	BatchState state = RBFR_IDLE;
-	volatile uint8_t load_semaphore = 2;
+	volatile bool load_semaphore = 0;
 };
 
 

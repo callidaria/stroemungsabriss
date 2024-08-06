@@ -312,7 +312,6 @@ void batch_idle(RenderBatch& batch)
 	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
 }
 
-
 /*
 	TODO
 */
@@ -321,10 +320,12 @@ void* bgr_process_textures(void* bt)
 	RenderBatch* batch = (RenderBatch*)bt;
 
 	// load textures
+	COMM_AWT("streaming %li textures",batch->textures.size());
 	for (SpriteTextureTuple& t : batch->textures) t.texture.load();
+	COMM_CNF();
 
 	// unlock batch
-	batch->load_semaphore--;
+	batch->load_semaphore = false;
 	return nullptr;
 }
 
@@ -333,31 +334,40 @@ void* bgr_process_textures(void* bt)
 */
 void batch_load(RenderBatch& batch)
 {
-	COMM_AWT("streaming %li textures",batch.textures.size());
+	// set semaphore & signal texture gpu upload when ready
+	batch.load_semaphore = true;
+	batch.state = RBFR_UPLOAD;
+
+	// load pixel data in background
 	pthread_t ld_thread;
-
-	switch(batch.load_semaphore)
-	{
-	case 0:
-		for (SpriteTextureTuple& t : batch.textures)
-		{
-			t.texture.upload();
-			Texture::set_texture_parameter_clamp_to_edge();
-			Texture::set_texture_parameter_linear_mipmap();
-			Texture::generate_mipmap();
-		}
-		batch.state = RBFR_RENDER;
-		break;
-	case 2:
-		pthread_create(&ld_thread,NULL,&bgr_process_textures,&batch);
-		pthread_detach(ld_thread);
-		//bgr_process_textures(&batch);
-		batch.load_semaphore--;
-		break;
-	};
-
-	COMM_CNF();
+	pthread_create(&ld_thread,NULL,&bgr_process_textures,&batch);
+	pthread_detach(ld_thread);
 }
+
+/*
+	TODO
+*/
+void batch_upload(RenderBatch& batch)
+{
+	// postpone load, when texture data not ready
+	if (batch.load_semaphore) return;
+
+	// load textures
+	COMM_AWT("uploading %li textures to gpu",batch.textures.size());
+	for (SpriteTextureTuple& t : batch.textures)
+	{
+		t.texture.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
+	}
+	COMM_CNF();
+
+	// proceed to render state
+	batch.state = RBFR_RENDER;
+}
+// TODO: automatically allocate time budget based on current workload
+//		background texture streaming while render
 
 /*
 	TODO
@@ -400,7 +410,7 @@ void batch_render(RenderBatch& batch)
 }
 
 // behaviours mapped towards bufferstate enumeration
-batch_routine batch_routines[RBFR_STATE_COUNT] = { batch_idle,batch_load,batch_render };
+batch_routine batch_routines[RBFR_STATE_COUNT] = { batch_idle,batch_load,batch_upload,batch_render };
 
 /*
 	TODO
