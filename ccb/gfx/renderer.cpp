@@ -183,22 +183,25 @@ const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = 
 /*
 	TODO
 */
-void Renderer::compile(const char* path)
+void bgr_compile_process(const char* path)
 {
 	COMM_LOG("renderer: reading load definition file \"%s\"",path);
 
 	// find available batch by unix approach: last batch will be overwritten if no idle
 	uint8_t batch_id = 0;
-	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&batches[batch_id].state!=RBFR_IDLE) batch_id++;
+	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
 	COMM_LOG("batch %i selected for writing",batch_id);
-	COMM_ERR_COND(batches[batch_id].state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
+	COMM_ERR_COND(
+			g_Renderer.batches[batch_id].state!=RBFR_IDLE,
+			"CAREFUL! batch not in idle, overflow buffer selected!"
+		);
 
 	// open file
 	COMM_MSG(LOG_BLUE,"-> interpretation start");
 	std::ifstream file(path,std::ios::in);
 	std::string cmd_line;
-	while (getline(file,cmd_line)) {
-
+	while (getline(file,cmd_line))
+	{
 		// split command and its arguments, interrupt when empty command
 		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
 		if (!args.size()) continue;
@@ -214,9 +217,18 @@ void Renderer::compile(const char* path)
 	// close file and ready batch load
 	COMM_MSG(LOG_BLUE,"-> interpretation end");
 	file.close();
-	batches[batch_id].state = RBFR_LOAD;
+	g_Renderer.batches[batch_id].state = RBFR_LOAD;
 
 	COMM_SCC("interpretation completed");
+}
+
+/*
+	TODO
+*/
+void Renderer::compile(const char* path)
+{
+	std::thread compiler_thread(&bgr_compile_process,path);
+	compiler_thread.detach();
 }
 
 
@@ -315,10 +327,8 @@ void batch_idle(RenderBatch& batch)
 /*
 	TODO
 */
-void* bgr_process_textures(void* bt)
+void bgr_process_textures(RenderBatch* batch)
 {
-	RenderBatch* batch = (RenderBatch*)bt;
-
 	// load textures
 	COMM_AWT("streaming %li textures",batch->textures.size());
 	for (SpriteTextureTuple& t : batch->textures) t.texture.load();
@@ -326,7 +336,6 @@ void* bgr_process_textures(void* bt)
 
 	// unlock batch
 	batch->load_semaphore = false;
-	return nullptr;
 }
 
 /*
@@ -339,9 +348,8 @@ void batch_load(RenderBatch& batch)
 	batch.state = RBFR_UPLOAD;
 
 	// load pixel data in background
-	pthread_t ld_thread;
-	pthread_create(&ld_thread,NULL,&bgr_process_textures,&batch);
-	pthread_detach(ld_thread);
+	std::thread ld_thread(&bgr_process_textures,&batch);
+	ld_thread.detach();
 }
 
 /*
