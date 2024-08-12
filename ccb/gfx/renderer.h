@@ -89,7 +89,7 @@ struct RenderBatch
 
 	// attributes
 	BatchState state = RBFR_IDLE;
-	volatile bool load_semaphore = 0;
+	volatile bool load_semaphore = false;
 };
 
 

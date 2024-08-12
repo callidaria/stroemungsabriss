@@ -7,7 +7,6 @@ Texture::Texture(std::string path,bool corrected)
 	: m_path(path)
 {
 	m_format = GL_RGBA+corrected*0x7338;
-	glGenTextures(1,&texture);
 }
 
 /*
@@ -21,7 +20,8 @@ void Texture::load()
 
 void Texture::upload()
 {
-	// upload texture to gpu
+	// upload new texture to gpu
+	glGenTextures(1,&texture);
 	bind();
 	glTexImage2D(GL_TEXTURE_2D,0,m_format,m_width,m_height,0,GL_RGBA,GL_UNSIGNED_BYTE,m_data);
 
