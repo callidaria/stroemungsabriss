@@ -111,8 +111,27 @@ Renderer::Renderer()
 
 
 /**
- *	TODO
+ *			Loader Language Definition
+ *
+ *	request a texture from memory:
+ *		-> texture string(texture_path)|
+ *		-> ( int(number_of_rows) int(number_of_columns) int(number_of_subtextures))+e|
+ *
+ *	register sprite to draw:
+ *		-> sprite int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
+ *		-> ( int(animation_duration_in_frames))+e
+ *
+ *	register instance groups:
+ *		-> instance int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
+ *		-> ( int(animation_duration_in_frames))+e
+ *
+ *	TODO register meshes
+ *
+ *	TODO register animations
+ *
+ *	TODO register free structures
 */
+// TODO: remove naming bloat, command can be reduces to single character format
 
 // loader definition command list
 const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite" };
@@ -132,7 +151,7 @@ void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 	const char* path = args[1].c_str();
 	uint8_t rows = 1, cols = 1, frames = 1;
 
-	// check for texture atlas
+	// check for texture atlas information
 	if (args.size()>2) rows = stoi(args[2]), cols = stoi(args[3]), frames = stoi(args[4]);
 
 	// write texture
