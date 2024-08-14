@@ -10,8 +10,9 @@
 
 
 // maxima
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 2;
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 3;
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
+constexpr uint16_t INSTANCE_CAPACITY = 4096;
 
 
 // transformation math
@@ -42,6 +43,20 @@ struct Transform2D
 };
 
 
+// upload structures
+// TODO
+struct SpriteInstanceUpload
+{
+	// utility
+	void set_rotation(float dg_rot);
+
+	// data
+	glm::vec2 offset = glm::vec2(0);
+	float rotation_sin = .0f, rotation_cos = 1.f;
+	glm::vec2 atlas_index = glm::vec2(0);
+};
+
+
 // batch datastructure definitions
 // description of current buffer state, is it rendering, is it loading, should it be ignored?
 enum BatchState
@@ -66,8 +81,8 @@ struct SpriteTextureTuple
 // render entry connected to loaded sprite and individually transformed
 struct Sprite
 {
-	Transform2D transform;
 	uint16_t texture_id;
+	Transform2D transform;
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 
@@ -76,7 +91,23 @@ struct SpriteAnimation
 {
 	uint16_t id;
 	uint8_t cycle_duration;
-	float frame_duration,anim_progression = .0f;
+	float frame_duration, anim_progression = .0f;
+};
+
+// TODO
+struct SpriteInstance
+{
+	uint16_t texture_id;
+	SpriteInstanceUpload upload[INSTANCE_CAPACITY];
+};
+
+// TODO
+struct SpriteAnimationInstance
+{
+	uint16_t id;
+	uint8_t cycle_durations[INSTANCE_CAPACITY];
+	float anim_progression[INSTANCE_CAPACITY] = { .0f };
+	float frame_duration;
 };
 
 // batch data to seperately load and display to other buffers
@@ -86,6 +117,10 @@ struct RenderBatch
 	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> animations;
+
+	// instanced sprites
+	std::vector<SpriteInstance> inst_sprites;
+	std::vector<SpriteAnimationInstance> inst_animations;
 
 	// attributes
 	BatchState state = RBFR_IDLE;

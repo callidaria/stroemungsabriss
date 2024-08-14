@@ -77,6 +77,16 @@ void Transform2D::rotate(float r,glm::vec2 a)
 }
 
 
+/*
+	TODO
+*/
+void SpriteInstanceUpload::set_rotation(float dg_rot)
+{
+	float rd_rot = glm::radians(dg_rot);
+	rotation_sin = glm::sin(rd_rot), rotation_cos = glm::cos(rd_rot);
+}
+
+
 /**
  * TODO: expand
 */
@@ -91,14 +101,14 @@ Renderer::Renderer()
 	// preload sprite data
 	// generate sprite vertex data
 	COMM_LOG("pre-loading basic geometry");
-	float vertices[] = { -.5f,.5f,.0f,.0f, .5f,.5f,1.f,.0f, .5f,-.5f,1.f,1.f, -.5f,-.5f,.0f,1.f };
-	uint32_t elements[] = { 0,2,1, 2,0,3 };
+	float vertices[] = {
+		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
+		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
+	};
 
 	// setup vertex & element buffer for sprites
-	spr_buffer.add_buffer();
 	spr_buffer.bind();
-	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_VERTEX_REPEAT*sizeof(float));
-	spr_buffer.upload_elements(elements,PATTERN_SPRITE_ELEMENT_REPEAT*sizeof(uint32_t));
+	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	// setup sprite shader
 	COMM_LOG("2D shader preparation");
@@ -113,6 +123,8 @@ Renderer::Renderer()
 /**
  *			Loader Language Definition
  *
+ *	TODO describe formatting
+ *
  *	request a texture from memory:
  *		-> texture string(texture_path)|
  *		-> ( int(number_of_rows) int(number_of_columns) int(number_of_subtextures))+e|
@@ -122,19 +134,25 @@ Renderer::Renderer()
  *		-> ( int(animation_duration_in_frames))+e
  *
  *	register instance groups:
- *		-> instance int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
+ *		-> duplicate int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
  *		-> ( int(animation_duration_in_frames))+e
+ *
+ *	TODO setup instance groups
  *
  *	TODO register meshes
  *
+ *	TODO register instances mesh groups
+ *
  *	TODO register animations
+ *
+ *	TODO emit particles
  *
  *	TODO register free structures
 */
-// TODO: remove naming bloat, command can be reduces to single character format
+// TODO: remove naming bloat, command can be reduced to single character format
 
 // loader definition command list
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite" };
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","sinst" };
 
 /*
 	TODO
@@ -188,6 +206,15 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 /*
 	TODO
 */
+void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string>& args)
+{
+	// TODO
+	COMM_MSG(LOG_SNITCH,"TODO instanced sprite and instanced sprite animations loading");
+}
+
+/*
+	TODO
+*/
 void interpreter_logic_syntax_error(uint8_t batch_id,std::vector<std::string>& args)
 {
 	COMM_ERR("syntax error while writing to batch %i: \"%s\" not a valid command",batch_id,args[0].c_str());
@@ -195,7 +222,7 @@ void interpreter_logic_syntax_error(uint8_t batch_id,std::vector<std::string>& a
 
 typedef void (*gfx_interpreter_logic)(uint8_t,std::vector<std::string>&);
 const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
-	interpreter_logic_texture,interpreter_logic_sprite,
+	interpreter_logic_texture,interpreter_logic_sprite,interpreter_logic_instanced_sprite,
 	interpreter_logic_syntax_error
 };
 
@@ -295,15 +322,15 @@ void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,floa
 	// information setup
 	Sprite sprite = {
 
+		// link sprite to texture
+		.texture_id = tex_id,
+
 		// transform component
 		.transform = {
 			.position = p,
 			.width = w,
 			.height = h,
 		},
-
-		// link sprite to texture
-		.texture_id = tex_id,
 	};
 
 	// transform and write
@@ -432,7 +459,7 @@ void batch_render(RenderBatch& batch)
 
 		// draw sprite
 		batch.textures[batch.sprites[i].texture_id].texture.bind();
-		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,(void*)0);
+		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }
 
