@@ -157,8 +157,6 @@ Renderer::Renderer()
  *		-> duplicate int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
  *		-> ( int(animation_duration_in_frames))+e
  *
- *	TODO setup instance groups
- *
  *	TODO register meshes
  *
  *	TODO register instances mesh groups
@@ -168,11 +166,13 @@ Renderer::Renderer()
  *	TODO emit particles
  *
  *	TODO register free structures
+ *
+ *	TODO spawn instances
 */
 // TODO: remove naming bloat, command can be reduced to single character format
 
 // loader definition command list
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","sinst" };
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","duplicate" };
 
 /*
 	TODO
@@ -293,7 +293,7 @@ void bgr_compile_process(const char* path)
 void Renderer::compile(const char* path)
 {
 	std::thread compiler_thread(&bgr_compile_process,path);
-	compiler_thread.detach();
+	compiler_thread.join();
 }
 
 
@@ -366,10 +366,10 @@ void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,floa
 	batches[batch_id].anim_sprites.push_back({
 			.id = batches[batch_id].sprites.size(),
 			.cycle_duration = dur,
-			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames
+			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames,
 		});
 
-	// register sprite data
+	// register sprite
 	register_sprite(batch_id,tex_id,p,w,h);
 }
 
@@ -393,7 +393,23 @@ void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,f
 
 	// transform and write
 	instance.transform.to_origin();
-	batches[batch_id].inst_sprites.push_back(instance);
+	batches[batch_id].duplicates.push_back(instance);
+}
+
+/*
+	TODO
+*/
+void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
+{
+	// add animation data
+	batches[batch_id].anim_duplicates.push_back({
+			.id = batches[batch_id].duplicates.size(),
+			.cycle_duration = dur,
+			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames,
+		});
+
+	// register duplicate
+	register_duplicate(batch_id,tex_id,p,w,h);
 }
 
 
@@ -470,12 +486,8 @@ void batch_upload(RenderBatch& batch)
 */
 void batch_render(RenderBatch& batch)
 {
-	// enter transparency section
-	glEnable(GL_BLEND);
-	// FIXME: join transparent/deferred batch sections together to switch only once per frame
-
 	// update processing
-	// iterate animation updates
+	// iterate sprite animation updates
 	for (SpriteAnimation& ta : batch.anim_sprites)
 	{
 		Sprite& ts = batch.sprites[ta.id];
@@ -486,13 +498,36 @@ void batch_render(RenderBatch& batch)
 		ta.anim_progression += inc_anim-ta.anim_progression*!inc_anim;
 		// TODO: make this update depend on frame update delta
 		//		test with unlocked frames to make sure this is actually working
+		//		-> also do the same for sprite instance animation update
 
 		// calculate spritesheet location
 		int index = ta.anim_progression/ta.frame_duration;
 		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
 	}
 
+	// iterate duplicate animation update
+	for (SpriteAnimationInstance& ta : batch.anim_duplicates)
+	{
+		SpriteInstance& ti = batch.duplicates[ta.id];
+		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
+
+		// calculate frames for all active instances
+		for (uint16_t i=0;i<ti.active_range;i++)
+		{
+			bool inc_anim = ta.anim_progressions[i]<ta.cycle_duration;
+			ta.anim_progressions[i] += inc_anim-ta.anim_progressions[i]*!inc_anim;
+			int index = ta.anim_progressions[i]/ta.frame_duration;
+			ti.upload[i].atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+		}
+		// FIXME: code repitition
+		// FIXME: a lot of division for update code
+	}
+
 	// rendering geometry
+	// enter transparency section
+	glEnable(GL_BLEND);
+	// FIXME: join transparent/deferred batch sections together to switch only once per frame
+
 	// ready sprite buffer & shader
 	g_Renderer.spr_buffer.bind();
 	g_Renderer.spr_shader.enable();
@@ -515,13 +550,13 @@ void batch_render(RenderBatch& batch)
 	}
 
 	// ready instance shader, instances will be using sprite buffer due to data overlap
-	//g_Renderer.spr_buffer.bind_index();
+	g_Renderer.spr_buffer.bind_index();
 	g_Renderer.dpl_shader.enable();
 
 	// iterate duplicates
-	for (uint16_t i=0;i<batch.inst_sprites.size();i++)
+	for (uint16_t i=0;i<batch.duplicates.size();i++)
 	{
-		SpriteInstance& ti = batch.inst_sprites[i];
+		SpriteInstance& ti = batch.duplicates[i];
 		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
 
 		// upload instance attributes & data

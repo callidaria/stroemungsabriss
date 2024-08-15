@@ -109,7 +109,7 @@ struct SpriteAnimationInstance
 {
 	uint16_t id;
 	uint8_t cycle_duration;
-	float anim_progression[INSTANCE_CAPACITY] = { .0f };
+	float anim_progressions[INSTANCE_CAPACITY] = { .0f };
 	float frame_duration;
 };
 
@@ -122,8 +122,8 @@ struct RenderBatch
 	std::vector<SpriteAnimation> anim_sprites;
 
 	// instanced sprites
-	std::vector<SpriteInstance> inst_sprites;
-	std::vector<SpriteAnimationInstance> inst_animations;
+	std::vector<SpriteInstance> duplicates;
+	std::vector<SpriteAnimationInstance> anim_duplicates;
 
 	// attributes
 	BatchState state = RBFR_IDLE;
@@ -149,6 +149,7 @@ public:
 	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
 	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
+	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 
 	// stages
 	void update();

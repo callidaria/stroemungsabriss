@@ -25,11 +25,19 @@ int main(int argc,char** argv)
 
 	// register test assets
 	g_Renderer.compile("./lvload/test_scene.ccb");
+
 	g_Renderer.register_duplicate(0,0,glm::vec2(0,0),25,25);
-	g_Renderer.batches[0].inst_sprites[0].upload[0].offset = glm::vec2(1200,700);
-	g_Renderer.batches[0].inst_sprites[0].upload[1].offset = glm::vec2(370,420);
-	g_Renderer.batches[0].inst_sprites[0].upload[2].offset = glm::vec2(640,360);
-	g_Renderer.batches[0].inst_sprites[0].active_range = 3;
+	g_Renderer.batches[0].duplicates[0].upload[0].offset = glm::vec2(1200,700);
+	g_Renderer.batches[0].duplicates[0].upload[1].offset = glm::vec2(370,420);
+	g_Renderer.batches[0].duplicates[0].upload[2].offset = glm::vec2(640,360);
+	g_Renderer.batches[0].duplicates[0].active_range = 3;
+
+	g_Renderer.register_duplicate(0,1,glm::vec2(0,0),17,17,20);
+	g_Renderer.batches[0].duplicates[1].upload[0].offset = glm::vec2(600,50);
+	g_Renderer.batches[0].duplicates[1].upload[1].offset = glm::vec2(620,50);
+	g_Renderer.batches[0].duplicates[1].upload[2].offset = glm::vec2(640,50);
+	g_Renderer.batches[0].duplicates[1].upload[3].offset = glm::vec2(660,50);
+	g_Renderer.batches[0].duplicates[1].active_range = 4;
 
 	// MAIN LOOP
 	bool run = true;
