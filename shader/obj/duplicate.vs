@@ -24,10 +24,13 @@ void main()
 	// calculate subtexture position on atlas
 	TexCoords = vec2(texCoords.x/col+i_tex.x/col,texCoords.y/row+i_tex.y/row);
 
-	// instance rotation
-	vec2 rpos = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos)*position;
+	// origin translation
+	vec2 Position = (model*vec4(position,0,1)).xy;
+
+	// instance translation
+	Position = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos)*Position;
+	Position += offset;
 
 	// upload final position
-	vec4 Position = model*vec4(position,0,1)+vec4(rpos+offset,0,1);
-	gl_Position = proj*view*Position;
+	gl_Position = proj*view*vec4(Position,0,1);
 }

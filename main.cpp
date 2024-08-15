@@ -25,8 +25,8 @@ int main(int argc,char** argv)
 
 	// register test assets
 	g_Renderer.compile("./lvload/test_scene.ccb");
-	g_Renderer.register_duplicate(0,0,glm::vec2(10,10),25,25);
-	g_Renderer.batches[0].inst_sprites[0].upload[0].offset = glm::vec2(1280,720);
+	g_Renderer.register_duplicate(0,0,glm::vec2(0,0),25,25);
+	g_Renderer.batches[0].inst_sprites[0].upload[0].offset = glm::vec2(1200,700);
 	g_Renderer.batches[0].inst_sprites[0].upload[1].offset = glm::vec2(370,420);
 	g_Renderer.batches[0].inst_sprites[0].upload[2].offset = glm::vec2(640,360);
 	g_Renderer.batches[0].inst_sprites[0].active_range = 3;
