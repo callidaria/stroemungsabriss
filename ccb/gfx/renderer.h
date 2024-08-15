@@ -10,7 +10,7 @@
 
 
 // maxima
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 3;
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 4;
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = 6;
 constexpr uint16_t INSTANCE_CAPACITY = 4096;
@@ -150,6 +150,10 @@ public:
 	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
 	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
+
+	// spawn
+	void spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,glm::vec2 ofs,
+			float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
 	// stages
 	void update();

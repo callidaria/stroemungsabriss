@@ -150,12 +150,12 @@ Renderer::Renderer()
  *		-> ( int(number_of_rows) int(number_of_columns) int(number_of_subtextures))+e|
  *
  *	register sprite to draw:
- *		-> sprite int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
- *		-> ( int(animation_duration_in_frames))+e
+ *		-> sprite int(texture_id) float(pos_x) float(pos_y) float(width) float(height)|
+ *		-> ( int(animation_duration_in_frames))+e|
  *
  *	register instance groups:
- *		-> duplicate int(texture_id) int(pos_x) int(pos_y) int(width) int(height)|
- *		-> ( int(animation_duration_in_frames))+e
+ *		-> duplicate int(texture_id) float(pos_x) float(pos_y) float(width) float(height)|
+ *		-> ( int(animation_duration_in_frames))+e|
  *
  *	TODO register meshes
  *
@@ -167,12 +167,19 @@ Renderer::Renderer()
  *
  *	TODO register free structures
  *
- *	TODO spawn instances
+ *	spawn instances:
+ *		-> spawn (sprite int(index) float(ofs_x) float(ofs_y)|
+ *		-> ( float(rotation) int(atlas_index_x) int(atlas_index_y))+e)|
+ *		-> +(mesh int(index) float(ofs_x) float(ofs_y) float(ofs_z)|
+ *		-> ( float(rotation_x) float(rotation_y) float(rotation_z))+e)|
 */
 // TODO: remove naming bloat, command can be reduced to single character format
 
 // loader definition command list
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","duplicate" };
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
+	"texture","sprite","duplicate",
+	"spawn"
+};
 
 /*
 	TODO
@@ -213,14 +220,16 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 	uint16_t texture_id = stoi(args[1]);
 	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
 	float width = stof(args[4]), height = stof(args[5]);
+	// TODO: error messaging when conversion fails
 
 	// register sprite or animation based on argument length
 	if (args.size()>6)
 	{
 		uint8_t duration = stoi(args[6]);
 		g_Renderer.register_sprite(batch_id,texture_id,position,width,height,duration);
+		return;
 	}
-	else g_Renderer.register_sprite(batch_id,texture_id,position,width,height);
+	g_Renderer.register_sprite(batch_id,texture_id,position,width,height);
 }
 
 /*
@@ -228,7 +237,70 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 */
 void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string>& args)
 {
-	// TODO
+	COMM_LOG_COND(
+			args.size()>5,
+			"register instanced sprite%s of texture %s: pos -> (%s,%s),dim -> %sx%s",
+			(args.size()>6) ? " animation" : "",
+			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str(),args[5].c_str()
+		)
+		COMM_ERR_FALLBACK("duplicate registration: not enough arguments provided");
+
+	// arguments to variables
+	uint16_t texture_id = stoi(args[1]);
+	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
+	float width = stof(args[4]), height = stof(args[5]);
+
+	// register animated sprite instance based on argument length
+	if (args.size()>6)
+	{
+		uint8_t duration = stoi(args[6]);
+		g_Renderer.register_duplicate(batch_id,texture_id,position,width,height,duration);
+		return;
+	}
+	g_Renderer.register_duplicate(batch_id,texture_id,position,width,height);
+}
+// FIXME: code duplications
+
+/*
+	TODO
+*/
+void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>& args)
+{
+	COMM_LOG_COND(
+			args.size()>4,
+			"attempting to spawn %s instance of %s: pos -> (%s,%s)",
+			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str()
+		)
+		COMM_ERR_FALLBACK("spawning instances: not enough arguments provided");
+
+	// process sprite instance spawn request
+	if (args[1]=="sprite")
+	{
+		// setup attributes
+		uint16_t inst_id = stoi(args[2]);
+		glm::vec2 offset = glm::vec2(stof(args[3]),stof(args[4]));
+		float rot = .0f;
+		glm::vec2 subtex = glm::vec2(0);
+
+		// optionally extract rotation and spritesheet index & spawn
+		if (args.size()>7)
+		{
+			rot = stof(args[5]);
+			subtex = glm::vec2(stoi(args[6]),stoi(args[7]));
+		}
+		g_Renderer.spawn_sprite_instance(batch_id,inst_id,offset,rot,subtex);
+	}
+
+	// process mesh instance spawn request
+	else if (args[1]=="mesh")
+	{
+		// TODO
+	}
+
+	else
+	{
+		COMM_ERR("cannot spawn instance of %s",args[1].c_str());
+	}
 }
 
 /*
@@ -242,6 +314,7 @@ void interpreter_logic_syntax_error(uint8_t batch_id,std::vector<std::string>& a
 typedef void (*gfx_interpreter_logic)(uint8_t,std::vector<std::string>&);
 const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_texture,interpreter_logic_sprite,interpreter_logic_instanced_sprite,
+	interpreter_logic_spawn_instanced,
 	interpreter_logic_syntax_error
 };
 
@@ -293,6 +366,7 @@ void bgr_compile_process(const char* path)
 void Renderer::compile(const char* path)
 {
 	std::thread compiler_thread(&bgr_compile_process,path);
+	//compiler_thread.detach();
 	compiler_thread.join();
 }
 
@@ -410,6 +484,23 @@ void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,f
 
 	// register duplicate
 	register_duplicate(batch_id,tex_id,p,w,h);
+}
+
+/*
+	TODO
+*/
+void Renderer::spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,glm::vec2 ofs,float rot,glm::vec2 subtex)
+{
+	SpriteInstance& si = batches[batch_id].duplicates[inst_id];
+	SpriteInstanceUpload& su = si.upload[si.active_range];
+
+	// setup transform
+	su.offset = ofs;
+	su.set_rotation(rot);
+	su.atlas_index = subtex;
+
+	// increase spawn counter
+	si.active_range++;
 }
 
 
