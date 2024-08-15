@@ -25,12 +25,11 @@ int main(int argc,char** argv)
 
 	// register test assets
 	g_Renderer.compile("./lvload/test_scene.ccb");
-	/*COMM_AWT("loading scene");
-	uint16_t sid = g_Renderer.add_sprite(0,"./res/bllt_ffdir.png");
-	g_Renderer.add_sprite(0,"./res/continue_dialogue.png",2,3,5);
-	g_Renderer.register_sprite(0,sid,glm::vec2(150,150),100,100);
-	g_Renderer.register_animation(0,sid+1,glm::vec2(300,200),75,75,20);
-	COMM_CNF();*/
+	g_Renderer.register_duplicate(0,0,glm::vec2(10,10),25,25);
+	g_Renderer.batches[0].inst_sprites[0].upload[0].offset = glm::vec2(1280,720);
+	g_Renderer.batches[0].inst_sprites[0].upload[1].offset = glm::vec2(370,420);
+	g_Renderer.batches[0].inst_sprites[0].upload[2].offset = glm::vec2(640,360);
+	g_Renderer.batches[0].inst_sprites[0].active_range = 3;
 
 	// MAIN LOOP
 	bool run = true;

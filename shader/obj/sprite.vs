@@ -3,7 +3,6 @@
 in vec2 position;
 in vec2 texCoords;
 
-out vec4 Position;
 out vec2 TexCoords;
 
 // camera transformation
@@ -20,7 +19,5 @@ uniform float vFlip = 0.0;		// identifies if texture is flipped
 void main()
 {
 	TexCoords = vec2(texCoords.x/col+i_tex.x/col,abs(vFlip-(texCoords.y/row+i_tex.y/row)));
-
-	Position = model*vec4(position.xy,0.0,1.0);
-	gl_Position = proj*view*Position;
+	gl_Position = proj*view*model*vec4(position.xy,0.0,1.0);
 }

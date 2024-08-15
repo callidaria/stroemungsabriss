@@ -111,10 +111,30 @@ Renderer::Renderer()
 	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	// setup sprite shader
-	COMM_LOG("2D shader preparation");
+	COMM_LOG("shader preparation for sprites");
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
+
+	// compile classical instance shader program
+	// TODO: ??maybe find a different way of representing instanced rotation??
+	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
+	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
+	// we could make instanced_anim the only instanced object or find a different solution??
+	COMM_LOG("shader preparation for sprite duplicates");
+	dpl_shader.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
+
+	// sprite duplication shader upload pattern
+	spr_buffer.add_buffer();
+	spr_buffer.bind_index();
+	dpl_shader.def_indexF("offset",2,0,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("rotation_sin",1,2,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("rotation_cos",1,3,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("i_tex",2,4,INSTANCE_SHADER_UPLOAD_REPEAT);
+
+	// sprite duplication shader initial attributes
+	dpl_shader.upload_int("tex",0);
+	dpl_shader.upload_camera();
 
 	COMM_SCC("renderer ready");
 }
@@ -198,7 +218,7 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 	if (args.size()>6)
 	{
 		uint8_t duration = stoi(args[6]);
-		g_Renderer.register_animation(batch_id,texture_id,position,width,height,duration);
+		g_Renderer.register_sprite(batch_id,texture_id,position,width,height,duration);
 	}
 	else g_Renderer.register_sprite(batch_id,texture_id,position,width,height);
 }
@@ -209,7 +229,6 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string>& args)
 {
 	// TODO
-	COMM_MSG(LOG_SNITCH,"TODO instanced sprite and instanced sprite animations loading");
 }
 
 /*
@@ -341,10 +360,10 @@ void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,floa
 /*
 	TODO
 */
-void Renderer::register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
+void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
 {
 	// add animation data
-	batches[batch_id].animations.push_back({
+	batches[batch_id].anim_sprites.push_back({
 			.id = batches[batch_id].sprites.size(),
 			.cycle_duration = dur,
 			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames
@@ -352,6 +371,29 @@ void Renderer::register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,f
 
 	// register sprite data
 	register_sprite(batch_id,tex_id,p,w,h);
+}
+
+/*
+	TODO
+*/
+void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h)
+{
+	SpriteInstance instance = {
+
+		// link sprites to texture
+		.texture_id = tex_id,
+
+		// tranformation
+		.transform = {
+			.position = p,
+			.width = w,
+			.height = h,
+		},
+	};
+
+	// transform and write
+	instance.transform.to_origin();
+	batches[batch_id].inst_sprites.push_back(instance);
 }
 
 
@@ -428,8 +470,13 @@ void batch_upload(RenderBatch& batch)
 */
 void batch_render(RenderBatch& batch)
 {
+	// enter transparency section
+	glEnable(GL_BLEND);
+	// FIXME: join transparent/deferred batch sections together to switch only once per frame
+
+	// update processing
 	// iterate animation updates
-	for (SpriteAnimation& ta : batch.animations)
+	for (SpriteAnimation& ta : batch.anim_sprites)
 	{
 		Sprite& ts = batch.sprites[ta.id];
 		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
@@ -445,6 +492,11 @@ void batch_render(RenderBatch& batch)
 		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
 	}
 
+	// rendering geometry
+	// ready sprite buffer & shader
+	g_Renderer.spr_buffer.bind();
+	g_Renderer.spr_shader.enable();
+
 	// iterate sprites
 	for (uint16_t i=0;i<batch.sprites.size();i++)
 	{
@@ -458,8 +510,29 @@ void batch_render(RenderBatch& batch)
 		g_Renderer.spr_shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		batch.textures[batch.sprites[i].texture_id].texture.bind();
+		batch.textures[ts.texture_id].texture.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
+	}
+
+	// ready instance shader, instances will be using sprite buffer due to data overlap
+	//g_Renderer.spr_buffer.bind_index();
+	g_Renderer.dpl_shader.enable();
+
+	// iterate duplicates
+	for (uint16_t i=0;i<batch.inst_sprites.size();i++)
+	{
+		SpriteInstance& ti = batch.inst_sprites[i];
+		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
+
+		// upload instance attributes & data
+		g_Renderer.spr_buffer.upload_indices(ti.upload,INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
+		g_Renderer.dpl_shader.upload_int("row",tt.rows);
+		g_Renderer.dpl_shader.upload_int("col",tt.columns);
+		g_Renderer.dpl_shader.upload_matrix("model",ti.transform.model);
+
+		// draw instances
+		batch.textures[ti.texture_id].texture.bind();
+		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
 	}
 }
 

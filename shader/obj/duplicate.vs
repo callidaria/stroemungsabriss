@@ -25,9 +25,9 @@ void main()
 	TexCoords = vec2(texCoords.x/col+i_tex.x/col,texCoords.y/row+i_tex.y/row);
 
 	// instance rotation
-	mat2 rmat = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos);
-	vec2 rpos = rmat*position;
+	vec2 rpos = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos)*position;
 
 	// upload final position
-	gl_Position = proj*view*model*vec4(rpos+offset,0,1);
+	vec4 Position = model*vec4(position,0,1)+vec4(rpos+offset,0,1);
+	gl_Position = proj*view*Position;
 }

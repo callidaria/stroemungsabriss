@@ -12,6 +12,7 @@
 // maxima
 constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 3;
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
+constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = 6;
 constexpr uint16_t INSTANCE_CAPACITY = 4096;
 
 
@@ -98,14 +99,16 @@ struct SpriteAnimation
 struct SpriteInstance
 {
 	uint16_t texture_id;
+	Transform2D transform;
 	SpriteInstanceUpload upload[INSTANCE_CAPACITY];
+	uint16_t active_range = 0;
 };
 
 // TODO
 struct SpriteAnimationInstance
 {
 	uint16_t id;
-	uint8_t cycle_durations[INSTANCE_CAPACITY];
+	uint8_t cycle_duration;
 	float anim_progression[INSTANCE_CAPACITY] = { .0f };
 	float frame_duration;
 };
@@ -116,7 +119,7 @@ struct RenderBatch
 	// sprites
 	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
-	std::vector<SpriteAnimation> animations;
+	std::vector<SpriteAnimation> anim_sprites;
 
 	// instanced sprites
 	std::vector<SpriteInstance> inst_sprites;
@@ -144,7 +147,8 @@ public:
 
 	// registration
 	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
-	void register_animation(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
+	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
+	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
 
 	// stages
 	void update();
@@ -153,7 +157,7 @@ public:
 
 	// shaders
 	Buffer spr_buffer;
-	Shader spr_shader;
+	Shader spr_shader,dpl_shader;
 
 	// buffers
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
