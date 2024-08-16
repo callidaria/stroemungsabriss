@@ -8,78 +8,6 @@
 /*
 	TODO
 */
-void Transform2D::transform(glm::vec2 p,float w,float h,float r)
-{
-	rotate(r);
-	scale(w,h);
-	translate(p);
-}
-
-/*
-	TODO
-*/
-void Transform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
-{
-	// reset towards arbitrary origin
-	model = glm::mat4(1.f);
-	translate(a-position);
-
-	// execute transformation
-	rotate(r);
-	scale(w,h);
-	translate(position+p-a);
-
-	// save current rotation
-	rot = r;
-}
-
-/*
-	TODO
-*/
-void Transform2D::to_origin()
-{
-	translate(position);
-	scale(width,height);
-}
-
-/*
-	TODO
-*/
-void Transform2D::scale(float w,float h,glm::vec2 a)
-{
-	// reset towards arbitrary origin
-	model = glm::mat4(1.f);
-	translate(a-position);
-
-	// scale from arbitrary position & reconstruct
-	rotate(rot);
-	scale(w,h);
-	translate(position-a);
-}
-
-/*
-	TODO
-*/
-void Transform2D::rotate(float r,glm::vec2 a)
-{
-	// reset towards arbitrary origin
-	float t_wfac = model[0][0], t_hfac = model[1][1];
-	model = glm::mat4(1.f);
-	translate(a-position);
-
-	// change rotation and reset scaling and previous position
-	rotate(r);
-	scale(t_wfac,t_hfac);
-
-	// reconstruct valid transform state
-	translate(position-a);
-	rot = r;
-}
-
-
-/*
-	TODO
-*/
 void SpriteInstanceUpload::set_rotation(float dg_rot)
 {
 	float rd_rot = glm::radians(dg_rot);
@@ -176,6 +104,7 @@ Renderer::Renderer()
 // TODO: remove naming bloat, command can be reduced to single character format
 
 // loader definition command list
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 4;
 const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
 	"texture","sprite","duplicate",
 	"spawn"
@@ -197,7 +126,12 @@ void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 	uint8_t rows = 1, cols = 1, frames = 1;
 
 	// check for texture atlas information
-	if (args.size()>2) rows = stoi(args[2]), cols = stoi(args[3]), frames = stoi(args[4]);
+	if (args.size()>2)
+	{
+		rows = stoi(args[2]);
+		cols = stoi(args[3]);
+		frames = stoi(args[4]);
+	}
 
 	// write texture
 	g_Renderer.add_sprite(batch_id,path,rows,cols,frames);
@@ -366,8 +300,7 @@ void bgr_compile_process(const char* path)
 void Renderer::compile(const char* path)
 {
 	std::thread compiler_thread(&bgr_compile_process,path);
-	//compiler_thread.detach();
-	compiler_thread.join();
+	compiler_thread.detach();
 }
 
 

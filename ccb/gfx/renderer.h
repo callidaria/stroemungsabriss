@@ -1,51 +1,15 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
-#include "../mat/toolbox.h"
-#include "../mat/camera2d.h"  // TODO: join camera definitions into one file
+#include "../mat/math.h"
 #include "../fcn/buffer.h"
 
 #include "shader.h"
 #include "texture.h"
 
 
-// maxima
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 4;
-constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
-constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = 6;
-constexpr uint16_t INSTANCE_CAPACITY = 4096;
-
-
-// transformation math
-// basic functionality of 2D geometry
-struct Transform2D
-{
-	// transformation combined
-	void transform(glm::vec2 p,float w,float h,float r);
-	void transform(glm::vec2 p,float w,float h,float r,glm::vec2 a);
-	void to_origin();
-
-	// transformation utility
-	inline void translate(glm::vec2 p) { model = glm::translate(model,glm::vec3(p.x,p.y,0)); }
-	inline void scale(float w,float h) { model[0][0] = w, model[1][1] = h; }
-	inline void rotate(float r) { model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1)); }
-
-	// arbitrary transformation
-	void scale(float w,float h,glm::vec2 a);
-	void rotate(float r,glm::vec2 a);
-
-	// attributes
-	const glm::vec2 position;
-	const float width,height;
-	float rot = .0f;
-
-	// transform
-	glm::mat4 model = glm::mat4(1.f);
-};
-
-
 // upload structures
-// TODO
+// per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
 {
 	// utility
@@ -56,6 +20,7 @@ struct SpriteInstanceUpload
 	float rotation_sin = .0f, rotation_cos = 1.f;
 	glm::vec2 atlas_index = glm::vec2(0);
 };
+constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
 
 
 // batch datastructure definitions
@@ -87,7 +52,7 @@ struct Sprite
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 
-// animation entry connected to render entry, holding state of animation
+// animation entry connected to sprite render entry, holding state of animation
 struct SpriteAnimation
 {
 	uint16_t id;
@@ -95,7 +60,8 @@ struct SpriteAnimation
 	float frame_duration, anim_progression = .0f;
 };
 
-// TODO
+// data structure to represent a full set of duplicates
+constexpr uint16_t INSTANCE_CAPACITY = 4096;
 struct SpriteInstance
 {
 	uint16_t texture_id;
@@ -104,7 +70,7 @@ struct SpriteInstance
 	uint16_t active_range = 0;
 };
 
-// TODO
+// animation entry connected to duplicate render entry, holding state of animation
 struct SpriteAnimationInstance
 {
 	uint16_t id;
@@ -129,6 +95,7 @@ struct RenderBatch
 	BatchState state = RBFR_IDLE;
 	volatile bool load_semaphore = false;
 };
+constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
 
 class Renderer
