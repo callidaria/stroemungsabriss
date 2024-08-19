@@ -1,5 +1,3 @@
-#define GLM_ENABLE_EXPERIMENTAL 1
-
 #ifdef __WIN32__
 #include <windows.h>
 #endif
@@ -16,7 +14,7 @@ int main(int argc,char** argv)
 	//g_Frame.set_refresh_rate(60);
 
 	// register test assets
-	g_Renderer.compile("./lvload/test_scene.ccb");
+	g_Renderer.load("./lvload/test_scene.ccb");
 
 	// MAIN LOOP
 	bool run = true, reboot = false;

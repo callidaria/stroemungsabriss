@@ -79,6 +79,19 @@ struct SpriteAnimationInstance
 // batch data to seperately load and display to other buffers
 struct RenderBatch
 {
+	// utility
+	// sprite creation
+	uint16_t add_sprite(const char* path,uint8_t rows=1,uint8_t cols=1,uint8_t frames=1);
+	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
+	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
+	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
+	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
+
+	// spawners
+	void spawn_sprite_instance(uint16_t inst_id,
+			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
+
+	// data
 	// sprites
 	std::vector<SpriteTextureTuple> textures;
 	std::vector<Sprite> sprites;
@@ -91,6 +104,7 @@ struct RenderBatch
 	// attributes
 	BatchState state = RBFR_IDLE;
 	volatile bool load_semaphore = false;
+	std::string path;
 };
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
@@ -104,20 +118,7 @@ public:
 	~Renderer() {  }
 
 	// interpretation
-	void compile(const char* path);
-
-	// object adder
-	uint16_t add_sprite(uint8_t batch_id,const char* texpath,uint8_t r=1,uint8_t c=1,uint8_t f=1);
-
-	// registration
-	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
-	void register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
-	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h);
-	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
-
-	// spawn
-	void spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,
-			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
+	RenderBatch* load(std::string path);
 
 	// stages
 	void update();

@@ -2,6 +2,143 @@
 
 
 /**
+ *	TODO
+*/
+
+/*
+	!O(1)m /+load -> (public)
+	// TODO: add purpose
+	\param path: path to file containing spritesheet
+	\param rows (default=1): rows on spritesheet
+	\param cols (default=1): columns on spritesheet
+	\param frames (default=1): number of frames held by spritesheet
+	\returns: memory index the spritesheet can be referenced by later
+*/
+uint16_t RenderBatch::add_sprite(const char* path,uint8_t rows,uint8_t cols,uint8_t frames)
+{
+	// create sprite source
+	SpriteTextureTuple tuple = {
+
+		// source
+		.texture = Texture(path),
+
+		// spritesheet segmentation
+		.rows = rows,
+		.columns = cols,
+		.frames = frames
+	};
+
+	// write and return reference id
+	textures.push_back(tuple);
+	return textures.size()-1;
+}
+
+/*
+	!O(1)m /+load -> (public)
+	\param tex_id: id of spritesheet texture to link
+	\param pos: origin position of added sprite
+	\param wdt: width of added sprite
+	\param hgt: height of added sprite
+	TODO extend param description
+*/
+void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
+{
+	// information setup
+	Sprite sprite = {
+
+		// link sprite to texture
+		.texture_id = tex_id,
+
+		// transform component
+		.transform = {
+			.position = pos,
+			.width = wdt,
+			.height = hgt,
+		},
+	};
+
+	// transform and write
+	sprite.transform.to_origin();
+	sprites.push_back(sprite);
+}
+
+/*
+	TODO
+*/
+void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
+{
+	// add animation data
+	SpriteAnimation anim = {
+		.id = sprites.size(),
+		.cycle_duration = dur,
+		.frame_duration = (float)dur/textures[tex_id].frames,
+	};
+
+	// register sprite & animation
+	anim_sprites.push_back(anim);
+	register_sprite(tex_id,pos,wdt,hgt);
+}
+
+/*
+	TODO
+*/
+void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
+{
+	SpriteInstance instance = {
+
+		// link sprites to texture
+		.texture_id = tex_id,
+
+		// tranformation
+		.transform = {
+			.position = pos,
+			.width = wdt,
+			.height = hgt,
+		},
+	};
+
+	// transform and write
+	instance.transform.to_origin();
+	duplicates.push_back(instance);
+}
+
+/*
+	TODO
+*/
+void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
+{
+	// add animation data
+	SpriteAnimationInstance anim = {
+		.id = duplicates.size(),
+		.cycle_duration = dur,
+		.frame_duration = (float)dur/textures[tex_id].frames,
+	};
+
+	// register duplicate & animation
+	anim_duplicates.push_back(anim);
+	register_duplicates(tex_id,pos,wdt,hgt);
+}
+
+/*
+	TODO
+*/
+void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2 scl,float rot,glm::vec2 subtex)
+{
+	SpriteInstance& t_instance = duplicates[inst_id];
+	SpriteInstanceUpload& t_upload = t_instance.upload[t_instance.active_range];
+
+	// setup transform
+	t_upload.offset = ofs;
+	t_upload.scale = scl;
+	t_upload.rotation = rot;
+	t_upload.atlas_index = subtex;
+
+	// increase spawn counter
+	t_instance.active_range++;
+}
+
+
+/**
  * TODO: expand
 */
 
@@ -53,9 +190,31 @@ Renderer::Renderer()
 	COMM_SCC("renderer ready");
 }
 
+/*
+	TODO
+*/
+RenderBatch* Renderer::load(std::string path)
+{
+	// find available batch by unix approach: last batch will be overwritten if no idle
+	uint8_t batch_id = 0;
+	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
+
+	// store path in free batch & signal batch load
+	RenderBatch* batch = &batches[batch_id];
+	batch->path = path;
+
+	// communicate selection
+	COMM_LOG("batch %i selected for writing",batch_id);
+	COMM_ERR_COND(batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
+
+	// activate and return batch
+	batch->state = RBFR_LOAD;
+	return batch;
+}
+
 
 /**
- *			Loader Language Definition
+ *			Load Interpretation: Loader Language Definition
  *
  *	TODO describe formatting
  *
@@ -91,15 +250,12 @@ Renderer::Renderer()
 
 // loader definition command list
 constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 4;
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
-	"texture","sprite","duplicate",
-	"spawn"
-};
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","duplicate","spawn" };
 
 /*
 	TODO
 */
-void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
+void interpreter_logic_texture(RenderBatch* batch,std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexPath,Rows,Columns,Frames };
 
@@ -122,13 +278,13 @@ void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 	}
 
 	// write texture
-	g_Renderer.add_sprite(batch_id,path,rows,cols,frames);
+	batch->add_sprite(path,rows,cols,frames);
 }
 
 /*
 	TODO
 */
-void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
+void interpreter_logic_sprite(RenderBatch* batch,std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
 
@@ -152,16 +308,16 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 	if (args.size()>Args::AnimDuration)
 	{
 		uint8_t duration = stoi(args[Args::AnimDuration]);
-		g_Renderer.register_sprite(batch_id,texture_id,position,width,height,duration);
+		batch->register_sprite(texture_id,position,width,height,duration);
 		return;
 	}
-	g_Renderer.register_sprite(batch_id,texture_id,position,width,height);
+	batch->register_sprite(texture_id,position,width,height);
 }
 
 /*
 	TODO
 */
-void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string>& args)
+void interpreter_logic_instanced_sprite(RenderBatch* batch,std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
 
@@ -184,17 +340,17 @@ void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string
 	if (args.size()>Args::AnimDuration)
 	{
 		uint8_t duration = stoi(args[Args::AnimDuration]);
-		g_Renderer.register_duplicate(batch_id,texture_id,position,width,height,duration);
+		batch->register_duplicates(texture_id,position,width,height,duration);
 		return;
 	}
-	g_Renderer.register_duplicate(batch_id,texture_id,position,width,height);
+	batch->register_duplicates(texture_id,position,width,height);
 }
 // FIXME: code duplications
 
 /*
 	TODO
 */
-void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>& args)
+void interpreter_logic_spawn_instanced(RenderBatch* batch,std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
 
@@ -222,11 +378,11 @@ void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>
 			rot = stof(args[Args::Rotation]);
 			subtex = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
 		}
-		g_Renderer.spawn_sprite_instance(batch_id,inst_id,offset,scale,rot,subtex);
+		batch->spawn_sprite_instance(inst_id,offset,scale,rot,subtex);
 	}
 
 	// process mesh instance spawn request
-	else if (args[1]=="mesh")
+	else if (args[Args::Type]=="mesh")
 	{
 		// TODO
 	}
@@ -241,203 +397,18 @@ void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>
 /*
 	TODO
 */
-void interpreter_logic_syntax_error(uint8_t batch_id,std::vector<std::string>& args)
+void interpreter_logic_syntax_error(RenderBatch* batch,std::vector<std::string>& args)
 {
-	COMM_ERR("syntax error while writing to batch %i: \"%s\" not a valid command",batch_id,args[0].c_str());
+	COMM_ERR("syntax error while interpreting %s: \"%s\" not a valid command",
+			batch->path.c_str(),args[0].c_str());
 }
 
-typedef void (*gfx_interpreter_logic)(uint8_t,std::vector<std::string>&);
+typedef void (*gfx_interpreter_logic)(RenderBatch*,std::vector<std::string>&);
 const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_texture,interpreter_logic_sprite,interpreter_logic_instanced_sprite,
 	interpreter_logic_spawn_instanced,
 	interpreter_logic_syntax_error
 };
-
-/*
-	TODO
-*/
-void bgr_compile_process(const char* path)
-{
-	COMM_LOG("renderer: reading load definition file \"%s\"",path);
-
-	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t batch_id = 0;
-	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
-	COMM_LOG("batch %i selected for writing",batch_id);
-	COMM_ERR_COND(
-			g_Renderer.batches[batch_id].state!=RBFR_IDLE,
-			"CAREFUL! batch not in idle, overflow buffer selected!"
-		);
-
-	// open file
-	COMM_MSG(LOG_BLUE,"-> interpretation start");
-	std::ifstream file(path,std::ios::in);
-	std::string cmd_line;
-	while (getline(file,cmd_line))
-	{
-		// split command and its arguments, interrupt when empty command
-		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
-		if (!args.size()) continue;
-
-		// correlate command
-		uint8_t i = 0;
-		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&args[0]!=gfxcmd[i]) i++;
-
-		// call command
-		cmd_handler[i](batch_id,args);
-	}
-
-	// close file and ready batch load
-	COMM_MSG(LOG_BLUE,"-> interpretation end");
-	file.close();
-	g_Renderer.batches[batch_id].state = RBFR_LOAD;
-
-	COMM_SCC("interpretation completed");
-}
-
-/*
-	TODO
-*/
-void Renderer::compile(const char* path)
-{
-	std::thread compiler_thread(&bgr_compile_process,path);
-	compiler_thread.detach();
-}
-
-
-/*
-	!O(1)m /+load -> (public)
-	// TODO: add purpose
-	\param batch_id: id of sprite buffer to write animation to
-	\param texpath: path to file containing spritesheet
-	\param r (default=1): rows on spritesheet
-	\param c (default=1): columns on spritesheet
-	\param f (default=1): number of frames held by spritesheet
-	\param s (default=0): frames the animation takes to fully iterate through all textures
-	\returns: memory index the spritesheet can be referenced by later
-*/
-uint16_t Renderer::add_sprite(uint8_t batch_id,const char* texpath,uint8_t r,uint8_t c,uint8_t f)
-{
-	// create sprite source
-	SpriteTextureTuple tuple = {
-
-		// source
-		.texture = Texture(texpath),
-
-		// spritesheet segmentation
-		.rows = r,
-		.columns = c,
-		.frames = f
-	};
-
-	// write and return reference id
-	batches[batch_id].textures.push_back(tuple);
-	return batches[batch_id].textures.size()-1;
-}
-
-/*
-	!O(1)m /+load -> (public)
-	\param batch_id: id of sprite buffer to write animation to
-	\param tex_id: id of spritesheet texture to link
-	\param p: origin position of added sprite
-	\param w: width of added sprite
-	\param h: height of added sprite
-	TODO extend param description
-*/
-void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h)
-{
-	// information setup
-	Sprite sprite = {
-
-		// link sprite to texture
-		.texture_id = tex_id,
-
-		// transform component
-		.transform = {
-			.position = p,
-			.width = w,
-			.height = h,
-		},
-	};
-
-	// transform and write
-	sprite.transform.to_origin();
-	batches[batch_id].sprites.push_back(sprite);
-}
-
-/*
-	TODO
-*/
-void Renderer::register_sprite(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
-{
-	// add animation data
-	batches[batch_id].anim_sprites.push_back({
-			.id = batches[batch_id].sprites.size(),
-			.cycle_duration = dur,
-			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames,
-		});
-
-	// register sprite
-	register_sprite(batch_id,tex_id,p,w,h);
-}
-
-/*
-	TODO
-*/
-void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h)
-{
-	SpriteInstance instance = {
-
-		// link sprites to texture
-		.texture_id = tex_id,
-
-		// tranformation
-		.transform = {
-			.position = p,
-			.width = w,
-			.height = h,
-		},
-	};
-
-	// transform and write
-	instance.transform.to_origin();
-	batches[batch_id].duplicates.push_back(instance);
-}
-
-/*
-	TODO
-*/
-void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur)
-{
-	// add animation data
-	batches[batch_id].anim_duplicates.push_back({
-			.id = batches[batch_id].duplicates.size(),
-			.cycle_duration = dur,
-			.frame_duration = (float)dur/batches[batch_id].textures[tex_id].frames,
-		});
-
-	// register duplicate
-	register_duplicate(batch_id,tex_id,p,w,h);
-}
-
-/*
-	TODO
-*/
-void Renderer::spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,
-		glm::vec2 ofs,glm::vec2 scl,float rot,glm::vec2 subtex)
-{
-	SpriteInstance& si = batches[batch_id].duplicates[inst_id];
-	SpriteInstanceUpload& su = si.upload[si.active_range];
-
-	// setup transform
-	su.offset = ofs;
-	su.scale = scl;
-	su.rotation = rot;
-	su.atlas_index = subtex;
-
-	// increase spawn counter
-	si.active_range++;
-}
 
 
 /**
@@ -458,8 +429,33 @@ void batch_idle(RenderBatch& batch)
 /*
 	TODO
 */
-void bgr_process_textures(RenderBatch* batch)
+void bgr_load_batch(RenderBatch* batch)
 {
+	// interpret load file
+	COMM_LOG("renderer: reading load definition file \"%s\"",batch->path.c_str());
+
+	// open file
+	COMM_MSG(LOG_BLUE,"-> interpretation start");
+	std::ifstream file(batch->path,std::ios::in);
+	std::string cmd_line;
+	while (getline(file,cmd_line))
+	{
+		// split command and its arguments, interrupt when empty command
+		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
+		if (!args.size()) continue;
+
+		// correlate command
+		uint8_t i = 0;
+		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&args[0]!=gfxcmd[i]) i++;
+
+		// call command
+		cmd_handler[i](batch,args);
+	}
+
+	// close file and ready batch load
+	file.close();
+	COMM_MSG(LOG_BLUE,"-> interpretation end");
+
 	// load textures
 	COMM_AWT("streaming %li textures",batch->textures.size());
 	for (SpriteTextureTuple& t : batch->textures) t.texture.load();
@@ -479,7 +475,7 @@ void batch_load(RenderBatch& batch)
 	batch.state = RBFR_UPLOAD;
 
 	// load pixel data in background
-	std::thread ld_thread(&bgr_process_textures,&batch);
+	std::thread ld_thread(&bgr_load_batch,&batch);
 	ld_thread.detach();
 }
 
