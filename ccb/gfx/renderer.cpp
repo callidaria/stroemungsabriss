@@ -8,20 +8,6 @@
 /*
 	TODO
 */
-void SpriteInstanceUpload::set_rotation(float dg_rot)
-{
-	float rd_rot = glm::radians(dg_rot);
-	rotation_sin = glm::sin(rd_rot), rotation_cos = glm::cos(rd_rot);
-}
-
-
-/**
- * TODO: expand
-*/
-
-/*
-	TODO
-*/
 Renderer::Renderer()
 {
 	COMM_MSG(LOG_HEADINGS,"renderer setup...");
@@ -56,9 +42,9 @@ Renderer::Renderer()
 	spr_buffer.add_buffer();
 	spr_buffer.bind_index();
 	dpl_shader.def_indexF("offset",2,0,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("rotation_sin",1,2,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("rotation_cos",1,3,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("i_tex",2,4,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("scale",2,2,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("rotation",1,4,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("i_tex",2,5,INSTANCE_SHADER_UPLOAD_REPEAT);
 
 	// sprite duplication shader initial attributes
 	dpl_shader.upload_int("tex",0);
@@ -97,7 +83,7 @@ Renderer::Renderer()
  *
  *	spawn instances:
  *		-> spawn (sprite int(index) float(ofs_x) float(ofs_y)|
- *		-> ( float(rotation) int(atlas_index_x) int(atlas_index_y))+e)|
+ *		-> ( float(scale_x) float(scale_y) float(rotation) int(atlas_index_x) int(atlas_index_y))+e)|
  *		-> +(mesh int(index) float(ofs_x) float(ofs_y) float(ofs_z)|
  *		-> ( float(rotation_x) float(rotation_y) float(rotation_z))+e)|
 */
@@ -115,22 +101,24 @@ const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
 */
 void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 {
+	enum Args : uint8_t { Command,TexPath,Rows,Columns,Frames };
+
 	COMM_LOG_COND(
-			args.size()>1,
-			"request texture: %s",args[1].c_str()
+			args.size()>Args::TexPath,
+			"request %s: %s",(args.size()>Args::Frames) ? "spritesheet" : "texture",args[Args::TexPath].c_str()
 		)
 		COMM_ERR_FALLBACK("texture request: not enough arguments provided");
 
 	// arguments to variables
-	const char* path = args[1].c_str();
+	const char* path = args[Args::TexPath].c_str();
 	uint8_t rows = 1, cols = 1, frames = 1;
 
 	// check for texture atlas information
-	if (args.size()>2)
+	if (args.size()>Args::Frames)
 	{
-		rows = stoi(args[2]);
-		cols = stoi(args[3]);
-		frames = stoi(args[4]);
+		rows = stoi(args[Args::Rows]);
+		cols = stoi(args[Args::Columns]);
+		frames = stoi(args[Args::Frames]);
 	}
 
 	// write texture
@@ -142,24 +130,28 @@ void interpreter_logic_texture(uint8_t batch_id,std::vector<std::string>& args)
 */
 void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 {
+	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
+
 	COMM_LOG_COND(
-			args.size()>5,
+			args.size()>Args::Height,
 			"register %s of texture %s: pos -> (%s,%s), dim -> %sx%s",
-			(args.size()>6) ? "animation" : "sprite",
-			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str(),args[5].c_str()
+			(args.size()>Args::AnimDuration) ? "animation" : "sprite",
+			args[Args::TexID].c_str(),
+			args[Args::PosX].c_str(),args[Args::PosY].c_str(),
+			args[Args::Width].c_str(),args[Args::Height].c_str()
 		)
 		COMM_ERR_FALLBACK("sprite registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t texture_id = stoi(args[1]);
-	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
-	float width = stof(args[4]), height = stof(args[5]);
+	uint16_t texture_id = stoi(args[Args::TexID]);
+	glm::vec2 position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float width = stof(args[Args::Width]), height = stof(args[Args::Height]);
 	// TODO: error messaging when conversion fails
 
 	// register sprite or animation based on argument length
-	if (args.size()>6)
+	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t duration = stoi(args[6]);
+		uint8_t duration = stoi(args[Args::AnimDuration]);
 		g_Renderer.register_sprite(batch_id,texture_id,position,width,height,duration);
 		return;
 	}
@@ -171,23 +163,27 @@ void interpreter_logic_sprite(uint8_t batch_id,std::vector<std::string>& args)
 */
 void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string>& args)
 {
+	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
+
 	COMM_LOG_COND(
-			args.size()>5,
+			args.size()>Args::Height,
 			"register instanced sprite%s of texture %s: pos -> (%s,%s),dim -> %sx%s",
-			(args.size()>6) ? " animation" : "",
-			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str(),args[5].c_str()
+			(args.size()>AnimDuration) ? " animation" : "",
+			args[Args::TexID].c_str(),
+			args[Args::PosX].c_str(),args[Args::PosY].c_str(),
+			args[Args::Width].c_str(),args[Args::Height].c_str()
 		)
 		COMM_ERR_FALLBACK("duplicate registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t texture_id = stoi(args[1]);
-	glm::vec2 position = glm::vec2(stof(args[2]),stof(args[3]));
-	float width = stof(args[4]), height = stof(args[5]);
+	uint16_t texture_id = stoi(args[Args::TexID]);
+	glm::vec2 position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float width = stof(args[Args::Width]), height = stof(args[Args::Height]);
 
 	// register animated sprite instance based on argument length
-	if (args.size()>6)
+	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t duration = stoi(args[6]);
+		uint8_t duration = stoi(args[Args::AnimDuration]);
 		g_Renderer.register_duplicate(batch_id,texture_id,position,width,height,duration);
 		return;
 	}
@@ -200,29 +196,33 @@ void interpreter_logic_instanced_sprite(uint8_t batch_id,std::vector<std::string
 */
 void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>& args)
 {
+	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
+
 	COMM_LOG_COND(
-			args.size()>4,
+			args.size()>Args::PosY,
 			"attempting to spawn %s instance of %s: pos -> (%s,%s)",
-			args[1].c_str(),args[2].c_str(),args[3].c_str(),args[4].c_str()
+			args[Args::Type].c_str(),args[Args::InstID].c_str(),args[Args::PosX].c_str(),args[Args::PosY].c_str()
 		)
 		COMM_ERR_FALLBACK("spawning instances: not enough arguments provided");
 
 	// process sprite instance spawn request
-	if (args[1]=="sprite")
+	if (args[Args::Type]=="sprite")
 	{
 		// setup attributes
-		uint16_t inst_id = stoi(args[2]);
-		glm::vec2 offset = glm::vec2(stof(args[3]),stof(args[4]));
+		uint16_t inst_id = stoi(args[Args::InstID]);
+		glm::vec2 offset = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+		glm::vec2 scale = glm::vec2(1.f);
 		float rot = .0f;
 		glm::vec2 subtex = glm::vec2(0);
 
 		// optionally extract rotation and spritesheet index & spawn
-		if (args.size()>7)
+		if (args.size()>Args::SubtexRow)
 		{
-			rot = stof(args[5]);
-			subtex = glm::vec2(stoi(args[6]),stoi(args[7]));
+			scale = glm::vec2(stof(args[Args::SclX]),stof(args[Args::SclY]));
+			rot = stof(args[Args::Rotation]);
+			subtex = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
 		}
-		g_Renderer.spawn_sprite_instance(batch_id,inst_id,offset,rot,subtex);
+		g_Renderer.spawn_sprite_instance(batch_id,inst_id,offset,scale,rot,subtex);
 	}
 
 	// process mesh instance spawn request
@@ -233,9 +233,10 @@ void interpreter_logic_spawn_instanced(uint8_t batch_id,std::vector<std::string>
 
 	else
 	{
-		COMM_ERR("cannot spawn instance of %s",args[1].c_str());
+		COMM_ERR("cannot spawn instance of %s",args[Args::Type].c_str());
 	}
 }
+// TODO use argument enumeration
 
 /*
 	TODO
@@ -422,14 +423,16 @@ void Renderer::register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,f
 /*
 	TODO
 */
-void Renderer::spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,glm::vec2 ofs,float rot,glm::vec2 subtex)
+void Renderer::spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,
+		glm::vec2 ofs,glm::vec2 scl,float rot,glm::vec2 subtex)
 {
 	SpriteInstance& si = batches[batch_id].duplicates[inst_id];
 	SpriteInstanceUpload& su = si.upload[si.active_range];
 
 	// setup transform
 	su.offset = ofs;
-	su.set_rotation(rot);
+	su.scale = scl;
+	su.rotation = rot;
 	su.atlas_index = subtex;
 
 	// increase spawn counter

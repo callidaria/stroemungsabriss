@@ -12,12 +12,9 @@
 // per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
 {
-	// utility
-	void set_rotation(float dg_rot);
-
-	// data
 	glm::vec2 offset = glm::vec2(0);
-	float rotation_sin = .0f, rotation_cos = 1.f;
+	glm::vec2 scale = glm::vec2(1);
+	float rotation = .0f;
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
@@ -119,8 +116,8 @@ public:
 	void register_duplicate(uint8_t batch_id,uint16_t tex_id,glm::vec2 p,float w,float h,uint8_t dur);
 
 	// spawn
-	void spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,glm::vec2 ofs,
-			float rot=.0f,glm::vec2 subtex=glm::vec2(0));
+	void spawn_sprite_instance(uint8_t batch_id,uint16_t inst_id,
+			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
 	// stages
 	void update();

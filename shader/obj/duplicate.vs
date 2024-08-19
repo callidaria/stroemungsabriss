@@ -4,8 +4,8 @@ in vec2 position;
 in vec2 texCoords;
 
 in vec2 offset;
-in float rotation_sin;
-in float rotation_cos;
+in vec2 scale;
+in float rotation;
 in vec2 i_tex;
 
 out vec2 TexCoords;
@@ -28,7 +28,13 @@ void main()
 	vec2 Position = (model*vec4(position,0,1)).xy;
 
 	// instance translation
+	// rotation
+	float rd_rotation = radians(rotation);
+	float rotation_sin = sin(rd_rotation), rotation_cos = cos(rd_rotation);
 	Position = mat2(rotation_cos,-rotation_sin,rotation_sin,rotation_cos)*Position;
+
+	// position & scaling
+	Position *= scale;
 	Position += offset;
 
 	// upload final position
