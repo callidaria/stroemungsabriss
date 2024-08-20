@@ -178,10 +178,10 @@ Renderer::Renderer()
 	// sprite duplication shader upload pattern
 	spr_buffer.add_buffer();
 	spr_buffer.bind_index();
-	dpl_shader.def_indexF("offset",2,0,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("scale",2,2,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("rotation",1,4,INSTANCE_SHADER_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("i_tex",2,5,INSTANCE_SHADER_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("offset",2,0,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("scale",2,2,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("rotation",1,4,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	dpl_shader.def_indexF("i_tex",2,5,SPRITE_INSTANCE_UPLOAD_REPEAT);
 
 	// sprite duplication shader initial attributes
 	dpl_shader.upload_int("tex",0);
@@ -193,7 +193,7 @@ Renderer::Renderer()
 /*
 	TODO
 */
-RenderBatch* Renderer::load(std::string path)
+RenderBatch* Renderer::load(std::string path,bool auto_load)
 {
 	// find available batch by unix approach: last batch will be overwritten if no idle
 	uint8_t batch_id = 0;
@@ -208,7 +208,7 @@ RenderBatch* Renderer::load(std::string path)
 	COMM_ERR_COND(batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
 
 	// activate and return batch
-	batch->state = RBFR_LOAD;
+	batch->state = (BatchState)(RBFR_IDLE+auto_load);
 	return batch;
 }
 
@@ -415,8 +415,6 @@ const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = 
  *	TODO
 */
 
-typedef void (*batch_routine)(RenderBatch&);
-
 /*
 	TODO
 */
@@ -499,7 +497,7 @@ void batch_upload(RenderBatch& batch)
 	COMM_CNF();
 
 	// proceed to render state
-	batch.state = RBFR_RENDER;
+	batch.state = RBFR_READY;
 }
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render
@@ -507,7 +505,7 @@ void batch_upload(RenderBatch& batch)
 /*
 	TODO
 */
-void batch_render(RenderBatch& batch)
+void batch_precalculation(RenderBatch& batch)
 {
 	// update processing
 	// iterate sprite animation updates
@@ -545,16 +543,19 @@ void batch_render(RenderBatch& batch)
 		// FIXME: code repitition
 		// FIXME: a lot of division for update code
 	}
+}
 
-	// rendering geometry
-	// enter transparency section
-	glEnable(GL_BLEND);
-	// FIXME: join transparent/deferred batch sections together to switch only once per frame
+// update behaviours mapped towards bufferstate enumeration
+typedef void (*batch_routine)(RenderBatch&);
+batch_routine batch_update[RBFR_STATE_COUNT] = {
+	batch_idle,batch_load,batch_upload,batch_precalculation
+};
 
-	// ready sprite buffer & shader
-	g_Renderer.spr_buffer.bind();
-	g_Renderer.spr_shader.enable();
-
+/*
+	TODO
+*/
+void batch_render_blended(RenderBatch& batch)
+{
 	// iterate sprites
 	for (uint16_t i=0;i<batch.sprites.size();i++)
 	{
@@ -583,7 +584,7 @@ void batch_render(RenderBatch& batch)
 		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
 
 		// upload instance attributes & data
-		g_Renderer.spr_buffer.upload_indices(ti.upload,INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
+		g_Renderer.spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
 		g_Renderer.dpl_shader.upload_int("row",tt.rows);
 		g_Renderer.dpl_shader.upload_int("col",tt.columns);
 		g_Renderer.dpl_shader.upload_matrix("model",ti.transform.model);
@@ -592,24 +593,28 @@ void batch_render(RenderBatch& batch)
 		batch.textures[ti.texture_id].texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
 	}
+	
 }
 
-// behaviours mapped towards bufferstate enumeration
-batch_routine batch_routines[RBFR_STATE_COUNT] = { batch_idle,batch_load,batch_upload,batch_render };
+// transparency render behaviours, enabled when buffer is ready
+batch_routine batch_blending[] = { batch_idle,batch_render_blended };
 
 /*
 	TODO
 */
 void Renderer::update()
 {
-	// setup sprite buffers
-	spr_shader.enable();
-	spr_buffer.bind();
+	// iterate batch updates
+	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++) batch_update[batches[i].state](batches[i]);
 
-	// iterate sprite buffer
-	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
-	{
-		RenderBatch& batch = batches[i];
-		batch_routines[batch.state](batch);
-	}
+	// rendering geometry
+	// enter transparency section
+	glEnable(GL_BLEND);
+
+	// setup sprite draw
+	spr_buffer.bind();
+	spr_shader.enable();
+
+	// iterate transparency render
+	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++) batch_blending[batches[i].state==RBFR_READY](batches[i]);
 }

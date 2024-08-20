@@ -14,7 +14,7 @@ int main(int argc,char** argv)
 	//g_Frame.set_refresh_rate(60);
 
 	// register test assets
-	g_Renderer.load("./lvload/test_scene.ccb");
+	RenderBatch* batch = g_Renderer.load("./lvload/test_scene.ccb");
 
 	// MAIN LOOP
 	bool run = true, reboot = false;

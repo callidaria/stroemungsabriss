@@ -17,7 +17,7 @@ struct SpriteInstanceUpload
 	float rotation = .0f;
 	glm::vec2 atlas_index = glm::vec2(0);
 };
-constexpr uint8_t INSTANCE_SHADER_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
+constexpr uint8_t SPRITE_INSTANCE_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
 
 
 // batch datastructure definitions
@@ -27,7 +27,7 @@ enum BatchState
 	RBFR_IDLE,
 	RBFR_LOAD,
 	RBFR_UPLOAD,
-	RBFR_RENDER,
+	RBFR_READY,
 	RBFR_STATE_COUNT
 };
 
@@ -54,16 +54,17 @@ struct SpriteAnimation
 {
 	uint16_t id;
 	uint8_t cycle_duration;
-	float frame_duration, anim_progression = .0f;
+	float frame_duration;
+	float anim_progression = .0f;
 };
 
 // data structure to represent a full set of duplicates
-constexpr uint16_t INSTANCE_CAPACITY = 4096;
+constexpr uint16_t SPRITE_INSTANCE_CAPACITY = 4096;
 struct SpriteInstance
 {
 	uint16_t texture_id;
 	Transform2D transform;
-	SpriteInstanceUpload upload[INSTANCE_CAPACITY];
+	SpriteInstanceUpload upload[SPRITE_INSTANCE_CAPACITY];
 	uint16_t active_range = 0;
 };
 
@@ -72,8 +73,8 @@ struct SpriteAnimationInstance
 {
 	uint16_t id;
 	uint8_t cycle_duration;
-	float anim_progressions[INSTANCE_CAPACITY] = { .0f };
 	float frame_duration;
+	float anim_progressions[SPRITE_INSTANCE_CAPACITY] = { .0f };
 };
 
 // batch data to seperately load and display to other buffers
@@ -118,7 +119,7 @@ public:
 	~Renderer() {  }
 
 	// interpretation
-	RenderBatch* load(std::string path);
+	RenderBatch* load(std::string path,bool auto_load=true);
 
 	// stages
 	void update();
