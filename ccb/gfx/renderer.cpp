@@ -193,23 +193,12 @@ Renderer::Renderer()
 /*
 	TODO
 */
-RenderBatch* Renderer::load(std::string path,bool auto_load)
+RenderBatch* Renderer::load(std::string path)
 {
-	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t batch_id = 0;
-	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
-
-	// store path in free batch & signal batch load
-	RenderBatch* batch = &batches[batch_id];
-	batch->path = path;
-
-	// communicate selection
-	COMM_LOG("batch %i selected for writing",batch_id);
-	COMM_ERR_COND(batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
-
-	// activate and return batch
-	batch->state = (BatchState)(RBFR_IDLE+auto_load);
-	return batch;
+	RenderBatch batch = { .path = path };
+	batches.push_back(batch);
+	COMM_LOG("batch no. %li created for writing",batches.size());
+	return &batches.back();
 }
 
 
@@ -547,57 +536,7 @@ void batch_precalculation(RenderBatch& batch)
 
 // update behaviours mapped towards bufferstate enumeration
 typedef void (*batch_routine)(RenderBatch&);
-batch_routine batch_update[RBFR_STATE_COUNT] = {
-	batch_idle,batch_load,batch_upload,batch_precalculation
-};
-
-/*
-	TODO
-*/
-void batch_render_blended(RenderBatch& batch)
-{
-	// iterate sprites
-	for (uint16_t i=0;i<batch.sprites.size();i++)
-	{
-		Sprite& ts = batch.sprites[i];
-		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
-
-		// upload sprite attributes
-		g_Renderer.spr_shader.upload_int("row",tt.rows);
-		g_Renderer.spr_shader.upload_int("col",tt.columns);
-		g_Renderer.spr_shader.upload_vec2("i_tex",ts.atlas_index);
-		g_Renderer.spr_shader.upload_matrix("model",ts.transform.model);
-
-		// draw sprite
-		batch.textures[ts.texture_id].texture.bind();
-		glDrawArrays(GL_TRIANGLES,0,6);
-	}
-
-	// ready instance shader, instances will be using sprite buffer due to data overlap
-	g_Renderer.spr_buffer.bind_index();
-	g_Renderer.dpl_shader.enable();
-
-	// iterate duplicates
-	for (uint16_t i=0;i<batch.duplicates.size();i++)
-	{
-		SpriteInstance& ti = batch.duplicates[i];
-		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
-
-		// upload instance attributes & data
-		g_Renderer.spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
-		g_Renderer.dpl_shader.upload_int("row",tt.rows);
-		g_Renderer.dpl_shader.upload_int("col",tt.columns);
-		g_Renderer.dpl_shader.upload_matrix("model",ti.transform.model);
-
-		// draw instances
-		batch.textures[ti.texture_id].texture.bind();
-		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
-	}
-	
-}
-
-// transparency render behaviours, enabled when buffer is ready
-batch_routine batch_blending[] = { batch_idle,batch_render_blended };
+batch_routine batch_update[RBFR_STATE_COUNT] = { batch_load,batch_upload,batch_precalculation };
 
 /*
 	TODO
@@ -605,16 +544,73 @@ batch_routine batch_blending[] = { batch_idle,batch_render_blended };
 void Renderer::update()
 {
 	// iterate batch updates
-	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++) batch_update[batches[i].state](batches[i]);
+	for (RenderBatch& batch : batches) batch_update[batch.state](batch);
 
-	// rendering geometry
+	// rendering 2D geometry
 	// enter transparency section
 	glEnable(GL_BLEND);
 
-	// setup sprite draw
+	// iterate sprite render
 	spr_buffer.bind();
 	spr_shader.enable();
+	for (RenderBatch& batch : batches)
+	{
+		if (batch.state!=RBFR_READY) continue;
+		render_sprites(batch);
+	}
 
-	// iterate transparency render
-	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++) batch_blending[batches[i].state==RBFR_READY](batches[i]);
+	// iterate duplicate render
+	spr_buffer.bind_index();
+	dpl_shader.enable();
+	for (RenderBatch& batch : batches)
+	{
+		if (batch.state!=RBFR_READY) continue;  // FIXME: multiple ee for each idle batch...
+		render_duplicates(batch);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer::render_sprites(RenderBatch& batch)
+{
+	// iterate registered sprites
+	for (uint16_t i=0;i<batch.sprites.size();i++)
+	{
+		Sprite& ts = batch.sprites[i];
+		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
+
+		// upload sprite attributes
+		spr_shader.upload_int("row",tt.rows);
+		spr_shader.upload_int("col",tt.columns);
+		spr_shader.upload_vec2("i_tex",ts.atlas_index);
+		spr_shader.upload_matrix("model",ts.transform.model);
+
+		// draw sprite
+		batch.textures[ts.texture_id].texture.bind();
+		glDrawArrays(GL_TRIANGLES,0,6);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer::render_duplicates(RenderBatch& batch)
+{
+	// iterate registered duplicates
+	for (uint16_t i=0;i<batch.duplicates.size();i++)
+	{
+		SpriteInstance& ti = batch.duplicates[i];
+		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
+
+		// upload instance attributes & data
+		spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
+		dpl_shader.upload_int("row",tt.rows);
+		dpl_shader.upload_int("col",tt.columns);
+		dpl_shader.upload_matrix("model",ti.transform.model);
+
+		// draw instances
+		batch.textures[ti.texture_id].texture.bind();
+		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
+	}
 }
