@@ -91,6 +91,10 @@ struct RenderBatch
 	void spawn_sprite_instance(uint16_t inst_id,
 			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
+	// update
+	void update_sprites();
+	void update_duplicates();
+
 	// data
 	// sprites
 	std::vector<SpriteTextureTuple> textures;
@@ -124,8 +128,8 @@ public:
 
 private:
 
-	void render_sprites(RenderBatch& batch);
-	void render_duplicates(RenderBatch& batch);
+	void render_sprites(RenderBatch* batch);
+	void render_duplicates(RenderBatch* batch);
 
 public:
 
@@ -135,6 +139,7 @@ public:
 
 	// batches
 	std::vector<RenderBatch> batches;
+	std::vector<RenderBatch*> draw_pointers;
 };
 
 inline Renderer g_Renderer = Renderer();

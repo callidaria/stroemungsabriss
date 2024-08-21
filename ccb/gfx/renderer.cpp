@@ -69,7 +69,7 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 {
 	// add animation data
 	SpriteAnimation anim = {
-		.id = sprites.size(),
+		.id = (uint16_t)sprites.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/textures[tex_id].frames,
 	};
@@ -109,7 +109,7 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 {
 	// add animation data
 	SpriteAnimationInstance anim = {
-		.id = duplicates.size(),
+		.id = (uint16_t)duplicates.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/textures[tex_id].frames,
 	};
@@ -135,6 +135,52 @@ void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2
 
 	// increase spawn counter
 	t_instance.active_range++;
+}
+
+/*
+	TODO
+*/
+void RenderBatch::update_sprites()
+{
+	for (SpriteAnimation& ta : anim_sprites)
+	{
+		Sprite& ts = sprites[ta.id];
+		SpriteTextureTuple& tt = textures[ts.texture_id];
+
+		// calculate current frame
+		bool inc_anim = ta.anim_progression<ta.cycle_duration;
+		ta.anim_progression += inc_anim-ta.anim_progression*!inc_anim;
+		// TODO: make this update depend on frame update delta
+		//		test with unlocked frames to make sure this is actually working
+		//		-> also do the same for sprite instance animation update
+
+		// calculate spritesheet location
+		int index = ta.anim_progression/ta.frame_duration;
+		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+	}
+}
+
+/*
+	TODO
+*/
+void RenderBatch::update_duplicates()
+{
+	for (SpriteAnimationInstance& ta : anim_duplicates)
+	{
+		SpriteInstance& ti = duplicates[ta.id];
+		SpriteTextureTuple& tt = textures[ti.texture_id];
+
+		// calculate frames for all active instances
+		for (uint16_t i=0;i<ti.active_range;i++)
+		{
+			bool inc_anim = ta.anim_progressions[i]<ta.cycle_duration;
+			ta.anim_progressions[i] += inc_anim-ta.anim_progressions[i]*!inc_anim;
+			int index = ta.anim_progressions[i]/ta.frame_duration;
+			ti.upload[i].atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+		}
+		// FIXME: code repitition
+		// FIXME: a lot of division for update code
+	}
 }
 
 
@@ -407,15 +453,6 @@ const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = 
 /*
 	TODO
 */
-void batch_idle(RenderBatch& batch)
-{
-	// TODO: what even do here? maintaining checks, idle update, can this be skipped?
-	//		buffers definitely will be in this state and the update has to be handled accordingly (no ee)
-}
-
-/*
-	TODO
-*/
 void bgr_load_batch(RenderBatch* batch)
 {
 	// interpret load file
@@ -485,8 +522,9 @@ void batch_upload(RenderBatch& batch)
 	}
 	COMM_CNF();
 
-	// proceed to render state
+	// proceed to update state
 	batch.state = RBFR_READY;
+	g_Renderer.draw_pointers.push_back(&batch);
 }
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render
@@ -496,42 +534,8 @@ void batch_upload(RenderBatch& batch)
 */
 void batch_precalculation(RenderBatch& batch)
 {
-	// update processing
-	// iterate sprite animation updates
-	for (SpriteAnimation& ta : batch.anim_sprites)
-	{
-		Sprite& ts = batch.sprites[ta.id];
-		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
-
-		// calculate current frame
-		bool inc_anim = ta.anim_progression<ta.cycle_duration;
-		ta.anim_progression += inc_anim-ta.anim_progression*!inc_anim;
-		// TODO: make this update depend on frame update delta
-		//		test with unlocked frames to make sure this is actually working
-		//		-> also do the same for sprite instance animation update
-
-		// calculate spritesheet location
-		int index = ta.anim_progression/ta.frame_duration;
-		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
-	}
-
-	// iterate duplicate animation update
-	for (SpriteAnimationInstance& ta : batch.anim_duplicates)
-	{
-		SpriteInstance& ti = batch.duplicates[ta.id];
-		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
-
-		// calculate frames for all active instances
-		for (uint16_t i=0;i<ti.active_range;i++)
-		{
-			bool inc_anim = ta.anim_progressions[i]<ta.cycle_duration;
-			ta.anim_progressions[i] += inc_anim-ta.anim_progressions[i]*!inc_anim;
-			int index = ta.anim_progressions[i]/ta.frame_duration;
-			ti.upload[i].atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
-		}
-		// FIXME: code repitition
-		// FIXME: a lot of division for update code
-	}
+	batch.update_sprites();
+	batch.update_duplicates();
 }
 
 // update behaviours mapped towards bufferstate enumeration
@@ -553,32 +557,24 @@ void Renderer::update()
 	// iterate sprite render
 	spr_buffer.bind();
 	spr_shader.enable();
-	for (RenderBatch& batch : batches)
-	{
-		if (batch.state!=RBFR_READY) continue;
-		render_sprites(batch);
-	}
+	for (RenderBatch* batch : draw_pointers) render_sprites(batch);
 
 	// iterate duplicate render
 	spr_buffer.bind_index();
 	dpl_shader.enable();
-	for (RenderBatch& batch : batches)
-	{
-		if (batch.state!=RBFR_READY) continue;  // FIXME: multiple ee for each idle batch...
-		render_duplicates(batch);
-	}
+	for (RenderBatch* batch : draw_pointers) render_duplicates(batch);
 }
 
 /*
 	TODO
 */
-void Renderer::render_sprites(RenderBatch& batch)
+void Renderer::render_sprites(RenderBatch* batch)
 {
 	// iterate registered sprites
-	for (uint16_t i=0;i<batch.sprites.size();i++)
+	for (uint16_t i=0;i<batch->sprites.size();i++)
 	{
-		Sprite& ts = batch.sprites[i];
-		SpriteTextureTuple& tt = batch.textures[ts.texture_id];
+		Sprite& ts = batch->sprites[i];
+		SpriteTextureTuple& tt = batch->textures[ts.texture_id];
 
 		// upload sprite attributes
 		spr_shader.upload_int("row",tt.rows);
@@ -587,7 +583,7 @@ void Renderer::render_sprites(RenderBatch& batch)
 		spr_shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		batch.textures[ts.texture_id].texture.bind();
+		batch->textures[ts.texture_id].texture.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }
@@ -595,13 +591,13 @@ void Renderer::render_sprites(RenderBatch& batch)
 /*
 	TODO
 */
-void Renderer::render_duplicates(RenderBatch& batch)
+void Renderer::render_duplicates(RenderBatch* batch)
 {
 	// iterate registered duplicates
-	for (uint16_t i=0;i<batch.duplicates.size();i++)
+	for (uint16_t i=0;i<batch->duplicates.size();i++)
 	{
-		SpriteInstance& ti = batch.duplicates[i];
-		SpriteTextureTuple& tt = batch.textures[ti.texture_id];
+		SpriteInstance& ti = batch->duplicates[i];
+		SpriteTextureTuple& tt = batch->textures[ti.texture_id];
 
 		// upload instance attributes & data
 		spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
@@ -610,7 +606,7 @@ void Renderer::render_duplicates(RenderBatch& batch)
 		dpl_shader.upload_matrix("model",ti.transform.model);
 
 		// draw instances
-		batch.textures[ti.texture_id].texture.bind();
+		batch->textures[ti.texture_id].texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
 	}
 }
