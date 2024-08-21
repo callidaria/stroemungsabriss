@@ -1,0 +1,11 @@
+texture ./res/anim_tex.png
+texture ./res/kopfuber_atlas.png 8 10 80
+
+sprite 0 300 150 100 100
+sprite 1 500 200 75 75 120
+
+duplicate 1 0 0 25 25 90
+
+spawn sprite 0 1100 700
+spawn sprite 0 360 420
+spawn sprite 0 630 360

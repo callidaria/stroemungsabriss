@@ -7,14 +7,52 @@
 #include "ccb/gfx/renderer.h"
 
 
+struct SceneData
+{
+	RenderBatch* batch0,*batch1;
+	bool await = false;
+	bool scene_ready = false;
+	bool second_request = false;
+
+	// debug
+	uint16_t stall_frames = 0;
+};
+
+void load_scene(SceneData& data)
+{
+	if (data.await)
+	{
+		data.scene_ready = data.batch0->state==RBFR_READY;
+		COMM_MSG_COND(data.scene_ready,LOG_SETTINGS,"scene stalled for %i frames",data.stall_frames);
+		data.stall_frames++;
+		return;
+	}
+	data.batch0 = g_Renderer.load("./lvload/test_scene0.ccb");
+	data.await = true;
+}
+
+void maintain_scene(SceneData& data)
+{
+	if (g_Input.kb.ka[SDL_SCANCODE_L]&&!data.second_request)
+	{
+		data.batch1 = g_Renderer.load("./lvload/test_scene1.ccb");
+		data.second_request = true;
+	}
+	COMM_LOG("draw pointers: %li",data.batch0->duplicates.size());
+}
+
+typedef void (*scene_update)(SceneData&);
+scene_update update_scene[] = { load_scene,maintain_scene };
+
+
 int main(int argc,char** argv)
 {
 	// settings
 	Frame::gpu_vsync_on();
 	//g_Frame.set_refresh_rate(60);
 
-	// register test assets
-	RenderBatch* batch = g_Renderer.load("./lvload/test_scene.ccb");
+	// store scene data
+	SceneData sdata;
 
 	// MAIN LOOP
 	bool run = true, reboot = false;
@@ -27,6 +65,7 @@ int main(int argc,char** argv)
 
 		// update
 		g_Input.update(run);
+		update_scene[sdata.scene_ready](sdata);
 
 		// render
 		Frame::clear();

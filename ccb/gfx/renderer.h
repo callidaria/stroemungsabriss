@@ -133,7 +133,7 @@ private:
 
 public:
 
-	// shaders
+	// sprite components
 	Buffer spr_buffer;
 	Shader spr_shader,dpl_shader;
 

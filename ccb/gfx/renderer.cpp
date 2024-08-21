@@ -195,7 +195,6 @@ Renderer::Renderer()
 {
 	COMM_MSG(LOG_HEADINGS,"renderer setup...");
 
-	// preload sprite data
 	// generate sprite vertex data
 	COMM_LOG("pre-loading basic geometry");
 	float vertices[] = {
@@ -214,10 +213,6 @@ Renderer::Renderer()
 	spr_shader.upload_camera();
 
 	// compile classical instance shader program
-	// TODO: ??maybe find a different way of representing instanced rotation??
-	// precalculating sine & cosine for a matrix 2D seems like the most performant way of doing this
-	// ??uploading i_tex for all instances using this shader leaves a lot of 0s for single textures
-	// we could make instanced_anim the only instanced object or find a different solution??
 	COMM_LOG("shader preparation for sprite duplicates");
 	dpl_shader.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
 
