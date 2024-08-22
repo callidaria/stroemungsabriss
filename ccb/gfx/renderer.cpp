@@ -236,10 +236,21 @@ Renderer::Renderer()
 */
 RenderBatch* Renderer::load(std::string path)
 {
-	RenderBatch batch = { .path = path };
-	batches.push_back(batch);
-	COMM_LOG("batch no. %li created for writing",batches.size());
-	return &batches.back();
+	// find available batch by unix approach: last batch will be overwritten if no idle
+	uint8_t batch_id = 0;
+	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
+
+	// store path in free batch & signal batch load
+	RenderBatch* batch = &batches[batch_id];
+	batch->path = path;
+
+	// communicate selection
+	COMM_LOG("batch %i selected for writing",batch_id);
+	COMM_ERR_COND(batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
+
+	// activate and return batch
+	batch->state = RBFR_LOAD;
+	return batch;
 }
 
 
@@ -543,7 +554,12 @@ batch_routine batch_update[RBFR_STATE_COUNT] = { batch_load,batch_upload,batch_p
 void Renderer::update()
 {
 	// iterate batch updates
-	for (RenderBatch& batch : batches) batch_update[batch.state](batch);
+	for (RenderBatch& batch : batches)
+	{
+		if (batch.state==RBFR_IDLE) continue;
+		batch_update[batch.state-1](batch);
+	}
+	// FIXME: remove idle state
 
 	// rendering 2D geometry
 	// enter transparency section

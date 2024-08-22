@@ -24,6 +24,7 @@ constexpr uint8_t SPRITE_INSTANCE_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/s
 // description of current buffer state, is it rendering, is it loading, should it be ignored?
 enum BatchState
 {
+	RBFR_IDLE,
 	RBFR_LOAD,
 	RBFR_UPLOAD,
 	RBFR_READY,
@@ -106,10 +107,11 @@ struct RenderBatch
 	std::vector<SpriteAnimationInstance> anim_duplicates;
 
 	// attributes
-	BatchState state = RBFR_LOAD;
+	BatchState state = RBFR_IDLE;
 	volatile bool load_semaphore = false;
 	std::string path;
 };
+constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
 
 class Renderer
@@ -138,7 +140,7 @@ public:
 	Shader spr_shader,dpl_shader;
 
 	// batches
-	std::vector<RenderBatch> batches;
+	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> draw_pointers;
 };
 

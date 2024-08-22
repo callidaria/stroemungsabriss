@@ -38,7 +38,6 @@ void maintain_scene(SceneData& data)
 		data.batch1 = g_Renderer.load("./lvload/test_scene1.ccb");
 		data.second_request = true;
 	}
-	COMM_LOG("draw pointers: %li",data.batch0->duplicates.size());
 }
 
 typedef void (*scene_update)(SceneData&);
