@@ -491,8 +491,9 @@ void bgr_load_batch(RenderBatch* batch)
 	for (SpriteTextureTuple& t : batch->textures) t.texture.load();
 	COMM_CNF();
 
-	// unlock batch
+	// unlock batch & reset
 	batch->load_semaphore = false;
+	batch->upload_head = 0;
 }
 
 /*
@@ -518,19 +519,31 @@ void batch_upload(RenderBatch& batch)
 	if (batch.load_semaphore) return;
 
 	// load textures
-	COMM_AWT("uploading %li textures to gpu",batch.textures.size());
-	for (SpriteTextureTuple& t : batch.textures)
+	COMM_AWT("attempting to upload %li textures to gpu",batch.textures.size());
+	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
+	while (batch.upload_head<batch.textures.size())
 	{
+		// check timing for stall until next frame when upload takes too long
+		if ((std::chrono::steady_clock::now()-stime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+		{
+			COMM_CNF();
+			return;
+		}
+
+		// upload texture to gpu
+		SpriteTextureTuple& t = batch.textures[batch.upload_head];
 		t.texture.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
+		batch.upload_head++;
 	}
-	COMM_CNF();
 
 	// proceed to update state
 	batch.state = RBFR_READY;
 	g_Renderer.draw_pointers.push_back(&batch);
+
+	COMM_CNF();
 }
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render

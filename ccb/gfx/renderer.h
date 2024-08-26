@@ -108,8 +108,11 @@ struct RenderBatch
 
 	// attributes
 	BatchState state = RBFR_IDLE;
-	volatile bool load_semaphore = false;
 	std::string path;
+
+	// loading
+	volatile bool load_semaphore = false;
+	uint16_t upload_head = 0;
 };
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
