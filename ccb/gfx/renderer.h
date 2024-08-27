@@ -1,6 +1,7 @@
 #ifndef CCB_GRAPHICS_RENDERER
 #define CCB_GRAPHICS_RENDERER
 
+#include "../fcn/config.h"
 #include "../mat/math.h"
 #include "../fcn/buffer.h"
 
@@ -145,6 +146,14 @@ public:
 	// batches
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> draw_pointers;
+
+private:
+
+	// rendertarget
+	Buffer m_canvas_buffer;
+	Shader m_deferred_shader;
+	FrameBuffer m_gbuffer = FrameBuffer(4);
+	FrameBuffer m_deferred = FrameBuffer(1);
 };
 
 inline Renderer g_Renderer = Renderer();

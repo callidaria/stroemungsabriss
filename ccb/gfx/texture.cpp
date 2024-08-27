@@ -1,5 +1,10 @@
 #include "texture.h"
 
+
+/**
+ *	TODO
+*/
+
 /*
 	TODO
 */
@@ -114,4 +119,74 @@ void Texture::set_texture_parameter_repeat()
 {
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+}
+
+
+/**
+ *	TODO
+*/
+
+/*
+	TODO
+*/
+FrameBuffer::FrameBuffer(uint8_t n_components)
+{
+	// generate framebuffer
+	glGenFramebuffers(1,&m_buffer);
+
+	// generate framebuffer textures
+	m_colour_components.reserve(n_components);
+	glGenTextures(n_components,&m_colour_components[0]);
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::add_colour_component(float width,float height,bool floatbuffer,uint8_t component)
+{
+	uint32_t cmp = GL_COLOR_ATTACHMENT0+component;
+	glBindTexture(GL_TEXTURE_2D,m_colour_components[component]);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA+floatbuffer*0x6f12,width,height,0,GL_RGBA,
+			GL_UNSIGNED_INT+floatbuffer,NULL);
+	Texture::set_texture_parameter_nearest_unfiltered();
+	glFramebufferTexture2D(GL_FRAMEBUFFER,cmp,GL_TEXTURE_2D,m_colour_components[component],0);
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::add_depth_component(float width,float height)
+{
+	// generate and bind depthbuffer texture
+	uint32_t t_depth_component;
+	glGenTextures(1,&t_depth_component);
+	glBindTexture(GL_TEXTURE_2D,t_depth_component);
+
+	// specify depthbuffer
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,width,height,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_INT,NULL);
+	Texture::set_texture_parameter_nearest_unfiltered();
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,t_depth_component,0);
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::combine_attachments()
+{
+	uint32_t attachments[m_colour_components.size()];
+	for (uint8_t i=0;i<m_colour_components.size();i++) attachments[i] = GL_COLOR_ATTACHMENT0+i;
+	glDrawBuffers(m_colour_components.size(),attachments);
+}
+
+/*
+	TODO
+*/
+void FrameBuffer::upload_components()
+{
+	for (uint8_t i=0;i<m_colour_components.size();i++)
+	{
+		glActiveTexture(GL_TEXTURE0+i);
+		glBindTexture(GL_TEXTURE_2D,m_colour_components[i]);
+	}
+	glActiveTexture(GL_TEXTURE0);
 }

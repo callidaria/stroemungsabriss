@@ -4,7 +4,6 @@
 #include "../mat/toolbox.h"
 
 
-// representing textures
 class Texture
 {
 public:
@@ -49,6 +48,34 @@ private:
 	std::string m_path;
 	int32_t m_width,m_height,m_format;
 	void* m_data;
+};
+
+
+class FrameBuffer
+{
+public:
+
+	// construction
+	FrameBuffer(uint8_t n_components);
+	~FrameBuffer() {  }
+
+	// components
+	void add_colour_component(float width,float height,bool floatbuffer=false,uint8_t component=0);
+	void add_depth_component(float width,float height);
+
+	// feature
+	void combine_attachments();
+	void upload_components();
+
+	// binding
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,m_buffer); }
+	static inline void unbind() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
+
+private:
+
+	// data
+	uint32_t m_buffer;
+	std::vector<uint32_t> m_colour_components;
 };
 
 #endif

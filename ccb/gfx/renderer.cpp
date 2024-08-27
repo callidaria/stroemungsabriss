@@ -185,7 +185,7 @@ void RenderBatch::update_duplicates()
 
 
 /**
- * TODO: expand
+ *	TODO: expand
 */
 
 /*
@@ -195,28 +195,25 @@ Renderer::Renderer()
 {
 	COMM_MSG(LOG_HEADINGS,"renderer setup...");
 
+	// sprite initialization
 	// generate sprite vertex data
-	COMM_LOG("pre-loading basic geometry");
-	float vertices[] = {
+	COMM_LOG("pre-loading basic sprite geometry");
+	float sprite_vertices[] = {
 		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
 		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
 	};
-
-	// setup vertex & element buffer for sprites
 	spr_buffer.bind();
-	spr_buffer.upload_vertices(vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+	spr_buffer.upload_vertices(sprite_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	// setup sprite shader
-	COMM_LOG("shader preparation for sprites");
+	COMM_LOG("compile shader for sprites");
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
 
 	// compile classical instance shader program
-	COMM_LOG("shader preparation for sprite duplicates");
+	COMM_LOG("compile shader for sprite duplicates");
 	dpl_shader.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
-
-	// sprite duplication shader upload pattern
 	spr_buffer.add_buffer();
 	spr_buffer.bind_index();
 	dpl_shader.def_indexF("offset",2,0,SPRITE_INSTANCE_UPLOAD_REPEAT);
@@ -227,6 +224,40 @@ Renderer::Renderer()
 	// sprite duplication shader initial attributes
 	dpl_shader.upload_int("tex",0);
 	dpl_shader.upload_camera();
+
+	// screen space
+	// setup gbuffer
+	COMM_LOG("setup material buffer and generate its components");
+	m_gbuffer.bind();
+	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,1);
+	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,2);
+	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,3);
+	m_gbuffer.add_depth_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	m_gbuffer.combine_attachments();  // FIXME: move to construction and remove
+	FrameBuffer::unbind();
+
+	// generate canvas vertex data
+	COMM_LOG("pre-loading basic canvas geometry");
+	float canvas_vertices[] = {
+		-1.f,1.f,.0f,.0f, 1.f,-1.f,1.f,1.f, 1.f,1.f,1.f,.0f,
+		1.f,-1.f,1.f,1.f, -1.f,1.f,.0f,.0f, -1.f,-1.f,.0f,1.f
+	};
+	m_canvas_buffer.bind();
+	m_canvas_buffer.upload_vertices(canvas_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+
+	// setup deferred lighting shader
+	COMM_LOG("compile shader for deferred lighting systems");
+	m_deferred_shader.compile2d("./shader/standard/framebuffer.vs","./shader/lighting/pbr.fs");
+	m_deferred_shader.upload_int("gbuffer_colour",0);
+	m_deferred_shader.upload_int("gbuffer_position",1);
+	m_deferred_shader.upload_int("gbuffer_normals",2);
+	m_deferred_shader.upload_int("gbuffer_materials",3);
+
+	// setup framebuffer for deferred shading
+	m_deferred.bind();
+	m_deferred.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	FrameBuffer::unbind();
 
 	COMM_SCC("renderer ready");
 }
@@ -574,10 +605,28 @@ void Renderer::update()
 	}
 	// FIXME: remove idle state
 
-	// rendering 2D geometry
-	// enter transparency section
+	// rendering 3D geometry
+	// deferred 3D setup
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	// opening rendertarget
+	// TODO
+
+	// post processing
+	// 2D setup
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
+	// deferred shading
+	//m_deferred.bind();
+	m_canvas_buffer.bind();
+	m_deferred_shader.enable();
+	m_gbuffer.upload_components();
+	glDrawArrays(GL_TRIANGLES,0,6);
+	//FrameBuffer::unbind();
+
+	// render 2D geometry
 	// iterate sprite render
 	spr_buffer.bind();
 	spr_shader.enable();
