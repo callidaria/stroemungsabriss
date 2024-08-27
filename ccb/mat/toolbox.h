@@ -78,8 +78,11 @@ constexpr const char* LOG_CLEAR = "\e[0;39m";
 constexpr const char* LOG_HEADINGS = LOG_PURPLE;
 constexpr const char* LOG_DESTRUCTION = LOG_CYAN;
 constexpr const char* LOG_SETTINGS = LOG_YELLOW;
-constexpr const char* LOG_TIMING = LOG_GREY;
+constexpr const char* LOG_TIMING[] = { LOG_GREY,LOG_YELLOW,LOG_RED };
 constexpr const char* LOG_SNITCH = LOG_BLUE;
+
+// logging value constants
+constexpr double LOG_FPS_ALERT = 16.6;
 
 // time performance records
 inline std::chrono::steady_clock::time_point log_tdelta = std::chrono::steady_clock::now();
@@ -87,14 +90,14 @@ static inline void reset_timestamp() { log_tdelta = std::chrono::steady_clock::n
 static inline void produce_timestamp(bool padding=true)
 {
 	double ll_delta = (std::chrono::steady_clock::now()-log_tdelta).count()*CONVERSION_MULT_MILLISECONDS;
-	printf((padding) ? "%s%12fms" : "%s%fms",LOG_TIMING,ll_delta);
+	printf((padding) ? "%s%12fms" : "%s%fms",LOG_TIMING[(uint8_t)std::min(ll_delta/LOG_FPS_ALERT,2.0)],ll_delta);
 	reset_timestamp();
 }
 
 // basic console communication
 #define COMM_RST() reset_timestamp()
 #define COMM_AWT(...) COMM_RST(),printf(__VA_ARGS__),printf("... ");
-#define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
+#define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING[0]),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
 #define COMM_MSG(col,...) produce_timestamp(),printf(" | %s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
 #define COMM_ERR(...) printf("%serror: ",LOG_RED),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
 #define COMM_LOG(...) COMM_MSG(LOG_CLEAR,__VA_ARGS__);

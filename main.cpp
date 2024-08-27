@@ -13,9 +13,6 @@ struct SceneData
 	bool await = false;
 	bool scene_ready = false;
 	bool second_request = false;
-
-	// debug
-	uint16_t stall_frames = 0;
 };
 
 void load_scene(SceneData& data)
@@ -23,19 +20,18 @@ void load_scene(SceneData& data)
 	if (data.await)
 	{
 		data.scene_ready = data.batch0->state==RBFR_READY;
-		COMM_MSG_COND(data.scene_ready,LOG_SETTINGS,"scene stalled for %i frames",data.stall_frames);
-		data.stall_frames++;
 		return;
 	}
-	data.batch0 = g_Renderer.load("./lvload/test_scene0.ccb");
+	data.batch0 = g_Renderer.load("./lvload/test_scene1.ccb");
 	data.await = true;
 }
 
 void maintain_scene(SceneData& data)
 {
+	// request additional batch load
 	if (g_Input.kb.ka[SDL_SCANCODE_L]&&!data.second_request)
 	{
-		data.batch1 = g_Renderer.load("./lvload/test_scene1.ccb");
+		data.batch1 = g_Renderer.load("./lvload/test_scene0.ccb");
 		data.second_request = true;
 	}
 }
