@@ -8,7 +8,6 @@
 
 #include "shader.h"
 #include "texture.h"
-#include "mesh.h"
 
 
 // upload structures
@@ -21,6 +20,16 @@ struct SpriteInstanceUpload
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 constexpr uint8_t SPRITE_INSTANCE_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
+
+// mesh upload struction
+struct MeshUpload
+{
+	glm::vec3 position;
+	glm::vec2 uv_coord;
+	glm::vec3 normal;
+	glm::vec3 tangent;
+};
+constexpr uint8_t MESH_UPLOAD_REPEAT = sizeof(MeshUpload)/sizeof(float);
 
 
 // batch datastructure definitions
@@ -80,6 +89,25 @@ struct SpriteAnimationInstance
 	float anim_progressions[SPRITE_INSTANCE_CAPACITY] = { .0f };
 };
 
+
+// mesh data
+// mesh texture cluster
+struct MeshTextureTuple
+{
+	Texture colours;
+	Texture normals;
+	Texture materials;
+	Texture emission;
+};
+
+// mesh geometry
+struct Mesh
+{
+	Transform3D transform;
+	std::string path;
+};
+
+
 // batches
 // batch data to seperately load and display to other buffers
 struct RenderBatch
@@ -100,6 +128,9 @@ struct RenderBatch
 	void spawn_sprite_instance(uint16_t inst_id,
 			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
+	// loader
+	void load_mesh(std::string& path);
+
 	// update
 	void update_sprites();
 	void update_duplicates();
@@ -111,8 +142,9 @@ struct RenderBatch
 	std::vector<SpriteAnimation> anim_sprites;
 
 	// meshes
-	std::vector<Texture> mesh_textures;
+	std::vector<MeshTextureTuple> mesh_textures;
 	std::vector<Mesh> meshes;
+	std::vector<MeshUpload> mesh_vertices;
 
 	// instanced sprites
 	std::vector<SpriteInstance> duplicates;

@@ -125,7 +125,21 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,
 		glm::vec3 pos,float scl,glm::vec3 rot)
 {
-	// TODO
+	// store mesh vertex data
+	Mesh mesh = {
+		// TODO: transform
+		.path = obj
+	};
+	meshes.push_back(mesh);
+
+	// store texture information
+	MeshTextureTuple texture = {
+		.colours = Texture(tex),
+		.normals = Texture(norm),
+		.materials = Texture(mats),
+		.emission = Texture(emit),
+	};
+	mesh_textures.push_back(texture);
 }
 
 /*
@@ -145,6 +159,103 @@ void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2
 	// increase spawn counter
 	t_instance.active_range++;
 }
+
+/*
+	TODO
+*/
+void RenderBatch::load_mesh(std::string& path)
+{
+	// create storage for file contents
+	std::vector<glm::vec3> positions;
+	std::vector<glm::vec2> uv_coordinates;
+	std::vector<glm::vec3> normals;
+	std::vector<uint32_t> idx_position,idx_uv,idx_normal;
+
+	// open source file
+	FILE* obj_file = fopen(path.c_str(),"r");
+	char cmd[128];
+	while (fscanf(obj_file,"%s",cmd)!=EOF)
+	{
+		// process value prefix
+		// position prefix
+		if (!strcmp(cmd,"v"))
+		{
+			glm::vec3 t_pos;
+			uint32_t _ = fscanf(obj_file,"%f %f %f\n",&t_pos.x,&t_pos.y,&t_pos.z);
+			positions.push_back(t_pos);
+		}
+
+		// uv coordinate prefix
+		else if (!strcmp(cmd,"vt"))
+		{
+			glm::vec2 t_uv;
+			uint32_t _ = fscanf(obj_file,"%f %f\n",&t_uv.x,&t_uv.y);
+			uv_coordinates.push_back(t_uv);
+		}
+
+		// normal prefix
+		else if (!strcmp(cmd,"vn"))
+		{
+			glm::vec3 t_norm;
+			uint32_t _ = fscanf(obj_file,"%f %f %f\n",&t_norm.x,&t_norm.y,&t_norm.z);
+			normals.push_back(t_norm);
+		}
+
+		// face prefix
+		else if (!strcmp(cmd,"f"))
+		{
+			// extract face indices
+			uint32_t t_ipos[3],t_iuv[3],t_inorm[3];
+			uint32_t _ = fscanf(
+					obj_file,"%u/%u/%u %u/%u/%u %u/%u/%u\n",
+					&t_ipos[0],&t_iuv[0],&t_inorm[0],
+					&t_ipos[1],&t_iuv[1],&t_inorm[1],
+					&t_ipos[2],&t_iuv[2],&t_inorm[2]
+				);
+
+			// insert face indices
+			for (uint8_t i=0;i<3;i++) idx_position.push_back(t_ipos[i]);
+			for (uint8_t i=0;i<3;i++) idx_uv.push_back(t_iuv[i]);
+			for (uint8_t i=0;i<3;i++) idx_normal.push_back(t_inorm[i]);
+		}
+	}
+	fclose(obj_file);
+
+	// iterate faces
+	for (uint32_t i=0;i<idx_position.size();i+=3)
+	{
+		// write vertex
+		for (uint8_t j=0;j<3;j++)
+		{
+			uint32_t n = i+j;
+			MeshUpload mu = {
+				.position = positions[n],
+				.uv_coord = uv_coordinates[n],
+				.normal = normals[n]
+			};
+			mesh_vertices.push_back(mu);
+		}
+
+		// precalculate tangent for normal mapping
+		// setup values
+		glm::vec3 e0 = mesh_vertices[i+1].position-mesh_vertices[i].position;
+		glm::vec3 e1 = mesh_vertices[i+2].position-mesh_vertices[i].position;
+		glm::vec2 t0 = mesh_vertices[i+1].uv_coord-mesh_vertices[i].uv_coord;
+		glm::vec2 t1 = mesh_vertices[i+2].uv_coord-mesh_vertices[i].uv_coord;
+		float fac = 1.f/(t0.y*t1.y-t1.x*t0.y);
+
+		// calculate tangent & store in vertex
+		glm::vec3 tangent = glm::vec3(
+				fac*(t1.y*e0.x-t0.y*e1.x),
+				fac*(t1.y*e0.y-t0.y*e1.y),
+				fac*(t1.y*e0.z-t0.y*e1.z)
+			);
+		tangent = glm::normalize(tangent);
+		for (uint8_t j=0;j<3;j++) mesh_vertices[i+j].tangent = tangent;
+		// FIXME: using a matrix calculation might be significantly faster
+	}
+}
+// FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
 
 /*
 	TODO
@@ -566,9 +677,25 @@ void bgr_load_batch(RenderBatch* batch)
 	file.close();
 	COMM_MSG(LOG_BLUE,"-> interpretation end");
 
-	// load textures
-	COMM_AWT("streaming %li textures",batch->sprite_textures.size());
+	// load geometry
+	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
+	for (Mesh& m : batch->meshes) batch->load_mesh(m.path);
+	COMM_CNF();
+
+	// load sprite textures
+	COMM_AWT("sprites: streaming %li textures",batch->sprite_textures.size());
 	for (SpriteTextureTuple& t : batch->sprite_textures) t.texture.load();
+	COMM_CNF();
+
+	// load mesh textures
+	COMM_AWT("meshes: streaming %li textures",batch->mesh_textures.size()*4);
+	for (MeshTextureTuple& t : batch->mesh_textures)
+	{
+		t.colours.load();
+		t.normals.load();
+		t.materials.load();
+		t.emission.load();
+	}
 	COMM_CNF();
 
 	// unlock batch & reset
@@ -581,13 +708,10 @@ void bgr_load_batch(RenderBatch* batch)
 */
 void batch_load(RenderBatch& batch)
 {
-	// set semaphore & signal texture gpu upload when ready
 	batch.load_semaphore = true;
-	batch.state = RBFR_UPLOAD;
-
-	// load pixel data in background
 	std::thread ld_thread(&bgr_load_batch,&batch);
 	ld_thread.detach();
+	batch.state = RBFR_UPLOAD;
 }
 
 /*
