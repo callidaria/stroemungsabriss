@@ -50,4 +50,13 @@ struct Transform2D
 	glm::mat4 model = glm::mat4(1.f);
 };
 
+// basic functionality of 3D geometry
+struct Transform3D
+{
+	// TODO
+
+	// transform
+	glm::mat4 model = glm::mat4(1.f);
+};
+
 #endif

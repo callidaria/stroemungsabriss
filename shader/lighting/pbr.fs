@@ -96,7 +96,7 @@ float schlick_out;
 
 void main()
 {
-	outColour = vec4(1,0,0,1);
+	outColour = vec4(texture(gbuffer_colour,TexCoords).rgb,1.0);
 	return;
 
 	// read g-buffer information

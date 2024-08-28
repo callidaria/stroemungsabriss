@@ -14,7 +14,7 @@
 	\param frames (default=1): number of frames held by spritesheet
 	\returns: memory index the spritesheet can be referenced by later
 */
-uint16_t RenderBatch::add_sprite(const char* path,uint8_t rows,uint8_t cols,uint8_t frames)
+uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint8_t frames)
 {
 	// create sprite source
 	SpriteTextureTuple tuple = {
@@ -29,8 +29,8 @@ uint16_t RenderBatch::add_sprite(const char* path,uint8_t rows,uint8_t cols,uint
 	};
 
 	// write and return reference id
-	textures.push_back(tuple);
-	return textures.size()-1;
+	sprite_textures.push_back(tuple);
+	return sprite_textures.size()-1;
 }
 
 /*
@@ -71,7 +71,7 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 	SpriteAnimation anim = {
 		.id = (uint16_t)sprites.size(),
 		.cycle_duration = dur,
-		.frame_duration = (float)dur/textures[tex_id].frames,
+		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register sprite & animation
@@ -111,12 +111,21 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 	SpriteAnimationInstance anim = {
 		.id = (uint16_t)duplicates.size(),
 		.cycle_duration = dur,
-		.frame_duration = (float)dur/textures[tex_id].frames,
+		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register duplicate & animation
 	anim_duplicates.push_back(anim);
 	register_duplicates(tex_id,pos,wdt,hgt);
+}
+
+/*
+	TODO
+*/
+void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,
+		glm::vec3 pos,float scl,glm::vec3 rot)
+{
+	// TODO
 }
 
 /*
@@ -145,7 +154,7 @@ void RenderBatch::update_sprites()
 	for (SpriteAnimation& ta : anim_sprites)
 	{
 		Sprite& ts = sprites[ta.id];
-		SpriteTextureTuple& tt = textures[ts.texture_id];
+		SpriteTextureTuple& tt = sprite_textures[ts.texture_id];
 
 		// calculate current frame
 		bool inc_anim = ta.anim_progression<ta.cycle_duration;
@@ -168,7 +177,7 @@ void RenderBatch::update_duplicates()
 	for (SpriteAnimationInstance& ta : anim_duplicates)
 	{
 		SpriteInstance& ti = duplicates[ta.id];
-		SpriteTextureTuple& tt = textures[ti.texture_id];
+		SpriteTextureTuple& tt = sprite_textures[ti.texture_id];
 
 		// calculate frames for all active instances
 		for (uint16_t i=0;i<ti.active_range;i++)
@@ -302,7 +311,10 @@ RenderBatch* Renderer::load(std::string path)
  *		-> duplicate int(texture_id) float(pos_x) float(pos_y) float(width) float(height)|
  *		-> ( int(animation_duration_in_frames))+e|
  *
- *	TODO register meshes
+ *	register meshes:
+ *		-> mesh string(object_path) string(texture_path)|
+ *		-> string(normal_map) string(material_map) string(emission_map)|
+ *		-> float(pos_x) float(pos_y) float(pos_z)( float(scale) float(rot_x) float(rot_y) float(rot_z))+e|
  *
  *	TODO register instances mesh groups
  *
@@ -321,8 +333,10 @@ RenderBatch* Renderer::load(std::string path)
 // TODO: remove naming bloat, command can be reduced to single character format
 
 // loader definition command list
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 4;
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = { "texture","sprite","duplicate","spawn" };
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 5;
+const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
+	"texture","sprite","duplicate","mesh","spawn"
+};
 
 /*
 	TODO
@@ -338,7 +352,6 @@ void interpreter_logic_texture(RenderBatch* batch,std::vector<std::string>& args
 		COMM_ERR_FALLBACK("texture request: not enough arguments provided");
 
 	// arguments to variables
-	const char* path = args[Args::TexPath].c_str();
 	uint8_t rows = 1, cols = 1, frames = 1;
 
 	// check for texture atlas information
@@ -350,7 +363,7 @@ void interpreter_logic_texture(RenderBatch* batch,std::vector<std::string>& args
 	}
 
 	// write texture
-	batch->add_sprite(path,rows,cols,frames);
+	batch->add_sprite(args[Args::TexPath],rows,cols,frames);
 }
 
 /*
@@ -422,6 +435,39 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,std::vector<std::stri
 /*
 	TODO
 */
+void interpreter_logic_mesh(RenderBatch* batch,std::vector<std::string>& args)
+{
+	enum Args : uint8_t { Command,ObjPath,TexPath,NormPath,MatPath,EmitPath,PosX,PosY,PosZ,Scl,RotX,RotY,RotZ };
+
+	COMM_LOG_COND(
+			args.size()>Args::PosZ,
+			"register mesh %s, textured with %s: pos -> (%s,%s,%s)",
+			args[Args::ObjPath].c_str(),args[Args::TexPath].c_str(),
+			args[Args::PosX].c_str(),args[Args::PosY].c_str(),args[Args::PosZ].c_str()
+		)
+		COMM_ERR_FALLBACK("mesh registration: not enough arguments provided");
+
+	// arguments to variables
+	glm::vec3 position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float scale = 1;
+	glm::vec3 rotation = glm::vec3(0);
+
+	// check if scale and rotation is specified before adding mesh
+	if (args.size()>Args::RotZ)
+	{
+		scale = stof(args[Args::Scl]);
+		rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
+	}
+	batch->add_mesh(
+			args[Args::ObjPath],args[Args::TexPath],
+			args[Args::NormPath],args[Args::MatPath],args[Args::EmitPath],
+			position,scale,rotation
+		);
+}
+
+/*
+	TODO
+*/
 void interpreter_logic_spawn_instanced(RenderBatch* batch,std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
@@ -477,7 +523,10 @@ void interpreter_logic_syntax_error(RenderBatch* batch,std::vector<std::string>&
 
 typedef void (*gfx_interpreter_logic)(RenderBatch*,std::vector<std::string>&);
 const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
-	interpreter_logic_texture,interpreter_logic_sprite,interpreter_logic_instanced_sprite,
+	interpreter_logic_texture,
+	interpreter_logic_sprite,
+	interpreter_logic_instanced_sprite,
+	interpreter_logic_mesh,
 	interpreter_logic_spawn_instanced,
 	interpreter_logic_syntax_error
 };
@@ -518,8 +567,8 @@ void bgr_load_batch(RenderBatch* batch)
 	COMM_MSG(LOG_BLUE,"-> interpretation end");
 
 	// load textures
-	COMM_AWT("streaming %li textures",batch->textures.size());
-	for (SpriteTextureTuple& t : batch->textures) t.texture.load();
+	COMM_AWT("streaming %li textures",batch->sprite_textures.size());
+	for (SpriteTextureTuple& t : batch->sprite_textures) t.texture.load();
 	COMM_CNF();
 
 	// unlock batch & reset
@@ -550,9 +599,9 @@ void batch_upload(RenderBatch& batch)
 	if (batch.load_semaphore) return;
 
 	// load textures
-	COMM_AWT("attempting to upload %li textures to gpu",batch.textures.size());
+	COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
 	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
-	while (batch.upload_head<batch.textures.size())
+	while (batch.upload_head<batch.sprite_textures.size())
 	{
 		// check timing for stall until next frame when upload takes too long
 		if ((std::chrono::steady_clock::now()-stime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
@@ -562,7 +611,7 @@ void batch_upload(RenderBatch& batch)
 		}
 
 		// upload texture to gpu
-		SpriteTextureTuple& t = batch.textures[batch.upload_head];
+		SpriteTextureTuple& t = batch.sprite_textures[batch.upload_head];
 		t.texture.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
@@ -611,10 +660,14 @@ void Renderer::update()
 	glDisable(GL_BLEND);
 
 	// opening rendertarget
+	m_gbuffer.bind();
+
+	// draw 3D geometry
 	// TODO
 
 	// post processing
 	// 2D setup
+	FrameBuffer::unbind();
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
@@ -647,7 +700,7 @@ void Renderer::render_sprites(RenderBatch* batch)
 	for (uint16_t i=0;i<batch->sprites.size();i++)
 	{
 		Sprite& ts = batch->sprites[i];
-		SpriteTextureTuple& tt = batch->textures[ts.texture_id];
+		SpriteTextureTuple& tt = batch->sprite_textures[ts.texture_id];
 
 		// upload sprite attributes
 		spr_shader.upload_int("row",tt.rows);
@@ -656,7 +709,7 @@ void Renderer::render_sprites(RenderBatch* batch)
 		spr_shader.upload_matrix("model",ts.transform.model);
 
 		// draw sprite
-		batch->textures[ts.texture_id].texture.bind();
+		batch->sprite_textures[ts.texture_id].texture.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }
@@ -670,7 +723,7 @@ void Renderer::render_duplicates(RenderBatch* batch)
 	for (uint16_t i=0;i<batch->duplicates.size();i++)
 	{
 		SpriteInstance& ti = batch->duplicates[i];
-		SpriteTextureTuple& tt = batch->textures[ti.texture_id];
+		SpriteTextureTuple& tt = batch->sprite_textures[ti.texture_id];
 
 		// upload instance attributes & data
 		spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
@@ -679,7 +732,7 @@ void Renderer::render_duplicates(RenderBatch* batch)
 		dpl_shader.upload_matrix("model",ti.transform.model);
 
 		// draw instances
-		batch->textures[ti.texture_id].texture.bind();
+		batch->sprite_textures[ti.texture_id].texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
 	}
 }

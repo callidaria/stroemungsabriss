@@ -9,3 +9,5 @@ duplicate 1 0 0 25 25 90
 spawn sprite 0 1100 700
 spawn sprite 0 360 420
 spawn sprite 0 630 360
+
+mesh ./res/casino/tobject.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 0 0

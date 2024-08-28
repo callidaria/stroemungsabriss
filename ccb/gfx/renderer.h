@@ -4,9 +4,11 @@
 #include "../fcn/config.h"
 #include "../mat/math.h"
 #include "../fcn/buffer.h"
+#include "../frm/frame.h"
 
 #include "shader.h"
 #include "texture.h"
+#include "mesh.h"
 
 
 // upload structures
@@ -78,16 +80,21 @@ struct SpriteAnimationInstance
 	float anim_progressions[SPRITE_INSTANCE_CAPACITY] = { .0f };
 };
 
+// batches
 // batch data to seperately load and display to other buffers
 struct RenderBatch
 {
 	// utility
 	// sprite creation
-	uint16_t add_sprite(const char* path,uint8_t rows=1,uint8_t cols=1,uint8_t frames=1);
+	uint16_t add_sprite(std::string path,uint8_t rows=1,uint8_t cols=1,uint8_t frames=1);
 	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
 	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
 	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
 	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
+
+	// mesh creation
+	void add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,
+			glm::vec3 pos,float scl=1.f,glm::vec3 rot=glm::vec3(0));
 
 	// spawners
 	void spawn_sprite_instance(uint16_t inst_id,
@@ -99,9 +106,13 @@ struct RenderBatch
 
 	// data
 	// sprites
-	std::vector<SpriteTextureTuple> textures;
+	std::vector<SpriteTextureTuple> sprite_textures;
 	std::vector<Sprite> sprites;
 	std::vector<SpriteAnimation> anim_sprites;
+
+	// meshes
+	std::vector<Texture> mesh_textures;
+	std::vector<Mesh> meshes;
 
 	// instanced sprites
 	std::vector<SpriteInstance> duplicates;
