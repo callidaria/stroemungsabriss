@@ -234,6 +234,7 @@ void RenderBatch::load_mesh(std::string& path)
 				.normal = normals[n]
 			};
 			mesh_vertices.push_back(mu);
+			// FIXME: this causes a memory leak?!? does not seem to be triggered due to threading
 		}
 
 		// precalculate tangent for normal mapping
@@ -326,13 +327,13 @@ Renderer::Renderer()
 	spr_buffer.upload_vertices(sprite_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	// setup sprite shader
-	COMM_LOG("compile shader for sprites");
+	COMM_LOG("compile sprite shader");
 	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
 	spr_shader.upload_int("tex",0);
 	spr_shader.upload_camera();
 
-	// compile classical instance shader program
-	COMM_LOG("compile shader for sprite duplicates");
+	// compile duplicate shader program
+	COMM_LOG("compile sprite duplicate shader");
 	dpl_shader.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
 	spr_buffer.add_buffer();
 	spr_buffer.bind_index();
@@ -344,6 +345,17 @@ Renderer::Renderer()
 	// sprite duplication shader initial attributes
 	dpl_shader.upload_int("tex",0);
 	dpl_shader.upload_camera();
+	Buffer::unbind();
+
+	// mesh initialization
+	// compile mesh shader
+	COMM_LOG("compile mesh shader");
+	mesh_shader.compile3d("./shader/obj/mesh.vs","./shader/obj/mesh.fs");
+	mesh_shader.upload_int("colour_map",0);
+	mesh_shader.upload_int("normal_map",1);
+	mesh_shader.upload_int("material_map",2);
+	mesh_shader.upload_int("emission_map",3);
+	mesh_shader.upload_camera(g_Camera3D);
 
 	// screen space
 	// setup gbuffer
@@ -722,6 +734,21 @@ void batch_upload(RenderBatch& batch)
 	// postpone load, when texture data not ready
 	if (batch.load_semaphore) return;
 
+	// ready mesh buffer
+	batch.mesh_buffer.bind();
+	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
+	/*
+	for (MeshTextureTuple& tm : batch.mesh_textures)
+	{
+		tm.colours.upload();
+		tm.normals.upload();
+		tm.materials.upload();
+		tm.emission.upload();
+	}
+	*/
+	Buffer::unbind();
+	// TODO: move this away from here & stall texture upload
+
 	// load textures
 	COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
 	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
@@ -784,19 +811,21 @@ void Renderer::update()
 	glDisable(GL_BLEND);
 
 	// opening rendertarget
-	m_gbuffer.bind();
+	//m_gbuffer.bind();
 
 	// draw 3D geometry
-	// TODO
+	mesh_shader.enable();
+	for (RenderBatch* batch : draw_pointers) render_meshes(batch);
 
 	// post processing
 	// 2D setup
-	FrameBuffer::unbind();
+	//FrameBuffer::unbind();
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
 	// deferred shading
-	//m_deferred.bind();
+	//m_deferred.bind()
+	/*;
 	m_canvas_buffer.bind();
 	m_deferred_shader.enable();
 	m_gbuffer.upload_components();
@@ -813,6 +842,7 @@ void Renderer::update()
 	spr_buffer.bind_index();
 	dpl_shader.enable();
 	for (RenderBatch* batch : draw_pointers) render_duplicates(batch);
+	*/
 }
 
 /*
@@ -855,8 +885,38 @@ void Renderer::render_duplicates(RenderBatch* batch)
 		dpl_shader.upload_int("col",tt.columns);
 		dpl_shader.upload_matrix("model",ti.transform.model);
 
-		// draw instances
+		// draw duplicates
 		batch->sprite_textures[ti.texture_id].texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer::render_meshes(RenderBatch* batch)
+{
+	// bind buffer and iterate meshes
+	batch->mesh_buffer.bind();
+	for (uint16_t i=0;i<batch->meshes.size();i++)
+	{
+		Mesh& tm = batch->meshes[i];
+		MeshTextureTuple& tt = batch->mesh_textures[i*4];
+
+		// upload attributes
+		mesh_shader.upload_matrix("model",tm.transform.model);
+
+		// upload textures
+		tt.colours.bind();
+		glActiveTexture(GL_TEXTURE1);
+		tt.normals.bind();
+		glActiveTexture(GL_TEXTURE2);
+		tt.materials.bind();
+		glActiveTexture(GL_TEXTURE3);
+		tt.emission.bind();
+		glActiveTexture(GL_TEXTURE0);
+
+		// draw meshes
+		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
 	}
 }

@@ -19,6 +19,17 @@ Camera2D::Camera2D(float x_bounds,float y_bounds)
 
 
 /**
+ *		TODO
+*/
+
+Camera3D::Camera3D(glm::vec3 position,glm::vec3 target,float ratio,float fov)
+{
+	view3D = glm::lookAt(position,target,glm::vec3(0,0,1));
+	proj3D = glm::perspective(glm::radians(fov),ratio,.1f,10000.f);
+}
+
+
+/**
  *		TODO expand
 */
 

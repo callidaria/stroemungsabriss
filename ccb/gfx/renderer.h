@@ -142,6 +142,7 @@ struct RenderBatch
 	std::vector<SpriteAnimation> anim_sprites;
 
 	// meshes
+	Buffer mesh_buffer;
 	std::vector<MeshTextureTuple> mesh_textures;
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
@@ -179,18 +180,22 @@ private:
 
 	void render_sprites(RenderBatch* batch);
 	void render_duplicates(RenderBatch* batch);
+	void render_meshes(RenderBatch* batch);
 
 public:
-
-	// sprite components
-	Buffer spr_buffer;
-	Shader spr_shader,dpl_shader;
 
 	// batches
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> draw_pointers;
 
 private:
+
+	// sprite components
+	Buffer spr_buffer;
+	Shader spr_shader,dpl_shader;
+
+	// mesh components
+	Shader mesh_shader;
 
 	// rendertarget
 	Buffer m_canvas_buffer;

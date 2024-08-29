@@ -20,6 +20,9 @@ uniform mat4 light_trans;
 
 void main()
 {
+	gl_Position = vec4(texCoords,0,1);
+	return;
+
 	// calculate position
 	Position = model*vec4(position,1.0);
 	gl_Position = proj*view*Position;

@@ -53,10 +53,8 @@ public:
 		{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
 	inline void upload_camera()
 		{ upload_matrix("view",g_Camera2D.view2D), upload_matrix("proj",g_Camera2D.proj2D); }
-	/*
-	inline void upload_camera(Camera3D cam3d)
+	inline void upload_camera(Camera3D& cam3d)
 		{ upload_matrix("view",cam3d.view3D), upload_matrix("proj",cam3d.proj3D); }
-	*/
 
 private:
 

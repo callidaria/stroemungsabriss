@@ -2,10 +2,11 @@
 #define CCB_MATH_SELFTITLED
 
 #include "toolbox.h"
+#include "../fcn/config.h"
 
 
 // coordinate systems
-// 2D camera translates sprite and other 2D canvas position and scaling
+// 2D camera translates sprite and other arbitrary 2D canvae
 class Camera2D
 {
 public:
@@ -20,7 +21,27 @@ public:
 };
 inline Camera2D g_Camera2D = Camera2D(1280.f,720.f);
 
-// TODO 3D camera
+
+// 3D camera translates meshes and other arbitrary 3D geometry
+class Camera3D
+{
+public:
+
+	// construction
+	Camera3D(glm::vec3 position,glm::vec3 target,float ratio,float fov);
+
+	// utility
+	// TODO
+
+public:
+
+	// conversion matrices
+	glm::mat4 view3D,proj3D;
+};
+inline Camera3D g_Camera3D = Camera3D(
+		glm::vec3(0,-.01f,10),glm::vec3(0),
+		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
+	);
 
 
 // transformation math

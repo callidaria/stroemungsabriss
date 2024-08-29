@@ -17,6 +17,10 @@ uniform sampler2D emission_map;
 
 void main()
 {
+	gbuffer_colour = vec4(1,0,0,1);
+	return;
+
+/*
 	// extract colour & position
 	gbuffer_colour = vec4(texture(colour_map,TexCoords).rgb,.0);
 	gbuffer_position = vec4(Position.rgb,.0);
@@ -27,4 +31,5 @@ void main()
 
 	// extract surface materials
 	gbuffer_materials = vec4(texture(material_map,TexCoords).rgb,.0);
+*/
 }
