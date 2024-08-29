@@ -221,20 +221,20 @@ void RenderBatch::load_mesh(std::string& path)
 	}
 	fclose(obj_file);
 
-	// iterate faces
+	// iterate faces & write vertex
+	size_t base_index = mesh_vertices.size();
+	mesh_vertices.reserve(base_index+idx_position.size());
 	for (uint32_t i=0;i<idx_position.size();i+=3)
 	{
-		// write vertex
 		for (uint8_t j=0;j<3;j++)
 		{
 			uint32_t n = i+j;
 			MeshUpload mu = {
-				.position = positions[n],
-				.uv_coord = uv_coordinates[n],
-				.normal = normals[n]
+				.position = positions[idx_position[n]],
+				.uv_coord = uv_coordinates[idx_uv[n]],
+				.normal = normals[idx_normal[n]]
 			};
-			mesh_vertices.push_back(mu);
-			// FIXME: this causes a memory leak?!? does not seem to be triggered due to threading
+			mesh_vertices[base_index+n] = mu;
 		}
 
 		// precalculate tangent for normal mapping
@@ -253,7 +253,9 @@ void RenderBatch::load_mesh(std::string& path)
 			);
 		tangent = glm::normalize(tangent);
 		for (uint8_t j=0;j<3;j++) mesh_vertices[i+j].tangent = tangent;
-		// FIXME: using a matrix calculation might be significantly faster
+		// FIXME: how the hell is the tangent creating a memory leak?!? it's a mathematical operation!
+		//		could be an old version, test on a more modern system (no offense, computer i'm writing this on)
+		// TODO: using a matrix calculation might be significantly faster
 	}
 }
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
@@ -907,6 +909,7 @@ void Renderer::render_meshes(RenderBatch* batch)
 		mesh_shader.upload_matrix("model",tm.transform.model);
 
 		// upload textures
+		/*
 		tt.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
 		tt.normals.bind();
@@ -915,6 +918,7 @@ void Renderer::render_meshes(RenderBatch* batch)
 		glActiveTexture(GL_TEXTURE3);
 		tt.emission.bind();
 		glActiveTexture(GL_TEXTURE0);
+		*/
 
 		// draw meshes
 		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());

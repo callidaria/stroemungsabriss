@@ -73,7 +73,7 @@ int main(int argc,char** argv)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
-		system("./yomisensei &");
+		uint32_t _ = system("./yomisensei &");
 #endif
 
 	// close
