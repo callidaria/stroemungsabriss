@@ -1,16 +1,6 @@
 #ifndef CCB_GRAPHICS_SHADER
 #define CCB_GRAPHICS_SHADER
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "../mat/math.h"
 
 class Shader
@@ -18,13 +8,29 @@ class Shader
 public:
 
 	// construction
-	Shader() {  }
+	Shader(const char* path,GLenum type);
 	~Shader() {  }
 
-	// compilation
-	void compile(const char* vspath, const char* fspath);
-	void compile2d(const char* vspath, const char* fspath);
-	void compile3d(const char* vspath,const char* fspath);
+public:
+
+	// data
+	uint32_t shader;
+};
+
+class ShaderPipeline
+{
+public:
+
+	// construction
+	ShaderPipeline() {  }
+	~ShaderPipeline() {  }
+
+	// setup
+	void assemble(const Shader& vs,const Shader& fs);
+
+	// environments
+	void point_buffer2D();
+	void point_buffer3D();
 
 	// definition
 	void def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
@@ -59,7 +65,6 @@ public:
 private:
 
 	// helpers
-	uint32_t compile_shader(const char* path,GLenum stype);
 	int32_t handle_attrib_location_by_name(const char* name);
 	int32_t handle_index_location_by_name(const char* name);
 

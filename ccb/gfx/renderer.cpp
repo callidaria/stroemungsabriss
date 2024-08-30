@@ -173,6 +173,13 @@ void RenderBatch::load_mesh(std::string& path)
 
 	// open source file
 	FILE* obj_file = fopen(path.c_str(),"r");
+	if (obj_file==NULL)
+	{
+		COMM_ERR("object loader -> file %s could not be found!",path.c_str());
+		return;
+	}
+
+	// iterate file contents
 	char cmd[128];
 	while (fscanf(obj_file,"%s",cmd)!=EOF)
 	{
@@ -222,8 +229,7 @@ void RenderBatch::load_mesh(std::string& path)
 	fclose(obj_file);
 
 	// iterate faces & write vertex
-	size_t base_index = mesh_vertices.size();
-	mesh_vertices.reserve(base_index+idx_position.size());
+	mesh_vertices.reserve(mesh_vertices.size()+idx_position.size());
 	for (uint32_t i=0;i<idx_position.size();i+=3)
 	{
 		for (uint8_t j=0;j<3;j++)
@@ -234,7 +240,7 @@ void RenderBatch::load_mesh(std::string& path)
 				.uv_coord = uv_coordinates[idx_uv[n]],
 				.normal = normals[idx_normal[n]]
 			};
-			mesh_vertices[base_index+n] = mu;
+			mesh_vertices.push_back(mu);
 		}
 
 		// precalculate tangent for normal mapping
@@ -317,7 +323,7 @@ void RenderBatch::update_duplicates()
 Renderer::Renderer()
 {
 	COMM_MSG(LOG_HEADINGS,"renderer setup...");
-
+/*
 	// sprite initialization
 	// generate sprite vertex data
 	COMM_LOG("pre-loading basic sprite geometry");
@@ -348,17 +354,33 @@ Renderer::Renderer()
 	dpl_shader.upload_int("tex",0);
 	dpl_shader.upload_camera();
 	Buffer::unbind();
-
+*/
 	// mesh initialization
 	// compile mesh shader
 	COMM_LOG("compile mesh shader");
+	/*
 	mesh_shader.compile3d("./shader/obj/mesh.vs","./shader/obj/mesh.fs");
 	mesh_shader.upload_int("colour_map",0);
 	mesh_shader.upload_int("normal_map",1);
 	mesh_shader.upload_int("material_map",2);
 	mesh_shader.upload_int("emission_map",3);
 	mesh_shader.upload_camera(g_Camera3D);
+	*/
+	sp_sprite.assemble(vs_sprite,fs_direct);
+	sp_duplicate.assemble(vs_duplicate,fs_direct);
+	sp_mesh.assemble(vs_sprite,fs_mesh);
+	float mesh_vertices[] = {
+		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
+		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
+	};
+	mesh_buffer.bind();
+	mesh_buffer.upload_vertices(mesh_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
+	sp_mesh.enable();
+	sp_mesh.point_buffer2D();
+	sp_mesh.upload_int("tex",0);
+
+	/*
 	// screen space
 	// setup gbuffer
 	COMM_LOG("setup material buffer and generate its components");
@@ -389,9 +411,11 @@ Renderer::Renderer()
 	m_deferred_shader.upload_int("gbuffer_materials",3);
 
 	// setup framebuffer for deferred shading
+/*
 	m_deferred.bind();
 	m_deferred.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
 	FrameBuffer::unbind();
+	*/
 
 	COMM_SCC("renderer ready");
 }
@@ -695,7 +719,7 @@ void bgr_load_batch(RenderBatch* batch)
 	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
 	for (Mesh& m : batch->meshes) batch->load_mesh(m.path);
 	COMM_CNF();
-
+/*
 	// load sprite textures
 	COMM_AWT("sprites: streaming %li textures",batch->sprite_textures.size());
 	for (SpriteTextureTuple& t : batch->sprite_textures) t.texture.load();
@@ -711,7 +735,7 @@ void bgr_load_batch(RenderBatch* batch)
 		t.emission.load();
 	}
 	COMM_CNF();
-
+*/
 	// unlock batch & reset
 	batch->load_semaphore = false;
 	batch->upload_head = 0;
@@ -737,8 +761,25 @@ void batch_upload(RenderBatch& batch)
 	if (batch.load_semaphore) return;
 
 	// ready mesh buffer
+	/*
+	batch.mesh_vertices = {
+		{ .uv_coord = glm::vec2(-.5f,.5f) },
+		{ .uv_coord = glm::vec2(.5f,-.5f) },
+		{ .uv_coord = glm::vec2(.5f,.5f) },
+		{ .uv_coord = glm::vec2(.5f,-.5f) },
+		{ .uv_coord = glm::vec2(-.5f,.5f) },
+		{ .uv_coord = glm::vec2(-.5f,-.5f) }
+	};
 	batch.mesh_buffer.bind();
 	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
+	std::vector<float> mesh_vertices = {
+		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
+		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
+	};
+	batch.mesh_buffer.bind();
+	batch.mesh_buffer.upload_vertices(mesh_vertices);
+	*/
+
 	/*
 	for (MeshTextureTuple& tm : batch.mesh_textures)
 	{
@@ -748,9 +789,9 @@ void batch_upload(RenderBatch& batch)
 		tm.emission.upload();
 	}
 	*/
-	Buffer::unbind();
+	//Buffer::unbind();
 	// TODO: move this away from here & stall texture upload
-
+/*
 	// load textures
 	COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
 	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
@@ -771,6 +812,7 @@ void batch_upload(RenderBatch& batch)
 		Texture::generate_mipmap();
 		batch.upload_head++;
 	}
+*/
 
 	// proceed to update state
 	batch.state = RBFR_READY;
@@ -809,21 +851,26 @@ void Renderer::update()
 
 	// rendering 3D geometry
 	// deferred 3D setup
+	/*
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+	*/
 
 	// opening rendertarget
 	//m_gbuffer.bind();
 
 	// draw 3D geometry
-	mesh_shader.enable();
+	mesh_buffer.bind();
+	sp_mesh.enable();
 	for (RenderBatch* batch : draw_pointers) render_meshes(batch);
 
 	// post processing
 	// 2D setup
 	//FrameBuffer::unbind();
+	/*
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	*/
 
 	// deferred shading
 	//m_deferred.bind()
@@ -850,6 +897,7 @@ void Renderer::update()
 /*
 	TODO
 */
+/*
 void Renderer::render_sprites(RenderBatch* batch)
 {
 	// iterate registered sprites
@@ -873,6 +921,7 @@ void Renderer::render_sprites(RenderBatch* batch)
 /*
 	TODO
 */
+/*
 void Renderer::render_duplicates(RenderBatch* batch)
 {
 	// iterate registered duplicates
@@ -899,14 +948,16 @@ void Renderer::render_duplicates(RenderBatch* batch)
 void Renderer::render_meshes(RenderBatch* batch)
 {
 	// bind buffer and iterate meshes
-	batch->mesh_buffer.bind();
+	//batch->mesh_buffer.bind();
+	//mesh_shader.enable(); // change back
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
 		Mesh& tm = batch->meshes[i];
 		MeshTextureTuple& tt = batch->mesh_textures[i*4];
 
 		// upload attributes
-		mesh_shader.upload_matrix("model",tm.transform.model);
+		//mesh_shader.upload_matrix("model",tm.transform.model);
+		sp_mesh.upload_matrix("model",glm::mat4(1.f));
 
 		// upload textures
 		/*
@@ -921,6 +972,7 @@ void Renderer::render_meshes(RenderBatch* batch)
 		*/
 
 		// draw meshes
-		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
+		//glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
+		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }

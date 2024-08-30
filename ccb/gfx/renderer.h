@@ -142,7 +142,7 @@ struct RenderBatch
 	std::vector<SpriteAnimation> anim_sprites;
 
 	// meshes
-	Buffer mesh_buffer;
+	//Buffer mesh_buffer;
 	std::vector<MeshTextureTuple> mesh_textures;
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
@@ -190,16 +190,24 @@ public:
 
 private:
 
-	// sprite components
+	// buffers
 	Buffer spr_buffer;
-	Shader spr_shader,dpl_shader;
+	Buffer mesh_buffer;
 
-	// mesh components
-	Shader mesh_shader;
+	// shaders
+	Shader vs_sprite = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
+	Shader vs_duplicate = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
+	Shader fs_direct = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
+	Shader fs_mesh = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
+
+	// shader pipelines
+	ShaderPipeline sp_sprite;
+	ShaderPipeline sp_duplicate;
+	ShaderPipeline sp_mesh;
 
 	// rendertarget
 	Buffer m_canvas_buffer;
-	Shader m_deferred_shader;
+	//Shader m_deferred_shader;
 	FrameBuffer m_gbuffer = FrameBuffer(4);
 	FrameBuffer m_deferred = FrameBuffer(1);
 };

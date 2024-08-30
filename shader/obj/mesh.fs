@@ -1,23 +1,32 @@
 #version 330 core
 
+/*
 in vec4 Position;
 in vec2 TexCoords;
 in mat3 TBN;
+*/
+in vec2 TexCoords;
 
+/*
 out vec4 gbuffer_colour;
 out vec4 gbuffer_position;
 out vec4 gbuffer_normals;
 out vec4 gbuffer_materials;
+*/
+out vec4 outColour;
 
 // object component maps
+/*
 uniform sampler2D colour_map;
 uniform sampler2D normal_map;
 uniform sampler2D material_map;
 uniform sampler2D emission_map;
+*/
+uniform sampler2D tex;
 
 void main()
 {
-	gbuffer_colour = vec4(1,0,0,1);
+	outColour = vec4(TexCoords,0,1);
 	return;
 
 /*
