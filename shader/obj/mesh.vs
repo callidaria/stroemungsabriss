@@ -20,12 +20,8 @@ uniform mat4 light_trans;
 
 void main()
 {
-	gl_Position = vec4(texCoords,0,1);
-	return;
-
-/*
 	// calculate position
-	Position = model*vec4(position,1.0);
+	Position = model*vec4(position,1);
 	gl_Position = proj*view*Position;
 
 	// calculate texture coordinates
@@ -36,5 +32,4 @@ void main()
 	vec3 Normals = normalize((model*vec4(normals,0)).xyz);
 	T = normalize(T-dot(T,Normals)*Normals);
 	TBN = mat3(T,cross(Normals,T),Normals);
-*/
 }

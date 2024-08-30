@@ -29,11 +29,15 @@ void load_scene(SceneData& data)
 void maintain_scene(SceneData& data)
 {
 	// request additional batch load
-	if (g_Input.kb.ka[SDL_SCANCODE_L]&&!data.second_request)
+	if (g_Input.kb.ka[SDL_SCANCODE_B]&&!data.second_request)
 	{
 		data.batch1 = g_Renderer.load("./lvload/test_scene0.ccb");
 		data.second_request = true;
 	}
+
+	int8_t camDir = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
+	g_Camera3D.rotate_around_target(camDir*4);
+	g_Camera3D.update();
 }
 
 typedef void (*scene_update)(SceneData&);

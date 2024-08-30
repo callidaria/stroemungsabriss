@@ -31,15 +31,20 @@ public:
 	Camera3D(glm::vec3 position,glm::vec3 target,float ratio,float fov);
 
 	// utility
-	// TODO
+	void rotate_around_target(float deg);
+	void update();
 
 public:
 
 	// conversion matrices
 	glm::mat4 view3D,proj3D;
+
+private:
+
+	glm::vec3 m_position,m_target;
 };
 inline Camera3D g_Camera3D = Camera3D(
-		glm::vec3(0,-.01f,10),glm::vec3(0),
+		glm::vec3(0,-2,4),glm::vec3(0),
 		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
 	);
 

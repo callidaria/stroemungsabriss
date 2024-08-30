@@ -1,11 +1,8 @@
 #version 330 core
 
-/*
 in vec4 Position;
 in vec2 TexCoords;
 in mat3 TBN;
-*/
-in vec2 TexCoords;
 
 /*
 out vec4 gbuffer_colour;
@@ -26,7 +23,7 @@ uniform sampler2D tex;
 
 void main()
 {
-	outColour = vec4(TexCoords,0,1);
+	outColour = vec4(TexCoords,1-TexCoords.x,1);
 	return;
 
 /*

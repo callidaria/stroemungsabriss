@@ -23,9 +23,26 @@ Camera2D::Camera2D(float x_bounds,float y_bounds)
 */
 
 Camera3D::Camera3D(glm::vec3 position,glm::vec3 target,float ratio,float fov)
+	: m_position(position),m_target(target)
 {
 	view3D = glm::lookAt(position,target,glm::vec3(0,0,1));
 	proj3D = glm::perspective(glm::radians(fov),ratio,.1f,10000.f);
+}
+
+/*
+	TODO
+*/
+void Camera3D::rotate_around_target(float deg)
+{
+	m_position = glm::rotate(glm::mat4(1.f),glm::radians(deg),glm::vec3(0,0,1))*glm::vec4(m_position,1);
+}
+
+/*
+	TODO
+*/
+void Camera3D::update()
+{
+	view3D = glm::lookAt(m_position,m_target,glm::vec3(0,0,1));
 }
 
 
