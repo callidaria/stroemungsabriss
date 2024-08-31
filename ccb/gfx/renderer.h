@@ -194,23 +194,26 @@ private:
 	// buffers
 	Buffer spr_buffer;
 	Buffer mesh_buffer;
+	Buffer m_canvas_buffer;
 
-	// shaders
+	// vertex shaders
 	Shader vs_sprite = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
 	Shader vs_duplicate = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
 	Shader vs_mesh = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
+	Shader vs_framebuffer = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
+
+	// fragment shaders
 	Shader fs_direct = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
 	Shader fs_mesh = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
+	Shader fs_deferred = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
 
 	// shader pipelines
 	ShaderPipeline sp_sprite;
 	ShaderPipeline sp_duplicate;
+	ShaderPipeline sp_deferred;
 
 	// rendertarget
-	Buffer m_canvas_buffer;
-	//Shader m_deferred_shader;
 	FrameBuffer m_gbuffer = FrameBuffer(4);
-	FrameBuffer m_deferred = FrameBuffer(1);
 };
 
 inline Renderer g_Renderer = Renderer();

@@ -96,9 +96,6 @@ float schlick_out;
 
 void main()
 {
-	outColour = vec4(texture(gbuffer_colour,TexCoords).rgb,1.0);
-	return;
-
 	// read g-buffer information
 	vec4 colourxspec = texture(gbuffer_colour,TexCoords);
 	vec4 positionxnull = texture(gbuffer_position,TexCoords);
@@ -115,6 +112,8 @@ void main()
 	float metallic = materials.r;
 	float roughness = materials.g;
 	float ambient_occlusion = materials.b;
+	outColour = vec4(normals,1.);
+	return;
 
 	// read transparency buffer
 	vec4 tbuffer = texture(transparency_buffer,TexCoords);

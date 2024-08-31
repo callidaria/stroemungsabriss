@@ -134,16 +134,6 @@ static inline void produce_timestamp(bool padding=true)
 #endif
 
 
-// data to represent detatched and waiting thread state
-/*
-struct ThreadState
-{
-	std::mutex mux;
-	std::condition_variable cond;
-	volatile bool active = true;
-};
-*/
-
 class Toolbox
 {
 public:
@@ -154,46 +144,11 @@ public:
 	// data helper
 	static std::vector<std::string> split_string(std::string str,char delim);
 
-	// loader
-	//static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
-	//		float scl,glm::vec3 rot);
-
 	// math helper
 	/*
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
-	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
-	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
 	*/
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
-
-	// threading
-	/*
-	static void thread_detached_continue(ThreadState& state);
-	static void thread_detached_stop(ThreadState& state);
-	*/
-
-	// vertex setup
-	/*
-	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
-	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,
-			glm::vec2 pos,float width,float height);
-	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
-	*/
-
-	// inline definition
-	/*
-	static inline std::vector<float> create_sprite_canvas() {
-		return {
-			-1.0f,	1.0f,	0.0f,	1.0f,
-			-1.0f,	-1.0f,	0.0f,	0.0f,
-			1.0f,	-1.0f,	1.0f,	0.0f,
-			-1.0f,	1.0f,	0.0f,	1.0f,
-			1.0f,	-1.0f,	1.0f,	0.0f,
-			1.0f,	1.0f,	1.0f,	1.0f
-		};
-	}
-	*/
-	// TODO: find out if vectorcopy is optimized away when inline
 };
 
 #endif

@@ -355,17 +355,7 @@ Renderer::Renderer()
 	dpl_shader.upload_camera();
 	Buffer::unbind();
 */
-	// mesh initialization
-	// compile mesh shader
 	COMM_LOG("assemble shader pipelines");
-	/*
-	mesh_shader.compile3d("./shader/obj/mesh.vs","./shader/obj/mesh.fs");
-	mesh_shader.upload_int("colour_map",0);
-	mesh_shader.upload_int("normal_map",1);
-	mesh_shader.upload_int("material_map",2);
-	mesh_shader.upload_int("emission_map",3);
-	mesh_shader.upload_camera(g_Camera3D);
-	*/
 	sp_sprite.assemble(vs_sprite,fs_direct);
 	sp_duplicate.assemble(vs_duplicate,fs_direct);
 	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
@@ -377,10 +367,9 @@ Renderer::Renderer()
 		batches[i].sp_mesh.upload_int("material_map",2);
 		batches[i].sp_mesh.upload_int("emission_map",3);
 	}
+	sp_deferred.assemble(vs_framebuffer,fs_deferred);
 
-	/*
 	// screen space
-	// setup gbuffer
 	COMM_LOG("setup material buffer and generate its components");
 	m_gbuffer.bind();
 	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
@@ -391,29 +380,21 @@ Renderer::Renderer()
 	m_gbuffer.combine_attachments();  // FIXME: move to construction and remove
 	FrameBuffer::unbind();
 
-	// generate canvas vertex data
 	COMM_LOG("pre-loading basic canvas geometry");
 	float canvas_vertices[] = {
-		-1.f,1.f,.0f,.0f, 1.f,-1.f,1.f,1.f, 1.f,1.f,1.f,.0f,
-		1.f,-1.f,1.f,1.f, -1.f,1.f,.0f,.0f, -1.f,-1.f,.0f,1.f
+		-1.f,1.f,.0f,1.f, 1.f,-1.f,1.f,.0f, 1.f,1.f,1.f,1.f,
+		1.f,-1.f,1.f,.0f, -1.f,1.f,.0f,1.f, -1.f,-1.f,.0f,.0f
 	};
 	m_canvas_buffer.bind();
 	m_canvas_buffer.upload_vertices(canvas_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
-	// setup deferred lighting shader
-	COMM_LOG("compile shader for deferred lighting systems");
-	m_deferred_shader.compile2d("./shader/standard/framebuffer.vs","./shader/lighting/pbr.fs");
-	m_deferred_shader.upload_int("gbuffer_colour",0);
-	m_deferred_shader.upload_int("gbuffer_position",1);
-	m_deferred_shader.upload_int("gbuffer_normals",2);
-	m_deferred_shader.upload_int("gbuffer_materials",3);
-
-	// setup framebuffer for deferred shading
-/*
-	m_deferred.bind();
-	m_deferred.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
-	FrameBuffer::unbind();
-	*/
+	COMM_LOG("setup shader for deferred lighting system");
+	sp_deferred.enable();
+	sp_deferred.point_buffer2D();
+	sp_deferred.upload_int("gbuffer_colour",0);
+	sp_deferred.upload_int("gbuffer_position",1);
+	sp_deferred.upload_int("gbuffer_normals",2);
+	sp_deferred.upload_int("gbuffer_materials",3);
 
 	COMM_SCC("renderer ready");
 }
@@ -851,33 +832,26 @@ void Renderer::update()
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	// opening rendertarget
-	//m_gbuffer.bind();
-
 	// draw 3D geometry
-	/*
-	mesh_buffer.bind();
-	sp_mesh.enable();
-	*/
+	m_gbuffer.bind();
+	Frame::clear();
 	for (RenderBatch* batch : draw_pointers) render_meshes(batch);
+	FrameBuffer::unbind();
 
 	// post processing
 	// 2D setup
-	//FrameBuffer::unbind();
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
 	// deferred shading
-	//m_deferred.bind()
-	/*;
 	m_canvas_buffer.bind();
-	m_deferred_shader.enable();
+	sp_deferred.enable();
 	m_gbuffer.upload_components();
 	glDrawArrays(GL_TRIANGLES,0,6);
-	//FrameBuffer::unbind();
 
 	// render 2D geometry
 	// iterate sprite render
+	/*
 	spr_buffer.bind();
 	spr_shader.enable();
 	for (RenderBatch* batch : draw_pointers) render_sprites(batch);
@@ -945,10 +919,6 @@ void Renderer::render_meshes(RenderBatch* batch)
 	// bind buffer and iterate meshes
 	batch->mesh_buffer.bind();
 	batch->sp_mesh.enable();
-	batch->sp_mesh.upload_int("colour_map",0);
-	batch->sp_mesh.upload_int("normal_map",1);
-	batch->sp_mesh.upload_int("material_map",2);
-	batch->sp_mesh.upload_int("emission_map",3);
 	batch->sp_mesh.upload_camera(g_Camera3D);
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{

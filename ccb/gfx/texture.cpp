@@ -138,7 +138,7 @@ FrameBuffer::FrameBuffer(uint8_t n_components)
 	glGenFramebuffers(1,&m_buffer);
 
 	// generate framebuffer textures
-	m_colour_components.reserve(n_components);
+	m_colour_components.resize(n_components);
 	glGenTextures(n_components,&m_colour_components[0]);
 }
 
