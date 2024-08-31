@@ -21,7 +21,7 @@ uniform mat4 light_trans;
 void main()
 {
 	// calculate position
-	Position = model*vec4(position,1);
+	Position = model*vec4(position,1.0);
 	gl_Position = proj*view*Position;
 
 	// calculate texture coordinates

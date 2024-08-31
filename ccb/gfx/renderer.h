@@ -29,7 +29,6 @@ struct MeshUpload
 	glm::vec3 normal;
 	glm::vec3 tangent;
 };
-constexpr uint8_t MESH_UPLOAD_REPEAT = sizeof(MeshUpload)/sizeof(float);
 
 
 // batch datastructure definitions

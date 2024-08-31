@@ -23,6 +23,9 @@ void Texture::load()
 	m_data = stbi_load(m_path.c_str(),&m_width,&m_height,0,STBI_rgb_alpha);
 }
 
+/*
+	TODO
+*/
 void Texture::upload()
 {
 	// upload new texture to gpu

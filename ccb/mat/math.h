@@ -44,7 +44,7 @@ private:
 	glm::vec3 m_position,m_target;
 };
 inline Camera3D g_Camera3D = Camera3D(
-		glm::vec3(0,-2,4),glm::vec3(0),
+		glm::vec3(0,-7,4),glm::vec3(0),
 		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
 	);
 

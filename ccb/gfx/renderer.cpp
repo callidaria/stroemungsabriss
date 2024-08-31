@@ -236,9 +236,9 @@ void RenderBatch::load_mesh(std::string& path)
 		{
 			uint32_t n = i+j;
 			MeshUpload mu = {
-				.position = positions[idx_position[n]],
-				.uv_coord = uv_coordinates[idx_uv[n]],
-				.normal = normals[idx_normal[n]]
+				.position = positions[idx_position[n]-1],
+				.uv_coord = uv_coordinates[idx_uv[n]-1],
+				.normal = normals[idx_normal[n]-1]
 			};
 			mesh_vertices.push_back(mu);
 		}
@@ -768,7 +768,7 @@ void batch_upload(RenderBatch& batch)
 	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
 	batch.sp_mesh.enable();
 	batch.sp_mesh.point_buffer3D();
-	batch.sp_mesh.upload_int("tex",0);  // TODO: move away from here
+	//batch.sp_mesh.upload_int("tex",0);  // TODO: move away from here
 
 	/*
 	for (MeshTextureTuple& tm : batch.mesh_textures)
@@ -781,9 +781,10 @@ void batch_upload(RenderBatch& batch)
 	*/
 	//Buffer::unbind();
 	// TODO: move this away from here & stall texture upload
-/*
+
 	// load textures
-	COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
+	//COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
+/*
 	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
 	while (batch.upload_head<batch.sprite_textures.size())
 	{
@@ -808,7 +809,7 @@ void batch_upload(RenderBatch& batch)
 	batch.state = RBFR_READY;
 	g_Renderer.draw_pointers.push_back(&batch);
 
-	COMM_CNF();
+	//COMM_CNF();
 }
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render
@@ -939,7 +940,6 @@ void Renderer::render_meshes(RenderBatch* batch)
 	batch->mesh_buffer.bind();
 	batch->sp_mesh.enable();
 	batch->sp_mesh.upload_camera(g_Camera3D);
-	//mesh_shader.enable(); // change back
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
 		Mesh& tm = batch->meshes[i];
