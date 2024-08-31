@@ -368,20 +368,15 @@ Renderer::Renderer()
 	*/
 	sp_sprite.assemble(vs_sprite,fs_direct);
 	sp_duplicate.assemble(vs_duplicate,fs_direct);
-	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++) batches[i].sp_mesh.assemble(vs_mesh,fs_mesh);
-
-	/*
-	float mesh_vertices[] = {
-		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
-		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
-	};
-	mesh_buffer.bind();
-	mesh_buffer.upload_vertices(mesh_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
-
-	sp_mesh.enable();
-	sp_mesh.point_buffer2D();
-	sp_mesh.upload_int("tex",0);
-	*/
+	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
+	{
+		batches[i].sp_mesh.assemble(vs_mesh,fs_mesh);
+		batches[i].sp_mesh.enable();
+		batches[i].sp_mesh.upload_int("colour_map",0);
+		batches[i].sp_mesh.upload_int("normal_map",1);
+		batches[i].sp_mesh.upload_int("material_map",2);
+		batches[i].sp_mesh.upload_int("emission_map",3);
+	}
 
 	/*
 	// screen space
@@ -727,6 +722,7 @@ void bgr_load_batch(RenderBatch* batch)
 	COMM_AWT("sprites: streaming %li textures",batch->sprite_textures.size());
 	for (SpriteTextureTuple& t : batch->sprite_textures) t.texture.load();
 	COMM_CNF();
+*/
 
 	// load mesh textures
 	COMM_AWT("meshes: streaming %li textures",batch->mesh_textures.size()*4);
@@ -738,7 +734,7 @@ void bgr_load_batch(RenderBatch* batch)
 		t.emission.load();
 	}
 	COMM_CNF();
-*/
+
 	// unlock batch & reset
 	batch->load_semaphore = false;
 	batch->upload_head = 0;
@@ -768,17 +764,27 @@ void batch_upload(RenderBatch& batch)
 	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
 	batch.sp_mesh.enable();
 	batch.sp_mesh.point_buffer3D();
-	//batch.sp_mesh.upload_int("tex",0);  // TODO: move away from here
 
-	/*
+	// upload textures
 	for (MeshTextureTuple& tm : batch.mesh_textures)
 	{
 		tm.colours.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
 		tm.normals.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
 		tm.materials.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
 		tm.emission.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
 	}
-	*/
 	//Buffer::unbind();
 	// TODO: move this away from here & stall texture upload
 
@@ -939,6 +945,10 @@ void Renderer::render_meshes(RenderBatch* batch)
 	// bind buffer and iterate meshes
 	batch->mesh_buffer.bind();
 	batch->sp_mesh.enable();
+	batch->sp_mesh.upload_int("colour_map",0);
+	batch->sp_mesh.upload_int("normal_map",1);
+	batch->sp_mesh.upload_int("material_map",2);
+	batch->sp_mesh.upload_int("emission_map",3);
 	batch->sp_mesh.upload_camera(g_Camera3D);
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
@@ -949,7 +959,6 @@ void Renderer::render_meshes(RenderBatch* batch)
 		batch->sp_mesh.upload_matrix("model",tm.transform.model);
 
 		// upload textures
-		/*
 		tt.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
 		tt.normals.bind();
@@ -958,7 +967,6 @@ void Renderer::render_meshes(RenderBatch* batch)
 		glActiveTexture(GL_TEXTURE3);
 		tt.emission.bind();
 		glActiveTexture(GL_TEXTURE0);
-		*/
 
 		// draw meshes
 		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
