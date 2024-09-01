@@ -75,7 +75,7 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 	};
 
 	// register sprite & animation
-	anim_sprites.push_back(t_Animation);
+	sprite_animations.push_back(t_Animation);
 	register_sprite(tex_id,pos,wdt,hgt);
 }
 
@@ -115,7 +115,7 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 	};
 
 	// register duplicate & animation
-	anim_duplicates.push_back(t_Animation);
+	duplicate_animations.push_back(t_Animation);
 	register_duplicates(tex_id,pos,wdt,hgt);
 }
 
@@ -271,7 +271,7 @@ void RenderBatch::load_mesh(const std::string& path)
 */
 void RenderBatch::update_sprites()
 {
-	for (SpriteAnimation& p_Animation : anim_sprites)
+	for (SpriteAnimation& p_Animation : sprite_animations)
 	{
 		Sprite& p_Sprite = sprites[p_Animation.id];
 		SpriteTextureTuple& p_Texture = sprite_textures[p_Sprite.texture_id];
@@ -294,7 +294,7 @@ void RenderBatch::update_sprites()
 */
 void RenderBatch::update_duplicates()
 {
-	for (SpriteAnimationInstance& p_Animation : anim_duplicates)
+	for (SpriteAnimationInstance& p_Animation : duplicate_animations)
 	{
 		SpriteInstance& p_Instance = duplicates[p_Animation.id];
 		SpriteTextureTuple& p_Texture = sprite_textures[p_Instance.texture_id];
@@ -323,38 +323,6 @@ void RenderBatch::update_duplicates()
 Renderer::Renderer()
 {
 	COMM_MSG(LOG_HEADINGS,"renderer setup...");
-/*
-	// sprite initialization
-	// generate sprite vertex data
-	COMM_LOG("pre-loading basic sprite geometry");
-	float sprite_vertices[] = {
-		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
-		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
-	};
-	spr_buffer.bind();
-	spr_buffer.upload_vertices(sprite_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
-
-	// setup sprite shader
-	COMM_LOG("compile sprite shader");
-	spr_shader.compile2d("./shader/obj/sprite.vs","./shader/standard/direct.fs");
-	spr_shader.upload_int("tex",0);
-	spr_shader.upload_camera();
-
-	// compile duplicate shader program
-	COMM_LOG("compile sprite duplicate shader");
-	dpl_shader.compile2d("./shader/obj/duplicate.vs","./shader/standard/direct.fs");
-	spr_buffer.add_buffer();
-	spr_buffer.bind_index();
-	dpl_shader.def_indexF("offset",2,0,SPRITE_INSTANCE_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("scale",2,2,SPRITE_INSTANCE_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("rotation",1,4,SPRITE_INSTANCE_UPLOAD_REPEAT);
-	dpl_shader.def_indexF("i_tex",2,5,SPRITE_INSTANCE_UPLOAD_REPEAT);
-
-	// sprite duplication shader initial attributes
-	dpl_shader.upload_int("tex",0);
-	dpl_shader.upload_camera();
-	Buffer::unbind();
-*/
 	COMM_LOG("compile shaders");
 
 	// vertex shaders
@@ -382,6 +350,30 @@ Renderer::Renderer()
 	}
 	m_DeferredPipeline.assemble(t_FramebufferVertexShader,t_DeferredFragmentShader);
 
+	COMM_LOG("pre-loading basic sprite geometry");
+	float t_SpriteVertices[] = {
+		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
+		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
+	};
+	m_SpriteBuffer.bind();
+	m_SpriteBuffer.upload_vertices(t_SpriteVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+	m_SpritePipeline.enable();
+	m_SpritePipeline.point_buffer2D();
+	m_SpritePipeline.upload_int("tex",0);
+	m_SpritePipeline.upload_camera();
+
+	COMM_LOG("setup sprite duplication");
+	m_SpriteBuffer.add_buffer();
+	m_DuplicatePipeline.enable();
+	m_DuplicatePipeline.point_buffer2D();
+	m_SpriteBuffer.bind_index();
+	m_DuplicatePipeline.def_indexF("offset",2,0,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	m_DuplicatePipeline.def_indexF("scale",2,2,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	m_DuplicatePipeline.def_indexF("rotation",1,4,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	m_DuplicatePipeline.def_indexF("i_tex",2,5,SPRITE_INSTANCE_UPLOAD_REPEAT);
+	m_DuplicatePipeline.upload_int("tex",0);
+	m_DuplicatePipeline.upload_camera();
+
 	// screen space post processing
 	COMM_LOG("setup material buffer and generate its components");
 	m_GBuffer.bind();
@@ -401,7 +393,7 @@ Renderer::Renderer()
 	m_CanvasBuffer.bind();
 	m_CanvasBuffer.upload_vertices(t_CanvasVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
-	COMM_LOG("setup shader for deferred lighting system");
+	COMM_LOG("setup shader pipeline for deferred lighting system");
 	m_DeferredPipeline.enable();
 	m_DeferredPipeline.point_buffer2D();
 	m_DeferredPipeline.upload_int("gbuffer_colour",0);
@@ -410,28 +402,6 @@ Renderer::Renderer()
 	m_DeferredPipeline.upload_int("gbuffer_materials",3);
 
 	COMM_SCC("renderer ready");
-}
-
-/*
-	TODO
-*/
-RenderBatch* Renderer::load(const std::string& path)
-{
-	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t t_BatchID = 0;
-	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[t_BatchID].state!=RBFR_IDLE) t_BatchID++;
-
-	// store path in free batch & signal batch load
-	RenderBatch* r_Batch = &batches[t_BatchID];
-	r_Batch->path = path;
-
-	// communicate selection
-	COMM_LOG("batch %i selected for writing",t_BatchID);
-	COMM_ERR_COND(r_Batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
-
-	// activate and return batch
-	r_Batch->state = RBFR_LOAD;
-	return r_Batch;
 }
 
 
@@ -473,9 +443,6 @@ RenderBatch* Renderer::load(const std::string& path)
 */
 // TODO: remove naming bloat, command can be reduced to single character format
 
-/*
-	TODO
-*/
 void interpreter_logic_texture(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexPath,Rows,Columns,Frames };
@@ -499,9 +466,6 @@ void interpreter_logic_texture(RenderBatch* batch,const std::vector<std::string>
 	batch->add_sprite(args[Args::TexPath],t_Rows,t_Cols,t_Frames);
 }
 
-/*
-	TODO
-*/
 void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
@@ -532,9 +496,6 @@ void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>&
 	batch->register_sprite(t_TextureID,t_Position,t_Width,t_Height);
 }
 
-/*
-	TODO
-*/
 void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
@@ -565,9 +526,6 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std
 }
 // FIXME: code duplications
 
-/*
-	TODO
-*/
 void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,ObjPath,TexPath,NormPath,MatPath,EmitPath,PosX,PosY,PosZ,Scl,RotX,RotY,RotZ };
@@ -598,9 +556,6 @@ void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& a
 		);
 }
 
-/*
-	TODO
-*/
 void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
@@ -645,17 +600,12 @@ void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std:
 }
 // TODO use argument enumeration
 
-/*
-	TODO
-*/
 void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	COMM_ERR("syntax error while interpreting %s: \"%s\" not a valid command",
 			batch->path.c_str(),args[0].c_str());
 }
 
-
-// command definitions
 constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 5;
 const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = {
 	"texture","sprite","duplicate","mesh","spawn"
@@ -671,16 +621,11 @@ const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = 
 };
 
 
-/**
- *	TODO
-*/
-
 /*
 	TODO
 */
 void bgr_load_batch(RenderBatch* batch)
 {
-	// interpret load file
 	COMM_LOG("renderer: reading load definition file \"%s\"",batch->path.c_str());
 
 	// open file
@@ -725,214 +670,133 @@ void bgr_load_batch(RenderBatch* batch)
 		t_Texture.materials.load();
 		t_Texture.emission.load();
 	}
+
+	g_Renderer.gpu_update_pointers.push_back(batch);
 	COMM_CNF();
-
-	// unlock batch & reset
-	batch->load_semaphore = false;
-	batch->upload_head = 0;
 }
 
-/*
-	TODO
-*/
-void batch_load(RenderBatch& batch)
+RenderBatch* Renderer::load(const std::string& path)
 {
-	batch.load_semaphore = true;
-	std::thread t_LoadThread(&bgr_load_batch,&batch);
+	// find available batch by unix approach: last batch will be overwritten if no idle
+	uint8_t t_BatchID = 0;
+	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[t_BatchID].selected) t_BatchID++;
+
+	// store path in free batch & signal batch load
+	RenderBatch* r_Batch = &batches[t_BatchID];
+	r_Batch->path = path;
+
+	// communicate selection
+	COMM_LOG("batch %i selected for writing",t_BatchID);
+	COMM_ERR_COND(r_Batch->selected,"CAREFUL! batch not in idle, overflow buffer selected!");
+	r_Batch->selected = true;
+
+	// start background loading
+	std::thread t_LoadThread(&bgr_load_batch,r_Batch);
 	t_LoadThread.detach();
-	batch.state = RBFR_UPLOAD;
+	return r_Batch;
 }
+
 
 /*
 	TODO
 */
-void batch_upload(RenderBatch& batch)
+void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline)
 {
-	// postpone load, when texture data not ready
-	if (batch.load_semaphore) return;
-
-	// ready mesh buffer
-	batch.mesh_buffer.bind();
-	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
-	batch.mesh_pipeline.enable();
-	batch.mesh_pipeline.point_buffer3D();
-
-	// upload textures
-	for (MeshTextureTuple& tm : batch.mesh_textures)
-	{
-		tm.colours.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
-		tm.normals.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
-		tm.materials.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
-		tm.emission.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
-	}
-	//Buffer::unbind();
-	// TODO: move this away from here & stall texture upload
-
+	COMM_AWT("attempting to upload %li sprite textures to gpu",batch->sprite_textures.size());
+	
 	// load textures
-	//COMM_AWT("attempting to upload %li textures to gpu",batch.sprite_textures.size());
-/*
-	std::chrono::steady_clock::time_point stime = std::chrono::steady_clock::now();
-	while (batch.upload_head<batch.sprite_textures.size())
+	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	while (batch->sprite_upload_head<batch->sprite_textures.size())
 	{
 		// check timing for stall until next frame when upload takes too long
-		if ((std::chrono::steady_clock::now()-stime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+		if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
 		{
 			COMM_CNF();
 			return;
 		}
 
 		// upload texture to gpu
-		SpriteTextureTuple& t = batch.sprite_textures[batch.upload_head];
-		t.texture.upload();
+		SpriteTextureTuple& t_Texture = batch->sprite_textures[batch->sprite_upload_head];
+		t_Texture.texture.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
-		batch.upload_head++;
+		batch->sprite_upload_head++;
 	}
-*/
 
-	// proceed to update state
-	batch.state = RBFR_READY;
-	g_Renderer.draw_pointers.push_back(&batch);
-
-	//COMM_CNF();
+	batch->sprite_ready = true;
+	COMM_CNF();
 }
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render
 
-/*
-	TODO
-*/
-void batch_precalculation(RenderBatch& batch)
+void sprite_update(RenderBatch* batch,ShaderPipeline* pipeline)
 {
-	batch.update_sprites();
-	batch.update_duplicates();
-}
+	// update registered animations
+	batch->update_sprites();
 
-// update behaviours mapped towards bufferstate enumeration
-typedef void (*batch_routine)(RenderBatch&);
-batch_routine batch_update[RBFR_STATE_COUNT] = { batch_load,batch_upload,batch_precalculation };
-
-/*
-	TODO
-*/
-void Renderer::update()
-{
-	// iterate batch updates
-	for (RenderBatch& batch : batches)
-	{
-		if (batch.state==RBFR_IDLE) continue;
-		batch_update[batch.state-1](batch);
-	}
-	// FIXME: remove idle state
-
-	// rendering 3D geometry
-	// deferred 3D setup
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
-	// draw 3D geometry
-	m_GBuffer.bind();
-	Frame::clear();
-	for (RenderBatch* batch : draw_pointers) render_meshes(batch);
-	FrameBuffer::unbind();
-
-	// post processing
-	// 2D setup
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-
-	// deferred shading
-	m_CanvasBuffer.bind();
-	m_DeferredPipeline.enable();
-	m_GBuffer.upload_components();
-	glDrawArrays(GL_TRIANGLES,0,6);
-
-	// render 2D geometry
-	// iterate sprite render
-	/*
-	spr_buffer.bind();
-	spr_shader.enable();
-	for (RenderBatch* batch : draw_pointers) render_sprites(batch);
-
-	// iterate duplicate render
-	spr_buffer.bind_index();
-	dpl_shader.enable();
-	for (RenderBatch* batch : draw_pointers) render_duplicates(batch);
-	*/
-}
-
-/*
-	TODO
-*/
-/*
-void Renderer::render_sprites(RenderBatch* batch)
-{
 	// iterate registered sprites
-	for (uint16_t i=0;i<batch->sprites.size();i++)
+	for (Sprite& t_Sprite : batch->sprites)
 	{
-		Sprite& ts = batch->sprites[i];
-		SpriteTextureTuple& tt = batch->sprite_textures[ts.texture_id];
+		SpriteTextureTuple& t_Texture = batch->sprite_textures[t_Sprite.texture_id];
 
 		// upload sprite attributes
-		spr_shader.upload_int("row",tt.rows);
-		spr_shader.upload_int("col",tt.columns);
-		spr_shader.upload_vec2("i_tex",ts.atlas_index);
-		spr_shader.upload_matrix("model",ts.transform.model);
+		pipeline->upload_int("row",t_Texture.rows);
+		pipeline->upload_int("col",t_Texture.columns);
+		pipeline->upload_vec2("i_tex",t_Sprite.atlas_index);
+		pipeline->upload_matrix("model",t_Sprite.transform.model);
 
 		// draw sprite
-		batch->sprite_textures[ts.texture_id].texture.bind();
+		t_Texture.texture.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }
 
+typedef void (*sprite_update_routine)(RenderBatch*,ShaderPipeline*);
+sprite_update_routine update_sprites[2] = { sprite_upload,sprite_update };
+
+
 /*
 	TODO
 */
-/*
-void Renderer::render_duplicates(RenderBatch* batch)
+void mesh_upload(RenderBatch* batch)
 {
-	// iterate registered duplicates
-	for (uint16_t i=0;i<batch->duplicates.size();i++)
+	COMM_AWT("attempting to upload %li mesh textures to gpu",batch->mesh_textures.size()*4);
+
+	// ready mesh buffer
+	batch->mesh_buffer.upload_vertices(batch->mesh_vertices);
+	batch->mesh_pipeline.point_buffer3D();
+
+	// upload textures
+	for (MeshTextureTuple& t_Texture : batch->mesh_textures)
 	{
-		SpriteInstance& ti = batch->duplicates[i];
-		SpriteTextureTuple& tt = batch->sprite_textures[ti.texture_id];
-
-		// upload instance attributes & data
-		spr_buffer.upload_indices(ti.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
-		dpl_shader.upload_int("row",tt.rows);
-		dpl_shader.upload_int("col",tt.columns);
-		dpl_shader.upload_matrix("model",ti.transform.model);
-
-		// draw duplicates
-		batch->sprite_textures[ti.texture_id].texture.bind();
-		glDrawArraysInstanced(GL_TRIANGLES,0,6,ti.active_range);
+		t_Texture.colours.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
+		t_Texture.normals.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
+		t_Texture.materials.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
+		t_Texture.emission.upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_mipmap();
+		Texture::generate_mipmap();
 	}
+	batch->mesh_ready = true;
+	// TODO: stall texture upload
+
+	COMM_CNF();
 }
 
-/*
-	TODO
-*/
-void Renderer::render_meshes(RenderBatch* batch)
+void mesh_update(RenderBatch* batch)
 {
-	// bind buffer and iterate meshes
-	batch->mesh_buffer.bind();
-	batch->mesh_pipeline.enable();
+	// upload camera transform & iterate meshes
 	batch->mesh_pipeline.upload_camera(g_Camera3D);
-	// FIXME: repeated mesh buffer and pipeline binds and setups for each update step, can be reduced
-
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
 		Mesh& t_Mesh = batch->meshes[i];
@@ -953,5 +817,78 @@ void Renderer::render_meshes(RenderBatch* batch)
 
 		// draw meshes
 		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
+	}
+}
+
+typedef void (*mesh_update_routine)(RenderBatch*);
+mesh_update_routine update_meshes[2] = { mesh_upload,mesh_update };
+
+
+/*
+	TODO
+*/
+void Renderer::update()
+{
+	// rendering 3D geometry
+	// deferred 3D setup
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	m_GBuffer.bind();
+
+	// draw 3D geometry
+	Frame::clear();
+	for (RenderBatch* batch : gpu_update_pointers)
+	{
+		batch->mesh_buffer.bind();
+		batch->mesh_pipeline.enable();
+		update_meshes[batch->mesh_ready](batch);
+	}
+
+	// post processing
+	// 2D setup
+	FrameBuffer::unbind();
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+
+	// deferred shading
+	m_CanvasBuffer.bind();
+	m_DeferredPipeline.enable();
+	m_GBuffer.upload_components();
+	glDrawArrays(GL_TRIANGLES,0,6);
+
+	// render 2D geometry
+	// iterate sprite render
+	m_SpriteBuffer.bind();
+	m_SpritePipeline.enable();
+	for (RenderBatch* batch : gpu_update_pointers) update_sprites[batch->sprite_ready](batch,&m_SpritePipeline);
+
+	// iterate duplicate render
+	m_SpriteBuffer.bind_index();
+	m_DuplicatePipeline.enable();
+	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
+}
+
+/*
+	TODO
+*/
+void Renderer::render_duplicates(RenderBatch* batch)
+{
+	// skip render if sprite textures are not ready yet
+	if (!batch->sprite_ready) return;
+
+	// iterate registered duplicates
+	for (SpriteInstance& t_Instance : batch->duplicates)
+	{
+		SpriteTextureTuple& t_Texture = batch->sprite_textures[t_Instance.texture_id];
+
+		// upload instance attributes & data
+		m_SpriteBuffer.upload_indices(t_Instance.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
+		m_DuplicatePipeline.upload_int("row",t_Texture.rows);
+		m_DuplicatePipeline.upload_int("col",t_Texture.columns);
+		m_DuplicatePipeline.upload_matrix("model",t_Instance.transform.model);
+
+		// draw duplicates
+		t_Texture.texture.bind();
+		glDrawArraysInstanced(GL_TRIANGLES,0,6,t_Instance.active_range);
 	}
 }

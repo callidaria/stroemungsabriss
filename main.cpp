@@ -9,18 +9,25 @@
 
 struct SceneData
 {
+	// pointers
 	bool* running;
 	RenderBatch* batch0,*batch1;
+
+	// load handling
 	bool await = false;
 	bool scene_ready = false;
 	bool second_request = false;
+
+	// mouse rotation interfacing
+	float dt_mouse_position;
+	float ape_momentum = .0f;
 };
 
 void load_scene(SceneData& data)
 {
 	if (data.await)
 	{
-		data.scene_ready = data.batch0->state==RBFR_READY;
+		data.scene_ready = data.batch0->mesh_ready;
 		return;
 	}
 	data.batch0 = g_Renderer.load("./lvload/test_scene1.ccb");
@@ -39,9 +46,14 @@ void maintain_scene(SceneData& data)
 		data.second_request = true;
 	}
 
-	int8_t camDir = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
-	g_Camera3D.rotate_around_target(camDir*4);
+	// calculate camera to target object rotation
+	int8_t t_KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
+	float t_MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
+	data.ape_momentum += t_KeyDirection+t_MouseDirection*100;
+	g_Camera3D.rotate_around_target(data.ape_momentum);
 	g_Camera3D.update();
+	data.ape_momentum *= .85f;
+	data.dt_mouse_position = g_Input.mouse.mxfr;
 }
 
 typedef void (*scene_update)(SceneData&);

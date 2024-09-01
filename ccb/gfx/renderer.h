@@ -31,18 +31,6 @@ struct MeshUpload
 };
 
 
-// batch datastructure definitions
-// description of current buffer state, is it rendering, is it loading, should it be ignored?
-enum BatchState
-{
-	RBFR_IDLE,
-	RBFR_LOAD,
-	RBFR_UPLOAD,
-	RBFR_READY,
-	RBFR_STATE_COUNT
-};
-
-
 // sprite data
 // texture information for sprites
 struct SpriteTextureTuple
@@ -138,27 +126,29 @@ struct RenderBatch
 	// sprites
 	std::vector<SpriteTextureTuple> sprite_textures;
 	std::vector<Sprite> sprites;
-	std::vector<SpriteAnimation> anim_sprites;
+	std::vector<SpriteAnimation> sprite_animations;
+
+	// instanced sprites
+	std::vector<SpriteInstance> duplicates;
+	std::vector<SpriteAnimationInstance> duplicate_animations;
 
 	// meshes
-	//Buffer mesh_buffer;
 	Buffer mesh_buffer;
 	ShaderPipeline mesh_pipeline;
 	std::vector<MeshTextureTuple> mesh_textures;
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
 
-	// instanced sprites
-	std::vector<SpriteInstance> duplicates;
-	std::vector<SpriteAnimationInstance> anim_duplicates;
+	// load progression
+	uint16_t sprite_upload_head = 0;
+
+	// load flags
+	bool selected = false;
+	bool sprite_ready = false;
+	bool mesh_ready = false;
 
 	// attributes
-	BatchState state = RBFR_IDLE;
 	std::string path;
-
-	// loading
-	volatile bool load_semaphore = false;
-	uint16_t upload_head = 0;
 };
 constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
@@ -181,15 +171,13 @@ private:
 
 public:
 
-	// batches
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
-	std::vector<RenderBatch*> draw_pointers;
+	std::vector<RenderBatch*> gpu_update_pointers;
 
 private:
 
 	// buffers
 	Buffer m_SpriteBuffer;
-	Buffer m_MeshBuffer;
 	Buffer m_CanvasBuffer;
 
 	// shader pipelines
