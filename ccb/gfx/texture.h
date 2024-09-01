@@ -55,27 +55,23 @@ class FrameBuffer
 {
 public:
 
-	// construction
 	FrameBuffer(uint8_t n_components);
 	~FrameBuffer() {  }
 
-	// components
 	void add_colour_component(float width,float height,bool floatbuffer=false,uint8_t component=0);
 	void add_depth_component(float width,float height);
-
-	// feature
 	void combine_attachments();
 	void upload_components();
 
 	// binding
-	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,m_buffer); }
+	inline void bind() { glBindFramebuffer(GL_FRAMEBUFFER,m_Buffer); }
 	static inline void unbind() { glBindFramebuffer(GL_FRAMEBUFFER,0); }
 
 private:
 
 	// data
-	uint32_t m_buffer;
-	std::vector<uint32_t> m_colour_components;
+	uint32_t m_Buffer;
+	std::vector<uint32_t> m_ColourComponents;
 };
 
 #endif

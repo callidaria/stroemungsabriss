@@ -69,16 +69,10 @@ uniform vec3 light_position;
 uniform mat4 shadow_matrix;
 
 // light processing definitions
-vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl);
-vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
-		light_sun sl);
-vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_point pl);
-vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
-		light_point pl);
-vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl);
-vec3 lumen_spot_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
-		light_spot sl);
-vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
+vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,light_sun sl);
+vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,light_point pl);
+vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,light_spot sl);
+vec3 pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
 		float metallic,float roughness);
 
 // math
@@ -112,8 +106,6 @@ void main()
 	float metallic = materials.r;
 	float roughness = materials.g;
 	float ambient_occlusion = materials.b;
-	outColour = vec4(normals,1.);
-	return;
 
 	// read transparency buffer
 	vec4 tbuffer = texture(transparency_buffer,TexCoords);
@@ -140,11 +132,13 @@ void main()
 	vec3 sdw_colours = vec3(0);
 	vec3 lgt_colours = vec3(0);
 	for (int i=0;i<sunlight_count;i++)
-		sdw_colours += lumen_sun_pbs(colour,position,normals,metallic,roughness,sunlight[i]);
+		sdw_colours += lumen_sun(colour,position,normals,metallic,roughness,sunlight[i]);
 	for (int j=0;j<pointlight_count;j++)
-		lgt_colours += lumen_point_pbs(colour,position,normals,metallic,roughness,pointlight[j]);
+		lgt_colours += lumen_point(colour,position,normals,metallic,roughness,pointlight[j]);
 	for (int k=0;k<spotlight_count;k++)
-		lgt_colours += lumen_spot_pbs(colour,position,normals,metallic,roughness,spotlight[k]);
+		lgt_colours += lumen_spot(colour,position,normals,metallic,roughness,spotlight[k]);
+	outColour = vec4(normals,1.);
+	return;
 
 	// process shadows with dynamic bias for sloped surfaces
 	vec4 rltp = shadow_matrix*vec4(position,1.0);
@@ -174,34 +168,8 @@ void main()
 	outColour = vec4(cmb_colours,1.0);
 }
 
-// specular processing
-vec3 process_specular(vec3 colour,vec3 lgt_colour,float in_speculars,vec3 spec_dir,float fresnel)
-{
-	float spec = pow(max(dot(camera_dir,spec_dir),0),spec_exponent)*spec_intensity;//*pow(fresnel,.25);
-	return spec*lgt_colour*in_speculars;
-}
-
 // sunlight processing
-vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_sun sl)
-{
-	// precalculations
-	vec3 light_dir = normalize(sl.position-position);
-	vec3 spec_dir = reflect(-light_dir,normals);
-	float fresnel = max(1-dot(camera_dir,normals),.1);
-
-	// specular & diffusion
-	float diff = max(dot(light_dir,normals),0);
-	vec3 diffusion = colour*diff*sl.colour;
-	vec3 specular = process_specular(colour,sl.colour,in_speculars,spec_dir,fresnel);
-
-	// combine sunlight shading components
-	//return (mix(diffusion,vec3(diff*.4),in_speculars*pow(fresnel,4))+specular)*sl.intensity;
-	return diffusion+specular*sl.intensity;
-}
-
-// physical based sunlight processing
-vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
-		light_sun sl)
+vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,light_sun sl)
 {
 	// precalculations
 	vec3 light_dir = normalize(sl.position-position);
@@ -209,30 +177,11 @@ vec3 lumen_sun_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float r
 	vec3 influence = sl.colour*sl.intensity;
 
 	// return sunlight colours
-	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
+	return pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
 }
 
 // pointlight processing
-vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_point pl)
-{
-	// precalculations
-	vec3 light_dir = normalize(pl.position-position);
-	vec3 spec_dir = reflect(-light_dir,normals);
-	float fresnel = max(1-dot(camera_dir,normals),.1);
-
-	// specular & diffusion
-	float diff = max(dot(light_dir,normals),0);
-	vec3 diffusion = colour*diff*pl.colour;
-	vec3 specular = process_specular(colour,pl.colour,in_speculars,spec_dir,fresnel);
-
-	// calculate pointlight influence
-	float distance = length(pl.position-position);
-	float attenuation = 1/(pl.constant+pl.linear*distance+pl.quadratic*(distance*distance));
-	return (diffusion+specular)*attenuation*pl.intensity;
-}
-
-// physical based pointlight processing
-vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
 		light_point pl)
 {
 	// precalculations
@@ -245,31 +194,11 @@ vec3 lumen_point_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float
 	vec3 influence = pl.colour*attenuation;
 
 	// return pointlight colours
-	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
+	return pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
 }
 
 // spotlight processing
-vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float in_speculars,light_spot sl)
-{
-	// precalculations
-	vec3 light_dir = normalize(sl.position-position);
-	vec3 spec_dir = reflect(-light_dir,normals);
-	float fresnel = max(1-dot(camera_dir,normals),.1);
-
-	// specular & diffusion
-	float diff = max(dot(light_dir,normals),0);
-	vec3 diffusion = colour*diff*sl.colour;
-	vec3 specular = process_specular(colour,sl.colour,in_speculars,spec_dir,fresnel);
-
-	// calculate spotlight influence
-	float theta = dot(light_dir,normalize(-sl.direction));
-	float epsilon = sl.cut_in-sl.cut_out;
-	float intensity = clamp((theta-sl.cut_out)/epsilon,0,1);
-	return (diffusion+specular)*intensity;
-}
-
-// physical based spotlight processing
-vec3 lumen_spot_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
+vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,
 		light_spot sl)
 {
 	// precalculations
@@ -283,12 +212,11 @@ vec3 lumen_spot_pbs(vec3 colour,vec3 position,vec3 normals,float metallic,float 
 	vec3 influence = sl.colour*intensity;
 
 	// return spotlight colours
-	return lumen_process_pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
+	return pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
 }
 
 // physical based light processing
-vec3 lumen_process_pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,
-		float metallic,float roughness)
+vec3 pbs(vec3 colour,vec3 light_dir,vec3 influence,vec3 normals,vec3 halfway,float metallic,float roughness)
 {
 	// distribution component
 	float throwbridge_reitz = asq/(PI*pow(pow(max(dot(normals,halfway),0.0),2.0)*(asq-1.0)+1.0,2.0));

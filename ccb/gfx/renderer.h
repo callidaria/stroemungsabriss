@@ -128,7 +128,7 @@ struct RenderBatch
 			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
 	// loader
-	void load_mesh(std::string& path);
+	void load_mesh(const std::string& path);
 
 	// update
 	void update_sprites();
@@ -143,7 +143,7 @@ struct RenderBatch
 	// meshes
 	//Buffer mesh_buffer;
 	Buffer mesh_buffer;
-	ShaderPipeline sp_mesh;
+	ShaderPipeline mesh_pipeline;
 	std::vector<MeshTextureTuple> mesh_textures;
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
@@ -167,14 +167,10 @@ class Renderer
 {
 public:
 
-	// construction
 	Renderer();
 	~Renderer() {  }
 
-	// interpretation
-	RenderBatch* load(std::string path);
-
-	// stages
+	RenderBatch* load(const std::string& path);
 	void update();
 
 private:
@@ -192,28 +188,17 @@ public:
 private:
 
 	// buffers
-	Buffer spr_buffer;
-	Buffer mesh_buffer;
-	Buffer m_canvas_buffer;
-
-	// vertex shaders
-	Shader vs_sprite = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
-	Shader vs_duplicate = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
-	Shader vs_mesh = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
-	Shader vs_framebuffer = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
-
-	// fragment shaders
-	Shader fs_direct = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
-	Shader fs_mesh = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
-	Shader fs_deferred = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
+	Buffer m_SpriteBuffer;
+	Buffer m_MeshBuffer;
+	Buffer m_CanvasBuffer;
 
 	// shader pipelines
-	ShaderPipeline sp_sprite;
-	ShaderPipeline sp_duplicate;
-	ShaderPipeline sp_deferred;
+	ShaderPipeline m_SpritePipeline;
+	ShaderPipeline m_DuplicatePipeline;
+	ShaderPipeline m_DeferredPipeline;
 
 	// rendertarget
-	FrameBuffer m_gbuffer = FrameBuffer(4);
+	FrameBuffer m_GBuffer = FrameBuffer(4);
 };
 
 inline Renderer g_Renderer = Renderer();

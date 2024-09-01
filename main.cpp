@@ -9,6 +9,7 @@
 
 struct SceneData
 {
+	bool* running;
 	RenderBatch* batch0,*batch1;
 	bool await = false;
 	bool scene_ready = false;
@@ -28,6 +29,9 @@ void load_scene(SceneData& data)
 
 void maintain_scene(SceneData& data)
 {
+	// check closing request
+	*data.running = !g_Input.kb.ka[SDL_SCANCODE_Q]&&*data.running;
+
 	// request additional batch load
 	if (g_Input.kb.ka[SDL_SCANCODE_B]&&!data.second_request)
 	{
@@ -55,6 +59,7 @@ int main(int argc,char** argv)
 
 	// MAIN LOOP
 	bool run = true, reboot = false;
+	sdata.running = &run;
 	while (run)
 	{
 		// frame

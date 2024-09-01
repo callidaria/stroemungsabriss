@@ -17,7 +17,7 @@
 uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint8_t frames)
 {
 	// create sprite source
-	SpriteTextureTuple tuple = {
+	SpriteTextureTuple t_Tuple = {
 
 		// source
 		.texture = Texture(path),
@@ -29,7 +29,7 @@ uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint
 	};
 
 	// write and return reference id
-	sprite_textures.push_back(tuple);
+	sprite_textures.push_back(t_Tuple);
 	return sprite_textures.size()-1;
 }
 
@@ -44,7 +44,7 @@ uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint
 void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
 	// information setup
-	Sprite sprite = {
+	Sprite t_Sprite = {
 
 		// link sprite to texture
 		.texture_id = tex_id,
@@ -58,8 +58,8 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 	};
 
 	// transform and write
-	sprite.transform.to_origin();
-	sprites.push_back(sprite);
+	t_Sprite.transform.to_origin();
+	sprites.push_back(t_Sprite);
 }
 
 /*
@@ -68,14 +68,14 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
 {
 	// add animation data
-	SpriteAnimation anim = {
+	SpriteAnimation t_Animation = {
 		.id = (uint16_t)sprites.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register sprite & animation
-	anim_sprites.push_back(anim);
+	anim_sprites.push_back(t_Animation);
 	register_sprite(tex_id,pos,wdt,hgt);
 }
 
@@ -84,7 +84,7 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 */
 void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
-	SpriteInstance instance = {
+	SpriteInstance t_Instance = {
 
 		// link sprites to texture
 		.texture_id = tex_id,
@@ -98,8 +98,8 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 	};
 
 	// transform and write
-	instance.transform.to_origin();
-	duplicates.push_back(instance);
+	t_Instance.transform.to_origin();
+	duplicates.push_back(t_Instance);
 }
 
 /*
@@ -108,14 +108,14 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
 {
 	// add animation data
-	SpriteAnimationInstance anim = {
+	SpriteAnimationInstance t_Animation = {
 		.id = (uint16_t)duplicates.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register duplicate & animation
-	anim_duplicates.push_back(anim);
+	anim_duplicates.push_back(t_Animation);
 	register_duplicates(tex_id,pos,wdt,hgt);
 }
 
@@ -126,20 +126,20 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 		glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	// store mesh vertex data
-	Mesh mesh = {
+	Mesh t_Mesh = {
 		// TODO: transform
 		.path = obj
 	};
-	meshes.push_back(mesh);
+	meshes.push_back(t_Mesh);
 
 	// store texture information
-	MeshTextureTuple texture = {
+	MeshTextureTuple t_Texture = {
 		.colours = Texture(tex),
 		.normals = Texture(norm),
 		.materials = Texture(mats),
 		.emission = Texture(emit),
 	};
-	mesh_textures.push_back(texture);
+	mesh_textures.push_back(t_Texture);
 }
 
 /*
@@ -147,118 +147,118 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 */
 void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2 scl,float rot,glm::vec2 subtex)
 {
-	SpriteInstance& t_instance = duplicates[inst_id];
-	SpriteInstanceUpload& t_upload = t_instance.upload[t_instance.active_range];
+	SpriteInstance& p_Instance = duplicates[inst_id];
+	SpriteInstanceUpload& p_Upload = p_Instance.upload[p_Instance.active_range];
 
 	// setup transform
-	t_upload.offset = ofs;
-	t_upload.scale = scl;
-	t_upload.rotation = rot;
-	t_upload.atlas_index = subtex;
+	p_Upload.offset = ofs;
+	p_Upload.scale = scl;
+	p_Upload.rotation = rot;
+	p_Upload.atlas_index = subtex;
 
 	// increase spawn counter
-	t_instance.active_range++;
+	p_Instance.active_range++;
 }
 
 /*
 	TODO
 */
-void RenderBatch::load_mesh(std::string& path)
+void RenderBatch::load_mesh(const std::string& path)
 {
 	// create storage for file contents
-	std::vector<glm::vec3> positions;
-	std::vector<glm::vec2> uv_coordinates;
-	std::vector<glm::vec3> normals;
-	std::vector<uint32_t> idx_position,idx_uv,idx_normal;
+	std::vector<glm::vec3> t_Positions;
+	std::vector<glm::vec2> t_UVCoordinates;
+	std::vector<glm::vec3> t_Normals;
+	std::vector<uint32_t> t_PositionIndices,t_UVIndices,t_NormalIndices;
 
 	// open source file
-	FILE* obj_file = fopen(path.c_str(),"r");
-	if (obj_file==NULL)
+	FILE* t_OBJFile = fopen(path.c_str(),"r");
+	if (t_OBJFile==NULL)
 	{
 		COMM_ERR("object loader -> file %s could not be found!",path.c_str());
 		return;
 	}
 
 	// iterate file contents
-	char cmd[128];
-	while (fscanf(obj_file,"%s",cmd)!=EOF)
+	char t_Command[128];
+	while (fscanf(t_OBJFile,"%s",t_Command)!=EOF)
 	{
 		// process value prefix
 		// position prefix
-		if (!strcmp(cmd,"v"))
+		if (!strcmp(t_Command,"v"))
 		{
-			glm::vec3 t_pos;
-			uint32_t _ = fscanf(obj_file,"%f %f %f\n",&t_pos.x,&t_pos.y,&t_pos.z);
-			positions.push_back(t_pos);
+			glm::vec3 t_Position;
+			uint32_t __eof = fscanf(t_OBJFile,"%f %f %f\n",&t_Position.x,&t_Position.y,&t_Position.z);
+			t_Positions.push_back(t_Position);
 		}
 
 		// uv coordinate prefix
-		else if (!strcmp(cmd,"vt"))
+		else if (!strcmp(t_Command,"vt"))
 		{
-			glm::vec2 t_uv;
-			uint32_t _ = fscanf(obj_file,"%f %f\n",&t_uv.x,&t_uv.y);
-			uv_coordinates.push_back(t_uv);
+			glm::vec2 t_UVCoordinate;
+			uint32_t __eof = fscanf(t_OBJFile,"%f %f\n",&t_UVCoordinate.x,&t_UVCoordinate.y);
+			t_UVCoordinates.push_back(t_UVCoordinate);
 		}
 
 		// normal prefix
-		else if (!strcmp(cmd,"vn"))
+		else if (!strcmp(t_Command,"vn"))
 		{
-			glm::vec3 t_norm;
-			uint32_t _ = fscanf(obj_file,"%f %f %f\n",&t_norm.x,&t_norm.y,&t_norm.z);
-			normals.push_back(t_norm);
+			glm::vec3 t_Normal;
+			uint32_t __eof = fscanf(t_OBJFile,"%f %f %f\n",&t_Normal.x,&t_Normal.y,&t_Normal.z);
+			t_Normals.push_back(t_Normal);
 		}
 
 		// face prefix
-		else if (!strcmp(cmd,"f"))
+		else if (!strcmp(t_Command,"f"))
 		{
 			// extract face indices
-			uint32_t t_ipos[3],t_iuv[3],t_inorm[3];
-			uint32_t _ = fscanf(
-					obj_file,"%u/%u/%u %u/%u/%u %u/%u/%u\n",
-					&t_ipos[0],&t_iuv[0],&t_inorm[0],
-					&t_ipos[1],&t_iuv[1],&t_inorm[1],
-					&t_ipos[2],&t_iuv[2],&t_inorm[2]
+			uint32_t t_PositionIndex[3],t_UVIndex[3],t_NormalIndex[3];
+			uint32_t __eof = fscanf(
+					t_OBJFile,"%u/%u/%u %u/%u/%u %u/%u/%u\n",
+					&t_PositionIndex[0],&t_UVIndex[0],&t_NormalIndex[0],
+					&t_PositionIndex[1],&t_UVIndex[1],&t_NormalIndex[1],
+					&t_PositionIndex[2],&t_UVIndex[2],&t_NormalIndex[2]
 				);
 
 			// insert face indices
-			for (uint8_t i=0;i<3;i++) idx_position.push_back(t_ipos[i]);
-			for (uint8_t i=0;i<3;i++) idx_uv.push_back(t_iuv[i]);
-			for (uint8_t i=0;i<3;i++) idx_normal.push_back(t_inorm[i]);
+			for (uint8_t i=0;i<3;i++) t_PositionIndices.push_back(t_PositionIndex[i]);
+			for (uint8_t i=0;i<3;i++) t_UVIndices.push_back(t_UVIndex[i]);
+			for (uint8_t i=0;i<3;i++) t_NormalIndices.push_back(t_NormalIndex[i]);
 		}
 	}
-	fclose(obj_file);
+	fclose(t_OBJFile);
 
 	// iterate faces & write vertex
-	mesh_vertices.reserve(mesh_vertices.size()+idx_position.size());
-	for (uint32_t i=0;i<idx_position.size();i+=3)
+	mesh_vertices.reserve(mesh_vertices.size()+t_PositionIndices.size());
+	for (uint32_t i=0;i<t_PositionIndices.size();i+=3)
 	{
 		for (uint8_t j=0;j<3;j++)
 		{
 			uint32_t n = i+j;
-			MeshUpload mu = {
-				.position = positions[idx_position[n]-1],
-				.uv_coord = uv_coordinates[idx_uv[n]-1],
-				.normal = normals[idx_normal[n]-1]
+			MeshUpload t_VertexComponent = {
+				.position = t_Positions[t_PositionIndices[n]-1],
+				.uv_coord = t_UVCoordinates[t_UVIndices[n]-1],
+				.normal = t_Normals[t_NormalIndices[n]-1]
 			};
-			mesh_vertices.push_back(mu);
+			mesh_vertices.push_back(t_VertexComponent);
 		}
 
 		// precalculate tangent for normal mapping
 		// setup values
-		glm::vec3 e0 = mesh_vertices[i+1].position-mesh_vertices[i].position;
-		glm::vec3 e1 = mesh_vertices[i+2].position-mesh_vertices[i].position;
-		glm::vec2 t0 = mesh_vertices[i+1].uv_coord-mesh_vertices[i].uv_coord;
-		glm::vec2 t1 = mesh_vertices[i+2].uv_coord-mesh_vertices[i].uv_coord;
-		float fac = 1.f/(t0.y*t1.y-t1.x*t0.y);
+		glm::vec3 t_e0 = mesh_vertices[i+1].position-mesh_vertices[i].position;
+		glm::vec3 t_e1 = mesh_vertices[i+2].position-mesh_vertices[i].position;
+		glm::vec2 t_duv0 = mesh_vertices[i+1].uv_coord-mesh_vertices[i].uv_coord;
+		glm::vec2 t_duv1 = mesh_vertices[i+2].uv_coord-mesh_vertices[i].uv_coord;
+		float t_Factor = 1.f/(t_duv0.y*t_duv1.y-t_duv1.x*t_duv0.y);
 
 		// calculate tangent & store in vertex
-		glm::vec3 tangent = glm::vec3(
-				fac*(t1.y*e0.x-t0.y*e1.x),
-				fac*(t1.y*e0.y-t0.y*e1.y),
-				fac*(t1.y*e0.z-t0.y*e1.z)
+		glm::vec3 t_Tangent = glm::vec3(
+				t_Factor*(t_duv1.y*t_e0.x-t_duv0.y*t_e1.x),
+				t_Factor*(t_duv1.y*t_e0.y-t_duv0.y*t_e1.y),
+				t_Factor*(t_duv1.y*t_e0.z-t_duv0.y*t_e1.z)
 			);
-		tangent = glm::normalize(tangent);
-		for (uint8_t j=0;j<3;j++) mesh_vertices[i+j].tangent = tangent;
+		t_Tangent = glm::normalize(t_Tangent);
+		for (uint8_t j=0;j<3;j++) mesh_vertices[i+j].tangent = t_Tangent;
 		// FIXME: how the hell is the tangent creating a memory leak?!? it's a mathematical operation!
 		//		could be an old version, test on a more modern system (no offense, computer i'm writing this on)
 		// TODO: using a matrix calculation might be significantly faster
@@ -271,21 +271,21 @@ void RenderBatch::load_mesh(std::string& path)
 */
 void RenderBatch::update_sprites()
 {
-	for (SpriteAnimation& ta : anim_sprites)
+	for (SpriteAnimation& p_Animation : anim_sprites)
 	{
-		Sprite& ts = sprites[ta.id];
-		SpriteTextureTuple& tt = sprite_textures[ts.texture_id];
+		Sprite& p_Sprite = sprites[p_Animation.id];
+		SpriteTextureTuple& p_Texture = sprite_textures[p_Sprite.texture_id];
 
 		// calculate current frame
-		bool inc_anim = ta.anim_progression<ta.cycle_duration;
-		ta.anim_progression += inc_anim-ta.anim_progression*!inc_anim;
+		bool t_IncAnim = p_Animation.anim_progression<p_Animation.cycle_duration;
+		p_Animation.anim_progression += t_IncAnim-p_Animation.anim_progression*!t_IncAnim;
 		// TODO: make this update depend on frame update delta
 		//		test with unlocked frames to make sure this is actually working
 		//		-> also do the same for sprite instance animation update
 
 		// calculate spritesheet location
-		int index = ta.anim_progression/ta.frame_duration;
-		ts.atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+		int t_Index = p_Animation.anim_progression/p_Animation.frame_duration;
+		p_Sprite.atlas_index = glm::vec2(t_Index%p_Texture.columns,t_Index/p_Texture.columns);
 	}
 }
 
@@ -294,18 +294,18 @@ void RenderBatch::update_sprites()
 */
 void RenderBatch::update_duplicates()
 {
-	for (SpriteAnimationInstance& ta : anim_duplicates)
+	for (SpriteAnimationInstance& p_Animation : anim_duplicates)
 	{
-		SpriteInstance& ti = duplicates[ta.id];
-		SpriteTextureTuple& tt = sprite_textures[ti.texture_id];
+		SpriteInstance& p_Instance = duplicates[p_Animation.id];
+		SpriteTextureTuple& p_Texture = sprite_textures[p_Instance.texture_id];
 
 		// calculate frames for all active instances
-		for (uint16_t i=0;i<ti.active_range;i++)
+		for (uint16_t i=0;i<p_Instance.active_range;i++)
 		{
-			bool inc_anim = ta.anim_progressions[i]<ta.cycle_duration;
-			ta.anim_progressions[i] += inc_anim-ta.anim_progressions[i]*!inc_anim;
-			int index = ta.anim_progressions[i]/ta.frame_duration;
-			ti.upload[i].atlas_index = glm::vec2(index%tt.columns,index/tt.columns);
+			bool t_IncAnim = p_Animation.anim_progressions[i]<p_Animation.cycle_duration;
+			p_Animation.anim_progressions[i] += t_IncAnim-p_Animation.anim_progressions[i]*!t_IncAnim;
+			int t_Index = p_Animation.anim_progressions[i]/p_Animation.frame_duration;
+			p_Instance.upload[i].atlas_index = glm::vec2(t_Index%p_Texture.columns,t_Index/p_Texture.columns);
 		}
 		// FIXME: code repitition
 		// FIXME: a lot of division for update code
@@ -355,46 +355,59 @@ Renderer::Renderer()
 	dpl_shader.upload_camera();
 	Buffer::unbind();
 */
+	COMM_LOG("compile shaders");
+
+	// vertex shaders
+	Shader t_SpriteVertexShader = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
+	Shader t_DuplicateVertexShader = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
+	Shader t_MeshVertexShader = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
+	Shader t_FramebufferVertexShader = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
+
+	// fragment shaders
+	Shader t_DirectFragmentShader = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
+	Shader t_MeshFragmentShader = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
+	Shader t_DeferredFragmentShader = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
+
 	COMM_LOG("assemble shader pipelines");
-	sp_sprite.assemble(vs_sprite,fs_direct);
-	sp_duplicate.assemble(vs_duplicate,fs_direct);
+	m_SpritePipeline.assemble(t_SpriteVertexShader,t_DirectFragmentShader);
+	m_DuplicatePipeline.assemble(t_DuplicateVertexShader,t_DirectFragmentShader);
 	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
 	{
-		batches[i].sp_mesh.assemble(vs_mesh,fs_mesh);
-		batches[i].sp_mesh.enable();
-		batches[i].sp_mesh.upload_int("colour_map",0);
-		batches[i].sp_mesh.upload_int("normal_map",1);
-		batches[i].sp_mesh.upload_int("material_map",2);
-		batches[i].sp_mesh.upload_int("emission_map",3);
+		batches[i].mesh_pipeline.assemble(t_MeshVertexShader,t_MeshFragmentShader);
+		batches[i].mesh_pipeline.enable();
+		batches[i].mesh_pipeline.upload_int("colour_map",0);
+		batches[i].mesh_pipeline.upload_int("normal_map",1);
+		batches[i].mesh_pipeline.upload_int("material_map",2);
+		batches[i].mesh_pipeline.upload_int("emission_map",3);
 	}
-	sp_deferred.assemble(vs_framebuffer,fs_deferred);
+	m_DeferredPipeline.assemble(t_FramebufferVertexShader,t_DeferredFragmentShader);
 
-	// screen space
+	// screen space post processing
 	COMM_LOG("setup material buffer and generate its components");
-	m_gbuffer.bind();
-	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
-	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,1);
-	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,2);
-	m_gbuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,3);
-	m_gbuffer.add_depth_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
-	m_gbuffer.combine_attachments();  // FIXME: move to construction and remove
+	m_GBuffer.bind();
+	m_GBuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	m_GBuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,1);
+	m_GBuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,2);
+	m_GBuffer.add_colour_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,true,3);
+	m_GBuffer.add_depth_component(g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	m_GBuffer.combine_attachments();
 	FrameBuffer::unbind();
 
 	COMM_LOG("pre-loading basic canvas geometry");
-	float canvas_vertices[] = {
+	float t_CanvasVertices[] = {
 		-1.f,1.f,.0f,1.f, 1.f,-1.f,1.f,.0f, 1.f,1.f,1.f,1.f,
 		1.f,-1.f,1.f,.0f, -1.f,1.f,.0f,1.f, -1.f,-1.f,.0f,.0f
 	};
-	m_canvas_buffer.bind();
-	m_canvas_buffer.upload_vertices(canvas_vertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+	m_CanvasBuffer.bind();
+	m_CanvasBuffer.upload_vertices(t_CanvasVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	COMM_LOG("setup shader for deferred lighting system");
-	sp_deferred.enable();
-	sp_deferred.point_buffer2D();
-	sp_deferred.upload_int("gbuffer_colour",0);
-	sp_deferred.upload_int("gbuffer_position",1);
-	sp_deferred.upload_int("gbuffer_normals",2);
-	sp_deferred.upload_int("gbuffer_materials",3);
+	m_DeferredPipeline.enable();
+	m_DeferredPipeline.point_buffer2D();
+	m_DeferredPipeline.upload_int("gbuffer_colour",0);
+	m_DeferredPipeline.upload_int("gbuffer_position",1);
+	m_DeferredPipeline.upload_int("gbuffer_normals",2);
+	m_DeferredPipeline.upload_int("gbuffer_materials",3);
 
 	COMM_SCC("renderer ready");
 }
@@ -402,23 +415,23 @@ Renderer::Renderer()
 /*
 	TODO
 */
-RenderBatch* Renderer::load(std::string path)
+RenderBatch* Renderer::load(const std::string& path)
 {
 	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t batch_id = 0;
-	while (batch_id<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[batch_id].state!=RBFR_IDLE) batch_id++;
+	uint8_t t_BatchID = 0;
+	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[t_BatchID].state!=RBFR_IDLE) t_BatchID++;
 
 	// store path in free batch & signal batch load
-	RenderBatch* batch = &batches[batch_id];
-	batch->path = path;
+	RenderBatch* r_Batch = &batches[t_BatchID];
+	r_Batch->path = path;
 
 	// communicate selection
-	COMM_LOG("batch %i selected for writing",batch_id);
-	COMM_ERR_COND(batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
+	COMM_LOG("batch %i selected for writing",t_BatchID);
+	COMM_ERR_COND(r_Batch->state!=RBFR_IDLE,"CAREFUL! batch not in idle, overflow buffer selected!");
 
 	// activate and return batch
-	batch->state = RBFR_LOAD;
-	return batch;
+	r_Batch->state = RBFR_LOAD;
+	return r_Batch;
 }
 
 
@@ -460,16 +473,10 @@ RenderBatch* Renderer::load(std::string path)
 */
 // TODO: remove naming bloat, command can be reduced to single character format
 
-// loader definition command list
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 5;
-const std::string gfxcmd[RENDERER_INTERPRETER_COMMAND_COUNT] = {
-	"texture","sprite","duplicate","mesh","spawn"
-};
-
 /*
 	TODO
 */
-void interpreter_logic_texture(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_texture(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexPath,Rows,Columns,Frames };
 
@@ -479,25 +486,23 @@ void interpreter_logic_texture(RenderBatch* batch,std::vector<std::string>& args
 		)
 		COMM_ERR_FALLBACK("texture request: not enough arguments provided");
 
-	// arguments to variables
-	uint8_t rows = 1, cols = 1, frames = 1;
-
 	// check for texture atlas information
+	uint8_t t_Rows = 1,t_Cols = 1,t_Frames = 1;
 	if (args.size()>Args::Frames)
 	{
-		rows = stoi(args[Args::Rows]);
-		cols = stoi(args[Args::Columns]);
-		frames = stoi(args[Args::Frames]);
+		t_Rows = stoi(args[Args::Rows]);
+		t_Cols = stoi(args[Args::Columns]);
+		t_Frames = stoi(args[Args::Frames]);
 	}
 
 	// write texture
-	batch->add_sprite(args[Args::TexPath],rows,cols,frames);
+	batch->add_sprite(args[Args::TexPath],t_Rows,t_Cols,t_Frames);
 }
 
 /*
 	TODO
 */
-void interpreter_logic_sprite(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
 
@@ -512,25 +517,25 @@ void interpreter_logic_sprite(RenderBatch* batch,std::vector<std::string>& args)
 		COMM_ERR_FALLBACK("sprite registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t texture_id = stoi(args[Args::TexID]);
-	glm::vec2 position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-	float width = stof(args[Args::Width]), height = stof(args[Args::Height]);
+	uint16_t t_TextureID = stoi(args[Args::TexID]);
+	glm::vec2 t_Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float t_Width = stof(args[Args::Width]),t_Height = stof(args[Args::Height]);
 	// TODO: error messaging when conversion fails
 
 	// register sprite or animation based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t duration = stoi(args[Args::AnimDuration]);
-		batch->register_sprite(texture_id,position,width,height,duration);
+		uint8_t t_Duration = stoi(args[Args::AnimDuration]);
+		batch->register_sprite(t_TextureID,t_Position,t_Width,t_Height,t_Duration);
 		return;
 	}
-	batch->register_sprite(texture_id,position,width,height);
+	batch->register_sprite(t_TextureID,t_Position,t_Width,t_Height);
 }
 
 /*
 	TODO
 */
-void interpreter_logic_instanced_sprite(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,TexID,PosX,PosY,Width,Height,AnimDuration };
 
@@ -545,25 +550,25 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,std::vector<std::stri
 		COMM_ERR_FALLBACK("duplicate registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t texture_id = stoi(args[Args::TexID]);
-	glm::vec2 position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-	float width = stof(args[Args::Width]), height = stof(args[Args::Height]);
+	uint16_t t_TextureID = stoi(args[Args::TexID]);
+	glm::vec2 t_Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float t_Width = stof(args[Args::Width]),t_Height = stof(args[Args::Height]);
 
 	// register animated sprite instance based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t duration = stoi(args[Args::AnimDuration]);
-		batch->register_duplicates(texture_id,position,width,height,duration);
+		uint8_t t_Duration = stoi(args[Args::AnimDuration]);
+		batch->register_duplicates(t_TextureID,t_Position,t_Width,t_Height,t_Duration);
 		return;
 	}
-	batch->register_duplicates(texture_id,position,width,height);
+	batch->register_duplicates(t_TextureID,t_Position,t_Width,t_Height);
 }
 // FIXME: code duplications
 
 /*
 	TODO
 */
-void interpreter_logic_mesh(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,ObjPath,TexPath,NormPath,MatPath,EmitPath,PosX,PosY,PosZ,Scl,RotX,RotY,RotZ };
 
@@ -576,27 +581,27 @@ void interpreter_logic_mesh(RenderBatch* batch,std::vector<std::string>& args)
 		COMM_ERR_FALLBACK("mesh registration: not enough arguments provided");
 
 	// arguments to variables
-	glm::vec3 position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
-	float scale = 1;
-	glm::vec3 rotation = glm::vec3(0);
+	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float t_Scale = 1;
+	glm::vec3 t_Rotation = glm::vec3(0);
 
 	// check if scale and rotation is specified before adding mesh
 	if (args.size()>Args::RotZ)
 	{
-		scale = stof(args[Args::Scl]);
-		rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
+		t_Scale = stof(args[Args::Scl]);
+		t_Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
 	}
 	batch->add_mesh(
 			args[Args::ObjPath],args[Args::TexPath],
 			args[Args::NormPath],args[Args::MatPath],args[Args::EmitPath],
-			position,scale,rotation
+			t_Position,t_Scale,t_Rotation
 		);
 }
 
 /*
 	TODO
 */
-void interpreter_logic_spawn_instanced(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
 
@@ -611,20 +616,20 @@ void interpreter_logic_spawn_instanced(RenderBatch* batch,std::vector<std::strin
 	if (args[Args::Type]=="sprite")
 	{
 		// setup attributes
-		uint16_t inst_id = stoi(args[Args::InstID]);
-		glm::vec2 offset = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-		glm::vec2 scale = glm::vec2(1.f);
-		float rot = .0f;
-		glm::vec2 subtex = glm::vec2(0);
+		uint16_t t_InstanceID = stoi(args[Args::InstID]);
+		glm::vec2 t_Offset = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+		glm::vec2 t_Scale = glm::vec2(1.f);
+		float t_Rotation = .0f;
+		glm::vec2 t_SubTexture = glm::vec2(0);
 
 		// optionally extract rotation and spritesheet index & spawn
 		if (args.size()>Args::SubtexRow)
 		{
-			scale = glm::vec2(stof(args[Args::SclX]),stof(args[Args::SclY]));
-			rot = stof(args[Args::Rotation]);
-			subtex = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
+			t_Scale = glm::vec2(stof(args[Args::SclX]),stof(args[Args::SclY]));
+			t_Rotation = stof(args[Args::Rotation]);
+			t_SubTexture = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
 		}
-		batch->spawn_sprite_instance(inst_id,offset,scale,rot,subtex);
+		batch->spawn_sprite_instance(t_InstanceID,t_Offset,t_Scale,t_Rotation,t_SubTexture);
 	}
 
 	// process mesh instance spawn request
@@ -643,13 +648,19 @@ void interpreter_logic_spawn_instanced(RenderBatch* batch,std::vector<std::strin
 /*
 	TODO
 */
-void interpreter_logic_syntax_error(RenderBatch* batch,std::vector<std::string>& args)
+void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	COMM_ERR("syntax error while interpreting %s: \"%s\" not a valid command",
 			batch->path.c_str(),args[0].c_str());
 }
 
-typedef void (*gfx_interpreter_logic)(RenderBatch*,std::vector<std::string>&);
+
+// command definitions
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 5;
+const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = {
+	"texture","sprite","duplicate","mesh","spawn"
+};
+typedef void (*gfx_interpreter_logic)(RenderBatch*,const std::vector<std::string>&);
 const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_texture,
 	interpreter_logic_sprite,
@@ -674,45 +685,45 @@ void bgr_load_batch(RenderBatch* batch)
 
 	// open file
 	COMM_MSG(LOG_BLUE,"-> interpretation start");
-	std::ifstream file(batch->path,std::ios::in);
-	std::string cmd_line;
-	while (getline(file,cmd_line))
+	std::ifstream t_CCBFile(batch->path,std::ios::in);
+	std::string t_CommandLine;
+	while (getline(t_CCBFile,t_CommandLine))
 	{
 		// split command and its arguments, interrupt when empty command
-		std::vector<std::string> args = Toolbox::split_string(cmd_line,' ');
-		if (!args.size()) continue;
+		std::vector<std::string> t_Args = Toolbox::split_string(t_CommandLine,' ');
+		if (!t_Args.size()) continue;
 
 		// correlate command
 		uint8_t i = 0;
-		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&args[0]!=gfxcmd[i]) i++;
+		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&t_Args[0]!=gfx_command_correlation[i]) i++;
 
 		// call command
-		cmd_handler[i](batch,args);
+		cmd_handler[i](batch,t_Args);
 	}
+	// FIXME: reading FILE* by fscan pattern could be a lot more useful in this case
 
 	// close file and ready batch load
-	file.close();
+	t_CCBFile.close();
 	COMM_MSG(LOG_BLUE,"-> interpretation end");
 
 	// load geometry
 	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
 	for (Mesh& m : batch->meshes) batch->load_mesh(m.path);
 	COMM_CNF();
-/*
+
 	// load sprite textures
 	COMM_AWT("sprites: streaming %li textures",batch->sprite_textures.size());
-	for (SpriteTextureTuple& t : batch->sprite_textures) t.texture.load();
+	for (SpriteTextureTuple& t_Texture : batch->sprite_textures) t_Texture.texture.load();
 	COMM_CNF();
-*/
 
 	// load mesh textures
 	COMM_AWT("meshes: streaming %li textures",batch->mesh_textures.size()*4);
-	for (MeshTextureTuple& t : batch->mesh_textures)
+	for (MeshTextureTuple& t_Texture : batch->mesh_textures)
 	{
-		t.colours.load();
-		t.normals.load();
-		t.materials.load();
-		t.emission.load();
+		t_Texture.colours.load();
+		t_Texture.normals.load();
+		t_Texture.materials.load();
+		t_Texture.emission.load();
 	}
 	COMM_CNF();
 
@@ -727,8 +738,8 @@ void bgr_load_batch(RenderBatch* batch)
 void batch_load(RenderBatch& batch)
 {
 	batch.load_semaphore = true;
-	std::thread ld_thread(&bgr_load_batch,&batch);
-	ld_thread.detach();
+	std::thread t_LoadThread(&bgr_load_batch,&batch);
+	t_LoadThread.detach();
 	batch.state = RBFR_UPLOAD;
 }
 
@@ -743,8 +754,8 @@ void batch_upload(RenderBatch& batch)
 	// ready mesh buffer
 	batch.mesh_buffer.bind();
 	batch.mesh_buffer.upload_vertices(batch.mesh_vertices);
-	batch.sp_mesh.enable();
-	batch.sp_mesh.point_buffer3D();
+	batch.mesh_pipeline.enable();
+	batch.mesh_pipeline.point_buffer3D();
 
 	// upload textures
 	for (MeshTextureTuple& tm : batch.mesh_textures)
@@ -833,7 +844,7 @@ void Renderer::update()
 	glDisable(GL_BLEND);
 
 	// draw 3D geometry
-	m_gbuffer.bind();
+	m_GBuffer.bind();
 	Frame::clear();
 	for (RenderBatch* batch : draw_pointers) render_meshes(batch);
 	FrameBuffer::unbind();
@@ -844,9 +855,9 @@ void Renderer::update()
 	glEnable(GL_BLEND);
 
 	// deferred shading
-	m_canvas_buffer.bind();
-	sp_deferred.enable();
-	m_gbuffer.upload_components();
+	m_CanvasBuffer.bind();
+	m_DeferredPipeline.enable();
+	m_GBuffer.upload_components();
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render 2D geometry
@@ -918,24 +929,26 @@ void Renderer::render_meshes(RenderBatch* batch)
 {
 	// bind buffer and iterate meshes
 	batch->mesh_buffer.bind();
-	batch->sp_mesh.enable();
-	batch->sp_mesh.upload_camera(g_Camera3D);
+	batch->mesh_pipeline.enable();
+	batch->mesh_pipeline.upload_camera(g_Camera3D);
+	// FIXME: repeated mesh buffer and pipeline binds and setups for each update step, can be reduced
+
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
-		Mesh& tm = batch->meshes[i];
-		MeshTextureTuple& tt = batch->mesh_textures[i*4];
+		Mesh& t_Mesh = batch->meshes[i];
+		MeshTextureTuple& t_Texture = batch->mesh_textures[i*4];
 
 		// upload attributes
-		batch->sp_mesh.upload_matrix("model",tm.transform.model);
+		batch->mesh_pipeline.upload_matrix("model",t_Mesh.transform.model);
 
 		// upload textures
-		tt.colours.bind();
+		t_Texture.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
-		tt.normals.bind();
+		t_Texture.normals.bind();
 		glActiveTexture(GL_TEXTURE2);
-		tt.materials.bind();
+		t_Texture.materials.bind();
 		glActiveTexture(GL_TEXTURE3);
-		tt.emission.bind();
+		t_Texture.emission.bind();
 		glActiveTexture(GL_TEXTURE0);
 
 		// draw meshes

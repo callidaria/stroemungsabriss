@@ -135,11 +135,11 @@ void Texture::set_texture_parameter_repeat()
 FrameBuffer::FrameBuffer(uint8_t n_components)
 {
 	// generate framebuffer
-	glGenFramebuffers(1,&m_buffer);
+	glGenFramebuffers(1,&m_Buffer);
 
 	// generate framebuffer textures
-	m_colour_components.resize(n_components);
-	glGenTextures(n_components,&m_colour_components[0]);
+	m_ColourComponents.resize(n_components);
+	glGenTextures(n_components,&m_ColourComponents[0]);
 }
 
 /*
@@ -147,12 +147,12 @@ FrameBuffer::FrameBuffer(uint8_t n_components)
 */
 void FrameBuffer::add_colour_component(float width,float height,bool floatbuffer,uint8_t component)
 {
-	uint32_t cmp = GL_COLOR_ATTACHMENT0+component;
-	glBindTexture(GL_TEXTURE_2D,m_colour_components[component]);
+	uint32_t t_Component = GL_COLOR_ATTACHMENT0+component;
+	glBindTexture(GL_TEXTURE_2D,m_ColourComponents[component]);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA+floatbuffer*0x6f12,width,height,0,GL_RGBA,
 			GL_UNSIGNED_INT+floatbuffer,NULL);
 	Texture::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,cmp,GL_TEXTURE_2D,m_colour_components[component],0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,t_Component,GL_TEXTURE_2D,m_ColourComponents[component],0);
 }
 
 /*
@@ -161,14 +161,14 @@ void FrameBuffer::add_colour_component(float width,float height,bool floatbuffer
 void FrameBuffer::add_depth_component(float width,float height)
 {
 	// generate and bind depthbuffer texture
-	uint32_t t_depth_component;
-	glGenTextures(1,&t_depth_component);
-	glBindTexture(GL_TEXTURE_2D,t_depth_component);
+	uint32_t t_DepthComponent;
+	glGenTextures(1,&t_DepthComponent);
+	glBindTexture(GL_TEXTURE_2D,t_DepthComponent);
 
 	// specify depthbuffer
 	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,width,height,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_INT,NULL);
 	Texture::set_texture_parameter_nearest_unfiltered();
-	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,t_depth_component,0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,t_DepthComponent,0);
 }
 
 /*
@@ -176,9 +176,9 @@ void FrameBuffer::add_depth_component(float width,float height)
 */
 void FrameBuffer::combine_attachments()
 {
-	uint32_t attachments[m_colour_components.size()];
-	for (uint8_t i=0;i<m_colour_components.size();i++) attachments[i] = GL_COLOR_ATTACHMENT0+i;
-	glDrawBuffers(m_colour_components.size(),attachments);
+	uint32_t t_Attachments[m_ColourComponents.size()];
+	for (uint8_t i=0;i<m_ColourComponents.size();i++) t_Attachments[i] = GL_COLOR_ATTACHMENT0+i;
+	glDrawBuffers(m_ColourComponents.size(),t_Attachments);
 }
 
 /*
@@ -186,10 +186,11 @@ void FrameBuffer::combine_attachments()
 */
 void FrameBuffer::upload_components()
 {
-	for (uint8_t i=0;i<m_colour_components.size();i++)
+	glBindTexture(GL_TEXTURE_2D,m_ColourComponents[0]);
+	for (uint8_t i=1;i<m_ColourComponents.size();i++)
 	{
 		glActiveTexture(GL_TEXTURE0+i);
-		glBindTexture(GL_TEXTURE_2D,m_colour_components[i]);
+		glBindTexture(GL_TEXTURE_2D,m_ColourComponents[i]);
 	}
 	glActiveTexture(GL_TEXTURE0);
 }
