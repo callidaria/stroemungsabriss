@@ -65,26 +65,9 @@ void Transform2D::transform(glm::vec2 p,float w,float h,float r)
 */
 void Transform2D::transform(glm::vec2 p,float w,float h,float r,glm::vec2 a)
 {
-	// reset towards arbitrary origin
 	model = glm::mat4(1.f);
 	translate(a-position);
-
-	// execute transformation
-	rotate(r);
-	scale(w,h);
-	translate(position+p-a);
-
-	// save current rotation
-	rot = r;
-}
-
-/*
-	TODO
-*/
-void Transform2D::to_origin()
-{
-	translate(position);
-	scale(width,height);
+	transform(position+p-a,w,h,r);
 }
 
 /*
@@ -92,14 +75,18 @@ void Transform2D::to_origin()
 */
 void Transform2D::scale(float w,float h,glm::vec2 a)
 {
-	// reset towards arbitrary origin
 	model = glm::mat4(1.f);
 	translate(a-position);
+	transform(position-a,w,h,rotation);
+}
 
-	// scale from arbitrary position & reconstruct
-	rotate(rot);
-	scale(w,h);
-	translate(position-a);
+/*
+	TODO
+*/
+void Transform2D::rotate(float r)
+{
+	model = glm::rotate(model,glm::radians(r),glm::vec3(0,0,1));
+	rotation = r;
 }
 
 /*
@@ -108,15 +95,61 @@ void Transform2D::scale(float w,float h,glm::vec2 a)
 void Transform2D::rotate(float r,glm::vec2 a)
 {
 	// reset towards arbitrary origin
-	float t_wfac = model[0][0], t_hfac = model[1][1];
+	float t_WidthFactor = model[0][0], t_HeightFactor = model[1][1];
 	model = glm::mat4(1.f);
 	translate(a-position);
+	transform(position-a,t_WidthFactor,t_HeightFactor,r);
+}
 
-	// change rotation and reset scaling and previous position
-	rotate(r);
-	scale(t_wfac,t_hfac);
 
-	// reconstruct valid transform state
-	translate(position-a);
-	rot = r;
+/*
+	TODO
+*/
+void Transform3D::transform(glm::vec3 pos,float scl,glm::vec3 rot)
+{
+	rotate(rot);
+	scale(scl);
+	translate(pos);
+}
+
+/*
+	TODO
+*/
+void Transform3D::transform(glm::vec3 pos,float scl,glm::vec3 rot,glm::vec3 arbit)
+{
+	model = glm::mat4(1.f);
+	translate(arbit-position);
+	transform(position+pos-arbit,scl,rot);
+}
+
+/*
+	TODO
+*/
+void Transform3D::scale(float scl,glm::vec3 arbit)
+{
+	model = glm::mat4(1.f);
+	translate(arbit-position);
+	transform(position-arbit,scl,rotation);
+}
+
+/*
+	TODO
+*/
+void Transform3D::rotate(glm::vec3 rot)
+{
+	model = glm::rotate(model,glm::radians(rot.x),glm::vec3(1,0,0));
+	model = glm::rotate(model,glm::radians(rot.y),glm::vec3(0,1,0));
+	model = glm::rotate(model,glm::radians(rot.z),glm::vec3(0,0,1));
+	rotation = rot;
+}
+
+/*
+	TODO
+*/
+void Transform3D::rotate(glm::vec3 rot,glm::vec3 arbit)
+{
+	float t_ScaleFactor = model[0][0];  // FIXME: untested questionable math trickery
+	model = glm::mat4(1.f);
+	translate(arbit-position);
+	transform(position-arbit,t_ScaleFactor,rot);
 }

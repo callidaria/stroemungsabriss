@@ -127,9 +127,14 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 {
 	// store mesh vertex data
 	Mesh t_Mesh = {
-		// TODO: transform
+		.transform = {
+			.position = pos,
+			.scaling = scl,
+			.rotation = rot
+		},
 		.path = obj
 	};
+	t_Mesh.transform.to_origin();
 	meshes.push_back(t_Mesh);
 
 	// store texture information
@@ -163,7 +168,7 @@ void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2
 /*
 	TODO
 */
-void RenderBatch::load_mesh(const std::string& path)
+void RenderBatch::load_mesh(Mesh& mesh)
 {
 	// create storage for file contents
 	std::vector<glm::vec3> t_Positions;
@@ -172,10 +177,10 @@ void RenderBatch::load_mesh(const std::string& path)
 	std::vector<uint32_t> t_PositionIndices,t_UVIndices,t_NormalIndices;
 
 	// open source file
-	FILE* t_OBJFile = fopen(path.c_str(),"r");
+	FILE* t_OBJFile = fopen(mesh.path.c_str(),"r");
 	if (t_OBJFile==NULL)
 	{
-		COMM_ERR("object loader -> file %s could not be found!",path.c_str());
+		COMM_ERR("object loader -> file %s could not be found!",mesh.path.c_str());
 		return;
 	}
 
@@ -228,8 +233,12 @@ void RenderBatch::load_mesh(const std::string& path)
 	}
 	fclose(t_OBJFile);
 
+	// set offset and allocate memory
+	mesh.vertex_offset = mesh_vertices.size();
+	mesh.vertex_range = t_PositionIndices.size();
+	mesh_vertices.reserve(mesh.vertex_offset+mesh.vertex_range);
+
 	// iterate faces & write vertex
-	mesh_vertices.reserve(mesh_vertices.size()+t_PositionIndices.size());
 	for (uint32_t i=0;i<t_PositionIndices.size();i+=3)
 	{
 		for (uint8_t j=0;j<3;j++)
@@ -653,7 +662,7 @@ void bgr_load_batch(RenderBatch* batch)
 
 	// load geometry
 	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
-	for (Mesh& m : batch->meshes) batch->load_mesh(m.path);
+	for (Mesh& m : batch->meshes) batch->load_mesh(m);
 	COMM_CNF();
 
 	// load sprite textures
@@ -736,18 +745,18 @@ void sprite_update(RenderBatch* batch,ShaderPipeline* pipeline)
 	batch->update_sprites();
 
 	// iterate registered sprites
-	for (Sprite& t_Sprite : batch->sprites)
+	for (Sprite& p_Sprite : batch->sprites)
 	{
-		SpriteTextureTuple& t_Texture = batch->sprite_textures[t_Sprite.texture_id];
+		SpriteTextureTuple& p_Texture = batch->sprite_textures[p_Sprite.texture_id];
 
 		// upload sprite attributes
-		pipeline->upload_int("row",t_Texture.rows);
-		pipeline->upload_int("col",t_Texture.columns);
-		pipeline->upload_vec2("i_tex",t_Sprite.atlas_index);
-		pipeline->upload_matrix("model",t_Sprite.transform.model);
+		pipeline->upload_int("row",p_Texture.rows);
+		pipeline->upload_int("col",p_Texture.columns);
+		pipeline->upload_vec2("i_tex",p_Sprite.atlas_index);
+		pipeline->upload_matrix("model",p_Sprite.transform.model);
 
 		// draw sprite
-		t_Texture.texture.bind();
+		p_Texture.texture.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }
@@ -768,21 +777,21 @@ void mesh_upload(RenderBatch* batch)
 	batch->mesh_pipeline.point_buffer3D();
 
 	// upload textures
-	for (MeshTextureTuple& t_Texture : batch->mesh_textures)
+	for (MeshTextureTuple& p_Texture : batch->mesh_textures)
 	{
-		t_Texture.colours.upload();
+		p_Texture.colours.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
-		t_Texture.normals.upload();
+		p_Texture.normals.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
-		t_Texture.materials.upload();
+		p_Texture.materials.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
-		t_Texture.emission.upload();
+		p_Texture.emission.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		Texture::generate_mipmap();
@@ -799,24 +808,24 @@ void mesh_update(RenderBatch* batch)
 	batch->mesh_pipeline.upload_camera(g_Camera3D);
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
-		Mesh& t_Mesh = batch->meshes[i];
-		MeshTextureTuple& t_Texture = batch->mesh_textures[i*4];
+		Mesh& p_Mesh = batch->meshes[i];
+		MeshTextureTuple& p_Texture = batch->mesh_textures[i*4];
 
 		// upload attributes
-		batch->mesh_pipeline.upload_matrix("model",t_Mesh.transform.model);
+		batch->mesh_pipeline.upload_matrix("model",p_Mesh.transform.model);
 
 		// upload textures
-		t_Texture.colours.bind();
+		p_Texture.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
-		t_Texture.normals.bind();
+		p_Texture.normals.bind();
 		glActiveTexture(GL_TEXTURE2);
-		t_Texture.materials.bind();
+		p_Texture.materials.bind();
 		glActiveTexture(GL_TEXTURE3);
-		t_Texture.emission.bind();
+		p_Texture.emission.bind();
 		glActiveTexture(GL_TEXTURE0);
 
 		// draw meshes
-		glDrawArrays(GL_TRIANGLES,0,batch->mesh_vertices.size());
+		glDrawArrays(GL_TRIANGLES,p_Mesh.vertex_offset,p_Mesh.vertex_range);
 	}
 }
 
@@ -875,20 +884,21 @@ void Renderer::render_duplicates(RenderBatch* batch)
 {
 	// skip render if sprite textures are not ready yet
 	if (!batch->sprite_ready) return;
+	batch->update_duplicates();
 
 	// iterate registered duplicates
-	for (SpriteInstance& t_Instance : batch->duplicates)
+	for (SpriteInstance& p_Instance : batch->duplicates)
 	{
-		SpriteTextureTuple& t_Texture = batch->sprite_textures[t_Instance.texture_id];
+		SpriteTextureTuple& p_Texture = batch->sprite_textures[p_Instance.texture_id];
 
 		// upload instance attributes & data
-		m_SpriteBuffer.upload_indices(t_Instance.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
-		m_DuplicatePipeline.upload_int("row",t_Texture.rows);
-		m_DuplicatePipeline.upload_int("col",t_Texture.columns);
-		m_DuplicatePipeline.upload_matrix("model",t_Instance.transform.model);
+		m_SpriteBuffer.upload_indices(p_Instance.upload,SPRITE_INSTANCE_CAPACITY*sizeof(SpriteInstanceUpload));
+		m_DuplicatePipeline.upload_int("row",p_Texture.rows);
+		m_DuplicatePipeline.upload_int("col",p_Texture.columns);
+		m_DuplicatePipeline.upload_matrix("model",p_Instance.transform.model);
 
 		// draw duplicates
-		t_Texture.texture.bind();
-		glDrawArraysInstanced(GL_TRIANGLES,0,6,t_Instance.active_range);
+		p_Texture.texture.bind();
+		glDrawArraysInstanced(GL_TRIANGLES,0,6,p_Instance.active_range);
 	}
 }

@@ -91,6 +91,7 @@ struct MeshTextureTuple
 struct Mesh
 {
 	Transform3D transform;
+	uint32_t vertex_offset,vertex_range;
 	std::string path;
 };
 
@@ -116,7 +117,7 @@ struct RenderBatch
 			glm::vec2 ofs,glm::vec2 scl=glm::vec2(1),float rot=.0f,glm::vec2 subtex=glm::vec2(0));
 
 	// loader
-	void load_mesh(const std::string& path);
+	void load_mesh(Mesh& mesh);
 
 	// update
 	void update_sprites();

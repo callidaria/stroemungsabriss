@@ -11,3 +11,4 @@ spawn sprite 0 360 420
 spawn sprite 0 630 360
 
 mesh ./res/casino/suzanne.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 0 0
+mesh ./res/casino/wobble.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 4 2 0
