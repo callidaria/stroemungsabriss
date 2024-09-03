@@ -14,7 +14,6 @@ struct SceneData
 	RenderBatch* batch0,*batch1;
 
 	// load handling
-	bool await = false;
 	bool scene_ready = false;
 	bool second_request = false;
 
@@ -25,13 +24,8 @@ struct SceneData
 
 void load_scene(SceneData& data)
 {
-	if (data.await)
-	{
-		data.scene_ready = data.batch0->mesh_ready;
-		return;
-	}
 	data.batch0 = g_Renderer.load("./lvload/test_scene1.ccb");
-	data.await = true;
+	data.scene_ready = true;
 }
 
 void maintain_scene(SceneData& data)

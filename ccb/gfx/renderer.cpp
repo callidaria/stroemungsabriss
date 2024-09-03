@@ -254,11 +254,12 @@ void RenderBatch::load_mesh(Mesh& mesh)
 
 		// precalculate tangent for normal mapping
 		// setup values
-		glm::vec3 t_e0 = mesh_vertices[i+1].position-mesh_vertices[i].position;
-		glm::vec3 t_e1 = mesh_vertices[i+2].position-mesh_vertices[i].position;
-		glm::vec2 t_duv0 = mesh_vertices[i+1].uv_coord-mesh_vertices[i].uv_coord;
-		glm::vec2 t_duv1 = mesh_vertices[i+2].uv_coord-mesh_vertices[i].uv_coord;
-		float t_Factor = 1.f/(t_duv0.y*t_duv1.y-t_duv1.x*t_duv0.y);
+		uint32_t n = mesh.vertex_offset+i;
+		glm::vec3 t_e0 = mesh_vertices[n+1].position-mesh_vertices[n].position;
+		glm::vec3 t_e1 = mesh_vertices[n+2].position-mesh_vertices[n].position;
+		glm::vec2 t_duv0 = mesh_vertices[n+1].uv_coord-mesh_vertices[n].uv_coord;
+		glm::vec2 t_duv1 = mesh_vertices[n+2].uv_coord-mesh_vertices[n].uv_coord;
+		float t_Factor = 1.f/(t_duv0.x*t_duv1.y-t_duv0.y*t_duv1.x);
 
 		// calculate tangent & store in vertex
 		glm::vec3 t_Tangent = glm::vec3(
@@ -267,10 +268,11 @@ void RenderBatch::load_mesh(Mesh& mesh)
 				t_Factor*(t_duv1.y*t_e0.z-t_duv0.y*t_e1.z)
 			);
 		t_Tangent = glm::normalize(t_Tangent);
-		for (uint8_t j=0;j<3;j++) mesh_vertices[i+j].tangent = t_Tangent;
-		// FIXME: how the hell is the tangent creating a memory leak?!? it's a mathematical operation!
+		for (uint8_t j=0;j<3;j++) mesh_vertices[n+j].tangent = t_Tangent;
+		// FIXME: how the hell is the tangent norm. creating a memory leak?!? it's a mathematical operation!
 		//		could be an old version, test on a more modern system (no offense, computer i'm writing this on)
 		// TODO: using a matrix calculation might be significantly faster
+		// TODO: this could easily be an element draw setup. mayhaps transition towards that
 	}
 }
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
