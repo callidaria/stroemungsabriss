@@ -142,6 +142,7 @@ struct RenderBatch
 
 	// load progression
 	uint16_t sprite_upload_head = 0;
+	uint16_t mesh_upload_head = 0,mesh_upload_subhead = 0;
 
 	// load flags
 	bool selected = false;

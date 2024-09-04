@@ -747,29 +747,40 @@ void mesh_upload(RenderBatch* batch)
 {
 	COMM_AWT("attempting to upload %li mesh textures to gpu",batch->mesh_textures.size()*4);
 
+	// upload textures
+	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	while (batch->mesh_upload_head<batch->mesh_textures.size())
+	{
+		while (batch->mesh_upload_subhead<4)
+		{
+			// check timing and stall texture upload until next frame when necessary for framerate reasons
+			if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+			{
+				COMM_CNF();
+				return;
+			}
+
+			// move to address of texture to upload
+			Texture* p_Texture = &batch->mesh_textures[batch->mesh_upload_head].colours;
+			p_Texture = p_Texture+batch->mesh_upload_subhead;
+
+			// upload texture and move on
+			p_Texture->upload();
+			Texture::set_texture_parameter_clamp_to_edge();
+			Texture::set_texture_parameter_linear_mipmap();
+			batch->mesh_upload_subhead++;
+		}
+
+		// reset texture index within tuple and increment tuple index
+		batch->mesh_upload_subhead = 0;
+		batch->mesh_upload_head++;
+	}
+
 	// ready mesh buffer
 	batch->mesh_buffer.upload_vertices(batch->mesh_vertices);
 	batch->mesh_pipeline.point_buffer3D();
 
-	// upload textures
-	for (MeshTextureTuple& p_Texture : batch->mesh_textures)
-	{
-		p_Texture.colours.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		p_Texture.normals.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		p_Texture.materials.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-		p_Texture.emission.upload();
-		Texture::set_texture_parameter_clamp_to_edge();
-		Texture::set_texture_parameter_linear_mipmap();
-	}
 	batch->mesh_ready = true;
-	// TODO: stall texture upload
-
 	COMM_CNF();
 }
 
