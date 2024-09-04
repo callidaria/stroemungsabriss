@@ -5,24 +5,27 @@ in vec2 TexCoords;
 out vec4 outColour;
 
 // sunlight structure definition
-struct light_sun {
+struct light_sun
+{
 	vec3 position;
 	vec3 colour;
 	float intensity;
 };
 
 // pointlight structure definition
-struct light_point {
+struct light_point
+{
 	vec3 position;
 	vec3 colour;
+	float intensity;
 	float constant;
 	float linear;
 	float quadratic;
-	float intensity;
 };
 
 // spotlight structure definition
-struct light_spot {
+struct light_spot
+{
 	vec3 position;
 	vec3 colour;
 	vec3 direction;
@@ -55,8 +58,8 @@ uniform int sunlight_count = 0;
 uniform int pointlight_count = 0;
 uniform int spotlight_count = 0;
 uniform light_sun sunlight[5];
-uniform light_point pointlight[128];
-uniform light_spot spotlight[32];
+uniform light_point pointlight[64];
+uniform light_spot spotlight[16];
 
 // light maps
 uniform samplerCube irradiance_map;
@@ -137,8 +140,6 @@ void main()
 		lgt_colours += lumen_point(colour,position,normals,metallic,roughness,pointlight[j]);
 	for (int k=0;k<spotlight_count;k++)
 		lgt_colours += lumen_spot(colour,position,normals,metallic,roughness,spotlight[k]);
-	outColour = vec4(normals,1.);
-	return;
 
 	// process shadows with dynamic bias for sloped surfaces
 	vec4 rltp = shadow_matrix*vec4(position,1.0);

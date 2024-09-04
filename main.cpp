@@ -25,6 +25,19 @@ struct SceneData
 void load_scene(SceneData& data)
 {
 	data.batch0 = g_Renderer.load("./lvload/test_scene1.ccb");
+
+	g_Renderer.m_Lighting.directional_lights[0] = {
+		.position = glm::vec3(50,-25,75),
+		.colour = glm::vec3(1.f),
+		.intensity = 4.2f
+	};
+	g_Renderer.m_Lighting.directional_lights[1] = {
+		.position = glm::vec3(-50,25,-75),
+		.colour = glm::vec3(1.f),
+		.intensity = .125f
+	};
+	g_Renderer.m_Lighting.directional_range+=2;
+
 	data.scene_ready = true;
 }
 

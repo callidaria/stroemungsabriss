@@ -28,7 +28,7 @@ class Camera3D
 public:
 
 	// construction
-	Camera3D(glm::vec3 position,glm::vec3 target,float ratio,float fov);
+	Camera3D(glm::vec3 pos,glm::vec3 tgt,float ratio,float fov);
 
 	// utility
 	void rotate_around_target(float deg);
@@ -38,15 +38,15 @@ public:
 
 	// conversion matrices
 	glm::mat4 view3D,proj3D;
+	glm::vec3 position,target;
 
 private:
-
-	glm::vec3 m_position,m_target;
 };
 inline Camera3D g_Camera3D = Camera3D(
 		glm::vec3(0,-4,2),glm::vec3(0),
 		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
 	);
+// TODO: remake these as structs with basic utility
 
 
 // transformation math

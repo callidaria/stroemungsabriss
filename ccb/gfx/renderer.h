@@ -10,6 +10,39 @@
 #include "texture.h"
 
 
+// lighting
+struct LightDirectional
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	float intensity;
+};
+
+struct LightPoint
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	float intensity;
+	float c0,c1,c2;
+};
+
+struct LightSpot
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	glm::vec3 direction;
+	float cut_inner,cut_outer;
+};
+
+struct Lighting
+{
+	LightDirectional directional_lights[5];
+	LightPoint point_lights[64];
+	LightSpot spot_lights[16];
+	uint8_t directional_range = 0,point_range = 0,spot_range = 0;
+};
+
+
 // upload structures
 // per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
@@ -167,14 +200,22 @@ public:
 
 private:
 
+	// draw
 	void render_sprites(RenderBatch* batch);
 	void render_duplicates(RenderBatch* batch);
 	void render_meshes(RenderBatch* batch);
+
+	// upload
+	void upload_lighting();
 
 public:
 
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> gpu_update_pointers;
+
+	// data
+	Lighting m_Lighting;
+	// TODO: back to private
 
 private:
 

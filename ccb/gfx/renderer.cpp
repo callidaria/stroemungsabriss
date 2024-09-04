@@ -335,6 +335,7 @@ Renderer::Renderer()
 	}
 	m_DeferredPipeline.assemble(t_FramebufferVertexShader,t_DeferredFragmentShader);
 
+	// geometry
 	COMM_LOG("pre-loading basic sprite geometry");
 	float t_SpriteVertices[] = {
 		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
@@ -844,11 +845,18 @@ void Renderer::update()
 	// deferred shading
 	m_CanvasBuffer.bind();
 	m_DeferredPipeline.enable();
+
+	// upload information
+	upload_lighting();
 	m_GBuffer.upload_components();
+	m_DeferredPipeline.upload_vec3("view_pos",g_Camera3D.position);
+
+	// process lighting deferred
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render 2D geometry
 	// iterate sprite render
+	/*
 	m_SpriteBuffer.bind();
 	m_SpritePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) update_sprites[batch->sprite_ready](batch,&m_SpritePipeline);
@@ -857,6 +865,7 @@ void Renderer::update()
 	m_SpriteBuffer.bind_index();
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
+	*/
 }
 
 /*
@@ -883,4 +892,45 @@ void Renderer::render_duplicates(RenderBatch* batch)
 		p_Texture.texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,p_Instance.active_range);
 	}
+}
+
+/*
+	TODO
+*/
+void Renderer::upload_lighting()
+{
+	// upload the many suns
+	for (uint8_t i=0;i<m_Lighting.directional_range;i++)
+	{
+		std::string t_ArrayLocation = "sunlight["+std::to_string(i)+"].";
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.directional_lights[i].position);
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.directional_lights[i].colour);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"intensity",m_Lighting.directional_lights[i].intensity);
+	}
+	m_DeferredPipeline.upload_int("sunlight_count",m_Lighting.directional_range);
+
+	// upload pointlights
+	for (uint8_t i=0;i<m_Lighting.point_range;i++)
+	{
+		std::string t_ArrayLocation = "pointlight["+std::to_string(i)+"].";
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.point_lights[i].position);
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.point_lights[i].colour);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"instensity",m_Lighting.point_lights[i].intensity);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"constant",m_Lighting.point_lights[i].c0);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"linear",m_Lighting.point_lights[i].c1);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"quadratic",m_Lighting.point_lights[i].c2);
+	}
+	m_DeferredPipeline.upload_int("pointlight_count",m_Lighting.point_range);
+
+	// upload spotlights
+	for (uint8_t i=0;i<m_Lighting.spot_range;i++)
+	{
+		std::string t_ArrayLocation = "spotlight["+std::to_string(i)+"].";
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.spot_lights[i].position);
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.spot_lights[i].colour);
+		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"direction",m_Lighting.spot_lights[i].direction);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"cut_in",m_Lighting.spot_lights[i].cut_inner);
+		m_DeferredPipeline.upload_float(t_ArrayLocation+"cut_out",m_Lighting.spot_lights[i].cut_outer);
+	}
+	m_DeferredPipeline.upload_int("spotlight_count",m_Lighting.spot_range);
 }
