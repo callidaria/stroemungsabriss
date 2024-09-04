@@ -55,9 +55,9 @@ void Camera3D::update()
 */
 void Transform2D::transform(glm::vec2 p,float w,float h,float r)
 {
-	rotate(r);
-	scale(w,h);
 	translate(p);
+	scale(w,h);
+	rotate(r);
 }
 
 /*
@@ -107,9 +107,9 @@ void Transform2D::rotate(float r,glm::vec2 a)
 */
 void Transform3D::transform(glm::vec3 pos,float scl,glm::vec3 rot)
 {
-	rotate(rot);
-	scale(scl);
 	translate(pos);
+	scale(scl);
+	rotate(rot);
 }
 
 /*

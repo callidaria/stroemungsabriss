@@ -16,19 +16,12 @@
 */
 uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint8_t frames)
 {
-	// create sprite source
 	SpriteTextureTuple t_Tuple = {
-
-		// source
 		.texture = Texture(path),
-
-		// spritesheet segmentation
 		.rows = rows,
 		.columns = cols,
 		.frames = frames
 	};
-
-	// write and return reference id
 	sprite_textures.push_back(t_Tuple);
 	return sprite_textures.size()-1;
 }
@@ -43,21 +36,14 @@ uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint
 */
 void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
-	// information setup
 	Sprite t_Sprite = {
-
-		// link sprite to texture
 		.texture_id = tex_id,
-
-		// transform component
 		.transform = {
 			.position = pos,
 			.width = wdt,
 			.height = hgt,
 		},
 	};
-
-	// transform and write
 	t_Sprite.transform.to_origin();
 	sprites.push_back(t_Sprite);
 }
@@ -85,19 +71,13 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
 	SpriteInstance t_Instance = {
-
-		// link sprites to texture
 		.texture_id = tex_id,
-
-		// tranformation
 		.transform = {
 			.position = pos,
 			.width = wdt,
 			.height = hgt,
 		},
 	};
-
-	// transform and write
 	t_Instance.transform.to_origin();
 	duplicates.push_back(t_Instance);
 }
@@ -507,7 +487,7 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std
 
 	COMM_LOG_COND(
 			args.size()>Args::Height,
-			"register instanced sprite%s of texture %s: pos -> (%s,%s),dim -> %sx%s",
+			"register instanced sprite%s of texture %s: pos -> (%s,%s), dim -> %sx%s",
 			(args.size()>AnimDuration) ? " animation" : "",
 			args[Args::TexID].c_str(),
 			args[Args::PosX].c_str(),args[Args::PosY].c_str(),
@@ -616,7 +596,7 @@ const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = 
 	"texture","sprite","duplicate","mesh","spawn"
 };
 typedef void (*gfx_interpreter_logic)(RenderBatch*,const std::vector<std::string>&);
-const gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
+gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_texture,
 	interpreter_logic_sprite,
 	interpreter_logic_instanced_sprite,
@@ -675,9 +655,9 @@ void bgr_load_batch(RenderBatch* batch)
 		t_Texture.materials.load();
 		t_Texture.emission.load();
 	}
+	COMM_CNF();
 
 	g_Renderer.gpu_update_pointers.push_back(batch);
-	COMM_CNF();
 }
 
 RenderBatch* Renderer::load(const std::string& path)
