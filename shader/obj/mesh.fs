@@ -24,7 +24,6 @@ void main()
 	// translate normals & emission
 	vec3 normals = texture(normal_map,TexCoords).rgb*2.0-1.0;
 	gbuffer_normals = vec4(normalize(TBN*normals),texture(emission_map,TexCoords).r);
-	gbuffer_normals = vec4(normals,1.0);
 
 	// extract surface materials
 	gbuffer_materials = vec4(texture(material_map,TexCoords).rgb,.0);

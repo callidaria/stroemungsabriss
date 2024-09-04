@@ -35,7 +35,6 @@ public:
 	// filter features
 	static inline void set_texture_filter_bias(float bias)
 		{ glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,bias); }
-	static inline void generate_mipmap() { glGenerateMipmap(GL_TEXTURE_2D); }
 
 public:
 

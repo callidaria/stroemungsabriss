@@ -705,7 +705,6 @@ void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline)
 		t_Texture.texture.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
 		batch->sprite_upload_head++;
 	}
 
@@ -758,19 +757,15 @@ void mesh_upload(RenderBatch* batch)
 		p_Texture.colours.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
 		p_Texture.normals.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
 		p_Texture.materials.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
 		p_Texture.emission.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
-		Texture::generate_mipmap();
 	}
 	batch->mesh_ready = true;
 	// TODO: stall texture upload
@@ -785,7 +780,7 @@ void mesh_update(RenderBatch* batch)
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
 		Mesh& p_Mesh = batch->meshes[i];
-		MeshTextureTuple& p_Texture = batch->mesh_textures[i*4];
+		MeshTextureTuple& p_Texture = batch->mesh_textures[i];
 
 		// upload attributes
 		batch->mesh_pipeline.upload_matrix("model",p_Mesh.transform.model);
