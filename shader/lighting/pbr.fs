@@ -98,7 +98,7 @@ void main()
 	vec4 positionxnull = texture(gbuffer_position,TexCoords);
 	vec4 normalsxemission = texture(gbuffer_normals,TexCoords);
 	vec4 materials = texture(gbuffer_materials,TexCoords);
-	float gdepth = texture(world_depth,TexCoords).r;
+	//float gdepth = texture(world_depth,TexCoords).r;
 
 	// translate g-buffer information
 	vec3 colour = colourxspec.rgb;
@@ -111,8 +111,10 @@ void main()
 	float ambient_occlusion = materials.b;
 
 	// read transparency buffer
+	/*
 	vec4 tbuffer = texture(transparency_buffer,TexCoords);
 	float tdepth = texture(transparency_depth,TexCoords).r;
+	*/
 
 	// precalculations
 	camera_dir = normalize(view_pos-position);
@@ -122,6 +124,7 @@ void main()
 	schlick_out = schlick_beckmann_approx(dlgt_out,roughness);
 
 	// light emission from irradiance map
+	/*
 	vec3 fresnel = mix(vec3(.04),colour,metallic);
 	fresnel = fresnel+(max(vec3(1.0-roughness),fresnel)-fresnel)
 			* pow(clamp(1.0-max(dot(normals,camera_dir),0.0),0.0,1.0),5.0);
@@ -130,6 +133,7 @@ void main()
 	vec3 ibspec = textureLod(specular_map,reflect(-camera_dir,normals),roughness*4.0).rgb
 			* (fresnel*pcbrdf.x+pcbrdf.y);
 	vec3 glb_colours = (ibdiff+ibspec)*ambient_occlusion;
+	*/
 
 	// process light sources
 	vec3 sdw_colours = vec3(0);
@@ -142,6 +146,7 @@ void main()
 		lgt_colours += lumen_spot(colour,position,normals,metallic,roughness,spotlight[k]);
 
 	// process shadows with dynamic bias for sloped surfaces
+	/*
 	vec4 rltp = shadow_matrix*vec4(position,1.0);
 	vec3 ltp = (rltp.xyz/rltp.w)*.5+.5;
 	vec3 slight_position = normalize(light_position-position);
@@ -150,9 +155,10 @@ void main()
 	float gshadow = min(1.0-dot(normals,slight_position),1.0);
 	//float shadow = mix(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),.0,gshadow);
 	float shadow = max(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),gshadow);
+	*/
 
 	// combine lighting stages
-	vec3 cmb_colours = (lgt_colours+sdw_colours+glb_colours)*(1.0-lemission)*(1.0-shadow*.66);
+	vec3 cmb_colours = (lgt_colours+sdw_colours/*+glb_colours*/)*(1.0-lemission);//*(1.0-shadow*.66);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;
@@ -163,7 +169,7 @@ void main()
 	cmb_colours = pow(cmb_colours,vec3(1.0/gamma));
 
 	// merge transparency buffer
-	cmb_colours.rgb = mix(cmb_colours.rgb,tbuffer.rgb,tbuffer.a*int(tdepth<gdepth));
+	//cmb_colours.rgb = mix(cmb_colours.rgb,tbuffer.rgb,tbuffer.a*int(tdepth<gdepth));
 
 	// return colour composition
 	outColour = vec4(cmb_colours,1.0);

@@ -9,9 +9,9 @@
 	TODO
 */
 Texture::Texture(std::string path,bool corrected)
-	: m_path(path)
+	: m_Path(path)
 {
-	m_format = GL_RGBA+corrected*0x7338;
+	m_Format = GL_RGBA+corrected*0x7338;
 }
 
 /*
@@ -19,8 +19,7 @@ Texture::Texture(std::string path,bool corrected)
 */
 void Texture::load()
 {
-	int32_t width = 0,height = 0;
-	m_data = stbi_load(m_path.c_str(),&m_width,&m_height,0,STBI_rgb_alpha);
+	m_Data = stbi_load(m_Path.c_str(),&m_Width,&m_Height,0,STBI_rgb_alpha);
 }
 
 /*
@@ -31,10 +30,10 @@ void Texture::upload()
 	// upload new texture to gpu
 	glGenTextures(1,&texture);
 	bind();
-	glTexImage2D(GL_TEXTURE_2D,0,m_format,m_width,m_height,0,GL_RGBA,GL_UNSIGNED_BYTE,m_data);
+	glTexImage2D(GL_TEXTURE_2D,0,m_Format,m_Width,m_Height,0,GL_RGBA,GL_UNSIGNED_BYTE,m_Data);
 
 	// cleanup pixel data
-	stbi_image_free(m_data);
+	stbi_image_free(m_Data);
 }
 
 /*

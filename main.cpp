@@ -29,7 +29,7 @@ void load_scene(SceneData& data)
 	g_Renderer.m_Lighting.directional_lights[0] = {
 		.position = glm::vec3(50,-25,75),
 		.colour = glm::vec3(1.f),
-		.intensity = 4.2f
+		.intensity = 2.5f
 	};
 	g_Renderer.m_Lighting.directional_lights[1] = {
 		.position = glm::vec3(-50,25,-75),

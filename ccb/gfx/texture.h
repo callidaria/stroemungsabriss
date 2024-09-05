@@ -44,9 +44,9 @@ public:
 private:
 
 	// image
-	std::string m_path;
-	int32_t m_width,m_height,m_format;
-	void* m_data;
+	std::string m_Path;
+	int32_t m_Width,m_Height,m_Format;
+	void* m_Data;
 };
 
 

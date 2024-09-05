@@ -119,7 +119,7 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 
 	// store texture information
 	MeshTextureTuple t_Texture = {
-		.colours = Texture(tex),
+		.colours = Texture(tex,true),
 		.normals = Texture(norm),
 		.materials = Texture(mats),
 		.emission = Texture(emit),
