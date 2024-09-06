@@ -17,3 +17,4 @@ spawn sprite 1 660 50
 
 mesh ./res/casino/tobject.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png -2 4 0
 mesh ./res/casino/box.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 3 1
+mesh ./res/casino/rolling.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 3 -3 0

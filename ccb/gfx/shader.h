@@ -45,23 +45,22 @@ public:
 	static inline void disable() { glUseProgram(0); }
 
 	// upload
-	inline void upload_int(const std::string& loc,int i)
-		{ glUniform1i(glGetUniformLocation(m_shaderProgram,loc.c_str()),i); }
-	inline void upload_float(const std::string& loc,float f)
-		{ glUniform1f(glGetUniformLocation(m_shaderProgram,loc.c_str()),f); }
-	inline void upload_vec2(const std::string& loc,glm::vec2 v)
-		{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc.c_str()),v.x,v.y); }
-	inline void upload_vec3(const std::string& loc,glm::vec3 v)
-		{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc.c_str()),v.x,v.y,v.z); }
-	inline void upload_vec4(const std::string& loc,glm::vec4 v)
-		{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc.c_str()),v.x,v.y,v.z,v.w); }
-	inline void upload_matrix(const std::string& loc,glm::mat4 m)
-		{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc.c_str()),1,GL_FALSE,glm::value_ptr(m)); }
+	inline void upload_int(const char* loc,int i)
+		{ glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
+	inline void upload_float(const char* loc,float f)
+		{ glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }
+	inline void upload_vec2(const char* loc,glm::vec2 v)
+		{ glUniform2f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y); }
+	inline void upload_vec3(const char* loc,glm::vec3 v)
+		{ glUniform3f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z); }
+	inline void upload_vec4(const char* loc,glm::vec4 v)
+		{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
+	inline void upload_matrix(const char* loc,glm::mat4 m)
+		{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
 	inline void upload_camera()
 		{ upload_matrix("view",g_Camera2D.view2D), upload_matrix("proj",g_Camera2D.proj2D); }
 	inline void upload_camera(Camera3D& cam3d)
 		{ upload_matrix("view",cam3d.view3D), upload_matrix("proj",cam3d.proj3D); }
-	// TODO: change back const std::string& to const char*
 
 private:
 

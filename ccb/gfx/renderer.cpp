@@ -6,6 +6,52 @@
 */
 
 /*
+	TODO
+*/
+void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& point_offset,uint8_t& spot_offset)
+{
+	// upload the many suns
+	for (LightDirectional& light : directional_lights)
+	{
+		std::string t_ArrayLocation = "sunlight["+std::to_string(dir_offset)+"].";
+		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_float((t_ArrayLocation+"intensity").c_str(),light.intensity);
+		dir_offset++;
+	}
+
+	// upload pointlights
+	for (LightPoint& light : point_lights)
+	{
+		std::string t_ArrayLocation = "pointlight["+std::to_string(point_offset)+"].";
+		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_float((t_ArrayLocation+"instensity").c_str(),light.intensity);
+		pipeline.upload_float((t_ArrayLocation+"constant").c_str(),light.c0);
+		pipeline.upload_float((t_ArrayLocation+"linear").c_str(),light.c1);
+		pipeline.upload_float((t_ArrayLocation+"quadratic").c_str(),light.c2);
+		point_offset++;
+	}
+
+	// upload spotlights
+	for (LightSpot& light : spot_lights)
+	{
+		std::string t_ArrayLocation = "spotlight["+std::to_string(spot_offset)+"].";
+		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_vec3((t_ArrayLocation+"direction").c_str(),light.direction);
+		pipeline.upload_float((t_ArrayLocation+"cut_in").c_str(),light.cut_inner);
+		pipeline.upload_float((t_ArrayLocation+"cut_out").c_str(),light.cut_outer);
+		spot_offset++;
+	}
+}
+
+
+/**
+ *	TODO
+*/
+
+/*
 	!O(1)m /+load -> (public)
 	// TODO: add purpose
 	\param path: path to file containing spritesheet
@@ -658,14 +704,14 @@ void bgr_load_batch(RenderBatch* batch)
 	}
 	COMM_CNF();
 
-	g_Renderer.gpu_update_pointers.push_back(batch);
+	RendererUtils::register_batch_pointer(batch);
 }
 
 RenderBatch* Renderer::load(const std::string& path)
 {
 	// find available batch by unix approach: last batch will be overwritten if no idle
 	uint8_t t_BatchID = 0;
-	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&g_Renderer.batches[t_BatchID].selected) t_BatchID++;
+	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&batches[t_BatchID].selected) t_BatchID++;
 
 	// store path in free batch & signal batch load
 	RenderBatch* r_Batch = &batches[t_BatchID];
@@ -847,7 +893,7 @@ void Renderer::update()
 	m_DeferredPipeline.enable();
 
 	// upload information
-	upload_lighting();
+	g_Renderer.update_lighting();  // TODO: move away from update
 	m_GBuffer.upload_components();
 	m_DeferredPipeline.upload_vec3("view_pos",g_Camera3D.position);
 
@@ -866,6 +912,20 @@ void Renderer::update()
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
 	*/
+}
+
+/*
+	TODO
+*/
+void Renderer::update_lighting()
+{
+	m_DeferredPipeline.enable();
+	uint8_t t_DirOffset = 0,t_PointOffset = 0,t_SpotOffset = 0;
+	for (RenderBatch* batch : gpu_update_pointers)
+		batch->lighting.upload(m_DeferredPipeline,t_DirOffset,t_PointOffset,t_SpotOffset);
+	m_DeferredPipeline.upload_int("sunlight_count",t_DirOffset);
+	m_DeferredPipeline.upload_int("pointlight_count",t_PointOffset);
+	m_DeferredPipeline.upload_int("spotlight_count",t_SpotOffset);
 }
 
 /*
@@ -892,45 +952,4 @@ void Renderer::render_duplicates(RenderBatch* batch)
 		p_Texture.texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,p_Instance.active_range);
 	}
-}
-
-/*
-	TODO
-*/
-void Renderer::upload_lighting()
-{
-	// upload the many suns
-	for (uint8_t i=0;i<m_Lighting.directional_range;i++)
-	{
-		std::string t_ArrayLocation = "sunlight["+std::to_string(i)+"].";
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.directional_lights[i].position);
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.directional_lights[i].colour);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"intensity",m_Lighting.directional_lights[i].intensity);
-	}
-	m_DeferredPipeline.upload_int("sunlight_count",m_Lighting.directional_range);
-
-	// upload pointlights
-	for (uint8_t i=0;i<m_Lighting.point_range;i++)
-	{
-		std::string t_ArrayLocation = "pointlight["+std::to_string(i)+"].";
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.point_lights[i].position);
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.point_lights[i].colour);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"instensity",m_Lighting.point_lights[i].intensity);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"constant",m_Lighting.point_lights[i].c0);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"linear",m_Lighting.point_lights[i].c1);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"quadratic",m_Lighting.point_lights[i].c2);
-	}
-	m_DeferredPipeline.upload_int("pointlight_count",m_Lighting.point_range);
-
-	// upload spotlights
-	for (uint8_t i=0;i<m_Lighting.spot_range;i++)
-	{
-		std::string t_ArrayLocation = "spotlight["+std::to_string(i)+"].";
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"position",m_Lighting.spot_lights[i].position);
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"colour",m_Lighting.spot_lights[i].colour);
-		m_DeferredPipeline.upload_vec3(t_ArrayLocation+"direction",m_Lighting.spot_lights[i].direction);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"cut_in",m_Lighting.spot_lights[i].cut_inner);
-		m_DeferredPipeline.upload_float(t_ArrayLocation+"cut_out",m_Lighting.spot_lights[i].cut_outer);
-	}
-	m_DeferredPipeline.upload_int("spotlight_count",m_Lighting.spot_range);
 }

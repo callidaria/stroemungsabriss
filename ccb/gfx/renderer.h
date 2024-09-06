@@ -10,39 +10,6 @@
 #include "texture.h"
 
 
-// lighting
-struct LightDirectional
-{
-	glm::vec3 position;
-	glm::vec3 colour;
-	float intensity;
-};
-
-struct LightPoint
-{
-	glm::vec3 position;
-	glm::vec3 colour;
-	float intensity;
-	float c0,c1,c2;
-};
-
-struct LightSpot
-{
-	glm::vec3 position;
-	glm::vec3 colour;
-	glm::vec3 direction;
-	float cut_inner,cut_outer;
-};
-
-struct Lighting
-{
-	LightDirectional directional_lights[5];
-	LightPoint point_lights[64];
-	LightSpot spot_lights[16];
-	uint8_t directional_range = 0,point_range = 0,spot_range = 0;
-};
-
-
 // upload structures
 // per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
@@ -129,6 +96,42 @@ struct Mesh
 };
 
 
+// lighting
+struct LightDirectional
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	float intensity;
+};
+
+struct LightPoint
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	float intensity;
+	float c0,c1,c2;
+};
+
+struct LightSpot
+{
+	glm::vec3 position;
+	glm::vec3 colour;
+	glm::vec3 direction;
+	float cut_inner,cut_outer;
+};
+
+struct Lighting
+{
+	// utility
+	void upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& point_offset,uint8_t& spot_offset);
+
+	// data
+	std::vector<LightDirectional> directional_lights;
+	std::vector<LightPoint> point_lights;
+	std::vector<LightSpot> spot_lights;
+};
+
+
 // batches
 // batch data to seperately load and display to other buffers
 struct RenderBatch
@@ -173,6 +176,9 @@ struct RenderBatch
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
 
+	// lighting
+	Lighting lighting;
+
 	// load progression
 	uint16_t sprite_upload_head = 0;
 	uint16_t mesh_upload_head = 0,mesh_upload_subhead = 0;
@@ -197,6 +203,7 @@ public:
 
 	RenderBatch* load(const std::string& path);
 	void update();
+	void update_lighting();
 
 private:
 
@@ -205,17 +212,10 @@ private:
 	void render_duplicates(RenderBatch* batch);
 	void render_meshes(RenderBatch* batch);
 
-	// upload
-	void upload_lighting();
-
 public:
 
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> gpu_update_pointers;
-
-	// data
-	Lighting m_Lighting;
-	// TODO: back to private
 
 private:
 
@@ -233,5 +233,9 @@ private:
 };
 
 inline Renderer g_Renderer = Renderer();
+namespace RendererUtils
+{
+	inline void register_batch_pointer(RenderBatch* batch) { g_Renderer.gpu_update_pointers.push_back(batch); }
+};
 
 #endif
