@@ -13,7 +13,7 @@
 */
 Camera2D::Camera2D(float x_bounds,float y_bounds)
 {
-	view2D = glm::lookAt(glm::vec3(0,-0.01f,1),glm::vec3(),glm::vec3(0,0,1));
+	view2D = glm::lookAt(glm::vec3(0,-0.0001f,1),glm::vec3(.0f),glm::vec3(0,0,1));
 	proj2D = glm::ortho(0.0f,x_bounds,0.0f,y_bounds,0.1f,10.0f);
 }
 
@@ -34,7 +34,7 @@ Camera3D::Camera3D(glm::vec3 pos,glm::vec3 tgt,float ratio,float fov)
 */
 void Camera3D::rotate_around_target(float deg)
 {
-	position = glm::rotate(glm::mat4(1.f),glm::radians(deg),glm::vec3(0,0,1))*glm::vec4(position,1.f);
+	position = glm::rotate(glm::mat4(1.f),glm::radians(deg),glm::vec3(0,0,1))*glm::vec4(position,.0f);
 }
 
 /*
@@ -94,7 +94,6 @@ void Transform2D::rotate(float r)
 */
 void Transform2D::rotate(float r,glm::vec2 a)
 {
-	// reset towards arbitrary origin
 	float t_WidthFactor = model[0][0], t_HeightFactor = model[1][1];
 	model = glm::mat4(1.f);
 	translate(a-position);

@@ -43,7 +43,7 @@ public:
 private:
 };
 inline Camera3D g_Camera3D = Camera3D(
-		glm::vec3(0,-4,2),glm::vec3(0),
+		glm::vec3(0,-4,2),glm::vec3(.0f),
 		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
 	);
 // TODO: remake these as structs with basic utility

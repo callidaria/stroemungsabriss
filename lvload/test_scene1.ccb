@@ -13,3 +13,4 @@ spawn sprite 0 630 360
 mesh ./res/casino/test_floor.obj ./res/casino/paquet_colour.png ./res/casino/paquet_normal.png ./res/casino/paquet_material.png ./res/none.png 0 0 -1
 mesh ./res/casino/suzanne.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 0 0
 mesh ./res/casino/wobble.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 4 2 0
+mesh ./res/casino/box.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png -2 -3 0

@@ -18,7 +18,7 @@ struct SceneData
 	bool second_request = false;
 
 	// mouse rotation interfacing
-	float dt_mouse_position;
+	float dt_mouse_position = .0f;
 	float ape_momentum = .0f;
 };
 
@@ -36,7 +36,7 @@ void load_scene(SceneData& data)
 		.colour = glm::vec3(1.f),
 		.intensity = .125f
 	};
-	g_Renderer.m_Lighting.directional_range+=2;
+	g_Renderer.m_Lighting.directional_range = 2;
 
 	data.scene_ready = true;
 }
