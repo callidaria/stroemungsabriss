@@ -22,11 +22,21 @@ Camera2D::Camera2D(float x_bounds,float y_bounds)
  *		TODO
 */
 
-Camera3D::Camera3D(glm::vec3 pos,glm::vec3 tgt,float ratio,float fov)
+/*
+	TODO
+*/
+Camera3D::Camera3D(glm::vec3 pos,glm::vec3 tgt,float width,float height)
+{
+	float t_HalfWidth = width*.5f,t_HalfHeight = height*.5f;
+	view3D = glm::lookAt(pos,tgt,glm::vec3(0,0,1));
+	proj3D = glm::ortho(-t_HalfWidth,t_HalfWidth,-t_HalfHeight,t_HalfHeight,.1f,100.f);
+}
+
+Camera3D::Camera3D(glm::vec3 pos,glm::vec3 tgt,float width,float height,float fov)
 	: position(pos),target(tgt)
 {
 	view3D = glm::lookAt(position,target,glm::vec3(0,0,1));
-	proj3D = glm::perspective(glm::radians(fov),ratio,.1f,10000.f);
+	proj3D = glm::perspective(glm::radians(fov),width/height,.1f,1000.f);
 }
 
 /*

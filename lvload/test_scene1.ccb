@@ -17,3 +17,5 @@ mesh ./res/casino/box.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/defau
 
 light sun 50 -25 75 4
 light sun -50 25 -75 .125
+
+shadow 50 -25 75

@@ -71,6 +71,7 @@ uniform sampler2D specular_brdf;
 uniform sampler2D shadow_map;
 uniform vec3 light_position;
 uniform mat4 shadow_matrix;
+uniform float shadow_intensity = .75;
 
 // light processing definitions
 vec3 lumen_sun(vec3 colour,vec3 position,vec3 normals,float metallic,float roughness,light_sun sl);
@@ -147,7 +148,6 @@ void main()
 		lgt_colours += lumen_spot(colour,position,normals,metallic,roughness,spotlight[k]);
 
 	// process shadows with dynamic bias for sloped surfaces
-	/*
 	vec4 rltp = shadow_matrix*vec4(position,1.0);
 	vec3 ltp = (rltp.xyz/rltp.w)*.5+.5;
 	vec3 slight_position = normalize(light_position-position);
@@ -156,10 +156,10 @@ void main()
 	float gshadow = min(1.0-dot(normals,slight_position),1.0);
 	//float shadow = mix(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),.0,gshadow);
 	float shadow = max(float(texture(shadow_map,ltp.xy).r<(obj_depth-bias)),gshadow);
-	*/
 
 	// combine lighting stages
-	vec3 cmb_colours = (lgt_colours+sdw_colours/*+glb_colours*/)*(1.0-lemission);//*(1.0-shadow*.66);
+	//vec3 cmb_colours = (lgt_colours+sdw_colours/*+glb_colours*/)*(1.0-lemission)*(1.0-shadow*.66);
+	vec3 cmb_colours = (lgt_colours+sdw_colours)*(1.0-lemission)*(1.0-shadow*shadow_intensity);
 
 	// process emission
 	vec3 emit_colours = colour*lemission;

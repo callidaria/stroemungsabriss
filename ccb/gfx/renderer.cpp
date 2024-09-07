@@ -436,6 +436,15 @@ Renderer::Renderer()
 	m_DeferredPipeline.upload_int("gbuffer_position",1);
 	m_DeferredPipeline.upload_int("gbuffer_normals",2);
 	m_DeferredPipeline.upload_int("gbuffer_materials",3);
+	m_DeferredPipeline.upload_int("shadow_map",4);
+
+	COMM_LOG("setup shadow projection");
+	m_ShadowFrameBuffer.bind();
+	m_ShadowFrameBuffer.add_depth_component(RENDERER_SHADOW_RESOLUTION,RENDERER_SHADOW_RESOLUTION);
+	Texture::set_texture_parameter_clamp_to_border();
+	Texture::set_texture_border_colour(glm::vec4(1));
+	FrameBuffer::unbind();
+	// TODO: setup geometry-only render pipeline for shadow projection
 
 	COMM_SCC("renderer ready");
 }
@@ -646,7 +655,7 @@ void interpreter_logic_light(RenderBatch* batch,const std::vector<std::string>& 
 			"emitting %slight from position -> (%s,%s,%s)",
 			args[Args::Type].c_str(),args[Args::PosX].c_str(),args[Args::PosY].c_str(),args[Args::PosZ].c_str()
 		)
-		COMM_ERR_FALLBACK("emitting lights: no enough arguments provided");
+		COMM_ERR_FALLBACK("emitting lights: not enough arguments provided");
 
 	// extracting basic parameters
 	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
@@ -699,15 +708,29 @@ void interpreter_logic_light(RenderBatch* batch,const std::vector<std::string>& 
 	COMM_ERR("cannot emit specified source of %slight, type not known",args[Args::Type].c_str());
 }
 
+void interpreter_logic_shadow(RenderBatch* batch,const std::vector<std::string>& args)
+{
+	enum Args : uint8_t { Command,PosX,PosY,PosZ };
+
+	COMM_LOG_COND(
+			args.size()>PosZ,
+			"projecting shadow from position -> (%s,%s,%s)",
+			args[Args::PosX].c_str(),args[Args::PosY].c_str(),args[Args::PosZ].c_str()
+		)
+		COMM_ERR_FALLBACK("shadow projection: not enough arguments provided");
+
+	g_Renderer.set_shadow(glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ])));
+}
+
 void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	COMM_ERR("syntax error while interpreting %s: \"%s\" not a valid command",
 			batch->path.c_str(),args[0].c_str());
 }
 
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 6;
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 7;
 const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = {
-	"texture","sprite","duplicate","mesh","spawn","light"
+	"texture","sprite","duplicate","mesh","spawn","light","shadow"
 };
 typedef void (*gfx_interpreter_logic)(RenderBatch*,const std::vector<std::string>&);
 gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
@@ -717,6 +740,7 @@ gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_mesh,
 	interpreter_logic_spawn_instanced,
 	interpreter_logic_light,
+	interpreter_logic_shadow,
 	interpreter_logic_syntax_error
 };
 
@@ -772,7 +796,7 @@ void bgr_load_batch(RenderBatch* batch)
 	}
 	COMM_CNF();
 
-	RendererUtils::register_batch_pointer(batch);
+	g_Renderer.gpu_update_pointers.push_back(batch);
 }
 
 RenderBatch* Renderer::load(const std::string& path)
@@ -903,7 +927,6 @@ void mesh_upload(RenderBatch* batch)
 void mesh_update(RenderBatch* batch)
 {
 	// upload camera transform & iterate meshes
-	batch->mesh_pipeline.upload_camera(g_Camera3D);
 	for (uint16_t i=0;i<batch->meshes.size();i++)
 	{
 		Mesh& p_Mesh = batch->meshes[i];
@@ -937,31 +960,62 @@ mesh_update_routine update_meshes[2] = { mesh_upload,mesh_update };
 void Renderer::update()
 {
 	// rendering 3D geometry
-	// deferred 3D setup
+	// 3D setup
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	m_GBuffer.bind();
 
-	// draw 3D geometry
+	// render geometry for shadow projection
+	glCullFace(GL_FRONT);
+	glViewport(0,0,RENDERER_SHADOW_RESOLUTION,RENDERER_SHADOW_RESOLUTION);
+	m_ShadowFrameBuffer.bind();
+	//glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
+	Frame::clear();
+	for (RenderBatch* batch : gpu_update_pointers)
+	{
+		if (!batch->mesh_ready) continue;
+		batch->mesh_buffer.bind();
+		batch->mesh_pipeline.enable();
+		batch->mesh_pipeline.upload_camera(m_Shadow.shadow_view);
+		update_meshes[1](batch);
+	}
+	FrameBuffer::unbind();
+	glViewport(0,0,g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
+	glCullFace(GL_BACK);
+	// FIXME: basic render call is way too heavy for a shadow projection!!
+
+	// render geometry for deferred shading
+	m_GBuffer.bind();
 	Frame::clear();
 	for (RenderBatch* batch : gpu_update_pointers)
 	{
 		batch->mesh_buffer.bind();
 		batch->mesh_pipeline.enable();
+		batch->mesh_pipeline.upload_camera(g_Camera3D);
 		update_meshes[batch->mesh_ready](batch);
 	}
+	FrameBuffer::unbind();
 
 	// post processing
 	// 2D setup
-	FrameBuffer::unbind();
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
 	// deferred shading
 	m_CanvasBuffer.bind();
 	m_DeferredPipeline.enable();
-	m_GBuffer.upload_components();
+	m_GBuffer.upload_colour_component(0);
+	glActiveTexture(GL_TEXTURE1);
+	m_GBuffer.upload_colour_component(1);
+	glActiveTexture(GL_TEXTURE2);
+	m_GBuffer.upload_colour_component(2);
+	glActiveTexture(GL_TEXTURE3);
+	m_GBuffer.upload_colour_component(3);
+	glActiveTexture(GL_TEXTURE4);
+	m_ShadowFrameBuffer.upload_depth_component();
+	glActiveTexture(GL_TEXTURE0);
 	m_DeferredPipeline.upload_vec3("view_pos",g_Camera3D.position);
+	m_DeferredPipeline.upload_vec3("light_position",m_Shadow.source_position);
+	m_DeferredPipeline.upload_matrix("shadow_matrix",m_Shadow.shadow_matrix);
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render 2D geometry
@@ -990,6 +1044,17 @@ void Renderer::update_lighting()
 	m_DeferredPipeline.upload_int("sunlight_count",t_DirOffset);
 	m_DeferredPipeline.upload_int("pointlight_count",t_PointOffset);
 	m_DeferredPipeline.upload_int("spotlight_count",t_SpotOffset);
+}
+
+/*
+	TODO
+*/
+void Renderer::set_shadow(glm::vec3 source)
+{
+	m_Shadow.shadow_view = Camera3D(source,glm::vec3(.0f),RENDERER_SHADOW_RANGE,RENDERER_SHADOW_RANGE);
+	m_Shadow.shadow_matrix = m_Shadow.shadow_view.combine_matrices();
+	m_Shadow.source_position = source;
+	// TODO: specify centerpoint and add vector to source and target respectively
 }
 
 /*

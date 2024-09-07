@@ -10,6 +10,10 @@
 #include "texture.h"
 
 
+constexpr uint16_t RENDERER_SHADOW_RESOLUTION = 4096;
+constexpr uint16_t RENDERER_SHADOW_RANGE = 25;
+
+
 // upload structures
 // per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
@@ -133,6 +137,13 @@ struct Lighting
 	uint8_t offset_directional,offset_point,offset_spot;
 };
 
+struct Shadow
+{
+	Camera3D shadow_view;
+	glm::mat4 shadow_matrix;
+	glm::vec3 source_position;
+};
+
 
 // batches
 // batch data to seperately load and display to other buffers
@@ -205,7 +216,10 @@ public:
 
 	RenderBatch* load(const std::string& path);
 	void update();
+
+	// lighting
 	void update_lighting();
+	void set_shadow(glm::vec3 source);
 
 private:
 
@@ -230,14 +244,14 @@ private:
 	ShaderPipeline m_DuplicatePipeline;
 	ShaderPipeline m_DeferredPipeline;
 
-	// rendertarget
+	// render targets
 	FrameBuffer m_GBuffer = FrameBuffer(4);
+	FrameBuffer m_ShadowFrameBuffer = FrameBuffer();
+
+	// data
+	Shadow m_Shadow;
 };
 
 inline Renderer g_Renderer = Renderer();
-namespace RendererUtils
-{
-	inline void register_batch_pointer(RenderBatch* batch) { g_Renderer.gpu_update_pointers.push_back(batch); }
-};
 
 #endif

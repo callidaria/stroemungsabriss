@@ -28,11 +28,16 @@ class Camera3D
 public:
 
 	// construction
-	Camera3D(glm::vec3 pos,glm::vec3 tgt,float ratio,float fov);
+	Camera3D() {  }
+	Camera3D(glm::vec3 pos,glm::vec3 tgt,float width,float height);
+	Camera3D(glm::vec3 pos,glm::vec3 tgt,float width,float height,float fov);
 
 	// utility
 	void rotate_around_target(float deg);
 	void update();
+
+	// export
+	inline glm::mat4 combine_matrices() { return proj3D*view3D; }
 
 public:
 
@@ -44,7 +49,7 @@ private:
 };
 inline Camera3D g_Camera3D = Camera3D(
 		glm::vec3(0,-4,2),glm::vec3(.0f),
-		(float)g_Config.vFrameResolutionWidth/(float)g_Config.vFrameResolutionHeight,90.f
+		g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight,90.f
 	);
 // TODO: remake these as structs with basic utility
 
