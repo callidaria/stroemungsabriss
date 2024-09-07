@@ -29,6 +29,7 @@ struct light_spot
 	vec3 position;
 	vec3 colour;
 	vec3 direction;
+	float intensity;
 	float cut_in;
 	float cut_out;
 };
@@ -198,7 +199,7 @@ vec3 lumen_point(vec3 colour,vec3 position,vec3 normals,float metallic,float rou
 	// calculate pointlight influence
 	float distance = length(pl.position-position);
 	float attenuation = 1/(pl.constant+pl.linear*distance+pl.quadratic*(distance*distance));
-	vec3 influence = pl.colour*attenuation;
+	vec3 influence = pl.colour*attenuation*pl.intensity;
 
 	// return pointlight colours
 	return pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);
@@ -216,7 +217,7 @@ vec3 lumen_spot(vec3 colour,vec3 position,vec3 normals,float metallic,float roug
 	float theta = dot(light_dir,normalize(sl.direction));
 	float epsilon = sl.cut_in-sl.cut_out;
 	float intensity = clamp((theta-sl.cut_out)/epsilon,.0,1.0);
-	vec3 influence = sl.colour*intensity;
+	vec3 influence = sl.colour*intensity*sl.intensity;
 
 	// return spotlight colours
 	return pbs(colour,light_dir,influence,normals,halfway,metallic,roughness);

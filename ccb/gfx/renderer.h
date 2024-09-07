@@ -117,6 +117,7 @@ struct LightSpot
 	glm::vec3 position;
 	glm::vec3 colour;
 	glm::vec3 direction;
+	float intensity;
 	float cut_inner,cut_outer;
 };
 
@@ -129,6 +130,7 @@ struct Lighting
 	std::vector<LightDirectional> directional_lights;
 	std::vector<LightPoint> point_lights;
 	std::vector<LightSpot> spot_lights;
+	uint8_t offset_directional,offset_point,offset_spot;
 };
 
 

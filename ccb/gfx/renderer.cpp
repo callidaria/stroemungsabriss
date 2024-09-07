@@ -11,6 +11,7 @@
 void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& point_offset,uint8_t& spot_offset)
 {
 	// upload the many suns
+	offset_directional = dir_offset;
 	for (LightDirectional& light : directional_lights)
 	{
 		std::string t_ArrayLocation = "sunlight["+std::to_string(dir_offset)+"].";
@@ -21,6 +22,7 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 	}
 
 	// upload pointlights
+	offset_point = point_offset;
 	for (LightPoint& light : point_lights)
 	{
 		std::string t_ArrayLocation = "pointlight["+std::to_string(point_offset)+"].";
@@ -34,12 +36,14 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 	}
 
 	// upload spotlights
+	offset_spot = spot_offset;
 	for (LightSpot& light : spot_lights)
 	{
 		std::string t_ArrayLocation = "spotlight["+std::to_string(spot_offset)+"].";
 		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
 		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
 		pipeline.upload_vec3((t_ArrayLocation+"direction").c_str(),light.direction);
+		pipeline.upload_float((t_ArrayLocation+"intensity").c_str(),light.intensity);
 		pipeline.upload_float((t_ArrayLocation+"cut_in").c_str(),light.cut_inner);
 		pipeline.upload_float((t_ArrayLocation+"cut_out").c_str(),light.cut_outer);
 		spot_offset++;
@@ -625,12 +629,75 @@ void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std:
 		// TODO
 	}
 
-	else
-	{
-		COMM_ERR("cannot spawn instance of %s",args[Args::Type].c_str());
-	}
+	COMM_ERR_FALLBACK("cannot spawn instance of %s",args[Args::Type].c_str());
 }
-// TODO use argument enumeration
+
+void interpreter_logic_light(RenderBatch* batch,const std::vector<std::string>& args)
+{
+	enum Args : uint8_t
+	{
+		Command,Type,PosX,PosY,PosZ,Intensity,ColR,ColG,ColB,
+		Coeff0,Coeff1,Coeff2,  // alternate: represent direction for spotlight
+		Inner,Outer
+	};
+
+	COMM_LOG_COND(
+			args.size()>Args::PosZ,
+			"emitting %slight from position -> (%s,%s,%s)",
+			args[Args::Type].c_str(),args[Args::PosX].c_str(),args[Args::PosY].c_str(),args[Args::PosZ].c_str()
+		)
+		COMM_ERR_FALLBACK("emitting lights: no enough arguments provided");
+
+	// extracting basic parameters
+	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float t_Intensity = stof(args[Args::Intensity]);
+	glm::vec3 t_Colour = glm::vec3(1.f);
+	if (args.size()>Args::ColB)
+		glm::vec3 t_Colour = glm::vec3(stof(args[Args::ColR]),stof(args[Args::ColG]),stof(args[Args::ColB]));
+
+	// process sunlight emission request
+	if (args[Args::Type]=="sun")
+	{
+		LightDirectional t_Result = {
+			.position = t_Position,
+			.colour = t_Colour,
+			.intensity = t_Intensity
+		};
+		batch->lighting.directional_lights.push_back(t_Result);
+		return;
+	}
+
+	// process pointlight emission request
+	if (args[Args::Type]=="point")
+	{
+		LightPoint t_Result = {
+			.position = t_Position,
+			.colour = t_Colour,
+			.intensity = t_Intensity,
+			.c0 = stof(args[Args::Coeff0]),
+			.c1 = stof(args[Args::Coeff1]),
+			.c2 = stof(args[Args::Coeff2])
+		};
+		batch->lighting.point_lights.push_back(t_Result);
+		return;
+	}
+
+	if (args[Args::Type]=="spot")
+	{
+		LightSpot t_Result = {
+			.position = t_Position,
+			.colour = t_Colour,
+			.direction = glm::vec3(stof(args[Args::Coeff0]),stof(args[Args::Coeff1]),stof(args[Args::Coeff2])),
+			.intensity = t_Intensity,
+			.cut_inner = stof(args[Args::Inner]),
+			.cut_outer = stof(args[Args::Outer])
+		};
+		batch->lighting.spot_lights.push_back(t_Result);
+		return;
+	}
+
+	COMM_ERR("cannot emit specified source of %slight, type not known",args[Args::Type].c_str());
+}
 
 void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::string>& args)
 {
@@ -638,9 +705,9 @@ void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::st
 			batch->path.c_str(),args[0].c_str());
 }
 
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 5;
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 6;
 const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = {
-	"texture","sprite","duplicate","mesh","spawn"
+	"texture","sprite","duplicate","mesh","spawn","light"
 };
 typedef void (*gfx_interpreter_logic)(RenderBatch*,const std::vector<std::string>&);
 gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
@@ -649,6 +716,7 @@ gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_instanced_sprite,
 	interpreter_logic_mesh,
 	interpreter_logic_spawn_instanced,
+	interpreter_logic_light,
 	interpreter_logic_syntax_error
 };
 
@@ -826,6 +894,7 @@ void mesh_upload(RenderBatch* batch)
 	// ready mesh buffer
 	batch->mesh_buffer.upload_vertices(batch->mesh_vertices);
 	batch->mesh_pipeline.point_buffer3D();
+	g_Renderer.update_lighting();
 
 	batch->mesh_ready = true;
 	COMM_CNF();
@@ -891,13 +960,8 @@ void Renderer::update()
 	// deferred shading
 	m_CanvasBuffer.bind();
 	m_DeferredPipeline.enable();
-
-	// upload information
-	g_Renderer.update_lighting();  // TODO: move away from update
 	m_GBuffer.upload_components();
 	m_DeferredPipeline.upload_vec3("view_pos",g_Camera3D.position);
-
-	// process lighting deferred
 	glDrawArrays(GL_TRIANGLES,0,6);
 
 	// render 2D geometry
