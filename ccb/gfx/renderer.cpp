@@ -180,12 +180,29 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 /*
 	TODO
 */
-void RenderBatch::add_animation(std::string dae)
+void RenderBatch::add_animation(std::string dae,std::string tex,
+		std::string norm,std::string mats,std::string emit,glm::vec3 pos,float scl,glm::vec3 rot)
 {
+	// store mesh animation vertex data
 	Mesh t_Animation = {
+		.transform = {
+			.position = pos,
+			.scaling = scl,
+			.rotation = rot
+		},
 		.path = dae
 	};
+	t_Animation.transform.to_origin();
 	animations.push_back(t_Animation);
+
+	// store texture information
+	MeshTextureTuple t_Texture = {
+		.colours = Texture(tex,true),
+		.normals = Texture(norm),
+		.materials = Texture(mats),
+		.emission = Texture(emit),
+	};
+	animation_textures.push_back(t_Texture);
 }
 
 /*
@@ -672,11 +689,32 @@ void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& a
 
 void interpreter_logic_animation(RenderBatch* batch,const std::vector<std::string>& args)
 {
-	enum Args : uint8_t { Command,DaePath };
+	enum Args : uint8_t { Command,DaePath,TexPath,NormPath,MatPath,EmitPath,PosX,PosY,PosZ,Scl,RotX,RotY,RotZ };
 
-	// TODO
+	COMM_LOG_COND(
+			args.size()>Args::PosZ,
+			"register mesh animation %s, textured with %s: pos -> (%s,%s,%s)",
+			args[Args::DaePath].c_str(),args[Args::TexPath].c_str(),
+			args[Args::PosX].c_str(),args[Args::PosY].c_str(),args[Args::PosZ].c_str()
+		)
+		COMM_ERR_FALLBACK("mesh animation registration: not enough arguments provided");
 
-	batch->add_animation(args[Args::DaePath]);
+	// arguments to variables
+	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float t_Scale = 1;
+	glm::vec3 t_Rotation = glm::vec3(0);
+
+	// check if scale and rotation is specified before adding mesh
+	if (args.size()>Args::RotZ)
+	{
+		t_Scale = stof(args[Args::Scl]);
+		t_Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
+	}
+	batch->add_animation(
+			args[Args::DaePath],args[Args::TexPath],
+			args[Args::NormPath],args[Args::MatPath],args[Args::EmitPath],
+			t_Position,t_Scale,t_Rotation
+		);
 }
 
 void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std::string>& args)
@@ -876,6 +914,16 @@ void bgr_load_batch(RenderBatch* batch)
 	}
 	COMM_CNF();
 
+	COMM_AWT("animations: streaming %li textures",batch->animation_textures.size()*4);
+	for (MeshTextureTuple& t_Texture : batch->animation_textures)
+	{
+		t_Texture.colours.load();
+		t_Texture.normals.load();
+		t_Texture.materials.load();
+		t_Texture.emission.load();
+	}
+	COMM_CNF();
+
 	g_Renderer.gpu_update_pointers.push_back(batch);
 }
 
@@ -1014,8 +1062,6 @@ void mesh_update(RenderBatch* batch)
 
 		// upload attributes
 		batch->mesh_pipeline.upload_matrix("model",p_Mesh.transform.model);
-
-		// upload textures
 		p_Texture.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
 		p_Texture.normals.bind();
@@ -1025,7 +1071,7 @@ void mesh_update(RenderBatch* batch)
 		p_Texture.emission.bind();
 		glActiveTexture(GL_TEXTURE0);
 
-		// draw meshes
+		// draw mesh
 		glDrawArrays(GL_TRIANGLES,p_Mesh.vertex_offset,p_Mesh.vertex_range);
 	}
 }
@@ -1038,6 +1084,39 @@ mesh_update_routine update_meshes[2] = { mesh_upload,mesh_update };
 */
 void animation_upload(RenderBatch* batch)
 {
+
+	COMM_AWT("attempting to upload %li animation textures to gpu",batch->animation_textures.size()*4);
+
+	// upload textures
+	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	while (batch->animation_upload_head<batch->animation_textures.size())
+	{
+		while (batch->animation_upload_subhead<4)
+		{
+			// check timing and stall texture upload until next frame when necessary for framerate reasons
+			if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+			{
+				COMM_CNF();
+				return;
+			}
+
+			// move to address of texture to upload
+			Texture* p_Texture = &batch->animation_textures[batch->animation_upload_head].colours;
+			p_Texture = p_Texture+batch->animation_upload_subhead;
+
+			// upload texture and move on
+			p_Texture->upload();
+			Texture::set_texture_parameter_clamp_to_edge();
+			Texture::set_texture_parameter_linear_mipmap();
+			batch->animation_upload_subhead++;
+		}
+
+		// reset texture index within tuple and increment tuple index
+		batch->animation_upload_subhead = 0;
+		batch->animation_upload_head++;
+	}
+
+	// setup vertices
 	batch->animation_buffer.upload_vertices(batch->animation_vertices);
 	batch->animation_buffer.upload_elements(batch->animation_elements);
 	batch->animation_pipeline.def_attributeF("position",3,0,ANIMATION_UPLOAD_REPEAT);
@@ -1048,6 +1127,8 @@ void animation_upload(RenderBatch* batch)
 	batch->animation_pipeline.def_attributeF("boneWeight",4,15,ANIMATION_UPLOAD_REPEAT);
 	// TODO: find a way to handle these offset parameters. this is very unsafe (handle by shader/offsetof)
 	batch->anim_ready = true;
+
+	COMM_CNF();
 }
 
 void animation_update(RenderBatch* batch)
@@ -1055,7 +1136,20 @@ void animation_update(RenderBatch* batch)
 	for (uint16_t i=0;i<batch->animations.size();i++)
 	{
 		Mesh& p_Animation = batch->animations[i];
-		//batch->animation_pipeline.upload_matrix("model",p_Animation.transform.model);
+		MeshTextureTuple& p_Texture = batch->animation_textures[i];
+
+		// upload attributes
+		batch->animation_pipeline.upload_matrix("model",p_Animation.transform.model);
+		p_Texture.colours.bind();
+		glActiveTexture(GL_TEXTURE1);
+		p_Texture.normals.bind();
+		glActiveTexture(GL_TEXTURE2);
+		p_Texture.materials.bind();
+		glActiveTexture(GL_TEXTURE3);
+		p_Texture.emission.bind();
+		glActiveTexture(GL_TEXTURE0);
+
+		// draw animation
 		glDrawElements(GL_TRIANGLES,p_Animation.vertex_range,GL_UNSIGNED_INT,
 				(void*)(p_Animation.vertex_offset*sizeof(uint32_t)));
 	}

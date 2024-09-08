@@ -167,7 +167,8 @@ struct RenderBatch
 	// mesh creation
 	void add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,
 			glm::vec3 pos,float scl=1.f,glm::vec3 rot=glm::vec3(0));
-	void add_animation(std::string dae);
+	void add_animation(std::string dae,std::string tex,std::string norm,std::string mats,std::string emit,
+			glm::vec3 pos,float scl=1.f,glm::vec3 rot=glm::vec3(0));
 
 	// spawners
 	void spawn_sprite_instance(uint16_t inst_id,
@@ -213,6 +214,7 @@ struct RenderBatch
 	// load progression
 	uint16_t sprite_upload_head = 0;
 	uint16_t mesh_upload_head = 0,mesh_upload_subhead = 0;
+	uint16_t animation_upload_head = 0,animation_upload_subhead = 0;
 
 	// load flags
 	bool selected = false;

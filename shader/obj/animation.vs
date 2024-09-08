@@ -28,6 +28,8 @@ void main()
 	/*
 	mat4 index_transform = mat4(.0);
 	for (int i=0;i<4;i++) index_transform += joint_transform[int(boneIndex[i])]*boneWeight[i];
+	*/
+	mat4 index_transform = mat4(1.);
 	Position = model*index_transform*vec4(position,1.0);
 
 	// TBN-matrix with gram-schmidt reorthogonalization
@@ -35,9 +37,7 @@ void main()
 	vec3 Normals = normalize((model*index_transform*vec4(normals,.0)).xyz);
 	T = normalize(T-dot(T,Normals)*Normals);
 	TBN = mat3(T,cross(Normals,T),Normals);
-	*/
 
 	// return position
-	Position = model*vec4(position,1.0);
 	gl_Position = proj*view*Position;
 }
