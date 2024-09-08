@@ -15,7 +15,6 @@ constexpr uint16_t RENDERER_SHADOW_RANGE = 25;
 
 
 // upload structures
-// per instance upload datastructure for duplicate shader
 struct SpriteInstanceUpload
 {
 	glm::vec2 offset = glm::vec2(0);
@@ -25,7 +24,6 @@ struct SpriteInstanceUpload
 };
 constexpr uint8_t SPRITE_INSTANCE_UPLOAD_REPEAT = sizeof(SpriteInstanceUpload)/sizeof(float);
 
-// mesh upload struction
 struct MeshUpload
 {
 	glm::vec3 position;
@@ -33,6 +31,17 @@ struct MeshUpload
 	glm::vec3 normal;
 	glm::vec3 tangent;
 };
+
+struct AnimationUpload
+{
+	glm::vec3 position;
+	glm::vec2 uv_coord;
+	glm::vec3 normal;
+	glm::vec3 tangent;
+	glm::vec4 bone_index;
+	glm::vec4 bone_weight;
+};
+constexpr uint8_t ANIMATION_UPLOAD_REPEAT = sizeof(AnimationUpload)/sizeof(float);
 
 
 // sprite data
@@ -82,7 +91,6 @@ struct SpriteAnimationInstance
 
 
 // mesh data
-// mesh texture cluster
 struct MeshTextureTuple
 {
 	Texture colours;
@@ -91,7 +99,6 @@ struct MeshTextureTuple
 	Texture emission;
 };
 
-// mesh geometry
 struct Mesh
 {
 	Transform3D transform;
@@ -160,6 +167,7 @@ struct RenderBatch
 	// mesh creation
 	void add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,
 			glm::vec3 pos,float scl=1.f,glm::vec3 rot=glm::vec3(0));
+	void add_animation(std::string dae);
 
 	// spawners
 	void spawn_sprite_instance(uint16_t inst_id,
@@ -167,6 +175,7 @@ struct RenderBatch
 
 	// loader
 	void load_mesh(Mesh& mesh);
+	void load_animation(Mesh& animation);
 
 	// update
 	void update_sprites();
@@ -189,6 +198,15 @@ struct RenderBatch
 	std::vector<Mesh> meshes;
 	std::vector<MeshUpload> mesh_vertices;
 
+	// animations
+	Buffer animation_buffer;
+	ShaderPipeline animation_pipeline;
+	std::vector<MeshTextureTuple> animation_textures;
+	std::vector<Mesh> animations;
+	std::vector<AnimationUpload> animation_vertices;
+	std::vector<uint32_t> animation_elements;
+	// TODO: just like sprite textures, make mesh textures reusable
+
 	// lighting
 	Lighting lighting;
 
@@ -200,6 +218,7 @@ struct RenderBatch
 	bool selected = false;
 	bool sprite_ready = false;
 	bool mesh_ready = false;
+	bool anim_ready = false;
 
 	// attributes
 	std::string path;

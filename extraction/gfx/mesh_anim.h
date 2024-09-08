@@ -90,7 +90,7 @@ public:
 	void interpolate(double dt);
 
 	// system
-	friend std::ostream &operator<<(std::ostream& os,const MeshAnimation& obj);
+	friend std::ostream& operator<<(std::ostream& os,const MeshAnimation& obj);
 
 private:
 
@@ -98,7 +98,7 @@ private:
 	void rc_assemble_joint_hierarchy(aiNode* joint,uint16_t& joint_count);
 
 	// standard recursion
-	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t &id);
+	void rc_transform_interpolation(ColladaJoint* cjoint,glm::mat4 gtrans,uint16_t& id);
 
 	// conversion
 	uint16_t get_joint_id(std::string jname);

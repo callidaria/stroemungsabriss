@@ -180,6 +180,17 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 /*
 	TODO
 */
+void RenderBatch::add_animation(std::string dae)
+{
+	Mesh t_Animation = {
+		.path = dae
+	};
+	animations.push_back(t_Animation);
+}
+
+/*
+	TODO
+*/
 void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2 scl,float rot,glm::vec2 subtex)
 {
 	SpriteInstance& p_Instance = duplicates[inst_id];
@@ -304,6 +315,53 @@ void RenderBatch::load_mesh(Mesh& mesh)
 /*
 	TODO
 */
+void RenderBatch::load_animation(Mesh& animation)
+{
+	// load collada file
+	Assimp::Importer t_Importer;
+	const aiScene* t_DAEFile = t_Importer.ReadFile(animation.path.c_str(),
+			aiProcess_CalcTangentSpace|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
+	aiMesh* t_Mesh = t_DAEFile->mMeshes[0];
+	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
+
+	// extract animation nodes
+	// TODO
+
+	// TODO: a lot more
+
+	// assemble vertex array
+	animation.vertex_offset = animation_vertices.size();
+	animation_vertices.reserve(animation.vertex_offset+t_Mesh->mNumVertices);
+	for (uint32_t i=0;i<t_Mesh->mNumVertices;i++)
+	{
+		AnimationUpload t_Vertex = {
+			.position = Toolbox::assimp_to_vec3(t_Mesh->mVertices[i]),
+			.uv_coord = Toolbox::assimp_to_vec2(t_Mesh->mTextureCoords[0][i]),
+			.normal = Toolbox::assimp_to_vec3(t_Mesh->mNormals[i]),
+			.tangent = Toolbox::assimp_to_vec3(t_Mesh->mTangents[i])
+		};
+		animation_vertices.push_back(t_Vertex);
+	}
+
+	// allocate memory for element array
+	animation.vertex_range = 0;
+	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++) animation.vertex_range += t_Mesh->mFaces[i].mNumIndices;
+	animation_elements.reserve(animation_elements.size()+animation.vertex_range);
+
+	// assemble element array
+	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++)
+	{
+		for (uint32_t j=0;j<t_Mesh->mFaces[i].mNumIndices;j++)
+			animation_elements.push_back(animation.vertex_offset+t_Mesh->mFaces[i].mIndices[j]);
+	}
+
+	// extract animations
+	// TODO
+}
+
+/*
+	TODO
+*/
 void RenderBatch::update_sprites()
 {
 	for (SpriteAnimation& p_Animation : sprite_animations)
@@ -364,6 +422,7 @@ Renderer::Renderer()
 	Shader t_SpriteVertexShader = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
 	Shader t_DuplicateVertexShader = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
 	Shader t_MeshVertexShader = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
+	Shader t_AnimationVertexShader = Shader("./shader/obj/animation.vs",GL_VERTEX_SHADER);
 	Shader t_FramebufferVertexShader = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
 
 	// fragment shaders
@@ -376,12 +435,22 @@ Renderer::Renderer()
 	m_DuplicatePipeline.assemble(t_DuplicateVertexShader,t_DirectFragmentShader);
 	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
 	{
+		// mesh
 		batches[i].mesh_pipeline.assemble(t_MeshVertexShader,t_MeshFragmentShader);
 		batches[i].mesh_pipeline.enable();
 		batches[i].mesh_pipeline.upload_int("colour_map",0);
 		batches[i].mesh_pipeline.upload_int("normal_map",1);
 		batches[i].mesh_pipeline.upload_int("material_map",2);
 		batches[i].mesh_pipeline.upload_int("emission_map",3);
+
+		// animation
+		batches[i].animation_buffer.add_buffer();
+		batches[i].animation_pipeline.assemble(t_AnimationVertexShader,t_MeshFragmentShader);
+		batches[i].animation_pipeline.enable();
+		batches[i].animation_pipeline.upload_int("colour_map",0);
+		batches[i].animation_pipeline.upload_int("normal_map",1);
+		batches[i].animation_pipeline.upload_int("material_map",2);
+		batches[i].animation_pipeline.upload_int("emission_map",3);
 	}
 	m_DeferredPipeline.assemble(t_FramebufferVertexShader,t_DeferredFragmentShader);
 
@@ -601,6 +670,15 @@ void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& a
 		);
 }
 
+void interpreter_logic_animation(RenderBatch* batch,const std::vector<std::string>& args)
+{
+	enum Args : uint8_t { Command,DaePath };
+
+	// TODO
+
+	batch->add_animation(args[Args::DaePath]);
+}
+
 void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std::string>& args)
 {
 	enum Args : uint8_t { Command,Type,InstID,PosX,PosY,SclX,SclY,Rotation,SubtexCol,SubtexRow };
@@ -728,9 +806,9 @@ void interpreter_logic_syntax_error(RenderBatch* batch,const std::vector<std::st
 			batch->path.c_str(),args[0].c_str());
 }
 
-constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 7;
+constexpr uint8_t RENDERER_INTERPRETER_COMMAND_COUNT = 8;
 const std::string gfx_command_correlation[RENDERER_INTERPRETER_COMMAND_COUNT] = {
-	"texture","sprite","duplicate","mesh","spawn","light","shadow"
+	"texture","sprite","duplicate","mesh","animation","spawn","light","shadow"
 };
 typedef void (*gfx_interpreter_logic)(RenderBatch*,const std::vector<std::string>&);
 gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
@@ -738,6 +816,7 @@ gfx_interpreter_logic cmd_handler[RENDERER_INTERPRETER_COMMAND_COUNT+1] = {
 	interpreter_logic_sprite,
 	interpreter_logic_instanced_sprite,
 	interpreter_logic_mesh,
+	interpreter_logic_animation,
 	interpreter_logic_spawn_instanced,
 	interpreter_logic_light,
 	interpreter_logic_shadow,
@@ -778,6 +857,7 @@ void bgr_load_batch(RenderBatch* batch)
 	// load geometry
 	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
 	for (Mesh& m : batch->meshes) batch->load_mesh(m);
+	for (Mesh& a : batch->animations) batch->load_animation(a);
 	COMM_CNF();
 
 	// load sprite textures
@@ -918,8 +998,8 @@ void mesh_upload(RenderBatch* batch)
 	// ready mesh buffer
 	batch->mesh_buffer.upload_vertices(batch->mesh_vertices);
 	batch->mesh_pipeline.point_buffer3D();
-	g_Renderer.update_lighting();
 
+	g_Renderer.update_lighting();
 	batch->mesh_ready = true;
 	COMM_CNF();
 }
@@ -953,6 +1033,36 @@ void mesh_update(RenderBatch* batch)
 typedef void (*mesh_update_routine)(RenderBatch*);
 mesh_update_routine update_meshes[2] = { mesh_upload,mesh_update };
 
+/*
+	TODO
+*/
+void animation_upload(RenderBatch* batch)
+{
+	batch->animation_buffer.upload_vertices(batch->animation_vertices);
+	batch->animation_buffer.upload_elements(batch->animation_elements);
+	batch->animation_pipeline.def_attributeF("position",3,0,ANIMATION_UPLOAD_REPEAT);
+	batch->animation_pipeline.def_attributeF("texCoords",2,3,ANIMATION_UPLOAD_REPEAT);
+	batch->animation_pipeline.def_attributeF("normals",3,5,ANIMATION_UPLOAD_REPEAT);
+	batch->animation_pipeline.def_attributeF("tangent",3,8,ANIMATION_UPLOAD_REPEAT);
+	batch->animation_pipeline.def_attributeF("boneIndex",4,11,ANIMATION_UPLOAD_REPEAT);
+	batch->animation_pipeline.def_attributeF("boneWeight",4,15,ANIMATION_UPLOAD_REPEAT);
+	// TODO: find a way to handle these offset parameters. this is very unsafe (handle by shader/offsetof)
+	batch->anim_ready = true;
+}
+
+void animation_update(RenderBatch* batch)
+{
+	for (uint16_t i=0;i<batch->animations.size();i++)
+	{
+		Mesh& p_Animation = batch->animations[i];
+		//batch->animation_pipeline.upload_matrix("model",p_Animation.transform.model);
+		glDrawElements(GL_TRIANGLES,p_Animation.vertex_range,GL_UNSIGNED_INT,
+				(void*)(p_Animation.vertex_offset*sizeof(uint32_t)));
+	}
+}
+
+typedef void (*anim_update_routine)(RenderBatch*);
+anim_update_routine update_animations[2] = { animation_upload,animation_update };
 
 /*
 	TODO
@@ -961,22 +1071,28 @@ void Renderer::update()
 {
 	// rendering 3D geometry
 	// 3D setup
-	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
 	// render geometry for shadow projection
 	glCullFace(GL_FRONT);
 	glViewport(0,0,RENDERER_SHADOW_RESOLUTION,RENDERER_SHADOW_RESOLUTION);
 	m_ShadowFrameBuffer.bind();
-	//glBindFramebuffer(GL_FRAMEBUFFER,depth_fbo);
 	Frame::clear();
 	for (RenderBatch* batch : gpu_update_pointers)
 	{
-		if (!batch->mesh_ready) continue;
+		if (!batch->mesh_ready||!batch->anim_ready) continue;
+
+		// mesh
 		batch->mesh_buffer.bind();
 		batch->mesh_pipeline.enable();
 		batch->mesh_pipeline.upload_camera(m_Shadow.shadow_view);
 		update_meshes[1](batch);
+
+		// animation
+		batch->animation_buffer.bind();
+		batch->animation_pipeline.enable();
+		batch->animation_pipeline.upload_camera(m_Shadow.shadow_view);
+		update_animations[1](batch);
 	}
 	FrameBuffer::unbind();
 	glViewport(0,0,g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
@@ -988,16 +1104,22 @@ void Renderer::update()
 	Frame::clear();
 	for (RenderBatch* batch : gpu_update_pointers)
 	{
+		// mesh
 		batch->mesh_buffer.bind();
 		batch->mesh_pipeline.enable();
 		batch->mesh_pipeline.upload_camera(g_Camera3D);
 		update_meshes[batch->mesh_ready](batch);
+
+		// animation
+		batch->animation_buffer.bind();
+		batch->animation_pipeline.enable();
+		batch->animation_pipeline.upload_camera(g_Camera3D);
+		update_animations[batch->anim_ready](batch);
 	}
 	FrameBuffer::unbind();
 
 	// post processing
 	// 2D setup
-	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
 	// deferred shading

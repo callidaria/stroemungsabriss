@@ -20,6 +20,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #define STB_IMAGE_IMPLEMENTATION
@@ -149,6 +152,10 @@ public:
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
 	*/
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
+
+	// conversion
+	static inline glm::vec2 assimp_to_vec2(aiVector3D vec) { return glm::vec2(vec.x,vec.y);}
+	static inline glm::vec3 assimp_to_vec3(aiVector3D vec) { return glm::vec3(vec.x,vec.y,vec.z);}
 };
 
 #endif
