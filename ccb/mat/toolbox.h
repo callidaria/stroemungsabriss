@@ -156,6 +156,7 @@ public:
 	// conversion
 	static inline glm::vec2 assimp_to_vec2(aiVector3D vec) { return glm::vec2(vec.x,vec.y);}
 	static inline glm::vec3 assimp_to_vec3(aiVector3D vec) { return glm::vec3(vec.x,vec.y,vec.z);}
+	static inline glm::mat4 assimp_to_mat4(aiMatrix4x4 mat) { return glm::transpose(glm::make_mat4(&mat.a1)); }
 };
 
 #endif

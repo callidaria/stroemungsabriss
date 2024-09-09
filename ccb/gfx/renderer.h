@@ -107,6 +107,15 @@ struct Mesh
 };
 
 
+// animation data
+struct AnimationJoint
+{
+	std::string uniform_location;
+	glm::mat4 transform;
+	std::vector<uint16_t> children;
+};
+
+
 // lighting
 struct LightDirectional
 {
@@ -206,6 +215,7 @@ struct RenderBatch
 	std::vector<Mesh> animations;
 	std::vector<AnimationUpload> animation_vertices;
 	std::vector<uint32_t> animation_elements;
+	std::vector<AnimationJoint> animation_joints;
 	// TODO: just like sprite textures, make mesh textures reusable
 
 	// lighting

@@ -332,6 +332,33 @@ void RenderBatch::load_mesh(Mesh& mesh)
 /*
 	TODO
 */
+uint16_t rc_get_joint_count(aiNode* root)
+{
+	uint16_t t_Result = 1;
+	for (uint16_t i=0;i<root->mNumChildren;i++) t_Result += rc_get_joint_count(root->mChildren[i]);
+	return t_Result;
+}
+
+void rc_assemble_joint_hierarchy(std::vector<AnimationJoint>& joints,aiNode* root)
+{
+	// translate root joint
+	uint16_t t_MemoryID = joints.size();
+	AnimationJoint t_Joint = {
+		.uniform_location = "joint_transform["+std::to_string(t_MemoryID)+"]",
+		.transform = Toolbox::assimp_to_mat4(root->mTransformation),
+		.children = std::vector<uint16_t>(root->mNumChildren)
+	};
+	std::cout << root->mName.C_Str() << '\n';
+	joints.push_back(t_Joint);
+
+	// recursively process children joints
+	for (uint16_t i=0;i<root->mNumChildren;i++)
+	{
+		joints[t_MemoryID].children[i] = joints.size();
+		rc_assemble_joint_hierarchy(joints,root->mChildren[i]);
+	}
+}
+
 void RenderBatch::load_animation(Mesh& animation)
 {
 	// load collada file
@@ -342,7 +369,10 @@ void RenderBatch::load_animation(Mesh& animation)
 	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
 
 	// extract animation nodes
-	// TODO
+	uint16_t t_JointCount = rc_get_joint_count(t_DAEFile->mRootNode);
+	animation_joints.reserve(t_JointCount);
+	rc_assemble_joint_hierarchy(animation_joints,t_DAEFile->mRootNode);
+	std::cout << (unsigned int)t_JointCount << '\n';
 
 	// TODO: a lot more
 
