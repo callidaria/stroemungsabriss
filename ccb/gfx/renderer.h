@@ -12,6 +12,7 @@
 
 constexpr uint16_t RENDERER_SHADOW_RESOLUTION = 4096;
 constexpr uint16_t RENDERER_SHADOW_RANGE = 25;
+constexpr uint8_t ANIMATION_INFLUENCE_STACK_RANGE = 4;
 
 
 // upload structures
@@ -110,7 +111,9 @@ struct Mesh
 // animation data
 struct AnimationJoint
 {
+	std::string id;
 	std::string uniform_location;
+	glm::mat4 offset;
 	glm::mat4 transform;
 	std::vector<uint16_t> children;
 };

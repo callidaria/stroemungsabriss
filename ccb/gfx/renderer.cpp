@@ -344,11 +344,11 @@ void rc_assemble_joint_hierarchy(std::vector<AnimationJoint>& joints,aiNode* roo
 	// translate root joint
 	uint16_t t_MemoryID = joints.size();
 	AnimationJoint t_Joint = {
+		.id = root->mName.C_Str(),
 		.uniform_location = "joint_transform["+std::to_string(t_MemoryID)+"]",
 		.transform = Toolbox::assimp_to_mat4(root->mTransformation),
 		.children = std::vector<uint16_t>(root->mNumChildren)
 	};
-	std::cout << root->mName.C_Str() << '\n';
 	joints.push_back(t_Joint);
 
 	// recursively process children joints
@@ -359,22 +359,77 @@ void rc_assemble_joint_hierarchy(std::vector<AnimationJoint>& joints,aiNode* roo
 	}
 }
 
+uint16_t get_joint_id(std::vector<AnimationJoint>& joints,std::string id)
+{
+	uint16_t i = 0;
+	while (id!=joints[i].id) i++;
+	return i;
+}
+
 void RenderBatch::load_animation(Mesh& animation)
 {
 	// load collada file
 	Assimp::Importer t_Importer;
 	const aiScene* t_DAEFile = t_Importer.ReadFile(animation.path.c_str(),
 			aiProcess_CalcTangentSpace|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
-	aiMesh* t_Mesh = t_DAEFile->mMeshes[0];
-	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
 
-	// extract animation nodes
+	// extract joints
 	uint16_t t_JointCount = rc_get_joint_count(t_DAEFile->mRootNode);
 	animation_joints.reserve(t_JointCount);
 	rc_assemble_joint_hierarchy(animation_joints,t_DAEFile->mRootNode);
-	std::cout << (unsigned int)t_JointCount << '\n';
 
-	// TODO: a lot more
+	// load mesh
+	// extract bone armature offset
+	aiMesh* t_Mesh = t_DAEFile->mMeshes[0];
+	uint16_t t_RootOffset = get_joint_id(animation_joints,t_Mesh->mBones[0]->mName.C_Str());
+	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
+
+	// extract bone influence weights
+	uint8_t t_WriteCount[t_Mesh->mNumVertices] = { 0 };
+	float t_BoneIndices[t_Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
+	float t_Weights[t_Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
+	// TODO: join these into one data structure
+	for (uint16_t i=0;i<t_Mesh->mNumBones;i++)
+	{
+		aiBone* t_Bone = t_Mesh->mBones[i];
+		uint16_t t_JointIndex = t_RootOffset+i;
+		animation_joints[t_JointIndex].offset = Toolbox::assimp_to_mat4(t_Bone->mOffsetMatrix);
+		// FIXME: questionable placement of offset extraction
+
+		// map bone weights onto vertices
+		for (uint32_t j=0;j<t_Bone->mNumWeights;j++)
+		{
+			aiVertexWeight& t_Weight = t_Bone->mWeights[j];
+
+			// store indices & weights until overflow
+			if (t_WriteCount[t_Weight.mVertexId]<ANIMATION_INFLUENCE_STACK_RANGE)
+			{
+				uint8_t k = t_WriteCount[t_Weight.mVertexId]++;
+				t_BoneIndices[t_Weight.mVertexId][k] = t_JointIndex;
+				t_Weights[t_Weight.mVertexId][k] = t_Weight.mWeight;
+			}
+
+			// priority store in case of weight overflow
+			else
+			{
+				// iterate to find least influential weight
+				uint8_t t_ProcIndex = 0;
+				float t_ProcWeight = t_Weights[t_Weight.mVertexId][0];  // TODO: remove
+				for (uint8_t k=1;k<ANIMATION_INFLUENCE_STACK_RANGE;k++)
+				{
+					if (t_ProcWeight>t_Weights[t_Weight.mVertexId][k])
+					{
+						t_ProcIndex = k;
+						t_ProcWeight = t_Weights[t_Weight.mVertexId][k];
+					}
+				}
+
+				// overwrite most insignificant weight if current weight is important enought
+				if (t_Weight.mWeight>t_Weights[t_Weight.mVertexId][t_ProcIndex])
+					t_Weights[t_Weight.mVertexId][t_ProcIndex] = t_Weight.mWeight;
+			}
+		}
+	}
 
 	// assemble vertex array
 	animation.vertex_offset = animation_vertices.size();
@@ -385,7 +440,10 @@ void RenderBatch::load_animation(Mesh& animation)
 			.position = Toolbox::assimp_to_vec3(t_Mesh->mVertices[i]),
 			.uv_coord = Toolbox::assimp_to_vec2(t_Mesh->mTextureCoords[0][i]),
 			.normal = Toolbox::assimp_to_vec3(t_Mesh->mNormals[i]),
-			.tangent = Toolbox::assimp_to_vec3(t_Mesh->mTangents[i])
+			.tangent = Toolbox::assimp_to_vec3(t_Mesh->mTangents[i]),
+			.bone_index = glm::vec4(
+					t_BoneIndices[i][0],t_BoneIndices[i][1],t_BoneIndices[i][2],t_BoneIndices[i][3]),
+			.bone_weight = glm::vec4(t_Weights[i][0],t_Weights[i][1],t_Weights[i][2],t_Weights[i][3])
 		};
 		animation_vertices.push_back(t_Vertex);
 	}
