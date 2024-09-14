@@ -431,6 +431,7 @@ void RenderBatch::load_animation(Mesh& animation)
 		}
 	}
 
+	// compose vertex data
 	// assemble vertex array
 	animation.vertex_offset = animation_vertices.size();
 	animation_vertices.reserve(animation.vertex_offset+t_Mesh->mNumVertices);
@@ -461,7 +462,62 @@ void RenderBatch::load_animation(Mesh& animation)
 	}
 
 	// extract animations
-	// TODO
+	// allocate memory & iterate animations
+	size_t t_AnimationOffset = mesh_animations.size();
+	mesh_animations.reserve(t_AnimationOffset+t_DAEFile->mNumAnimations);
+	for (uint32_t i=0;i<t_DAEFile->mNumAnimations;i++)
+	{
+		aiAnimation* t_Animation = t_DAEFile->mAnimations[i];
+
+		// birth of a new animation
+		MeshAnimation t_MeshAnimation = {
+			.joints = std::vector<MeshJoint>(t_Animation->mNumChannels),
+			.duration = t_Animation->mDuration/t_Animation->mTicksPerSecond
+		};
+		mesh_animations.push_back(t_MeshAnimation);
+
+		// process animation channels
+		for (uint32_t j=0;j<t_Animation->mNumChannels;j++)
+		{
+			aiNodeAnim* t_Node = t_Animation->mChannels[j];
+			MeshJoint& t_Joint = mesh_animations.back().joints[j];
+
+			// process channel keys for related joint
+			t_Joint = {
+				.id = get_joint_id(animation_joints,t_Node->mNodeName.C_Str()),
+				.position_keys = std::vector<VectorKey>(t_Node->mNumPositionKeys),
+				.scale_keys = std::vector<VectorKey>(t_Node->mNumScalingKeys),
+				.rotation_keys = std::vector<QuaternionKey>(t_Node->mNumRotationKeys)
+			};
+
+			// extract position keys
+			for (uint32_t k=0;k<t_Node->mNumPositionKeys;k++)
+			{
+				t_Joint.position_keys[k] = {
+					.position = Toolbox::assimp_to_vec3(t_Node->mPositionKeys[k].mValue),
+					.duration = t_Node->mPositionKeys[k].mTime/t_Animation->mTicksPerSecond
+				};
+			}
+
+			// extract scaling keys
+			for (uint32_t k=0;k<t_Node->mNumScalingKeys;k++)
+			{
+				t_Joint.scale_keys[k] = {
+					.position = Toolbox::assimp_to_vec3(t_Node->mScalingKeys[k].mValue),
+					.duration = t_Node->mScalingKeys[k].mTime/t_Animation->mTicksPerSecond
+				};
+			}
+
+			// extract rotation keys
+			for (uint32_t k=0;k<t_Node->mNumRotationKeys;k++)
+			{
+				t_Joint.rotation_keys[k] = {
+					.rotation = Toolbox::assimp_to_quat(t_Node->mRotationKeys[k].mValue),
+					.duration = t_Node->mRotationKeys[k].mTime/t_Animation->mTicksPerSecond
+				};
+			}
+		}
+	}
 }
 
 /*

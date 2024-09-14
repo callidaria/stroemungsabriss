@@ -107,8 +107,6 @@ struct Mesh
 	std::string path;
 };
 
-
-// animation data
 struct AnimationJoint
 {
 	std::string id;
@@ -116,6 +114,33 @@ struct AnimationJoint
 	glm::mat4 offset;
 	glm::mat4 transform;
 	std::vector<uint16_t> children;
+};
+
+struct VectorKey
+{
+	glm::vec3 position;
+	double duration;
+};
+
+struct QuaternionKey
+{
+	glm::quat rotation;
+	double duration;
+};
+
+struct MeshJoint
+{
+	uint16_t id;
+	std::vector<VectorKey> position_keys;
+	std::vector<VectorKey> scale_keys;
+	std::vector<QuaternionKey> rotation_keys;
+	uint16_t crr_position = 0,crr_scale = 0,crr_rotation = 0;
+};
+
+struct MeshAnimation
+{
+	std::vector<MeshJoint> joints;
+	double duration;
 };
 
 
@@ -219,6 +244,7 @@ struct RenderBatch
 	std::vector<AnimationUpload> animation_vertices;
 	std::vector<uint32_t> animation_elements;
 	std::vector<AnimationJoint> animation_joints;
+	std::vector<MeshAnimation> mesh_animations;
 	// TODO: just like sprite textures, make mesh textures reusable
 
 	// lighting
