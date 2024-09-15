@@ -8,6 +8,48 @@
 /*
 	TODO
 */
+void AnimatedMesh::update_animation()
+{
+	// iterate joints for local animation transformations
+	MeshAnimation& p_Animation = animations[current_animation];
+	for (MeshJoint& p_Joint : p_Animation.joints)
+	{
+		// determine transformation keyframes
+		// TODO
+
+		// interpolation between keyframes
+		// TODO
+		glm::vec3 t_PositionInterpolation = p_Joint.position_keys[p_Joint.crr_position].position;
+		glm::vec3 t_ScalingInterpolation = p_Joint.scale_keys[p_Joint.crr_scale].position;
+		glm::quat t_RotationInterpolation = p_Joint.rotation_keys[p_Joint.crr_rotation].rotation;
+
+		joints[p_Joint.id].transform
+				= glm::translate(glm::mat4(1.f),t_PositionInterpolation)
+				* glm::toMat4(t_RotationInterpolation)
+				* glm::scale(glm::mat4(1.f),t_ScalingInterpolation);
+		// TODO: double check multiplication order
+	}
+
+	// calculate transform after parent influence
+	rc_transform_interpolation(joints[0],glm::mat4(1.f));
+	// FIXME: it's unclear if joints[0] is always root node
+}
+
+void AnimatedMesh::rc_transform_interpolation(AnimationJoint& joint,glm::mat4 const& parent_transform)
+{
+	glm::mat4 t_LocalTransform = parent_transform*joint.transform;
+	joint.recursive_transform = t_LocalTransform*joint.offset;
+	for (uint16_t child : joint.children) rc_transform_interpolation(joints[child],t_LocalTransform);
+}
+
+
+/**
+ *	TODO
+*/
+
+/*
+	TODO
+*/
 void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& point_offset,uint8_t& spot_offset)
 {
 	// upload the many suns
@@ -184,16 +226,18 @@ void RenderBatch::add_animation(std::string dae,std::string tex,
 		std::string norm,std::string mats,std::string emit,glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	// store mesh animation vertex data
-	Mesh t_Animation = {
-		.transform = {
-			.position = pos,
-			.scaling = scl,
-			.rotation = rot
-		},
-		.path = dae
+	AnimatedMesh t_Animation = {
+		.mesh = {
+			.transform = {
+				.position = pos,
+				.scaling = scl,
+				.rotation = rot
+			},
+			.path = dae
+		}
 	};
-	t_Animation.transform.to_origin();
-	animations.push_back(t_Animation);
+	t_Animation.mesh.transform.to_origin();
+	animated_meshes.push_back(t_Animation);
 
 	// store texture information
 	MeshTextureTuple t_Texture = {
@@ -366,22 +410,22 @@ uint16_t get_joint_id(std::vector<AnimationJoint>& joints,std::string id)
 	return i;
 }
 
-void RenderBatch::load_animation(Mesh& animation)
+void RenderBatch::load_animation(AnimatedMesh& mesh)
 {
 	// load collada file
 	Assimp::Importer t_Importer;
-	const aiScene* t_DAEFile = t_Importer.ReadFile(animation.path.c_str(),
+	const aiScene* t_DAEFile = t_Importer.ReadFile(mesh.mesh.path.c_str(),
 			aiProcess_CalcTangentSpace|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
 
 	// extract joints
 	uint16_t t_JointCount = rc_get_joint_count(t_DAEFile->mRootNode);
-	animation_joints.reserve(t_JointCount);
-	rc_assemble_joint_hierarchy(animation_joints,t_DAEFile->mRootNode);
+	mesh.joints.reserve(t_JointCount);
+	rc_assemble_joint_hierarchy(mesh.joints,t_DAEFile->mRootNode);
 
 	// load mesh
 	// extract bone armature offset
 	aiMesh* t_Mesh = t_DAEFile->mMeshes[0];
-	uint16_t t_RootOffset = get_joint_id(animation_joints,t_Mesh->mBones[0]->mName.C_Str());
+	uint16_t t_RootOffset = get_joint_id(mesh.joints,t_Mesh->mBones[0]->mName.C_Str());
 	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
 
 	// extract bone influence weights
@@ -393,7 +437,7 @@ void RenderBatch::load_animation(Mesh& animation)
 	{
 		aiBone* t_Bone = t_Mesh->mBones[i];
 		uint16_t t_JointIndex = t_RootOffset+i;
-		animation_joints[t_JointIndex].offset = Toolbox::assimp_to_mat4(t_Bone->mOffsetMatrix);
+		mesh.joints[t_JointIndex].offset = Toolbox::assimp_to_mat4(t_Bone->mOffsetMatrix);
 		// FIXME: questionable placement of offset extraction
 
 		// map bone weights onto vertices
@@ -433,8 +477,8 @@ void RenderBatch::load_animation(Mesh& animation)
 
 	// compose vertex data
 	// assemble vertex array
-	animation.vertex_offset = animation_vertices.size();
-	animation_vertices.reserve(animation.vertex_offset+t_Mesh->mNumVertices);
+	mesh.mesh.vertex_offset = animation_vertices.size();
+	animation_vertices.reserve(mesh.mesh.vertex_offset+t_Mesh->mNumVertices);
 	for (uint32_t i=0;i<t_Mesh->mNumVertices;i++)
 	{
 		AnimationUpload t_Vertex = {
@@ -450,21 +494,21 @@ void RenderBatch::load_animation(Mesh& animation)
 	}
 
 	// allocate memory for element array
-	animation.vertex_range = 0;
-	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++) animation.vertex_range += t_Mesh->mFaces[i].mNumIndices;
-	animation_elements.reserve(animation_elements.size()+animation.vertex_range);
+	mesh.mesh.vertex_range = 0;
+	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++) mesh.mesh.vertex_range += t_Mesh->mFaces[i].mNumIndices;
+	animation_elements.reserve(animation_elements.size()+mesh.mesh.vertex_range);
 
 	// assemble element array
 	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++)
 	{
 		for (uint32_t j=0;j<t_Mesh->mFaces[i].mNumIndices;j++)
-			animation_elements.push_back(animation.vertex_offset+t_Mesh->mFaces[i].mIndices[j]);
+			animation_elements.push_back(mesh.mesh.vertex_offset+t_Mesh->mFaces[i].mIndices[j]);
 	}
 
 	// extract animations
 	// allocate memory & iterate animations
-	size_t t_AnimationOffset = mesh_animations.size();
-	mesh_animations.reserve(t_AnimationOffset+t_DAEFile->mNumAnimations);
+	size_t t_AnimationOffset = mesh.animations.size();
+	mesh.animations.reserve(t_AnimationOffset+t_DAEFile->mNumAnimations);
 	for (uint32_t i=0;i<t_DAEFile->mNumAnimations;i++)
 	{
 		aiAnimation* t_Animation = t_DAEFile->mAnimations[i];
@@ -474,17 +518,17 @@ void RenderBatch::load_animation(Mesh& animation)
 			.joints = std::vector<MeshJoint>(t_Animation->mNumChannels),
 			.duration = t_Animation->mDuration/t_Animation->mTicksPerSecond
 		};
-		mesh_animations.push_back(t_MeshAnimation);
+		mesh.animations.push_back(t_MeshAnimation);
 
 		// process animation channels
 		for (uint32_t j=0;j<t_Animation->mNumChannels;j++)
 		{
 			aiNodeAnim* t_Node = t_Animation->mChannels[j];
-			MeshJoint& t_Joint = mesh_animations.back().joints[j];
+			MeshJoint& t_Joint = mesh.animations.back().joints[j];
 
 			// process channel keys for related joint
 			t_Joint = {
-				.id = get_joint_id(animation_joints,t_Node->mNodeName.C_Str()),
+				.id = get_joint_id(mesh.joints,t_Node->mNodeName.C_Str()),
 				.position_keys = std::vector<VectorKey>(t_Node->mNumPositionKeys),
 				.scale_keys = std::vector<VectorKey>(t_Node->mNumScalingKeys),
 				.rotation_keys = std::vector<QuaternionKey>(t_Node->mNumRotationKeys)
@@ -1039,7 +1083,7 @@ void bgr_load_batch(RenderBatch* batch)
 	// load geometry
 	COMM_AWT("loading geometry of %li meshes",batch->meshes.size());
 	for (Mesh& m : batch->meshes) batch->load_mesh(m);
-	for (Mesh& a : batch->animations) batch->load_animation(a);
+	for (AnimatedMesh& a : batch->animated_meshes) batch->load_animation(a);
 	COMM_CNF();
 
 	// load sprite textures
@@ -1277,13 +1321,18 @@ void animation_upload(RenderBatch* batch)
 
 void animation_update(RenderBatch* batch)
 {
-	for (uint16_t i=0;i<batch->animations.size();i++)
+	for (uint16_t i=0;i<batch->animated_meshes.size();i++)
 	{
-		Mesh& p_Animation = batch->animations[i];
+		AnimatedMesh& p_Animation = batch->animated_meshes[i];
 		MeshTextureTuple& p_Texture = batch->animation_textures[i];
 
+		// update
+		p_Animation.update_animation();
+		for (AnimationJoint& joint : p_Animation.joints)
+			batch->animation_pipeline.upload_matrix(joint.uniform_location.c_str(),joint.recursive_transform);
+
 		// upload attributes
-		batch->animation_pipeline.upload_matrix("model",p_Animation.transform.model);
+		batch->animation_pipeline.upload_matrix("model",p_Animation.mesh.transform.model);
 		p_Texture.colours.bind();
 		glActiveTexture(GL_TEXTURE1);
 		p_Texture.normals.bind();
@@ -1294,8 +1343,8 @@ void animation_update(RenderBatch* batch)
 		glActiveTexture(GL_TEXTURE0);
 
 		// draw animation
-		glDrawElements(GL_TRIANGLES,p_Animation.vertex_range,GL_UNSIGNED_INT,
-				(void*)(p_Animation.vertex_offset*sizeof(uint32_t)));
+		glDrawElements(GL_TRIANGLES,p_Animation.mesh.vertex_range,GL_UNSIGNED_INT,
+				(void*)(p_Animation.mesh.vertex_offset*sizeof(uint32_t)));
 	}
 }
 

@@ -112,7 +112,8 @@ struct AnimationJoint
 	std::string id;
 	std::string uniform_location;
 	glm::mat4 offset;
-	glm::mat4 transform;
+	glm::mat4 transform = glm::mat4(1.f);
+	glm::mat4 recursive_transform = glm::mat4(1.f);
 	std::vector<uint16_t> children;
 };
 
@@ -141,6 +142,19 @@ struct MeshAnimation
 {
 	std::vector<MeshJoint> joints;
 	double duration;
+};
+
+struct AnimatedMesh
+{
+	// utility
+	void update_animation();
+	void rc_transform_interpolation(AnimationJoint& joint,glm::mat4 const& parent_transform);
+
+	// data
+	uint16_t current_animation = 0;
+	Mesh mesh;
+	std::vector<AnimationJoint> joints;
+	std::vector<MeshAnimation> animations;
 };
 
 
@@ -213,11 +227,12 @@ struct RenderBatch
 
 	// loader
 	void load_mesh(Mesh& mesh);
-	void load_animation(Mesh& animation);
+	void load_animation(AnimatedMesh& animation);
 
 	// update
 	void update_sprites();
 	void update_duplicates();
+	void update_animations();
 
 	// data
 	// sprites
@@ -240,11 +255,9 @@ struct RenderBatch
 	Buffer animation_buffer;
 	ShaderPipeline animation_pipeline;
 	std::vector<MeshTextureTuple> animation_textures;
-	std::vector<Mesh> animations;
+	std::vector<AnimatedMesh> animated_meshes;
 	std::vector<AnimationUpload> animation_vertices;
 	std::vector<uint32_t> animation_elements;
-	std::vector<AnimationJoint> animation_joints;
-	std::vector<MeshAnimation> mesh_animations;
 	// TODO: just like sprite textures, make mesh textures reusable
 
 	// lighting
