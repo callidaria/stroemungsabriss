@@ -1,126 +1,99 @@
-#define GLM_ENABLE_EXPERIMENTAL 1
-#include <iostream>
-#include <glm/gtx/rotate_vector.hpp>
-
 #ifdef __WIN32__
 #include <windows.h>
 #endif
 
 #include "ccb/frm/frame.h"
+#include "ccb/fcn/input.h"
+#include "ccb/gfx/renderer.h"
 
-#include "ccb/gfx/renderer2d.h"
-#include "ccb/gfx/renderer3d.h"
-#include "ccb/gfx/rendereri.h"
-#include "ccb/gfx/particle_system.h"
 
-#include "ccb/mat/camera2d.h"
-#include "ccb/mat/camera3d.h"
+struct SceneData
+{
+	// pointers
+	bool* running;
+	RenderBatch* batch0,*batch1;
 
-#include "ccb/ppe/msaa.h"
-#include "ccb/ppe/bloom.h"
+	// load handling
+	bool scene_ready = false;
+	bool second_request = false;
 
-#include "ccb/fcn/text.h"
-#include "ccb/fcn/init.h"
+	// mouse rotation interfacing
+	float dt_mouse_position = .0f;
+	float ape_momentum = .0f;
+};
 
-#include "ccb/aud/audio.h"
-#include "ccb/aud/listener.h"
+void load_scene(SceneData& data)
+{
+	data.batch0 = g_Renderer.load("./lvload/test_scene1.ccb");
+	data.scene_ready = true;
+}
 
-#include "ccb/fcn/ccb_manager.h"
+void maintain_scene(SceneData& data)
+{
+	// check closing request
+	*data.running = !g_Input.kb.ka[SDL_SCANCODE_Q]&&*data.running;
 
-#include "ccb/gfx/mesh_anim.h"
+	// request additional batch load
+	if (g_Input.kb.ka[SDL_SCANCODE_B]&&!data.second_request)
+	{
+		data.batch1 = g_Renderer.load("./lvload/test_scene0.ccb");
+		data.second_request = true;
+	}
 
-#include "script/systems/input_map.h"
-#include "script/systems/worldbuilder.h"
+	// calculate camera to target object rotation
+	int8_t t_KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
+	float t_MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
+	data.ape_momentum += t_KeyDirection+t_MouseDirection*100;
+	g_Camera3D.rotate_around_target(data.ape_momentum);
+	g_Camera3D.update();
+	data.ape_momentum *= .85f;
+	data.dt_mouse_position = g_Input.mouse.mxfr;
+}
 
-#include "script/world.h"
+typedef void (*scene_update)(SceneData&);
+scene_update update_scene[] = { load_scene,maintain_scene };
 
-#define MVMT_SPEED 4
-#define BUILD_DEV_MODE 1
 
 int main(int argc,char** argv)
 {
-	// INIT
-	Init("config.ini");
-	Frame f = Frame(
-			"黄泉先生",
-			Init::iConfig[InitVariable::FRAME_DISPLAY_ID],
-			Init::iConfig[InitVariable::FRAME_RESOLUTION_WIDTH],
-			Init::iConfig[InitVariable::FRAME_RESOLUTION_HEIGHT],
-			(SDL_WindowFlags)Init::iConfig[InitVariable::FRAME_SET_FULLSCREEN]);
-	//Frame::gpu_vsync_on();
-	f.set_refresh_rate(60);
-	InputMap imap = InputMap(&f);
+	// settings
+	Frame::gpu_vsync_on();
+	//g_Frame.set_refresh_rate(60);
 
-	// AUDIO
-	Listener listener = Listener();
-
-	// RENDERERS
-	Renderer2D r2d = Renderer2D();
-	Renderer3D r3d = Renderer3D();
-	RendererI ri = RendererI();
-	ParticleSystem psys = ParticleSystem();
-	BulletSystem bsys = BulletSystem(&f,&ri);
-
-	// LOADERS
-	CCBManager ccbm = CCBManager(&f,&r2d);
-	CascabelBaseFeature eref = { &f,&r2d,&r3d,&ri,&psys,&bsys,&imap };
-
-	// BUILD SET
-	World world = World(&eref);
-
-	// WORLD LOADING
-	Worldbuilder wb = Worldbuilder(&eref,&ccbm,&world);
-	eref.ld.push(LOAD_START);
-
-#if BUILD_DEV_MODE
-	bool dactive = false;
-#endif
+	// store scene data
+	SceneData sdata;
 
 	// MAIN LOOP
-	bool run = true,reboot = false;
-	while (run) {
+	bool run = true, reboot = false;
+	sdata.running = &run;
+	while (run)
+	{
+		// frame
+		//g_Frame.calc_time_delta();
+		//g_Frame.cpu_vsync();
+		//g_Frame.print_fps();
 
-		// process loading requests
-		wb.load();
+		// update
+		g_Input.update(run);
+		update_scene[sdata.scene_ready](sdata);
 
-		// timing & raw input
-		f.calc_time_delta();
-		f.cpu_vsync();
-		f.print_fps();
-		f.input(run);
+		// render
 		Frame::clear();
-
-		// input mapping
-		imap.update();
-		imap.precalculate_all();
-		imap.stick_to_dpad();
-
-		// render scene
-		world.render(run,reboot);
-
-		// debrief
-		imap.update_triggers();
-
-		// developer tools in debug mode
-#if BUILD_DEV_MODE
-		ccbm.dev_console(run,dactive);
-#endif
-
-		// flip
-		f.update();
+		g_Renderer.update();
+		g_Frame.update();
 	}
 
-	// TRIGGER REBOOT
+	// reboot on request
 	if (reboot)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
-		system("./yomisensei &");
+		uint32_t _ = system("./yomisensei &");
 #endif
 
-	// CLOSING
-	world.free_memory();
-	r3d.clear_memory();
-	f.vanish();
+	// close
+	COMM_RST();
+	g_Input.close();
+	g_Frame.vanish();
 	return 0;
 }

@@ -21,9 +21,6 @@ uniform mat4 joint_transform[64];
 
 void main()
 {
-	// pass through
-	TexCoords = texCoords;
-
 	// animation transformation
 	mat4 index_transform = mat4(.0);
 	for (int i=0;i<4;i++) index_transform += joint_transform[int(boneIndex[i])]*boneWeight[i];
@@ -35,6 +32,7 @@ void main()
 	T = normalize(T-dot(T,Normals)*Normals);
 	TBN = mat3(T,cross(Normals,T),Normals);
 
-	// return position
+	// return position & pass through
 	gl_Position = proj*view*Position;
+	TexCoords = texCoords;
 }

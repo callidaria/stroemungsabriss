@@ -1,0 +1,20 @@
+texture ./res/bllt_ffdir.png
+texture ./res/continue_dialogue.png 2 3 5
+
+sprite 0 150 150 100 100
+sprite 1 300 200 75 75 20
+
+duplicate 0 0 0 25 25
+duplicate 1 0 0 17 17 20
+
+spawn sprite 0 1200 700
+spawn sprite 0 370 420
+spawn sprite 0 640 360
+spawn sprite 1 600 50
+spawn sprite 1 620 50
+spawn sprite 1 640 50
+spawn sprite 1 660 50
+
+mesh ./res/casino/tobject.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png -2 4 0
+mesh ./res/casino/box.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 3 1
+mesh ./res/casino/rolling.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 3 -3 0

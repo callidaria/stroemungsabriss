@@ -2,14 +2,28 @@
 #define CCB_MATHEMATICS_TOOLBOX
 
 #include <iostream>
-#include <chrono>
+#include <sstream>
+#include <string>
 #include <vector>
+#include <queue>
+#include <map>
+#include <fstream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #define STB_IMAGE_IMPLEMENTATION
@@ -22,6 +36,11 @@
 #define STB_IMAGE_WRITE_STATIC
 #include "../../include/stb_image_write.h"
 #endif
+
+
+// define build state
+#define DEBUG
+// TODO: move debug flag definition
 
 
 // math constants
@@ -47,83 +66,99 @@ constexpr uint8_t PATTERN_SPRITE_TRIANGLE_REPEAT = 6*PATTERN_SPRITE_LOAD_REPEAT;
 constexpr uint8_t PATTERN_OBJECT_LOAD_REPEAT = 11;
 
 
-// debug timing keys to record individual loadtimes for task sequences
-struct DebugLogKey
-{
-	const char* key_name;
-	double delta_ticks;
-};
+// logger macro definition to include component in debug build
+#ifdef DEBUG
 
-// structure to hold all timing debug data for a single method
-struct DebugLogData
+// text colour definitions
+constexpr const char* LOG_WHITE = "\e[0;30m";
+constexpr const char* LOG_RED = "\e[1;31m";
+constexpr const char* LOG_GREEN = "\e[1;32m";
+constexpr const char* LOG_YELLOW = "\e[1;33m";
+constexpr const char* LOG_BLUE = "\e[1;34m";
+constexpr const char* LOG_PURPLE = "\e[1;35m";
+constexpr const char* LOG_CYAN = "\e[1;36m";
+constexpr const char* LOG_GREY = "\e[1;90m";
+constexpr const char* LOG_CLEAR = "\e[0;39m";
+
+// functionality shortcuts
+constexpr const char* LOG_HEADINGS = LOG_PURPLE;
+constexpr const char* LOG_DESTRUCTION = LOG_CYAN;
+constexpr const char* LOG_SETTINGS = LOG_YELLOW;
+constexpr const char* LOG_TIMING[] = { LOG_GREY,LOG_YELLOW,LOG_RED };
+constexpr const char* LOG_SNITCH = LOG_BLUE;
+
+// logging value constants
+constexpr double LOG_FPS_ALERT = 16.6;
+
+// time performance records
+inline std::chrono::steady_clock::time_point log_tdelta = std::chrono::steady_clock::now();
+static inline void reset_timestamp() { log_tdelta = std::chrono::steady_clock::now(); }
+static inline void produce_timestamp(bool padding=true)
 {
-	const char* task_name;
-	std::vector<DebugLogKey> key_list = {  };
-	std::chrono::steady_clock::time_point last_ticks;
-	uint8_t max_name_width = 0;
-};
+	double ll_delta = (std::chrono::steady_clock::now()-log_tdelta).count()*CONVERSION_MULT_MILLISECONDS;
+	printf((padding) ? "%s%12fms" : "%s%fms",LOG_TIMING[(uint8_t)std::min(ll_delta/LOG_FPS_ALERT,2.0)],ll_delta);
+	reset_timestamp();
+}
+
+// basic console communication
+#define COMM_RST() reset_timestamp()
+#define COMM_AWT(...) COMM_RST(),printf(__VA_ARGS__),printf("... ");
+#define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING[0]),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
+#define COMM_MSG(col,...) produce_timestamp(),printf(" | %s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
+#define COMM_ERR(...) printf("%serror: ",LOG_RED),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
+#define COMM_LOG(...) COMM_MSG(LOG_CLEAR,__VA_ARGS__);
+#define COMM_SCC(...) COMM_MSG(LOG_GREEN,__VA_ARGS__);
+
+// communicate by condition
+#define COMM_MSG_COND(cnd,col,...) if (cnd) { COMM_MSG(col,__VA_ARGS__); }
+#define COMM_ERR_COND(cnd,...) if (cnd) { COMM_ERR(__VA_ARGS__); }
+#define COMM_LOG_COND(cnd,...) if (cnd) { COMM_LOG(__VA_ARGS__); }
+#define COMM_MSG_FALLBACK(col,...) else { COMM_MSG(col,__VA_ARGS__); }
+#define COMM_ERR_FALLBACK(...) else { COMM_ERR(__VA_ARGS__); }
+#define COMM_LOG_FALLBACK(...) else { COMM_LOG(__VA_ARGS__); }
+
+// logger macro definition to exclude component in release build
+#else
+
+#define COMM_RST()
+#define COMM_AWT(...)
+#define COMM_CNF()
+#define COMM_MSG(col,...)
+#define COMM_ERR(...)
+#define COMM_LOG(...)
+#define COMM_SCC(...)
+
+#define COMM_MSG_COND(cnd,col,...)
+#define COMM_ERR_COND(cnd,...)
+#define COMM_LOG_COND(cnd,...)
+#define COMM_MSG_FALLBACK(col,...)
+#define COMM_ERR_FALLBACK(...)
+#define COMM_LOG_FALLBACK(...)
+
+#endif
+
 
 class Toolbox
 {
 public:
 
-	// loader
-	static uint32_t load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
-			float scl,glm::vec3 rot);
+	// system
+	static void copy_file(const char* origin,const char* dest);
+
+	// data helper
+	static std::vector<std::string> split_string(std::string str,char delim);
 
 	// math helper
+	/*
 	static float calculate_vecangle(glm::vec2 a,glm::vec2 b);
-	static void transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot);
-	static void rotate_vector(glm::vec3 &ov,glm::vec3 rot);
+	*/
 	static void transition_float_on_condition(float &tval,float tspeed,bool cnd);
 
-	// timing debug
-	static void start_debug_logging(DebugLogData &dld,const char* tname);
-	static void add_timekey(DebugLogData &dld,const char* kname);
-	static void flush_debug_logging(DebugLogData dld);
-
-	// vertex setup
-	static void create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
-	static void create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height);
-	static void generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e);
-
-	// graphical setup
-	static void load_texture(uint32_t tex,const char* path,bool corrected=false);
-	static void load_texture(uint32_t tex,const char* path,float bias,bool corrected=false);
-	static void load_texture_unfiltered(uint32_t tex,const char* path,bool corrected=false);
-	static void load_texture_repeat(uint32_t tex,const char* path,bool corrected=false);
-
-	// filter settings
-	static void set_texture_parameter_linear_mipmap();
-	static void set_texture_parameter_linear_unfiltered();
-	static void set_texture_parameter_nearest_unfiltered();
-	static void set_cubemap_texture_parameters();
-	static void set_cubemap_texture_parameters_mipmap();
-
-	// pattern handling
-	static void set_texture_parameter_clamp_to_edge();
-	static void set_texture_parameter_clamp_to_border();
-	static void set_texture_parameter_texture_repeat();
-
-	// inline definition
-	static inline std::vector<float> create_sprite_canvas() {
-		return {
-			-1.0f,	1.0f,	0.0f,	1.0f,
-			-1.0f,	-1.0f,	0.0f,	0.0f,
-			1.0f,	-1.0f,	1.0f,	0.0f,
-			-1.0f,	1.0f,	0.0f,	1.0f,
-			1.0f,	-1.0f,	1.0f,	0.0f,
-			1.0f,	1.0f,	1.0f,	1.0f
-		};
-	}
-	// TODO: find out if vectorcopy is optimized away when inline
-
-private:
-
-	// helpers
-	static void load_texture_function_head(uint32_t tex,const char* path,bool corrected);
-	static inline std::string produce_logging_cell(std::string content,std::string col,uint8_t len)
-		{ return "| "+col+content+std::string(len-content.length(),' ')+"\033[0m |"; }
+	// conversion
+	static inline glm::vec2 assimp_to_vec2(aiVector3D vec) { return glm::vec2(vec.x,vec.y); }
+	static inline glm::vec3 assimp_to_vec3(aiVector3D vec) { return glm::vec3(vec.x,vec.y,vec.z); }
+	static inline glm::quat assimp_to_quat(aiQuaternion quat) { return glm::quat(quat.w,quat.x,quat.y,quat.z); }
+	static inline glm::mat4 assimp_to_mat4(aiMatrix4x4 mat) { return glm::transpose(glm::make_mat4(&mat.a1)); }
 };
 
 #endif

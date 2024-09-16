@@ -1,117 +1,42 @@
 #include "toolbox.h"
 
 /*
-	load_object(const char*,vector<float>&,vec3,float scl,vec3) -> void (static) !O(n)
-	purpose: load object from file
-	\param path: path to .obj file
-	\param ov: vertex array to save extracted data from .obj file to
-	\param pos: direct modification of vertex positions
-	\param scl: direct modification of object scaling
-	\param rot: direct modification of vertex rotation around the object's origin point#
-	\returns amount of written vertices (vertices NOT values)
+	!O(n) .filesize /function -> (static)
+	purpose: copy file data to a new location
+	\param origin: path to file to copy from
+	\param dest: destination path of new file
 */
-uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 pos,
-		float scl,glm::vec3 rot)
+void Toolbox::copy_file(const char* origin,const char* dest)
 {
-	// setup vertex information lists
-	std::vector<uint32_t> ovi,oui,oni;
-	std::vector<glm::vec3> verts,norm;
-	std::vector<glm::vec2> uv;
+	// open files
+	std::ifstream read_file(origin,std::ios::in);
+	std::ofstream write_file(dest,std::ios::app);
 
-	// read source file
-	FILE* file = fopen(path,"r");
-	while(true) {
+	// write file content
+	std::string line;
+	while (getline(read_file,line)) write_file << line << '\n';
 
-		// read next line if exists
-		char lh[128];
-		int res = fscanf(file,"%s",lh);
-		if (res==EOF) break;
-		else {
+	// close files
+	read_file.close();
+	write_file.close();
+}
 
-			// check value prefix
-			// position prefix
-			if (strcmp(lh,"v")==0) {
-				glm::vec3 p;
-				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
-				verts.push_back(p);
-			}
+/*
+	TODO
+*/
+std::vector<std::string> Toolbox::split_string(std::string str,char delim)
+{
+	// prepare buffer read
+	std::vector<std::string> out;
+	std::stringstream bfr(str);
+	std::string substr;
 
-			// texture coordinate prefix
-			else if (strcmp(lh,"vt")==0) {
-				glm::vec2 p;
-				fscanf(file,"%f %f\n",&p.x,&p.y);
-				uv.push_back(p);
-			}
-
-			// normals prefix
-			else if (strcmp(lh,"vn")==0) {
-				glm::vec3 p;
-				fscanf(file,"%f %f %f\n",&p.x,&p.y,&p.z);
-				norm.push_back(p);
-			}
-
-			// faces prefix
-			else if(strcmp(lh,"f")==0) {
-
-				// read element node for current triangle
-				unsigned int vi[3],ui[3],ni[3];
-				fscanf(file,"%d/%d/%d %d/%d/%d %d/%d/%d\n",
-						&vi[0],&ui[0],&ni[0],&vi[1],&ui[1],&ni[1],&vi[2],&ui[2],&ni[2]);
-				glm::vec3 pproc = glm::vec3(vi[0],vi[1],vi[2]);
-				glm::vec3 nproc = glm::vec3(ni[0],ni[1],ni[2]);
-
-				// translate triangle
-				transform_vector(pproc,pos,scl,rot);
-				rotate_vector(nproc,rot);
-
-				// save values position vertices
-				ovi.push_back(vi[0]),ovi.push_back(vi[1]),ovi.push_back(vi[2]);
-				oui.push_back(ui[0]),oui.push_back(ui[1]),oui.push_back(ui[2]);
-				oni.push_back(ni[0]),oni.push_back(ni[1]),oni.push_back(ni[2]);
-			}
-		}
-	}
-
-	// translate vertex data to object vertices
-	uint32_t out = 0;
-	glm::vec3 tg(1.0f);
-	for(int i=0;i<ovi.size();i++) {
-
-		// precalculations for normal mapping
-		if (i%3==0&&ovi.size()) {
-			glm::vec3 e1 = verts[ovi[i+1]-1]-verts[ovi[i]-1];
-			glm::vec3 e2 = verts[ovi[i+2]-1]-verts[ovi[i]-1];
-			glm::vec2 duv1 = uv[oui[i+1]-1]-uv[oui[i]-1];
-			glm::vec2 duv2 = uv[oui[i+2]-1]-uv[oui[i]-1];
-
-			// calculate tangent
-			float ff = 1.0f/(duv1.x*duv2.y-duv2.x*duv1.y);
-			tg.x = ff*(duv2.y*e1.x-duv1.y*e2.x);
-			tg.y = ff*(duv2.y*e1.y-duv1.y*e2.y);
-			tg.z = ff*(duv2.y*e1.z-duv1.y*e2.z);
-			tg = glm::normalize(tg);
-			// FIXME: using a matrix calculation might be significantly faster
-		}
-
-		// get read vertices to process and save
-		unsigned int tvi = ovi[i],tui = oui[i],tni = oni[i];
-		glm::vec3 tv = verts[tvi-1],tn = norm[tni-1];
-		glm::vec2 tu = uv[tui-1];
-
-		// translate vertices & normals
-		transform_vector(tv,pos,scl,rot);
-		rotate_vector(tn,rot);
-
-		// save data to buffer vector
-		ov.push_back(tv.x),ov.push_back(tv.y),ov.push_back(tv.z);
-		ov.push_back(tu.x),ov.push_back(tu.y);
-		ov.push_back(tn.x),ov.push_back(tn.y),ov.push_back(tn.z);
-		ov.push_back(tg.x),ov.push_back(tg.y),ov.push_back(tg.z);
-		out++;
-	}
+	// execute buffer read until end, then return substring list
+	while (std::getline(bfr,substr,delim))
+		out.push_back(substr);
 	return out;
 }
-// FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
+// FIXME: contemplate improving performance
 
 /*
 	calculate_vecangle(vec2,vec2) -> float (static)
@@ -119,33 +44,10 @@ uint32_t Toolbox::load_object(const char* path,std::vector<float>& ov,glm::vec3 
 	b: second vector, returned degrees from first vector
 	returns: angle between vectors in radians
 */
+/*
 float Toolbox::calculate_vecangle(glm::vec2 a,glm::vec2 b)
 { return glm::acos(glm::dot(a,b)/(glm::length(a)*glm::length(b))); }
-
-/*
-	transform_vector(vec3&,vec3,float,vec3) -> void (static)
-	pos: additive modification of vector direction & endpoint
-	scl: multiplicative modification of vector length
-	purpose: full vector transformation
 */
-void Toolbox::transform_vector(glm::vec3 &ov,glm::vec3 pos,float scl,glm::vec3 rot)
-{
-	rotate_vector(ov,rot);
-	ov *= scl,ov += pos;
-}
-
-/*
-	rotate_vector(vec3&,vec3) -> void (static)
-	ov: vector to be transformed
-	rot: rotation of vector, without directional reset
-	purpose: 3D vector rotation
-*/
-void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
-{
-	ov = glm::rotate(ov,glm::radians(rot.x),glm::vec3(1,0,0));
-	ov = glm::rotate(ov,glm::radians(rot.y),glm::vec3(0,1,0));
-	ov = glm::rotate(ov,glm::radians(rot.z),glm::vec3(0,0,1));
-}
 
 /*
 	!O(1)b /+function -> (public,static)
@@ -154,7 +56,7 @@ void Toolbox::rotate_vector(glm::vec3 &ov,glm::vec3 rot)
 	\param tspeed: controlled delay interval
 	\param cnd: boolean condition, defining target float value
 */
-void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
+void Toolbox::transition_float_on_condition(float& tval,float tspeed,bool cnd)
 {
 	tval += tspeed*(cnd-!cnd);
 	tval = (tval<.0f) ? .0f : (tval>1.f) ? 1.f : tval;
@@ -166,296 +68,3 @@ void Toolbox::transition_float_on_condition(float &tval,float tspeed,bool cnd)
 // TODO: optimize further (!use assembly translation as guide!)
 // TODO: maybe even set some bounds to enhance the transition range possibilities
 // TODO: i feel like this implementation lacks wit
-
-/*
-	start_debug_logging(DebugLogData&,const char*) -> void
-	purpose: start time difference debug recording
-	\param dld: variable holding runtime debug data, such as recording keys & their string id
-	\param tname: title of debug log, to describe output information to recognize their allegiance
-*/
-void Toolbox::start_debug_logging(DebugLogData &dld,const char* tname)
-{
-	dld.task_name = tname;
-	dld.last_ticks = std::chrono::steady_clock::now();
-	printf("\033[1;35mprocessing -> %s\033[0m",tname);
-}
-
-/*
-	add_timekey(DebugLogData&,const char*) -> void (static) !O(1)
-	purpose: create a timekey, recording the time difference since the last key or the data creation
-	\param dld: variable holding runtime debug data, such as recording keys & their string id
-	\param kname: string id of created key, to describe what was achieved within the recorded time
-*/
-void Toolbox::add_timekey(DebugLogData &dld,const char* kname)
-{
-	// add time log key
-	DebugLogKey nkey = {
-		.key_name = kname,
-		.delta_ticks = (std::chrono::steady_clock::now()-dld.last_ticks).count()*CONVERSION_MULT_MILLISECONDS,
-	};
-	dld.key_list.push_back(nkey);
-
-	// update needed leftmost table cell width
-	uint8_t key_width = strlen(kname);
-	dld.max_name_width = (dld.max_name_width<key_width) ? key_width : dld.max_name_width;
-
-	// signal progression
-	printf("...");
-	
-	// reset counter
-	dld.last_ticks = std::chrono::steady_clock::now();
-}
-
-/*
-	flush_debug_logging(DebugLogData) -> void (static) !O(1)
-	purpose: writes structured runtime debug log data to the console
-	\param dld: variable holding runtime debug data, such as recording keys & their string id
-*/
-void Toolbox::flush_debug_logging(DebugLogData dld)
-{
-	// output task headline
-	std::string head_line = '|'+std::string(dld.max_name_width+23,'-')+'|';
-	printf("\n%s\n",head_line.c_str());
-	printf("%s\n",produce_logging_cell(dld.task_name,"\033[1;34m",dld.max_name_width+21).c_str());
-
-	// output table contents
-	std::string pref_line = '|'+std::string(dld.max_name_width+2,'-')+'|'+std::string(20,'-')+'|';
-	printf("%s\n",pref_line.c_str());
-	double total_time = .0;
-	for(auto key : dld.key_list) {
-		printf("%s%17fms |\n",
-				produce_logging_cell(key.key_name,"\033[1;32m",dld.max_name_width).c_str(),key.delta_ticks);
-		total_time += key.delta_ticks;
-	}
-
-	// output result row and close table
-	printf("%s\n",pref_line.c_str());
-	printf("%s%17fms |\n",produce_logging_cell("total","\033[1;35m",dld.max_name_width).c_str(),total_time);
-	printf("%s\n\n",head_line.c_str());
-}
-
-/*
-	PARAMETER DEFINITIONS:
-	vs: reference to vertex array
-	ofs: memory offset of vertex array write. !already rasterized, not an index. actual float offset!
-	pos: origin position of canvas
-	width: vertex distanced width of canvas
-	height: vertex distanced height of canvas
-*/
-
-/*
-	O(1) /+load -> (static)
-	purpose: create vertices for a sprite, supported by an additional element buffer
-	NOTE: expects memory to be allocated
-*/
-void Toolbox::create_sprite_canvas(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
-{
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
-}
-
-/*
-	O(1) /+load -> (static)
-	purpose: create vertices for a sprite without element buffer, drawn per triangle
-	NOTE: expects memory to be allocated
-*/
-void Toolbox::create_sprite_canvas_triangled(std::vector<float>& vs,size_t& ofs,glm::vec2 pos,float width,float height)
-{
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
-	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y+height,	vs[ofs++] = 1.f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x+width,	vs[ofs++] = pos.y,			vs[ofs++] = 1.f,	vs[ofs++] = 1.f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y+height,	vs[ofs++] = .0f,	vs[ofs++] = .0f,
-	vs[ofs++] = pos.x,			vs[ofs++] = pos.y,			vs[ofs++] = .0f,	vs[ofs++] = 1.f;
-}
-
-/*
-	O(1) /+load -> (static)
-	purpose: generate buffer elements based on object list index
-	\param k0: reference to current element memory offset. !actual memory offset, not to be rasterized!
-	\param k1: current triangle starting vertex index
-	\param e: element array
-	NOTE: expects memory to be allocated
-*/
-void Toolbox::generate_elements(size_t& k0,size_t& k1,std::vector<uint32_t>& e)
-{
-	e[k0++] = k1,		e[k0++] = k1+2,		e[k0++] = k1+1,
-	e[k0++] = k1+2,		e[k0++] = k1,		e[k0++] = k1+3;
-	k1 += PATTERN_SPRITE_LOAD_REPEAT;;
-}
-
-/*
-	PARAMETER DEFINITIONS:
-	tex: reference to be associated with texture value when bound
-	path: path to file holding texture value
-	corrected: defines colour format as corrected sRGB (true) or uncorrected RGBA (false)
-*/
-
-/*
-	load_texture(uint32_t,const char*,bool) -> void (static)
-	purpose: load texture value, generate mipmap and associate it with given texture reference
-*/
-void Toolbox::load_texture(uint32_t tex,const char* path,bool corrected)
-{
-	// bind and load texture data
-	load_texture_function_head(tex,path,corrected);
-
-	// texture parameters & mipmap
-	set_texture_parameter_clamp_to_edge();
-	set_texture_parameter_linear_mipmap();
-	glGenerateMipmap(GL_TEXTURE_2D);
-}
-
-/*
-	load_texture(uint32_t,const char*,float,bool) -> void (static)
-	overloads previous load_texture()
-	bias: mipmapping level-of-detail bias
-	purpose: load mipmapped texture with modified lod bias
-*/
-void Toolbox::load_texture(uint32_t tex,const char* path,float bias,bool corrected)
-{
-	// bind and load texture data
-	load_texture_function_head(tex,path,corrected);
-
-	// texture parameters & mipmap
-	set_texture_parameter_clamp_to_edge();
-	set_texture_parameter_linear_mipmap();
-	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,bias);
-	glGenerateMipmap(GL_TEXTURE_2D);
-}
-
-/*
-	load_texture_unfiltered(uint32_t,const char*,bool) -> void (static)
-	purpose: load texture without mipmapping
-*/
-void Toolbox::load_texture_unfiltered(uint32_t tex,const char* path,bool corrected)
-{
-	// bind and load texture data
-	load_texture_function_head(tex,path,corrected);
-
-	// texture paramteres without mipmap
-	set_texture_parameter_clamp_to_edge();
-	set_texture_parameter_linear_unfiltered();
-}
-
-/*
-	load_texture_repeat(uint32_t,const char*,bool) -> void (static)
-	purpose: load repeating mipmapped texture
-*/
-void Toolbox::load_texture_repeat(uint32_t tex,const char* path,bool corrected)
-{
-	// bind and load texture data
-	load_texture_function_head(tex,path,corrected);
-
-	// texture parameters repeating
-	set_texture_parameter_texture_repeat();
-	set_texture_parameter_linear_mipmap();
-	glGenerateMipmap(GL_TEXTURE_2D);
-}
-// TODO: break edge cases apart and let the statii be determined separately with additional methods
-
-/*
-	set_texture_parameter_linear_mipmap() -> void (static)
-	purpose: define texture as mipmappable
-*/
-void Toolbox::set_texture_parameter_linear_mipmap()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-}
-
-/*
-	set_texture_parameter_linear_unfiltered() -> void
-	purpose: define texture as simply linearly filtered
-*/
-void Toolbox::set_texture_parameter_linear_unfiltered()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-}
-
-/*
-	set_texture_parameter_nearest_unfiltered() -> void (static)
-	purpose: define texture as unfiltered
-*/
-void Toolbox::set_texture_parameter_nearest_unfiltered()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-}
-
-/*
-	set_cubemap_texture_parameters() -> void
-	purpose: define filtered cubemap texture
-*/
-void Toolbox::set_cubemap_texture_parameters()
-{
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-}
-
-/*
-	set_cubemap_texture_parameters_mipmap() -> void
-	purpose: define filtered cubemap with multiple levels of detail
-*/
-void Toolbox::set_cubemap_texture_parameters_mipmap()
-{
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-}
-
-/*
-	set_texture_parameter_clamp_to_edge() -> void (static)
-	purpose: define texture as to be stretched out towards the edge
-*/
-void Toolbox::set_texture_parameter_clamp_to_edge()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-}
-
-/*
-	set_texture_parameter_clamp_to_border() -> void (static)
-	purpose: define texture as to be scaled up towards custom borders, to avoid ratio manipulation
-*/
-void Toolbox::set_texture_parameter_clamp_to_border()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
-}
-
-/*
-	set_texture_parameter_texture_repeat() -> void (private,static)
-	purpose: define texture as repeatable
-*/
-void Toolbox::set_texture_parameter_texture_repeat()
-{
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-}
-
-/*
-	load_texture_function_head(GLuint tex,const char* path,bool) -> void (private,static) !O(1)
-	purpose: load texture value from given file
-*/
-void Toolbox::load_texture_function_head(uint32_t tex,const char* path,bool corrected)
-{
-	// setup
-	int width,height;
-	glBindTexture(GL_TEXTURE_2D,tex);
-	int32_t format = GL_RGBA+corrected*0x7338;
-
-	// load texture data from source
-	unsigned char* image = stbi_load(path,&width,&height,0,STBI_rgb_alpha);
-	glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,image);
-	stbi_image_free(image);
-}

@@ -1,32 +1,36 @@
 #ifndef CCB_GRAPHICS_SHADER
 #define CCB_GRAPHICS_SHADER
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "../mat/toolbox.h"
-#include "../mat/camera2d.h"
-#include "../mat/camera3d.h"
+#include "../mat/math.h"
 
 class Shader
 {
 public:
 
 	// construction
-	Shader() {  }
+	Shader(const char* path,GLenum type);
 	~Shader() {  }
 
-	// compilation
-	void compile(const char* vspath, const char* fspath);
-	void compile2d(const char* vspath, const char* fspath);
-	void compile3d(const char* vspath,const char* fspath);
+public:
+
+	// data
+	uint32_t shader;
+};
+
+class ShaderPipeline
+{
+public:
+
+	// construction
+	ShaderPipeline() {  }
+	~ShaderPipeline() {  }
+
+	// setup
+	void assemble(const Shader& vs,const Shader& fs);
+
+	// environments
+	void point_buffer2D();
+	void point_buffer3D();
 
 	// definition
 	void def_attributeI(const char* vname,uint8_t dim,uint8_t offset,uint8_t cap);
@@ -52,15 +56,15 @@ public:
 	inline void upload_vec4(const char* loc,glm::vec4 v)
 		{ glUniform4f(glGetUniformLocation(m_shaderProgram,loc),v.x,v.y,v.z,v.w); }
 	inline void upload_matrix(const char* loc,glm::mat4 m)
-	{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
+		{ glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram,loc),1,GL_FALSE,glm::value_ptr(m)); }
 	inline void upload_camera()
-	{ upload_matrix("view",gCamera2D.view2D), upload_matrix("proj",gCamera2D.proj2D); }
-	void upload_camera(Camera3D cam3d);
+		{ upload_matrix("view",g_Camera2D.view2D), upload_matrix("proj",g_Camera2D.proj2D); }
+	inline void upload_camera(Camera3D& cam3d)
+		{ upload_matrix("view",cam3d.view3D), upload_matrix("proj",cam3d.proj3D); }
 
 private:
 
 	// helpers
-	uint32_t compile_shader(const char* path,GLenum stype);
 	int32_t handle_attrib_location_by_name(const char* name);
 	int32_t handle_index_location_by_name(const char* name);
 

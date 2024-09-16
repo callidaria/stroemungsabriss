@@ -1,0 +1,23 @@
+texture ./res/anim_tex.png
+texture ./res/kopfuber_atlas.png 8 10 80
+
+sprite 0 300 150 100 100
+sprite 1 500 200 75 75 120
+
+duplicate 1 0 0 25 25 90
+
+spawn sprite 0 1100 700
+spawn sprite 0 360 420
+spawn sprite 0 630 360
+
+mesh ./res/casino/test_floor.obj ./res/casino/paquet_colour.png ./res/casino/paquet_normal.png ./res/casino/paquet_material.png ./res/none.png 0 0 -1
+mesh ./res/casino/suzanne.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 0 0
+mesh ./res/casino/wobble.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 4 2 0
+mesh ./res/casino/box.obj ./res/flyfighter_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png -2 -3 0
+
+animation ./res/test_anim.dae ./res/anim_tex.png ./res/dnormal.png ./res/default_mat.png ./res/none.png 0 0 0
+
+light sun 50 -25 75 4
+light sun -50 25 -75 .125
+
+shadow 50 -25 75
