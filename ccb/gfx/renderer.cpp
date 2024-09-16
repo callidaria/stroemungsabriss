@@ -8,23 +8,48 @@
 /*
 	TODO
 */
+float advance_keys(std::vector<double>& durations,uint16_t& crr,double progress)
+{
+	while (durations[crr+1]<progress) crr++;
+	crr *= crr<durations.size()&&durations[crr]<progress;
+	return (progress-durations[crr])/(durations[crr+1]-durations[crr]);
+}
+
 void AnimatedMesh::update_animation()
 {
+	// interpolation delta
+	progress += g_Frame.time_delta;
+	progress = fmod(progress,animations[current_animation].duration);
+
 	// iterate joints for local animation transformations
 	MeshAnimation& p_Animation = animations[current_animation];
 	for (MeshJoint& p_Joint : p_Animation.joints)
 	{
 		// determine transformation keyframes
-		// TODO
+		float t_TransformProgress = advance_keys(p_Joint.position_durations,p_Joint.crr_position,progress);
+		float t_ScalingProgress = advance_keys(p_Joint.scaling_durations,p_Joint.crr_scale,progress);
+		float t_RotationProgress = advance_keys(p_Joint.rotation_durations,p_Joint.crr_rotation,progress);
 
 		// interpolation between keyframes
-		// TODO
-		glm::vec3 t_PositionInterpolation = p_Joint.position_keys[p_Joint.crr_position].position;
-		glm::vec3 t_ScalingInterpolation = p_Joint.scale_keys[p_Joint.crr_scale].position;
-		glm::quat t_RotationInterpolation = p_Joint.rotation_keys[p_Joint.crr_rotation].rotation;
+		glm::vec3 t_TransformInterpolation = glm::mix(
+				p_Joint.position_keys[p_Joint.crr_position],
+				p_Joint.position_keys[p_Joint.crr_position+1],
+				t_TransformProgress
+			);
+		glm::vec3 t_ScalingInterpolation = glm::mix(
+				p_Joint.scaling_keys[p_Joint.crr_scale],
+				p_Joint.scaling_keys[p_Joint.crr_scale+1],
+				t_ScalingProgress
+			);
+		glm::quat t_RotationInterpolation = glm::slerp(
+				p_Joint.rotation_keys[p_Joint.crr_rotation],
+				p_Joint.rotation_keys[p_Joint.crr_rotation+1],
+				t_RotationProgress
+			);
 
+		// translation
 		joints[p_Joint.id].transform
-				= glm::translate(glm::mat4(1.f),t_PositionInterpolation)
+				= glm::translate(glm::mat4(1.f),t_TransformInterpolation)
 				* glm::toMat4(t_RotationInterpolation)
 				* glm::scale(glm::mat4(1.f),t_ScalingInterpolation);
 		// TODO: double check multiplication order
@@ -414,7 +439,7 @@ void RenderBatch::load_animation(AnimatedMesh& mesh)
 {
 	// load collada file
 	Assimp::Importer t_Importer;
-	const aiScene* t_DAEFile = t_Importer.ReadFile(mesh.mesh.path.c_str(),
+	aiScene const* t_DAEFile = t_Importer.ReadFile(mesh.mesh.path.c_str(),
 			aiProcess_CalcTangentSpace|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
 
 	// extract joints
@@ -529,36 +554,33 @@ void RenderBatch::load_animation(AnimatedMesh& mesh)
 			// process channel keys for related joint
 			t_Joint = {
 				.id = get_joint_id(mesh.joints,t_Node->mNodeName.C_Str()),
-				.position_keys = std::vector<VectorKey>(t_Node->mNumPositionKeys),
-				.scale_keys = std::vector<VectorKey>(t_Node->mNumScalingKeys),
-				.rotation_keys = std::vector<QuaternionKey>(t_Node->mNumRotationKeys)
+				.position_keys = std::vector<glm::vec3>(t_Node->mNumPositionKeys),
+				.scaling_keys = std::vector<glm::vec3>(t_Node->mNumScalingKeys),
+				.rotation_keys = std::vector<glm::quat>(t_Node->mNumRotationKeys),
+				.position_durations = std::vector<double>(t_Node->mNumPositionKeys),
+				.scaling_durations = std::vector<double>(t_Node->mNumScalingKeys),
+				.rotation_durations = std::vector<double>(t_Node->mNumRotationKeys)
 			};
 
 			// extract position keys
 			for (uint32_t k=0;k<t_Node->mNumPositionKeys;k++)
 			{
-				t_Joint.position_keys[k] = {
-					.position = Toolbox::assimp_to_vec3(t_Node->mPositionKeys[k].mValue),
-					.duration = t_Node->mPositionKeys[k].mTime/t_Animation->mTicksPerSecond
-				};
+				t_Joint.position_keys[k] = Toolbox::assimp_to_vec3(t_Node->mPositionKeys[k].mValue);
+				t_Joint.position_durations[k] = t_Node->mPositionKeys[k].mTime/t_Animation->mTicksPerSecond;
 			}
 
 			// extract scaling keys
 			for (uint32_t k=0;k<t_Node->mNumScalingKeys;k++)
 			{
-				t_Joint.scale_keys[k] = {
-					.position = Toolbox::assimp_to_vec3(t_Node->mScalingKeys[k].mValue),
-					.duration = t_Node->mScalingKeys[k].mTime/t_Animation->mTicksPerSecond
-				};
+				t_Joint.scaling_keys[k] = Toolbox::assimp_to_vec3(t_Node->mScalingKeys[k].mValue);
+				t_Joint.scaling_durations[k] = t_Node->mScalingKeys[k].mTime/t_Animation->mTicksPerSecond;
 			}
 
 			// extract rotation keys
 			for (uint32_t k=0;k<t_Node->mNumRotationKeys;k++)
 			{
-				t_Joint.rotation_keys[k] = {
-					.rotation = Toolbox::assimp_to_quat(t_Node->mRotationKeys[k].mValue),
-					.duration = t_Node->mRotationKeys[k].mTime/t_Animation->mTicksPerSecond
-				};
+				t_Joint.rotation_keys[k] = Toolbox::assimp_to_quat(t_Node->mRotationKeys[k].mValue);
+				t_Joint.rotation_durations[k] = t_Node->mRotationKeys[k].mTime/t_Animation->mTicksPerSecond;
 			}
 		}
 	}

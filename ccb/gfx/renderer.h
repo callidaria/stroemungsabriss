@@ -117,25 +117,16 @@ struct AnimationJoint
 	std::vector<uint16_t> children;
 };
 
-struct VectorKey
-{
-	glm::vec3 position;
-	double duration;
-};
-
-struct QuaternionKey
-{
-	glm::quat rotation;
-	double duration;
-};
-
 struct MeshJoint
 {
 	uint16_t id;
-	std::vector<VectorKey> position_keys;
-	std::vector<VectorKey> scale_keys;
-	std::vector<QuaternionKey> rotation_keys;
 	uint16_t crr_position = 0,crr_scale = 0,crr_rotation = 0;
+	std::vector<glm::vec3> position_keys;
+	std::vector<glm::vec3> scaling_keys;
+	std::vector<glm::quat> rotation_keys;
+	std::vector<double> position_durations;
+	std::vector<double> scaling_durations;
+	std::vector<double> rotation_durations;
 };
 
 struct MeshAnimation
@@ -152,6 +143,7 @@ struct AnimatedMesh
 
 	// data
 	uint16_t current_animation = 0;
+	double progress = .0;
 	Mesh mesh;
 	std::vector<AnimationJoint> joints;
 	std::vector<MeshAnimation> animations;

@@ -75,7 +75,7 @@ void Frame::calc_time_delta()
 {
 	past_ticks = curr_ticks;
 	curr_ticks = std::chrono::steady_clock::now();
-	time_delta_nmod = (curr_ticks-past_ticks).count()*CONVERSION_MULT_SECONDS;
+	time_delta_nmod = (curr_ticks-past_ticks).count()*CONVERSION_MULT_SECONDS*.5f;
 	time_delta = time_delta_nmod*time_mod;
 }
 

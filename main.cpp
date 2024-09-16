@@ -69,9 +69,9 @@ int main(int argc,char** argv)
 	while (run)
 	{
 		// frame
-		//g_Frame.calc_time_delta();
-		//g_Frame.cpu_vsync();
+		g_Frame.calc_time_delta();
 		//g_Frame.print_fps();
+		//g_Frame.cpu_vsync();
 
 		// update
 		g_Input.update(run);
@@ -88,7 +88,7 @@ int main(int argc,char** argv)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
-		uint32_t _ = system("./yomisensei &");
+		uint32_t __rbt = system("./yomisensei &");
 #endif
 
 	// close
