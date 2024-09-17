@@ -50,9 +50,8 @@ void AnimatedMesh::update_animation()
 		// translation
 		joints[p_Joint.id].transform
 				= glm::translate(glm::mat4(1.f),t_TransformInterpolation)
-				* glm::toMat4(t_RotationInterpolation)
-				* glm::scale(glm::mat4(1.f),t_ScalingInterpolation);
-		// TODO: double check multiplication order
+				* glm::scale(glm::mat4(1.f),t_ScalingInterpolation)
+				* glm::toMat4(t_RotationInterpolation);
 	}
 
 	// calculate transform after parent influence

@@ -20,6 +20,9 @@ struct SceneData
 	// mouse rotation interfacing
 	float dt_mouse_position = .0f;
 	float ape_momentum = .0f;
+	float ape_zoom = 1.f;
+	float zoom_momentum = .0f;
+	glm::vec3 cam_position = glm::vec3(0,-4,2);
 };
 
 void load_scene(SceneData& data)
@@ -44,9 +47,20 @@ void maintain_scene(SceneData& data)
 	int8_t t_KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
 	float t_MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
 	data.ape_momentum += t_KeyDirection+t_MouseDirection*100;
+	g_Camera3D.position = data.cam_position;
 	g_Camera3D.rotate_around_target(data.ape_momentum);
+	data.cam_position = g_Camera3D.position;
+
+	// calculate camera zoom
+	int8_t t_KeyZoom = g_Input.kb.ka[SDL_SCANCODE_K]-g_Input.kb.ka[SDL_SCANCODE_I];
+	data.zoom_momentum += g_Input.mouse.mw*-.1f+t_KeyZoom*.01f;
+	data.ape_zoom += data.zoom_momentum;
+	g_Camera3D.position *= data.ape_zoom;
+
+	// update camera and reset
 	g_Camera3D.update();
 	data.ape_momentum *= .85f;
+	data.zoom_momentum *= .85f;
 	data.dt_mouse_position = g_Input.mouse.mxfr;
 }
 

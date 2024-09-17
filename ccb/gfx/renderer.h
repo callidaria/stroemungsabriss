@@ -46,7 +46,6 @@ constexpr uint8_t ANIMATION_UPLOAD_REPEAT = sizeof(AnimationUpload)/sizeof(float
 
 
 // sprite data
-// texture information for sprites
 struct SpriteTextureTuple
 {
 	Texture texture;
@@ -54,7 +53,6 @@ struct SpriteTextureTuple
 	uint16_t frames;
 };
 
-// render entry connected to loaded sprite and individually transformed
 struct Sprite
 {
 	uint16_t texture_id;
@@ -62,7 +60,6 @@ struct Sprite
 	glm::vec2 atlas_index = glm::vec2(0);
 };
 
-// animation entry connected to sprite render entry, holding state of animation
 struct SpriteAnimation
 {
 	uint16_t id;
@@ -71,7 +68,6 @@ struct SpriteAnimation
 	float anim_progression = .0f;
 };
 
-// data structure to represent a full set of duplicates
 constexpr uint16_t SPRITE_INSTANCE_CAPACITY = 4096;
 struct SpriteInstance
 {
@@ -81,7 +77,6 @@ struct SpriteInstance
 	uint16_t active_range = 0;
 };
 
-// animation entry connected to duplicate render entry, holding state of animation
 struct SpriteAnimationInstance
 {
 	uint16_t id;
@@ -107,6 +102,8 @@ struct Mesh
 	std::string path;
 };
 
+
+// animation data
 struct AnimationJoint
 {
 	std::string id;
@@ -142,11 +139,11 @@ struct AnimatedMesh
 	void rc_transform_interpolation(AnimationJoint& joint,glm::mat4 const& parent_transform);
 
 	// data
-	uint16_t current_animation = 0;
-	double progress = .0;
 	Mesh mesh;
 	std::vector<AnimationJoint> joints;
 	std::vector<MeshAnimation> animations;
+	uint16_t current_animation = 0;
+	double progress = .0;
 };
 
 
