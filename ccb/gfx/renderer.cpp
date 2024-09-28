@@ -510,8 +510,8 @@ void RenderBatch::load_animation(AnimatedMesh& mesh)
 			.uv_coord = Toolbox::assimp_to_vec2(t_Mesh->mTextureCoords[0][i]),
 			.normal = Toolbox::assimp_to_vec3(t_Mesh->mNormals[i]),
 			.tangent = Toolbox::assimp_to_vec3(t_Mesh->mTangents[i]),
-			.bone_index = glm::vec4(
-					t_BoneIndices[i][0],t_BoneIndices[i][1],t_BoneIndices[i][2],t_BoneIndices[i][3]),
+			.bone_index
+					= glm::vec4(t_BoneIndices[i][0],t_BoneIndices[i][1],t_BoneIndices[i][2],t_BoneIndices[i][3]),
 			.bone_weight = glm::vec4(t_Weights[i][0],t_Weights[i][1],t_Weights[i][2],t_Weights[i][3])
 		};
 		animation_vertices.push_back(t_Vertex);
@@ -597,10 +597,7 @@ void RenderBatch::update_sprites()
 
 		// calculate current frame
 		bool t_IncAnim = p_Animation.anim_progression<p_Animation.cycle_duration;
-		p_Animation.anim_progression += t_IncAnim-p_Animation.anim_progression*!t_IncAnim;
-		// TODO: make this update depend on frame update delta
-		//		test with unlocked frames to make sure this is actually working
-		//		-> also do the same for sprite instance animation update
+		p_Animation.anim_progression += t_IncAnim*g_Frame.time_delta-p_Animation.anim_progression*!t_IncAnim;
 
 		// calculate spritesheet location
 		int t_Index = p_Animation.anim_progression/p_Animation.frame_duration;
@@ -622,7 +619,8 @@ void RenderBatch::update_duplicates()
 		for (uint16_t i=0;i<p_Instance.active_range;i++)
 		{
 			bool t_IncAnim = p_Animation.anim_progressions[i]<p_Animation.cycle_duration;
-			p_Animation.anim_progressions[i] += t_IncAnim-p_Animation.anim_progressions[i]*!t_IncAnim;
+			p_Animation.anim_progressions[i] += t_IncAnim*g_Frame.time_delta
+					- p_Animation.anim_progressions[i]*!t_IncAnim;
 			int t_Index = p_Animation.anim_progressions[i]/p_Animation.frame_duration;
 			p_Instance.upload[i].atlas_index = glm::vec2(t_Index%p_Texture.columns,t_Index/p_Texture.columns);
 		}
@@ -1450,7 +1448,6 @@ void Renderer::update()
 
 	// render 2D geometry
 	// iterate sprite render
-	/*
 	m_SpriteBuffer.bind();
 	m_SpritePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) update_sprites[batch->sprite_ready](batch,&m_SpritePipeline);
@@ -1459,7 +1456,6 @@ void Renderer::update()
 	m_SpriteBuffer.bind_index();
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
-	*/
 }
 
 /*

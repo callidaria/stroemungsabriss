@@ -33,9 +33,16 @@ void load_scene(SceneData& data)
 
 void maintain_scene(SceneData& data)
 {
+	// system
 	// check closing request
 	*data.running = !g_Input.kb.ka[SDL_SCANCODE_Q]&&*data.running;
 
+	// timing
+	// time manipulation
+	g_Frame.time_mod += (g_Input.kb.ka[SDL_SCANCODE_T]-g_Input.kb.ka[SDL_SCANCODE_E])*.05f;
+	g_Frame.time_mod = (g_Input.kb.ka[SDL_SCANCODE_R]) ? 1.f : g_Frame.time_mod;
+
+	// loading
 	// request additional batch load
 	if (g_Input.kb.ka[SDL_SCANCODE_B]&&!data.second_request)
 	{
@@ -43,6 +50,7 @@ void maintain_scene(SceneData& data)
 		data.second_request = true;
 	}
 
+	// camera movement
 	// calculate camera to target object rotation
 	int8_t t_KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
 	float t_MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
@@ -71,7 +79,7 @@ scene_update update_scene[] = { load_scene,maintain_scene };
 int main(int argc,char** argv)
 {
 	// settings
-	Frame::gpu_vsync_on();
+	//Frame::gpu_vsync_on();
 	//g_Frame.set_refresh_rate(60);
 
 	// store scene data
