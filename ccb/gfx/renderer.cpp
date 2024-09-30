@@ -26,32 +26,32 @@ void AnimatedMesh::update_animation()
 	for (MeshJoint& p_Joint : p_Animation.joints)
 	{
 		// determine transformation keyframes
-		float t_TransformProgress = advance_keys(p_Joint.position_durations,p_Joint.crr_position,progress);
-		float t_ScalingProgress = advance_keys(p_Joint.scaling_durations,p_Joint.crr_scale,progress);
-		float t_RotationProgress = advance_keys(p_Joint.rotation_durations,p_Joint.crr_rotation,progress);
+		float __TransformProgress = advance_keys(p_Joint.position_durations,p_Joint.crr_position,progress);
+		float __ScalingProgress = advance_keys(p_Joint.scaling_durations,p_Joint.crr_scale,progress);
+		float __RotationProgress = advance_keys(p_Joint.rotation_durations,p_Joint.crr_rotation,progress);
 
 		// interpolation between keyframes
-		glm::vec3 t_TransformInterpolation = glm::mix(
+		glm::vec3 __TransformInterpolation = glm::mix(
 				p_Joint.position_keys[p_Joint.crr_position],
 				p_Joint.position_keys[p_Joint.crr_position+1],
-				t_TransformProgress
+				__TransformProgress
 			);
-		glm::vec3 t_ScalingInterpolation = glm::mix(
+		glm::vec3 __ScalingInterpolation = glm::mix(
 				p_Joint.scaling_keys[p_Joint.crr_scale],
 				p_Joint.scaling_keys[p_Joint.crr_scale+1],
-				t_ScalingProgress
+				__ScalingProgress
 			);
-		glm::quat t_RotationInterpolation = glm::slerp(
+		glm::quat __RotationInterpolation = glm::slerp(
 				p_Joint.rotation_keys[p_Joint.crr_rotation],
 				p_Joint.rotation_keys[p_Joint.crr_rotation+1],
-				t_RotationProgress
+				__RotationProgress
 			);
 
 		// translation
 		joints[p_Joint.id].transform
-				= glm::translate(glm::mat4(1.f),t_TransformInterpolation)
-				* glm::scale(glm::mat4(1.f),t_ScalingInterpolation)
-				* glm::toMat4(t_RotationInterpolation);
+				= glm::translate(glm::mat4(1.f),__TransformInterpolation)
+				* glm::scale(glm::mat4(1.f),__ScalingInterpolation)
+				* glm::toMat4(__RotationInterpolation);
 	}
 
 	// calculate transform after parent influence
@@ -61,9 +61,9 @@ void AnimatedMesh::update_animation()
 
 void AnimatedMesh::rc_transform_interpolation(AnimationJoint& joint,glm::mat4 const& parent_transform)
 {
-	glm::mat4 t_LocalTransform = parent_transform*joint.transform;
-	joint.recursive_transform = t_LocalTransform*joint.offset;
-	for (uint16_t child : joint.children) rc_transform_interpolation(joints[child],t_LocalTransform);
+	glm::mat4 __LocalTransform = parent_transform*joint.transform;
+	joint.recursive_transform = __LocalTransform*joint.offset;
+	for (uint16_t child : joint.children) rc_transform_interpolation(joints[child],__LocalTransform);
 }
 
 
@@ -80,10 +80,10 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 	offset_directional = dir_offset;
 	for (LightDirectional& light : directional_lights)
 	{
-		std::string t_ArrayLocation = "sunlight["+std::to_string(dir_offset)+"].";
-		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
-		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
-		pipeline.upload_float((t_ArrayLocation+"intensity").c_str(),light.intensity);
+		std::string __ArrayLocation = "sunlight["+std::to_string(dir_offset)+"].";
+		pipeline.upload_vec3((__ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((__ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_float((__ArrayLocation+"intensity").c_str(),light.intensity);
 		dir_offset++;
 	}
 
@@ -91,13 +91,13 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 	offset_point = point_offset;
 	for (LightPoint& light : point_lights)
 	{
-		std::string t_ArrayLocation = "pointlight["+std::to_string(point_offset)+"].";
-		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
-		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
-		pipeline.upload_float((t_ArrayLocation+"instensity").c_str(),light.intensity);
-		pipeline.upload_float((t_ArrayLocation+"constant").c_str(),light.c0);
-		pipeline.upload_float((t_ArrayLocation+"linear").c_str(),light.c1);
-		pipeline.upload_float((t_ArrayLocation+"quadratic").c_str(),light.c2);
+		std::string __ArrayLocation = "pointlight["+std::to_string(point_offset)+"].";
+		pipeline.upload_vec3((__ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((__ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_float((__ArrayLocation+"instensity").c_str(),light.intensity);
+		pipeline.upload_float((__ArrayLocation+"constant").c_str(),light.c0);
+		pipeline.upload_float((__ArrayLocation+"linear").c_str(),light.c1);
+		pipeline.upload_float((__ArrayLocation+"quadratic").c_str(),light.c2);
 		point_offset++;
 	}
 
@@ -105,13 +105,13 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 	offset_spot = spot_offset;
 	for (LightSpot& light : spot_lights)
 	{
-		std::string t_ArrayLocation = "spotlight["+std::to_string(spot_offset)+"].";
-		pipeline.upload_vec3((t_ArrayLocation+"position").c_str(),light.position);
-		pipeline.upload_vec3((t_ArrayLocation+"colour").c_str(),light.colour);
-		pipeline.upload_vec3((t_ArrayLocation+"direction").c_str(),light.direction);
-		pipeline.upload_float((t_ArrayLocation+"intensity").c_str(),light.intensity);
-		pipeline.upload_float((t_ArrayLocation+"cut_in").c_str(),light.cut_inner);
-		pipeline.upload_float((t_ArrayLocation+"cut_out").c_str(),light.cut_outer);
+		std::string __ArrayLocation = "spotlight["+std::to_string(spot_offset)+"].";
+		pipeline.upload_vec3((__ArrayLocation+"position").c_str(),light.position);
+		pipeline.upload_vec3((__ArrayLocation+"colour").c_str(),light.colour);
+		pipeline.upload_vec3((__ArrayLocation+"direction").c_str(),light.direction);
+		pipeline.upload_float((__ArrayLocation+"intensity").c_str(),light.intensity);
+		pipeline.upload_float((__ArrayLocation+"cut_in").c_str(),light.cut_inner);
+		pipeline.upload_float((__ArrayLocation+"cut_out").c_str(),light.cut_outer);
 		spot_offset++;
 	}
 }
@@ -132,13 +132,13 @@ void Lighting::upload(ShaderPipeline& pipeline,uint8_t& dir_offset,uint8_t& poin
 */
 uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint8_t frames)
 {
-	SpriteTextureTuple t_Tuple = {
+	SpriteTextureTuple __Tuple = {
 		.texture = Texture(path),
 		.rows = rows,
 		.columns = cols,
 		.frames = frames
 	};
-	sprite_textures.push_back(t_Tuple);
+	sprite_textures.push_back(__Tuple);
 	return sprite_textures.size()-1;
 }
 
@@ -152,7 +152,7 @@ uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint
 */
 void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
-	Sprite t_Sprite = {
+	Sprite __Sprite = {
 		.texture_id = tex_id,
 		.transform = {
 			.position = pos,
@@ -160,8 +160,8 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 			.height = hgt,
 		},
 	};
-	t_Sprite.transform.to_origin();
-	sprites.push_back(t_Sprite);
+	__Sprite.transform.to_origin();
+	sprites.push_back(__Sprite);
 }
 
 /*
@@ -170,14 +170,14 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
 {
 	// add animation data
-	SpriteAnimation t_Animation = {
+	SpriteAnimation __Animation = {
 		.id = (uint16_t)sprites.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register sprite & animation
-	sprite_animations.push_back(t_Animation);
+	sprite_animations.push_back(__Animation);
 	register_sprite(tex_id,pos,wdt,hgt);
 }
 
@@ -186,7 +186,7 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 */
 void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt)
 {
-	SpriteInstance t_Instance = {
+	SpriteInstance __Instance = {
 		.texture_id = tex_id,
 		.transform = {
 			.position = pos,
@@ -194,8 +194,8 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 			.height = hgt,
 		},
 	};
-	t_Instance.transform.to_origin();
-	duplicates.push_back(t_Instance);
+	__Instance.transform.to_origin();
+	duplicates.push_back(__Instance);
 }
 
 /*
@@ -204,14 +204,14 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
 {
 	// add animation data
-	SpriteAnimationInstance t_Animation = {
+	SpriteAnimationInstance __Animation = {
 		.id = (uint16_t)duplicates.size(),
 		.cycle_duration = dur,
 		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
 	};
 
 	// register duplicate & animation
-	duplicate_animations.push_back(t_Animation);
+	duplicate_animations.push_back(__Animation);
 	register_duplicates(tex_id,pos,wdt,hgt);
 }
 
@@ -222,7 +222,7 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 		glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	// store mesh vertex data
-	Mesh t_Mesh = {
+	Mesh __Mesh = {
 		.transform = {
 			.position = pos,
 			.scaling = scl,
@@ -230,17 +230,17 @@ void RenderBatch::add_mesh(std::string obj,std::string tex,std::string norm,std:
 		},
 		.path = obj
 	};
-	t_Mesh.transform.to_origin();
-	meshes.push_back(t_Mesh);
+	__Mesh.transform.to_origin();
+	meshes.push_back(__Mesh);
 
 	// store texture information
-	MeshTextureTuple t_Texture = {
+	MeshTextureTuple __Texture = {
 		.colours = Texture(tex,true),
 		.normals = Texture(norm),
 		.materials = Texture(mats),
 		.emission = Texture(emit),
 	};
-	mesh_textures.push_back(t_Texture);
+	mesh_textures.push_back(__Texture);
 }
 
 /*
@@ -250,7 +250,7 @@ void RenderBatch::add_animation(std::string dae,std::string tex,
 		std::string norm,std::string mats,std::string emit,glm::vec3 pos,float scl,glm::vec3 rot)
 {
 	// store mesh animation vertex data
-	AnimatedMesh t_Animation = {
+	AnimatedMesh __Animation = {
 		.mesh = {
 			.transform = {
 				.position = pos,
@@ -260,17 +260,17 @@ void RenderBatch::add_animation(std::string dae,std::string tex,
 			.path = dae
 		}
 	};
-	t_Animation.mesh.transform.to_origin();
-	animated_meshes.push_back(t_Animation);
+	__Animation.mesh.transform.to_origin();
+	animated_meshes.push_back(__Animation);
 
 	// store texture information
-	MeshTextureTuple t_Texture = {
+	MeshTextureTuple __Texture = {
 		.colours = Texture(tex,true),
 		.normals = Texture(norm),
 		.materials = Texture(mats),
 		.emission = Texture(emit),
 	};
-	animation_textures.push_back(t_Texture);
+	animation_textures.push_back(__Texture);
 }
 
 /*
@@ -297,102 +297,102 @@ void RenderBatch::spawn_sprite_instance(uint16_t inst_id,glm::vec2 ofs,glm::vec2
 void RenderBatch::load_mesh(Mesh& mesh)
 {
 	// create storage for file contents
-	std::vector<glm::vec3> t_Positions;
-	std::vector<glm::vec2> t_UVCoordinates;
-	std::vector<glm::vec3> t_Normals;
-	std::vector<uint32_t> t_PositionIndices,t_UVIndices,t_NormalIndices;
+	std::vector<glm::vec3> __Positions;
+	std::vector<glm::vec2> __UVCoordinates;
+	std::vector<glm::vec3> __Normals;
+	std::vector<uint32_t> __PositionIndices,__UVIndices,__NormalIndices;
 
 	// open source file
-	FILE* t_OBJFile = fopen(mesh.path.c_str(),"r");
-	if (t_OBJFile==NULL)
+	FILE* __OBJFile = fopen(mesh.path.c_str(),"r");
+	if (__OBJFile==NULL)
 	{
 		COMM_ERR("object loader -> file %s could not be found!",mesh.path.c_str());
 		return;
 	}
 
 	// iterate file contents
-	char t_Command[128];
-	while (fscanf(t_OBJFile,"%s",t_Command)!=EOF)
+	char __Command[128];
+	while (fscanf(__OBJFile,"%s",__Command)!=EOF)
 	{
 		// process value prefix
 		// position prefix
-		if (!strcmp(t_Command,"v"))
+		if (!strcmp(__Command,"v"))
 		{
-			glm::vec3 t_Position;
-			uint32_t __eof = fscanf(t_OBJFile,"%f %f %f\n",&t_Position.x,&t_Position.y,&t_Position.z);
-			t_Positions.push_back(t_Position);
+			glm::vec3 __Position;
+			uint32_t _eof = fscanf(__OBJFile,"%f %f %f\n",&__Position.x,&__Position.y,&__Position.z);
+			__Positions.push_back(__Position);
 		}
 
 		// uv coordinate prefix
-		else if (!strcmp(t_Command,"vt"))
+		else if (!strcmp(__Command,"vt"))
 		{
-			glm::vec2 t_UVCoordinate;
-			uint32_t __eof = fscanf(t_OBJFile,"%f %f\n",&t_UVCoordinate.x,&t_UVCoordinate.y);
-			t_UVCoordinates.push_back(t_UVCoordinate);
+			glm::vec2 __UVCoordinate;
+			uint32_t _eof = fscanf(__OBJFile,"%f %f\n",&__UVCoordinate.x,&__UVCoordinate.y);
+			__UVCoordinates.push_back(__UVCoordinate);
 		}
 
 		// normal prefix
-		else if (!strcmp(t_Command,"vn"))
+		else if (!strcmp(__Command,"vn"))
 		{
-			glm::vec3 t_Normal;
-			uint32_t __eof = fscanf(t_OBJFile,"%f %f %f\n",&t_Normal.x,&t_Normal.y,&t_Normal.z);
-			t_Normals.push_back(t_Normal);
+			glm::vec3 __Normal;
+			uint32_t _eof = fscanf(__OBJFile,"%f %f %f\n",&__Normal.x,&__Normal.y,&__Normal.z);
+			__Normals.push_back(__Normal);
 		}
 
 		// face prefix
-		else if (!strcmp(t_Command,"f"))
+		else if (!strcmp(__Command,"f"))
 		{
 			// extract face indices
-			uint32_t t_PositionIndex[3],t_UVIndex[3],t_NormalIndex[3];
-			uint32_t __eof = fscanf(
-					t_OBJFile,"%u/%u/%u %u/%u/%u %u/%u/%u\n",
-					&t_PositionIndex[0],&t_UVIndex[0],&t_NormalIndex[0],
-					&t_PositionIndex[1],&t_UVIndex[1],&t_NormalIndex[1],
-					&t_PositionIndex[2],&t_UVIndex[2],&t_NormalIndex[2]
+			uint32_t __PositionIndex[3],__UVIndex[3],__NormalIndex[3];
+			uint32_t _eof = fscanf(
+					__OBJFile,"%u/%u/%u %u/%u/%u %u/%u/%u\n",
+					&__PositionIndex[0],&__UVIndex[0],&__NormalIndex[0],
+					&__PositionIndex[1],&__UVIndex[1],&__NormalIndex[1],
+					&__PositionIndex[2],&__UVIndex[2],&__NormalIndex[2]
 				);
 
 			// insert face indices
-			for (uint8_t i=0;i<3;i++) t_PositionIndices.push_back(t_PositionIndex[i]);
-			for (uint8_t i=0;i<3;i++) t_UVIndices.push_back(t_UVIndex[i]);
-			for (uint8_t i=0;i<3;i++) t_NormalIndices.push_back(t_NormalIndex[i]);
+			for (uint8_t i=0;i<3;i++) __PositionIndices.push_back(__PositionIndex[i]);
+			for (uint8_t i=0;i<3;i++) __UVIndices.push_back(__UVIndex[i]);
+			for (uint8_t i=0;i<3;i++) __NormalIndices.push_back(__NormalIndex[i]);
 		}
 	}
-	fclose(t_OBJFile);
+	fclose(__OBJFile);
 
 	// set offset and allocate memory
 	mesh.vertex_offset = mesh_vertices.size();
-	mesh.vertex_range = t_PositionIndices.size();
+	mesh.vertex_range = __PositionIndices.size();
 	mesh_vertices.reserve(mesh.vertex_offset+mesh.vertex_range);
 
 	// iterate faces & write vertex
-	for (uint32_t i=0;i<t_PositionIndices.size();i+=3)
+	for (uint32_t i=0;i<__PositionIndices.size();i+=3)
 	{
 		for (uint8_t j=0;j<3;j++)
 		{
 			uint32_t n = i+j;
-			MeshUpload t_VertexComponent = {
-				.position = t_Positions[t_PositionIndices[n]-1],
-				.uv_coord = t_UVCoordinates[t_UVIndices[n]-1],
-				.normal = t_Normals[t_NormalIndices[n]-1]
+			MeshUpload __VertexComponent = {
+				.position = __Positions[__PositionIndices[n]-1],
+				.uv_coord = __UVCoordinates[__UVIndices[n]-1],
+				.normal = __Normals[__NormalIndices[n]-1]
 			};
-			mesh_vertices.push_back(t_VertexComponent);
+			mesh_vertices.push_back(__VertexComponent);
 		}
 
 		// precalculate tangent for normal mapping
 		// setup values
 		uint32_t n = mesh.vertex_offset+i;
-		glm::vec3 t_EdgeDelta0 = mesh_vertices[n+1].position-mesh_vertices[n].position;
-		glm::vec3 t_EdgeDelta1 = mesh_vertices[n+2].position-mesh_vertices[n].position;
-		glm::vec2 t_UVDelta0 = mesh_vertices[n+1].uv_coord-mesh_vertices[n].uv_coord;
-		glm::vec2 t_UVDelta1 = mesh_vertices[n+2].uv_coord-mesh_vertices[n].uv_coord;
-		float t_Factor = 1.f/(t_UVDelta0.x*t_UVDelta1.y-t_UVDelta0.y*t_UVDelta1.x);
+		glm::vec3 __EdgeDelta0 = mesh_vertices[n+1].position-mesh_vertices[n].position;
+		glm::vec3 __EdgeDelta1 = mesh_vertices[n+2].position-mesh_vertices[n].position;
+		glm::vec2 __UVDelta0 = mesh_vertices[n+1].uv_coord-mesh_vertices[n].uv_coord;
+		glm::vec2 __UVDelta1 = mesh_vertices[n+2].uv_coord-mesh_vertices[n].uv_coord;
+		float __Factor = 1.f/(__UVDelta0.x*__UVDelta1.y-__UVDelta0.y*__UVDelta1.x);
 
 		// calculate tangent & store in vertex
-		glm::mat2x3 t_CombinedEdges = glm::mat2x3(t_EdgeDelta0,t_EdgeDelta1);
-		glm::vec2 t_CombinedUVs = glm::vec2(t_UVDelta1.y,-t_UVDelta0.y);
-		glm::vec3 t_Tangent = t_Factor*(t_CombinedEdges*t_CombinedUVs);
-		t_Tangent = glm::normalize(t_Tangent);
-		for (uint8_t j=0;j<3;j++) mesh_vertices[n+j].tangent = t_Tangent;
+		glm::mat2x3 __CombinedEdges = glm::mat2x3(__EdgeDelta0,__EdgeDelta1);
+		glm::vec2 __CombinedUVs = glm::vec2(__UVDelta1.y,-__UVDelta0.y);
+		glm::vec3 __Tangent = __Factor*(__CombinedEdges*__CombinedUVs);
+		__Tangent = glm::normalize(__Tangent);
+		for (uint8_t j=0;j<3;j++) mesh_vertices[n+j].tangent = __Tangent;
 	}
 }
 // FIXME: it was written [-NAS] a long time ago, there are some things to optimize here
@@ -402,27 +402,27 @@ void RenderBatch::load_mesh(Mesh& mesh)
 */
 uint16_t rc_get_joint_count(aiNode* root)
 {
-	uint16_t t_Result = 1;
-	for (uint16_t i=0;i<root->mNumChildren;i++) t_Result += rc_get_joint_count(root->mChildren[i]);
-	return t_Result;
+	uint16_t __Result = 1;
+	for (uint16_t i=0;i<root->mNumChildren;i++) __Result += rc_get_joint_count(root->mChildren[i]);
+	return __Result;
 }
 
 void rc_assemble_joint_hierarchy(std::vector<AnimationJoint>& joints,aiNode* root)
 {
 	// translate root joint
-	uint16_t t_MemoryID = joints.size();
-	AnimationJoint t_Joint = {
+	uint16_t __MemoryID = joints.size();
+	AnimationJoint __Joint = {
 		.id = root->mName.C_Str(),
-		.uniform_location = "joint_transform["+std::to_string(t_MemoryID)+"]",
+		.uniform_location = "joint_transform["+std::to_string(__MemoryID)+"]",
 		.transform = Toolbox::assimp_to_mat4(root->mTransformation),
 		.children = std::vector<uint16_t>(root->mNumChildren)
 	};
-	joints.push_back(t_Joint);
+	joints.push_back(__Joint);
 
 	// recursively process children joints
 	for (uint16_t i=0;i<root->mNumChildren;i++)
 	{
-		joints[t_MemoryID].children[i] = joints.size();
+		joints[__MemoryID].children[i] = joints.size();
 		rc_assemble_joint_hierarchy(joints,root->mChildren[i]);
 	}
 }
@@ -437,64 +437,64 @@ uint16_t get_joint_id(std::vector<AnimationJoint>& joints,std::string id)
 void RenderBatch::load_animation(AnimatedMesh& mesh)
 {
 	// load collada file
-	Assimp::Importer t_Importer;
-	aiScene const* t_DAEFile = t_Importer.ReadFile(mesh.mesh.path.c_str(),
+	Assimp::Importer __Importer;
+	aiScene const* __DAEFile = __Importer.ReadFile(mesh.mesh.path.c_str(),
 			aiProcess_CalcTangentSpace|aiProcess_Triangulate|aiProcess_JoinIdenticalVertices);
 
 	// extract joints
-	uint16_t t_JointCount = rc_get_joint_count(t_DAEFile->mRootNode);
-	mesh.joints.reserve(t_JointCount);
-	rc_assemble_joint_hierarchy(mesh.joints,t_DAEFile->mRootNode);
+	uint16_t __JointCount = rc_get_joint_count(__DAEFile->mRootNode);
+	mesh.joints.reserve(__JointCount);
+	rc_assemble_joint_hierarchy(mesh.joints,__DAEFile->mRootNode);
 
 	// load mesh
 	// extract bone armature offset
-	aiMesh* t_Mesh = t_DAEFile->mMeshes[0];
-	uint16_t t_RootOffset = get_joint_id(mesh.joints,t_Mesh->mBones[0]->mName.C_Str());
+	aiMesh* __Mesh = __DAEFile->mMeshes[0];
+	uint16_t __RootOffset = get_joint_id(mesh.joints,__Mesh->mBones[0]->mName.C_Str());
 	// TODO: allow for all the meshes in the file to be added one by one. not only the first one!
 
 	// extract bone influence weights
-	uint8_t t_WriteCount[t_Mesh->mNumVertices] = { 0 };
-	float t_BoneIndices[t_Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
-	float t_Weights[t_Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
+	uint8_t __WriteCount[__Mesh->mNumVertices] = { 0 };
+	float __BoneIndices[__Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
+	float __Weights[__Mesh->mNumVertices][ANIMATION_INFLUENCE_STACK_RANGE] = { 0 };
 	// TODO: join these into one data structure
-	for (uint16_t i=0;i<t_Mesh->mNumBones;i++)
+	for (uint16_t i=0;i<__Mesh->mNumBones;i++)
 	{
-		aiBone* t_Bone = t_Mesh->mBones[i];
-		uint16_t t_JointIndex = t_RootOffset+i;
-		mesh.joints[t_JointIndex].offset = Toolbox::assimp_to_mat4(t_Bone->mOffsetMatrix);
+		aiBone* __Bone = __Mesh->mBones[i];
+		uint16_t __JointIndex = __RootOffset+i;
+		mesh.joints[__JointIndex].offset = Toolbox::assimp_to_mat4(__Bone->mOffsetMatrix);
 		// FIXME: questionable placement of offset extraction
 
 		// map bone weights onto vertices
-		for (uint32_t j=0;j<t_Bone->mNumWeights;j++)
+		for (uint32_t j=0;j<__Bone->mNumWeights;j++)
 		{
-			aiVertexWeight& t_Weight = t_Bone->mWeights[j];
+			aiVertexWeight& __Weight = __Bone->mWeights[j];
 
 			// store indices & weights until overflow
-			if (t_WriteCount[t_Weight.mVertexId]<ANIMATION_INFLUENCE_STACK_RANGE)
+			if (__WriteCount[__Weight.mVertexId]<ANIMATION_INFLUENCE_STACK_RANGE)
 			{
-				uint8_t k = t_WriteCount[t_Weight.mVertexId]++;
-				t_BoneIndices[t_Weight.mVertexId][k] = t_JointIndex;
-				t_Weights[t_Weight.mVertexId][k] = t_Weight.mWeight;
+				uint8_t k = __WriteCount[__Weight.mVertexId]++;
+				__BoneIndices[__Weight.mVertexId][k] = __JointIndex;
+				__Weights[__Weight.mVertexId][k] = __Weight.mWeight;
 			}
 
 			// priority store in case of weight overflow
 			else
 			{
 				// iterate to find least influential weight
-				uint8_t t_ProcIndex = 0;
-				float t_ProcWeight = t_Weights[t_Weight.mVertexId][0];  // TODO: remove
+				uint8_t __ProcIndex = 0;
+				float __ProcWeight = __Weights[__Weight.mVertexId][0];  // TODO: remove
 				for (uint8_t k=1;k<ANIMATION_INFLUENCE_STACK_RANGE;k++)
 				{
-					if (t_ProcWeight>t_Weights[t_Weight.mVertexId][k])
+					if (__ProcWeight>__Weights[__Weight.mVertexId][k])
 					{
-						t_ProcIndex = k;
-						t_ProcWeight = t_Weights[t_Weight.mVertexId][k];
+						__ProcIndex = k;
+						__ProcWeight = __Weights[__Weight.mVertexId][k];
 					}
 				}
 
 				// overwrite most insignificant weight if current weight is important enought
-				if (t_Weight.mWeight>t_Weights[t_Weight.mVertexId][t_ProcIndex])
-					t_Weights[t_Weight.mVertexId][t_ProcIndex] = t_Weight.mWeight;
+				if (__Weight.mWeight>__Weights[__Weight.mVertexId][__ProcIndex])
+					__Weights[__Weight.mVertexId][__ProcIndex] = __Weight.mWeight;
 			}
 		}
 	}
@@ -502,84 +502,84 @@ void RenderBatch::load_animation(AnimatedMesh& mesh)
 	// compose vertex data
 	// assemble vertex array
 	mesh.mesh.vertex_offset = animation_vertices.size();
-	animation_vertices.reserve(mesh.mesh.vertex_offset+t_Mesh->mNumVertices);
-	for (uint32_t i=0;i<t_Mesh->mNumVertices;i++)
+	animation_vertices.reserve(mesh.mesh.vertex_offset+__Mesh->mNumVertices);
+	for (uint32_t i=0;i<__Mesh->mNumVertices;i++)
 	{
-		AnimationUpload t_Vertex = {
-			.position = Toolbox::assimp_to_vec3(t_Mesh->mVertices[i]),
-			.uv_coord = Toolbox::assimp_to_vec2(t_Mesh->mTextureCoords[0][i]),
-			.normal = Toolbox::assimp_to_vec3(t_Mesh->mNormals[i]),
-			.tangent = Toolbox::assimp_to_vec3(t_Mesh->mTangents[i]),
+		AnimationUpload __Vertex = {
+			.position = Toolbox::assimp_to_vec3(__Mesh->mVertices[i]),
+			.uv_coord = Toolbox::assimp_to_vec2(__Mesh->mTextureCoords[0][i]),
+			.normal = Toolbox::assimp_to_vec3(__Mesh->mNormals[i]),
+			.tangent = Toolbox::assimp_to_vec3(__Mesh->mTangents[i]),
 			.bone_index
-					= glm::vec4(t_BoneIndices[i][0],t_BoneIndices[i][1],t_BoneIndices[i][2],t_BoneIndices[i][3]),
-			.bone_weight = glm::vec4(t_Weights[i][0],t_Weights[i][1],t_Weights[i][2],t_Weights[i][3])
+					= glm::vec4(__BoneIndices[i][0],__BoneIndices[i][1],__BoneIndices[i][2],__BoneIndices[i][3]),
+			.bone_weight = glm::vec4(__Weights[i][0],__Weights[i][1],__Weights[i][2],__Weights[i][3])
 		};
-		animation_vertices.push_back(t_Vertex);
+		animation_vertices.push_back(__Vertex);
 	}
 
 	// allocate memory for element array
 	mesh.mesh.vertex_range = 0;
-	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++) mesh.mesh.vertex_range += t_Mesh->mFaces[i].mNumIndices;
+	for (uint32_t i=0;i<__Mesh->mNumFaces;i++) mesh.mesh.vertex_range += __Mesh->mFaces[i].mNumIndices;
 	animation_elements.reserve(animation_elements.size()+mesh.mesh.vertex_range);
 
 	// assemble element array
-	for (uint32_t i=0;i<t_Mesh->mNumFaces;i++)
+	for (uint32_t i=0;i<__Mesh->mNumFaces;i++)
 	{
-		for (uint32_t j=0;j<t_Mesh->mFaces[i].mNumIndices;j++)
-			animation_elements.push_back(mesh.mesh.vertex_offset+t_Mesh->mFaces[i].mIndices[j]);
+		for (uint32_t j=0;j<__Mesh->mFaces[i].mNumIndices;j++)
+			animation_elements.push_back(mesh.mesh.vertex_offset+__Mesh->mFaces[i].mIndices[j]);
 	}
 
 	// extract animations
 	// allocate memory & iterate animations
-	size_t t_AnimationOffset = mesh.animations.size();
-	mesh.animations.reserve(t_AnimationOffset+t_DAEFile->mNumAnimations);
-	for (uint32_t i=0;i<t_DAEFile->mNumAnimations;i++)
+	size_t __AnimationOffset = mesh.animations.size();
+	mesh.animations.reserve(__AnimationOffset+__DAEFile->mNumAnimations);
+	for (uint32_t i=0;i<__DAEFile->mNumAnimations;i++)
 	{
-		aiAnimation* t_Animation = t_DAEFile->mAnimations[i];
+		aiAnimation* __Animation = __DAEFile->mAnimations[i];
 
 		// birth of a new animation
-		MeshAnimation t_MeshAnimation = {
-			.joints = std::vector<MeshJoint>(t_Animation->mNumChannels),
-			.duration = t_Animation->mDuration/t_Animation->mTicksPerSecond
+		MeshAnimation __MeshAnimation = {
+			.joints = std::vector<MeshJoint>(__Animation->mNumChannels),
+			.duration = __Animation->mDuration/__Animation->mTicksPerSecond
 		};
-		mesh.animations.push_back(t_MeshAnimation);
+		mesh.animations.push_back(__MeshAnimation);
 
 		// process animation channels
-		for (uint32_t j=0;j<t_Animation->mNumChannels;j++)
+		for (uint32_t j=0;j<__Animation->mNumChannels;j++)
 		{
-			aiNodeAnim* t_Node = t_Animation->mChannels[j];
-			MeshJoint& t_Joint = mesh.animations.back().joints[j];
+			aiNodeAnim* __Node = __Animation->mChannels[j];
+			MeshJoint& __Joint = mesh.animations.back().joints[j];
 
 			// process channel keys for related joint
-			t_Joint = {
-				.id = get_joint_id(mesh.joints,t_Node->mNodeName.C_Str()),
-				.position_keys = std::vector<glm::vec3>(t_Node->mNumPositionKeys),
-				.scaling_keys = std::vector<glm::vec3>(t_Node->mNumScalingKeys),
-				.rotation_keys = std::vector<glm::quat>(t_Node->mNumRotationKeys),
-				.position_durations = std::vector<double>(t_Node->mNumPositionKeys),
-				.scaling_durations = std::vector<double>(t_Node->mNumScalingKeys),
-				.rotation_durations = std::vector<double>(t_Node->mNumRotationKeys)
+			__Joint = {
+				.id = get_joint_id(mesh.joints,__Node->mNodeName.C_Str()),
+				.position_keys = std::vector<glm::vec3>(__Node->mNumPositionKeys),
+				.scaling_keys = std::vector<glm::vec3>(__Node->mNumScalingKeys),
+				.rotation_keys = std::vector<glm::quat>(__Node->mNumRotationKeys),
+				.position_durations = std::vector<double>(__Node->mNumPositionKeys),
+				.scaling_durations = std::vector<double>(__Node->mNumScalingKeys),
+				.rotation_durations = std::vector<double>(__Node->mNumRotationKeys)
 			};
 
 			// extract position keys
-			for (uint32_t k=0;k<t_Node->mNumPositionKeys;k++)
+			for (uint32_t k=0;k<__Node->mNumPositionKeys;k++)
 			{
-				t_Joint.position_keys[k] = Toolbox::assimp_to_vec3(t_Node->mPositionKeys[k].mValue);
-				t_Joint.position_durations[k] = t_Node->mPositionKeys[k].mTime/t_Animation->mTicksPerSecond;
+				__Joint.position_keys[k] = Toolbox::assimp_to_vec3(__Node->mPositionKeys[k].mValue);
+				__Joint.position_durations[k] = __Node->mPositionKeys[k].mTime/__Animation->mTicksPerSecond;
 			}
 
 			// extract scaling keys
-			for (uint32_t k=0;k<t_Node->mNumScalingKeys;k++)
+			for (uint32_t k=0;k<__Node->mNumScalingKeys;k++)
 			{
-				t_Joint.scaling_keys[k] = Toolbox::assimp_to_vec3(t_Node->mScalingKeys[k].mValue);
-				t_Joint.scaling_durations[k] = t_Node->mScalingKeys[k].mTime/t_Animation->mTicksPerSecond;
+				__Joint.scaling_keys[k] = Toolbox::assimp_to_vec3(__Node->mScalingKeys[k].mValue);
+				__Joint.scaling_durations[k] = __Node->mScalingKeys[k].mTime/__Animation->mTicksPerSecond;
 			}
 
 			// extract rotation keys
-			for (uint32_t k=0;k<t_Node->mNumRotationKeys;k++)
+			for (uint32_t k=0;k<__Node->mNumRotationKeys;k++)
 			{
-				t_Joint.rotation_keys[k] = Toolbox::assimp_to_quat(t_Node->mRotationKeys[k].mValue);
-				t_Joint.rotation_durations[k] = t_Node->mRotationKeys[k].mTime/t_Animation->mTicksPerSecond;
+				__Joint.rotation_keys[k] = Toolbox::assimp_to_quat(__Node->mRotationKeys[k].mValue);
+				__Joint.rotation_durations[k] = __Node->mRotationKeys[k].mTime/__Animation->mTicksPerSecond;
 			}
 		}
 	}
@@ -596,12 +596,12 @@ void RenderBatch::update_sprites()
 		SpriteTextureTuple& p_Texture = sprite_textures[p_Sprite.texture_id];
 
 		// calculate current frame
-		bool t_IncAnim = p_Animation.anim_progression<p_Animation.cycle_duration;
-		p_Animation.anim_progression += t_IncAnim*g_Frame.time_delta-p_Animation.anim_progression*!t_IncAnim;
+		bool __IncAnim = p_Animation.anim_progression<p_Animation.cycle_duration;
+		p_Animation.anim_progression += __IncAnim*g_Frame.time_delta-p_Animation.anim_progression*!__IncAnim;
 
 		// calculate spritesheet location
-		int t_Index = p_Animation.anim_progression/p_Animation.frame_duration;
-		p_Sprite.atlas_index = glm::vec2(t_Index%p_Texture.columns,t_Index/p_Texture.columns);
+		int __Index = p_Animation.anim_progression/p_Animation.frame_duration;
+		p_Sprite.atlas_index = glm::vec2(__Index%p_Texture.columns,__Index/p_Texture.columns);
 	}
 }
 
@@ -618,11 +618,11 @@ void RenderBatch::update_duplicates()
 		// calculate frames for all active instances
 		for (uint16_t i=0;i<p_Instance.active_range;i++)
 		{
-			bool t_IncAnim = p_Animation.anim_progressions[i]<p_Animation.cycle_duration;
-			p_Animation.anim_progressions[i] += t_IncAnim*g_Frame.time_delta
-					- p_Animation.anim_progressions[i]*!t_IncAnim;
-			int t_Index = p_Animation.anim_progressions[i]/p_Animation.frame_duration;
-			p_Instance.upload[i].atlas_index = glm::vec2(t_Index%p_Texture.columns,t_Index/p_Texture.columns);
+			bool __IncAnim = p_Animation.anim_progressions[i]<p_Animation.cycle_duration;
+			p_Animation.anim_progressions[i] += __IncAnim*g_Frame.time_delta
+					- p_Animation.anim_progressions[i]*!__IncAnim;
+			int __Index = p_Animation.anim_progressions[i]/p_Animation.frame_duration;
+			p_Instance.upload[i].atlas_index = glm::vec2(__Index%p_Texture.columns,__Index/p_Texture.columns);
 		}
 		// FIXME: code repitition
 		// FIXME: a lot of division for update code
@@ -643,24 +643,24 @@ Renderer::Renderer()
 	COMM_LOG("compile shaders");
 
 	// vertex shaders
-	Shader t_SpriteVertexShader = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
-	Shader t_DuplicateVertexShader = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
-	Shader t_MeshVertexShader = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
-	Shader t_AnimationVertexShader = Shader("./shader/obj/animation.vs",GL_VERTEX_SHADER);
-	Shader t_FramebufferVertexShader = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
+	Shader __SpriteVertexShader = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
+	Shader __DuplicateVertexShader = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
+	Shader __MeshVertexShader = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
+	Shader __AnimationVertexShader = Shader("./shader/obj/animation.vs",GL_VERTEX_SHADER);
+	Shader __FramebufferVertexShader = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
 
 	// fragment shaders
-	Shader t_DirectFragmentShader = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
-	Shader t_MeshFragmentShader = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
-	Shader t_DeferredFragmentShader = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
+	Shader __DirectFragmentShader = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
+	Shader __MeshFragmentShader = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
+	Shader __DeferredFragmentShader = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
 
 	COMM_LOG("assemble shader pipelines");
-	m_SpritePipeline.assemble(t_SpriteVertexShader,t_DirectFragmentShader);
-	m_DuplicatePipeline.assemble(t_DuplicateVertexShader,t_DirectFragmentShader);
+	m_SpritePipeline.assemble(__SpriteVertexShader,__DirectFragmentShader);
+	m_DuplicatePipeline.assemble(__DuplicateVertexShader,__DirectFragmentShader);
 	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
 	{
 		// mesh
-		batches[i].mesh_pipeline.assemble(t_MeshVertexShader,t_MeshFragmentShader);
+		batches[i].mesh_pipeline.assemble(__MeshVertexShader,__MeshFragmentShader);
 		batches[i].mesh_pipeline.enable();
 		batches[i].mesh_pipeline.upload_int("colour_map",0);
 		batches[i].mesh_pipeline.upload_int("normal_map",1);
@@ -669,23 +669,23 @@ Renderer::Renderer()
 
 		// animation
 		batches[i].animation_buffer.add_buffer();
-		batches[i].animation_pipeline.assemble(t_AnimationVertexShader,t_MeshFragmentShader);
+		batches[i].animation_pipeline.assemble(__AnimationVertexShader,__MeshFragmentShader);
 		batches[i].animation_pipeline.enable();
 		batches[i].animation_pipeline.upload_int("colour_map",0);
 		batches[i].animation_pipeline.upload_int("normal_map",1);
 		batches[i].animation_pipeline.upload_int("material_map",2);
 		batches[i].animation_pipeline.upload_int("emission_map",3);
 	}
-	m_DeferredPipeline.assemble(t_FramebufferVertexShader,t_DeferredFragmentShader);
+	m_DeferredPipeline.assemble(__FramebufferVertexShader,__DeferredFragmentShader);
 
 	// geometry
 	COMM_LOG("pre-loading basic sprite geometry");
-	float t_SpriteVertices[] = {
+	float __SpriteVertices[] = {
 		-.5f,.5f,.0f,.0f, .5f,-.5f,1.f,1.f, .5f,.5f,1.f,.0f,
 		.5f,-.5f,1.f,1.f, -.5f,.5f,.0f,.0f, -.5f,-.5f,.0f,1.f
 	};
 	m_SpriteBuffer.bind();
-	m_SpriteBuffer.upload_vertices(t_SpriteVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+	m_SpriteBuffer.upload_vertices(__SpriteVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 	m_SpritePipeline.enable();
 	m_SpritePipeline.point_buffer2D();
 	m_SpritePipeline.upload_int("tex",0);
@@ -715,12 +715,12 @@ Renderer::Renderer()
 	FrameBuffer::unbind();
 
 	COMM_LOG("pre-loading basic canvas geometry");
-	float t_CanvasVertices[] = {
+	float __CanvasVertices[] = {
 		-1.f,1.f,.0f,1.f, 1.f,-1.f,1.f,.0f, 1.f,1.f,1.f,1.f,
 		1.f,-1.f,1.f,.0f, -1.f,1.f,.0f,1.f, -1.f,-1.f,.0f,.0f
 	};
 	m_CanvasBuffer.bind();
-	m_CanvasBuffer.upload_vertices(t_CanvasVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
+	m_CanvasBuffer.upload_vertices(__CanvasVertices,PATTERN_SPRITE_TRIANGLE_REPEAT*sizeof(float));
 
 	COMM_LOG("setup shader pipeline for deferred lighting system");
 	m_DeferredPipeline.enable();
@@ -792,16 +792,16 @@ void interpreter_logic_texture(RenderBatch* batch,const std::vector<std::string>
 		COMM_ERR_FALLBACK("texture request: not enough arguments provided");
 
 	// check for texture atlas information
-	uint8_t t_Rows = 1,t_Cols = 1,t_Frames = 1;
+	uint8_t __Rows = 1,__Cols = 1,__Frames = 1;
 	if (args.size()>Args::Frames)
 	{
-		t_Rows = stoi(args[Args::Rows]);
-		t_Cols = stoi(args[Args::Columns]);
-		t_Frames = stoi(args[Args::Frames]);
+		__Rows = stoi(args[Args::Rows]);
+		__Cols = stoi(args[Args::Columns]);
+		__Frames = stoi(args[Args::Frames]);
 	}
 
 	// write texture
-	batch->add_sprite(args[Args::TexPath],t_Rows,t_Cols,t_Frames);
+	batch->add_sprite(args[Args::TexPath],__Rows,__Cols,__Frames);
 }
 
 void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>& args)
@@ -819,19 +819,19 @@ void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>&
 		COMM_ERR_FALLBACK("sprite registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t t_TextureID = stoi(args[Args::TexID]);
-	glm::vec2 t_Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-	float t_Width = stof(args[Args::Width]),t_Height = stof(args[Args::Height]);
+	uint16_t __TextureID = stoi(args[Args::TexID]);
+	glm::vec2 __Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float __Width = stof(args[Args::Width]),__Height = stof(args[Args::Height]);
 	// TODO: error messaging when conversion fails
 
 	// register sprite or animation based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t t_Duration = stoi(args[Args::AnimDuration]);
-		batch->register_sprite(t_TextureID,t_Position,t_Width,t_Height,t_Duration);
+		uint8_t __Duration = stoi(args[Args::AnimDuration]);
+		batch->register_sprite(__TextureID,__Position,__Width,__Height,__Duration);
 		return;
 	}
-	batch->register_sprite(t_TextureID,t_Position,t_Width,t_Height);
+	batch->register_sprite(__TextureID,__Position,__Width,__Height);
 }
 
 void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std::string>& args)
@@ -849,18 +849,18 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std
 		COMM_ERR_FALLBACK("duplicate registration: not enough arguments provided");
 
 	// arguments to variables
-	uint16_t t_TextureID = stoi(args[Args::TexID]);
-	glm::vec2 t_Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-	float t_Width = stof(args[Args::Width]),t_Height = stof(args[Args::Height]);
+	uint16_t __TextureID = stoi(args[Args::TexID]);
+	glm::vec2 __Position = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+	float __Width = stof(args[Args::Width]),__Height = stof(args[Args::Height]);
 
 	// register animated sprite instance based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t t_Duration = stoi(args[Args::AnimDuration]);
-		batch->register_duplicates(t_TextureID,t_Position,t_Width,t_Height,t_Duration);
+		uint8_t __Duration = stoi(args[Args::AnimDuration]);
+		batch->register_duplicates(__TextureID,__Position,__Width,__Height,__Duration);
 		return;
 	}
-	batch->register_duplicates(t_TextureID,t_Position,t_Width,t_Height);
+	batch->register_duplicates(__TextureID,__Position,__Width,__Height);
 }
 // FIXME: code duplications
 
@@ -877,20 +877,20 @@ void interpreter_logic_mesh(RenderBatch* batch,const std::vector<std::string>& a
 		COMM_ERR_FALLBACK("mesh registration: not enough arguments provided");
 
 	// arguments to variables
-	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
-	float t_Scale = 1;
-	glm::vec3 t_Rotation = glm::vec3(0);
+	glm::vec3 __Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float __Scale = 1;
+	glm::vec3 __Rotation = glm::vec3(0);
 
 	// check if scale and rotation is specified before adding mesh
 	if (args.size()>Args::RotZ)
 	{
-		t_Scale = stof(args[Args::Scl]);
-		t_Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
+		__Scale = stof(args[Args::Scl]);
+		__Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
 	}
 	batch->add_mesh(
 			args[Args::ObjPath],args[Args::TexPath],
 			args[Args::NormPath],args[Args::MatPath],args[Args::EmitPath],
-			t_Position,t_Scale,t_Rotation
+			__Position,__Scale,__Rotation
 		);
 }
 
@@ -907,20 +907,20 @@ void interpreter_logic_animation(RenderBatch* batch,const std::vector<std::strin
 		COMM_ERR_FALLBACK("mesh animation registration: not enough arguments provided");
 
 	// arguments to variables
-	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
-	float t_Scale = 1;
-	glm::vec3 t_Rotation = glm::vec3(0);
+	glm::vec3 __Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float __Scale = 1;
+	glm::vec3 __Rotation = glm::vec3(0);
 
 	// check if scale and rotation is specified before adding mesh
 	if (args.size()>Args::RotZ)
 	{
-		t_Scale = stof(args[Args::Scl]);
-		t_Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
+		__Scale = stof(args[Args::Scl]);
+		__Rotation = glm::vec3(stof(args[Args::RotX]),stof(args[Args::RotY]),stof(args[Args::RotZ]));
 	}
 	batch->add_animation(
 			args[Args::DaePath],args[Args::TexPath],
 			args[Args::NormPath],args[Args::MatPath],args[Args::EmitPath],
-			t_Position,t_Scale,t_Rotation
+			__Position,__Scale,__Rotation
 		);
 }
 
@@ -939,20 +939,20 @@ void interpreter_logic_spawn_instanced(RenderBatch* batch,const std::vector<std:
 	if (args[Args::Type]=="sprite")
 	{
 		// setup attributes
-		uint16_t t_InstanceID = stoi(args[Args::InstID]);
-		glm::vec2 t_Offset = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
-		glm::vec2 t_Scale = glm::vec2(1.f);
-		float t_Rotation = .0f;
-		glm::vec2 t_SubTexture = glm::vec2(0);
+		uint16_t __InstanceID = stoi(args[Args::InstID]);
+		glm::vec2 __Offset = glm::vec2(stof(args[Args::PosX]),stof(args[Args::PosY]));
+		glm::vec2 __Scale = glm::vec2(1.f);
+		float __Rotation = .0f;
+		glm::vec2 __SubTexture = glm::vec2(0);
 
 		// optionally extract rotation and spritesheet index & spawn
 		if (args.size()>Args::SubtexRow)
 		{
-			t_Scale = glm::vec2(stof(args[Args::SclX]),stof(args[Args::SclY]));
-			t_Rotation = stof(args[Args::Rotation]);
-			t_SubTexture = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
+			__Scale = glm::vec2(stof(args[Args::SclX]),stof(args[Args::SclY]));
+			__Rotation = stof(args[Args::Rotation]);
+			__SubTexture = glm::vec2(stoi(args[Args::SubtexCol]),stoi(args[Args::SubtexRow]));
 		}
-		batch->spawn_sprite_instance(t_InstanceID,t_Offset,t_Scale,t_Rotation,t_SubTexture);
+		batch->spawn_sprite_instance(__InstanceID,__Offset,__Scale,__Rotation,__SubTexture);
 	}
 
 	// process mesh instance spawn request
@@ -981,50 +981,50 @@ void interpreter_logic_light(RenderBatch* batch,const std::vector<std::string>& 
 		COMM_ERR_FALLBACK("emitting lights: not enough arguments provided");
 
 	// extracting basic parameters
-	glm::vec3 t_Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
-	float t_Intensity = stof(args[Args::Intensity]);
-	glm::vec3 t_Colour = glm::vec3(1.f);
+	glm::vec3 __Position = glm::vec3(stof(args[Args::PosX]),stof(args[Args::PosY]),stof(args[Args::PosZ]));
+	float __Intensity = stof(args[Args::Intensity]);
+	glm::vec3 __Colour = glm::vec3(1.f);
 	if (args.size()>Args::ColB)
-		glm::vec3 t_Colour = glm::vec3(stof(args[Args::ColR]),stof(args[Args::ColG]),stof(args[Args::ColB]));
+		glm::vec3 __Colour = glm::vec3(stof(args[Args::ColR]),stof(args[Args::ColG]),stof(args[Args::ColB]));
 
 	// process sunlight emission request
 	if (args[Args::Type]=="sun")
 	{
-		LightDirectional t_Result = {
-			.position = t_Position,
-			.colour = t_Colour,
-			.intensity = t_Intensity
+		LightDirectional __Result = {
+			.position = __Position,
+			.colour = __Colour,
+			.intensity = __Intensity
 		};
-		batch->lighting.directional_lights.push_back(t_Result);
+		batch->lighting.directional_lights.push_back(__Result);
 		return;
 	}
 
 	// process pointlight emission request
 	if (args[Args::Type]=="point")
 	{
-		LightPoint t_Result = {
-			.position = t_Position,
-			.colour = t_Colour,
-			.intensity = t_Intensity,
+		LightPoint __Result = {
+			.position = __Position,
+			.colour = __Colour,
+			.intensity = __Intensity,
 			.c0 = stof(args[Args::Coeff0]),
 			.c1 = stof(args[Args::Coeff1]),
 			.c2 = stof(args[Args::Coeff2])
 		};
-		batch->lighting.point_lights.push_back(t_Result);
+		batch->lighting.point_lights.push_back(__Result);
 		return;
 	}
 
 	if (args[Args::Type]=="spot")
 	{
-		LightSpot t_Result = {
-			.position = t_Position,
-			.colour = t_Colour,
+		LightSpot __Result = {
+			.position = __Position,
+			.colour = __Colour,
 			.direction = glm::vec3(stof(args[Args::Coeff0]),stof(args[Args::Coeff1]),stof(args[Args::Coeff2])),
-			.intensity = t_Intensity,
+			.intensity = __Intensity,
 			.cut_inner = stof(args[Args::Inner]),
 			.cut_outer = stof(args[Args::Outer])
 		};
-		batch->lighting.spot_lights.push_back(t_Result);
+		batch->lighting.spot_lights.push_back(__Result);
 		return;
 	}
 
@@ -1078,25 +1078,25 @@ void bgr_load_batch(RenderBatch* batch)
 
 	// open file
 	COMM_MSG(LOG_BLUE,"-> interpretation start");
-	std::ifstream t_CCBFile(batch->path,std::ios::in);
-	std::string t_CommandLine;
-	while (getline(t_CCBFile,t_CommandLine))
+	std::ifstream __CCBFile(batch->path,std::ios::in);
+	std::string __CommandLine;
+	while (getline(__CCBFile,__CommandLine))
 	{
 		// split command and its arguments, interrupt when empty command
-		std::vector<std::string> t_Args = Toolbox::split_string(t_CommandLine,' ');
-		if (!t_Args.size()) continue;
+		std::vector<std::string> __Args = Toolbox::split_string(__CommandLine,' ');
+		if (!__Args.size()) continue;
 
 		// correlate command
 		uint8_t i = 0;
-		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&t_Args[0]!=gfx_command_correlation[i]) i++;
+		while (i<RENDERER_INTERPRETER_COMMAND_COUNT&&__Args[0]!=gfx_command_correlation[i]) i++;
 
 		// call command
-		cmd_handler[i](batch,t_Args);
+		cmd_handler[i](batch,__Args);
 	}
 	// FIXME: reading FILE* by fscan pattern could be a lot more useful in this case
 
 	// close file and ready batch load
-	t_CCBFile.close();
+	__CCBFile.close();
 	COMM_MSG(LOG_BLUE,"-> interpretation end");
 
 	// load geometry
@@ -1107,27 +1107,27 @@ void bgr_load_batch(RenderBatch* batch)
 
 	// load sprite textures
 	COMM_AWT("sprites: streaming %li textures",batch->sprite_textures.size());
-	for (SpriteTextureTuple& t_Texture : batch->sprite_textures) t_Texture.texture.load();
+	for (SpriteTextureTuple& __Texture : batch->sprite_textures) __Texture.texture.load();
 	COMM_CNF();
 
 	// load mesh textures
 	COMM_AWT("meshes: streaming %li textures",batch->mesh_textures.size()*4);
-	for (MeshTextureTuple& t_Texture : batch->mesh_textures)
+	for (MeshTextureTuple& __Texture : batch->mesh_textures)
 	{
-		t_Texture.colours.load();
-		t_Texture.normals.load();
-		t_Texture.materials.load();
-		t_Texture.emission.load();
+		__Texture.colours.load();
+		__Texture.normals.load();
+		__Texture.materials.load();
+		__Texture.emission.load();
 	}
 	COMM_CNF();
 
 	COMM_AWT("animations: streaming %li textures",batch->animation_textures.size()*4);
-	for (MeshTextureTuple& t_Texture : batch->animation_textures)
+	for (MeshTextureTuple& __Texture : batch->animation_textures)
 	{
-		t_Texture.colours.load();
-		t_Texture.normals.load();
-		t_Texture.materials.load();
-		t_Texture.emission.load();
+		__Texture.colours.load();
+		__Texture.normals.load();
+		__Texture.materials.load();
+		__Texture.emission.load();
 	}
 	COMM_CNF();
 
@@ -1137,21 +1137,21 @@ void bgr_load_batch(RenderBatch* batch)
 RenderBatch* Renderer::load(const std::string& path)
 {
 	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t t_BatchID = 0;
-	while (t_BatchID<(RENDERER_BATCHES_COUNT-1)&&batches[t_BatchID].selected) t_BatchID++;
+	uint8_t __BatchID = 0;
+	while (__BatchID<(RENDERER_BATCHES_COUNT-1)&&batches[__BatchID].selected) __BatchID++;
 
 	// store path in free batch & signal batch load
-	RenderBatch* r_Batch = &batches[t_BatchID];
+	RenderBatch* r_Batch = &batches[__BatchID];
 	r_Batch->path = path;
 
 	// communicate selection
-	COMM_LOG("batch %i selected for writing",t_BatchID);
+	COMM_LOG("batch %i selected for writing",__BatchID);
 	COMM_ERR_COND(r_Batch->selected,"CAREFUL! batch not in idle, overflow buffer selected!");
 	r_Batch->selected = true;
 
 	// start background loading
-	std::thread t_LoadThread(&bgr_load_batch,r_Batch);
-	t_LoadThread.detach();
+	std::thread __LoadThread(&bgr_load_batch,r_Batch);
+	__LoadThread.detach();
 	return r_Batch;
 }
 
@@ -1159,24 +1159,26 @@ RenderBatch* Renderer::load(const std::string& path)
 /*
 	TODO
 */
-void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline)
+void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline,double& stream_time)
 {
 	COMM_AWT("attempting to upload %li sprite textures to gpu",batch->sprite_textures.size());
-	
+
 	// load textures
-	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point __StreamTime = std::chrono::steady_clock::now();
 	while (batch->sprite_upload_head<batch->sprite_textures.size())
 	{
 		// check timing for stall until next frame when upload takes too long
-		if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+		stream_time += (std::chrono::steady_clock::now()-__StreamTime).count()*CONVERSION_MULT_MILLISECONDS;
+		if (stream_time>1.f)
 		{
 			COMM_CNF();
 			return;
 		}
+		// TODO: maybe order uploads towards end of render to measure a remaining time budget for streaming
 
 		// upload texture to gpu
-		SpriteTextureTuple& t_Texture = batch->sprite_textures[batch->sprite_upload_head];
-		t_Texture.texture.upload();
+		SpriteTextureTuple& __Texture = batch->sprite_textures[batch->sprite_upload_head];
+		__Texture.texture.upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_mipmap();
 		batch->sprite_upload_head++;
@@ -1188,7 +1190,7 @@ void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline)
 // TODO: automatically allocate time budget based on current workload
 //		background texture streaming while render
 
-void sprite_update(RenderBatch* batch,ShaderPipeline* pipeline)
+void sprite_update(RenderBatch* batch,ShaderPipeline* pipeline,double& stream_time)
 {
 	// update registered animations
 	batch->update_sprites();
@@ -1210,25 +1212,27 @@ void sprite_update(RenderBatch* batch,ShaderPipeline* pipeline)
 	}
 }
 
-typedef void (*sprite_update_routine)(RenderBatch*,ShaderPipeline*);
+typedef void (*sprite_update_routine)(RenderBatch*,ShaderPipeline*,double&);
 sprite_update_routine update_sprites[2] = { sprite_upload,sprite_update };
 
 
 /*
 	TODO
 */
-void mesh_upload(RenderBatch* batch)
+void mesh_upload(RenderBatch* batch,double& stream_time)
 {
 	COMM_AWT("attempting to upload %li mesh textures to gpu",batch->mesh_textures.size()*4);
 
 	// upload textures
-	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point __StreamTime = std::chrono::steady_clock::now();
 	while (batch->mesh_upload_head<batch->mesh_textures.size())
 	{
 		while (batch->mesh_upload_subhead<4)
 		{
 			// check timing and stall texture upload until next frame when necessary for framerate reasons
-			if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+			stream_time += (std::chrono::steady_clock::now()-__StreamTime).count()
+					* CONVERSION_MULT_MILLISECONDS;
+			if (stream_time>1.f)
 			{
 				COMM_CNF();
 				return;
@@ -1259,7 +1263,7 @@ void mesh_upload(RenderBatch* batch)
 	COMM_CNF();
 }
 
-void mesh_update(RenderBatch* batch)
+void mesh_update(RenderBatch* batch,double& stream_time)
 {
 	// upload camera transform & iterate meshes
 	for (uint16_t i=0;i<batch->meshes.size();i++)
@@ -1283,25 +1287,27 @@ void mesh_update(RenderBatch* batch)
 	}
 }
 
-typedef void (*mesh_update_routine)(RenderBatch*);
+typedef void (*mesh_update_routine)(RenderBatch*,double&);
 mesh_update_routine update_meshes[2] = { mesh_upload,mesh_update };
 
 /*
 	TODO
 */
-void animation_upload(RenderBatch* batch)
+void animation_upload(RenderBatch* batch,double& stream_time)
 {
 
 	COMM_AWT("attempting to upload %li animation textures to gpu",batch->animation_textures.size()*4);
 
 	// upload textures
-	std::chrono::steady_clock::time_point t_StreamTime = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point __StreamTime = std::chrono::steady_clock::now();
 	while (batch->animation_upload_head<batch->animation_textures.size())
 	{
 		while (batch->animation_upload_subhead<4)
 		{
 			// check timing and stall texture upload until next frame when necessary for framerate reasons
-			if ((std::chrono::steady_clock::now()-t_StreamTime).count()*CONVERSION_MULT_MILLISECONDS>1.f)
+			stream_time += (std::chrono::steady_clock::now()-__StreamTime).count()
+					* CONVERSION_MULT_MILLISECONDS;
+			if (stream_time>1.f)
 			{
 				COMM_CNF();
 				return;
@@ -1338,7 +1344,7 @@ void animation_upload(RenderBatch* batch)
 	COMM_CNF();
 }
 
-void animation_update(RenderBatch* batch)
+void animation_update(RenderBatch* batch,double& stream_time)
 {
 	for (uint16_t i=0;i<batch->animated_meshes.size();i++)
 	{
@@ -1367,7 +1373,7 @@ void animation_update(RenderBatch* batch)
 	}
 }
 
-typedef void (*anim_update_routine)(RenderBatch*);
+typedef void (*anim_update_routine)(RenderBatch*,double&);
 anim_update_routine update_animations[2] = { animation_upload,animation_update };
 
 /*
@@ -1377,6 +1383,7 @@ void Renderer::update()
 {
 	// rendering 3D geometry
 	// 3D setup
+	double __StreamTime = .0;
 	glDisable(GL_BLEND);
 
 	// render geometry for shadow projection
@@ -1392,13 +1399,13 @@ void Renderer::update()
 		batch->mesh_buffer.bind();
 		batch->mesh_pipeline.enable();
 		batch->mesh_pipeline.upload_camera(m_Shadow.shadow_view);
-		update_meshes[1](batch);
+		update_meshes[1](batch,__StreamTime);
 
 		// animation
 		batch->animation_buffer.bind();
 		batch->animation_pipeline.enable();
 		batch->animation_pipeline.upload_camera(m_Shadow.shadow_view);
-		update_animations[1](batch);
+		update_animations[1](batch,__StreamTime);
 	}
 	FrameBuffer::unbind();
 	glViewport(0,0,g_Config.vFrameResolutionWidth,g_Config.vFrameResolutionHeight);
@@ -1414,13 +1421,13 @@ void Renderer::update()
 		batch->mesh_buffer.bind();
 		batch->mesh_pipeline.enable();
 		batch->mesh_pipeline.upload_camera(g_Camera3D);
-		update_meshes[batch->mesh_ready](batch);
+		update_meshes[batch->mesh_ready](batch,__StreamTime);
 
 		// animation
 		batch->animation_buffer.bind();
 		batch->animation_pipeline.enable();
 		batch->animation_pipeline.upload_camera(g_Camera3D);
-		update_animations[batch->anim_ready](batch);
+		update_animations[batch->anim_ready](batch,__StreamTime);
 	}
 	FrameBuffer::unbind();
 
@@ -1450,7 +1457,8 @@ void Renderer::update()
 	// iterate sprite render
 	m_SpriteBuffer.bind();
 	m_SpritePipeline.enable();
-	for (RenderBatch* batch : gpu_update_pointers) update_sprites[batch->sprite_ready](batch,&m_SpritePipeline);
+	for (RenderBatch* batch : gpu_update_pointers)
+		update_sprites[batch->sprite_ready](batch,&m_SpritePipeline,__StreamTime);
 
 	// iterate duplicate render
 	m_SpriteBuffer.bind_index();
@@ -1464,12 +1472,12 @@ void Renderer::update()
 void Renderer::update_lighting()
 {
 	m_DeferredPipeline.enable();
-	uint8_t t_DirOffset = 0,t_PointOffset = 0,t_SpotOffset = 0;
+	uint8_t __DirOffset = 0,__PointOffset = 0,__SpotOffset = 0;
 	for (RenderBatch* batch : gpu_update_pointers)
-		batch->lighting.upload(m_DeferredPipeline,t_DirOffset,t_PointOffset,t_SpotOffset);
-	m_DeferredPipeline.upload_int("sunlight_count",t_DirOffset);
-	m_DeferredPipeline.upload_int("pointlight_count",t_PointOffset);
-	m_DeferredPipeline.upload_int("spotlight_count",t_SpotOffset);
+		batch->lighting.upload(m_DeferredPipeline,__DirOffset,__PointOffset,__SpotOffset);
+	m_DeferredPipeline.upload_int("sunlight_count",__DirOffset);
+	m_DeferredPipeline.upload_int("pointlight_count",__PointOffset);
+	m_DeferredPipeline.upload_int("spotlight_count",__SpotOffset);
 }
 
 /*

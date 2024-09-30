@@ -310,9 +310,10 @@ private:
 	FrameBuffer m_GBuffer = FrameBuffer(4);
 	FrameBuffer m_ShadowFrameBuffer = FrameBuffer();
 
-	// data
+	// lighting
 	Shadow m_Shadow;
 };
+// TODO: make data static to prevent problems with possible underuse of renderer global
 
 inline Renderer g_Renderer = Renderer();
 

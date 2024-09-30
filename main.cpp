@@ -79,7 +79,7 @@ scene_update update_scene[] = { load_scene,maintain_scene };
 int main(int argc,char** argv)
 {
 	// settings
-	//Frame::gpu_vsync_on();
+	Frame::gpu_vsync_on();
 	//g_Frame.set_refresh_rate(60);
 
 	// store scene data
@@ -110,7 +110,7 @@ int main(int argc,char** argv)
 #ifdef __WIN32__
 		ShellExecute(NULL,NULL,"yomisensei.exe",NULL,NULL,SW_SHOW);
 #else
-		uint32_t __rbt = system("./yomisensei &");
+		uint32_t _rbt = system("./yomisensei &");
 #endif
 
 	// close
