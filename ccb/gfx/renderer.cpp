@@ -1171,7 +1171,7 @@ void sprite_upload(RenderBatch* batch,ShaderPipeline* pipeline,double& stream_ti
 		stream_time += (std::chrono::steady_clock::now()-__StreamTime).count()*CONVERSION_MULT_MILLISECONDS;
 		if (stream_time>1.f)
 		{
-			COMM_CNF();
+			COMM_STL();
 			return;
 		}
 		// TODO: maybe order uploads towards end of render to measure a remaining time budget for streaming
@@ -1234,7 +1234,7 @@ void mesh_upload(RenderBatch* batch,double& stream_time)
 					* CONVERSION_MULT_MILLISECONDS;
 			if (stream_time>1.f)
 			{
-				COMM_CNF();
+				COMM_STL();
 				return;
 			}
 
@@ -1309,7 +1309,7 @@ void animation_upload(RenderBatch* batch,double& stream_time)
 					* CONVERSION_MULT_MILLISECONDS;
 			if (stream_time>1.f)
 			{
-				COMM_CNF();
+				COMM_STL();
 				return;
 			}
 

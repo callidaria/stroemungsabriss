@@ -103,6 +103,7 @@ static inline void produce_timestamp(bool padding=true)
 // basic console communication
 #define COMM_RST() reset_timestamp()
 #define COMM_AWT(...) COMM_RST(),printf(__VA_ARGS__),printf("... ");
+#define COMM_STL() printf("%sstalled%s after ",LOG_GREY,LOG_TIMING[0]),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
 #define COMM_CNF() printf("%sdone%s in ",LOG_GREEN,LOG_TIMING[0]),produce_timestamp(false),printf("%s\n",LOG_CLEAR);
 #define COMM_MSG(col,...) produce_timestamp(),printf(" | %s",col),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
 #define COMM_ERR(...) printf("%serror: ",LOG_RED),printf(__VA_ARGS__),printf("%s\n",LOG_CLEAR);
