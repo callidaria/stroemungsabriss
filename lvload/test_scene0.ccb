@@ -2,10 +2,10 @@ texture ./res/bllt_ffdir.png
 texture ./res/continue_dialogue.png 2 3 5
 
 sprite 0 150 150 100 100
-sprite 1 300 200 75 75 20
+sprite 1 300 200 75 75 0.25
 
 duplicate 0 0 0 25 25
-duplicate 1 0 0 17 17 20
+duplicate 1 0 0 17 17 0.35
 
 spawn sprite 0 1200 700
 spawn sprite 0 370 420

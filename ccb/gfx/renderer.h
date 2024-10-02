@@ -63,7 +63,7 @@ struct Sprite
 struct SpriteAnimation
 {
 	uint16_t id;
-	uint8_t cycle_duration;
+	float cycle_duration;
 	float frame_duration;
 	float anim_progression = .0f;
 };
@@ -80,7 +80,7 @@ struct SpriteInstance
 struct SpriteAnimationInstance
 {
 	uint16_t id;
-	uint8_t cycle_duration;
+	float cycle_duration;
 	float frame_duration;
 	float anim_progressions[SPRITE_INSTANCE_CAPACITY] = { .0f };
 };
@@ -200,9 +200,9 @@ struct RenderBatch
 	// sprite creation
 	uint16_t add_sprite(std::string path,uint8_t rows=1,uint8_t cols=1,uint8_t frames=1);
 	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
-	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
+	void register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,float dur);
 	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt);
-	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur);
+	void register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,float dur);
 
 	// mesh creation
 	void add_mesh(std::string obj,std::string tex,std::string norm,std::string mats,std::string emit,

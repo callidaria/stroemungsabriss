@@ -167,14 +167,15 @@ void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float 
 /*
 	TODO
 */
-void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
+void RenderBatch::register_sprite(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,float dur)
 {
 	// add animation data
 	SpriteAnimation __Animation = {
 		.id = (uint16_t)sprites.size(),
 		.cycle_duration = dur,
-		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
+		.frame_duration = dur/sprite_textures[tex_id].frames,
 	};
+	// FIXME: input duration is doubled. it seems that 1.f will cause the animation to repeat after 2 seconds
 
 	// register sprite & animation
 	sprite_animations.push_back(__Animation);
@@ -201,13 +202,13 @@ void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,fl
 /*
 	TODO
 */
-void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,uint8_t dur)
+void RenderBatch::register_duplicates(uint16_t tex_id,glm::vec2 pos,float wdt,float hgt,float dur)
 {
 	// add animation data
 	SpriteAnimationInstance __Animation = {
 		.id = (uint16_t)duplicates.size(),
 		.cycle_duration = dur,
-		.frame_duration = (float)dur/sprite_textures[tex_id].frames,
+		.frame_duration = dur/sprite_textures[tex_id].frames,
 	};
 
 	// register duplicate & animation
@@ -827,7 +828,7 @@ void interpreter_logic_sprite(RenderBatch* batch,const std::vector<std::string>&
 	// register sprite or animation based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t __Duration = stoi(args[Args::AnimDuration]);
+		float __Duration = stof(args[Args::AnimDuration]);
 		batch->register_sprite(__TextureID,__Position,__Width,__Height,__Duration);
 		return;
 	}
@@ -856,7 +857,7 @@ void interpreter_logic_instanced_sprite(RenderBatch* batch,const std::vector<std
 	// register animated sprite instance based on argument length
 	if (args.size()>Args::AnimDuration)
 	{
-		uint8_t __Duration = stoi(args[Args::AnimDuration]);
+		float __Duration = stof(args[Args::AnimDuration]);
 		batch->register_duplicates(__TextureID,__Position,__Width,__Height,__Duration);
 		return;
 	}
@@ -1141,18 +1142,18 @@ RenderBatch* Renderer::load(const std::string& path)
 	while (__BatchID<(RENDERER_BATCHES_COUNT-1)&&batches[__BatchID].selected) __BatchID++;
 
 	// store path in free batch & signal batch load
-	RenderBatch* r_Batch = &batches[__BatchID];
-	r_Batch->path = path;
+	RenderBatch* p_Batch = &batches[__BatchID];
+	p_Batch->path = path;
 
 	// communicate selection
 	COMM_LOG("batch %i selected for writing",__BatchID);
-	COMM_ERR_COND(r_Batch->selected,"CAREFUL! batch not in idle, overflow buffer selected!");
-	r_Batch->selected = true;
+	COMM_ERR_COND(p_Batch->selected,"CAREFUL! batch not in idle, overflow buffer selected!");
+	p_Batch->selected = true;
 
 	// start background loading
-	std::thread __LoadThread(&bgr_load_batch,r_Batch);
+	std::thread __LoadThread(&bgr_load_batch,p_Batch);
 	__LoadThread.detach();
-	return r_Batch;
+	return p_Batch;
 }
 
 
