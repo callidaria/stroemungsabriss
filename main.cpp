@@ -52,16 +52,16 @@ void maintain_scene(SceneData& data)
 
 	// camera movement
 	// calculate camera to target object rotation
-	int8_t t_KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
-	float t_MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
-	data.ape_momentum += t_KeyDirection+t_MouseDirection*100;
+	int8_t __KeyDirection = g_Input.kb.ka[SDL_SCANCODE_L]-g_Input.kb.ka[SDL_SCANCODE_J];
+	float __MouseDirection = (data.dt_mouse_position-g_Input.mouse.mxfr)*g_Input.mouse.mb[0];
+	data.ape_momentum += __KeyDirection+__MouseDirection*100;
 	g_Camera3D.position = data.cam_position;
 	g_Camera3D.rotate_around_target(data.ape_momentum);
 	data.cam_position = g_Camera3D.position;
 
 	// calculate camera zoom
-	int8_t t_KeyZoom = g_Input.kb.ka[SDL_SCANCODE_K]-g_Input.kb.ka[SDL_SCANCODE_I];
-	data.zoom_momentum += g_Input.mouse.mw*-.1f+t_KeyZoom*.01f;
+	int8_t __KeyZoom = g_Input.kb.ka[SDL_SCANCODE_K]-g_Input.kb.ka[SDL_SCANCODE_I];
+	data.zoom_momentum += g_Input.mouse.mw*-.1f+__KeyZoom*.01f;
 	data.ape_zoom += data.zoom_momentum;
 	g_Camera3D.position *= data.ape_zoom;
 
