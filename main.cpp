@@ -6,6 +6,8 @@
 #include "ccb/fcn/input.h"
 #include "ccb/gfx/renderer.h"
 
+#include "script/ui/ui.h"
+
 
 struct SceneData
 {
@@ -78,6 +80,9 @@ scene_update update_scene[] = { load_scene,maintain_scene };
 
 int main(int argc,char** argv)
 {
+	// setup
+	UI ui = UI();
+
 	// settings
 	Frame::gpu_vsync_on();
 	//g_Frame.set_refresh_rate(60);
@@ -97,6 +102,7 @@ int main(int argc,char** argv)
 
 		// update
 		g_Input.update(run);
+		ui.update();
 		update_scene[sdata.scene_ready](sdata);
 
 		// render

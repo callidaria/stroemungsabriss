@@ -194,6 +194,7 @@ struct Shadow
 
 // batches
 // batch data to seperately load and display to other buffers
+constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 struct RenderBatch
 {
 	// utility
@@ -266,7 +267,6 @@ struct RenderBatch
 	// attributes
 	std::string path;
 };
-constexpr uint8_t RENDERER_BATCHES_COUNT = 4;
 
 
 class Renderer
@@ -276,7 +276,7 @@ public:
 	Renderer();
 	~Renderer() {  }
 
-	RenderBatch* load(const std::string& path);
+	RenderBatch* load(const std::string& path,int16_t target_batch=-1);
 	void update();
 
 	// lighting

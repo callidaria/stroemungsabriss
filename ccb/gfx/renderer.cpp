@@ -1135,18 +1135,21 @@ void bgr_load_batch(RenderBatch* batch)
 	g_Renderer.gpu_update_pointers.push_back(batch);
 }
 
-RenderBatch* Renderer::load(const std::string& path)
+RenderBatch* Renderer::load(const std::string& path,int16_t batch_id)
 {
 	// find available batch by unix approach: last batch will be overwritten if no idle
-	uint8_t __BatchID = 0;
-	while (__BatchID<(RENDERER_BATCHES_COUNT-1)&&batches[__BatchID].selected) __BatchID++;
+	if (batch_id<0)
+	{
+		batch_id = 0;
+		while (batch_id<(RENDERER_BATCHES_COUNT-1)&&batches[batch_id].selected) batch_id++;
+	}
 
 	// store path in free batch & signal batch load
-	RenderBatch* p_Batch = &batches[__BatchID];
+	RenderBatch* p_Batch = &batches[batch_id];
 	p_Batch->path = path;
 
 	// communicate selection
-	COMM_LOG("batch %i selected for writing",__BatchID);
+	COMM_LOG("batch %i selected for writing",batch_id);
 	COMM_ERR_COND(p_Batch->selected,"CAREFUL! batch not in idle, overflow buffer selected!");
 	p_Batch->selected = true;
 
