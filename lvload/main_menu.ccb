@@ -1,3 +1,7 @@
-anim: -50 -200 100 400 ./res/vrt_title.png 1 4 30 0
-anim: -250 -42 500 83 ./res/hrz_title.png 4 1 30 0
-sprite: 720 75 320 180 ./res/weight.png
+texture ./res/weight.png
+texture ./res/vrt_title.png 1 4 4
+
+sprite 0 720 75 320 180
+
+sprite 1 -50 -200 100 400
+sprite 1 -250 -42 500 83

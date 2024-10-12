@@ -740,6 +740,11 @@ Renderer::Renderer()
 	FrameBuffer::unbind();
 	// TODO: setup geometry-only render pipeline for shadow projection
 
+	COMM_LOG("setup text");
+	FT_Library _ftlib;
+	bool __failed = FT_Init_FreeType(&_ftlib);
+	COMM_ERR_COND(__failed,"text interpretation not available");
+
 	COMM_SCC("renderer ready");
 }
 

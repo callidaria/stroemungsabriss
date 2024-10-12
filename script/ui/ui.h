@@ -1,4 +1,5 @@
 #include "../../ccb/mat/math.h"
+#include "menu.h"
 
 class UI
 {
@@ -13,5 +14,5 @@ public:
 private:
 
 	MainMenu m_MainMenu;
-	ActionMenu m_ActionMenu;
+	//ActionMenu m_ActionMenu;
 };
