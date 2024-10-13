@@ -54,6 +54,7 @@ Frame::Frame(const char* title)
 	glFrontFace(GL_CCW);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glViewport(0,0,w_res,h_res);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 
 	// openal setup
 	COMM_LOG("audio setup");

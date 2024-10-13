@@ -741,9 +741,8 @@ Renderer::Renderer()
 	// TODO: setup geometry-only render pipeline for shadow projection
 
 	COMM_LOG("setup text");
-	FT_Library _ftlib;
-	bool __failed = FT_Init_FreeType(&_ftlib);
-	COMM_ERR_COND(__failed,"text interpretation not available");
+	bool _failed = FT_Init_FreeType(&m_FreetypeLibrary);
+	COMM_ERR_COND(_failed,"text interpretation not available");
 
 	COMM_SCC("renderer ready");
 }
@@ -1473,6 +1472,50 @@ void Renderer::update()
 	m_SpriteBuffer.bind_index();
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
+}
+
+/*
+	TODO
+*/
+void Renderer::vanish()
+{
+	FT_Done_FreeType(m_FreetypeLibrary);
+}
+
+/*
+	TODO
+*/
+void Renderer::add_font(const char* path,uint16_t size)
+{
+	COMM_LOG("loading font: %s",path);
+
+	// load ttf file
+	FT_Face __Face;
+	bool _failed = FT_New_Face(m_FreetypeLibrary,path,0,&__Face);
+	COMM_ERR_COND(_failed,"font loading unsuccessful");
+	FT_Set_Pixel_Sizes(__Face,0,size);
+
+	// iterate characters
+	for (uint8_t i=0;i<128;i++)
+	{
+		// load glyph
+		_failed = FT_Load_Char(__Face,i,FT_LOAD_RENDER);
+		COMM_ERR_COND(_failed,"character %c not found",(char)i);
+
+		// texture generation
+		m_Font[i] = {
+			.buffer = __Face->glyph->bitmap.buffer,
+			.width = __Face->glyph->bitmap.width,
+			.height = __Face->glyph->bitmap.rows,
+			.bearing_x = __Face->glyph->bitmap_left,
+			.bearing_y = __Face->glyph->bitmap_top,
+			.advance = __Face->glyph->advance.x
+		};
+		m_Font[i].upload();
+		Texture::set_texture_parameter_clamp_to_edge();
+		Texture::set_texture_parameter_linear_unfiltered();
+	}
+	FT_Done_Face(__Face);
 }
 
 /*

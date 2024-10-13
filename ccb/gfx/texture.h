@@ -51,6 +51,21 @@ private:
 };
 
 
+struct Glyph
+{
+	// utility
+	inline void bind() { glBindTexture(GL_TEXTURE_2D,texture); }
+	void upload();
+
+	// data
+	void* buffer;
+	uint32_t texture;
+	uint32_t width,height;
+	int32_t bearing_x,bearing_y;
+	int64_t advance;
+};
+
+
 class FrameBuffer
 {
 public:

@@ -278,6 +278,10 @@ public:
 
 	RenderBatch* load(const std::string& path,int16_t target_batch=-1);
 	void update();
+	void vanish();
+
+	// text
+	void add_font(const char* path,uint16_t size);
 
 	// lighting
 	void update_lighting();
@@ -309,6 +313,10 @@ private:
 	// render targets
 	FrameBuffer m_GBuffer = FrameBuffer(4);
 	FrameBuffer m_ShadowFrameBuffer = FrameBuffer();
+
+	// text
+	FT_Library m_FreetypeLibrary;
+	Glyph m_Font[128];
 
 	// lighting
 	Shadow m_Shadow;

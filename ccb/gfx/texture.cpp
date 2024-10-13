@@ -141,6 +141,21 @@ void Texture::set_texture_border_colour(glm::vec4 colour)
 /*
 	TODO
 */
+void Glyph::upload()
+{
+	glGenTextures(1,&texture);
+	bind();
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RED,width,height,0,GL_RED,GL_UNSIGNED_BYTE,buffer);
+}
+
+
+/**
+ *	TODO
+*/
+
+/*
+	TODO
+*/
 FrameBuffer::FrameBuffer()
 {
 	glGenFramebuffers(1,&m_Buffer);

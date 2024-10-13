@@ -122,6 +122,7 @@ int main(int argc,char** argv)
 	// close
 	COMM_RST();
 	g_Input.close();
+	g_Renderer.vanish();
 	g_Frame.vanish();
 	return 0;
 }
