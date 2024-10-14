@@ -8,6 +8,19 @@
 /*
 	TODO
 */
+void Text::render()
+{
+	// TODO: iterate characters
+}
+
+
+/**
+ *	TODO
+*/
+
+/*
+	TODO
+*/
 float advance_keys(std::vector<double>& durations,uint16_t& crr,double progress)
 {
 	while (durations[crr+1]<progress) crr++;
@@ -744,6 +757,14 @@ Renderer::Renderer()
 	bool _failed = FT_Init_FreeType(&m_FreetypeLibrary);
 	COMM_ERR_COND(_failed,"text interpretation not available");
 
+	// testing text setup
+	Text __text = {
+		.data = "Lorem Ipsum",
+		.position = glm::vec2(100,100)
+	};
+	m_Texts.push_back(__text);
+	// FIXME: remove this
+
 	COMM_SCC("renderer ready");
 }
 
@@ -1472,6 +1493,10 @@ void Renderer::update()
 	m_SpriteBuffer.bind_index();
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
+
+	// iterate text render
+	// TODO: bind text shader pipeline
+	for (Text p_Text : m_Texts) p_Text.render();
 }
 
 /*

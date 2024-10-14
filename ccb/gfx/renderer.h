@@ -86,6 +86,18 @@ struct SpriteAnimationInstance
 };
 
 
+// text data
+struct Text
+{
+	// utility
+	void render();
+
+	// data
+	std::string data;
+	glm::vec2 position;
+};
+
+
 // mesh data
 struct MeshTextureTuple
 {
@@ -317,6 +329,7 @@ private:
 	// text
 	FT_Library m_FreetypeLibrary;
 	Glyph m_Font[128];
+	std::vector<Text> m_Texts;
 
 	// lighting
 	Shadow m_Shadow;
