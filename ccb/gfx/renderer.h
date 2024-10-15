@@ -89,10 +89,6 @@ struct SpriteAnimationInstance
 // text data
 struct Text
 {
-	// utility
-	void render();
-
-	// data
 	std::string data;
 	glm::vec2 position;
 };
@@ -302,9 +298,8 @@ public:
 private:
 
 	// draw
-	void render_sprites(RenderBatch* batch);
 	void render_duplicates(RenderBatch* batch);
-	void render_meshes(RenderBatch* batch);
+	void render_text(Text& text);
 
 public:
 
@@ -320,6 +315,7 @@ private:
 	// shader pipelines
 	ShaderPipeline m_SpritePipeline;
 	ShaderPipeline m_DuplicatePipeline;
+	ShaderPipeline m_TextPipeline;
 	ShaderPipeline m_DeferredPipeline;
 
 	// render targets

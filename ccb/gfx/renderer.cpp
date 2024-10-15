@@ -8,19 +8,6 @@
 /*
 	TODO
 */
-void Text::render()
-{
-	// TODO: iterate characters
-}
-
-
-/**
- *	TODO
-*/
-
-/*
-	TODO
-*/
 float advance_keys(std::vector<double>& durations,uint16_t& crr,double progress)
 {
 	while (durations[crr+1]<progress) crr++;
@@ -659,18 +646,21 @@ Renderer::Renderer()
 	// vertex shaders
 	Shader __SpriteVertexShader = Shader("./shader/obj/sprite.vs",GL_VERTEX_SHADER);
 	Shader __DuplicateVertexShader = Shader("./shader/obj/duplicate.vs",GL_VERTEX_SHADER);
+	Shader __TextVertexShader = Shader("./shader/obj/text.vs",GL_VERTEX_SHADER);
 	Shader __MeshVertexShader = Shader("./shader/obj/mesh.vs",GL_VERTEX_SHADER);
 	Shader __AnimationVertexShader = Shader("./shader/obj/animation.vs",GL_VERTEX_SHADER);
 	Shader __FramebufferVertexShader = Shader("./shader/standard/framebuffer.vs",GL_VERTEX_SHADER);
 
 	// fragment shaders
 	Shader __DirectFragmentShader = Shader("./shader/standard/direct.fs",GL_FRAGMENT_SHADER);
+	Shader __TextFragmentShader = Shader("./shader/obj/text.fs",GL_FRAGMENT_SHADER);
 	Shader __MeshFragmentShader = Shader("./shader/obj/mesh.fs",GL_FRAGMENT_SHADER);
 	Shader __DeferredFragmentShader = Shader("./shader/lighting/pbr.fs",GL_FRAGMENT_SHADER);
 
 	COMM_LOG("assemble shader pipelines");
 	m_SpritePipeline.assemble(__SpriteVertexShader,__DirectFragmentShader);
 	m_DuplicatePipeline.assemble(__DuplicateVertexShader,__DirectFragmentShader);
+	m_TextPipeline.assemble(__TextVertexShader,__TextFragmentShader);
 	for (uint8_t i=0;i<RENDERER_BATCHES_COUNT;i++)
 	{
 		// mesh
@@ -704,6 +694,12 @@ Renderer::Renderer()
 	m_SpritePipeline.point_buffer2D();
 	m_SpritePipeline.upload_int("tex",0);
 	m_SpritePipeline.upload_camera();
+
+	COMM_LOG("setup text pipeline");
+	m_TextPipeline.enable();
+	m_TextPipeline.point_buffer2D();
+	m_TextPipeline.upload_int("tex",0);
+	m_TextPipeline.upload_camera();
 
 	COMM_LOG("setup sprite duplication");
 	m_SpriteBuffer.add_buffer();
@@ -1489,14 +1485,14 @@ void Renderer::update()
 	for (RenderBatch* batch : gpu_update_pointers)
 		update_sprites[batch->sprite_ready](batch,&m_SpritePipeline,__StreamTime);
 
+	// iterate text render
+	m_TextPipeline.enable();
+	for (Text& p_Text : m_Texts) render_text(p_Text);
+
 	// iterate duplicate render
 	m_SpriteBuffer.bind_index();
 	m_DuplicatePipeline.enable();
 	for (RenderBatch* batch : gpu_update_pointers) render_duplicates(batch);
-
-	// iterate text render
-	// TODO: bind text shader pipeline
-	for (Text p_Text : m_Texts) p_Text.render();
 }
 
 /*
@@ -1591,5 +1587,21 @@ void Renderer::render_duplicates(RenderBatch* batch)
 		// draw duplicates
 		p_Texture.texture.bind();
 		glDrawArraysInstanced(GL_TRIANGLES,0,6,p_Instance.active_range);
+	}
+}
+
+/*
+	TODO
+*/
+void Renderer::render_text(Text& text)
+{
+	glm::vec2 __CursorPosition = text.position;
+	for (char c : text.data)
+	{
+		Glyph& p_Glyph = m_Font[c];
+		m_TextPipeline.upload_vec2("offset",__CursorPosition);
+		m_TextPipeline.upload_vec2("scale",glm::vec2(p_Glyph.width,p_Glyph.height));
+		__CursorPosition.x += p_Glyph.width+4;
+		glDrawArrays(GL_TRIANGLES,0,6);
 	}
 }

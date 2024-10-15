@@ -8,5 +8,6 @@ uniform sampler2D tex;
 
 void main()
 {
-	outColour = vec4(texture(tex,TexCoords).r);
+	//outColour = vec4(texture(tex,TexCoords).r);
+    outColour = vec4(1,0,0,1);
 }
