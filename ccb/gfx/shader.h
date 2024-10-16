@@ -17,6 +17,7 @@ public:
 	uint32_t shader;
 };
 
+
 class ShaderPipeline
 {
 public:
@@ -45,7 +46,7 @@ public:
 	static inline void disable() { glUseProgram(0); }
 
 	// upload
-	inline void upload_int(const char* loc,int i)
+	inline void upload_int(const char* loc,uint32_t i)
 		{ glUniform1i(glGetUniformLocation(m_shaderProgram,loc),i); }
 	inline void upload_float(const char* loc,float f)
 		{ glUniform1f(glGetUniformLocation(m_shaderProgram,loc),f); }

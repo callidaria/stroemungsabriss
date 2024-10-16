@@ -60,8 +60,8 @@ struct Glyph
 	// data
 	void* buffer;
 	uint32_t texture;
-	uint32_t width,height;
-	int32_t bearing_x,bearing_y;
+	glm::vec2 scale;
+	glm::vec2 bearing;
 	int64_t advance;
 };
 

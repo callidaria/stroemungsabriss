@@ -1526,11 +1526,9 @@ void Renderer::add_font(const char* path,uint16_t size)
 		// texture generation
 		m_Font[i] = {
 			.buffer = __Face->glyph->bitmap.buffer,
-			.width = __Face->glyph->bitmap.width,
-			.height = __Face->glyph->bitmap.rows,
-			.bearing_x = __Face->glyph->bitmap_left,
-			.bearing_y = __Face->glyph->bitmap_top,
-			.advance = __Face->glyph->advance.x
+			.scale = glm::vec2(__Face->glyph->bitmap.width,__Face->glyph->bitmap.rows),
+			.bearing = glm::vec2(__Face->glyph->bitmap_left,__Face->glyph->bitmap_top),
+			.advance = (__Face->glyph->advance.x>>6)
 		};
 		m_Font[i].upload();
 		Texture::set_texture_parameter_clamp_to_edge();
@@ -1595,13 +1593,24 @@ void Renderer::render_duplicates(RenderBatch* batch)
 */
 void Renderer::render_text(Text& text)
 {
+	// iterate characters in text
 	glm::vec2 __CursorPosition = text.position;
 	for (char c : text.data)
 	{
 		Glyph& p_Glyph = m_Font[c];
+
+		// upload text data
+		// TODO: instance if possible to reduce draw calls, but glyph texture could be a problem
 		m_TextPipeline.upload_vec2("offset",__CursorPosition);
-		m_TextPipeline.upload_vec2("scale",glm::vec2(p_Glyph.width,p_Glyph.height));
-		__CursorPosition.x += p_Glyph.width+4;
+		m_TextPipeline.upload_float("size",25);
+		m_TextPipeline.upload_vec2("scale",p_Glyph.scale);
+		m_TextPipeline.upload_vec2("bearing",p_Glyph.bearing);
+
+		// draw
+		p_Glyph.bind();
 		glDrawArrays(GL_TRIANGLES,0,6);
+
+		// advance cursor position
+		__CursorPosition.x += p_Glyph.advance;
 	}
 }
