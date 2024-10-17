@@ -4,10 +4,10 @@ in vec2 TexCoords;
 
 out vec4 outColour;
 
+uniform vec3 text_colour = vec3(1,1,1);
 uniform sampler2D tex;
 
 void main()
 {
-	outColour = vec4(texture(tex,TexCoords).r,0,0,1);
-    outColour = vec4(1,0,0,1);
+	outColour = vec4(text_colour,texture(tex,TexCoords).r);
 }

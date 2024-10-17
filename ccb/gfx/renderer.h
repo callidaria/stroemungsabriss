@@ -91,6 +91,7 @@ struct Text
 {
 	std::string data;
 	glm::vec2 position;
+	float scale;
 };
 
 
@@ -290,6 +291,7 @@ public:
 
 	// text
 	void add_font(const char* path,uint16_t size);
+	void write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale);
 
 	// lighting
 	void update_lighting();

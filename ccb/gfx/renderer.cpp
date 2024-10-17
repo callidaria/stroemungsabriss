@@ -753,14 +753,6 @@ Renderer::Renderer()
 	bool _failed = FT_Init_FreeType(&m_FreetypeLibrary);
 	COMM_ERR_COND(_failed,"text interpretation not available");
 
-	// testing text setup
-	Text __text = {
-		.data = "Lorem Ipsum",
-		.position = glm::vec2(100,100)
-	};
-	m_Texts.push_back(__text);
-	// FIXME: remove this
-
 	COMM_SCC("renderer ready");
 }
 
@@ -1517,6 +1509,7 @@ void Renderer::add_font(const char* path,uint16_t size)
 	FT_Set_Pixel_Sizes(__Face,0,size);
 
 	// iterate characters
+	m_TextPipeline.enable();
 	for (uint8_t i=0;i<128;i++)
 	{
 		// load glyph
@@ -1535,6 +1528,19 @@ void Renderer::add_font(const char* path,uint16_t size)
 		Texture::set_texture_parameter_linear_unfiltered();
 	}
 	FT_Done_Face(__Face);
+}
+
+/*
+	TODO
+*/
+void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale)
+{
+	Text __Text = {
+		.data = content,
+		.position = position,
+		.scale = scale
+	};
+	m_Texts.push_back(__Text);
 }
 
 /*
@@ -1602,8 +1608,8 @@ void Renderer::render_text(Text& text)
 		// upload text data
 		// TODO: instance if possible to reduce draw calls, but glyph texture could be a problem
 		m_TextPipeline.upload_vec2("offset",__CursorPosition);
-		m_TextPipeline.upload_float("size",25);
-		m_TextPipeline.upload_vec2("scale",p_Glyph.scale);
+		m_TextPipeline.upload_float("scale",text.scale);
+		m_TextPipeline.upload_vec2("size",p_Glyph.scale);
 		m_TextPipeline.upload_vec2("bearing",p_Glyph.bearing);
 
 		// draw
@@ -1611,6 +1617,6 @@ void Renderer::render_text(Text& text)
 		glDrawArrays(GL_TRIANGLES,0,6);
 
 		// advance cursor position
-		__CursorPosition.x += p_Glyph.advance;
+		__CursorPosition.x += p_Glyph.advance*text.scale;
 	}
 }

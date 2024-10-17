@@ -80,6 +80,9 @@ scene_update update_scene[] = { load_scene,maintain_scene };
 
 int main(int argc,char** argv)
 {
+	// fonts
+	g_Renderer.add_font("./res/fonts/ubuntu.ttf",100);
+
 	// setup
 	UI ui = UI();
 
