@@ -87,11 +87,32 @@ struct SpriteAnimationInstance
 
 
 // text data
+enum TextAlignment
+{
+	TEXT_ALIGN_TOPLEFT,
+	TEXT_ALIGN_CENTERLEFT,
+	TEXT_ALIGN_BOTTOMLEFT,
+	TEXT_ALIGN_TOPCENTER,
+	TEXT_ALIGN_CENTER,
+	TEXT_ALIGN_BOTTOMCENTER,
+	TEXT_ALIGN_TOPRIGHT,
+	TEXT_ALIGN_CENTERRIGHT,
+	TEXT_ALIGN_BOTTOMRIGHT
+};
+
+struct Font
+{
+	uint16_t size;
+	Glyph letters[128];
+};
+
 struct Text
 {
+	uint16_t font_id;
 	std::string data;
 	glm::vec2 position;
 	float scale;
+	glm::vec3 colour;
 };
 
 
@@ -291,7 +312,8 @@ public:
 
 	// text
 	void add_font(const char* path,uint16_t size);
-	void write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale);
+	void write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
+			glm::vec3 colour,TextAlignment align=TEXT_ALIGN_TOPLEFT);
 
 	// lighting
 	void update_lighting();
@@ -326,7 +348,7 @@ private:
 
 	// text
 	FT_Library m_FreetypeLibrary;
-	Glyph m_Font[128];
+	std::vector<Font> m_Fonts;
 	std::vector<Text> m_Texts;
 
 	// lighting

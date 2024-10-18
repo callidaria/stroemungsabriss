@@ -141,6 +141,7 @@ uint16_t RenderBatch::add_sprite(std::string path,uint8_t rows,uint8_t cols,uint
 	sprite_textures.push_back(__Tuple);
 	return sprite_textures.size()-1;
 }
+// TODO: maybe when loading into gpu pack all textures of a single batch into one giant texture atlas
 
 /*
 	!O(1)m /+load -> (public)
@@ -1509,6 +1510,7 @@ void Renderer::add_font(const char* path,uint16_t size)
 	FT_Set_Pixel_Sizes(__Face,0,size);
 
 	// iterate characters
+	Font __Font = { .size = size };
 	m_TextPipeline.enable();
 	for (uint8_t i=0;i<128;i++)
 	{
@@ -1517,28 +1519,42 @@ void Renderer::add_font(const char* path,uint16_t size)
 		COMM_ERR_COND(_failed,"character %c not found",(char)i);
 
 		// texture generation
-		m_Font[i] = {
+		__Font.letters[i] = {
 			.buffer = __Face->glyph->bitmap.buffer,
 			.scale = glm::vec2(__Face->glyph->bitmap.width,__Face->glyph->bitmap.rows),
 			.bearing = glm::vec2(__Face->glyph->bitmap_left,__Face->glyph->bitmap_top),
 			.advance = (__Face->glyph->advance.x>>6)
 		};
-		m_Font[i].upload();
+		__Font.letters[i].upload();
 		Texture::set_texture_parameter_clamp_to_edge();
 		Texture::set_texture_parameter_linear_unfiltered();
 	}
+	// TODO: store in spritesheet to speed rendering up by a lot!
+
+	// store & clear
+	m_Fonts.push_back(__Font);
 	FT_Done_Face(__Face);
 }
 
 /*
 	TODO
 */
-void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale)
+void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
+		glm::vec3 colour,TextAlignment align)
 {
+	Font& p_Font = m_Fonts[font_id];
+
+	// adjust alignment
+	uint8_t vertical_align = 2-(align%3);
+	position.y += vertical_align*MATH_CENTER_Y-vertical_align*(p_Font.size/2);
+
+	// store text block
 	Text __Text = {
+		.font_id = font_id,
 		.data = content,
 		.position = position,
-		.scale = scale
+		.scale = scale,
+		.colour = colour
 	};
 	m_Texts.push_back(__Text);
 }
@@ -1601,9 +1617,10 @@ void Renderer::render_text(Text& text)
 {
 	// iterate characters in text
 	glm::vec2 __CursorPosition = text.position;
+	m_TextPipeline.upload_vec3("text_colour",text.colour);
 	for (char c : text.data)
 	{
-		Glyph& p_Glyph = m_Font[c];
+		Glyph& p_Glyph = m_Fonts[text.font_id].letters[c];
 
 		// upload text data
 		// TODO: instance if possible to reduce draw calls, but glyph texture could be a problem

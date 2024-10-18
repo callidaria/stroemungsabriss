@@ -50,6 +50,8 @@ constexpr double MATH_CARTESIAN_XRANGE = 1280.f;
 constexpr double MATH_CARTESIAN_YRANGE = 720.f;
 constexpr double MATH_PI = 3.141592653;
 constexpr double MATH_E = 2.7182818284;
+constexpr double MATH_CENTER_X = MATH_CARTESIAN_XRANGE/2;
+constexpr double MATH_CENTER_Y = MATH_CARTESIAN_YRANGE/2;
 constexpr double MATH_CENTER_GOLDEN = MATH_CARTESIAN_XRANGE*.618;
 
 // conversion
