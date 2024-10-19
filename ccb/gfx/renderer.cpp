@@ -1544,9 +1544,18 @@ void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 positio
 {
 	Font& p_Font = m_Fonts[font_id];
 
-	// adjust alignment
+	// adjust vertical alignment
 	uint8_t vertical_align = 2-(align%3);
-	position.y += vertical_align*MATH_CENTER_Y-vertical_align*(p_Font.size/2);
+	position.y += vertical_align*(MATH_CENTER_Y-(p_Font.size*scale)/2);
+
+	// adjust horizontal alignment
+	uint8_t horizontal_align = align/3;
+	if (!!horizontal_align)
+	{
+		float wordlen = 0;
+		for (char c : content) wordlen += m_Fonts[font_id].letters[c].advance*scale;
+		position.x += horizontal_align*(MATH_CENTER_X-wordlen/2);
+	}
 
 	// store text block
 	Text __Text = {
