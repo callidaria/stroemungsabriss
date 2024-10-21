@@ -1480,7 +1480,7 @@ void Renderer::update()
 
 	// iterate text render
 	m_TextPipeline.enable();
-	for (Text& p_Text : m_Texts) render_text(p_Text);
+	for (Text& p_Text : texts) render_text(p_Text);
 
 	// iterate duplicate render
 	m_SpriteBuffer.bind_index();
@@ -1499,7 +1499,7 @@ void Renderer::vanish()
 /*
 	TODO
 */
-void Renderer::add_font(const char* path,uint16_t size)
+uint16_t Renderer::add_font(const char* path,uint16_t size)
 {
 	COMM_LOG("loading font: %s",path);
 
@@ -1534,12 +1534,13 @@ void Renderer::add_font(const char* path,uint16_t size)
 	// store & clear
 	m_Fonts.push_back(__Font);
 	FT_Done_Face(__Face);
+	return m_Fonts.size()-1;
 }
 
 /*
 	TODO
 */
-void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
+uint16_t Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
 		glm::vec3 colour,TextAlignment align)
 {
 	Font& p_Font = m_Fonts[font_id];
@@ -1565,7 +1566,8 @@ void Renderer::write_text(uint16_t font_id,std::string content,glm::vec2 positio
 		.scale = scale,
 		.colour = colour
 	};
-	m_Texts.push_back(__Text);
+	texts.push_back(__Text);
+	return texts.size()-1;
 }
 
 /*

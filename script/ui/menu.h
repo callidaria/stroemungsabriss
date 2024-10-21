@@ -18,4 +18,13 @@ public:
 	~MainMenu() {  }
 
 	void update();
+
+private:
+
+	void update_peripheral_annotations();
+
+private:
+
+	// text
+	uint16_t m_DareMessage;
 };

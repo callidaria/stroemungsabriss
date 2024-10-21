@@ -311,8 +311,8 @@ public:
 	void vanish();
 
 	// text
-	void add_font(const char* path,uint16_t size);
-	void write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
+	uint16_t add_font(const char* path,uint16_t size);
+	uint16_t write_text(uint16_t font_id,std::string content,glm::vec2 position,float scale,
 			glm::vec3 colour,TextAlignment align=TEXT_ALIGN_TOPLEFT);
 
 	// lighting
@@ -327,8 +327,12 @@ private:
 
 public:
 
+	// geometry
 	RenderBatch batches[RENDERER_BATCHES_COUNT];
 	std::vector<RenderBatch*> gpu_update_pointers;
+
+	// text
+	std::vector<Text> texts;
 
 private:
 
@@ -349,7 +353,6 @@ private:
 	// text
 	FT_Library m_FreetypeLibrary;
 	std::vector<Font> m_Fonts;
-	std::vector<Text> m_Texts;
 
 	// lighting
 	Shadow m_Shadow;
